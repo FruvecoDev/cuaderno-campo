@@ -1,10 +1,10 @@
 [
   {
     "content": "Eliminar campo 'Artículo MP' del formulario de contratos",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Agregar buscador de contratos en formulario de parcelas",
-    "status": "pending"
+    "status": "in_progress"
   }
 ]
