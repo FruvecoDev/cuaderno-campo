@@ -366,3 +366,317 @@ async def delete_pregunta_config(
     )
     
     return {"success": True, "message": "Pregunta eliminada"}
+
+
+# ============================================================================
+# GENERACIÓN DE PDF
+# ============================================================================
+
+@router.get("/evaluaciones/{evaluacion_id}/pdf")
+async def generate_evaluacion_pdf(
+    evaluacion_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Generar PDF de la hoja de evaluación"""
+    from fastapi.responses import Response
+    from weasyprint import HTML
+    import io
+    
+    if not ObjectId.is_valid(evaluacion_id):
+        raise HTTPException(status_code=400, detail="ID inválido")
+    
+    evaluacion = await evaluaciones_collection.find_one({"_id": ObjectId(evaluacion_id)})
+    if not evaluacion:
+        raise HTTPException(status_code=404, detail="Evaluación no encontrada")
+    
+    # Función helper para formatear respuestas
+    def format_respuesta(resp):
+        if resp is True:
+            return "Sí"
+        elif resp is False:
+            return "No"
+        elif resp is None or resp == "":
+            return "—"
+        return str(resp)
+    
+    # Generar HTML para el PDF
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            @page {{
+                size: A4;
+                margin: 1.5cm;
+            }}
+            body {{
+                font-family: 'Helvetica', 'Arial', sans-serif;
+                font-size: 10pt;
+                line-height: 1.4;
+                color: #333;
+            }}
+            .header {{
+                text-align: center;
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+                border-bottom: 2px solid #2d5a27;
+            }}
+            .header h1 {{
+                color: #2d5a27;
+                font-size: 18pt;
+                margin: 0 0 5px 0;
+            }}
+            .header h2 {{
+                color: #666;
+                font-size: 12pt;
+                margin: 0;
+                font-weight: normal;
+            }}
+            .section {{
+                margin-bottom: 15px;
+                page-break-inside: avoid;
+            }}
+            .section-title {{
+                background-color: #2d5a27;
+                color: white;
+                padding: 8px 12px;
+                font-weight: bold;
+                font-size: 11pt;
+                margin-bottom: 0;
+            }}
+            .section-content {{
+                border: 1px solid #ddd;
+                border-top: none;
+                padding: 12px;
+            }}
+            .info-grid {{
+                display: table;
+                width: 100%;
+            }}
+            .info-row {{
+                display: table-row;
+            }}
+            .info-cell {{
+                display: table-cell;
+                padding: 5px 10px;
+                border-bottom: 1px solid #eee;
+            }}
+            .info-label {{
+                font-weight: bold;
+                width: 30%;
+                background-color: #f9f9f9;
+            }}
+            .question-row {{
+                padding: 8px 0;
+                border-bottom: 1px solid #eee;
+            }}
+            .question-row:last-child {{
+                border-bottom: none;
+            }}
+            .question-num {{
+                font-weight: bold;
+                color: #2d5a27;
+            }}
+            .question-text {{
+                margin-left: 5px;
+            }}
+            .answer {{
+                margin-left: 20px;
+                color: #555;
+                font-style: italic;
+            }}
+            .answer-yes {{
+                color: #28a745;
+                font-weight: bold;
+            }}
+            .answer-no {{
+                color: #dc3545;
+                font-weight: bold;
+            }}
+            .footer {{
+                margin-top: 30px;
+                padding-top: 15px;
+                border-top: 1px solid #ddd;
+                font-size: 9pt;
+                color: #666;
+                text-align: center;
+            }}
+            .datos-grid {{
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }}
+            .dato-item {{
+                padding: 5px;
+            }}
+            .dato-label {{
+                font-weight: bold;
+                font-size: 9pt;
+                color: #666;
+            }}
+            .dato-value {{
+                font-size: 10pt;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>FRUVECO</h1>
+            <h2>HOJA DE EVALUACIÓN - CUADERNO DE CAMPO</h2>
+        </div>
+        
+        <!-- Datos Generales -->
+        <div class="section">
+            <div class="section-title">DATOS GENERALES</div>
+            <div class="section-content">
+                <div class="datos-grid">
+                    <div class="dato-item">
+                        <div class="dato-label">Fecha Inicio</div>
+                        <div class="dato-value">{evaluacion.get('fecha_inicio', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Fecha Fin</div>
+                        <div class="dato-value">{evaluacion.get('fecha_fin', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Técnico</div>
+                        <div class="dato-value">{evaluacion.get('tecnico', '—')}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Plantación -->
+        <div class="section">
+            <div class="section-title">PLANTACIÓN</div>
+            <div class="section-content">
+                <div class="datos-grid">
+                    <div class="dato-item">
+                        <div class="dato-label">Proveedor / Agricultor</div>
+                        <div class="dato-value">{evaluacion.get('proveedor', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Código Plantación</div>
+                        <div class="dato-value">{evaluacion.get('codigo_plantacion', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Finca</div>
+                        <div class="dato-value">{evaluacion.get('finca', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Cultivo</div>
+                        <div class="dato-value">{evaluacion.get('cultivo', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Variedad</div>
+                        <div class="dato-value">{evaluacion.get('variedad', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Superficie</div>
+                        <div class="dato-value">{evaluacion.get('superficie', 0)} ha</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Campaña</div>
+                        <div class="dato-value">{evaluacion.get('campana', '—')}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    """
+    
+    # Secciones de cuestionarios
+    secciones_config = [
+        ('toma_datos', 'TOMA DE DATOS'),
+        ('analisis_suelo', 'ANÁLISIS DE SUELO'),
+        ('pasos_precampana', 'PASOS PRECAMPAÑA DESINFECCIÓN'),
+        ('calidad_cepellones', 'CALIDAD DE CEPELLONES'),
+        ('inspeccion_maquinaria', 'INSPECCIÓN MAQUINARIA'),
+        ('observaciones', 'OBSERVACIONES'),
+        ('calibracion_mantenimiento', 'CALIBRACIÓN Y MANTENIMIENTO APARATOS MEDICIÓN FITO')
+    ]
+    
+    for seccion_key, seccion_titulo in secciones_config:
+        respuestas = evaluacion.get(seccion_key, [])
+        if respuestas:
+            html_content += f"""
+        <div class="section">
+            <div class="section-title">{seccion_titulo}</div>
+            <div class="section-content">
+            """
+            for idx, resp in enumerate(respuestas, 1):
+                pregunta = resp.get('pregunta', '')
+                respuesta = resp.get('respuesta')
+                respuesta_fmt = format_respuesta(respuesta)
+                
+                # Clase CSS según tipo de respuesta
+                respuesta_class = ''
+                if respuesta is True:
+                    respuesta_class = 'answer-yes'
+                elif respuesta is False:
+                    respuesta_class = 'answer-no'
+                
+                html_content += f"""
+                <div class="question-row">
+                    <span class="question-num">{idx}.</span>
+                    <span class="question-text">{pregunta}</span>
+                    <div class="answer {respuesta_class}">R: {respuesta_fmt}</div>
+                </div>
+                """
+            html_content += """
+            </div>
+        </div>
+            """
+    
+    # Impresos
+    impresos = evaluacion.get('impresos', {})
+    if impresos:
+        html_content += f"""
+        <div class="section">
+            <div class="section-title">IMPRESOS</div>
+            <div class="section-content">
+                <div class="datos-grid">
+                    <div class="dato-item">
+                        <div class="dato-label">Fecha Inicio</div>
+                        <div class="dato-value">{impresos.get('fecha_inicio', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Fecha Fin</div>
+                        <div class="dato-value">{impresos.get('fecha_fin', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Técnico</div>
+                        <div class="dato-value">{impresos.get('tecnico', '—')}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """
+    
+    # Footer
+    html_content += f"""
+        <div class="footer">
+            <p>Documento generado automáticamente por FRUVECO - Cuaderno de Campo</p>
+            <p>Fecha de generación: {datetime.now().strftime('%d/%m/%Y %H:%M')}</p>
+        </div>
+    </body>
+    </html>
+    """
+    
+    # Generar PDF
+    try:
+        pdf_buffer = io.BytesIO()
+        HTML(string=html_content).write_pdf(pdf_buffer)
+        pdf_buffer.seek(0)
+        
+        filename = f"evaluacion_{evaluacion.get('codigo_plantacion', 'sin_codigo')}_{evaluacion.get('fecha_inicio', 'sin_fecha')}.pdf"
+        
+        return Response(
+            content=pdf_buffer.getvalue(),
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f'attachment; filename="{filename}"'
+            }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generando PDF: {str(e)}")
