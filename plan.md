@@ -5,12 +5,20 @@
 - Gestión integral de módulos: **Contratos, Fincas, Parcelas (SIGPAC manual + polígonos), Visitas, Tareas, Tratamientos, Irrigaciones, Recetas, Albaranes, Cosechas**.
 - **Dashboard KPI** (producción, costes, tratamientos, cumplimiento) + **informes PDF/Excel**.
 - **IA** para **reportes personalizados** y **análisis de datos** (resúmenes, alertas, insights, comparativas).
-- **Usuarios/roles** (Admin/Manager/Technician/Viewer) con **permisos por sección y campos** + autenticación email/password.
+- **Seguridad end-to-end**: autenticación + **roles/permisos (RBAC)** por módulo/acción y (futuro) por campo/sección.
+- **Gestión de usuarios** (Admins) y gobernanza básica: activación/desactivación, auditoría mínima.
 - **Subida de documentos** (PDF/imagenes) vinculados a finca/parcela/contrato.
+
+> Estado actual (resumen):
+> - ✅ Fase 1 (POC): completada.
+> - ✅ Fase 2 (V1 Build): completada.
+> - ✅ Autenticación (Fase 3 - parte 1): **implementada y verificada E2E** (login, logout, /me, rutas protegidas, init-admin).
+
+---
 
 ## 2) Implementation Steps (Phases)
 
-### Phase 1 — Core POC (aislado) “Cuaderno de Campo generable”
+### Phase 1 — Core POC (aislado) “Cuaderno de Campo generable” ✅ COMPLETADA
 **Meta:** probar lo más frágil: **IA + exportación PDF/Excel + agregación de datos** y una **parcela con polígono**.
 - Web research rápido: mejores prácticas para
   - generación PDF server-side (plantillas HTML→PDF) y Excel (XLSX)
@@ -20,41 +28,40 @@
   - Llamada IA: generar **resumen de campaña** a partir de JSON agregado.
   - Generar **PDF “Cuaderno de Campo”** (plantilla simple) y **Excel** con tablas.
 - POC UI mínima (sin auth):
-  - Crear Parcela + dibujar polígono en Google Maps
+  - Crear Parcela + dibujar polígono
   - Añadir 1 Contrato + Cultivo + 2-3 eventos (tratamiento/riego/visita/cosecha)
   - Botón: **Generar PDF/Excel** + **Reporte IA**
 - Criterio de salida: exporta correctamente y el reporte IA es estable/repetible con guardado.
 
 **User stories (Phase 1)**
-1. Como técnico, quiero crear una parcela y dibujar su polígono para ubicarla en el mapa.
-2. Como manager, quiero registrar un contrato asociado a parcela y cultivo para iniciar campaña.
-3. Como técnico, quiero añadir tratamientos/riegos/visitas rápidamente para tener trazabilidad.
-4. Como manager, quiero generar un PDF de cuaderno de campo descargable para auditorías.
-5. Como usuario, quiero un reporte IA que resuma la campaña y destaque anomalías/costes.
+1. ✅ Como técnico, quiero crear una parcela y dibujar su polígono para ubicarla en el mapa.
+2. ✅ Como manager, quiero registrar un contrato asociado a parcela y cultivo para iniciar campaña.
+3. ✅ Como técnico, quiero añadir tratamientos/riegos/visitas rápidamente para tener trazabilidad.
+4. ✅ Como manager, quiero generar un PDF de cuaderno de campo descargable para auditorías.
+5. ✅ Como usuario, quiero un reporte IA que resuma la campaña y destaque anomalías/costes.
 
 ---
 
-### Phase 2 — V1 App Development (MVP completo y funcional) ✅ COMPLETADO - 95% TEST SUCCESS
-
+### Phase 2 — V1 App Development (MVP completo y funcional) ✅ COMPLETADO
 **Meta:** construir la app funcional end-to-end alrededor del core probado.
 
 **IMPLEMENTADO COMPLETAMENTE:**
 
 **Backend FastAPI + MongoDB:**
 - ✅ 10+ colecciones MongoDB con modelos completos
-- ✅ CRUD APIs para TODOS los módulos (94.7% success rate)
+- ✅ CRUD APIs para TODOS los módulos (histórico: ~95% test success)
 - ✅ Dashboard KPIs endpoint con agregaciones
-- ✅ AI report generation (OpenAI GPT-5.2)
+- ✅ AI report generation
 - ✅ PDF generation (WeasyPrint)
 - ✅ Excel export (openpyxl)
 - ✅ File upload system (documentos)
 - ✅ Módulos implementados:
-  - Contratos (46+ campos completos)
+  - Contratos
   - Parcelas (con recintos SIGPAC)
   - Fincas
   - Visitas
   - Tareas
-  - Tratamientos (complejo con aplicador, maquinaria, productos)
+  - Tratamientos
   - Irrigaciones
   - Recetas
   - Albaranes
@@ -63,86 +70,53 @@
 
 **Frontend React + Leaflet:**
 - ✅ Navegación completa con sidebar profesional (12 módulos)
-- ✅ Dashboard con 8 KPIs + gráficas (Recharts)
-- ✅ Contratos: formulario extenso, tabla, CRUD completo
-- ✅ Parcelas: formulario + mapa Leaflet con dibujo de polígonos
-- ✅ Todas las páginas funcionales con CRUD
-- ✅ Diseño profesional agrícola (verde #2c5f2d, #97bf0d)
-- ✅ Sistema de tablas, formularios, cards, badges
-- ✅ 95% frontend test success
+- ✅ Dashboard con KPIs + gráficas
+- ✅ Páginas por módulo funcionales con CRUD
+- ✅ Diseño profesional
 
-**Características V1:**
-- Dashboard con KPIs en tiempo real
-- Navegación fluida entre 12 módulos
-- Formularios extensos pero organizados
-- Mapas interactivos con OpenStreetMap (gratuito)
-- Sistema de documentos con upload
-- Exportación PDF/Excel lista
-- Generación de informes IA
-- Diseño responsive y profesional
-
-**Testing Results:**
-- Backend: 94.7% (18/19 tests passed)
-- Frontend: 95% success rate
-- Overall: 95% application success
-- Solo issues menores de baja prioridad
-
-**User stories Phase 2** - TODAS COMPLETADAS ✅
-1. ✅ Como usuario, quiero un dashboard que muestre KPIs clave de mi explotación
-2. ✅ Como manager, quiero crear contratos completos con todos los campos requeridos
-3. ✅ Como técnico, quiero visualizar parcelas en mapa y dibujar polígonos
-4. ✅ Como agrónomo, quiero registrar tratamientos detallados con productos
-5. ✅ Como usuario, quiero navegar fácilmente entre todos los módulos
-6. ✅ Como manager, quiero ver datos agregados y gráficas de producción
-7. ✅ Como técnico, quiero subir documentos y vincularlos a entidades
-8. ✅ Como usuario, quiero que los datos persistan y se actualicen en tiempo real
-- Backend:
-  - CRUD de módulos: Fincas, Parcelas (SIGPAC manual), Contratos, Cultivos, Visitas, Tareas, Tratamientos, Irrigaciones, Recetas, Albaranes, Cosechas, Documentos.
-  - Relaciones:
-    - Contrato → (Parcela, Cultivo)
-    - Parcela → Finca; muchos: Visitas/Tareas/Tratamientos/Riegos/Cosechas/Docs
-    - Tratamiento ↔ Receta (opcional) y materiales
-    - Albarán ligado a entradas/salidas de materiales o cosecha (definición abajo)
-  - Costes: mano de obra, maquinaria, insumos, riego; agregación por campaña/parcela/cultivo.
-- Frontend:
-  - Navegación por módulos + vistas: listado, detalle, crear/editar.
-  - Vista Parcela: mapa (Google Maps) + capa polígono + ficha SIGPAC manual.
-  - Vista “Campaña” (Contrato): timeline de eventos + costes + acciones export.
-- Export:
-  - PDF cuaderno por Contrato/Parcela/Cultivo (plantilla V1)
-  - Excel: export de tratamientos/riegos/tareas/cosechas/costes.
-- Documentos:
-  - Subida (PDF/imagen), preview, tags, vínculo a entidad.
-- Dashboard V1:
-  - KPIs básicos: ha por cultivo, nº tratamientos, consumo agua, kg cosecha, coste/ha, margen estimado.
-- Testing: 1 ronda E2E sobre el flujo principal (crear finca→parcela→contrato→eventos→export→dashboard).
-
-**Campos propuestos (V1) para módulos “abiertos”**
-- Irrigaciones: fecha, sistema, duración, volumen (m³), fuente, coste, observaciones.
-- Recetas: nombre, cultivo objetivo, lista productos (materia activa, dosis, unidad), instrucciones, plazo seguridad, PPE.
-- Albaranes: tipo (entrada/salida), fecha, proveedor/cliente, items (producto/lote/cantidad/ud/precio), parcela/contrato (opcional), adjuntos.
-
-**User stories (Phase 2)**
-1. Como manager, quiero ver por contrato una línea temporal con todos los eventos para controlar la campaña.
-2. Como técnico, quiero registrar un tratamiento con productos/dosis y coste para cumplir normativa.
-3. Como técnico, quiero adjuntar fotos/PDFs a la parcela para centralizar evidencias.
-4. Como manager, quiero exportar Excel de tratamientos y riegos para análisis externo.
-5. Como manager, quiero un dashboard con KPIs por finca/cultivo para decidir prioridades.
+**Notas de estabilidad (actualización):**
+- Se resolvió un bloqueo del backend al instalar dependencias runtime necesarias para WeasyPrint (libs del sistema). Se recomienda consolidarlo en la imagen/infra (ver Phase 5).
 
 ---
 
 ### Phase 3 — Seguridad, permisos y configuración (Auth + RBAC + campos)
 **Meta:** activar autenticación y control fino sin romper el core.
-- Auth email/password: registro (solo Admin), login, reset password.
-- Roles: Admin/Manager/Technician/Viewer.
-- Permisos:
-  - por módulo (ver/crear/editar/borrar/exportar)
-  - por campo (ocultar/solo lectura) + “secciones” configurables.
-- Multi-empresa (si aplica) ligero: separar datos por organización.
-- Auditoría: log de cambios en eventos críticos (tratamientos, cosechas, albaranes).
-- Testing E2E multi-rol (viewer solo lectura, technician sin borrar, etc.).
 
-**User stories (Phase 3)**
+#### Phase 3A — Autenticación (email/password + sesiones) ✅ COMPLETADA Y VERIFICADA
+- ✅ Login (JWT)
+- ✅ Logout (limpia token en cliente)
+- ✅ `/api/auth/me` (sesión vigente)
+- ✅ Rutas protegidas en frontend (redirige a `/login` si no autenticado)
+- ✅ Inicialización Admin (`/api/auth/init-admin`) y credenciales por defecto
+- ✅ Registro de usuarios (endpoint existente; creación solo Admin)
+- ✅ Corrección warning React Hook (AuthContext) con `useCallback`
+
+**User stories (Phase 3A)**
+1. ✅ Como usuario, quiero iniciar sesión para acceder a la app.
+2. ✅ Como usuario, quiero cerrar sesión y que se elimine mi token.
+3. ✅ Como usuario, quiero que al entrar a rutas protegidas sin sesión me lleve al login.
+
+#### Phase 3B — RBAC por módulo/acción + Gestión de usuarios (P0/P1) ⏳ PRÓXIMO
+- Permisos por acción (ver/crear/editar/borrar/exportar) aplicados en:
+  - Backend: dependencias/guards por endpoint
+  - Frontend: ocultar/inhabilitar acciones (botones, formularios)
+- Panel Admin: gestión de usuarios
+  - listar usuarios
+  - crear usuario (Admin only)
+  - editar rol/estado (activar/desactivar)
+  - reset password / cambio de password (definir enfoque)
+- Alinear modelo de permisos:
+  - fuente de verdad en backend
+  - reflejo en UI desde `/me`
+- Testing E2E multi-rol (Admin/Manager/Technician/Viewer)
+
+#### Phase 3C — Permisos por campo/sección (P2) ⏳ FUTURO
+- Ocultar campos sensibles (p.ej., costes) por rol
+- Secciones configurables por rol
+- (Opcional) Multi-empresa ligero: separar datos por organización
+- Auditoría mínima (log de cambios) en eventos críticos
+
+**User stories (Phase 3B/3C)**
 1. Como admin, quiero crear usuarios y asignar roles para controlar accesos.
 2. Como manager, quiero que un técnico solo edite tratamientos y riegos, no contratos.
 3. Como viewer, quiero consultar informes sin poder modificar datos.
@@ -162,40 +136,47 @@
 - Controles: límites de tokens, plantillas de prompt, redacción segura, trazas.
 - Testing: calidad de outputs + estabilidad + costes.
 
-**User stories (Phase 4)**
-1. Como manager, quiero un informe IA mensual por finca para presentarlo a dirección.
-2. Como técnico, quiero que IA me resuma la última visita y pendientes de la parcela.
-3. Como manager, quiero detectar costes anómalos por parcela para corregir desviaciones.
-4. Como usuario, quiero hacer preguntas en lenguaje natural sobre mi campaña y obtener tablas.
-5. Como admin, quiero controlar el acceso a IA por rol y limitar consumo.
-
 ---
 
 ### Phase 5 — Hardening, rendimiento y calidad de datos
+- Consolidar dependencias de WeasyPrint en build/infra (evitar fallos por libs faltantes).
 - Validaciones (unidades, rangos, fechas), catálogos (productos, variedades, maquinaria).
 - Importación CSV/Excel (parcelas, eventos) + deduplicación.
 - Optimización dashboard (agregaciones, índices).
 - Regeneración de PDFs versionados y firma/folio (si requerido).
 - Suite de tests regresión + checklist de “nada se rompe”.
 
-**User stories (Phase 5)**
-1. Como técnico, quiero importar tratamientos desde Excel para ahorrar tiempo.
-2. Como manager, quiero que el dashboard cargue rápido aunque tenga muchas parcelas.
-3. Como admin, quiero catálogos de productos para evitar errores de escritura.
-4. Como manager, quiero PDFs versionados por campaña para mantener histórico.
-5. Como usuario, quiero validaciones claras para no registrar datos incorrectos.
+---
 
 ## 3) Next Actions
-1. Confirmar stack objetivo (p.ej. React/Next + API + DB) y despliegue (1 entorno).
-2. Ejecutar Phase 1 POC: IA + PDF/Excel + mapa polígono + agregación mínima.
-3. Congelar plantilla V1 del PDF/Excel (estructura mínima) tras validar POC.
-4. Construir Phase 2 V1 end-to-end sin auth y pasar testing E2E.
-5. Pedir OK para activar Phase 3 (auth/roles) ya con core estable.
+### P0 (inmediato)
+1. **Corregir issues menores pendientes**
+   - Inconsistencia en modelo backend de `albaranes` (definir/normalizar esquema y ajustar endpoints + UI si aplica).
+   - Warnings menores de React/webpack dev-server (si quedan) y limpieza de lint.
+2. **RBAC por módulo/acción (mínimo viable)**
+   - Definir matriz permisos por rol.
+   - Implementar guards backend para acciones críticas (create/update/delete/export).
+   - Implementar control UI (botones/acciones) usando `user.can_*` + `modules_access`.
+
+### P1
+3. **Panel Admin de usuarios**
+   - Vista lista + edición de rol/estado.
+   - Crear usuario (Admin only) usando endpoint `/api/auth/register`.
+   - Desactivar usuario y validar login bloqueado.
+4. **E2E multi-rol**
+   - Scripts Playwright/cypress (o smoke tests) para: Viewer read-only, Technician sin delete, Manager sin admin.
+
+### P2
+5. Permisos por campo/sección + auditoría mínima de cambios
+6. Mejoras módulos simplificados (Irrigaciones, Recetas, Albaranes) y consistencia de datos
+
+---
 
 ## 4) Success Criteria
-- Flujo principal completo: **Finca→Parcela (mapa)→Contrato+Cultivo→eventos→costes→PDF/Excel→dashboard**.
-- PDF “Cuaderno de Campo” descargable por contrato con datos correctos y consistentes.
-- Excel export con tablas utilizables (filtros/columnas estables).
+- ✅ Flujo principal completo: **Finca→Parcela (mapa)→Contrato+Cultivo→eventos→costes→PDF/Excel→dashboard**.
+- ✅ Autenticación robusta: **login/logout**, rutas protegidas, `/me` estable.
+- RBAC funciona sin filtrar datos ni permitir acciones indebidas (backend + UI).
+- Panel Admin permite gestionar usuarios y roles sin intervención técnica.
+- PDF/Excel export estable (sin fallos por dependencias runtime) y con datos consistentes.
 - IA genera reportes **útiles, reproducibles y guardables** a partir de datos reales.
-- Roles/permisos funcionan sin filtrar datos ni permitir acciones indebidas.
 - Subida/visualización de documentos estable (PDF/imagen) y vinculada a entidades.

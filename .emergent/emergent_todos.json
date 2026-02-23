@@ -1,42 +1,26 @@
 [
   {
-    "content": "Phase 3: Install auth dependencies (PyJWT, passlib)",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 3: Create User model and authentication endpoints",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 3: Implement JWT authentication middleware",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 3: Create role-based permission system",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 3: Add authentication to frontend (login page, context)",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 3: Protect routes with authentication",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 3: Add PDF/Excel export buttons in frontend",
-    "status": "in_progress"
-  },
-  {
-    "content": "Phase 3: Implement advanced filters in main tables",
+    "content": "Corregir inconsistencia en modelo backend de albaranes",
     "status": "pending"
   },
   {
-    "content": "Phase 3: Create Hoja de Evaluación module",
+    "content": "Corregir warnings menores de React (webpack dev-server deprecation)",
     "status": "pending"
   },
   {
-    "content": "Phase 3: End to End Testing",
+    "content": "Implementar RBAC: crear matriz de permisos por rol",
+    "status": "pending"
+  },
+  {
+    "content": "Implementar RBAC: guards backend para acciones críticas (create/update/delete/export)",
+    "status": "pending"
+  },
+  {
+    "content": "Implementar RBAC: control UI usando user permissions",
+    "status": "pending"
+  },
+  {
+    "content": "Crear panel de gestión de usuarios (Admin only)",
     "status": "pending"
   }
 ]
