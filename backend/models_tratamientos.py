@@ -134,6 +134,44 @@ class TratamientoInDB(TratamientoBase):
         json_encoders = {ObjectId: str}
 
 # ============================================================================
+# MAQUINARIA (Catálogo de Maquinaria Agrícola)
+# ============================================================================
+
+class MaquinariaBase(BaseModel):
+    nombre: str  # Nombre identificativo de la máquina
+    tipo: str  # Tractor, Pulverizador, Cosechadora, etc.
+    modelo: Optional[str] = None
+    marca: Optional[str] = None
+    matricula: Optional[str] = None
+    num_serie: Optional[str] = None
+    año_fabricacion: Optional[int] = None
+    capacidad: Optional[str] = None  # Ej: "1000L", "150CV"
+    estado: str = "Operativo"  # Operativo, En mantenimiento, Averiado
+    observaciones: Optional[str] = None
+    
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
+
+class MaquinariaCreate(BaseModel):
+    nombre: str
+    tipo: str
+    modelo: Optional[str] = None
+    marca: Optional[str] = None
+    matricula: Optional[str] = None
+    num_serie: Optional[str] = None
+    año_fabricacion: Optional[int] = None
+    capacidad: Optional[str] = None
+    estado: str = "Operativo"
+    observaciones: Optional[str] = None
+
+class MaquinariaInDB(MaquinariaBase):
+    id: str = Field(alias="_id")
+    
+    class Config:
+        populate_by_name = True
+        json_encoders = {ObjectId: str}
+
+# ============================================================================
 # IRRIGACIONES
 # ============================================================================
 
