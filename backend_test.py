@@ -647,18 +647,28 @@ class AgriculturalAPITester:
         return success
 
 def main():
-    print("🚀 Starting Agricultural Management API Testing...")
+    print("🚀 Starting Agricultural Management API Testing (Refactored Model)...")
     tester = AgriculturalAPITester()
+    
+    # Step 1: Authenticate
+    if not tester.test_login():
+        print("❌ Authentication failed - cannot proceed with protected endpoint testing")
+        return 1
+    
+    # Step 2: Setup required catalogs
+    if not tester.setup_test_catalogs():
+        print("❌ Catalog setup failed - cannot proceed with CRUD testing") 
+        return 1
     
     # Run all tests
     tests = [
         ("Root Endpoint", tester.test_root),
         ("Dashboard KPIs", tester.test_dashboard_kpis),
-        ("Contratos CRUD", tester.test_contratos_crud),
+        ("Contratos CRUD (New Model)", tester.test_contratos_crud),
         ("Parcelas CRUD", tester.test_parcelas_crud),
         ("Fincas CRUD", tester.test_fincas_crud), 
-        ("Visitas CRUD", tester.test_visitas_crud),
-        ("Tratamientos CRUD", tester.test_tratamientos_crud),
+        ("Visitas CRUD (New Model)", tester.test_visitas_crud),
+        ("Tratamientos CRUD (New Model)", tester.test_tratamientos_crud),
         ("Irrigaciones CRUD", tester.test_irrigaciones_crud),
         ("Extended Modules", tester.test_extended_modules)
     ]
@@ -694,6 +704,10 @@ def main():
     print(f"\n🆔 Created Test Data IDs:")
     for entity, entity_id in tester.created_ids.items():
         print(f"   {entity}: {entity_id}")
+        
+    print(f"\n📚 Catalog IDs Used:")
+    for catalog, catalog_id in tester.catalog_ids.items():
+        print(f"   {catalog}: {catalog_id}")
     
     return 0 if len(failed_tests) == 0 else 1
 
