@@ -82,14 +82,9 @@ Visita/Tratamiento → realizados sobre → Parcela
    - Página para generar y ver reportes IA
    - Formularios para seleccionar parámetros
 
-2. **Módulos Placeholder** (P1)
-   - Irrigaciones (CRUD completo)
-   - Recetas (CRUD completo)
-   - Albaranes (CRUD completo)
-
-3. **Mejoras UI/UX** (P2)
+2. **Mejoras UI/UX** (P2)
    - Consistencia en patrones de búsqueda/filtro
-   - Corregir warnings de hydration de React
+   - Corregir warnings de hydration de React (cosmético)
 
 ## Technical Stack
 - **Backend**: FastAPI, Python 3.11
