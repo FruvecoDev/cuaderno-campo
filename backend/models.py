@@ -92,9 +92,16 @@ class ContratoCreate(BaseModel):
     campana: str
     procedencia: str
     fecha_contrato: str
-    proveedor: str
-    cultivo: str
-    articulo_mp: str
+    
+    # Nuevos campos (catálogos)
+    proveedor_id: Optional[str] = None  # ObjectId ref a proveedores
+    cultivo_id: Optional[str] = None    # ObjectId ref a cultivos
+    
+    # Campos legacy (mantener compatibilidad temporal)
+    proveedor: Optional[str] = None
+    cultivo: Optional[str] = None
+    articulo_mp: Optional[str] = None
+    
     cantidad: float
     precio: float
     periodo_desde: str
