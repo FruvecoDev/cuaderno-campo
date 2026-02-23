@@ -13,11 +13,11 @@
   },
   {
     "content": "Verificar que el payload enviado al backend incluye proveedor_id y cultivo_id",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Probar flujo completo: crear contrato, verificar en tabla, eliminar",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Verificar que no hay errores de compilación frontend (esbuild check)",
