@@ -17,7 +17,9 @@ const Cosechas = () => {
   const [filters, setFilters] = useState({
     proveedor: '',
     campana: '',
-    estado: ''
+    estado: '',
+    contrato: '',
+    cultivo: ''
   });
   
   // Form para nueva cosecha
