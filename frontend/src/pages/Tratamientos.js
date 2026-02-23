@@ -485,6 +485,7 @@ const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
               {/* Botones de acción */}
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
                 <button
+                  type="button"
                   onClick={guardarEnHistorial}
                   className="btn btn-secondary"
                   disabled={resultados.cantidadProducto <= 0}
@@ -493,6 +494,7 @@ const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
                   Guardar en Historial
                 </button>
                 <button
+                  type="button"
                   onClick={aplicarAlFormulario}
                   className="btn btn-primary"
                   disabled={resultados.superficieHa <= 0}
