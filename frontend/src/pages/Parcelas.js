@@ -610,13 +610,127 @@ const Parcelas = () => {
           <h2 className="card-title">{editingId ? 'Editar Parcela' : 'Crear Parcela'}</h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
             <div>
-              <h3 style={{ marginBottom: '1rem' }}><MapIcon size={18} style={{ display: 'inline', marginRight: '0.5rem' }} />Mapa - Dibuja el polígono</h3>
-              <MapContainer center={[37.0886, -2.3170]} zoom={13} style={{ height: '400px', width: '100%', borderRadius: '8px' }}>
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                <DrawControl onPolygonCreated={handlePolygonCreated} />
-                {polygon.length > 0 && <Polygon positions={polygon.map(p => [p.lat, p.lng])} color="green" />}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <MapIcon size={18} />
+                  Mapa - Dibuja el polígono
+                </h3>
+                {/* Selector de tipo de mapa */}
+                <div style={{ display: 'flex', gap: '0.25rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setMapType('osm')}
+                    className={`btn btn-sm ${mapType === 'osm' ? 'btn-primary' : 'btn-secondary'}`}
+                    title="Mapa Base"
+                    style={{ padding: '0.4rem 0.6rem' }}
+                  >
+                    <Layers size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMapType('satellite')}
+                    className={`btn btn-sm ${mapType === 'satellite' ? 'btn-primary' : 'btn-secondary'}`}
+                    title="Vista Satélite"
+                    style={{ padding: '0.4rem 0.6rem' }}
+                  >
+                    <Satellite size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMapType('topo')}
+                    className={`btn btn-sm ${mapType === 'topo' ? 'btn-primary' : 'btn-secondary'}`}
+                    title="Topográfico"
+                    style={{ padding: '0.4rem 0.6rem', fontSize: '0.7rem', fontWeight: '600' }}
+                  >
+                    TOPO
+                  </button>
+                </div>
+              </div>
+              
+              {/* Leyenda de tipo de mapa */}
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                marginBottom: '0.5rem',
+                padding: '0.5rem 0.75rem',
+                backgroundColor: mapType === 'satellite' ? '#1a1a2e' : 'hsl(var(--muted))',
+                borderRadius: '6px 6px 0 0',
+                color: mapType === 'satellite' ? '#fff' : 'inherit'
+              }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: '500' }}>
+                  Vista: {TILE_LAYERS[mapType].name}
+                </span>
+                <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>
+                  {editingId ? 'Haz clic en el polígono para editarlo' : 'Usa las herramientas de la derecha para dibujar'}
+                </span>
+              </div>
+              
+              <MapContainer 
+                center={polygon.length > 0 ? [polygon[0].lat, polygon[0].lng] : [37.0886, -2.3170]} 
+                zoom={polygon.length > 0 ? 15 : 13} 
+                style={{ height: '450px', width: '100%', borderRadius: '0 0 8px 8px' }}
+                key={mapType} // Forzar re-render al cambiar tipo
+              >
+                <TileLayer 
+                  url={TILE_LAYERS[mapType].url} 
+                  attribution={TILE_LAYERS[mapType].attribution}
+                />
+                {/* Capa de etiquetas para vista satélite */}
+                {mapType === 'satellite' && (
+                  <TileLayer 
+                    url="https://stamen-tiles-{s}.a.ssl.fastly.net/toner-labels/{z}/{x}/{y}.png"
+                    attribution=""
+                    opacity={0.7}
+                  />
+                )}
+                <DrawControl 
+                  onPolygonCreated={handlePolygonCreated} 
+                  onPolygonEdited={handlePolygonCreated}
+                  editablePolygon={polygon}
+                  isEditing={!!editingId}
+                />
+                {/* Mostrar polígono existente cuando no estamos editando */}
+                {!editingId && polygon.length > 0 && (
+                  <Polygon 
+                    positions={polygon.map(p => [p.lat, p.lng])} 
+                    pathOptions={{ color: '#2d5a27', fillColor: '#4CAF50', fillOpacity: 0.3 }}
+                  />
+                )}
+                {/* Centrar en polígono existente */}
+                {polygon.length > 0 && <FitBounds polygon={polygon} />}
               </MapContainer>
-              {polygon.length > 0 && <p className="text-sm text-muted" style={{ marginTop: '0.5rem' }}>Polígono: {polygon.length} puntos</p>}
+              
+              {/* Info del polígono */}
+              <div style={{ 
+                marginTop: '0.75rem', 
+                padding: '0.75rem',
+                backgroundColor: polygon.length > 0 ? '#e8f5e9' : 'hsl(var(--muted))',
+                borderRadius: '6px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                {polygon.length > 0 ? (
+                  <>
+                    <span style={{ fontSize: '0.875rem', color: '#2d5a27', fontWeight: '500' }}>
+                      ✓ Polígono dibujado: {polygon.length} puntos
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setPolygon([])}
+                      className="btn btn-sm"
+                      style={{ backgroundColor: '#fee2e2', color: '#dc2626' }}
+                    >
+                      <X size={14} /> Limpiar
+                    </button>
+                  </>
+                ) : (
+                  <span style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
+                    {editingId ? 'Dibuja un nuevo polígono para actualizar la geometría (opcional)' : 'Dibuja el polígono de la parcela en el mapa'}
+                  </span>
+                )}
+              </div>
             </div>
             
             <form onSubmit={handleSubmit}>
