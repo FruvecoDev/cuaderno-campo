@@ -1,11 +1,11 @@
 [
   {
     "content": "Corregir inconsistencia en modelo backend de albaranes",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Corregir warnings menores de React (webpack dev-server deprecation)",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Implementar RBAC: crear matriz de permisos por rol",
