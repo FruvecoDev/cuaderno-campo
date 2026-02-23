@@ -470,6 +470,7 @@ class CargaCosechaCreate(BaseModel):
     kilos_reales: float
     es_descuento: bool = False
     tipo_descuento: Optional[str] = None
+    valor_tenderometria: Optional[float] = None  # Solo para guisante
     num_albaran: Optional[str] = None
     observaciones: Optional[str] = None
 
