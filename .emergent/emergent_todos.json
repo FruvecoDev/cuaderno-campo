@@ -1,6 +1,18 @@
 [
   {
-    "content": "Testing E2E multi-rol (Admin, Manager, Technician, Viewer)",
-    "status": "completed"
+    "content": "P1.1: Ocultar/deshabilitar botones Delete en listados según can_delete",
+    "status": "in_progress"
+  },
+  {
+    "content": "P1.2: Mostrar mensajes 403 amigables cuando backend rechaza operación",
+    "status": "pending"
+  },
+  {
+    "content": "P1.3: Implementar cambio/reset de contraseña",
+    "status": "pending"
+  },
+  {
+    "content": "P2: Ocultar campos de costes para roles sin can_view_costs",
+    "status": "pending"
   }
 ]
