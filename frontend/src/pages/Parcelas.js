@@ -196,6 +196,7 @@ const Parcelas = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [polygon, setPolygon] = useState([]);
+  const [mapType, setMapType] = useState('satellite'); // Tipo de mapa: osm, satellite, hybrid, topo
   const { token } = useAuth();
   const navigate = useNavigate();
   
