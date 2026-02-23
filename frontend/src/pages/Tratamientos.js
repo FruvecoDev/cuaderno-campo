@@ -1035,7 +1035,7 @@ const Tratamientos = () => {
                           )}
                         </div>
                       </td>
-                    )}
+                    ) : null}
                   </tr>
                 ))}
               </tbody>
