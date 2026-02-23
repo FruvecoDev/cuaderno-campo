@@ -1,10 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Info } from 'lucide-react';
+import { Plus, Edit2, Trash2, Info, Filter, Settings, X } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+
+// Default field configuration
+const DEFAULT_FIELDS_CONFIG = {
+  objetivo: true,
+  fecha_visita: true,
+  parcela_id: true,
+  observaciones: true
+};
+
+const FIELD_LABELS = {
+  objetivo: 'Objetivo',
+  fecha_visita: 'Fecha Visita',
+  parcela_id: 'Parcela',
+  observaciones: 'Observaciones'
+};
+
+// Table columns config
+const DEFAULT_TABLE_CONFIG = {
+  objetivo: true,
+  parcela: true,
+  proveedor: true,
+  cultivo: true,
+  campana: true,
+  fecha: true,
+  estado: true
+};
+
+const TABLE_LABELS = {
+  objetivo: 'Objetivo',
+  parcela: 'Parcela',
+  proveedor: 'Proveedor',
+  cultivo: 'Cultivo',
+  campana: 'Campaña',
+  fecha: 'Fecha',
+  estado: 'Estado'
+};
 
 const Visitas = () => {
   const [visitas, setVisitas] = useState([]);
@@ -20,6 +56,35 @@ const Visitas = () => {
   const [parcelas, setParcelas] = useState([]);
   const [selectedParcelaInfo, setSelectedParcelaInfo] = useState(null);
   
+  // Filtros
+  const [filters, setFilters] = useState({
+    proveedor: '',
+    cultivo: '',
+    campana: '',
+    parcela: ''
+  });
+  
+  // Configuración de campos del formulario
+  const [showFieldsConfig, setShowFieldsConfig] = useState(false);
+  const [fieldsConfig, setFieldsConfig] = useState(() => {
+    const saved = localStorage.getItem('visitas_fields_config');
+    return saved ? JSON.parse(saved) : DEFAULT_FIELDS_CONFIG;
+  });
+  
+  // Configuración de columnas de la tabla
+  const [tableConfig, setTableConfig] = useState(() => {
+    const saved = localStorage.getItem('visitas_table_config');
+    return saved ? JSON.parse(saved) : DEFAULT_TABLE_CONFIG;
+  });
+  
+  // Opciones únicas para filtros
+  const [filterOptions, setFilterOptions] = useState({
+    proveedores: [],
+    cultivos: [],
+    campanas: [],
+    parcelas: []
+  });
+  
   // Form data SIMPLIFICADO - solo parcela_id es obligatorio
   const [formData, setFormData] = useState({
     objetivo: 'Control Rutinario',
@@ -32,6 +97,30 @@ const Visitas = () => {
     fetchVisitas();
     fetchParcelas();
   }, []);
+  
+  // Extraer opciones únicas cuando cambian las visitas
+  useEffect(() => {
+    const proveedores = [...new Set(visitas.map(v => v.proveedor).filter(Boolean))];
+    const cultivos = [...new Set(visitas.map(v => v.cultivo).filter(Boolean))];
+    const campanas = [...new Set(visitas.map(v => v.campana).filter(Boolean))];
+    const parcelasCodigos = [...new Set(visitas.map(v => v.codigo_plantacion).filter(Boolean))];
+    
+    setFilterOptions({
+      proveedores,
+      cultivos,
+      campanas,
+      parcelas: parcelasCodigos
+    });
+  }, [visitas]);
+  
+  // Guardar configuración en localStorage
+  useEffect(() => {
+    localStorage.setItem('visitas_fields_config', JSON.stringify(fieldsConfig));
+  }, [fieldsConfig]);
+  
+  useEffect(() => {
+    localStorage.setItem('visitas_table_config', JSON.stringify(tableConfig));
+  }, [tableConfig]);
   
   // Cuando se selecciona una parcela, mostrar info heredada
   useEffect(() => {
@@ -80,6 +169,27 @@ const Visitas = () => {
     } finally {
       setLoading(false);
     }
+  };
+  
+  // Filtrar visitas
+  const filteredVisitas = visitas.filter(v => {
+    if (filters.proveedor && v.proveedor !== filters.proveedor) return false;
+    if (filters.cultivo && v.cultivo !== filters.cultivo) return false;
+    if (filters.campana && v.campana !== filters.campana) return false;
+    if (filters.parcela && v.codigo_plantacion !== filters.parcela) return false;
+    return true;
+  });
+  
+  const clearFilters = () => {
+    setFilters({ proveedor: '', cultivo: '', campana: '', parcela: '' });
+  };
+  
+  const toggleFieldConfig = (field) => {
+    setFieldsConfig(prev => ({ ...prev, [field]: !prev[field] }));
+  };
+  
+  const toggleTableConfig = (field) => {
+    setTableConfig(prev => ({ ...prev, [field]: !prev[field] }));
   };
   
   const handleSubmit = async (e) => {
@@ -200,19 +310,31 @@ const Visitas = () => {
     }
   };
   
+  const hasActiveFilters = Object.values(filters).some(v => v !== '');
+  
   return (
     <div data-testid="visitas-page">
       <div className="flex justify-between items-center mb-6">
         <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>Visitas</h1>
-        <PermissionButton
-          permission="create"
-          onClick={() => setShowForm(!showForm)}
-          className="btn btn-primary"
-          data-testid="btn-nueva-visita"
-        >
-          <Plus size={18} />
-          Nueva Visita
-        </PermissionButton>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button 
+            className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setShowFieldsConfig(!showFieldsConfig)}
+            title="Configurar campos visibles"
+            data-testid="btn-config-fields"
+          >
+            <Settings size={18} />
+          </button>
+          <PermissionButton
+            permission="create"
+            onClick={() => setShowForm(!showForm)}
+            className="btn btn-primary"
+            data-testid="btn-nueva-visita"
+          >
+            <Plus size={18} />
+            Nueva Visita
+          </PermissionButton>
+        </div>
       </div>
 
       {error && (
@@ -220,6 +342,130 @@ const Visitas = () => {
           <p style={{ color: 'hsl(var(--destructive))' }}>{error}</p>
         </div>
       )}
+      
+      {/* Panel de configuración de campos */}
+      {showFieldsConfig && (
+        <div className="card mb-6" data-testid="fields-config-panel">
+          <div className="flex justify-between items-center mb-4">
+            <h3 style={{ fontWeight: '600' }}>Configurar Campos</h3>
+            <button className="btn btn-sm btn-secondary" onClick={() => setShowFieldsConfig(false)}>
+              <X size={16} />
+            </button>
+          </div>
+          
+          <div style={{ marginBottom: '1.5rem' }}>
+            <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.75rem' }}>Campos del Formulario:</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '0.75rem' }}>
+              {Object.entries(FIELD_LABELS).map(([key, label]) => (
+                <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={fieldsConfig[key]}
+                    onChange={() => toggleFieldConfig(key)}
+                    disabled={key === 'parcela_id'} // parcela_id siempre obligatorio
+                    style={{ width: '18px', height: '18px' }}
+                  />
+                  <span style={{ fontSize: '0.875rem' }}>{label} {key === 'parcela_id' && '(obligatorio)'}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          
+          <div>
+            <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.75rem' }}>Columnas de la Tabla:</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '0.75rem' }}>
+              {Object.entries(TABLE_LABELS).map(([key, label]) => (
+                <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={tableConfig[key]}
+                    onChange={() => toggleTableConfig(key)}
+                    style={{ width: '18px', height: '18px' }}
+                  />
+                  <span style={{ fontSize: '0.875rem' }}>{label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Filtros de búsqueda */}
+      <div className="card mb-6" data-testid="filters-panel">
+        <div className="flex justify-between items-center mb-4">
+          <h3 style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Filter size={18} /> Filtros de Búsqueda
+          </h3>
+          {hasActiveFilters && (
+            <button className="btn btn-sm btn-secondary" onClick={clearFilters}>
+              Limpiar filtros
+            </button>
+          )}
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Proveedor</label>
+            <select
+              className="form-select"
+              value={filters.proveedor}
+              onChange={(e) => setFilters({...filters, proveedor: e.target.value})}
+              data-testid="filter-proveedor"
+            >
+              <option value="">Todos</option>
+              {filterOptions.proveedores.map(p => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Cultivo</label>
+            <select
+              className="form-select"
+              value={filters.cultivo}
+              onChange={(e) => setFilters({...filters, cultivo: e.target.value})}
+              data-testid="filter-cultivo"
+            >
+              <option value="">Todos</option>
+              {filterOptions.cultivos.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Campaña</label>
+            <select
+              className="form-select"
+              value={filters.campana}
+              onChange={(e) => setFilters({...filters, campana: e.target.value})}
+              data-testid="filter-campana"
+            >
+              <option value="">Todas</option>
+              {filterOptions.campanas.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Parcela</label>
+            <select
+              className="form-select"
+              value={filters.parcela}
+              onChange={(e) => setFilters({...filters, parcela: e.target.value})}
+              data-testid="filter-parcela"
+            >
+              <option value="">Todas</option>
+              {filterOptions.parcelas.map(p => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        {hasActiveFilters && (
+          <p style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
+            Mostrando {filteredVisitas.length} de {visitas.length} visitas
+          </p>
+        )}
+      </div>
       
       {showForm && (
         <div className="card mb-6" data-testid="visita-form">
@@ -234,36 +480,40 @@ const Visitas = () => {
             </div>
             
             <div className="grid-2">
-              <div className="form-group">
-                <label className="form-label">Objetivo *</label>
-                <select
-                  className="form-select"
-                  value={formData.objetivo}
-                  onChange={(e) => setFormData({...formData, objetivo: e.target.value})}
-                  required
-                  data-testid="select-objetivo"
-                >
-                  <option value="Control Rutinario">Control Rutinario</option>
-                  <option value="Informe">Informe</option>
-                  <option value="Evaluación">Evaluación</option>
-                  <option value="Plagas y Enfermedades">Plagas y Enfermedades</option>
-                  <option value="Cosecha">Cosecha</option>
-                </select>
-              </div>
+              {fieldsConfig.objetivo && (
+                <div className="form-group">
+                  <label className="form-label">Objetivo *</label>
+                  <select
+                    className="form-select"
+                    value={formData.objetivo}
+                    onChange={(e) => setFormData({...formData, objetivo: e.target.value})}
+                    required
+                    data-testid="select-objetivo"
+                  >
+                    <option value="Control Rutinario">Control Rutinario</option>
+                    <option value="Informe">Informe</option>
+                    <option value="Evaluación">Evaluación</option>
+                    <option value="Plagas y Enfermedades">Plagas y Enfermedades</option>
+                    <option value="Cosecha">Cosecha</option>
+                  </select>
+                </div>
+              )}
               
-              <div className="form-group">
-                <label className="form-label">Fecha Visita</label>
-                <input
-                  type="date"
-                  className="form-input"
-                  value={formData.fecha_visita}
-                  onChange={(e) => setFormData({...formData, fecha_visita: e.target.value})}
-                  data-testid="input-fecha-visita"
-                />
-              </div>
+              {fieldsConfig.fecha_visita && (
+                <div className="form-group">
+                  <label className="form-label">Fecha Visita</label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    value={formData.fecha_visita}
+                    onChange={(e) => setFormData({...formData, fecha_visita: e.target.value})}
+                    data-testid="input-fecha-visita"
+                  />
+                </div>
+              )}
             </div>
             
-            {/* SELECTOR DE PARCELA - Único campo obligatorio */}
+            {/* SELECTOR DE PARCELA - Siempre visible (obligatorio) */}
             <div className="form-group">
               <label className="form-label">Parcela * (Obligatorio - define el contexto)</label>
               <select
@@ -297,17 +547,19 @@ const Visitas = () => {
               </div>
             )}
             
-            <div className="form-group">
-              <label className="form-label">Observaciones</label>
-              <textarea
-                className="form-textarea"
-                value={formData.observaciones}
-                onChange={(e) => setFormData({...formData, observaciones: e.target.value})}
-                placeholder="Notas, incidencias observadas, recomendaciones..."
-                rows="4"
-                data-testid="textarea-observaciones"
-              />
-            </div>
+            {fieldsConfig.observaciones && (
+              <div className="form-group">
+                <label className="form-label">Observaciones</label>
+                <textarea
+                  className="form-textarea"
+                  value={formData.observaciones}
+                  onChange={(e) => setFormData({...formData, observaciones: e.target.value})}
+                  placeholder="Notas, incidencias observadas, recomendaciones..."
+                  rows="4"
+                  data-testid="textarea-observaciones"
+                />
+              </div>
+            )}
             
             <div className="flex gap-2">
               <button type="submit" className="btn btn-primary" data-testid="btn-guardar-visita">
@@ -326,40 +578,42 @@ const Visitas = () => {
       )}
       
       <div className="card">
-        <h2 className="card-title">Lista de Visitas</h2>
+        <h2 className="card-title">Lista de Visitas ({filteredVisitas.length})</h2>
         {loading ? (
           <p>Cargando visitas...</p>
-        ) : visitas.length === 0 ? (
-          <p className="text-muted">No hay visitas registradas. Crea la primera!</p>
+        ) : filteredVisitas.length === 0 ? (
+          <p className="text-muted">{hasActiveFilters ? 'No hay visitas que coincidan con los filtros' : 'No hay visitas registradas. Crea la primera!'}</p>
         ) : (
           <div className="table-container">
             <table data-testid="visitas-table">
               <thead>
                 <tr>
-                  <th>Objetivo</th>
-                  <th>Parcela</th>
-                  <th>Proveedor</th>
-                  <th>Cultivo</th>
-                  <th>Campaña</th>
-                  <th>Fecha</th>
-                  <th>Estado</th>
+                  {tableConfig.objetivo && <th>Objetivo</th>}
+                  {tableConfig.parcela && <th>Parcela</th>}
+                  {tableConfig.proveedor && <th>Proveedor</th>}
+                  {tableConfig.cultivo && <th>Cultivo</th>}
+                  {tableConfig.campana && <th>Campaña</th>}
+                  {tableConfig.fecha && <th>Fecha</th>}
+                  {tableConfig.estado && <th>Estado</th>}
                   {(canEdit || canDelete) && <th>Acciones</th>}
                 </tr>
               </thead>
               <tbody>
-                {visitas.map((visita) => (
+                {filteredVisitas.map((visita) => (
                   <tr key={visita._id}>
-                    <td className="font-semibold">{visita.objetivo}</td>
-                    <td>{visita.codigo_plantacion || 'N/A'}</td>
-                    <td>{visita.proveedor || 'N/A'}</td>
-                    <td>{visita.cultivo || 'N/A'}</td>
-                    <td>{visita.campana || 'N/A'}</td>
-                    <td>{visita.fecha_visita ? new Date(visita.fecha_visita).toLocaleDateString() : 'Sin fecha'}</td>
-                    <td>
-                      <span className={`badge ${visita.realizado ? 'badge-success' : 'badge-default'}`}>
-                        {visita.realizado ? 'Realizada' : 'Pendiente'}
-                      </span>
-                    </td>
+                    {tableConfig.objetivo && <td className="font-semibold">{visita.objetivo}</td>}
+                    {tableConfig.parcela && <td>{visita.codigo_plantacion || 'N/A'}</td>}
+                    {tableConfig.proveedor && <td>{visita.proveedor || 'N/A'}</td>}
+                    {tableConfig.cultivo && <td>{visita.cultivo || 'N/A'}</td>}
+                    {tableConfig.campana && <td>{visita.campana || 'N/A'}</td>}
+                    {tableConfig.fecha && <td>{visita.fecha_visita ? new Date(visita.fecha_visita).toLocaleDateString() : 'Sin fecha'}</td>}
+                    {tableConfig.estado && (
+                      <td>
+                        <span className={`badge ${visita.realizado ? 'badge-success' : 'badge-default'}`}>
+                          {visita.realizado ? 'Realizada' : 'Pendiente'}
+                        </span>
+                      </td>
+                    )}
                     {(canEdit || canDelete) && (
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
