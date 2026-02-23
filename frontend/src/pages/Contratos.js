@@ -146,7 +146,6 @@ const Contratos = () => {
       fecha_contrato: contrato.fecha_contrato || new Date().toISOString().split('T')[0],
       proveedor_id: contrato.proveedor_id || '',
       cultivo_id: contrato.cultivo_id || '',
-      articulo_mp: contrato.articulo_mp || '',
       cantidad: contrato.cantidad || '',
       precio: contrato.precio || '',
       periodo_desde: contrato.periodo_desde || '',
