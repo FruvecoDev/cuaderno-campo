@@ -321,6 +321,30 @@ async def delete_receta(
     
     return {"success": True, "message": "Receta deleted"}
 
+@router.put("/recetas/{receta_id}")
+async def update_receta(
+    receta_id: str,
+    receta: RecetaCreate,
+    current_user: dict = Depends(RequireEdit),
+    _access: dict = Depends(RequireRecetasAccess)
+):
+    if not ObjectId.is_valid(receta_id):
+        raise HTTPException(status_code=400, detail="Invalid ID")
+    
+    update_data = receta.dict()
+    update_data["updated_at"] = datetime.now()
+    
+    result = await recetas_collection.update_one(
+        {"_id": ObjectId(receta_id)},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Receta not found")
+    
+    updated = await recetas_collection.find_one({"_id": ObjectId(receta_id)})
+    return {"success": True, "data": serialize_doc(updated)}
+
 # ============================================================================
 # ALBARANES
 # ============================================================================
