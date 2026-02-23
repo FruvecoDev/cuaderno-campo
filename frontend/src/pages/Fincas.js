@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, X, MapPin, Search } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -6,6 +7,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001'
 
 const Fincas = () => {
   const { token } = useAuth();
+  const { t } = useTranslation();
   const [fincas, setFincas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
