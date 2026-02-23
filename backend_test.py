@@ -368,12 +368,11 @@ class AgriculturalAPITester:
         
         # Test Albaranes
         albaran_data = {
-            "numero": "ALB001",
-            "fecha": "2025-01-20",
             "tipo": "Entrada",
-            "proveedor": "Test Provider",
+            "fecha": "2025-01-20", 
+            "proveedor_cliente": "Test Provider",
             "items": [
-                {"descripcion": "Test Item", "cantidad": 10, "precio": 5.0, "total": 50.0}
+                {"producto": "Test Item", "cantidad": 10, "unidad": "kg", "precio_unitario": 5.0, "total": 50.0}
             ]
         }
         
