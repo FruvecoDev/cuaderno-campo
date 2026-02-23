@@ -5,16 +5,22 @@ import { useAuth } from '../contexts/AuthContext';
  * Hook para verificar permisos del usuario
  */
 export const usePermissions = () => {
-  const { user, hasPermission } = useAuth();
+  const { user } = useAuth();
+  
+  const hasPermission = (permission) => {
+    if (!user) return false;
+    return user[`can_${permission}`] === true;
+  };
   
   return {
     canCreate: hasPermission('create'),
     canEdit: hasPermission('edit'),
     canDelete: hasPermission('delete'),
     canExport: hasPermission('export'),
-    canManageUsers: user?.can_manage_users || false,
-    canViewCosts: user?.can_view_costs !== false, // Default true
-    user
+    canManageUsers: user?.can_manage_users === true,
+    canViewCosts: user?.can_view_costs !== false, // Default true for backward compatibility
+    user,
+    hasPermission
   };
 };
 
@@ -70,4 +76,21 @@ export const ModuleGuard = ({ module, children, fallback = null }) => {
   const hasAccess = user?.modules_access?.includes(module);
   
   return hasAccess ? children : fallback;
+};
+
+/**
+ * Hook para manejar errores de permisos y mostrar mensajes amigables
+ */
+export const usePermissionError = () => {
+  const handlePermissionError = (error, action = 'realizar esta acción') => {
+    if (error.status === 403 || error.message?.includes('Permission denied')) {
+      return `No tienes permisos para ${action}. Contacta al administrador si necesitas acceso.`;
+    }
+    if (error.status === 401) {
+      return 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
+    }
+    return error.message || 'Ocurrió un error inesperado';
+  };
+  
+  return { handlePermissionError };
 };
