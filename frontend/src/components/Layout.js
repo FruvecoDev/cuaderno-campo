@@ -31,28 +31,28 @@ const Layout = ({ children }) => {
       { path: '/parcelas', label: t('nav.parcels'), icon: MapPin, module: 'parcelas' },
       { path: '/fincas', label: t('nav.farms'), icon: Home, module: 'fincas' },
     ]},
-    { section: 'Actividades', items: [
-      { path: '/visitas', label: 'Visitas', icon: Calendar, module: 'visitas' },
-      { path: '/tareas', label: 'Tareas', icon: ListTodo, module: 'tareas' },
-      { path: '/tratamientos', label: 'Tratamientos', icon: Sprout, module: 'tratamientos' },
-      { path: '/irrigaciones', label: 'Irrigaciones', icon: Droplets, module: 'irrigaciones' },
-      { path: '/evaluaciones', label: 'Evaluaciones', icon: ClipboardCheck, module: 'evaluaciones' },
+    { section: t('nav.activities'), items: [
+      { path: '/visitas', label: t('nav.visits'), icon: Calendar, module: 'visitas' },
+      { path: '/tareas', label: t('nav.tasks'), icon: ListTodo, module: 'tareas' },
+      { path: '/tratamientos', label: t('nav.treatments'), icon: Sprout, module: 'tratamientos' },
+      { path: '/irrigaciones', label: t('nav.irrigations'), icon: Droplets, module: 'irrigaciones' },
+      { path: '/evaluaciones', label: t('nav.evaluations'), icon: ClipboardCheck, module: 'evaluaciones' },
     ]},
-    { section: 'Administración', items: [
-      { path: '/recetas', label: 'Recetas', icon: BookOpen, module: 'recetas' },
-      { path: '/albaranes', label: 'Albaranes', icon: FileBarChart, module: 'albaranes' },
-      { path: '/cosechas', label: 'Cosechas', icon: Wheat, module: 'cosechas' },
-      { path: '/documentos', label: 'Documentos', icon: FolderOpen, module: 'documentos' },
-      { path: '/informes-gastos', label: 'Informes Gastos', icon: BarChart3, module: 'albaranes' },
+    { section: t('nav.administration'), items: [
+      { path: '/recetas', label: t('nav.recipes'), icon: BookOpen, module: 'recetas' },
+      { path: '/albaranes', label: t('nav.deliveryNotes'), icon: FileBarChart, module: 'albaranes' },
+      { path: '/cosechas', label: t('nav.harvests'), icon: Wheat, module: 'cosechas' },
+      { path: '/documentos', label: t('nav.documents'), icon: FolderOpen, module: 'documentos' },
+      { path: '/informes-gastos', label: t('nav.expenseReports'), icon: BarChart3, module: 'albaranes' },
     ]},
-    { section: 'Catálogos', items: [
-      { path: '/proveedores', label: 'Proveedores', icon: Package },
-      { path: '/cultivos', label: 'Cultivos', icon: Leaf },
-      { path: '/maquinaria', label: 'Maquinaria', icon: Cog },
-      { path: '/fitosanitarios', label: 'Fitosanitarios', icon: Beaker },
+    { section: t('nav.catalogs'), items: [
+      { path: '/proveedores', label: t('nav.providers'), icon: Package },
+      { path: '/cultivos', label: t('nav.crops'), icon: Leaf },
+      { path: '/maquinaria', label: t('nav.machinery'), icon: Cog },
+      { path: '/fitosanitarios', label: t('nav.phytosanitary'), icon: Beaker },
     ]},
-    { section: 'Sistema', items: [
-      { path: '/usuarios', label: 'Usuarios', icon: Users, requireAdmin: true },
+    { section: t('nav.configuration'), items: [
+      { path: '/usuarios', label: t('nav.users'), icon: Users, requireAdmin: true },
     ]}
   ];
   
