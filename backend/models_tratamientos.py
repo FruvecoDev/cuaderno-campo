@@ -135,6 +135,12 @@ class TratamientoCreate(BaseModel):
     # El resto (cultivo_id, campana, contrato_id) se hereda desde la primera parcela
     parcelas_ids: List[str]  # OBLIGATORIO
     
+    # Producto fitosanitario seleccionado de la base de datos
+    producto_fitosanitario_id: Optional[str] = None  # ObjectId ref a fitosanitarios collection
+    producto_fitosanitario_nombre: Optional[str] = None  # Nombre del producto (denormalizado)
+    producto_fitosanitario_dosis: Optional[float] = None  # Dosis aplicada
+    producto_fitosanitario_unidad: Optional[str] = None  # Unidad de dosis
+    
     # Nuevos campos para Aplicador y Máquina
     aplicador_nombre: Optional[str] = None  # Nombre del aplicador (texto libre)
     maquina_id: Optional[str] = None  # ObjectId ref a maquinaria
