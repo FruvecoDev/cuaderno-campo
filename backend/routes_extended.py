@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
 from typing import List, Optional
 from bson import ObjectId
 from datetime import datetime
@@ -15,6 +15,12 @@ from database import (
     tratamientos_collection, irrigaciones_collection, recetas_collection,
     albaranes_collection, tareas_collection, cosechas_collection,
     documentos_collection, serialize_doc, serialize_docs
+)
+from rbac_guards import (
+    RequireCreate, RequireEdit, RequireDelete, RequireExport,
+    RequireTratamientosAccess, RequireIrrigacionesAccess, RequireRecetasAccess,
+    RequireAlbaranesAccess, RequireTareasAccess, RequireCosechasAccess,
+    get_current_user
 )
 
 router = APIRouter(prefix="/api", tags=["extended"])
