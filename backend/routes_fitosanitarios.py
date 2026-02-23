@@ -98,7 +98,7 @@ async def get_producto(
     
     try:
         producto = await fitosanitarios_collection.find_one({"_id": ObjectId(producto_id)})
-    except:
+    except Exception:
         raise HTTPException(status_code=400, detail="ID de producto inválido")
     
     if not producto:
@@ -143,7 +143,7 @@ async def update_producto(
     
     try:
         existing = await fitosanitarios_collection.find_one({"_id": ObjectId(producto_id)})
-    except:
+    except Exception:
         raise HTTPException(status_code=400, detail="ID de producto inválido")
     
     if not existing:
@@ -173,7 +173,7 @@ async def delete_producto(
     
     try:
         result = await fitosanitarios_collection.delete_one({"_id": ObjectId(producto_id)})
-    except:
+    except Exception:
         raise HTTPException(status_code=400, detail="ID de producto inválido")
     
     if result.deleted_count == 0:
