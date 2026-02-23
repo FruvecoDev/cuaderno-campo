@@ -410,10 +410,11 @@ class CargaCosecha(BaseModel):
     id_carga: str  # ID único de la carga
     fecha: str  # Fecha de la carga
     kilos_reales: float  # Kilos realmente recolectados
-    precio: float  # Precio por kilo (viene del contrato)
+    precio: float  # Precio por kilo (del contrato o ajustado por tenderometría)
     importe: float  # kilos_reales * precio
     es_descuento: bool = False  # True si es línea negativa (destare/calidad)
     tipo_descuento: Optional[str] = None  # "destare", "calidad", etc.
+    valor_tenderometria: Optional[float] = None  # Solo para guisante
     num_albaran: Optional[str] = None
     observaciones: Optional[str] = None
 
