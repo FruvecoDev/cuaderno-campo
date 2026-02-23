@@ -624,15 +624,48 @@ const Cosechas = () => {
                                 required
                               />
                             </div>
-                            <div className="form-group" style={{ marginBottom: 0 }}>
-                              <label className="form-label" style={{ fontSize: '0.75rem' }}>Nº Albarán</label>
-                              <input
-                                className="form-input"
-                                value={cargaForm.num_albaran}
-                                onChange={(e) => setCargaForm({ ...cargaForm, num_albaran: e.target.value })}
-                              />
-                            </div>
+                            {/* Campo Tenderometría - Solo para Guisante */}
+                            {(cosecha.cultivo || '').toLowerCase().includes('guisante') && !cargaForm.es_descuento && (
+                              <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label" style={{ fontSize: '0.75rem', color: '#1a5276', fontWeight: '600' }}>
+                                  Tenderometría
+                                </label>
+                                <input
+                                  type="number"
+                                  step="1"
+                                  className="form-input"
+                                  value={cargaForm.valor_tenderometria}
+                                  onChange={(e) => setCargaForm({ ...cargaForm, valor_tenderometria: e.target.value })}
+                                  placeholder="Ej: 105"
+                                  style={{ borderColor: '#1a5276' }}
+                                />
+                              </div>
+                            )}
+                            {/* Nº Albarán - se mueve o se queda según hay tenderometría */}
+                            {!((cosecha.cultivo || '').toLowerCase().includes('guisante') && !cargaForm.es_descuento) && (
+                              <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label" style={{ fontSize: '0.75rem' }}>Nº Albarán</label>
+                                <input
+                                  className="form-input"
+                                  value={cargaForm.num_albaran}
+                                  onChange={(e) => setCargaForm({ ...cargaForm, num_albaran: e.target.value })}
+                                />
+                              </div>
+                            )}
                           </div>
+                          {/* Segunda fila para Albarán cuando hay tenderometría */}
+                          {(cosecha.cultivo || '').toLowerCase().includes('guisante') && !cargaForm.es_descuento && (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                              <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label" style={{ fontSize: '0.75rem' }}>Nº Albarán</label>
+                                <input
+                                  className="form-input"
+                                  value={cargaForm.num_albaran}
+                                  onChange={(e) => setCargaForm({ ...cargaForm, num_albaran: e.target.value })}
+                                />
+                              </div>
+                            </div>
+                          )}
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
                             <div className="form-group" style={{ marginBottom: 0 }}>
                               <label className="form-label" style={{ fontSize: '0.75rem' }}>
