@@ -9,11 +9,11 @@
   },
   {
     "content": "Actualizar endpoints backend de Visitas: validar nuevos campos y consistencia con contrato",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Actualizar endpoints backend de Tratamientos: validar nuevos campos y consistencia",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Actualizar formulario frontend de Visitas: flujo guiado Contrato → Parcela → Cultivo → Campaña",
