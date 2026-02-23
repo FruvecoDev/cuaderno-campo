@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, Search, Filter, Settings, X, Beaker, AlertTriangle, Database, Download, Upload, FileSpreadsheet, ExternalLink, RefreshCw } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';

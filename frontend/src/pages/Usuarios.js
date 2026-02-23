@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, UserX, UserCheck, Shield } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
