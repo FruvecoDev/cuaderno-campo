@@ -402,45 +402,75 @@ class TareaInDB(TareaBase):
         json_encoders = {ObjectId: str}
 
 # ============================================================================
-# COSECHAS
+# COSECHAS - Asociadas a Contratos
 # ============================================================================
 
-class CosechaRegistro(BaseModel):
-    fecha_fin: str
-    proveedor: str
+class CargaCosecha(BaseModel):
+    """Registro individual de carga de cosecha"""
+    id_carga: str  # ID único de la carga
+    fecha: str  # Fecha de la carga
+    kilos_reales: float  # Kilos realmente recolectados
+    precio: float  # Precio por kilo (viene del contrato)
+    importe: float  # kilos_reales * precio
+    es_descuento: bool = False  # True si es línea negativa (destare/calidad)
+    tipo_descuento: Optional[str] = None  # "destare", "calidad", etc.
     num_albaran: Optional[str] = None
-    num_lote: Optional[str] = None
-    cantidad: float
-    unidad: str = "kg"
-    precio_venta: float
+    observaciones: Optional[str] = None
+
+class PlanificacionRecoleccion(BaseModel):
+    """Planificación de fecha y kilos a recolectar"""
+    fecha_planificada: str
+    kilos_estimados: float
     observaciones: Optional[str] = None
 
 class CosechaBase(BaseModel):
-    nombre: str
-    realizado: bool = False
-    planificado: bool = False
-    superficie_total: float
-    unidad_medida: str = "ha"
-    num_plantas: int
+    """Cosecha asociada a un contrato"""
+    # Relación con contrato (obligatorio)
+    contrato_id: str
     
-    # Registros de cosechas
-    cosechas: List[CosechaRegistro] = []
+    # Datos heredados del contrato (denormalizados para facilitar consultas)
+    proveedor: Optional[str] = None
+    cultivo: Optional[str] = None
+    variedad: Optional[str] = None
+    parcela: Optional[str] = None
+    campana: Optional[str] = None
+    precio_contrato: float = 0.0  # Precio por kg del contrato
     
-    # Parcelas asociadas
-    parcelas_ids: List[str] = []
+    # Estado
+    estado: str = "planificada"  # planificada, en_curso, completada
     
-    # Totales
-    cosecha_total: float = 0.0
-    ingreso_total: float = 0.0
+    # Planificación de recolección
+    planificaciones: List[PlanificacionRecoleccion] = []
+    kilos_totales_estimados: float = 0.0
+    
+    # Registros de cargas
+    cargas: List[CargaCosecha] = []
+    
+    # Totales calculados
+    kilos_totales_reales: float = 0.0  # Suma de kilos_reales (positivos)
+    kilos_descuentos: float = 0.0  # Suma de descuentos (negativos)
+    kilos_netos: float = 0.0  # kilos_totales_reales - kilos_descuentos
+    importe_bruto: float = 0.0
+    importe_descuentos: float = 0.0
+    importe_neto: float = 0.0
     
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
 
 class CosechaCreate(BaseModel):
-    nombre: str
-    superficie_total: float
-    num_plantas: int
-    parcelas_ids: List[str]
+    """Para crear una nueva cosecha"""
+    contrato_id: str
+    planificaciones: List[PlanificacionRecoleccion] = []
+
+class CargaCosechaCreate(BaseModel):
+    """Para añadir una carga a la cosecha"""
+    id_carga: str
+    fecha: str
+    kilos_reales: float
+    es_descuento: bool = False
+    tipo_descuento: Optional[str] = None
+    num_albaran: Optional[str] = None
+    observaciones: Optional[str] = None
 
 class CosechaInDB(CosechaBase):
     id: str = Field(alias="_id")
