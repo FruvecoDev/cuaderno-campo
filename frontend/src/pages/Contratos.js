@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Download, FileText, Edit2, Trash2 } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
@@ -14,6 +15,8 @@ const Contratos = () => {
   const [error, setError] = useState(null);
   const { token } = useAuth();
   const { canCreate, canEdit, canDelete, canExport } = usePermissions();
+  const { handlePermissionError } = usePermissionError();
+  const { t } = useTranslation();
   const { handlePermissionError } = usePermissionError();
   
   // Estados para catálogos
