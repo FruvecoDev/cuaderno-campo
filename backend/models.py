@@ -290,6 +290,7 @@ class VisitaCreate(BaseModel):
     
     # Campos opcionales editables por el usuario
     fecha_visita: Optional[str] = None
+    fecha_planificada: Optional[str] = None  # Para planificar visitas futuras
     observaciones: Optional[str] = None
     
     # Cuestionario de Plagas y Enfermedades (solo cuando objetivo = "Plagas y Enfermedades")
