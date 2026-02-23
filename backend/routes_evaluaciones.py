@@ -369,7 +369,7 @@ async def delete_pregunta_config(
 
 
 # ============================================================================
-# GENERACIÓN DE PDF
+# GENERACIÓN DE PDF - CON VISITAS Y TRATAMIENTOS
 # ============================================================================
 
 @router.get("/evaluaciones/{evaluacion_id}/pdf")
@@ -377,9 +377,10 @@ async def generate_evaluacion_pdf(
     evaluacion_id: str,
     current_user: dict = Depends(get_current_user)
 ):
-    """Generar PDF de la hoja de evaluación"""
+    """Generar PDF de la hoja de evaluación con visitas y tratamientos"""
     from fastapi.responses import Response
     from weasyprint import HTML
+    from database import visitas_collection, tratamientos_collection
     import io
     
     if not ObjectId.is_valid(evaluacion_id):
@@ -388,6 +389,18 @@ async def generate_evaluacion_pdf(
     evaluacion = await evaluaciones_collection.find_one({"_id": ObjectId(evaluacion_id)})
     if not evaluacion:
         raise HTTPException(status_code=404, detail="Evaluación no encontrada")
+    
+    parcela_id = evaluacion.get("parcela_id", "")
+    
+    # Obtener visitas de la parcela
+    visitas = []
+    if parcela_id:
+        visitas = await visitas_collection.find({"parcela_id": parcela_id}).sort("fecha_visita", -1).to_list(100)
+    
+    # Obtener tratamientos de la parcela
+    tratamientos = []
+    if parcela_id:
+        tratamientos = await tratamientos_collection.find({"parcelas_ids": parcela_id}).sort("fecha_tratamiento", -1).to_list(100)
     
     # Función helper para formatear respuestas
     def format_respuesta(resp):
@@ -399,131 +412,213 @@ async def generate_evaluacion_pdf(
             return "—"
         return str(resp)
     
+    def format_fecha(fecha):
+        if not fecha:
+            return "—"
+        return str(fecha)
+    
+    # CSS común para todas las páginas
+    css_styles = """
+        @page {
+            size: A4;
+            margin: 1.5cm;
+        }
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 10pt;
+            line-height: 1.4;
+            color: #333;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #2d5a27;
+        }
+        .header h1 {
+            color: #2d5a27;
+            font-size: 18pt;
+            margin: 0 0 5px 0;
+        }
+        .header h2 {
+            color: #666;
+            font-size: 12pt;
+            margin: 0;
+            font-weight: normal;
+        }
+        .header h3 {
+            color: #2d5a27;
+            font-size: 10pt;
+            margin: 5px 0 0 0;
+            font-weight: normal;
+        }
+        .section {
+            margin-bottom: 15px;
+            page-break-inside: avoid;
+        }
+        .section-title {
+            background-color: #2d5a27;
+            color: white;
+            padding: 8px 12px;
+            font-weight: bold;
+            font-size: 11pt;
+            margin-bottom: 0;
+        }
+        .section-title-blue {
+            background-color: #1a5276;
+        }
+        .section-title-orange {
+            background-color: #b9770e;
+        }
+        .section-content {
+            border: 1px solid #ddd;
+            border-top: none;
+            padding: 12px;
+        }
+        .question-row {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .question-row:last-child {
+            border-bottom: none;
+        }
+        .question-num {
+            font-weight: bold;
+            color: #2d5a27;
+        }
+        .question-text {
+            margin-left: 5px;
+        }
+        .answer {
+            margin-left: 20px;
+            color: #555;
+            font-style: italic;
+        }
+        .answer-yes {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .answer-no {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            font-size: 9pt;
+            color: #666;
+            text-align: center;
+        }
+        .datos-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .datos-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .dato-item {
+            padding: 5px;
+        }
+        .dato-label {
+            font-weight: bold;
+            font-size: 9pt;
+            color: #666;
+        }
+        .dato-value {
+            font-size: 10pt;
+        }
+        .visita-header {
+            background-color: #1a5276;
+            color: white;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        .visita-header h3 {
+            margin: 0;
+            color: white;
+        }
+        .tratamiento-header {
+            background-color: #b9770e;
+            color: white;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        .tratamiento-header h3 {
+            margin: 0;
+            color: white;
+        }
+        .summary-box {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .summary-title {
+            font-weight: bold;
+            font-size: 12pt;
+            margin-bottom: 10px;
+            color: #2d5a27;
+        }
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table.data-table th, table.data-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        table.data-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        table.data-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    """
+    
     # Generar HTML para el PDF
     html_content = f"""
     <!DOCTYPE html>
     <html>
     <head>
         <meta charset="UTF-8">
-        <style>
-            @page {{
-                size: A4;
-                margin: 1.5cm;
-            }}
-            body {{
-                font-family: 'Helvetica', 'Arial', sans-serif;
-                font-size: 10pt;
-                line-height: 1.4;
-                color: #333;
-            }}
-            .header {{
-                text-align: center;
-                margin-bottom: 20px;
-                padding-bottom: 15px;
-                border-bottom: 2px solid #2d5a27;
-            }}
-            .header h1 {{
-                color: #2d5a27;
-                font-size: 18pt;
-                margin: 0 0 5px 0;
-            }}
-            .header h2 {{
-                color: #666;
-                font-size: 12pt;
-                margin: 0;
-                font-weight: normal;
-            }}
-            .section {{
-                margin-bottom: 15px;
-                page-break-inside: avoid;
-            }}
-            .section-title {{
-                background-color: #2d5a27;
-                color: white;
-                padding: 8px 12px;
-                font-weight: bold;
-                font-size: 11pt;
-                margin-bottom: 0;
-            }}
-            .section-content {{
-                border: 1px solid #ddd;
-                border-top: none;
-                padding: 12px;
-            }}
-            .info-grid {{
-                display: table;
-                width: 100%;
-            }}
-            .info-row {{
-                display: table-row;
-            }}
-            .info-cell {{
-                display: table-cell;
-                padding: 5px 10px;
-                border-bottom: 1px solid #eee;
-            }}
-            .info-label {{
-                font-weight: bold;
-                width: 30%;
-                background-color: #f9f9f9;
-            }}
-            .question-row {{
-                padding: 8px 0;
-                border-bottom: 1px solid #eee;
-            }}
-            .question-row:last-child {{
-                border-bottom: none;
-            }}
-            .question-num {{
-                font-weight: bold;
-                color: #2d5a27;
-            }}
-            .question-text {{
-                margin-left: 5px;
-            }}
-            .answer {{
-                margin-left: 20px;
-                color: #555;
-                font-style: italic;
-            }}
-            .answer-yes {{
-                color: #28a745;
-                font-weight: bold;
-            }}
-            .answer-no {{
-                color: #dc3545;
-                font-weight: bold;
-            }}
-            .footer {{
-                margin-top: 30px;
-                padding-top: 15px;
-                border-top: 1px solid #ddd;
-                font-size: 9pt;
-                color: #666;
-                text-align: center;
-            }}
-            .datos-grid {{
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 10px;
-            }}
-            .dato-item {{
-                padding: 5px;
-            }}
-            .dato-label {{
-                font-weight: bold;
-                font-size: 9pt;
-                color: #666;
-            }}
-            .dato-value {{
-                font-size: 10pt;
-            }}
-        </style>
+        <style>{css_styles}</style>
     </head>
     <body>
+        <!-- PÁGINA 1: HOJA DE EVALUACIÓN PRINCIPAL -->
         <div class="header">
             <h1>FRUVECO</h1>
             <h2>HOJA DE EVALUACIÓN - CUADERNO DE CAMPO</h2>
+            <h3>Página 1 de {1 + len(visitas) + len(tratamientos)}</h3>
+        </div>
+        
+        <!-- Resumen -->
+        <div class="summary-box">
+            <div class="summary-title">RESUMEN DEL CUADERNO DE CAMPO</div>
+            <div class="datos-grid">
+                <div class="dato-item">
+                    <div class="dato-label">Total Visitas Registradas</div>
+                    <div class="dato-value" style="font-size: 14pt; font-weight: bold; color: #1a5276;">{len(visitas)}</div>
+                </div>
+                <div class="dato-item">
+                    <div class="dato-label">Total Tratamientos Registrados</div>
+                    <div class="dato-value" style="font-size: 14pt; font-weight: bold; color: #b9770e;">{len(tratamientos)}</div>
+                </div>
+                <div class="dato-item">
+                    <div class="dato-label">Total Páginas</div>
+                    <div class="dato-value" style="font-size: 14pt; font-weight: bold;">{1 + len(visitas) + len(tratamientos)}</div>
+                </div>
+            </div>
         </div>
         
         <!-- Datos Generales -->
@@ -609,7 +704,6 @@ async def generate_evaluacion_pdf(
                 respuesta = resp.get('respuesta')
                 respuesta_fmt = format_respuesta(respuesta)
                 
-                # Clase CSS según tipo de respuesta
                 respuesta_class = ''
                 if respuesta is True:
                     respuesta_class = 'answer-yes'
@@ -653,11 +747,211 @@ async def generate_evaluacion_pdf(
         </div>
         """
     
-    # Footer
+    # ========================================================================
+    # PÁGINAS DE VISITAS - Una página por cada visita
+    # ========================================================================
+    for idx, visita in enumerate(visitas, 1):
+        page_num = 1 + idx
+        html_content += f"""
+        <div class="page-break"></div>
+        <div class="header">
+            <h1>FRUVECO</h1>
+            <h2>REGISTRO DE VISITA</h2>
+            <h3>Visita {idx} de {len(visitas)} | Página {page_num} de {1 + len(visitas) + len(tratamientos)}</h3>
+        </div>
+        
+        <div class="visita-header">
+            <h3>VISITA #{idx} - {format_fecha(visita.get('fecha_visita'))}</h3>
+        </div>
+        
+        <div class="section">
+            <div class="section-title section-title-blue">DATOS DE LA VISITA</div>
+            <div class="section-content">
+                <div class="datos-grid">
+                    <div class="dato-item">
+                        <div class="dato-label">Fecha de Visita</div>
+                        <div class="dato-value">{format_fecha(visita.get('fecha_visita'))}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Objetivo</div>
+                        <div class="dato-value">{visita.get('objetivo', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Código Plantación</div>
+                        <div class="dato-value">{visita.get('codigo_plantacion', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Proveedor</div>
+                        <div class="dato-value">{visita.get('proveedor', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Cultivo</div>
+                        <div class="dato-value">{visita.get('cultivo', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Variedad</div>
+                        <div class="dato-value">{visita.get('variedad', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Finca</div>
+                        <div class="dato-value">{visita.get('finca', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Campaña</div>
+                        <div class="dato-value">{visita.get('campana', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Realizado</div>
+                        <div class="dato-value">{'Sí' if visita.get('realizado') else 'No'}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title section-title-blue">OBSERVACIONES</div>
+            <div class="section-content">
+                <p>{visita.get('observaciones') or 'Sin observaciones registradas.'}</p>
+            </div>
+        </div>
+        """
+        
+        # Cuestionario de Plagas y Enfermedades si existe
+        cuestionario_plagas = visita.get('cuestionario_plagas', {})
+        if cuestionario_plagas:
+            html_content += f"""
+        <div class="section">
+            <div class="section-title section-title-blue">CUESTIONARIO PLAGAS Y ENFERMEDADES</div>
+            <div class="section-content">
+            """
+            for key, value in cuestionario_plagas.items():
+                if value:
+                    label = key.replace('_', ' ').title()
+                    html_content += f"""
+                <div class="question-row">
+                    <span class="question-text"><strong>{label}:</strong></span>
+                    <div class="answer">{format_respuesta(value)}</div>
+                </div>
+                """
+            html_content += """
+            </div>
+        </div>
+            """
+    
+    # ========================================================================
+    # PÁGINAS DE TRATAMIENTOS - Una página por cada tratamiento
+    # ========================================================================
+    for idx, tratamiento in enumerate(tratamientos, 1):
+        page_num = 1 + len(visitas) + idx
+        html_content += f"""
+        <div class="page-break"></div>
+        <div class="header">
+            <h1>FRUVECO</h1>
+            <h2>REGISTRO DE TRATAMIENTO</h2>
+            <h3>Tratamiento {idx} de {len(tratamientos)} | Página {page_num} de {1 + len(visitas) + len(tratamientos)}</h3>
+        </div>
+        
+        <div class="tratamiento-header">
+            <h3>TRATAMIENTO #{idx} - {format_fecha(tratamiento.get('fecha_tratamiento'))}</h3>
+        </div>
+        
+        <div class="section">
+            <div class="section-title section-title-orange">DATOS DEL TRATAMIENTO</div>
+            <div class="section-content">
+                <div class="datos-grid">
+                    <div class="dato-item">
+                        <div class="dato-label">Fecha Tratamiento</div>
+                        <div class="dato-value">{format_fecha(tratamiento.get('fecha_tratamiento'))}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Fecha Aplicación</div>
+                        <div class="dato-value">{format_fecha(tratamiento.get('fecha_aplicacion'))}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Tipo</div>
+                        <div class="dato-value">{tratamiento.get('tipo', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Aplicador</div>
+                        <div class="dato-value">{tratamiento.get('aplicador_nombre', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Máquina</div>
+                        <div class="dato-value">{tratamiento.get('maquina_nombre', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Campaña</div>
+                        <div class="dato-value">{tratamiento.get('campana', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Realizado</div>
+                        <div class="dato-value">{'Sí' if tratamiento.get('realizado') else 'No'}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Coste Total</div>
+                        <div class="dato-value">{tratamiento.get('coste_total', 0):.2f} €</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Dosis</div>
+                        <div class="dato-value">{tratamiento.get('dosis', '—')}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title section-title-orange">DESCRIPCIÓN / MOTIVO</div>
+            <div class="section-content">
+                <p>{tratamiento.get('descripcion') or tratamiento.get('motivo') or 'Sin descripción registrada.'}</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title section-title-orange">OBSERVACIONES</div>
+            <div class="section-content">
+                <p>{tratamiento.get('observaciones') or 'Sin observaciones registradas.'}</p>
+            </div>
+        </div>
+        """
+        
+        # Productos utilizados si existen
+        productos = tratamiento.get('productos', [])
+        if productos:
+            html_content += """
+        <div class="section">
+            <div class="section-title section-title-orange">PRODUCTOS UTILIZADOS</div>
+            <div class="section-content">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Dosis</th>
+                            <th>Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            """
+            for prod in productos:
+                html_content += f"""
+                        <tr>
+                            <td>{prod.get('nombre', '—')}</td>
+                            <td>{prod.get('dosis', '—')}</td>
+                            <td>{prod.get('cantidad', '—')}</td>
+                        </tr>
+                """
+            html_content += """
+                    </tbody>
+                </table>
+            </div>
+        </div>
+            """
+    
+    # Footer final
     html_content += f"""
         <div class="footer">
             <p>Documento generado automáticamente por FRUVECO - Cuaderno de Campo</p>
             <p>Fecha de generación: {datetime.now().strftime('%d/%m/%Y %H:%M')}</p>
+            <p>Total: {1 + len(visitas) + len(tratamientos)} páginas | {len(visitas)} visitas | {len(tratamientos)} tratamientos</p>
         </div>
     </body>
     </html>
@@ -669,7 +963,7 @@ async def generate_evaluacion_pdf(
         HTML(string=html_content).write_pdf(pdf_buffer)
         pdf_buffer.seek(0)
         
-        filename = f"evaluacion_{evaluacion.get('codigo_plantacion', 'sin_codigo')}_{evaluacion.get('fecha_inicio', 'sin_fecha')}.pdf"
+        filename = f"cuaderno_campo_{evaluacion.get('codigo_plantacion', 'sin_codigo')}_{evaluacion.get('campana', 'sin_campana')}.pdf"
         
         return Response(
             content=pdf_buffer.getvalue(),
