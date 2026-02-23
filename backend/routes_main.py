@@ -36,6 +36,22 @@ async def create_contrato(
     current_user: dict = Depends(RequireCreate),
     _access: dict = Depends(RequireContratosAccess)
 ):
+    # Validar referencias a catálogos
+    proveedores_collection = db['proveedores']
+    cultivos_collection = db['cultivos']
+    
+    # Validar proveedor existe
+    if contrato.proveedor_id:
+        proveedor = await proveedores_collection.find_one({"_id": ObjectId(contrato.proveedor_id)})
+        if not proveedor:
+            raise HTTPException(status_code=400, detail="Proveedor no encontrado")
+    
+    # Validar cultivo existe
+    if contrato.cultivo_id:
+        cultivo = await cultivos_collection.find_one({"_id": ObjectId(contrato.cultivo_id)})
+        if not cultivo:
+            raise HTTPException(status_code=400, detail="Cultivo no encontrado")
+    
     # Get next numero
     last_contrato = await contratos_collection.find_one(
         {"año": datetime.now().year},
@@ -52,6 +68,12 @@ async def create_contrato(
         "created_at": datetime.now(),
         "updated_at": datetime.now()
     })
+    
+    # Poblar nombres para compatibilidad/reportes
+    if contrato.proveedor_id and proveedor:
+        contrato_dict['proveedor'] = proveedor['nombre']
+    if contrato.cultivo_id and cultivo:
+        contrato_dict['cultivo'] = f"{cultivo['nombre']} {cultivo.get('variedad', '')}".strip()
     
     result = await contratos_collection.insert_one(contrato_dict)
     created = await contratos_collection.find_one({"_id": result.inserted_id})
