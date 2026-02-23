@@ -5,11 +5,11 @@
   },
   {
     "content": "Phase 1 POC: Create comprehensive test script for AI + PDF + Excel generation",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Phase 1 POC: Test Google Maps with polygon drawing",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Phase 1 POC: Build minimal UI for POC testing",
