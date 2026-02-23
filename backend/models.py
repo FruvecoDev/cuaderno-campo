@@ -319,6 +319,51 @@ class TareaBase(BaseModel):
     fecha_fin: Optional[str] = None
     
     superficie_tratar: float
+
+
+# ============================================================================
+# AI REPORTS
+# ============================================================================
+
+class AIReportBase(BaseModel):
+    report_type: str  # "parcel_campaign", "contract_summary", "cost_analysis", "recommendations"
+    entity_type: str  # "parcela", "contrato", "finca"
+    entity_id: str  # ObjectId of the entity
+    entity_name: Optional[str] = None  # Nombre legible para referencia
+    
+    # Context
+    campana: Optional[str] = None
+    cultivo: Optional[str] = None
+    
+    # Report content
+    title: str
+    summary: str  # Executive summary
+    content: Dict[str, Any]  # Full structured report
+    insights: List[str] = []  # Key insights/findings
+    recommendations: List[str] = []  # Actionable recommendations
+    anomalies: List[str] = []  # Detected anomalies
+    
+    # Metadata
+    tokens_used: int = 0
+    model_used: str = "gpt-4o"
+    generation_time_seconds: float = 0.0
+    
+    created_at: datetime = Field(default_factory=datetime.now)
+    created_by: Optional[str] = None  # User email
+
+class AIReportCreate(BaseModel):
+    report_type: str
+    entity_type: str
+    entity_id: str
+    campana: Optional[str] = None
+
+class AIReportInDB(AIReportBase):
+    id: str = Field(alias="_id")
+    
+    class Config:
+        populate_by_name = True
+        json_encoders = {ObjectId: str}
+
     unidad_medida: str = "ha"
     num_plantas: Optional[int] = None
     observaciones: Optional[str] = None
