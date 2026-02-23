@@ -80,13 +80,23 @@ const Evaluaciones = () => {
   const [parcelaSearch, setParcelaSearch] = useState({ proveedor: '', cultivo: '', campana: '' });
   
   // Filtros de lista
-  const [filters, setFilters] = useState({ campana: '', estado: '' });
+  const [filters, setFilters] = useState({ 
+    parcela: '',
+    cultivo: '', 
+    proveedor: '', 
+    campana: '', 
+    contrato: '',
+    estado: '' 
+  });
   
   // Secciones expandidas
   const [expandedSections, setExpandedSections] = useState({});
   
   // Preguntas custom cargadas del backend
   const [customPreguntas, setCustomPreguntas] = useState({});
+  
+  // Contratos para filtro
+  const [contratos, setContratos] = useState([]);
   
   // Modal para agregar preguntas
   const [showAddQuestion, setShowAddQuestion] = useState(false);
