@@ -1,11 +1,11 @@
 [
   {
     "content": "P1.1: Ocultar/deshabilitar botones Delete en listados según can_delete",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "P1.2: Mostrar mensajes 403 amigables cuando backend rechaza operación",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "P1.3: Implementar cambio/reset de contraseña",
