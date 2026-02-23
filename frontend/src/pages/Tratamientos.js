@@ -63,6 +63,20 @@ const Tratamientos = () => {
   const [selectedParcelas, setSelectedParcelas] = useState([]);
   const [selectedParcelasInfo, setSelectedParcelasInfo] = useState(null);
   
+  // Filtros de búsqueda de parcelas (dentro del formulario)
+  const [parcelaSearch, setParcelaSearch] = useState({
+    proveedor: '',
+    cultivo: '',
+    campana: ''
+  });
+  
+  // Opciones únicas para filtros de parcelas (dentro del formulario)
+  const [parcelaFilterOptions, setParcelaFilterOptions] = useState({
+    proveedores: [],
+    cultivos: [],
+    campanas: []
+  });
+  
   // Filtros
   const [filters, setFilters] = useState({
     proveedor: '',
