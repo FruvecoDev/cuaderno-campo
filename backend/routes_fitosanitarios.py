@@ -5,7 +5,7 @@ from bson import ObjectId
 from datetime import datetime
 
 from database import db
-from auth_routes import get_current_user
+from routes_auth import get_current_user
 
 router = APIRouter(prefix="/api/fitosanitarios", tags=["fitosanitarios"])
 
