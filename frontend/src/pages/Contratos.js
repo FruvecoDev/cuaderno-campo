@@ -90,14 +90,15 @@ const Contratos = () => {
     <div data-testid="contratos-page">
       <div className="flex justify-between items-center mb-6">
         <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>Contratos</h1>
-        <button
-          className="btn btn-primary"
+        <PermissionButton
+          permission="create"
           onClick={() => setShowForm(!showForm)}
+          className="btn btn-primary"
           data-testid="btn-nuevo-contrato"
         >
           <Plus size={18} />
           Nuevo Contrato
-        </button>
+        </PermissionButton>
       </div>
       
       {showForm && (
