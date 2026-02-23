@@ -83,7 +83,11 @@ const Parcelas = () => {
   
   const fetchParcelas = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/parcelas`);
+      const response = await fetch(`${BACKEND_URL}/api/parcelas`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await response.json();
       setParcelas(data.parcelas || []);
     } catch (error) {
