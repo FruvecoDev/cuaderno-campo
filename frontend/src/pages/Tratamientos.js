@@ -519,10 +519,26 @@ const Tratamientos = () => {
                 {tratamientos.map((tratamiento) => (
                   <tr key={tratamiento._id}>
                     <td className="font-semibold">{tratamiento.tipo_tratamiento}</td>
-                    <td>{tratamiento.subtipo || 'N/A'}</td>
+                    <td>{tratamiento.subtipo || '—'}</td>
                     <td>{tratamiento.metodo_aplicacion}</td>
-                    <td>{tratamiento.cultivo_id || 'N/A'}</td>
-                    <td>{tratamiento.campana || 'N/A'}</td>
+                    <td>
+                      {tratamiento.cultivo_id ? (
+                        tratamiento.cultivo_id
+                      ) : (
+                        <span style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }} title="Registro anterior a la implementación de catálogos">
+                          No especificado
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      {tratamiento.campana ? (
+                        tratamiento.campana
+                      ) : (
+                        <span style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }} title="Registro anterior a la implementación de catálogos">
+                          No especificado
+                        </span>
+                      )}
+                    </td>
                     <td>{tratamiento.superficie_aplicacion} ha</td>
                     <td>€{tratamiento.coste_total ? tratamiento.coste_total.toFixed(2) : '0.00'}</td>
                     <td>
