@@ -91,6 +91,99 @@ async def get_productos(
     }
 
 
+# GET template for import (MUST be before /{producto_id})
+@router.get("/template")
+async def get_import_template(
+    current_user: dict = Depends(get_current_user)
+):
+    """Returns a base64 encoded Excel template for importing products"""
+    
+    template_data = {
+        "numero_registro": ["ES-00001", "ES-00002"],
+        "nombre_comercial": ["PRODUCTO EJEMPLO 1", "PRODUCTO EJEMPLO 2"],
+        "denominacion_comun": ["Nombre alternativo 1", "Nombre alternativo 2"],
+        "empresa": ["Empresa S.A.", "Otra Empresa S.L."],
+        "tipo": ["Herbicida", "Insecticida"],
+        "materia_activa": ["Glifosato 36%", "Cipermetrina 10%"],
+        "dosis_min": [1.0, 0.1],
+        "dosis_max": [3.0, 0.2],
+        "unidad_dosis": ["L/ha", "L/ha"],
+        "volumen_agua_min": [200, 200],
+        "volumen_agua_max": [400, 500],
+        "plagas_objetivo": ["Malas hierbas", "Pulgón, Trips"],
+        "plazo_seguridad": [21, 7],
+        "observaciones": ["", "Usar en horas frescas"]
+    }
+    
+    df = pd.DataFrame(template_data)
+    
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Plantilla')
+    output.seek(0)
+    
+    import base64
+    excel_base64 = base64.b64encode(output.read()).decode('utf-8')
+    
+    return {
+        "success": True,
+        "filename": "plantilla_fitosanitarios.xlsx",
+        "data": excel_base64
+    }
+
+
+# EXPORT products to Excel (MUST be before /{producto_id})
+@router.get("/export")
+async def export_productos(
+    tipo: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    query = {"activo": True}
+    if tipo:
+        query["tipo"] = tipo
+    
+    productos = await fitosanitarios_collection.find(query).sort("nombre_comercial", 1).to_list(length=5000)
+    
+    # Convert to DataFrame
+    data = []
+    for p in productos:
+        data.append({
+            "Nº Registro": p.get("numero_registro", ""),
+            "Nombre Comercial": p.get("nombre_comercial", ""),
+            "Denominación": p.get("denominacion_comun", ""),
+            "Empresa": p.get("empresa", ""),
+            "Tipo": p.get("tipo", ""),
+            "Materia Activa": p.get("materia_activa", ""),
+            "Dosis Mín": p.get("dosis_min", ""),
+            "Dosis Máx": p.get("dosis_max", ""),
+            "Unidad Dosis": p.get("unidad_dosis", ""),
+            "Vol. Agua Mín": p.get("volumen_agua_min", ""),
+            "Vol. Agua Máx": p.get("volumen_agua_max", ""),
+            "Plagas Objetivo": ", ".join(p.get("plagas_objetivo", [])),
+            "Plazo Seguridad": p.get("plazo_seguridad", ""),
+            "Observaciones": p.get("observaciones", "")
+        })
+    
+    df = pd.DataFrame(data)
+    
+    # Create Excel file in memory
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Productos')
+    output.seek(0)
+    
+    # Return as base64
+    import base64
+    excel_base64 = base64.b64encode(output.read()).decode('utf-8')
+    
+    return {
+        "success": True,
+        "filename": f"fitosanitarios_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+        "data": excel_base64,
+        "total": len(productos)
+    }
+
+
 # GET single product
 @router.get("/{producto_id}")
 async def get_producto(
