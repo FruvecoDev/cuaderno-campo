@@ -200,6 +200,12 @@ const Parcelas = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
   
+  // Historial de tratamientos
+  const [showHistorial, setShowHistorial] = useState(false);
+  const [historialParcela, setHistorialParcela] = useState(null);
+  const [historialData, setHistorialData] = useState(null);
+  const [historialLoading, setHistorialLoading] = useState(false);
+  
   // Filtros de búsqueda de contratos (dentro del formulario)
   const [contratoSearch, setContratoSearch] = useState({
     proveedor: '',
