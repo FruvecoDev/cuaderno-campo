@@ -29,6 +29,7 @@ from routes_main import router as main_router
 from routes_extended import router as extended_router
 from routes_auth import router as auth_router
 from routes_catalogos import router as catalogos_router
+from routes_ai import router as ai_router
 
 # Import database
 from database import (
