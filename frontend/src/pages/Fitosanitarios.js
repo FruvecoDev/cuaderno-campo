@@ -56,6 +56,12 @@ const Fitosanitarios = () => {
   const { token } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
+  
+  // Import/Export
+  const [showImport, setShowImport] = useState(false);
+  const [importLoading, setImportLoading] = useState(false);
+  const [importResult, setImportResult] = useState(null);
+  const fileInputRef = useRef(null);
 
   // Filters
   const [filters, setFilters] = useState({
