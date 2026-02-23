@@ -1,14 +1,10 @@
 [
   {
     "content": "Crear página de gestión de usuarios para Admins - Backend endpoints listos, crear UI",
-    "status": "in_progress"
-  },
-  {
-    "content": "Agregar ruta /usuarios al sistema de navegación (solo Admin)",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "Testing E2E multi-rol (Admin, Manager, Technician, Viewer)",
-    "status": "pending"
+    "status": "in_progress"
   }
 ]
