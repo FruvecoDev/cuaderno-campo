@@ -276,19 +276,15 @@ Módulos actualizados para seguir patrón consistente:
     - Detección de duplicados por numero_registro
   - **Exportación a Excel**: Endpoint `/api/fitosanitarios/export`
   - **Plantilla de importación**: Endpoint `/api/fitosanitarios/template`
+  - **Enlace al Registro MAPA**: Botón para acceder al registro oficial del Ministerio
 - **Modelo de datos**:
-  - `numero_registro`: Número de registro oficial
-  - `nombre_comercial`: Nombre comercial del producto
-  - `denominacion_comun`: Denominación alternativa
-  - `empresa`: Empresa concesionaria
+  - `numero_registro`, `nombre_comercial`, `denominacion_comun`, `empresa`
   - `tipo`: Herbicida/Insecticida/Fungicida/Acaricida/Molusquicida/Fertilizante
-  - `materia_activa`: Composición
-  - `dosis_min`, `dosis_max`: Rango de dosis recomendada
-  - `unidad_dosis`: L/ha, kg/ha, ml/ha, g/ha, %
-  - `volumen_agua_min`, `volumen_agua_max`: Volumen de agua recomendado
-  - `plagas_objetivo`: Array de plagas/enfermedades
-  - `plazo_seguridad`: Días antes de cosecha
-  - `observaciones`: Notas adicionales
-- **Integración con Calculadora**: Al seleccionar un producto en la calculadora, se auto-rellenan los campos con las dosis recomendadas
+  - `materia_activa`, `dosis_min`, `dosis_max`, `unidad_dosis`
+  - `volumen_agua_min`, `volumen_agua_max`, `plagas_objetivo`, `plazo_seguridad`
+- **Integración con Tratamientos**:
+  - Al seleccionar producto en calculadora, se transfiere al formulario de tratamiento
+  - Se muestra tarjeta verde con: Producto, Materia Activa, Dosis, Plazo Seguridad
+  - Los datos se guardan en el tratamiento: `producto_fitosanitario_id`, `producto_fitosanitario_nombre`, etc.
 - **Enlace en menú**: Catálogos > Fitosanitarios
 - **Estado**: ✅ COMPLETADO
