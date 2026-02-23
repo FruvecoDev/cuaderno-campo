@@ -372,11 +372,11 @@ const Recetas = () => {
               <tbody>
                 {filteredRecetas.map((receta) => (
                   <tr key={receta._id}>
-                    {fieldsConfig.nombre && <td className="font-semibold">{receta.nombre}</td>}
-                    {(fieldsConfig.cultivo_objetivo) ? <td><span className="badge badge-default">{receta.cultivo_objetivo}</span></td>}
-                    {(fieldsConfig.plazo_seguridad) ? <td>{receta.plazo_seguridad}</td> : null}
-                    {fieldsConfig.instrucciones && <td style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{receta.instrucciones || '—'}</td>}
-                    {(canEdit || canDelete) && (
+                    {fieldsConfig.nombre ? <td className="font-semibold">{receta.nombre}</td> : null}
+                    {fieldsConfig.cultivo_objetivo ? <td><span className="badge badge-default">{receta.cultivo_objetivo}</span></td> : null}
+                    {fieldsConfig.plazo_seguridad ? <td>{receta.plazo_seguridad}</td> : null}
+                    {fieldsConfig.instrucciones ? <td style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{receta.instrucciones || '—'}</td> : null}
+                    {(canEdit || canDelete) ? (
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                           {canEdit && (
@@ -391,7 +391,7 @@ const Recetas = () => {
                           )}
                         </div>
                       </td>
-                    )}
+                    ) : null}
                   </tr>
                 ))}
               </tbody>
