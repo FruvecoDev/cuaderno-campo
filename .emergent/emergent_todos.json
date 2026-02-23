@@ -1,10 +1,6 @@
 [
   {
-    "content": "Verificar compilación frontend sin errores",
-    "status": "completed"
-  },
-  {
     "content": "Probar flujo completo de Visitas y Tratamientos con nuevos vínculos",
-    "status": "in_progress"
+    "status": "completed"
   }
 ]
