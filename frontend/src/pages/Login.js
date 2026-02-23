@@ -179,7 +179,7 @@ const Login = () => {
               <strong>Credenciales por defecto:</strong>
             </p>
             <p className="text-xs" style={{ fontFamily: 'var(--font-mono)' }}>
-              Email: admin@agrogest.com<br />
+              Email: admin@fruveco.com<br />
               Password: admin123
             </p>
           </div>
