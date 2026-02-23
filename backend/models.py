@@ -187,6 +187,7 @@ class ParcelaCreate(BaseModel):
     num_plantas: int
     finca: str
     recintos: List[ParcelaRecinto]
+    contrato_id: Optional[str] = None  # Referencia al contrato asociado
 
 class ParcelaInDB(ParcelaBase):
     id: str = Field(alias="_id")
