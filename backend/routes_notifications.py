@@ -83,8 +83,7 @@ async def send_test_notification(
 async def trigger_visit_reminders(
     background_tasks: BackgroundTasks,
     days_ahead: int = 3,
-    current_user: dict = Depends(get_current_user),
-    _admin: dict = Depends(RequireAdminAccess)
+    current_user: dict = Depends(get_current_user)
 ):
     """
     Manually trigger visit reminder emails.
