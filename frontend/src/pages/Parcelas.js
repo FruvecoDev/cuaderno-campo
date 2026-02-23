@@ -99,6 +99,23 @@ const Parcelas = () => {
   };
 
   
+  // Autocompletar campos cuando se selecciona un contrato
+  useEffect(() => {
+    if (formData.contrato_id) {
+      const contrato = contratos.find(c => c._id === formData.contrato_id);
+      if (contrato) {
+        setFormData(prev => ({
+          ...prev,
+          proveedor: contrato.proveedor || '',
+          cultivo: contrato.cultivo || '',
+          campana: contrato.campana || '2025/26'
+        }));
+      }
+    }
+  }, [formData.contrato_id, contratos]);
+
+
+  
   const handlePolygonCreated = (coords) => {
     setPolygon(coords);
     alert(`Polígono dibujado con ${coords.length} puntos`);
