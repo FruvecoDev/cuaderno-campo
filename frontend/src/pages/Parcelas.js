@@ -746,6 +746,14 @@ const Parcelas = () => {
                     <td><span className={`badge ${p.activo ? 'badge-success' : 'badge-default'}`}>{p.activo ? 'Activa' : 'Inactiva'}</span></td>
                     <td>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button 
+                          className="btn btn-sm btn-primary" 
+                          onClick={() => navigate(`/evaluaciones?parcela_id=${p._id}`)} 
+                          title="Nueva Hoja de Evaluación"
+                          data-testid={`evaluacion-parcela-${p._id}`}
+                        >
+                          <ClipboardCheck size={14} />
+                        </button>
                         <button className="btn btn-sm btn-secondary" onClick={() => handleEdit(p)} title="Editar" data-testid={`edit-parcela-${p._id}`}>
                           <Edit2 size={14} />
                         </button>
