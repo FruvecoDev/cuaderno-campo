@@ -925,6 +925,13 @@ const Evaluaciones = () => {
                       {(canEdit || canDelete) && (
                         <td>
                           <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button
+                              className="btn btn-sm btn-primary"
+                              onClick={() => handleDownloadPDF(evaluacion._id)}
+                              title="Descargar PDF"
+                            >
+                              <Download size={14} />
+                            </button>
                             {canEdit && (
                               <button
                                 className="btn btn-sm btn-secondary"
