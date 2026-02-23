@@ -684,6 +684,62 @@ async def generate_evaluacion_pdf(
             </div>
         </div>
         
+        <!-- ÍNDICE DE CONTENIDOS -->
+        <div class="index-box">
+            <div class="index-title">ÍNDICE DE CONTENIDOS</div>
+            
+            <!-- Índice de Visitas -->
+            <div class="index-section">
+                <div class="index-section-title visitas">VISITAS ({len(visitas)})</div>
+    """
+    
+    if visitas:
+        for idx, visita in enumerate(visitas, 1):
+            page_num = 1 + idx
+            fecha = format_fecha(visita.get('fecha_visita'))
+            objetivo = visita.get('objetivo', 'Sin objetivo')[:40]
+            html_content += f"""
+                <div class="index-item">
+                    <span class="index-item-name">{idx}. {objetivo}</span>
+                    <span class="index-item-date">{fecha}</span>
+                    <span class="index-item-page">Pág. {page_num}</span>
+                </div>
+            """
+    else:
+        html_content += """
+                <div class="index-empty">No hay visitas registradas</div>
+        """
+    
+    html_content += """
+            </div>
+            
+            <!-- Índice de Tratamientos -->
+            <div class="index-section">
+                <div class="index-section-title tratamientos">TRATAMIENTOS (""" + str(len(tratamientos)) + """)</div>
+    """
+    
+    if tratamientos:
+        for idx, tratamiento in enumerate(tratamientos, 1):
+            page_num = 1 + len(visitas) + idx
+            fecha = format_fecha(tratamiento.get('fecha_tratamiento'))
+            tipo = tratamiento.get('tipo', 'Sin tipo')[:30]
+            descripcion = tratamiento.get('descripcion', '')[:20] or ''
+            html_content += f"""
+                <div class="index-item">
+                    <span class="index-item-name">{idx}. {tipo} {('- ' + descripcion) if descripcion else ''}</span>
+                    <span class="index-item-date">{fecha}</span>
+                    <span class="index-item-page">Pág. {page_num}</span>
+                </div>
+            """
+    else:
+        html_content += """
+                <div class="index-empty">No hay tratamientos registrados</div>
+        """
+    
+    html_content += f"""
+            </div>
+        </div>
+        
         <!-- Datos Generales -->
         <div class="section">
             <div class="section-title">DATOS GENERALES</div>
