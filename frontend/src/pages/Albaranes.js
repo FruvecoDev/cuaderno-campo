@@ -109,7 +109,22 @@ const Albaranes = () => {
   useEffect(() => {
     fetchAlbaranes();
     fetchContratos();
+    fetchProveedores();
   }, []);
+  
+  const fetchProveedores = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/proveedores?limit=500`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setProveedores(data.proveedores || []);
+      }
+    } catch (error) {
+      console.error('Error fetching proveedores:', error);
+    }
+  };
   
   useEffect(() => {
     // Extraer opciones de filtro de albaranes existentes
