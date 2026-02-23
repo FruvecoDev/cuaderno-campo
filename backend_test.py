@@ -232,11 +232,12 @@ class AgriculturalAPITester:
         parcela_id = self.created_ids.get("parcela", "test_id")
         
         visita_data = {
+            "objetivo": "Test Visit",
+            "proveedor": "Test Provider",
+            "campana": "2025/26", 
+            "cultivo": "Test Cultivo",
             "parcela_id": parcela_id,
             "fecha_visita": "2025-01-20",
-            "objetivo": "Test Visit",
-            "proveedor": "Test Provider", 
-            "cultivo": "Test Cultivo",
             "observaciones": "Test visit observations"
         }
         
