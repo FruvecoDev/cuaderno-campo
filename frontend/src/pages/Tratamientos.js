@@ -301,7 +301,9 @@ const Tratamientos = () => {
         metodo_aplicacion: formData.metodo_aplicacion,
         superficie_aplicacion: parseFloat(formData.superficie_aplicacion) || 0,
         caldo_superficie: parseFloat(formData.caldo_superficie) || 0,
-        parcelas_ids: formData.parcelas_ids
+        parcelas_ids: formData.parcelas_ids,
+        aplicador_nombre: formData.aplicador_nombre || null,
+        maquina_id: formData.maquina_id || null
       };
       
       const response = await fetch(url, {
