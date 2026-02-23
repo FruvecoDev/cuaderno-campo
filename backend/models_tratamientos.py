@@ -205,10 +205,12 @@ class RecetaInDB(RecetaBase):
 # ============================================================================
 
 class AlbaranItem(BaseModel):
-    producto: str
+    # Simplified model for frontend - descripcion maps to producto
+    descripcion: Optional[str] = None  # Frontend uses descripcion 
+    producto: Optional[str] = None  # Backend can use producto
     lote: Optional[str] = None
     cantidad: float
-    unidad: str
+    unidad: Optional[str] = None  # Made optional for frontend compatibility
     precio_unitario: float
     total: float
 
