@@ -1,4 +1,4 @@
-# AgroGest Pro - PRD (Product Requirements Document)
+# FRUVECO - PRD (Product Requirements Document)
 
 ## Problem Statement
 Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que permita gestionar:
@@ -93,6 +93,25 @@ Visita/Tratamiento → realizados sobre → Parcela
    - Columnas Aplicador y Máquina en tabla de Tratamientos
    - Backend denormaliza maquina_nombre automáticamente
 
+8. **Módulo Hoja de Evaluación (Nuevo - 23/02/2026)**
+   - Formulario multi-sección con cuestionarios dinámicos
+   - Secciones: Toma de Datos, Análisis de Suelo, Pasos Precampaña, Calidad Cepellones, Inspección Maquinaria, Observaciones, Calibración
+   - Tipos de respuesta: Sí/No, Texto, Número, Fecha
+   - Preguntas personalizables (Admin/Manager pueden agregar)
+   - Hereda datos automáticamente de la parcela seleccionada
+   - Generación de PDF profesional con WeasyPrint
+   - Acceso rápido desde Parcelas (botón "Crear Evaluación")
+
+9. **Filtros Hoja de Evaluación (Nuevo - 23/02/2026)**
+   - Filtrar por: Parcela, Cultivo, Proveedor, Campaña, Contrato, Estado
+   - Botón "Limpiar filtros" cuando hay filtros activos
+   - Filtros combinados funcionan correctamente
+   - Actualización dinámica de la lista
+
+10. **Formulario Plagas y Enfermedades en Visitas (Nuevo - 23/02/2026)**
+    - Cuestionario condicional cuando objetivo="Plagas y Enfermedades"
+    - Preguntas dinámicas guardadas en campo formulario_plagas
+
 ### Pending/In Progress
 1. **Frontend IA** (P0)
    - Página para generar y ver reportes IA
@@ -114,18 +133,20 @@ Visita/Tratamiento → realizados sobre → Parcela
 ## Key Files
 - `/app/backend/routes_main.py` - CRUD Contratos, Parcelas, Visitas, Fincas
 - `/app/backend/routes_extended.py` - CRUD Tratamientos, Irrigaciones, Recetas, Albaranes, Tareas, Cosechas
-- `/app/backend/routes_maquinaria.py` - CRUD Maquinaria (Nuevo)
+- `/app/backend/routes_maquinaria.py` - CRUD Maquinaria
+- `/app/backend/routes_evaluaciones.py` - CRUD Evaluaciones + PDF generation
 - `/app/backend/routes_ai.py` - Endpoints IA
-- `/app/frontend/src/pages/Maquinaria.js` - Gestión de maquinaria (Nuevo)
-- `/app/frontend/src/pages/Visitas.js` - Formulario simplificado
+- `/app/frontend/src/pages/Maquinaria.js` - Gestión de maquinaria
+- `/app/frontend/src/pages/Evaluaciones.js` - Hojas de Evaluación con filtros completos
+- `/app/frontend/src/pages/Visitas.js` - Formulario simplificado + Plagas/Enfermedades
 - `/app/frontend/src/pages/Tratamientos.js` - Formulario con Aplicador y Máquina
 
 ## Test Credentials
-- **Admin**: `admin@agrogest.com` / `admin123`
-- **Test**: `test@agrogest.com` / `test1234`
+- **Admin**: `admin@fruveco.com` / `admin123`
 - **Manager**: `manager@test.com` / (check DB)
 - **Technician**: `technician@test.com` / (check DB)
 - **Viewer**: `viewer@test.com` / (check DB)
 
 ## Test Reports
-- `/app/test_reports/iteration_7.json` - Latest test results (100% pass - Maquinaria + Tratamientos integration)
+- `/app/test_reports/iteration_8.json` - Latest test results (100% pass - Filtros Hoja de Evaluación)
+- `/app/test_reports/iteration_7.json` - (100% pass - Maquinaria + Tratamientos integration)
