@@ -351,9 +351,9 @@ class AgriculturalAPITester:
         # Test Recetas
         receta_data = {
             "nombre": "Test Recipe",
-            "descripcion": "Test recipe description",
-            "tipo": "Herbicida",
-            "dosis_ha": 2.5
+            "cultivo_objetivo": "Test Cultivo",
+            "plazo_seguridad": 7,
+            "instrucciones": "Test recipe instructions"
         }
         
         success, _ = self.run_test(
