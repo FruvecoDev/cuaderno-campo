@@ -144,7 +144,13 @@ async def create_irrigacion(
     return {"success": True, "data": serialize_doc(created)}
 
 @router.get("/irrigaciones")
-async def get_irrigaciones(skip: int = 0, limit: int = 100, parcela_id: Optional[str] = None):
+async def get_irrigaciones(
+    skip: int = 0,
+    limit: int = 100,
+    parcela_id: Optional[str] = None,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireIrrigacionesAccess)
+):
     query = {}
     if parcela_id:
         query["parcela_id"] = parcela_id
