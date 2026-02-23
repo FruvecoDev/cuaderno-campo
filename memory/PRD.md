@@ -269,6 +269,13 @@ Módulos actualizados para seguir patrón consistente:
   - Columnas configurables en tabla
   - Datos pre-cargados de productos oficiales españoles (32 productos)
   - Endpoint `/api/fitosanitarios/seed` para cargar datos iniciales
+  - **Importación desde Excel/CSV**: Endpoint `/api/fitosanitarios/import`
+    - Soporta archivos .xlsx, .xls, .csv
+    - Mapeo automático de columnas comunes
+    - Validación de datos y reporte de errores
+    - Detección de duplicados por numero_registro
+  - **Exportación a Excel**: Endpoint `/api/fitosanitarios/export`
+  - **Plantilla de importación**: Endpoint `/api/fitosanitarios/template`
 - **Modelo de datos**:
   - `numero_registro`: Número de registro oficial
   - `nombre_comercial`: Nombre comercial del producto
