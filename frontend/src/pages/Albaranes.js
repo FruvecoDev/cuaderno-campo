@@ -55,6 +55,22 @@ const Albaranes = () => {
     cultivo: ''
   });
   
+  // Filtros para buscar contratos en el formulario
+  const [contratoSearch, setContratoSearch] = useState({
+    proveedor: '',
+    cultivo: '',
+    campana: '',
+    parcela: ''
+  });
+  
+  // Opciones para filtros de contratos (extraídos de los contratos)
+  const [contratoOptions, setContratoOptions] = useState({
+    proveedores: [],
+    cultivos: [],
+    campanas: [],
+    parcelas: []
+  });
+  
   // Configuración de campos
   const [showFieldsConfig, setShowFieldsConfig] = useState(false);
   const [fieldsConfig, setFieldsConfig] = useState(() => {
