@@ -131,7 +131,7 @@ const Login = () => {
             </div>
             
             <div className="form-group">
-              <label className="form-label">Contraseña</label>
+              <label className="form-label">{t('auth.password')}</label>
               <div style={{ position: 'relative' }}>
                 <input
                   type="password"
@@ -160,7 +160,7 @@ const Login = () => {
               disabled={loading}
               data-testid="login-submit"
             >
-              {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+              {loading ? `${t('common.loading')}` : t('auth.login')}
             </button>
           </form>
           
