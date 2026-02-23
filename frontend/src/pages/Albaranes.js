@@ -507,7 +507,7 @@ const Albaranes = () => {
               <tbody>
                 {filteredAlbaranes.map((albaran) => (
                   <tr key={albaran._id}>
-                    {fieldsConfig.tipo && (
+                    {fieldsConfig.tipo ? (
                       <td>
                         <span className={`badge ${albaran.tipo === 'Entrada' ? 'badge-success' : 'badge-warning'}`}>
                           {albaran.tipo}
