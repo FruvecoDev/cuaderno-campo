@@ -272,12 +272,13 @@ class AgriculturalAPITester:
         parcela_id = self.created_ids.get("parcela", "test_id")
         
         tratamiento_data = {
-            "parcelas_ids": [parcela_id],
-            "fecha_inicio": "2025-01-15",
             "tipo_tratamiento": "Herbicida",
             "subtipo": "Pre-emergencia",
+            "aplicacion_numero": 1,
             "metodo_aplicacion": "Pulverización",
-            "superficie_aplicacion": 2.5
+            "superficie_aplicacion": 2.5,
+            "caldo_superficie": 300.0,
+            "parcelas_ids": [parcela_id]
         }
         
         success, response = self.run_test(
