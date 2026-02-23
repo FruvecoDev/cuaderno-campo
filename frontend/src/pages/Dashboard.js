@@ -1,9 +1,64 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, MapPin, FileText, Sprout, Euro } from 'lucide-react';
+import { MapContainer, TileLayer, Polygon, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { TrendingUp, MapPin, FileText, Sprout, Euro, Calendar, Bell, Layers, Satellite } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+
+// Tile layers para el mapa
+const TILE_LAYERS = {
+  osm: {
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    name: 'Mapa Base'
+  },
+  satellite: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    name: 'Satélite'
+  }
+};
+
+// Componente para ajustar bounds del mapa
+function FitAllBounds({ parcelas }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (parcelas && parcelas.length > 0) {
+      const allCoords = [];
+      parcelas.forEach(p => {
+        if (p.recintos && p.recintos[0]?.geometria) {
+          p.recintos[0].geometria.forEach(coord => {
+            allCoords.push([coord.lat, coord.lng]);
+          });
+        }
+      });
+      if (allCoords.length > 0) {
+        const bounds = L.latLngBounds(allCoords);
+        map.fitBounds(bounds, { padding: [30, 30] });
+      }
+    }
+  }, [map, parcelas]);
+  
+  return null;
+}
+
+// Colores por cultivo
+const CULTIVO_COLORS = {
+  'Guisante': '#4CAF50',
+  'Brócoli': '#2E7D32',
+  'Coliflor': '#81C784',
+  'Lechuga': '#A5D6A7',
+  'Espinaca': '#388E3C',
+  'default': '#66BB6A'
+};
+
+const getCultivoColor = (cultivo) => {
+  return CULTIVO_COLORS[cultivo] || CULTIVO_COLORS.default;
+};
 
 const Dashboard = () => {
   const [kpis, setKpis] = useState(null);
