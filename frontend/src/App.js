@@ -20,6 +20,7 @@ import Usuarios from './pages/Usuarios';
 import Proveedores from './pages/Proveedores';
 import Cultivos from './pages/Cultivos';
 import Maquinaria from './pages/Maquinaria';
+import Evaluaciones from './pages/Evaluaciones';
 
 function App() {
   return (
