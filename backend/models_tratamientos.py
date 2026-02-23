@@ -122,6 +122,11 @@ class TratamientoCreate(BaseModel):
     superficie_aplicacion: float
     caldo_superficie: float
     parcelas_ids: List[str]
+    
+    # Nuevos campos obligatorios
+    cultivo_id: Optional[str] = None  # OBLIGATORIO
+    campana: Optional[str] = None  # OBLIGATORIO
+    contrato_id: Optional[str] = None  # Recomendado
 
 class TratamientoInDB(TratamientoBase):
     id: str = Field(alias="_id")
