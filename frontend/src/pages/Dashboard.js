@@ -731,6 +731,103 @@ const Dashboard = () => {
         </div>
       </div>
       
+      {/* Panel de Notificaciones por Email */}
+      <div className="card mb-6" data-testid="panel-notificaciones">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Mail size={20} /> Notificaciones por Email
+          </h2>
+          {notificationStatus && (
+            <span style={{ 
+              fontSize: '0.75rem', 
+              padding: '4px 8px', 
+              borderRadius: '4px',
+              backgroundColor: notificationStatus.configured ? '#e8f5e9' : '#fff3e0',
+              color: notificationStatus.configured ? '#2d5a27' : '#f57c00'
+            }}>
+              {notificationStatus.configured ? '✓ Configurado' : '⚠ No configurado'}
+            </span>
+          )}
+        </div>
+        
+        <div style={{ 
+          padding: '1rem',
+          backgroundColor: 'hsl(var(--muted))',
+          borderRadius: '8px',
+          marginBottom: '1rem'
+        }}>
+          <p style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+            Envía recordatorios automáticos de visitas próximas a tu email.
+          </p>
+          <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+            {visitasPlanificadas.length > 0 
+              ? `Tienes ${visitasPlanificadas.length} visita(s) planificada(s) que recibirán notificación.`
+              : 'No hay visitas planificadas para notificar.'
+            }
+          </p>
+        </div>
+        
+        {/* Result message */}
+        {notificationResult && (
+          <div style={{ 
+            padding: '0.75rem 1rem',
+            marginBottom: '1rem',
+            borderRadius: '6px',
+            backgroundColor: notificationResult.success ? '#e8f5e9' : '#ffebee',
+            border: `1px solid ${notificationResult.success ? '#4CAF50' : '#f44336'}`,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            {notificationResult.success 
+              ? <CheckCircle size={18} style={{ color: '#4CAF50' }} />
+              : <AlertCircle size={18} style={{ color: '#f44336' }} />
+            }
+            <span style={{ fontSize: '0.875rem' }}>{notificationResult.message}</span>
+            {notificationResult.sent !== undefined && (
+              <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                ({notificationResult.sent} enviados)
+              </span>
+            )}
+          </div>
+        )}
+        
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <button 
+            onClick={sendVisitReminders}
+            disabled={sendingNotification || !notificationStatus?.configured || visitasPlanificadas.length === 0}
+            className="btn btn-primary"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <Send size={16} />
+            {sendingNotification ? 'Enviando...' : 'Enviar Recordatorios'}
+          </button>
+          
+          <button 
+            onClick={sendTestEmail}
+            disabled={sendingNotification || !notificationStatus?.configured}
+            className="btn btn-secondary"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <Mail size={16} />
+            Enviar Email de Prueba
+          </button>
+        </div>
+        
+        {!notificationStatus?.configured && (
+          <p style={{ 
+            fontSize: '0.75rem', 
+            color: '#f57c00', 
+            marginTop: '1rem',
+            padding: '0.5rem',
+            backgroundColor: '#fff8e1',
+            borderRadius: '4px'
+          }}>
+            Para activar las notificaciones, añade tu API key de Resend en el archivo .env del backend (RESEND_API_KEY)
+          </p>
+        )}
+      </div>
+      
       {/* Recent Activity */}
       {kpis.actividad_reciente && (
         <div className="grid-2">
