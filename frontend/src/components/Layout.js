@@ -68,12 +68,16 @@ const Layout = ({ children }) => {
     <div className="layout">
       <aside className="sidebar">
         <div className="sidebar-header">
-          <div className="sidebar-title">
-            <Wheat size={24} />
-            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1.2' }}>
-              <span style={{ fontWeight: '700', fontSize: '1.25rem' }}>FRUVECO</span>
-              <span style={{ fontSize: '0.7rem', fontWeight: '400', color: 'hsl(var(--muted-foreground))' }}>Cuaderno de Campo</span>
-            </div>
+          <div className="sidebar-title" style={{ justifyContent: 'center' }}>
+            <img 
+              src={logo} 
+              alt="Logo" 
+              style={{ 
+                maxWidth: '160px', 
+                height: 'auto',
+                objectFit: 'contain'
+              }} 
+            />
           </div>
         </div>
         <nav className="sidebar-nav">
