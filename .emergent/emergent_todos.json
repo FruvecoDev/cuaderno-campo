@@ -1,15 +1,11 @@
 [
   {
-    "content": "Instalar emergentintegrations library y agregar EMERGENT_LLM_KEY a .env",
+    "content": "Crear modelos de datos para reportes IA (AIReport en models.py)",
     "status": "completed"
   },
   {
-    "content": "Crear modelos de datos para reportes IA (AIReport en models.py)",
-    "status": "in_progress"
-  },
-  {
     "content": "Crear servicio de IA (ai_service.py) con plantillas de prompts",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Crear endpoints backend para generar reportes (/api/ai/report/parcel, /api/ai/report/contract)",
