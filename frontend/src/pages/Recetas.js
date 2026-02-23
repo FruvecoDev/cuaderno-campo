@@ -374,7 +374,7 @@ const Recetas = () => {
                   <tr key={receta._id}>
                     {fieldsConfig.nombre && <td className="font-semibold">{receta.nombre}</td>}
                     {(fieldsConfig.cultivo_objetivo) ? <td><span className="badge badge-default">{receta.cultivo_objetivo}</span></td>}
-                    {(fieldsConfig.plazo_seguridad) ? <td>{receta.plazo_seguridad}</td>}
+                    {(fieldsConfig.plazo_seguridad) ? <td>{receta.plazo_seguridad}</td> : null}
                     {fieldsConfig.instrucciones && <td style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{receta.instrucciones || '—'}</td>}
                     {(canEdit || canDelete) && (
                       <td>

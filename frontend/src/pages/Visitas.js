@@ -873,11 +873,11 @@ const Visitas = () => {
                 {filteredVisitas.map((visita) => (
                   <tr key={visita._id}>
                     {tableConfig.objetivo && <td className="font-semibold">{visita.objetivo}</td>}
-                    {(tableConfig.parcela) ? <td>{visita.codigo_plantacion || 'N/A'}</td>}
-                    {(tableConfig.proveedor) ? <td>{visita.proveedor || 'N/A'}</td>}
-                    {(tableConfig.cultivo) ? <td>{visita.cultivo || 'N/A'}</td>}
-                    {(tableConfig.campana) ? <td>{visita.campana || 'N/A'}</td>}
-                    {(tableConfig.fecha) ? <td>{visita.fecha_visita ? new Date(visita.fecha_visita).toLocaleDateString() : 'Sin fecha'}</td>}
+                    {(tableConfig.parcela) ? <td>{visita.codigo_plantacion || 'N/A'}</td> : null}
+                    {(tableConfig.proveedor) ? <td>{visita.proveedor || 'N/A'}</td> : null}
+                    {(tableConfig.cultivo) ? <td>{visita.cultivo || 'N/A'}</td> : null}
+                    {(tableConfig.campana) ? <td>{visita.campana || 'N/A'}</td> : null}
+                    {(tableConfig.fecha) ? <td>{visita.fecha_visita ? new Date(visita.fecha_visita).toLocaleDateString() : 'Sin fecha'}</td> : null}
                     {tableConfig.estado && (
                       <td>
                         <span className={`badge ${visita.realizado ? 'badge-success' : 'badge-default'}`}>
