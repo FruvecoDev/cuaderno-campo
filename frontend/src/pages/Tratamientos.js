@@ -21,6 +21,9 @@ const Tratamientos = () => {
   const [cultivos, setCultivos] = useState([]);
   const [selectedParcelas, setSelectedParcelas] = useState([]);
   
+  // Maps para resolver IDs a nombres en tablas
+  const [cultivosMap, setCultivosMap] = useState({});
+  
   // Form data con nuevos campos obligatorios
   const [formData, setFormData] = useState({
     tipo_tratamiento: 'FITOSANITARIOS',
