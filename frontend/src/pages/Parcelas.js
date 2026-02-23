@@ -55,10 +55,12 @@ function DrawControl({ onPolygonCreated }) {
 
 const Parcelas = () => {
   const [parcelas, setParcelas] = useState([]);
+  const [contratos, setContratos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [polygon, setPolygon] = useState([]);
   const [formData, setFormData] = useState({
+    contrato_id: '',
     proveedor: '',
     cultivo: '',
     campana: '2025/26',
@@ -71,6 +73,7 @@ const Parcelas = () => {
   
   useEffect(() => {
     fetchParcelas();
+    fetchContratos();
   }, []);
   
   const fetchParcelas = async () => {
