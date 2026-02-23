@@ -188,14 +188,13 @@ class AgriculturalAPITester:
         if not success:
             return False
         
-        # 2. Test CREATE contrato with new model
+        # 2. Test CREATE contrato with new model (articulo_mp field removed)
         contrato_data = {
             "campana": "2025/26",
             "procedencia": "Campo",
             "fecha_contrato": "2025-01-15",
             "proveedor_id": self.catalog_ids["proveedor_id"],  # New: using catalog reference
             "cultivo_id": self.catalog_ids["cultivo_id"],      # New: using catalog reference
-            "articulo_mp": "TEST-001",
             "cantidad": 1000.50,
             "precio": 2.75,
             "periodo_desde": "2025-02-01",
