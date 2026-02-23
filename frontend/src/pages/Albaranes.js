@@ -524,11 +524,88 @@ const Albaranes = () => {
               marginBottom: '1.5rem',
               border: '1px solid hsl(var(--primary) / 0.3)'
             }}>
-              <h3 style={{ fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <FileText size={18} /> 1. Seleccionar Contrato
-              </h3>
+              <div className="flex justify-between items-center mb-3">
+                <h3 style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+                  <FileText size={18} /> 1. Seleccionar Contrato
+                </h3>
+                {hasContratoSearchActive && (
+                  <button 
+                    type="button" 
+                    className="btn btn-sm btn-secondary" 
+                    onClick={clearContratoSearch}
+                  >
+                    Limpiar filtros
+                  </button>
+                )}
+              </div>
+              
+              {/* Filtros para buscar contratos */}
+              <div style={{ 
+                backgroundColor: 'white', 
+                padding: '0.75rem', 
+                borderRadius: '6px', 
+                marginBottom: '1rem',
+                border: '1px solid hsl(var(--border))'
+              }}>
+                <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.5rem' }}>
+                  Buscar contrato por:
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
+                  <select
+                    className="form-select"
+                    value={contratoSearch.proveedor}
+                    onChange={(e) => setContratoSearch({...contratoSearch, proveedor: e.target.value})}
+                    style={{ fontSize: '0.875rem' }}
+                  >
+                    <option value="">Proveedor</option>
+                    {contratoOptions.proveedores.map(p => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                  <select
+                    className="form-select"
+                    value={contratoSearch.cultivo}
+                    onChange={(e) => setContratoSearch({...contratoSearch, cultivo: e.target.value})}
+                    style={{ fontSize: '0.875rem' }}
+                  >
+                    <option value="">Cultivo</option>
+                    {contratoOptions.cultivos.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                  <select
+                    className="form-select"
+                    value={contratoSearch.campana}
+                    onChange={(e) => setContratoSearch({...contratoSearch, campana: e.target.value})}
+                    style={{ fontSize: '0.875rem' }}
+                  >
+                    <option value="">Campaña</option>
+                    {contratoOptions.campanas.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                  <select
+                    className="form-select"
+                    value={contratoSearch.parcela}
+                    onChange={(e) => setContratoSearch({...contratoSearch, parcela: e.target.value})}
+                    style={{ fontSize: '0.875rem' }}
+                  >
+                    <option value="">Parcela</option>
+                    {contratoOptions.parcelas.map(p => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              
+              {/* Selector de contrato filtrado */}
               <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Contrato *</label>
+                <label className="form-label">
+                  Contrato * 
+                  <span style={{ fontWeight: 'normal', fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginLeft: '0.5rem' }}>
+                    ({filteredContratos.length} {filteredContratos.length === 1 ? 'contrato' : 'contratos'} encontrados)
+                  </span>
+                </label>
                 <select
                   className="form-select"
                   value={formData.contrato_id}
@@ -537,9 +614,9 @@ const Albaranes = () => {
                   data-testid="select-contrato"
                 >
                   <option value="">-- Seleccionar contrato --</option>
-                  {contratos.map(c => (
+                  {filteredContratos.map(c => (
                     <option key={c._id} value={c._id}>
-                      {c.numero_contrato || `CON-${c._id.slice(-6)}`} | {c.proveedor} | {c.cultivo} | {c.parcela || c.parcela_codigo}
+                      {c.numero_contrato || `CON-${c._id.slice(-6)}`} | {c.proveedor} | {c.cultivo} | {c.parcela || c.parcela_codigo} | {c.campana}
                     </option>
                   ))}
                 </select>
