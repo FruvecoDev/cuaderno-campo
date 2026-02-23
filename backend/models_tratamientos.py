@@ -134,6 +134,10 @@ class TratamientoCreate(BaseModel):
     # Nuevos campos para Aplicador y Máquina
     aplicador_nombre: Optional[str] = None  # Nombre del aplicador (texto libre)
     maquina_id: Optional[str] = None  # ObjectId ref a maquinaria
+    
+    # Fechas
+    fecha_tratamiento: Optional[str] = None  # Fecha cuando se genera el tratamiento (auto si no se proporciona)
+    fecha_aplicacion: Optional[str] = None  # Fecha cuando se aplica (con aplicador y máquina)
 
 class TratamientoInDB(TratamientoBase):
     id: str = Field(alias="_id")
