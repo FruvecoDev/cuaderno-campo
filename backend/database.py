@@ -22,6 +22,7 @@ recetas_collection = db['recetas']
 albaranes_collection = db['albaranes']
 documentos_collection = db['documentos']
 maquinaria_collection = db['maquinaria']
+users_collection = db['users']
 
 # Helper function to serialize MongoDB documents
 def serialize_doc(doc):
