@@ -1,10 +1,18 @@
 [
   {
-    "content": "Arreglar fetchContratos en Parcelas.js - agregar header de autorización",
-    "status": "completed"
+    "content": "Completar edición en Tratamientos",
+    "status": "in_progress"
   },
   {
-    "content": "Aplicar patrón de edición a otros módulos: Visitas y Tratamientos",
-    "status": "in_progress"
+    "content": "Completar CRUD en Irrigaciones",
+    "status": "pending"
+  },
+  {
+    "content": "Completar CRUD en Recetas",
+    "status": "pending"
+  },
+  {
+    "content": "Completar CRUD en Albaranes",
+    "status": "pending"
   }
 ]
