@@ -158,7 +158,7 @@ class IrrigacionCreate(BaseModel):
     duracion: float
     volumen: float
     coste: float
-    parcela_id: str
+    parcela_id: Optional[str] = ""  # Optional - frontend can send empty string
 
 class IrrigacionInDB(IrrigacionBase):
     id: str = Field(alias="_id")
