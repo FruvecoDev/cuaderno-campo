@@ -711,7 +711,7 @@ async def generate_evaluacion_pdf(
         <div class="header">
             <h1>FRUVECO</h1>
             <h2>HOJA DE EVALUACIÓN - CUADERNO DE CAMPO</h2>
-            <h3>Página 1 de {1 + len(visitas) + len(tratamientos)}</h3>
+            <h3>Página 1 de {total_pages}</h3>
         </div>
         
         <!-- Resumen -->
@@ -719,16 +719,24 @@ async def generate_evaluacion_pdf(
             <div class="summary-title">RESUMEN DEL CUADERNO DE CAMPO</div>
             <div class="datos-grid">
                 <div class="dato-item">
-                    <div class="dato-label">Total Visitas Registradas</div>
+                    <div class="dato-label">Visitas</div>
                     <div class="dato-value" style="font-size: 14pt; font-weight: bold; color: #1a5276;">{len(visitas)}</div>
                 </div>
                 <div class="dato-item">
-                    <div class="dato-label">Total Tratamientos Registrados</div>
+                    <div class="dato-label">Tratamientos</div>
                     <div class="dato-value" style="font-size: 14pt; font-weight: bold; color: #b9770e;">{len(tratamientos)}</div>
                 </div>
                 <div class="dato-item">
+                    <div class="dato-label">Irrigaciones</div>
+                    <div class="dato-value" style="font-size: 14pt; font-weight: bold; color: #2874a6;">{len(irrigaciones)}</div>
+                </div>
+                <div class="dato-item">
+                    <div class="dato-label">Cosechas</div>
+                    <div class="dato-value" style="font-size: 14pt; font-weight: bold; color: #1e8449;">{len(cosechas)}</div>
+                </div>
+                <div class="dato-item">
                     <div class="dato-label">Total Páginas</div>
-                    <div class="dato-value" style="font-size: 14pt; font-weight: bold;">{1 + len(visitas) + len(tratamientos)}</div>
+                    <div class="dato-value" style="font-size: 14pt; font-weight: bold;">{total_pages}</div>
                 </div>
             </div>
         </div>
