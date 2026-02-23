@@ -54,6 +54,7 @@ app.include_router(auth_router)
 app.include_router(main_router)
 app.include_router(extended_router)
 app.include_router(catalogos_router)
+app.include_router(ai_router)
 
 # ============================================================================
 # ROOT
