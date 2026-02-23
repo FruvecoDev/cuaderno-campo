@@ -122,6 +122,21 @@ const Evaluaciones = () => {
     fetchPreguntasConfig();
   }, []);
   
+  // Detectar parámetro de URL para preseleccionar parcela
+  useEffect(() => {
+    const parcelaIdFromUrl = searchParams.get('parcela_id');
+    if (parcelaIdFromUrl && parcelas.length > 0) {
+      const parcela = parcelas.find(p => p._id === parcelaIdFromUrl);
+      if (parcela) {
+        // Abrir formulario y preseleccionar parcela
+        setShowForm(true);
+        handleParcelaSelect(parcelaIdFromUrl);
+        // Limpiar el parámetro de la URL
+        setSearchParams({});
+      }
+    }
+  }, [parcelas, searchParams]);
+  
   // Inicializar respuestas cuando se selecciona parcela
   useEffect(() => {
     if (formData.parcela_id && !editingId) {
