@@ -680,8 +680,27 @@ async def add_carga_cosecha(
     if not cosecha:
         raise HTTPException(status_code=404, detail="Cosecha not found")
     
-    # Obtener precio del contrato
+    # Obtener precio base del contrato
     precio = cosecha.get("precio_contrato", 0.0)
+    cultivo = (cosecha.get("cultivo") or "").lower()
+    
+    # Si es guisante y tiene valor de tenderometría, buscar precio en tabla del contrato
+    valor_tenderometria = carga.valor_tenderometria
+    if "guisante" in cultivo and valor_tenderometria is not None and not carga.es_descuento:
+        # Obtener el contrato para buscar la tabla de precios por tenderometría
+        contrato_id = cosecha.get("contrato_id")
+        if contrato_id and ObjectId.is_valid(contrato_id):
+            contrato = await contratos_collection.find_one({"_id": ObjectId(contrato_id)})
+            if contrato:
+                precios_calidad = contrato.get("precios_calidad", [])
+                # Buscar el precio que corresponde al valor de tenderometría
+                for pc in precios_calidad:
+                    min_tend = pc.get("min_tenderometria")
+                    max_tend = pc.get("max_tenderometria")
+                    if min_tend is not None and max_tend is not None:
+                        if min_tend <= valor_tenderometria <= max_tend:
+                            precio = pc.get("precio", precio)
+                            break
     
     # Calcular importe (negativo si es descuento)
     kilos = carga.kilos_reales
@@ -699,6 +718,7 @@ async def add_carga_cosecha(
         "importe": importe,
         "es_descuento": carga.es_descuento,
         "tipo_descuento": carga.tipo_descuento,
+        "valor_tenderometria": valor_tenderometria,
         "num_albaran": carga.num_albaran,
         "observaciones": carga.observaciones
     }
