@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Edit2, Trash2, Info, Filter, Settings, X, Calculator, AlertTriangle, RotateCcw, Beaker, Droplets, Ruler, Bug } from 'lucide-react';
+import { Plus, Edit2, Trash2, Info, Filter, Settings, X, Calculator, AlertTriangle, RotateCcw, Beaker, Droplets, Ruler, Bug, Database, ChevronDown } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
@@ -11,6 +11,13 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001'
 // ============================================================================
 const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
   const [showCalculator, setShowCalculator] = useState(false);
+  const { token } = useAuth();
+  
+  // State for products from DB
+  const [productosDB, setProductosDB] = useState([]);
+  const [loadingProductos, setLoadingProductos] = useState(false);
+  const [selectedProducto, setSelectedProducto] = useState(null);
+  
   const [calcData, setCalcData] = useState({
     superficie: '',
     unidadSuperficie: 'ha', // ha o m2
