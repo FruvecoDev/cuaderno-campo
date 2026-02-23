@@ -259,13 +259,17 @@ const Dashboard = () => {
   const [visitasPlanificadas, setVisitasPlanificadas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mapType, setMapType] = useState('satellite');
-  const { token } = useAuth();
+  const [notificationStatus, setNotificationStatus] = useState(null);
+  const [sendingNotification, setSendingNotification] = useState(false);
+  const [notificationResult, setNotificationResult] = useState(null);
+  const { token, user } = useAuth();
   const navigate = useNavigate();
   
   useEffect(() => {
     fetchDashboardData();
     fetchParcelas();
     fetchVisitasPlanificadas();
+    fetchNotificationStatus();
   }, []);
   
   const fetchDashboardData = async () => {
