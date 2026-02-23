@@ -27,6 +27,7 @@ from openpyxl.utils import get_column_letter
 # Import routes
 from routes_main import router as main_router
 from routes_extended import router as extended_router
+from routes_auth import router as auth_router
 
 # Import database
 from database import (
@@ -47,6 +48,7 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(auth_router)
 app.include_router(main_router)
 app.include_router(extended_router)
 
