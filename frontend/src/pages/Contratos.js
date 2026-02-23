@@ -97,6 +97,40 @@ const Contratos = () => {
     }
   };
   
+  const handleDelete = async (contratoId) => {
+    if (!canDelete) {
+      setError('No tienes permisos para eliminar contratos');
+      setTimeout(() => setError(null), 5000);
+      return;
+    }
+    
+    if (!window.confirm('¿Estás seguro de que quieres eliminar este contrato?')) {
+      return;
+    }
+    
+    try {
+      setError(null);
+      const response = await fetch(`${BACKEND_URL}/api/contratos/${contratoId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw { status: response.status, message: errorData.detail };
+      }
+      
+      fetchContratos();
+    } catch (error) {
+      console.error('Error deleting contrato:', error);
+      const errorMsg = handlePermissionError(error, 'eliminar el contrato');
+      setError(errorMsg);
+      setTimeout(() => setError(null), 5000);
+    }
+  };
+  
   return (
     <div data-testid="contratos-page">
       <div className="flex justify-between items-center mb-6">
