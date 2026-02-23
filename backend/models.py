@@ -285,6 +285,9 @@ class VisitaCreate(BaseModel):
     # Campos opcionales editables por el usuario
     fecha_visita: Optional[str] = None
     observaciones: Optional[str] = None
+    
+    # Cuestionario de Plagas y Enfermedades (solo cuando objetivo = "Plagas y Enfermedades")
+    cuestionario_plagas: Optional[Dict[str, int]] = None
 
 class VisitaInDB(VisitaBase):
     id: str = Field(alias="_id")
