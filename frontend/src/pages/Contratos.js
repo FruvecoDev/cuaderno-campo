@@ -14,12 +14,17 @@ const Contratos = () => {
   const { token } = useAuth();
   const { canCreate, canEdit, canDelete, canExport } = usePermissions();
   const { handlePermissionError } = usePermissionError();
+  
+  // Estados para catálogos
+  const [proveedores, setProveedores] = useState([]);
+  const [cultivos, setCultivos] = useState([]);
+  
   const [formData, setFormData] = useState({
     campana: '2025/26',
     procedencia: 'Campo',
     fecha_contrato: new Date().toISOString().split('T')[0],
-    proveedor: '',
-    cultivo: '',
+    proveedor_id: '',
+    cultivo_id: '',
     articulo_mp: '',
     cantidad: '',
     precio: '',
@@ -31,7 +36,37 @@ const Contratos = () => {
   
   useEffect(() => {
     fetchContratos();
+    fetchProveedores();
+    fetchCultivos();
   }, []);
+  
+  const fetchProveedores = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/proveedores?activo=true`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setProveedores(data.proveedores || []);
+      }
+    } catch (error) {
+      console.error('Error fetching proveedores:', error);
+    }
+  };
+  
+  const fetchCultivos = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/cultivos?activo=true`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCultivos(data.cultivos || []);
+      }
+    } catch (error) {
+      console.error('Error fetching cultivos:', error);
+    }
+  };
   
   const fetchContratos = async () => {
     try {
