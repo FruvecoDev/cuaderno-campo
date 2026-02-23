@@ -5,7 +5,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
-import { Plus, Map as MapIcon, Edit2, Trash2, Filter, Settings, X, ClipboardCheck, Layers, Satellite } from 'lucide-react';
+import { Plus, Map as MapIcon, Edit2, Trash2, Filter, Settings, X, ClipboardCheck, Layers, Satellite, History, Beaker, Calendar, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 
