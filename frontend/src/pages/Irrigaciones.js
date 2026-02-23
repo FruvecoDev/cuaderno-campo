@@ -420,7 +420,7 @@ const Irrigaciones = () => {
                           )}
                         </div>
                       </td>
-                    )}
+                    ) : null}
                   </tr>
                 ))}
               </tbody>
