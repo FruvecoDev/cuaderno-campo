@@ -4,10 +4,13 @@ from typing import Optional, List
 from bson import ObjectId
 from datetime import datetime
 
-from database import get_database
+from database import db
 from auth_routes import get_current_user
 
 router = APIRouter(prefix="/api/fitosanitarios", tags=["fitosanitarios"])
+
+# Collection
+fitosanitarios_collection = db['fitosanitarios']
 
 # Models
 class ProductoFitosanitarioBase(BaseModel):
