@@ -1049,7 +1049,13 @@ const Tratamientos = () => {
       fecha_tratamiento: tratamiento.fecha_tratamiento || '',
       fecha_aplicacion: tratamiento.fecha_aplicacion || '',
       aplicador_nombre: tratamiento.aplicador_nombre || '',
-      maquina_id: tratamiento.maquina_id || ''
+      maquina_id: tratamiento.maquina_id || '',
+      producto_fitosanitario_id: tratamiento.producto_fitosanitario_id || '',
+      producto_fitosanitario_nombre: tratamiento.producto_fitosanitario_nombre || '',
+      producto_fitosanitario_dosis: tratamiento.producto_fitosanitario_dosis || '',
+      producto_fitosanitario_unidad: tratamiento.producto_fitosanitario_unidad || '',
+      producto_materia_activa: tratamiento.producto_materia_activa || '',
+      producto_plazo_seguridad: tratamiento.producto_plazo_seguridad || ''
     });
     setSelectedParcelas(tratamiento.parcelas_ids || []);
     setShowForm(true);
@@ -1072,7 +1078,13 @@ const Tratamientos = () => {
       fecha_tratamiento: new Date().toISOString().split('T')[0],
       fecha_aplicacion: '',
       aplicador_nombre: '',
-      maquina_id: ''
+      maquina_id: '',
+      producto_fitosanitario_id: '',
+      producto_fitosanitario_nombre: '',
+      producto_fitosanitario_dosis: '',
+      producto_fitosanitario_unidad: '',
+      producto_materia_activa: '',
+      producto_plazo_seguridad: ''
     });
   };
   
