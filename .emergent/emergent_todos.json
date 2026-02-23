@@ -1,7 +1,7 @@
 [
   {
     "content": "Actualizar modelo VisitaBase en models.py: agregar contrato_id, parcela_id (obligatorio), cultivo_id (obligatorio), campana (obligatorio)",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Actualizar modelo TratamientoBase: agregar contrato_id, parcela_id, cultivo_id, campana",
