@@ -337,6 +337,7 @@ const Tratamientos = () => {
     setShowForm(false);
     setSelectedParcelas([]);
     setSelectedParcelasInfo(null);
+    setParcelaSearch({ proveedor: '', cultivo: '', campana: '' });
     setFormData({
       tipo_tratamiento: 'FITOSANITARIOS',
       subtipo: 'Insecticida',
