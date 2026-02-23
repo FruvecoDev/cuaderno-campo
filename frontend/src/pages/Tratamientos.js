@@ -68,6 +68,7 @@ const Tratamientos = () => {
   
   // Solo necesitamos parcelas para el selector
   const [parcelas, setParcelas] = useState([]);
+  const [maquinaria, setMaquinaria] = useState([]);
   const [selectedParcelas, setSelectedParcelas] = useState([]);
   const [selectedParcelasInfo, setSelectedParcelasInfo] = useState(null);
   
