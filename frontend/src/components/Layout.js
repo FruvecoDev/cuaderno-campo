@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, FileText, MapPin, Home, Calendar, ListTodo,
   Sprout, Droplets, BookOpen, FileBarChart, Wheat, FolderOpen,
-  LogOut, User, Users, Package, Leaf, Cog
+  LogOut, User, Users, Package, Leaf, Cog, ClipboardCheck
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
