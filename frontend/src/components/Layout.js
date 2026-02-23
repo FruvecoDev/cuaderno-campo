@@ -40,6 +40,7 @@ const Layout = ({ children }) => {
       { path: '/albaranes', label: 'Albaranes', icon: FileBarChart, module: 'albaranes' },
       { path: '/cosechas', label: 'Cosechas', icon: Wheat, module: 'cosechas' },
       { path: '/documentos', label: 'Documentos', icon: FolderOpen, module: 'documentos' },
+      { path: '/informes-gastos', label: 'Informes Gastos', icon: BarChart3, module: 'albaranes' },
     ]},
     { section: 'Catálogos', items: [
       { path: '/proveedores', label: 'Proveedores', icon: Package },
