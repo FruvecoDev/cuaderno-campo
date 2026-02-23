@@ -287,7 +287,10 @@ const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
                 <select
                   className="form-select"
                   value={calcData.tipoProducto}
-                  onChange={(e) => setCalcData({...calcData, tipoProducto: e.target.value})}
+                  onChange={(e) => {
+                    setCalcData({...calcData, tipoProducto: e.target.value, nombreProducto: ''});
+                    setSelectedProducto(null);
+                  }}
                 >
                   <option value="insecticida">Insecticida</option>
                   <option value="herbicida">Herbicida</option>
@@ -296,7 +299,51 @@ const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
                 </select>
               </div>
               
-              {/* Nombre del producto */}
+              {/* Selector de producto desde base de datos */}
+              {productosDB.length > 0 && (
+                <div className="form-group">
+                  <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Database size={14} /> Seleccionar Producto Registrado
+                  </label>
+                  <select
+                    className="form-select"
+                    value={selectedProducto?._id || ''}
+                    onChange={(e) => {
+                      const prod = productosDB.find(p => p._id === e.target.value);
+                      if (prod) handleSelectProducto(prod);
+                    }}
+                    style={{ backgroundColor: selectedProducto ? '#f0fdf4' : 'white' }}
+                  >
+                    <option value="">-- Seleccionar producto de la base de datos --</option>
+                    {productosDB.map(prod => (
+                      <option key={prod._id} value={prod._id}>
+                        {prod.nombre_comercial} {prod.materia_activa ? `(${prod.materia_activa})` : ''} 
+                        {prod.dosis_min && prod.dosis_max ? ` - Dosis: ${prod.dosis_min}-${prod.dosis_max} ${prod.unidad_dosis}` : ''}
+                      </option>
+                    ))}
+                  </select>
+                  {loadingProductos && <small style={{ color: 'hsl(var(--muted-foreground))' }}>Cargando productos...</small>}
+                  {selectedProducto && (
+                    <div style={{ 
+                      marginTop: '0.5rem', 
+                      padding: '0.5rem', 
+                      backgroundColor: '#f0fdf4', 
+                      borderRadius: '6px',
+                      fontSize: '0.8rem',
+                      border: '1px solid #86efac'
+                    }}>
+                      <strong style={{ color: '#166534' }}>Dosis recomendada:</strong> {selectedProducto.dosis_min}-{selectedProducto.dosis_max} {selectedProducto.unidad_dosis}
+                      {selectedProducto.plazo_seguridad && (
+                        <span style={{ marginLeft: '1rem' }}>
+                          | <strong>Plazo seguridad:</strong> {selectedProducto.plazo_seguridad} días
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Nombre del producto (manual o auto-rellenado) */}
               <div className="form-group">
                 <label className="form-label">Nombre del Producto</label>
                 <input
@@ -305,6 +352,7 @@ const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
                   placeholder="Ej: Cipermetrina 20%"
                   value={calcData.nombreProducto}
                   onChange={(e) => setCalcData({...calcData, nombreProducto: e.target.value})}
+                  style={{ backgroundColor: selectedProducto ? '#f0fdf4' : 'white' }}
                 />
               </div>
               
