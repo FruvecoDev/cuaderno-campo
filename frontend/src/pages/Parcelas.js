@@ -518,26 +518,98 @@ const Parcelas = () => {
               {fieldsConfig.contrato_id && (
                 <div className="form-group">
                   <label className="form-label">Contrato * (Obligatorio)</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder="Buscar contrato..."
-                    value={searchContrato}
-                    onChange={(e) => setSearchContrato(e.target.value)}
-                    style={{ marginBottom: '0.5rem' }}
-                  />
+                  
+                  {/* Filtros de búsqueda de contratos */}
+                  <div style={{ 
+                    backgroundColor: 'hsl(var(--muted))', 
+                    padding: '1rem', 
+                    borderRadius: '0.5rem', 
+                    marginBottom: '0.75rem' 
+                  }}>
+                    <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>
+                      Buscar contrato por:
+                    </p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
+                      <div>
+                        <label style={{ fontSize: '0.75rem', fontWeight: '500' }}>Proveedor</label>
+                        <select
+                          className="form-select"
+                          value={contratoSearch.proveedor}
+                          onChange={(e) => setContratoSearch({...contratoSearch, proveedor: e.target.value})}
+                          style={{ fontSize: '0.875rem' }}
+                          data-testid="contrato-search-proveedor"
+                        >
+                          <option value="">Todos</option>
+                          {contratoFilterOptions.proveedores.map(p => (
+                            <option key={p} value={p}>{p}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '0.75rem', fontWeight: '500' }}>Cultivo</label>
+                        <select
+                          className="form-select"
+                          value={contratoSearch.cultivo}
+                          onChange={(e) => setContratoSearch({...contratoSearch, cultivo: e.target.value})}
+                          style={{ fontSize: '0.875rem' }}
+                          data-testid="contrato-search-cultivo"
+                        >
+                          <option value="">Todos</option>
+                          {contratoFilterOptions.cultivos.map(c => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '0.75rem', fontWeight: '500' }}>Campaña</label>
+                        <select
+                          className="form-select"
+                          value={contratoSearch.campana}
+                          onChange={(e) => setContratoSearch({...contratoSearch, campana: e.target.value})}
+                          style={{ fontSize: '0.875rem' }}
+                          data-testid="contrato-search-campana"
+                        >
+                          <option value="">Todas</option>
+                          {contratoFilterOptions.campanas.map(c => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    {(contratoSearch.proveedor || contratoSearch.cultivo || contratoSearch.campana) && (
+                      <button
+                        type="button"
+                        onClick={() => setContratoSearch({ proveedor: '', cultivo: '', campana: '' })}
+                        style={{ 
+                          marginTop: '0.5rem', 
+                          fontSize: '0.75rem', 
+                          color: 'hsl(var(--primary))',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          textDecoration: 'underline'
+                        }}
+                      >
+                        Limpiar filtros de búsqueda
+                      </button>
+                    )}
+                  </div>
+                  
+                  {/* Selector de contrato filtrado */}
                   <select
                     className="form-select"
                     value={formData.contrato_id}
                     onChange={(e) => setFormData({...formData, contrato_id: e.target.value})}
                     required
+                    data-testid="select-contrato"
                   >
                     <option value="">-- Seleccionar contrato --</option>
                     {contratos
                       .filter(c => {
-                        if (!searchContrato) return true;
-                        const search = searchContrato.toLowerCase();
-                        return `${c.serie}-${c.año}-${c.numero} ${c.proveedor} ${c.cultivo}`.toLowerCase().includes(search);
+                        if (contratoSearch.proveedor && c.proveedor !== contratoSearch.proveedor) return false;
+                        if (contratoSearch.cultivo && c.cultivo !== contratoSearch.cultivo) return false;
+                        if (contratoSearch.campana && c.campana !== contratoSearch.campana) return false;
+                        return true;
                       })
                       .map(c => (
                         <option key={c._id} value={c._id}>
@@ -546,6 +618,16 @@ const Parcelas = () => {
                       ))
                     }
                   </select>
+                  {(contratoSearch.proveedor || contratoSearch.cultivo || contratoSearch.campana) && (
+                    <small style={{ color: 'hsl(var(--muted-foreground))' }}>
+                      Mostrando {contratos.filter(c => {
+                        if (contratoSearch.proveedor && c.proveedor !== contratoSearch.proveedor) return false;
+                        if (contratoSearch.cultivo && c.cultivo !== contratoSearch.cultivo) return false;
+                        if (contratoSearch.campana && c.campana !== contratoSearch.campana) return false;
+                        return true;
+                      }).length} de {contratos.length} contratos
+                    </small>
+                  )}
                 </div>
               )}
               
