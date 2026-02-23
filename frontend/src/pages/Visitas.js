@@ -287,7 +287,7 @@ const Visitas = () => {
       
       {showForm && (
         <div className="card mb-6" data-testid="visita-form">
-          <h2 className="card-title">Crear Visita</h2>
+          <h2 className="card-title">{editingId ? 'Editar Visita' : 'Crear Visita'}</h2>
           <form onSubmit={handleSubmit}>
             {/* Información de la alerta sobre el flujo */}
             <div className="card" style={{ backgroundColor: 'hsl(var(--muted))', marginBottom: '1.5rem', padding: '1rem' }}>
