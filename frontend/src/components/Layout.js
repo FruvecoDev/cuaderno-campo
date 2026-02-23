@@ -72,6 +72,66 @@ const Layout = ({ children }) => {
             </div>
           ))}
         </nav>
+        
+        <div style={{
+          padding: '1rem',
+          borderTop: '1px solid hsl(var(--border))',
+          marginTop: 'auto'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            padding: '0.75rem',
+            background: 'hsl(var(--muted))',
+            borderRadius: '0.5rem',
+            marginBottom: '0.5rem'
+          }}>
+            <div style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              background: 'hsl(var(--primary))',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white'
+            }}>
+              <User size={16} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '0.875rem', fontWeight: '600' }}>
+                {user?.full_name || 'Usuario'}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                {user?.role || 'Viewer'}
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            style={{
+              width: '100%',
+              padding: '0.625rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              border: '1px solid hsl(var(--border))',
+              background: 'transparent',
+              borderRadius: '0.5rem',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              color: 'hsl(var(--foreground))',
+              transition: 'all 0.2s'
+            }}
+            data-testid="logout-button"
+          >
+            <LogOut size={16} />
+            Cerrar Sesión
+          </button>
+        </div>
       </aside>
       
       <div className="main-content">
