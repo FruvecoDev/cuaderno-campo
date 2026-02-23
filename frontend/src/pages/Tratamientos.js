@@ -534,7 +534,7 @@ const Tratamientos = () => {
                     <td>{tratamiento.metodo_aplicacion}</td>
                     <td>
                       {tratamiento.cultivo_id ? (
-                        tratamiento.cultivo_id
+                        cultivosMap[tratamiento.cultivo_id] || tratamiento.cultivo_id
                       ) : (
                         <span style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }} title="Registro anterior a la implementación de catálogos">
                           No especificado
