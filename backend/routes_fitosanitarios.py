@@ -523,3 +523,152 @@ async def import_productos(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error procesando archivo: {str(e)}")
 
+
+
+# SYNC with MAPA (Ministerio de Agricultura) registry
+MAPA_BASE_URL = "https://www.mapa.gob.es/es/agricultura/temas/sanidad-vegetal/productos-fitosanitarios/fitos.asp"
+
+@router.post("/sync-mapa")
+async def sync_with_mapa(
+    search_term: str = "",
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Sincroniza productos con el Registro Oficial de Productos Fitosanitarios del MAPA.
+    Busca productos por nombre comercial o materia activa.
+    """
+    if current_user.get("role") not in ["Admin", "Manager"]:
+        raise HTTPException(status_code=403, detail="No tienes permisos para sincronizar con MAPA")
+    
+    try:
+        # MAPA doesn't have a public API, so we'll use their search page
+        # This is a simplified example - in production you'd need to handle their specific form
+        
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            # Search for products
+            search_url = f"{MAPA_BASE_URL}"
+            params = {
+                "nombre": search_term,
+                "formulado": "",
+                "sustancia": "",
+                "cultivo": "",
+                "plaga": ""
+            }
+            
+            response = await client.get(search_url, params=params)
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=502, detail="Error conectando con el servidor del MAPA")
+            
+            # Parse HTML response
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # Find product tables (structure depends on MAPA's current HTML)
+            productos_encontrados = []
+            
+            # Look for product rows in the results table
+            table = soup.find('table', {'class': 'listado'})
+            if table:
+                rows = table.find_all('tr')[1:]  # Skip header
+                for row in rows:
+                    cols = row.find_all('td')
+                    if len(cols) >= 4:
+                        producto = {
+                            "numero_registro": cols[0].get_text(strip=True),
+                            "nombre_comercial": cols[1].get_text(strip=True),
+                            "empresa": cols[2].get_text(strip=True) if len(cols) > 2 else "",
+                            "tipo": cols[3].get_text(strip=True) if len(cols) > 3 else "Fitosanitario"
+                        }
+                        productos_encontrados.append(producto)
+            
+            # If no table found, try alternative parsing
+            if not productos_encontrados:
+                # Return info that search was performed but no results in expected format
+                return {
+                    "success": True,
+                    "message": "Búsqueda realizada. El MAPA no proporciona una API pública, se recomienda usar la importación desde Excel con datos descargados manualmente.",
+                    "mapa_url": "https://www.mapa.gob.es/es/agricultura/temas/sanidad-vegetal/productos-fitosanitarios/registro-productos/",
+                    "productos_encontrados": 0,
+                    "nota": "Para obtener datos actualizados, visite el enlace del MAPA y exporte los datos a Excel."
+                }
+            
+            # Insert or update products found
+            inserted = 0
+            updated = 0
+            
+            for prod in productos_encontrados:
+                existing = await fitosanitarios_collection.find_one({
+                    "numero_registro": prod["numero_registro"]
+                })
+                
+                if existing:
+                    # Update existing
+                    await fitosanitarios_collection.update_one(
+                        {"_id": existing["_id"]},
+                        {"$set": {
+                            "nombre_comercial": prod["nombre_comercial"],
+                            "empresa": prod["empresa"],
+                            "updated_at": datetime.utcnow(),
+                            "source": "MAPA"
+                        }}
+                    )
+                    updated += 1
+                else:
+                    # Insert new
+                    prod["activo"] = True
+                    prod["created_at"] = datetime.utcnow()
+                    prod["source"] = "MAPA"
+                    await fitosanitarios_collection.insert_one(prod)
+                    inserted += 1
+            
+            return {
+                "success": True,
+                "message": f"Sincronización completada",
+                "inserted": inserted,
+                "updated": updated,
+                "total_encontrados": len(productos_encontrados)
+            }
+            
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Timeout conectando con el servidor del MAPA")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error en sincronización: {str(e)}")
+
+
+# Search in MAPA (returns URL for manual search)
+@router.get("/mapa-search-url")
+async def get_mapa_search_url(
+    nombre: Optional[str] = "",
+    sustancia: Optional[str] = "",
+    cultivo: Optional[str] = "",
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Genera la URL de búsqueda en el registro oficial del MAPA.
+    Como el MAPA no tiene API pública, proporcionamos el enlace directo.
+    """
+    base_url = "https://www.mapa.gob.es/es/agricultura/temas/sanidad-vegetal/productos-fitosanitarios/fitos.asp"
+    
+    params = []
+    if nombre:
+        params.append(f"nombre={nombre}")
+    if sustancia:
+        params.append(f"sustancia={sustancia}")
+    if cultivo:
+        params.append(f"cultivo={cultivo}")
+    
+    search_url = base_url
+    if params:
+        search_url += "?" + "&".join(params)
+    
+    return {
+        "success": True,
+        "search_url": search_url,
+        "registro_url": "https://www.mapa.gob.es/es/agricultura/temas/sanidad-vegetal/productos-fitosanitarios/registro-productos/",
+        "instructions": [
+            "1. Haga clic en el enlace del registro oficial",
+            "2. Busque los productos deseados",
+            "3. Exporte los resultados a Excel",
+            "4. Use la función 'Importar' en FRUVECO para cargar los datos"
+        ]
+    }
