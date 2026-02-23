@@ -35,7 +35,7 @@ async def create_tratamiento(
     current_user: dict = Depends(RequireCreate),
     _access: dict = Depends(RequireTratamientosAccess)
 ):
-    from database import db, contratos_collection, parcelas_collection
+    from database import db, contratos_collection, parcelas_collection, maquinaria_collection
     from bson import ObjectId
     
     # MODELO SIMPLIFICADO: parcelas_ids obligatorio, el resto se hereda
@@ -68,11 +68,19 @@ async def create_tratamiento(
             if not campana:
                 campana = contrato.get("campana", "")
     
+    # Obtener nombre de máquina si se proporciona maquina_id
+    maquina_nombre = None
+    if tratamiento.maquina_id and ObjectId.is_valid(tratamiento.maquina_id):
+        maquina = await maquinaria_collection.find_one({"_id": ObjectId(tratamiento.maquina_id)})
+        if maquina:
+            maquina_nombre = maquina.get("nombre", "")
+    
     tratamiento_dict = tratamiento.dict()
     tratamiento_dict.update({
         "contrato_id": contrato_id,
         "cultivo_id": cultivo_id,
         "campana": campana,
+        "maquina_nombre": maquina_nombre,
         "realizado": False,
         "planificado": False,
         "coste_superficie": 0.0,
