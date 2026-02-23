@@ -929,6 +929,8 @@ const Tratamientos = () => {
                   {tableConfig.campana && <th>Campaña</th>}
                   {tableConfig.superficie && <th>Superficie</th>}
                   {tableConfig.parcelas && <th>Parcelas</th>}
+                  {tableConfig.aplicador && <th>Aplicador</th>}
+                  {tableConfig.maquina && <th>Máquina</th>}
                   {tableConfig.estado && <th>Estado</th>}
                   {(canEdit || canDelete) && <th>Acciones</th>}
                 </tr>
@@ -942,6 +944,8 @@ const Tratamientos = () => {
                     {tableConfig.campana && <td>{tratamiento.campana || 'N/A'}</td>}
                     {tableConfig.superficie && <td>{tratamiento.superficie_aplicacion} ha</td>}
                     {tableConfig.parcelas && <td>{tratamiento.parcelas_ids?.length || 0} parcela(s)</td>}
+                    {tableConfig.aplicador && <td>{tratamiento.aplicador_nombre || '—'}</td>}
+                    {tableConfig.maquina && <td>{tratamiento.maquina_nombre || '—'}</td>}
                     {tableConfig.estado && (
                       <td>
                         <span className={`badge ${tratamiento.realizado ? 'badge-success' : 'badge-default'}`}>
