@@ -146,8 +146,8 @@ class IrrigacionBase(BaseModel):
     coste: float
     observaciones: Optional[str] = None
     
-    # Parcelas
-    parcela_id: str
+    # Parcelas - optional for flexibility
+    parcela_id: Optional[str] = None
     
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
