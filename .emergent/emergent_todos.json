@@ -1,11 +1,11 @@
 [
   {
     "content": "Arreglar funcionalidad de editar contrato",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Agregar selector de contrato en formulario de crear parcela",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Testing de ambas funcionalidades",
