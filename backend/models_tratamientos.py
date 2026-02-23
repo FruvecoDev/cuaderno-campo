@@ -121,12 +121,10 @@ class TratamientoCreate(BaseModel):
     metodo_aplicacion: str
     superficie_aplicacion: float
     caldo_superficie: float
-    parcelas_ids: List[str]
     
-    # Nuevos campos obligatorios
-    cultivo_id: Optional[str] = None  # OBLIGATORIO
-    campana: Optional[str] = None  # OBLIGATORIO
-    contrato_id: Optional[str] = None  # Recomendado
+    # MODELO SIMPLIFICADO: solo parcelas_ids obligatorio
+    # El resto (cultivo_id, campana, contrato_id) se hereda desde la primera parcela
+    parcelas_ids: List[str]  # OBLIGATORIO
 
 class TratamientoInDB(TratamientoBase):
     id: str = Field(alias="_id")
