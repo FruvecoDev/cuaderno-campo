@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Polygon, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
-import { Plus, Map as MapIcon, Edit2, Trash2, Filter, Settings, X } from 'lucide-react';
+import { Plus, Map as MapIcon, Edit2, Trash2, Filter, Settings, X, ClipboardCheck } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 
