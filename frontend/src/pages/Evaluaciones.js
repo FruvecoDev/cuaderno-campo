@@ -661,18 +661,81 @@ const Evaluaciones = () => {
       )}
       
       {/* Filtros */}
-      <div className="card mb-6">
-        <h3 style={{ fontWeight: '600', marginBottom: '1rem' }}>Filtros</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+      <div className="card mb-6" data-testid="filtros-evaluaciones">
+        <div className="flex justify-between items-center mb-4">
+          <h3 style={{ fontWeight: '600', margin: 0 }}>Filtros</h3>
+          {hasActiveFilters && (
+            <button 
+              className="btn btn-sm btn-secondary"
+              onClick={clearFilters}
+              data-testid="btn-limpiar-filtros"
+            >
+              <X size={14} style={{ marginRight: '0.25rem' }} />
+              Limpiar filtros
+            </button>
+          )}
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Parcela</label>
+            <select
+              className="form-select"
+              value={filters.parcela}
+              onChange={(e) => setFilters({...filters, parcela: e.target.value})}
+              data-testid="filter-parcela"
+            >
+              <option value="">Todas</option>
+              {evaluacionFilterOptions.parcelas.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Cultivo</label>
+            <select
+              className="form-select"
+              value={filters.cultivo}
+              onChange={(e) => setFilters({...filters, cultivo: e.target.value})}
+              data-testid="filter-cultivo"
+            >
+              <option value="">Todos</option>
+              {evaluacionFilterOptions.cultivos.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Proveedor</label>
+            <select
+              className="form-select"
+              value={filters.proveedor}
+              onChange={(e) => setFilters({...filters, proveedor: e.target.value})}
+              data-testid="filter-proveedor"
+            >
+              <option value="">Todos</option>
+              {evaluacionFilterOptions.proveedores.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label">Campaña</label>
             <select
               className="form-select"
               value={filters.campana}
               onChange={(e) => setFilters({...filters, campana: e.target.value})}
+              data-testid="filter-campana"
             >
               <option value="">Todas</option>
-              {campanas.map(c => <option key={c} value={c}>{c}</option>)}
+              {evaluacionFilterOptions.campanas.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Contrato</label>
+            <select
+              className="form-select"
+              value={filters.contrato}
+              onChange={(e) => setFilters({...filters, contrato: e.target.value})}
+              data-testid="filter-contrato"
+            >
+              <option value="">Todos</option>
+              {evaluacionFilterOptions.contratos.map(c => (
+                <option key={c.id} value={c.id}>{c.nombre}</option>
+              ))}
             </select>
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
@@ -681,6 +744,7 @@ const Evaluaciones = () => {
               className="form-select"
               value={filters.estado}
               onChange={(e) => setFilters({...filters, estado: e.target.value})}
+              data-testid="filter-estado"
             >
               <option value="">Todos</option>
               <option value="borrador">Borrador</option>
