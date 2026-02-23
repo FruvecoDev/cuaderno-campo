@@ -189,10 +189,13 @@ const Albaranes = () => {
     setSelectedContrato(contrato);
     
     if (contrato) {
+      const proveedorContrato = contrato.proveedor || '';
       setFormData(prev => ({
         ...prev,
         contrato_id: contratoId,
-        proveedor: contrato.proveedor || '',
+        proveedor_contrato: proveedorContrato,
+        proveedor: proveedorContrato,  // Por defecto, mismo proveedor del contrato
+        usar_otro_proveedor: false,
         cultivo: contrato.cultivo || '',
         parcela_codigo: contrato.parcela_codigo || contrato.parcela || '',
         parcela_id: contrato.parcela_id || '',
@@ -202,13 +205,24 @@ const Albaranes = () => {
       setFormData(prev => ({
         ...prev,
         contrato_id: '',
+        proveedor_contrato: '',
         proveedor: '',
+        usar_otro_proveedor: false,
         cultivo: '',
         parcela_codigo: '',
         parcela_id: '',
         campana: ''
       }));
     }
+  };
+  
+  // Manejar cambio de checkbox para usar otro proveedor
+  const handleUsarOtroProveedorChange = (checked) => {
+    setFormData(prev => ({
+      ...prev,
+      usar_otro_proveedor: checked,
+      proveedor: checked ? '' : prev.proveedor_contrato
+    }));
   };
   
   // Calcular total de líneas
