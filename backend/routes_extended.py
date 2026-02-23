@@ -10,11 +10,11 @@ from models_tratamientos import (
     RecetaBase, RecetaCreate, RecetaInDB,
     AlbaranBase, AlbaranCreate, AlbaranInDB
 )
-from models import TareaCreate, CosechaCreate
+from models import TareaCreate, CosechaCreate, CargaCosechaCreate, PlanificacionRecoleccion
 from database import (
     tratamientos_collection, irrigaciones_collection, recetas_collection,
     albaranes_collection, tareas_collection, cosechas_collection,
-    documentos_collection, serialize_doc, serialize_docs
+    documentos_collection, contratos_collection, serialize_doc, serialize_docs
 )
 from rbac_guards import (
     RequireCreate, RequireEdit, RequireDelete, RequireExport,
