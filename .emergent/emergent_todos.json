@@ -1,11 +1,11 @@
 [
   {
     "content": "Ajustar formulario Parcelas: contrato OBLIGATORIO (no opcional)",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Ajustar formulario Visitas: solo seleccionar Parcela, autocompleta todo",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Ajustar formulario Tratamientos: solo seleccionar Parcela(s), autocompleta todo",
