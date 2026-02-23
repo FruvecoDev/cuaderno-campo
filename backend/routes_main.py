@@ -349,6 +349,37 @@ async def get_visitas(
     visitas = await visitas_collection.find(query).skip(skip).limit(limit).to_list(limit)
     return {"visitas": serialize_docs(visitas), "total": await visitas_collection.count_documents(query)}
 
+@router.get("/visitas/planificadas")
+async def get_visitas_planificadas(
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireVisitasAccess)
+):
+    """Obtener visitas planificadas (con fecha_planificada futura o reciente)"""
+    from datetime import timedelta
+    
+    # Buscar visitas con fecha_planificada en los próximos 30 días o los últimos 7 días
+    hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    hace_7_dias = hoy - timedelta(days=7)
+    en_30_dias = hoy + timedelta(days=30)
+    
+    query = {
+        "$or": [
+            {"fecha_planificada": {"$gte": hace_7_dias.isoformat(), "$lte": en_30_dias.isoformat()}},
+            {"planificado": True, "realizado": False}
+        ]
+    }
+    
+    visitas = await visitas_collection.find(query).sort("fecha_planificada", 1).to_list(50)
+    
+    # Filtrar las que tienen fecha_planificada válida
+    visitas_filtradas = []
+    for v in visitas:
+        if v.get("fecha_planificada"):
+            v["parcela"] = v.get("codigo_plantacion", "")
+            visitas_filtradas.append(v)
+    
+    return {"visitas": serialize_docs(visitas_filtradas)}
+
 @router.get("/visitas/{visita_id}")
 async def get_visita(
     visita_id: str,
