@@ -434,7 +434,7 @@ const Fitosanitarios = () => {
             Base de datos de productos con dosis recomendadas
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <button
             className={`btn ${showConfig ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setShowConfig(!showConfig)}
@@ -442,6 +442,24 @@ const Fitosanitarios = () => {
             data-testid="btn-config"
           >
             <Settings size={18} />
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={handleExport}
+            title="Exportar a Excel"
+            data-testid="btn-export"
+          >
+            <Download size={18} />
+            Exportar
+          </button>
+          <button
+            className={`btn ${showImport ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setShowImport(!showImport)}
+            title="Importar desde Excel/CSV"
+            data-testid="btn-import"
+          >
+            <Upload size={18} />
+            Importar
           </button>
           {productos.length === 0 && (
             <button
