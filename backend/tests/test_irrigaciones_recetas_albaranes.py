@@ -69,7 +69,7 @@ class TestIrrigacionesCRUD:
             "duracion": 2.5,
             "volumen": 150.0,
             "coste": 45.50,
-            "parcela_id": ""  # Optional field
+            "parcela_id": ""  # Optional field - can be empty
         }
         
         response = requests.post(f"{BASE_URL}/api/irrigaciones", json=payload, headers=headers)
@@ -86,7 +86,6 @@ class TestIrrigacionesCRUD:
         assert irrigacion.get("coste") == 45.50
         
         print(f"✓ Irrigacion created successfully: {irrigacion.get('_id')}")
-        return irrigacion["_id"]
     
     def test_list_irrigaciones(self, headers):
         """Test listing irrigaciones"""
