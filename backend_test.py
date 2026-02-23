@@ -424,23 +424,33 @@ class AgriculturalAPITester:
         return True
 
     def test_tratamientos_crud(self):
-        """Test tratamientos CRUD operations"""
-        print("\n🌿 Testing Tratamientos CRUD...")
+        """Test tratamientos CRUD operations with new obligatory fields"""
+        print("\n🌿 Testing Tratamientos CRUD (New Model)...")
         
-        parcela_id = self.created_ids.get("parcela", "test_id")
+        parcela_id = self.created_ids.get("parcela")
+        cultivo_id = self.catalog_ids.get("cultivo_id")
+        contrato_id = self.catalog_ids.get("contrato_id")
         
+        if not parcela_id or not cultivo_id:
+            print("   ❌ Missing required parcela_id or cultivo_id for testing")
+            return False
+        
+        # Test CREATE tratamiento with new obligatory fields
         tratamiento_data = {
-            "tipo_tratamiento": "Herbicida",
-            "subtipo": "Pre-emergencia",
+            "tipo_tratamiento": "FITOSANITARIOS",
+            "subtipo": "Insecticida",
             "aplicacion_numero": 1,
             "metodo_aplicacion": "Pulverización",
             "superficie_aplicacion": 2.5,
             "caldo_superficie": 300.0,
-            "parcelas_ids": [parcela_id]
+            "cultivo_id": cultivo_id,         # OBLIGATORIO
+            "campana": "2025/26",             # OBLIGATORIO
+            "parcelas_ids": [parcela_id],     # OBLIGATORIO (lista)
+            "contrato_id": contrato_id        # Opcional - para consistency validation
         }
         
         success, response = self.run_test(
-            "Create Tratamiento", 
+            "Create Tratamiento (New Model)", 
             "POST",
             "api/tratamientos",
             200,
@@ -452,16 +462,71 @@ class AgriculturalAPITester:
         tratamiento_id = response.get("data", {}).get("_id")
         if tratamiento_id:
             self.created_ids["tratamiento"] = tratamiento_id
+            print(f"   Created tratamiento ID: {tratamiento_id}")
         
-        # Test GET list
+        # Test consistency validation - wrong cultivo should fail
+        bad_tratamiento_data = tratamiento_data.copy()
+        bad_tratamiento_data["cultivo_id"] = "invalid_cultivo_id"
+        
+        success, response = self.run_test(
+            "Create Tratamiento (Bad Cultivo)",
+            "POST",
+            "api/tratamientos",
+            400,  # Should fail validation
+            bad_tratamiento_data
+        )
+        if not success:
+            print("   ⚠️  Cultivo validation might not be working")
+        
+        # Test missing obligatory fields
+        incomplete_tratamiento = {
+            "tipo_tratamiento": "FITOSANITARIOS",
+            "aplicacion_numero": 1,
+            "metodo_aplicacion": "Pulverización"
+            # Missing cultivo_id, campana, parcelas_ids
+        }
+        
+        success, response = self.run_test(
+            "Create Tratamiento (Missing Required Fields)",
+            "POST",
+            "api/tratamientos", 
+            422,  # Should fail validation
+            incomplete_tratamiento
+        )
+        if not success:
+            print("   ⚠️  Field validation might not be working")
+        
+        # Test GET list with filters (new features)
         success, _ = self.run_test(
             "Get Tratamientos",
             "GET", 
             "api/tratamientos",
             200
         )
+        if not success:
+            return False
+            
+        # Test GET with campaign filter
+        success, _ = self.run_test(
+            "Get Tratamientos by Campaign",
+            "GET",
+            "api/tratamientos?campana=2025/26", 
+            200
+        )
+        if not success:
+            return False
+            
+        # Test GET with cultivo filter
+        success, _ = self.run_test(
+            "Get Tratamientos by Cultivo",
+            "GET",
+            f"api/tratamientos?cultivo_id={cultivo_id}",
+            200
+        )
+        if not success:
+            return False
         
-        return success
+        return True
 
     def test_irrigaciones_crud(self):
         """Test irrigaciones CRUD operations"""
