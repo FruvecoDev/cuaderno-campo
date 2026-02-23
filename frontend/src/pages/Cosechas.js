@@ -634,7 +634,7 @@ const Cosechas = () => {
                                   onChange={(e) => setCargaForm({ ...cargaForm, es_descuento: e.target.checked })}
                                   style={{ marginRight: '0.5rem' }}
                                 />
-                                Es Descuento
+                                Aplica Descuento
                               </label>
                             </div>
                             {cargaForm.es_descuento && (
