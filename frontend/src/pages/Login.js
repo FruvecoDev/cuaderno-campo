@@ -109,7 +109,7 @@ const Login = () => {
                   className="form-input"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@agrogest.com"
+                  placeholder="usuario@fruveco.com"
                   required
                   data-testid="login-email"
                   style={{ paddingLeft: '2.5rem' }}
