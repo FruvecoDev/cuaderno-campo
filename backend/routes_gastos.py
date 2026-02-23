@@ -103,7 +103,7 @@ async def get_resumen_gastos(
                 "total": data["total"],
                 "count": data["count"]
             })
-        except:
+        except Exception:
             contratos_enriched.append({
                 "contrato_id": contrato_id,
                 "total": data["total"],
