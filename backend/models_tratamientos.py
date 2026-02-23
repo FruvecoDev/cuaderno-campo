@@ -85,6 +85,10 @@ class TratamientoBase(BaseModel):
     tecnico: Optional[str] = None
     metodo_aplicacion: str
     
+    # Fechas de tratamiento y aplicación
+    fecha_tratamiento: Optional[str] = None  # Fecha cuando se genera/registra el tratamiento
+    fecha_aplicacion: Optional[str] = None  # Fecha cuando se realiza la aplicación (con aplicador y máquina)
+    
     # Costes
     coste_superficie: float = 0.0
     coste_total: float = 0.0
