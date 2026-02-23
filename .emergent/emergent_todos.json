@@ -1,11 +1,11 @@
 [
   {
     "content": "Completar edición en Tratamientos",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Completar CRUD en Irrigaciones",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Completar CRUD en Recetas",
