@@ -1,18 +1,18 @@
 [
   {
-    "content": "Implementar RBAC: crear matriz de permisos por rol",
-    "status": "completed"
-  },
-  {
-    "content": "Implementar RBAC: guards backend para acciones críticas (create/update/delete/export)",
+    "content": "Aplicar guards RBAC a todos los endpoints restantes (Parcelas, Fincas, Visitas, Tareas, Tratamientos, Irrigaciones, Recetas, Albaranes, Cosechas)",
     "status": "in_progress"
   },
   {
-    "content": "Implementar RBAC: control UI usando user permissions",
+    "content": "Implementar control UI basado en permisos (ocultar botones Create/Edit/Delete según rol)",
     "status": "pending"
   },
   {
-    "content": "Crear panel de gestión de usuarios (Admin only)",
+    "content": "Crear página de gestión de usuarios para Admins",
+    "status": "pending"
+  },
+  {
+    "content": "Testing E2E multi-rol (Admin, Manager, Technician, Viewer)",
     "status": "pending"
   }
 ]
