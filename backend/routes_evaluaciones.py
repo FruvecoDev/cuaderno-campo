@@ -584,6 +584,69 @@ async def generate_evaluacion_pdf(
         table.data-table tr:nth-child(even) {
             background-color: #f9f9f9;
         }
+        .index-box {
+            background-color: #fff;
+            border: 2px solid #2d5a27;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .index-title {
+            font-weight: bold;
+            font-size: 14pt;
+            margin-bottom: 15px;
+            color: #2d5a27;
+            text-align: center;
+            border-bottom: 2px solid #2d5a27;
+            padding-bottom: 10px;
+        }
+        .index-section {
+            margin-bottom: 15px;
+        }
+        .index-section-title {
+            font-weight: bold;
+            font-size: 11pt;
+            margin-bottom: 8px;
+            padding: 5px 10px;
+            border-radius: 3px;
+        }
+        .index-section-title.visitas {
+            background-color: #1a5276;
+            color: white;
+        }
+        .index-section-title.tratamientos {
+            background-color: #b9770e;
+            color: white;
+        }
+        .index-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 10px;
+            border-bottom: 1px dotted #ddd;
+            font-size: 10pt;
+        }
+        .index-item:last-child {
+            border-bottom: none;
+        }
+        .index-item-name {
+            flex: 1;
+        }
+        .index-item-date {
+            color: #666;
+            margin-left: 10px;
+        }
+        .index-item-page {
+            font-weight: bold;
+            margin-left: 10px;
+            min-width: 50px;
+            text-align: right;
+        }
+        .index-empty {
+            color: #999;
+            font-style: italic;
+            padding: 10px;
+            text-align: center;
+        }
     """
     
     # Generar HTML para el PDF
