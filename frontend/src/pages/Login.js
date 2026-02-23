@@ -62,8 +62,14 @@ const Login = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%)'
+      background: 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%)',
+      position: 'relative'
     }}>
+      {/* Language selector in top right */}
+      <div style={{ position: 'absolute', top: '1rem', right: '1rem' }}>
+        <LanguageSelector />
+      </div>
+      
       <div style={{
         width: '100%',
         maxWidth: '400px',
@@ -81,7 +87,7 @@ const Login = () => {
               }} 
             />
             <p style={{ fontSize: '0.875rem', fontWeight: '500', color: 'hsl(var(--muted-foreground))', marginBottom: '0.5rem' }}>Cuaderno de Campo</p>
-            <p className="text-muted">Inicia sesión para continuar</p>
+            <p className="text-muted">{t('auth.loginTitle')}</p>
           </div>
           
           {error && (
@@ -102,7 +108,7 @@ const Login = () => {
           
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label className="form-label">Email</label>
+              <label className="form-label">{t('auth.email')}</label>
               <div style={{ position: 'relative' }}>
                 <input
                   type="email"
