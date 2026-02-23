@@ -336,6 +336,7 @@ const Visitas = () => {
     setFormData({
       objetivo: visita.objetivo || 'Control Rutinario',
       fecha_visita: visita.fecha_visita || '',
+      fecha_planificada: visita.fecha_planificada || '',
       parcela_id: visita.parcela_id || '',
       observaciones: visita.observaciones || ''
     });
