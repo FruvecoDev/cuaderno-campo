@@ -77,14 +77,17 @@ const Cosechas = () => {
       if (filters.proveedor && !c.proveedor?.toLowerCase().includes(filters.proveedor.toLowerCase())) return false;
       if (filters.campana && c.campana !== filters.campana) return false;
       if (filters.estado && c.estado !== filters.estado) return false;
+      if (filters.contrato && c.contrato_id !== filters.contrato) return false;
+      if (filters.cultivo && c.cultivo !== filters.cultivo) return false;
       return true;
     });
   }, [cosechas, filters]);
 
   // Opciones únicas para filtros
   const filterOptions = useMemo(() => ({
-    campanas: [...new Set(cosechas.map(c => c.campana).filter(Boolean))],
-    proveedores: [...new Set(cosechas.map(c => c.proveedor).filter(Boolean))]
+    campanas: [...new Set(cosechas.map(c => c.campana).filter(Boolean))].sort(),
+    proveedores: [...new Set(cosechas.map(c => c.proveedor).filter(Boolean))].sort(),
+    cultivos: [...new Set(cosechas.map(c => c.cultivo).filter(Boolean))].sort()
   }), [cosechas]);
 
   // Generar ID de carga automático
