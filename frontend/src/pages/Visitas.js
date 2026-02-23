@@ -872,20 +872,20 @@ const Visitas = () => {
               <tbody>
                 {filteredVisitas.map((visita) => (
                   <tr key={visita._id}>
-                    {tableConfig.objetivo && <td className="font-semibold">{visita.objetivo}</td>}
-                    {(tableConfig.parcela) ? <td>{visita.codigo_plantacion || 'N/A'}</td> : null}
-                    {(tableConfig.proveedor) ? <td>{visita.proveedor || 'N/A'}</td> : null}
-                    {(tableConfig.cultivo) ? <td>{visita.cultivo || 'N/A'}</td> : null}
-                    {(tableConfig.campana) ? <td>{visita.campana || 'N/A'}</td> : null}
-                    {(tableConfig.fecha) ? <td>{visita.fecha_visita ? new Date(visita.fecha_visita).toLocaleDateString() : 'Sin fecha'}</td> : null}
-                    {tableConfig.estado && (
+                    {tableConfig.objetivo ? <td className="font-semibold">{visita.objetivo}</td> : null}
+                    {tableConfig.parcela ? <td>{visita.codigo_plantacion || 'N/A'}</td> : null}
+                    {tableConfig.proveedor ? <td>{visita.proveedor || 'N/A'}</td> : null}
+                    {tableConfig.cultivo ? <td>{visita.cultivo || 'N/A'}</td> : null}
+                    {tableConfig.campana ? <td>{visita.campana || 'N/A'}</td> : null}
+                    {tableConfig.fecha ? <td>{visita.fecha_visita ? new Date(visita.fecha_visita).toLocaleDateString() : 'Sin fecha'}</td> : null}
+                    {tableConfig.estado ? (
                       <td>
                         <span className={`badge ${visita.realizado ? 'badge-success' : 'badge-default'}`}>
                           {visita.realizado ? 'Realizada' : 'Pendiente'}
                         </span>
                       </td>
-                    )}
-                    {(canEdit || canDelete) && (
+                    ) : null}
+                    {(canEdit || canDelete) ? (
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                           {canEdit && (
@@ -910,7 +910,7 @@ const Visitas = () => {
                           )}
                         </div>
                       </td>
-                    )}
+                    ) : null}
                   </tr>
                 ))}
               </tbody>
