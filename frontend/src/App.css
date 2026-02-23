@@ -355,3 +355,8 @@ tr:hover {
   background: hsl(var(--muted));
   color: hsl(var(--foreground));
 }
+
+/* Spinner animation */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
