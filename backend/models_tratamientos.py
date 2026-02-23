@@ -270,22 +270,30 @@ class AlbaranItem(BaseModel):
     descripcion: Optional[str] = None  # Frontend uses descripcion 
     producto: Optional[str] = None  # Backend can use producto
     lote: Optional[str] = None
-    cantidad: float
-    unidad: Optional[str] = None  # Made optional for frontend compatibility
-    precio_unitario: float
-    total: float
+    cantidad: float = 0
+    unidad: Optional[str] = "kg"
+    precio_unitario: float = 0
+    total: float = 0
 
 class AlbaranBase(BaseModel):
     tipo: str  # Entrada / Salida
     fecha: str
-    proveedor_cliente: str
-    items: List[AlbaranItem] = []
-    parcela_id: Optional[str] = None
+    # Vinculación con contrato
     contrato_id: Optional[str] = None
+    # Datos heredados del contrato
+    proveedor: Optional[str] = None  # Heredado del contrato
+    cultivo: Optional[str] = None  # Heredado del contrato
+    parcela_codigo: Optional[str] = None  # Heredado del contrato
+    parcela_id: Optional[str] = None
+    campana: Optional[str] = None  # Heredado del contrato
+    # Compatibilidad con versiones anteriores
+    proveedor_cliente: Optional[str] = None  # Deprecated, usar proveedor
+    # Líneas y totales
+    items: List[AlbaranItem] = []
+    total_albaran: float = 0.0
+    total_general: float = 0.0  # Deprecated, usar total_albaran
     adjuntos: List[str] = []  # IDs de documentos
     observaciones: Optional[str] = None
-    
-    total_general: float = 0.0
     
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
@@ -293,8 +301,19 @@ class AlbaranBase(BaseModel):
 class AlbaranCreate(BaseModel):
     tipo: str
     fecha: str
-    proveedor_cliente: str
-    items: List[AlbaranItem]
+    contrato_id: Optional[str] = None
+    # Datos heredados del contrato
+    proveedor: Optional[str] = None
+    cultivo: Optional[str] = None
+    parcela_codigo: Optional[str] = None
+    parcela_id: Optional[str] = None
+    campana: Optional[str] = None
+    # Compatibilidad
+    proveedor_cliente: Optional[str] = None
+    # Líneas
+    items: List[AlbaranItem] = []
+    total_albaran: Optional[float] = 0.0
+    observaciones: Optional[str] = None
 
 class AlbaranInDB(AlbaranBase):
     id: str = Field(alias="_id")
