@@ -333,23 +333,30 @@ class AgriculturalAPITester:
         return success
 
     def test_visitas_crud(self):
-        """Test visitas CRUD operations"""
-        print("\n👥 Testing Visitas CRUD...")
+        """Test visitas CRUD operations with new obligatory fields"""
+        print("\n👥 Testing Visitas CRUD (New Model)...")
         
-        parcela_id = self.created_ids.get("parcela", "test_id")
+        parcela_id = self.created_ids.get("parcela")
+        cultivo_id = self.catalog_ids.get("cultivo_id") 
+        contrato_id = self.catalog_ids.get("contrato_id")
         
+        if not parcela_id or not cultivo_id:
+            print("   ❌ Missing required parcela_id or cultivo_id for testing")
+            return False
+        
+        # Test CREATE visita with new obligatory fields
         visita_data = {
-            "objetivo": "Test Visit",
-            "proveedor": "Test Provider",
-            "campana": "2025/26", 
-            "cultivo": "Test Cultivo",
-            "parcela_id": parcela_id,
+            "objetivo": "Control Rutinario",
+            "parcela_id": parcela_id,        # OBLIGATORIO
+            "cultivo_id": cultivo_id,        # OBLIGATORIO 
+            "campana": "2025/26",            # OBLIGATORIO
+            "contrato_id": contrato_id,      # Opcional - para consistency validation
             "fecha_visita": "2025-01-20",
-            "observaciones": "Test visit observations"
+            "observaciones": "Test visita with new obligatory fields"
         }
         
         success, response = self.run_test(
-            "Create Visita",
+            "Create Visita (New Model)",
             "POST",
             "api/visitas",
             200,
@@ -361,16 +368,60 @@ class AgriculturalAPITester:
         visita_id = response.get("data", {}).get("_id")
         if visita_id:
             self.created_ids["visita"] = visita_id
+            print(f"   Created visita ID: {visita_id}")
         
-        # Test GET list
+        # Test consistency validation - wrong campana should fail
+        bad_visita_data = visita_data.copy()
+        bad_visita_data["campana"] = "2024/25"  # Different from contrato
+        
+        success, response = self.run_test(
+            "Create Visita (Bad Consistency)",
+            "POST", 
+            "api/visitas",
+            400,  # Should fail validation
+            bad_visita_data
+        )
+        if not success:
+            print("   ⚠️  Consistency validation might not be working")
+        
+        # Test missing obligatory field
+        incomplete_visita = {
+            "objetivo": "Control Rutinario", 
+            "fecha_visita": "2025-01-20"
+            # Missing parcela_id, cultivo_id, campana
+        }
+        
+        success, response = self.run_test(
+            "Create Visita (Missing Required Fields)",
+            "POST",
+            "api/visitas", 
+            422,  # Should fail validation
+            incomplete_visita
+        )
+        if not success:
+            print("   ⚠️  Field validation might not be working")
+        
+        # Test GET list with filters
         success, _ = self.run_test(
             "Get Visitas",
             "GET",
             "api/visitas",
             200
         )
+        if not success:
+            return False
+            
+        # Test GET with campaign filter (new feature)
+        success, _ = self.run_test(
+            "Get Visitas by Campaign", 
+            "GET",
+            "api/visitas?campana=2025/26",
+            200
+        )
+        if not success:
+            return False
         
-        return success
+        return True
 
     def test_tratamientos_crud(self):
         """Test tratamientos CRUD operations"""
