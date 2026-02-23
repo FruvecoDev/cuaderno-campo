@@ -1,10 +1,564 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Info, Filter, Settings, X } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Plus, Edit2, Trash2, Info, Filter, Settings, X, Calculator, AlertTriangle, RotateCcw, Beaker, Droplets, Ruler, Bug } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+
+// ============================================================================
+// CALCULADORA DE FITOSANITARIOS
+// ============================================================================
+const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
+  const [showCalculator, setShowCalculator] = useState(false);
+  const [calcData, setCalcData] = useState({
+    superficie: '',
+    unidadSuperficie: 'ha', // ha o m2
+    volumenAgua: '', // L/ha
+    dosisProducto: '', // L o kg por ha
+    unidadDosis: 'L/ha', // L/ha, kg/ha, ml/ha, g/ha
+    concentracion: '', // % concentración del producto
+    nombreProducto: '',
+    tipoProducto: 'insecticida', // insecticida, herbicida, fungicida, fertilizante
+    plagaObjetivo: ''
+  });
+  
+  const [alerts, setAlerts] = useState({});
+  const [historial, setHistorial] = useState([]);
+  
+  // Límites recomendados por tipo de producto (L o kg por ha)
+  const LIMITES_DOSIS = {
+    insecticida: { min: 0.1, max: 3, unidad: 'L/ha' },
+    herbicida: { min: 0.5, max: 5, unidad: 'L/ha' },
+    fungicida: { min: 0.2, max: 4, unidad: 'L/ha' },
+    fertilizante: { min: 1, max: 50, unidad: 'kg/ha' }
+  };
+  
+  // Límites de volumen de agua por ha
+  const LIMITES_AGUA = { min: 100, max: 1000 }; // L/ha
+  
+  // Calcular resultados
+  const resultados = useMemo(() => {
+    const sup = parseFloat(calcData.superficie) || 0;
+    const volAgua = parseFloat(calcData.volumenAgua) || 0;
+    const dosis = parseFloat(calcData.dosisProducto) || 0;
+    const conc = parseFloat(calcData.concentracion) || 100;
+    
+    // Convertir superficie a hectáreas si está en m2
+    const supHa = calcData.unidadSuperficie === 'm2' ? sup / 10000 : sup;
+    
+    // Cantidad total de producto necesario
+    let cantidadProducto = dosis * supHa;
+    
+    // Si hay concentración, ajustar
+    if (conc < 100 && conc > 0) {
+      cantidadProducto = cantidadProducto * (100 / conc);
+    }
+    
+    // Volumen total de agua
+    const volumenTotalAgua = volAgua * supHa;
+    
+    // Cantidad de producto por litro de agua (para mezcla)
+    const productoPorLitro = volumenTotalAgua > 0 ? (cantidadProducto / volumenTotalAgua) * 1000 : 0; // ml o g por litro
+    
+    // Concentración en la mezcla final
+    const concentracionMezcla = volumenTotalAgua > 0 ? (cantidadProducto / volumenTotalAgua) * 100 : 0;
+    
+    return {
+      superficieHa: supHa,
+      cantidadProducto: cantidadProducto,
+      volumenTotalAgua: volumenTotalAgua,
+      productoPorLitro: productoPorLitro,
+      concentracionMezcla: concentracionMezcla,
+      dosisReal: dosis
+    };
+  }, [calcData]);
+  
+  // Verificar alertas
+  useEffect(() => {
+    const newAlerts = {};
+    const limites = LIMITES_DOSIS[calcData.tipoProducto];
+    const dosis = parseFloat(calcData.dosisProducto) || 0;
+    const volAgua = parseFloat(calcData.volumenAgua) || 0;
+    
+    // Alerta de dosis
+    if (dosis > 0 && limites) {
+      if (dosis < limites.min) {
+        newAlerts.dosis = { type: 'warning', message: `Dosis baja. Mínimo recomendado: ${limites.min} ${limites.unidad}` };
+      } else if (dosis > limites.max) {
+        newAlerts.dosis = { type: 'danger', message: `¡Dosis excesiva! Máximo recomendado: ${limites.max} ${limites.unidad}` };
+      }
+    }
+    
+    // Alerta de volumen de agua
+    if (volAgua > 0) {
+      if (volAgua < LIMITES_AGUA.min) {
+        newAlerts.agua = { type: 'warning', message: `Volumen de agua bajo. Mínimo: ${LIMITES_AGUA.min} L/ha` };
+      } else if (volAgua > LIMITES_AGUA.max) {
+        newAlerts.agua = { type: 'danger', message: `Volumen excesivo. Máximo: ${LIMITES_AGUA.max} L/ha` };
+      }
+    }
+    
+    // Alerta de concentración
+    if (resultados.concentracionMezcla > 5) {
+      newAlerts.concentracion = { type: 'danger', message: '¡Concentración muy alta! Riesgo de fitotoxicidad' };
+    } else if (resultados.concentracionMezcla > 2) {
+      newAlerts.concentracion = { type: 'warning', message: 'Concentración elevada. Verificar tolerancia del cultivo' };
+    }
+    
+    setAlerts(newAlerts);
+  }, [calcData, resultados]);
+  
+  const resetCalculator = () => {
+    setCalcData({
+      superficie: '',
+      unidadSuperficie: 'ha',
+      volumenAgua: '',
+      dosisProducto: '',
+      unidadDosis: 'L/ha',
+      concentracion: '',
+      nombreProducto: '',
+      tipoProducto: 'insecticida',
+      plagaObjetivo: ''
+    });
+    setAlerts({});
+  };
+  
+  const guardarEnHistorial = () => {
+    if (resultados.cantidadProducto > 0) {
+      const registro = {
+        fecha: new Date().toLocaleString(),
+        ...calcData,
+        resultados: { ...resultados }
+      };
+      setHistorial(prev => [registro, ...prev].slice(0, 10)); // Máximo 10 registros
+    }
+  };
+  
+  const aplicarAlFormulario = () => {
+    if (onApplyToForm && resultados.superficieHa > 0) {
+      onApplyToForm({
+        superficie_aplicacion: resultados.superficieHa,
+        caldo_superficie: parseFloat(calcData.volumenAgua) || 0
+      });
+      setShowCalculator(false);
+    }
+  };
+  
+  const hasAlerts = Object.keys(alerts).length > 0;
+  const hasDangerAlerts = Object.values(alerts).some(a => a.type === 'danger');
+  
+  return (
+    <div className="mb-6">
+      {/* Botón para mostrar/ocultar calculadora */}
+      <button
+        onClick={() => setShowCalculator(!showCalculator)}
+        className={`btn ${showCalculator ? 'btn-primary' : 'btn-secondary'}`}
+        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}
+        data-testid="btn-calculadora"
+      >
+        <Calculator size={18} />
+        Calculadora de Fitosanitarios
+        {hasAlerts && !showCalculator && (
+          <span style={{ 
+            width: '8px', 
+            height: '8px', 
+            backgroundColor: hasDangerAlerts ? '#dc2626' : '#f59e0b',
+            borderRadius: '50%'
+          }} />
+        )}
+      </button>
+      
+      {showCalculator && (
+        <div className="card" style={{ border: hasAlerts ? `2px solid ${hasDangerAlerts ? '#dc2626' : '#f59e0b'}` : '1px solid hsl(var(--border))' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Beaker size={20} style={{ color: '#2d5a27' }} />
+              Calculadora de Dosis de Fitosanitarios
+            </h3>
+            <button
+              onClick={resetCalculator}
+              className="btn btn-sm"
+              style={{ 
+                backgroundColor: '#e8f5e9', 
+                color: '#2d5a27',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.25rem'
+              }}
+              title="Restablecer valores"
+              data-testid="btn-reset-calculadora"
+            >
+              <RotateCcw size={14} />
+              Restablecer
+            </button>
+          </div>
+          
+          {/* Alertas globales */}
+          {hasAlerts && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              {Object.entries(alerts).map(([key, alert]) => (
+                <div 
+                  key={key}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.75rem 1rem',
+                    marginBottom: '0.5rem',
+                    backgroundColor: alert.type === 'danger' ? '#fef2f2' : '#fffbeb',
+                    border: `1px solid ${alert.type === 'danger' ? '#fecaca' : '#fde68a'}`,
+                    borderRadius: '8px',
+                    color: alert.type === 'danger' ? '#dc2626' : '#d97706'
+                  }}
+                >
+                  <AlertTriangle size={18} />
+                  <span style={{ fontWeight: '500' }}>{alert.message}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '2rem' }}>
+            {/* Columna izquierda: Inputs */}
+            <div>
+              <h4 style={{ marginBottom: '1rem', color: '#2d5a27', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Ruler size={16} /> Datos de entrada
+              </h4>
+              
+              {/* Tipo de producto */}
+              <div className="form-group">
+                <label className="form-label">Tipo de Fitosanitario</label>
+                <select
+                  className="form-select"
+                  value={calcData.tipoProducto}
+                  onChange={(e) => setCalcData({...calcData, tipoProducto: e.target.value})}
+                >
+                  <option value="insecticida">Insecticida</option>
+                  <option value="herbicida">Herbicida</option>
+                  <option value="fungicida">Fungicida</option>
+                  <option value="fertilizante">Fertilizante</option>
+                </select>
+              </div>
+              
+              {/* Nombre del producto */}
+              <div className="form-group">
+                <label className="form-label">Nombre del Producto</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Ej: Cipermetrina 20%"
+                  value={calcData.nombreProducto}
+                  onChange={(e) => setCalcData({...calcData, nombreProducto: e.target.value})}
+                />
+              </div>
+              
+              {/* Superficie */}
+              <div className="form-group">
+                <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  Superficie a Tratar
+                  {alerts.superficie && <AlertTriangle size={14} style={{ color: '#dc2626' }} />}
+                </label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input
+                    type="number"
+                    className="form-input"
+                    placeholder="Ej: 5"
+                    value={calcData.superficie}
+                    onChange={(e) => setCalcData({...calcData, superficie: e.target.value})}
+                    min="0"
+                    step="0.01"
+                    style={{ flex: 1 }}
+                  />
+                  <select
+                    className="form-select"
+                    value={calcData.unidadSuperficie}
+                    onChange={(e) => setCalcData({...calcData, unidadSuperficie: e.target.value})}
+                    style={{ width: '80px' }}
+                  >
+                    <option value="ha">Ha</option>
+                    <option value="m2">m²</option>
+                  </select>
+                </div>
+              </div>
+              
+              {/* Volumen de agua */}
+              <div className="form-group">
+                <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Droplets size={14} />
+                  Volumen de Agua (L/ha)
+                  {alerts.agua && <AlertTriangle size={14} style={{ color: alerts.agua.type === 'danger' ? '#dc2626' : '#f59e0b' }} />}
+                </label>
+                <input
+                  type="number"
+                  className={`form-input ${alerts.agua ? (alerts.agua.type === 'danger' ? 'border-red-500' : 'border-yellow-500') : ''}`}
+                  placeholder="Ej: 400"
+                  value={calcData.volumenAgua}
+                  onChange={(e) => setCalcData({...calcData, volumenAgua: e.target.value})}
+                  min="0"
+                  step="10"
+                  style={alerts.agua ? { borderColor: alerts.agua.type === 'danger' ? '#dc2626' : '#f59e0b', borderWidth: '2px' } : {}}
+                />
+                <small style={{ color: 'hsl(var(--muted-foreground))' }}>Recomendado: {LIMITES_AGUA.min}-{LIMITES_AGUA.max} L/ha</small>
+              </div>
+              
+              {/* Dosis del producto */}
+              <div className="form-group">
+                <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Beaker size={14} />
+                  Dosis del Producto
+                  {alerts.dosis && <AlertTriangle size={14} style={{ color: alerts.dosis.type === 'danger' ? '#dc2626' : '#f59e0b' }} />}
+                </label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input
+                    type="number"
+                    className="form-input"
+                    placeholder="Ej: 1.5"
+                    value={calcData.dosisProducto}
+                    onChange={(e) => setCalcData({...calcData, dosisProducto: e.target.value})}
+                    min="0"
+                    step="0.01"
+                    style={alerts.dosis ? { borderColor: alerts.dosis.type === 'danger' ? '#dc2626' : '#f59e0b', borderWidth: '2px', flex: 1 } : { flex: 1 }}
+                  />
+                  <select
+                    className="form-select"
+                    value={calcData.unidadDosis}
+                    onChange={(e) => setCalcData({...calcData, unidadDosis: e.target.value})}
+                    style={{ width: '90px' }}
+                  >
+                    <option value="L/ha">L/ha</option>
+                    <option value="kg/ha">kg/ha</option>
+                    <option value="ml/ha">ml/ha</option>
+                    <option value="g/ha">g/ha</option>
+                  </select>
+                </div>
+                {LIMITES_DOSIS[calcData.tipoProducto] && (
+                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
+                    Rango típico para {calcData.tipoProducto}: {LIMITES_DOSIS[calcData.tipoProducto].min}-{LIMITES_DOSIS[calcData.tipoProducto].max} {LIMITES_DOSIS[calcData.tipoProducto].unidad}
+                  </small>
+                )}
+              </div>
+              
+              {/* Concentración del producto (opcional) */}
+              <div className="form-group">
+                <label className="form-label">Concentración del Producto (%)</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  placeholder="Ej: 20 (dejar vacío si es 100%)"
+                  value={calcData.concentracion}
+                  onChange={(e) => setCalcData({...calcData, concentracion: e.target.value})}
+                  min="0"
+                  max="100"
+                  step="0.1"
+                />
+                <small style={{ color: 'hsl(var(--muted-foreground))' }}>Si el producto es concentrado al 20%, indica 20</small>
+              </div>
+              
+              {/* Plaga objetivo */}
+              <div className="form-group">
+                <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Bug size={14} />
+                  Plaga/Enfermedad Objetivo
+                </label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Ej: Pulgón, Mildiu, Grama..."
+                  value={calcData.plagaObjetivo}
+                  onChange={(e) => setCalcData({...calcData, plagaObjetivo: e.target.value})}
+                />
+              </div>
+            </div>
+            
+            {/* Columna derecha: Resultados */}
+            <div>
+              <h4 style={{ marginBottom: '1rem', color: '#2d5a27', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Calculator size={16} /> Resultados del Cálculo
+              </h4>
+              
+              <div style={{ 
+                backgroundColor: hasDangerAlerts ? '#fef2f2' : '#f0fdf4', 
+                padding: '1.5rem', 
+                borderRadius: '12px',
+                border: `2px solid ${hasDangerAlerts ? '#fecaca' : '#bbf7d0'}`
+              }}>
+                {/* Superficie en Ha */}
+                <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: 'white', borderRadius: '8px' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.25rem' }}>
+                    Superficie Total
+                  </div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#2d5a27' }}>
+                    {resultados.superficieHa.toFixed(2)} Ha
+                  </div>
+                  {calcData.unidadSuperficie === 'm2' && calcData.superficie && (
+                    <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                      ({parseFloat(calcData.superficie).toLocaleString()} m²)
+                    </div>
+                  )}
+                </div>
+                
+                {/* Cantidad de producto */}
+                <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: 'white', borderRadius: '8px' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.25rem' }}>
+                    Cantidad Total de Producto
+                  </div>
+                  <div style={{ 
+                    fontSize: '1.75rem', 
+                    fontWeight: '700', 
+                    color: hasDangerAlerts ? '#dc2626' : '#2d5a27',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    {resultados.cantidadProducto.toFixed(2)} {calcData.unidadDosis.includes('L') ? 'L' : 'kg'}
+                    {alerts.dosis && <AlertTriangle size={20} style={{ color: alerts.dosis.type === 'danger' ? '#dc2626' : '#f59e0b' }} />}
+                  </div>
+                  {calcData.nombreProducto && (
+                    <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
+                      de {calcData.nombreProducto}
+                    </div>
+                  )}
+                </div>
+                
+                {/* Volumen total de agua */}
+                <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: 'white', borderRadius: '8px' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.25rem' }}>
+                    Volumen Total de Agua
+                  </div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#0ea5e9' }}>
+                    {resultados.volumenTotalAgua.toFixed(0)} L
+                  </div>
+                </div>
+                
+                {/* Mezcla por litro */}
+                <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: 'white', borderRadius: '8px', border: alerts.concentracion ? '2px solid #f59e0b' : 'none' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.25rem' }}>
+                    Producto por Litro de Agua
+                  </div>
+                  <div style={{ 
+                    fontSize: '1.25rem', 
+                    fontWeight: '700', 
+                    color: alerts.concentracion ? (alerts.concentracion.type === 'danger' ? '#dc2626' : '#d97706') : '#6b7280',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    {resultados.productoPorLitro.toFixed(2)} {calcData.unidadDosis.includes('L') ? 'ml' : 'g'}/L
+                    {alerts.concentracion && <AlertTriangle size={16} />}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                    Concentración: {resultados.concentracionMezcla.toFixed(3)}%
+                  </div>
+                </div>
+                
+                {/* Tabla resumen */}
+                <div style={{ padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '8px', fontSize: '0.875rem' }}>
+                  <div style={{ fontWeight: '600', marginBottom: '0.5rem' }}>Resumen de la Mezcla:</div>
+                  <table style={{ width: '100%' }}>
+                    <tbody>
+                      <tr>
+                        <td style={{ padding: '0.25rem 0' }}>Tipo:</td>
+                        <td style={{ textAlign: 'right', fontWeight: '500' }}>{calcData.tipoProducto}</td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '0.25rem 0' }}>Dosis aplicada:</td>
+                        <td style={{ textAlign: 'right', fontWeight: '500' }}>{calcData.dosisProducto || '—'} {calcData.unidadDosis}</td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '0.25rem 0' }}>Caldo/ha:</td>
+                        <td style={{ textAlign: 'right', fontWeight: '500' }}>{calcData.volumenAgua || '—'} L/ha</td>
+                      </tr>
+                      {calcData.plagaObjetivo && (
+                        <tr>
+                          <td style={{ padding: '0.25rem 0' }}>Objetivo:</td>
+                          <td style={{ textAlign: 'right', fontWeight: '500' }}>{calcData.plagaObjetivo}</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              
+              {/* Botones de acción */}
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+                <button
+                  onClick={guardarEnHistorial}
+                  className="btn btn-secondary"
+                  disabled={resultados.cantidadProducto <= 0}
+                  style={{ flex: 1 }}
+                >
+                  Guardar en Historial
+                </button>
+                <button
+                  onClick={aplicarAlFormulario}
+                  className="btn btn-primary"
+                  disabled={resultados.superficieHa <= 0}
+                  style={{ flex: 1 }}
+                >
+                  Aplicar al Tratamiento
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {/* Historial de cálculos */}
+          {historial.length > 0 && (
+            <div style={{ marginTop: '2rem', borderTop: '1px solid hsl(var(--border))', paddingTop: '1.5rem' }}>
+              <h4 style={{ marginBottom: '1rem' }}>Historial de Cálculos</h4>
+              <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                <table className="table" style={{ fontSize: '0.8rem' }}>
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Producto</th>
+                      <th>Superficie</th>
+                      <th>Cantidad</th>
+                      <th>Agua Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {historial.map((h, idx) => (
+                      <tr key={idx}>
+                        <td>{h.fecha}</td>
+                        <td>{h.nombreProducto || h.tipoProducto}</td>
+                        <td>{h.resultados.superficieHa.toFixed(2)} ha</td>
+                        <td>{h.resultados.cantidadProducto.toFixed(2)} {h.unidadDosis.includes('L') ? 'L' : 'kg'}</td>
+                        <td>{h.resultados.volumenTotalAgua.toFixed(0)} L</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+          
+          {/* Información adicional */}
+          <div style={{ 
+            marginTop: '1.5rem', 
+            padding: '1rem', 
+            backgroundColor: '#f0f9ff', 
+            borderRadius: '8px',
+            border: '1px solid #bae6fd',
+            fontSize: '0.8rem'
+          }}>
+            <div style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#0369a1' }}>
+              <Info size={14} style={{ display: 'inline', marginRight: '0.25rem' }} />
+              Consideraciones importantes:
+            </div>
+            <ul style={{ margin: 0, paddingLeft: '1.25rem', color: '#0c4a6e' }}>
+              <li>Siempre lea la etiqueta del producto antes de aplicar</li>
+              <li>Respete los plazos de seguridad indicados por el fabricante</li>
+              <li>Use equipo de protección personal adecuado</li>
+              <li>Las dosis varían según cultivo, plaga y condiciones climáticas</li>
+              <li>En agricultura ecológica, use solo productos autorizados</li>
+            </ul>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Default field configuration
 const DEFAULT_FIELDS_CONFIG = {
