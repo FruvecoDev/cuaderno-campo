@@ -32,6 +32,7 @@ const Layout = ({ children }) => {
       { path: '/tareas', label: 'Tareas', icon: ListTodo, module: 'tareas' },
       { path: '/tratamientos', label: 'Tratamientos', icon: Sprout, module: 'tratamientos' },
       { path: '/irrigaciones', label: 'Irrigaciones', icon: Droplets, module: 'irrigaciones' },
+      { path: '/evaluaciones', label: 'Evaluaciones', icon: ClipboardCheck, module: 'evaluaciones' },
     ]},
     { section: 'Administración', items: [
       { path: '/recetas', label: 'Recetas', icon: BookOpen, module: 'recetas' },
