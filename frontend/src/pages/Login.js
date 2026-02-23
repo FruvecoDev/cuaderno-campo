@@ -74,9 +74,10 @@ const Login = () => {
               style={{ 
                 maxWidth: '180px', 
                 height: 'auto',
-                marginBottom: '1rem'
+                marginBottom: '0.5rem'
               }} 
             />
+            <p style={{ fontSize: '0.875rem', fontWeight: '500', color: 'hsl(var(--muted-foreground))', marginBottom: '0.5rem' }}>Cuaderno de Campo</p>
             <p className="text-muted">Inicia sesión para continuar</p>
           </div>
           
