@@ -58,6 +58,7 @@ app.include_router(extended_router)
 app.include_router(catalogos_router)
 app.include_router(ai_router)
 app.include_router(maquinaria_router)
+app.include_router(evaluaciones_router)
 
 # ============================================================================
 # ROOT
