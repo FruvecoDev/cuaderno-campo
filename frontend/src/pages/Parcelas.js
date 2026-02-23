@@ -88,6 +88,17 @@ const Parcelas = () => {
     }
   };
   
+  const fetchContratos = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/contratos`);
+      const data = await response.json();
+      setContratos(data.contratos || []);
+    } catch (error) {
+      console.error('Error fetching contratos:', error);
+    }
+  };
+
+  
   const handlePolygonCreated = (coords) => {
     setPolygon(coords);
     alert(`Polígono dibujado con ${coords.length} puntos`);
