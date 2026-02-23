@@ -185,5 +185,16 @@ Módulos actualizados para seguir patrón consistente:
 
 ## Branding Update (23/02/2026)
 - **Logo en Sidebar**: Reemplazado texto "FRUVECO" por imagen del logo corporativo
+- **Logo en Login**: Añadido logo y subtítulo "Cuaderno de Campo"
 - Archivo: `/app/frontend/src/assets/logo.png`
-- Componente: `/app/frontend/src/components/Layout.js`
+- Componentes: `/app/frontend/src/components/Layout.js`, `/app/frontend/src/pages/Login.js`
+
+## Mapa Interactivo Mejorado (23/02/2026)
+- **Vista Satélite**: Por defecto se muestra vista satelital (Esri World Imagery)
+- **Selector de capas**: Botones para cambiar entre Mapa Base (OSM), Satélite y Topográfico
+- **Edición de parcelas mejorada**: 
+  - Polígonos editables al editar una parcela existente
+  - Centrado automático en el polígono existente
+  - Indicador visual del estado del polígono
+  - Botón para limpiar polígono dibujado
+- Archivo: `/app/frontend/src/pages/Parcelas.js`
