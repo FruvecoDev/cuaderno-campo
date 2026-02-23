@@ -1,6 +1,14 @@
 [
   {
-    "content": "Probar flujo completo de Visitas y Tratamientos con nuevos vínculos",
-    "status": "completed"
+    "content": "Mejorar visualización de registros legacy en Tratamientos (mostrar mensaje informativo en vez de N/A)",
+    "status": "in_progress"
+  },
+  {
+    "content": "Mejorar legibilidad de tablas: mostrar nombres de parcelas en vez de IDs",
+    "status": "pending"
+  },
+  {
+    "content": "Resolver warnings de hidratación en tablas (estructura DOM)",
+    "status": "pending"
   }
 ]
