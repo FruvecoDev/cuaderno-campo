@@ -130,13 +130,19 @@ const Cosechas = () => {
   // Añadir carga
   const handleAddCarga = async (cosechaId) => {
     try {
+      const payload = {
+        ...cargaForm,
+        kilos_reales: parseFloat(cargaForm.kilos_reales)
+      };
+      // Incluir valor_tenderometria solo si tiene valor
+      if (cargaForm.valor_tenderometria) {
+        payload.valor_tenderometria = parseFloat(cargaForm.valor_tenderometria);
+      }
+      
       const res = await fetch(`${BACKEND_URL}/api/cosechas/${cosechaId}/cargas`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({
-          ...cargaForm,
-          kilos_reales: parseFloat(cargaForm.kilos_reales)
-        })
+        body: JSON.stringify(payload)
       });
       
       if (res.ok) {
@@ -147,6 +153,7 @@ const Cosechas = () => {
           kilos_reales: '',
           es_descuento: false,
           tipo_descuento: '',
+          valor_tenderometria: '',
           num_albaran: '',
           observaciones: ''
         });
