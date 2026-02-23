@@ -44,20 +44,21 @@ const Visitas = () => {
   }, []);
   
   useEffect(() => {
-    // Cuando se selecciona un contrato, autocompletar campaña y filtrar parcelas
-    if (formData.contrato_id) {
-      const contrato = contratos.find(c => c._id === formData.contrato_id);
-      if (contrato) {
+    // Cuando se selecciona una parcela, autocompletar todo desde ella
+    if (formData.parcela_id) {
+      const parcela = parcelas.find(p => p._id === formData.parcela_id);
+      if (parcela) {
         setFormData(prev => ({
           ...prev,
-          campana: contrato.campana,
-          cultivo_id: contrato.cultivo_id || ''
+          contrato_id: parcela.contrato_id || '',
+          proveedor: parcela.proveedor || '',
+          cultivo: parcela.cultivo || '',
+          cultivo_id: parcela.cultivo_id || '',
+          campana: parcela.campana || ''
         }));
-        // Filtrar parcelas por campaña (en producción, deberías tener este filtro en backend)
-        fetchParcelas(contrato.campana);
       }
     }
-  }, [formData.contrato_id, contratos]);
+  }, [formData.parcela_id, parcelas]);
   
   const fetchContratos = async () => {
     try {
