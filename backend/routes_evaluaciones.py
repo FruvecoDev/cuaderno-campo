@@ -569,6 +569,32 @@ async def generate_evaluacion_pdf(
             margin: 0;
             color: white;
         }
+        .irrigacion-header {
+            background-color: #2874a6;
+            color: white;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        .irrigacion-header h3 {
+            margin: 0;
+            color: white;
+        }
+        .cosecha-header {
+            background-color: #1e8449;
+            color: white;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        .cosecha-header h3 {
+            margin: 0;
+            color: white;
+        }
+        .section-title-water {
+            background-color: #2874a6;
+        }
+        .section-title-harvest {
+            background-color: #1e8449;
+        }
         .summary-box {
             background-color: #f8f9fa;
             border: 1px solid #dee2e6;
