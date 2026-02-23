@@ -42,11 +42,14 @@ class ContratoBase(BaseModel):
     fecha_contrato: str
     fecha_baja: Optional[str] = None
     
-    # Proveedor y cultivo
-    proveedor: str
-    proveedor_id: Optional[str] = None
-    cultivo: str
-    articulo_mp: str
+    # Proveedor y cultivo (referencias a catálogos)
+    proveedor_id: str  # ObjectId ref a proveedores collection
+    cultivo_id: str    # ObjectId ref a cultivos collection
+    
+    # Campos legacy (mantener por compatibilidad temporal)
+    proveedor: Optional[str] = None  # Deprecated
+    cultivo: Optional[str] = None    # Deprecated
+    articulo_mp: Optional[str] = None  # Deprecated - usar cultivo_id
     cantidad: float
     precio: float
     moneda: str = "EUR"
