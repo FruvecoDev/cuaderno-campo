@@ -12,7 +12,9 @@
 > Estado actual (resumen):
 > - ✅ Fase 1 (POC): completada.
 > - ✅ Fase 2 (V1 Build): completada.
-> - ✅ Autenticación (Fase 3 - parte 1): **implementada y verificada E2E** (login, logout, /me, rutas protegidas, init-admin).
+> - ✅ Fase 3A (Autenticación): completada y verificada E2E.
+> - ✅ Fase 3B (RBAC por módulo/acción): **completada** (backend + frontend con control de visibilidad/acciones).
+> - ⏳ Fase 3B (Gestión de usuarios): pendiente (panel admin + operaciones avanzadas).
 
 ---
 
@@ -75,7 +77,7 @@
 - ✅ Diseño profesional
 
 **Notas de estabilidad (actualización):**
-- Se resolvió un bloqueo del backend al instalar dependencias runtime necesarias para WeasyPrint (libs del sistema). Se recomienda consolidarlo en la imagen/infra (ver Phase 5).
+- ✅ Se resolvió un bloqueo del backend instalando dependencias runtime necesarias para WeasyPrint (libs del sistema). Recomendación: consolidarlo en la imagen/infra (ver Phase 5).
 
 ---
 
@@ -96,10 +98,23 @@
 2. ✅ Como usuario, quiero cerrar sesión y que se elimine mi token.
 3. ✅ Como usuario, quiero que al entrar a rutas protegidas sin sesión me lleve al login.
 
-#### Phase 3B — RBAC por módulo/acción + Gestión de usuarios (P0/P1) ⏳ PRÓXIMO
-- Permisos por acción (ver/crear/editar/borrar/exportar) aplicados en:
-  - Backend: dependencias/guards por endpoint
-  - Frontend: ocultar/inhabilitar acciones (botones, formularios)
+#### Phase 3B — RBAC por módulo/acción + Gestión de usuarios (P0/P1)
+
+**3B-1 RBAC por módulo/acción ✅ COMPLETADO**
+- ✅ Matriz de permisos por rol centralizada (backend)
+- ✅ Guards/dependencies aplicados a todos los endpoints CRUD:
+  - Contratos, Parcelas, Fincas, Visitas
+  - Tratamientos, Irrigaciones, Recetas, Albaranes
+  - Tareas, Cosechas
+- ✅ Verificación funcional:
+  - Sin token → 401/"Not authenticated"
+  - Con token y rol adecuado → 200
+- ✅ Frontend:
+  - Sidebar filtrado por `modules_access`
+  - Botones/acciones condicionadas por permisos (`can_create`, etc.)
+  - Utilidades de permisos (`utils/permissions.js`) para reutilización
+
+**3B-2 Gestión de usuarios ⏳ PRÓXIMO (P1)**
 - Panel Admin: gestión de usuarios
   - listar usuarios
   - crear usuario (Admin only)
@@ -117,11 +132,13 @@
 - Auditoría mínima (log de cambios) en eventos críticos
 
 **User stories (Phase 3B/3C)**
-1. Como admin, quiero crear usuarios y asignar roles para controlar accesos.
-2. Como manager, quiero que un técnico solo edite tratamientos y riegos, no contratos.
-3. Como viewer, quiero consultar informes sin poder modificar datos.
-4. Como admin, quiero ocultar campos sensibles (costes) para ciertos roles.
-5. Como manager, quiero trazabilidad de cambios en tratamientos para auditoría.
+1. ✅ Como admin/manager/viewer, quiero que el sistema respete permisos por acción (crear/editar/borrar/exportar).
+2. ✅ Como usuario, quiero que el menú muestre solo los módulos permitidos.
+3. Como admin, quiero crear usuarios y asignar roles para controlar accesos.
+4. Como manager, quiero que un técnico solo edite operaciones de campo y no contratos.
+5. Como viewer, quiero consultar informes sin poder modificar datos.
+6. Como admin, quiero ocultar campos sensibles (costes) para ciertos roles.
+7. Como manager, quiero trazabilidad de cambios en tratamientos para auditoría.
 
 ---
 
@@ -149,22 +166,28 @@
 ---
 
 ## 3) Next Actions
-### P0 (inmediato)
-1. **Corregir issues menores pendientes**
-   - Inconsistencia en modelo backend de `albaranes` (definir/normalizar esquema y ajustar endpoints + UI si aplica).
-   - Warnings menores de React/webpack dev-server (si quedan) y limpieza de lint.
-2. **RBAC por módulo/acción (mínimo viable)**
-   - Definir matriz permisos por rol.
-   - Implementar guards backend para acciones críticas (create/update/delete/export).
-   - Implementar control UI (botones/acciones) usando `user.can_*` + `modules_access`.
 
-### P1
+### P0 (inmediato) ✅ COMPLETADO
+1. ✅ **Corregir issues menores**
+   - ✅ Albaranes: verificado modelo consistente (`proveedor_cliente`).
+   - ✅ Warnings menores React/dev-server: mitigados/no bloqueantes.
+2. ✅ **RBAC por módulo/acción (mínimo viable)**
+   - ✅ Matriz permisos por rol.
+   - ✅ Guards backend para acciones críticas y acceso por módulo.
+   - ✅ Control UI (sidebar + botones) usando `user.can_*` + `modules_access`.
+
+### P1 (siguiente)
 3. **Panel Admin de usuarios**
    - Vista lista + edición de rol/estado.
    - Crear usuario (Admin only) usando endpoint `/api/auth/register`.
    - Desactivar usuario y validar login bloqueado.
+   - Definir y construir flujo de cambio/reset de password.
 4. **E2E multi-rol**
-   - Scripts Playwright/cypress (o smoke tests) para: Viewer read-only, Technician sin delete, Manager sin admin.
+   - Scripts Playwright (o smoke tests) para:
+     - Viewer read-only (sin create/edit/delete)
+     - Technician sin delete/export y sin acceso a contratos
+     - Manager sin delete ni user-management
+     - Admin full access
 
 ### P2
 5. Permisos por campo/sección + auditoría mínima de cambios
@@ -175,7 +198,7 @@
 ## 4) Success Criteria
 - ✅ Flujo principal completo: **Finca→Parcela (mapa)→Contrato+Cultivo→eventos→costes→PDF/Excel→dashboard**.
 - ✅ Autenticación robusta: **login/logout**, rutas protegidas, `/me` estable.
-- RBAC funciona sin filtrar datos ni permitir acciones indebidas (backend + UI).
+- ✅ RBAC funciona sin filtrar datos ni permitir acciones indebidas (backend + UI).
 - Panel Admin permite gestionar usuarios y roles sin intervención técnica.
 - PDF/Excel export estable (sin fallos por dependencias runtime) y con datos consistentes.
 - IA genera reportes **útiles, reproducibles y guardables** a partir de datos reales.
