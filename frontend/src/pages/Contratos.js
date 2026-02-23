@@ -235,7 +235,7 @@ const Contratos = () => {
       
       {showForm && (
         <div className="card mb-6" data-testid="contrato-form">
-          <h2 className="card-title">Crear Contrato</h2>
+          <h2 className="card-title">{editingId ? 'Editar Contrato' : 'Crear Contrato'}</h2>
           <form onSubmit={handleSubmit}>
             <div className="grid-3">
               <div className="form-group">
