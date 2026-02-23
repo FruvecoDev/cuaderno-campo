@@ -1,31 +1,41 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Filter, Settings, X, FileSpreadsheet, PlusCircle, MinusCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, Filter, Settings, X, FileSpreadsheet, PlusCircle, MinusCircle, FileText, Package } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
-// Configuración de campos
+// Configuración de campos visibles en tabla
 const DEFAULT_FIELDS_CONFIG = {
+  numero: true,
   tipo: true,
   fecha: true,
-  proveedor_cliente: true,
+  contrato: true,
+  proveedor: true,
+  cultivo: true,
+  parcela: true,
   items: true,
-  observaciones: true
+  total: true,
+  observaciones: false
 };
 
 const FIELD_LABELS = {
+  numero: 'Nº Albarán',
   tipo: 'Tipo',
   fecha: 'Fecha',
-  proveedor_cliente: 'Proveedor/Cliente',
+  contrato: 'Contrato',
+  proveedor: 'Proveedor',
+  cultivo: 'Cultivo',
+  parcela: 'Parcela',
   items: 'Líneas',
+  total: 'Total',
   observaciones: 'Observaciones'
 };
 
 const Albaranes = () => {
   const [albaranes, setAlbaranes] = useState([]);
-  const [proveedores, setProveedores] = useState([]);
+  const [contratos, setContratos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -34,57 +44,73 @@ const Albaranes = () => {
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   
+  // Contrato seleccionado y datos heredados
+  const [selectedContrato, setSelectedContrato] = useState(null);
+  
   // Filtros
   const [filters, setFilters] = useState({
     tipo: '',
-    proveedor_cliente: ''
+    contrato_id: '',
+    proveedor: '',
+    cultivo: ''
   });
   
   // Configuración de campos
   const [showFieldsConfig, setShowFieldsConfig] = useState(false);
   const [fieldsConfig, setFieldsConfig] = useState(() => {
-    const saved = localStorage.getItem('albaranes_fields_config');
+    const saved = localStorage.getItem('albaranes_fields_config_v2');
     return saved ? JSON.parse(saved) : DEFAULT_FIELDS_CONFIG;
   });
   
   // Opciones de filtros
   const [filterOptions, setFilterOptions] = useState({
-    proveedores_clientes: []
+    proveedores: [],
+    cultivos: []
   });
   
+  // Form data
   const [formData, setFormData] = useState({
     tipo: 'Entrada',
-    fecha: '',
-    proveedor_cliente: '',
-    items: [{ descripcion: '', cantidad: '', precio_unitario: '', total: 0 }],
+    fecha: new Date().toISOString().split('T')[0],
+    contrato_id: '',
+    // Datos heredados del contrato (solo lectura)
+    proveedor: '',
+    cultivo: '',
+    parcela_codigo: '',
+    parcela_id: '',
+    campana: '',
+    // Líneas del albarán
+    items: [{ descripcion: '', cantidad: '', unidad: 'kg', precio_unitario: '', total: 0 }],
     observaciones: ''
   });
   
   useEffect(() => {
     fetchAlbaranes();
-    fetchProveedores();
+    fetchContratos();
   }, []);
   
   useEffect(() => {
-    const provClientes = [...new Set(albaranes.map(a => a.proveedor_cliente).filter(Boolean))];
-    setFilterOptions({ proveedores_clientes: provClientes });
+    // Extraer opciones de filtro
+    const proveedores = [...new Set(albaranes.map(a => a.proveedor).filter(Boolean))];
+    const cultivos = [...new Set(albaranes.map(a => a.cultivo).filter(Boolean))];
+    setFilterOptions({ proveedores, cultivos });
   }, [albaranes]);
   
   useEffect(() => {
-    localStorage.setItem('albaranes_fields_config', JSON.stringify(fieldsConfig));
+    localStorage.setItem('albaranes_fields_config_v2', JSON.stringify(fieldsConfig));
   }, [fieldsConfig]);
   
-  const fetchProveedores = async () => {
+  const fetchContratos = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/proveedores`, {
+      const response = await fetch(`${BACKEND_URL}/api/contratos`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
         const data = await response.json();
-        setProveedores(data.proveedores || []);
+        setContratos(data.contratos || []);
       }
     } catch (error) {
-      console.error('Error fetching proveedores:', error);
+      console.error('Error fetching contratos:', error);
     }
   };
   
@@ -111,56 +137,73 @@ const Albaranes = () => {
     }
   };
   
-  // Filtrar albaranes
-  const filteredAlbaranes = albaranes.filter(a => {
-    if (filters.tipo && a.tipo !== filters.tipo) return false;
-    if (filters.proveedor_cliente && a.proveedor_cliente !== filters.proveedor_cliente) return false;
-    return true;
-  });
-  
-  const clearFilters = () => {
-    setFilters({ tipo: '', proveedor_cliente: '' });
+  // Cuando se selecciona un contrato, heredar datos
+  const handleContratoSelect = (contratoId) => {
+    const contrato = contratos.find(c => c._id === contratoId);
+    setSelectedContrato(contrato);
+    
+    if (contrato) {
+      setFormData(prev => ({
+        ...prev,
+        contrato_id: contratoId,
+        proveedor: contrato.proveedor || '',
+        cultivo: contrato.cultivo || '',
+        parcela_codigo: contrato.parcela_codigo || contrato.parcela || '',
+        parcela_id: contrato.parcela_id || '',
+        campana: contrato.campana || ''
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        contrato_id: '',
+        proveedor: '',
+        cultivo: '',
+        parcela_codigo: '',
+        parcela_id: '',
+        campana: ''
+      }));
+    }
   };
   
-  const toggleFieldConfig = (field) => {
-    setFieldsConfig(prev => ({ ...prev, [field]: !prev[field] }));
-  };
-  
-  // Gestión de items del albarán
-  const addItem = () => {
-    setFormData(prev => ({
-      ...prev,
-      items: [...prev.items, { descripcion: '', cantidad: '', precio_unitario: '', total: 0 }]
-    }));
-  };
-  
-  const removeItem = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      items: prev.items.filter((_, i) => i !== index)
-    }));
-  };
-  
-  const updateItem = (index, field, value) => {
-    setFormData(prev => {
-      const newItems = [...prev.items];
-      newItems[index] = { ...newItems[index], [field]: value };
-      
-      // Recalcular total del item
+  // Calcular total de líneas
+  const updateItemTotal = (index, field, value) => {
+    const newItems = [...formData.items];
+    newItems[index][field] = value;
+    
+    if (field === 'cantidad' || field === 'precio_unitario') {
       const cantidad = parseFloat(newItems[index].cantidad) || 0;
       const precio = parseFloat(newItems[index].precio_unitario) || 0;
       newItems[index].total = cantidad * precio;
-      
-      return { ...prev, items: newItems };
+    }
+    
+    setFormData({ ...formData, items: newItems });
+  };
+  
+  const addItem = () => {
+    setFormData({
+      ...formData,
+      items: [...formData.items, { descripcion: '', cantidad: '', unidad: 'kg', precio_unitario: '', total: 0 }]
     });
   };
   
-  const calculateTotal = () => {
+  const removeItem = (index) => {
+    if (formData.items.length > 1) {
+      const newItems = formData.items.filter((_, i) => i !== index);
+      setFormData({ ...formData, items: newItems });
+    }
+  };
+  
+  const calculateGrandTotal = () => {
     return formData.items.reduce((sum, item) => sum + (item.total || 0), 0);
   };
   
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!formData.contrato_id) {
+      setError('Debe seleccionar un contrato');
+      return;
+    }
     
     try {
       setError(null);
@@ -173,16 +216,17 @@ const Albaranes = () => {
       const payload = {
         ...formData,
         items: formData.items.map(item => ({
-          descripcion: item.descripcion,
+          ...item,
           cantidad: parseFloat(item.cantidad) || 0,
           precio_unitario: parseFloat(item.precio_unitario) || 0,
           total: parseFloat(item.total) || 0
-        }))
+        })),
+        total_albaran: calculateGrandTotal()
       };
       
       const response = await fetch(url, {
-        method: method,
-        headers: { 
+        method,
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -194,57 +238,44 @@ const Albaranes = () => {
         throw { status: response.status, message: errorData.detail };
       }
       
-      const data = await response.json();
-      if (data.success) {
-        setShowForm(false);
-        setEditingId(null);
-        fetchAlbaranes();
-        setFormData({
-          tipo: 'Entrada',
-          fecha: '',
-          proveedor_cliente: '',
-          items: [{ descripcion: '', cantidad: '', precio_unitario: '', total: 0 }],
-          observaciones: ''
-        });
-      }
+      setShowForm(false);
+      setEditingId(null);
+      resetForm();
+      fetchAlbaranes();
     } catch (error) {
       console.error('Error saving albaran:', error);
       const errorMsg = handlePermissionError(error, editingId ? 'actualizar el albarán' : 'crear el albarán');
       setError(errorMsg);
-      setTimeout(() => setError(null), 5000);
     }
   };
   
   const handleEdit = (albaran) => {
     setEditingId(albaran._id);
+    
+    // Buscar el contrato para establecer selectedContrato
+    const contrato = contratos.find(c => c._id === albaran.contrato_id);
+    setSelectedContrato(contrato);
+    
     setFormData({
       tipo: albaran.tipo || 'Entrada',
       fecha: albaran.fecha || '',
-      proveedor_cliente: albaran.proveedor_cliente || '',
-      items: albaran.items && albaran.items.length > 0 
+      contrato_id: albaran.contrato_id || '',
+      proveedor: albaran.proveedor || '',
+      cultivo: albaran.cultivo || '',
+      parcela_codigo: albaran.parcela_codigo || '',
+      parcela_id: albaran.parcela_id || '',
+      campana: albaran.campana || '',
+      items: albaran.items?.length > 0 
         ? albaran.items 
-        : [{ descripcion: '', cantidad: '', precio_unitario: '', total: 0 }],
+        : [{ descripcion: '', cantidad: '', unidad: 'kg', precio_unitario: '', total: 0 }],
       observaciones: albaran.observaciones || ''
     });
     setShowForm(true);
   };
   
-  const handleCancelEdit = () => {
-    setEditingId(null);
-    setShowForm(false);
-    setFormData({
-      tipo: 'Entrada',
-      fecha: '',
-      proveedor_cliente: '',
-      items: [{ descripcion: '', cantidad: '', precio_unitario: '', total: 0 }],
-      observaciones: ''
-    });
-  };
-  
   const handleDelete = async (albaranId) => {
     if (!canDelete) {
       setError('No tienes permisos para eliminar albaranes');
-      setTimeout(() => setError(null), 5000);
       return;
     }
     
@@ -253,7 +284,6 @@ const Albaranes = () => {
     }
     
     try {
-      setError(null);
       const response = await fetch(`${BACKEND_URL}/api/albaranes/${albaranId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
@@ -269,271 +299,505 @@ const Albaranes = () => {
       console.error('Error deleting albaran:', error);
       const errorMsg = handlePermissionError(error, 'eliminar el albarán');
       setError(errorMsg);
-      setTimeout(() => setError(null), 5000);
     }
   };
   
-  const hasActiveFilters = Object.values(filters).some(v => v !== '');
+  const resetForm = () => {
+    setSelectedContrato(null);
+    setFormData({
+      tipo: 'Entrada',
+      fecha: new Date().toISOString().split('T')[0],
+      contrato_id: '',
+      proveedor: '',
+      cultivo: '',
+      parcela_codigo: '',
+      parcela_id: '',
+      campana: '',
+      items: [{ descripcion: '', cantidad: '', unidad: 'kg', precio_unitario: '', total: 0 }],
+      observaciones: ''
+    });
+  };
   
+  const clearFilters = () => {
+    setFilters({ tipo: '', contrato_id: '', proveedor: '', cultivo: '' });
+  };
+  
+  const toggleFieldConfig = (field) => {
+    setFieldsConfig(prev => ({ ...prev, [field]: !prev[field] }));
+  };
+  
+  // Filtrar albaranes
+  const filteredAlbaranes = albaranes.filter(a => {
+    if (filters.tipo && a.tipo !== filters.tipo) return false;
+    if (filters.contrato_id && a.contrato_id !== filters.contrato_id) return false;
+    if (filters.proveedor && a.proveedor !== filters.proveedor) return false;
+    if (filters.cultivo && a.cultivo !== filters.cultivo) return false;
+    return true;
+  });
+  
+  const hasActiveFilters = filters.tipo || filters.contrato_id || filters.proveedor || filters.cultivo;
+
   return (
     <div data-testid="albaranes-page">
       <div className="flex justify-between items-center mb-6">
-        <h1 style={{ fontSize: '2rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <FileSpreadsheet size={28} /> Albaranes
-        </h1>
+        <div>
+          <h1 style={{ fontSize: '2rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <FileSpreadsheet size={28} />
+            Albaranes
+          </h1>
+          <p style={{ color: 'hsl(var(--muted-foreground))', marginTop: '0.25rem' }}>
+            Gestión de albaranes de entrada y salida por contrato
+          </p>
+        </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button 
+          <button
             className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setShowFieldsConfig(!showFieldsConfig)}
-            title="Configurar campos visibles"
-            data-testid="btn-config-fields"
+            title="Configurar columnas"
           >
             <Settings size={18} />
           </button>
           <PermissionButton
             permission="create"
-            onClick={() => setShowForm(!showForm)}
+            onClick={() => { resetForm(); setShowForm(!showForm); setEditingId(null); }}
             className="btn btn-primary"
             data-testid="btn-nuevo-albaran"
           >
-            <Plus size={18} /> Nuevo Albarán
+            <Plus size={18} />
+            Nuevo Albarán
           </PermissionButton>
         </div>
       </div>
 
       {error && (
-        <div className="card" style={{ backgroundColor: 'hsl(var(--destructive) / 0.1)', border: '1px solid hsl(var(--destructive))', marginBottom: '1.5rem', padding: '1rem' }}>
+        <div className="card" style={{ backgroundColor: 'hsl(var(--destructive) / 0.1)', border: '1px solid hsl(var(--destructive))', marginBottom: '1rem', padding: '1rem' }}>
           <p style={{ color: 'hsl(var(--destructive))' }}>{error}</p>
         </div>
       )}
-      
+
       {/* Configuración de campos */}
       {showFieldsConfig && (
-        <div className="card mb-6" data-testid="fields-config-panel">
+        <div className="card mb-6">
           <div className="flex justify-between items-center mb-4">
-            <h3 style={{ fontWeight: '600' }}>Configurar Campos Visibles</h3>
-            <button className="btn btn-sm btn-secondary" onClick={() => setShowFieldsConfig(false)}><X size={16} /></button>
+            <h3 style={{ fontWeight: '600' }}>Configurar Columnas Visibles</h3>
+            <button className="btn btn-sm btn-secondary" onClick={() => setShowFieldsConfig(false)}>
+              <X size={16} />
+            </button>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '0.75rem' }}>
             {Object.entries(FIELD_LABELS).map(([key, label]) => (
               <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input type="checkbox" checked={fieldsConfig[key]} onChange={() => toggleFieldConfig(key)} style={{ width: '18px', height: '18px' }} />
+                <input
+                  type="checkbox"
+                  checked={fieldsConfig[key]}
+                  onChange={() => toggleFieldConfig(key)}
+                  style={{ width: '18px', height: '18px' }}
+                />
                 <span style={{ fontSize: '0.875rem' }}>{label}</span>
               </label>
             ))}
           </div>
         </div>
       )}
-      
+
       {/* Filtros */}
-      <div className="card mb-6" data-testid="filters-panel">
+      <div className="card mb-6">
         <div className="flex justify-between items-center mb-4">
           <h3 style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Filter size={18} /> Filtros de Búsqueda
           </h3>
           {hasActiveFilters && (
-            <button className="btn btn-sm btn-secondary" onClick={clearFilters}>Limpiar filtros</button>
+            <button className="btn btn-sm btn-secondary" onClick={clearFilters}>
+              Limpiar filtros
+            </button>
           )}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+        <div className="grid-4">
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label">Tipo</label>
-            <select className="form-select" value={filters.tipo} onChange={(e) => setFilters({...filters, tipo: e.target.value})} data-testid="filter-tipo">
+            <select 
+              className="form-select" 
+              value={filters.tipo} 
+              onChange={(e) => setFilters({...filters, tipo: e.target.value})}
+            >
               <option value="">Todos</option>
               <option value="Entrada">Entrada</option>
               <option value="Salida">Salida</option>
             </select>
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Proveedor/Cliente</label>
-            <select className="form-select" value={filters.proveedor_cliente} onChange={(e) => setFilters({...filters, proveedor_cliente: e.target.value})} data-testid="filter-proveedor">
+            <label className="form-label">Contrato</label>
+            <select 
+              className="form-select" 
+              value={filters.contrato_id} 
+              onChange={(e) => setFilters({...filters, contrato_id: e.target.value})}
+            >
               <option value="">Todos</option>
-              {filterOptions.proveedores_clientes.map(p => <option key={p} value={p}>{p}</option>)}
+              {contratos.map(c => (
+                <option key={c._id} value={c._id}>
+                  {c.numero_contrato || c._id.slice(-6)} - {c.proveedor}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Proveedor</label>
+            <select 
+              className="form-select" 
+              value={filters.proveedor} 
+              onChange={(e) => setFilters({...filters, proveedor: e.target.value})}
+            >
+              <option value="">Todos</option>
+              {filterOptions.proveedores.map(p => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Cultivo</label>
+            <select 
+              className="form-select" 
+              value={filters.cultivo} 
+              onChange={(e) => setFilters({...filters, cultivo: e.target.value})}
+            >
+              <option value="">Todos</option>
+              {filterOptions.cultivos.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
             </select>
           </div>
         </div>
-        {hasActiveFilters && (
-          <p style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
-            Mostrando {filteredAlbaranes.length} de {albaranes.length} albaranes
-          </p>
-        )}
       </div>
-      
+
+      {/* Formulario */}
       {showForm && (
         <div className="card mb-6" data-testid="albaran-form">
           <h2 className="card-title">{editingId ? 'Editar Albarán' : 'Nuevo Albarán'}</h2>
+          
           <form onSubmit={handleSubmit}>
-            <div className="grid-3">
-              {fieldsConfig.tipo && (
-                <div className="form-group">
-                  <label className="form-label">Tipo *</label>
-                  <select className="form-select" value={formData.tipo} onChange={(e) => setFormData({...formData, tipo: e.target.value})} required data-testid="select-tipo">
-                    <option value="Entrada">Entrada</option>
-                    <option value="Salida">Salida</option>
-                  </select>
-                </div>
-              )}
-              {fieldsConfig.fecha && (
-                <div className="form-group">
-                  <label className="form-label">Fecha *</label>
-                  <input type="date" className="form-input" value={formData.fecha} onChange={(e) => setFormData({...formData, fecha: e.target.value})} required data-testid="input-fecha" />
-                </div>
-              )}
-              {fieldsConfig.proveedor_cliente && (
-                <div className="form-group">
-                  <label className="form-label">Proveedor/Cliente *</label>
-                  <select className="form-select" value={formData.proveedor_cliente} onChange={(e) => setFormData({...formData, proveedor_cliente: e.target.value})} required data-testid="select-proveedor">
-                    <option value="">Seleccionar...</option>
-                    {proveedores.map(p => <option key={p._id} value={p.nombre}>{p.nombre}</option>)}
-                    {formData.proveedor_cliente && !proveedores.find(p => p.nombre === formData.proveedor_cliente) && (
-                      <option value={formData.proveedor_cliente}>{formData.proveedor_cliente}</option>
-                    )}
-                  </select>
-                </div>
-              )}
+            {/* Paso 1: Seleccionar Contrato */}
+            <div style={{ 
+              backgroundColor: 'hsl(var(--primary) / 0.1)', 
+              padding: '1rem', 
+              borderRadius: '8px', 
+              marginBottom: '1.5rem',
+              border: '1px solid hsl(var(--primary) / 0.3)'
+            }}>
+              <h3 style={{ fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <FileText size={18} /> 1. Seleccionar Contrato
+              </h3>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Contrato *</label>
+                <select
+                  className="form-select"
+                  value={formData.contrato_id}
+                  onChange={(e) => handleContratoSelect(e.target.value)}
+                  required
+                  data-testid="select-contrato"
+                >
+                  <option value="">-- Seleccionar contrato --</option>
+                  {contratos.map(c => (
+                    <option key={c._id} value={c._id}>
+                      {c.numero_contrato || `CON-${c._id.slice(-6)}`} | {c.proveedor} | {c.cultivo} | {c.parcela || c.parcela_codigo}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
             
-            {fieldsConfig.items && (
-              <div className="form-group">
-                <div className="flex justify-between items-center mb-2">
-                  <label className="form-label" style={{ marginBottom: 0 }}>Líneas del Albarán</label>
-                  <button type="button" className="btn btn-sm btn-secondary" onClick={addItem}>
-                    <PlusCircle size={14} /> Añadir línea
-                  </button>
-                </div>
-                <div style={{ border: '1px solid hsl(var(--border))', borderRadius: '0.5rem', overflow: 'hidden' }}>
-                  <table style={{ width: '100%', marginBottom: 0 }}>
-                    <thead>
-                      <tr style={{ backgroundColor: 'hsl(var(--muted))' }}>
-                        <th style={{ padding: '0.5rem' }}>Descripción</th>
-                        <th style={{ padding: '0.5rem', width: '100px' }}>Cantidad</th>
-                        <th style={{ padding: '0.5rem', width: '120px' }}>Precio Unit.</th>
-                        <th style={{ padding: '0.5rem', width: '100px' }}>Total</th>
-                        <th style={{ padding: '0.5rem', width: '50px' }}></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {formData.items.map((item, index) => (
-                        <tr key={index}>
-                          <td style={{ padding: '0.25rem' }}>
-                            <input 
-                              type="text" 
-                              className="form-input" 
-                              value={item.descripcion} 
-                              onChange={(e) => updateItem(index, 'descripcion', e.target.value)}
-                              placeholder="Descripción del producto"
-                              style={{ marginBottom: 0 }}
-                            />
-                          </td>
-                          <td style={{ padding: '0.25rem' }}>
-                            <input 
-                              type="number" 
-                              step="0.01"
-                              className="form-input" 
-                              value={item.cantidad} 
-                              onChange={(e) => updateItem(index, 'cantidad', e.target.value)}
-                              style={{ marginBottom: 0 }}
-                            />
-                          </td>
-                          <td style={{ padding: '0.25rem' }}>
-                            <input 
-                              type="number" 
-                              step="0.01"
-                              className="form-input" 
-                              value={item.precio_unitario} 
-                              onChange={(e) => updateItem(index, 'precio_unitario', e.target.value)}
-                              style={{ marginBottom: 0 }}
-                            />
-                          </td>
-                          <td style={{ padding: '0.25rem', textAlign: 'right', fontWeight: '600' }}>
-                            €{(item.total || 0).toFixed(2)}
-                          </td>
-                          <td style={{ padding: '0.25rem' }}>
-                            {formData.items.length > 1 && (
-                              <button type="button" className="btn btn-sm btn-error" onClick={() => removeItem(index)}>
-                                <MinusCircle size={14} />
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot>
-                      <tr style={{ backgroundColor: 'hsl(var(--muted))' }}>
-                        <td colSpan="3" style={{ padding: '0.5rem', textAlign: 'right', fontWeight: '600' }}>TOTAL:</td>
-                        <td style={{ padding: '0.5rem', textAlign: 'right', fontWeight: '600', fontSize: '1.1rem' }}>€{calculateTotal().toFixed(2)}</td>
-                        <td></td>
-                      </tr>
-                    </tfoot>
-                  </table>
+            {/* Datos heredados del contrato */}
+            {selectedContrato && (
+              <div style={{ 
+                backgroundColor: '#f0fdf4', 
+                padding: '1rem', 
+                borderRadius: '8px', 
+                marginBottom: '1.5rem',
+                border: '1px solid #86efac'
+              }}>
+                <h4 style={{ fontWeight: '600', marginBottom: '0.75rem', color: '#166534' }}>
+                  Datos del Contrato (heredados automáticamente)
+                </h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+                  <div>
+                    <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Proveedor</span>
+                    <p style={{ fontWeight: '500' }}>{formData.proveedor || '-'}</p>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Cultivo</span>
+                    <p style={{ fontWeight: '500' }}>{formData.cultivo || '-'}</p>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Parcela</span>
+                    <p style={{ fontWeight: '500' }}>{formData.parcela_codigo || '-'}</p>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Campaña</span>
+                    <p style={{ fontWeight: '500' }}>{formData.campana || '-'}</p>
+                  </div>
                 </div>
               </div>
             )}
             
-            {fieldsConfig.observaciones && (
+            {/* Datos del Albarán */}
+            <div className="grid-3 mb-4">
               <div className="form-group">
-                <label className="form-label">Observaciones</label>
-                <textarea className="form-textarea" rows="2" value={formData.observaciones} onChange={(e) => setFormData({...formData, observaciones: e.target.value})} placeholder="Notas adicionales..." data-testid="textarea-observaciones" />
+                <label className="form-label">Tipo *</label>
+                <select 
+                  className="form-select" 
+                  value={formData.tipo} 
+                  onChange={(e) => setFormData({...formData, tipo: e.target.value})} 
+                  required 
+                  data-testid="select-tipo"
+                >
+                  <option value="Entrada">Entrada</option>
+                  <option value="Salida">Salida</option>
+                </select>
               </div>
-            )}
+              <div className="form-group">
+                <label className="form-label">Fecha *</label>
+                <input 
+                  type="date" 
+                  className="form-input" 
+                  value={formData.fecha} 
+                  onChange={(e) => setFormData({...formData, fecha: e.target.value})} 
+                  required 
+                  data-testid="input-fecha" 
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Total Albarán</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  value={`${calculateGrandTotal().toFixed(2)} €`} 
+                  disabled
+                  style={{ backgroundColor: '#f0fdf4', fontWeight: '600' }}
+                />
+              </div>
+            </div>
+            
+            {/* Líneas del albarán */}
+            <div className="form-group">
+              <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Package size={16} /> Líneas del Albarán
+              </label>
+              <div style={{ overflowX: 'auto' }}>
+                <table className="table" style={{ marginBottom: '0.5rem' }}>
+                  <thead>
+                    <tr>
+                      <th style={{ minWidth: '200px' }}>Descripción</th>
+                      <th style={{ width: '100px' }}>Cantidad</th>
+                      <th style={{ width: '80px' }}>Unidad</th>
+                      <th style={{ width: '120px' }}>Precio Unit.</th>
+                      <th style={{ width: '120px' }}>Total</th>
+                      <th style={{ width: '50px' }}></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {formData.items.map((item, index) => (
+                      <tr key={index}>
+                        <td>
+                          <input
+                            type="text"
+                            className="form-input"
+                            value={item.descripcion}
+                            onChange={(e) => updateItemTotal(index, 'descripcion', e.target.value)}
+                            placeholder="Descripción del producto"
+                            data-testid={`item-descripcion-${index}`}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            className="form-input"
+                            value={item.cantidad}
+                            onChange={(e) => updateItemTotal(index, 'cantidad', e.target.value)}
+                            placeholder="0"
+                            data-testid={`item-cantidad-${index}`}
+                          />
+                        </td>
+                        <td>
+                          <select
+                            className="form-select"
+                            value={item.unidad || 'kg'}
+                            onChange={(e) => updateItemTotal(index, 'unidad', e.target.value)}
+                          >
+                            <option value="kg">kg</option>
+                            <option value="ud">ud</option>
+                            <option value="L">L</option>
+                            <option value="cajas">cajas</option>
+                            <option value="pallets">pallets</option>
+                          </select>
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            className="form-input"
+                            value={item.precio_unitario}
+                            onChange={(e) => updateItemTotal(index, 'precio_unitario', e.target.value)}
+                            placeholder="0.00"
+                            data-testid={`item-precio-${index}`}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            className="form-input"
+                            value={`${(item.total || 0).toFixed(2)} €`}
+                            disabled
+                            style={{ backgroundColor: '#f5f5f5', textAlign: 'right' }}
+                          />
+                        </td>
+                        <td>
+                          {formData.items.length > 1 && (
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-error"
+                              onClick={() => removeItem(index)}
+                              title="Eliminar línea"
+                            >
+                              <MinusCircle size={16} />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <button
+                type="button"
+                className="btn btn-sm btn-secondary"
+                onClick={addItem}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+              >
+                <PlusCircle size={16} /> Añadir Línea
+              </button>
+            </div>
+            
+            {/* Observaciones */}
+            <div className="form-group">
+              <label className="form-label">Observaciones</label>
+              <textarea 
+                className="form-textarea" 
+                rows="2" 
+                value={formData.observaciones} 
+                onChange={(e) => setFormData({...formData, observaciones: e.target.value})} 
+                placeholder="Notas adicionales..." 
+                data-testid="textarea-observaciones" 
+              />
+            </div>
             
             <div className="flex gap-2">
-              <button type="submit" className="btn btn-primary" data-testid="btn-guardar">{editingId ? 'Actualizar' : 'Guardar'}</button>
-              <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>Cancelar</button>
+              <button type="submit" className="btn btn-primary" data-testid="btn-guardar">
+                {editingId ? 'Actualizar Albarán' : 'Guardar Albarán'}
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }}
+              >
+                Cancelar
+              </button>
             </div>
           </form>
         </div>
       )}
-      
+
+      {/* Tabla */}
       <div className="card">
         <h2 className="card-title">Lista de Albaranes ({filteredAlbaranes.length})</h2>
         {loading ? (
-          <p>Cargando...</p>
+          <p>Cargando albaranes...</p>
         ) : filteredAlbaranes.length === 0 ? (
-          <p className="text-muted">{hasActiveFilters ? 'No hay albaranes que coincidan con los filtros' : 'No hay albaranes registrados'}</p>
+          <p className="text-muted">No hay albaranes registrados.</p>
         ) : (
-          <div className="table-container">
-            <table data-testid="albaranes-table">
+          <div style={{ overflowX: 'auto' }}>
+            <table className="table" data-testid="albaranes-table">
               <thead>
                 <tr>
-                  {fieldsConfig.tipo ? <th>Tipo</th> : null}
-                  {fieldsConfig.fecha ? <th>Fecha</th> : null}
-                  {fieldsConfig.proveedor_cliente ? <th>Proveedor/Cliente</th> : null}
-                  {fieldsConfig.items ? <th>Líneas</th> : null}
-                  <th>Total</th>
-                  {(canEdit || canDelete) ? <th>Acciones</th> : null}
+                  {fieldsConfig.numero && <th>Nº</th>}
+                  {fieldsConfig.tipo && <th>Tipo</th>}
+                  {fieldsConfig.fecha && <th>Fecha</th>}
+                  {fieldsConfig.contrato && <th>Contrato</th>}
+                  {fieldsConfig.proveedor && <th>Proveedor</th>}
+                  {fieldsConfig.cultivo && <th>Cultivo</th>}
+                  {fieldsConfig.parcela && <th>Parcela</th>}
+                  {fieldsConfig.items && <th>Líneas</th>}
+                  {fieldsConfig.total && <th>Total</th>}
+                  {fieldsConfig.observaciones && <th>Observaciones</th>}
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredAlbaranes.map((albaran) => (
+                {filteredAlbaranes.map((albaran, index) => (
                   <tr key={albaran._id}>
-                    {fieldsConfig.tipo ? (
+                    {fieldsConfig.numero && (
                       <td>
-                        <span className={`badge ${albaran.tipo === 'Entrada' ? 'badge-success' : 'badge-warning'}`}>
+                        <code style={{ fontSize: '0.8rem' }}>ALB-{String(index + 1).padStart(4, '0')}</code>
+                      </td>
+                    )}
+                    {fieldsConfig.tipo && (
+                      <td>
+                        <span style={{
+                          padding: '0.25rem 0.5rem',
+                          borderRadius: '4px',
+                          fontSize: '0.75rem',
+                          backgroundColor: albaran.tipo === 'Entrada' ? '#dcfce7' : '#fee2e2',
+                          color: albaran.tipo === 'Entrada' ? '#166534' : '#991b1b'
+                        }}>
                           {albaran.tipo}
                         </span>
                       </td>
-                    ) : null}
-                    {fieldsConfig.fecha ? <td>{albaran.fecha ? new Date(albaran.fecha).toLocaleDateString() : '—'}</td> : null}
-                    {fieldsConfig.proveedor_cliente ? <td className="font-semibold">{albaran.proveedor_cliente}</td> : null}
-                    {fieldsConfig.items ? <td>{albaran.items?.length || 0}</td> : null}
-                    <td style={{ fontWeight: '600' }}>€{(albaran.total_general || 0).toFixed(2)}</td>
-                    {(canEdit || canDelete) ? (
+                    )}
+                    {fieldsConfig.fecha && <td>{albaran.fecha ? new Date(albaran.fecha).toLocaleDateString('es-ES') : '-'}</td>}
+                    {fieldsConfig.contrato && (
                       <td>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                          {canEdit && (
-                            <button className="btn btn-sm btn-secondary" onClick={() => handleEdit(albaran)} title="Editar" data-testid={`edit-albaran-${albaran._id}`}>
-                              <Edit2 size={14} />
-                            </button>
-                          )}
-                          {canDelete && (
-                            <button className="btn btn-sm btn-error" onClick={() => handleDelete(albaran._id)} title="Eliminar" data-testid={`delete-albaran-${albaran._id}`}>
-                              <Trash2 size={14} />
-                            </button>
-                          )}
-                        </div>
+                        {albaran.contrato_id ? (
+                          <code style={{ fontSize: '0.75rem' }}>
+                            {contratos.find(c => c._id === albaran.contrato_id)?.numero_contrato || albaran.contrato_id.slice(-6)}
+                          </code>
+                        ) : '-'}
                       </td>
-                    ) : null}
+                    )}
+                    {fieldsConfig.proveedor && <td>{albaran.proveedor || '-'}</td>}
+                    {fieldsConfig.cultivo && <td>{albaran.cultivo || '-'}</td>}
+                    {fieldsConfig.parcela && <td>{albaran.parcela_codigo || '-'}</td>}
+                    {fieldsConfig.items && <td>{albaran.items?.length || 0} líneas</td>}
+                    {fieldsConfig.total && (
+                      <td style={{ fontWeight: '600', color: '#166534' }}>
+                        {(albaran.total_albaran || 0).toFixed(2)} €
+                      </td>
+                    )}
+                    {fieldsConfig.observaciones && (
+                      <td style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {albaran.observaciones || '-'}
+                      </td>
+                    )}
+                    <td>
+                      <div style={{ display: 'flex', gap: '0.25rem' }}>
+                        <PermissionButton
+                          permission="edit"
+                          onClick={() => handleEdit(albaran)}
+                          className="btn btn-sm btn-secondary"
+                          title="Editar"
+                        >
+                          <Edit2 size={14} />
+                        </PermissionButton>
+                        <PermissionButton
+                          permission="delete"
+                          onClick={() => handleDelete(albaran._id)}
+                          className="btn btn-sm btn-error"
+                          title="Eliminar"
+                        >
+                          <Trash2 size={14} />
+                        </PermissionButton>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
