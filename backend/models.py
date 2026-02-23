@@ -276,10 +276,16 @@ class VisitaBase(BaseModel):
 
 class VisitaCreate(BaseModel):
     objetivo: str
-    proveedor: str
-    campana: str
-    cultivo: str
-    parcela_id: Optional[str] = None
+    
+    # Campos obligatorios (nuevo modelo)
+    parcela_id: str  # OBLIGATORIO
+    cultivo_id: str  # OBLIGATORIO
+    campana: str  # OBLIGATORIO
+    
+    # Campos opcionales
+    contrato_id: Optional[str] = None
+    proveedor: Optional[str] = None  # Legacy/compatibilidad
+    cultivo: Optional[str] = None  # Legacy/compatibilidad
     fecha_visita: Optional[str] = None
     observaciones: Optional[str] = None
 
