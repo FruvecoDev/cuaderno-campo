@@ -247,3 +247,25 @@ Módulos actualizados para seguir patrón consistente:
 - **Solución aplicada**: Reemplazo por `{condition ? <element> : null}` en todos los archivos afectados
 - **Archivos corregidos**: Contratos.js, Parcelas.js, Visitas.js, Tratamientos.js, Irrigaciones.js, Recetas.js, Albaranes.js, Maquinaria.js
 - **Resultado**: Eliminación completa de warnings de hidratación en la consola
+
+## Calculadora de Fitosanitarios (23/02/2026)
+- **Ubicación**: Componente `CalculadoraFitosanitarios` en `/app/frontend/src/pages/Tratamientos.js` (líneas 12-561)
+- **Funcionalidades implementadas**:
+  - **Campos de entrada**: Tipo de fitosanitario (Insecticida/Herbicida/Fungicida/Fertilizante), Nombre del producto, Superficie (Ha/m²), Volumen de agua (L/ha), Dosis del producto, Concentración (%), Plaga/Enfermedad objetivo
+  - **Cálculos automáticos**:
+    - Superficie total en hectáreas (con conversión m² a Ha)
+    - Cantidad total de producto necesario
+    - Volumen total de agua
+    - Producto por litro de agua (ml o g/L)
+    - Concentración de la mezcla final (%)
+  - **Sistema de alertas**:
+    - Alertas amarillas (warning): Valores por debajo del mínimo recomendado
+    - Alertas rojas (danger): Valores excesivos que superan límites de seguridad
+    - Límites por tipo: Insecticida (0.1-3 L/ha), Herbicida (0.5-5 L/ha), Fungicida (0.2-4 L/ha), Fertilizante (1-50 kg/ha)
+    - Límites de agua: 100-1000 L/ha
+  - **Botón Restablecer**: Limpia todos los campos y alertas
+  - **Historial de cálculos**: Guarda hasta 10 registros con fecha, producto, superficie, cantidad y agua
+  - **Integración con formulario**: Botón "Aplicar al Tratamiento" pasa valores de superficie_aplicacion y caldo_superficie al formulario padre
+  - **Consideraciones de seguridad**: Panel informativo con recomendaciones de uso seguro
+- **Test IDs**: `btn-calculadora`, `btn-reset-calculadora`
+- **Estado**: ✅ COMPLETADO Y TESTEADO (iteration_10.json - 100% pass)
