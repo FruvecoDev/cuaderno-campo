@@ -533,7 +533,7 @@ const Albaranes = () => {
                           )}
                         </div>
                       </td>
-                    )}
+                    ) : null}
                   </tr>
                 ))}
               </tbody>
