@@ -81,7 +81,7 @@ async def get_productos(
             {"numero_registro": {"$regex": search, "$options": "i"}}
         ]
     
-    productos = await db.fitosanitarios.find(query).sort("nombre_comercial", 1).to_list(length=1000)
+    productos = await fitosanitarios_collection.find(query).sort("nombre_comercial", 1).to_list(length=1000)
     
     return {
         "success": True,
@@ -99,7 +99,7 @@ async def get_producto(
     db = get_database()
     
     try:
-        producto = await db.fitosanitarios.find_one({"_id": ObjectId(producto_id)})
+        producto = await fitosanitarios_collection.find_one({"_id": ObjectId(producto_id)})
     except:
         raise HTTPException(status_code=400, detail="ID de producto inválido")
     
@@ -124,7 +124,7 @@ async def create_producto(
     producto_dict["created_at"] = datetime.utcnow()
     producto_dict["created_by"] = current_user.get("email")
     
-    result = await db.fitosanitarios.insert_one(producto_dict)
+    result = await fitosanitarios_collection.insert_one(producto_dict)
     
     return {
         "success": True,
@@ -146,7 +146,7 @@ async def update_producto(
     db = get_database()
     
     try:
-        existing = await db.fitosanitarios.find_one({"_id": ObjectId(producto_id)})
+        existing = await fitosanitarios_collection.find_one({"_id": ObjectId(producto_id)})
     except:
         raise HTTPException(status_code=400, detail="ID de producto inválido")
     
@@ -157,7 +157,7 @@ async def update_producto(
     update_data["updated_at"] = datetime.utcnow()
     update_data["updated_by"] = current_user.get("email")
     
-    await db.fitosanitarios.update_one(
+    await fitosanitarios_collection.update_one(
         {"_id": ObjectId(producto_id)},
         {"$set": update_data}
     )
@@ -177,7 +177,7 @@ async def delete_producto(
     db = get_database()
     
     try:
-        result = await db.fitosanitarios.delete_one({"_id": ObjectId(producto_id)})
+        result = await fitosanitarios_collection.delete_one({"_id": ObjectId(producto_id)})
     except:
         raise HTTPException(status_code=400, detail="ID de producto inválido")
     
@@ -198,7 +198,7 @@ async def seed_productos(
     db = get_database()
     
     # Check if already seeded
-    count = await db.fitosanitarios.count_documents({})
+    count = await fitosanitarios_collection.count_documents({})
     if count > 0:
         return {"success": False, "message": f"Ya existen {count} productos en la base de datos"}
     
@@ -253,7 +253,7 @@ async def seed_productos(
         p["created_at"] = datetime.utcnow()
         p["created_by"] = "system"
     
-    result = await db.fitosanitarios.insert_many(productos_iniciales)
+    result = await fitosanitarios_collection.insert_many(productos_iniciales)
     
     return {
         "success": True,
@@ -282,7 +282,7 @@ async def get_productos_by_tipo(
     
     db_tipo = tipo_map.get(tipo.lower(), tipo)
     
-    productos = await db.fitosanitarios.find({
+    productos = await fitosanitarios_collection.find({
         "tipo": db_tipo,
         "activo": True
     }).sort("nombre_comercial", 1).to_list(length=500)
