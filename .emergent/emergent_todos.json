@@ -1,10 +1,10 @@
 [
   {
-    "content": "Implementar control UI basado en permisos (ocultar botones Create/Edit/Delete según rol)",
-    "status": "completed"
+    "content": "Crear página de gestión de usuarios para Admins - Backend endpoints listos, crear UI",
+    "status": "in_progress"
   },
   {
-    "content": "Crear página de gestión de usuarios para Admins",
+    "content": "Agregar ruta /usuarios al sistema de navegación (solo Admin)",
     "status": "pending"
   },
   {
