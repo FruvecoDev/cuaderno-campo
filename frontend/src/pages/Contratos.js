@@ -158,7 +158,7 @@ const Contratos = () => {
     setFormData({
       ...formData,
       precios_calidad: [
-        ...formData.precios_calidad,
+        ...(formData.precios_calidad || []),
         { min_tenderometria: '', max_tenderometria: '', precio: '', calidad: 'standard' }
       ]
     });
@@ -167,12 +167,12 @@ const Contratos = () => {
   const removePrecioTenderometria = (index) => {
     setFormData({
       ...formData,
-      precios_calidad: formData.precios_calidad.filter((_, i) => i !== index)
+      precios_calidad: (formData.precios_calidad || []).filter((_, i) => i !== index)
     });
   };
   
   const updatePrecioTenderometria = (index, field, value) => {
-    const updated = [...formData.precios_calidad];
+    const updated = [...(formData.precios_calidad || [])];
     updated[index][field] = value;
     setFormData({ ...formData, precios_calidad: updated });
   };
