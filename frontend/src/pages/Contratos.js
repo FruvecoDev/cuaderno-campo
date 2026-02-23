@@ -369,7 +369,7 @@ const Contratos = () => {
             
             <div className="flex gap-2">
               <button type="submit" className="btn btn-primary" data-testid="btn-guardar-contrato">
-                Guardar Contrato
+                {editingId ? 'Actualizar Contrato' : 'Guardar Contrato'}
               </button>
               <button
                 type="button"
