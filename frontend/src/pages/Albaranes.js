@@ -44,6 +44,7 @@ const Albaranes = () => {
   const { token } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
+  const { t } = useTranslation();
   
   // Contrato seleccionado y datos heredados
   const [selectedContrato, setSelectedContrato] = useState(null);
