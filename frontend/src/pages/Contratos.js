@@ -145,6 +145,12 @@ const Contratos = () => {
           Nuevo Contrato
         </PermissionButton>
       </div>
+
+      {error && (
+        <div className="card" style={{ backgroundColor: 'hsl(var(--destructive) / 0.1)', border: '1px solid hsl(var(--destructive))', marginBottom: '1.5rem', padding: '1rem' }}>
+          <p style={{ color: 'hsl(var(--destructive))' }}>{error}</p>
+        </div>
+      )}
       
       {showForm && (
         <div className="card mb-6" data-testid="contrato-form">
