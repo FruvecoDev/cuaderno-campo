@@ -59,6 +59,7 @@ const Parcelas = () => {
   const [searchContrato, setSearchContrato] = useState('');
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [polygon, setPolygon] = useState([]);
   const [formData, setFormData] = useState({
     contrato_id: '',
