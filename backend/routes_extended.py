@@ -75,12 +75,18 @@ async def create_tratamiento(
         if maquina:
             maquina_nombre = maquina.get("nombre", "")
     
+    # Fecha tratamiento: si no se proporciona, usar fecha actual
+    fecha_tratamiento = tratamiento.fecha_tratamiento
+    if not fecha_tratamiento:
+        fecha_tratamiento = datetime.now().strftime("%Y-%m-%d")
+    
     tratamiento_dict = tratamiento.dict()
     tratamiento_dict.update({
         "contrato_id": contrato_id,
         "cultivo_id": cultivo_id,
         "campana": campana,
         "maquina_nombre": maquina_nombre,
+        "fecha_tratamiento": fecha_tratamiento,
         "realizado": False,
         "planificado": False,
         "coste_superficie": 0.0,
