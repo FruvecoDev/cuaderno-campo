@@ -1,31 +1,11 @@
 [
   {
-    "content": "Actualizar modelo VisitaBase en models.py: agregar contrato_id, parcela_id (obligatorio), cultivo_id (obligatorio), campana (obligatorio)",
-    "status": "completed"
-  },
-  {
-    "content": "Actualizar modelo TratamientoBase: agregar contrato_id, parcela_id, cultivo_id, campana",
-    "status": "completed"
-  },
-  {
-    "content": "Actualizar endpoints backend de Visitas: validar nuevos campos y consistencia con contrato",
-    "status": "completed"
-  },
-  {
-    "content": "Actualizar endpoints backend de Tratamientos: validar nuevos campos y consistencia",
-    "status": "completed"
-  },
-  {
-    "content": "Verificar backend funciona correctamente después de cambios",
-    "status": "completed"
-  },
-  {
-    "content": "Actualizar formulario frontend de Visitas: flujo guiado Contrato → Parcela → Cultivo → Campaña",
-    "status": "completed"
-  },
-  {
     "content": "Actualizar formulario frontend de Tratamientos: flujo guiado similar",
-    "status": "pending"
+    "status": "completed"
+  },
+  {
+    "content": "Verificar compilación frontend sin errores",
+    "status": "in_progress"
   },
   {
     "content": "Probar flujo completo de Visitas y Tratamientos con nuevos vínculos",
