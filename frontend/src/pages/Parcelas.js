@@ -4,7 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
-import { Plus, Map as MapIcon } from 'lucide-react';
+import { Plus, Map as MapIcon, Edit2, Trash2 } from 'lucide-react';
 import '../App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
