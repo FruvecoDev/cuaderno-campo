@@ -2,7 +2,8 @@
 
 ## 1) Objectives
 - Entregar un **Cuaderno de Campo** completo por **Parcela + Cultivo + Contrato/Campaña** con trazabilidad: visitas, tareas, tratamientos, riegos, cosechas, documentos, costes.
-- Asegurar que los módulos operativos (**Visitas** y **Tratamientos**) queden **vinculados de forma consistente** al contexto agronómico correcto (**Contrato → Parcela → Cultivo → Campaña**), evitando datos “sueltos” y duplicidades.
+- Asegurar que los módulos operativos (**Visitas** y **Tratamientos**) queden **vinculados de forma consistente** al contexto agronómico correcto (**Contrato → Parcela → Cultivo → Campaña**), evitando datos “sueltos”, duplicidades y problemas de auditoría.
+- Mantener un flujo estable de **Gestión** (Contratos) y **Operación** (Visitas/Tratamientos) con validaciones y UX guiada, respetando RBAC.
 - Gestión integral de módulos: **Contratos, Fincas, Parcelas (SIGPAC manual + polígonos), Visitas, Tareas, Tratamientos, Irrigaciones, Recetas, Albaranes, Cosechas, Documentos**.
 - **Dashboard KPI** (producción, costes, tratamientos, cumplimiento) + **informes PDF/Excel**.
 - **IA** para **reportes personalizados** y **análisis de datos** (resúmenes, alertas, insights, comparativas).
@@ -17,10 +18,11 @@
 > - ✅ Fase 3B-1 (RBAC por módulo/acción): completada (backend + frontend).
 > - ✅ Fase 3B-2 (Gestión de usuarios): completada (panel Admin + creación/rol/estado).
 > - ✅ Catálogos de **Proveedores** y **Cultivos**: creados (backend + frontend).
-> - ✅ **Contratos**: formulario **reparado** y funcionando con dropdowns y referencias `proveedor_id` / `cultivo_id`.
-> - ⏳ **Visitas/Tratamientos**: pendiente consolidar el **vínculo obligatorio** a **Parcela + Cultivo + Campaña** (preferiblemente derivado del contrato).
-> - ⚠️ **Hardening WeasyPrint**: se detectó que faltaban libs (p.ej. `libpangoft2-1.0-0`) y se reinstalaron; queda como tarea de hardening para evitar regresiones.
-> - ⏳ Próximo foco: integridad de datos Visitas/Tratamientos, hardening, permisos por campo/sección, mejora de UX/consistencia y expansión IA.
+> - ✅ **Contratos**: formulario reparado y funcionando con dropdowns y referencias `proveedor_id` / `cultivo_id`.
+> - ✅ **Visitas/Tratamientos (modelo + UX)**: vínculo a **Parcela + Cultivo + Campaña** implementado end-to-end (backend + frontend), con validaciones.
+> - ⏳ **Testing E2E/Manual**: pendiente verificar el flujo completo en UI (crear/listar/filtrar) para Visitas y Tratamientos con nuevos campos.
+> - ⚠️ **Hardening WeasyPrint**: se detectó falta de libs (p.ej. `libpangoft2-1.0-0`) y se reinstaló; queda como tarea de hardening para evitar regresiones.
+> - ⏳ Próximo foco: testing multi-rol, consistencia en listados (mostrar nombres vs IDs), hardening, permisos por campo/sección, mejoras UX.
 
 ---
 
@@ -153,34 +155,40 @@
 - ✅ Se puede crear contrato con IDs.
 - ✅ La tabla puede mostrar nombres legibles mediante campos poblados.
 
-#### Phase 4B — Vincular Visitas y Tratamientos a Parcela + Cultivo + Campaña (P1 — Alto) ⏳ EN CURSO
-- Definir/confirmar el **modelo de vínculo** (mínimo recomendado):
-  - `contrato_id` (recomendado)
+#### Phase 4B — Vincular Visitas y Tratamientos a Parcela + Cultivo + Campaña (P1 — Alto) ✅ COMPLETADA
+**Decisión de modelo (implementado):**
+- Visitas:
   - `parcela_id` (obligatorio)
   - `cultivo_id` (obligatorio)
-  - `campana` (obligatorio; si viene `contrato_id`, derivar/validar)
-- Backend:
-  - Actualizar modelos Pydantic de Visitas y Tratamientos para incluir IDs y campos requeridos.
-  - Actualizar endpoints CRUD para aceptar/validar estos campos.
-  - Añadir validaciones de consistencia:
-    - Si `contrato_id` existe → forzar que `campana`, `cultivo_id` y (si aplica) `proveedor_id` coincidan.
-    - `parcela_id` debe existir y pertenecer al mismo contexto (campaña/proveedor) cuando aplique.
-  - Ajustar listados para soportar filtros (`campana`, `parcela_id`, `cultivo_id`, `contrato_id`).
-- Frontend:
-  - Rediseñar formularios Visitas/Tratamientos con flujo guiado:
-    1) Contrato (o Campaña) → 2) Parcela → 3) Cultivo → 4) Campaña (autocompletada/bloqueada si viene del contrato).
-  - Mejorar UX: filtros por campaña/parcela; preselecciones desde páginas de detalle.
+  - `campana` (obligatorio)
+  - `contrato_id` (opcional recomendado; si existe, se valida consistencia)
+- Tratamientos:
+  - `parcelas_ids` (multi-parcela)
+  - `cultivo_id` (obligatorio para contexto)
+  - `campana` (obligatorio)
+  - `contrato_id` (opcional recomendado; si existe, se valida consistencia)
 
-**Criterio de salida Phase 4B:**
-- Visitas/Tratamientos quedan inequívocamente asociados a Parcela + Cultivo + Campaña.
-- Se puede generar cuaderno/reportes sin ambigüedades por campaña.
+**Backend (implementado):**
+- ✅ Modelos Pydantic actualizados (Visita/Tratamiento).
+- ✅ Endpoints POST con validación de:
+  - existencia de parcelas/cultivo
+  - existencia y consistencia de contrato (si se proporciona)
+- ✅ Listados GET soportan filtros: `campana`, `parcela_id`, `cultivo_id`, `contrato_id`.
 
-#### Phase 4C — Testing integral del flujo (P1) ⏳ PENDIENTE
-- Smoke tests multi-rol (Admin/Manager/Technician/Viewer) para:
-  - Contratos (ya estable)
+**Frontend (implementado):**
+- ✅ Visitas: formulario guiado con selección de contrato opcional que autocompleta `campana`/`cultivo_id`.
+- ✅ Tratamientos: formulario guiado equivalente + selección múltiple de parcelas.
+
+**Criterio de salida Phase 4B (cumplido, pendiente verificación E2E):**
+- ✅ Campos y validaciones aseguran vínculo inequívoco a **Parcela + Cultivo + Campaña**.
+- ⏳ Verificar en UI el flujo completo (crear/listar/filtrar) como prueba final.
+
+#### Phase 4C — Testing integral del flujo (P1) ⏳ EN CURSO
+- ⏳ Smoke tests multi-rol (Admin/Manager/Technician/Viewer) para:
+  - Contratos (estable)
   - Visitas/Tratamientos (nuevo modelo)
-- Verificar respuestas 401/403 y mensajes consistentes.
-- Verificar que cambios no rompen exportaciones (PDF/Excel) si consumen estos datos.
+- ⏳ Verificar respuestas 401/403 y mensajes consistentes.
+- ⏳ Validar que cambios no rompen exportaciones (PDF/Excel) si consumen estos datos.
 
 ---
 
@@ -209,25 +217,24 @@
 
 ## 3) Next Actions
 
-### P0 (inmediato) ✅
-1. ✅ **Reparar formulario de Contratos**
-   - ✅ Eliminar JSX duplicado y dejar un formulario único.
-   - ✅ Dropdowns para `proveedor_id` y `cultivo_id`.
-   - ✅ Crear/listar contratos verificado.
+### P0 ✅
+1. ✅ Contratos estables con `proveedor_id`/`cultivo_id`.
+2. ✅ Visitas/Tratamientos vinculados a Parcela+Cultivo+Campaña (backend+frontend).
 
-### P1 (siguiente) 🔄
-2. **Vincular Visitas/Tratamientos al contexto agronómico (Parcela + Cultivo + Campaña)**
-   - Actualizar modelos + endpoints backend.
-   - Actualizar formularios frontend con flujo guiado.
-   - Añadir validaciones de consistencia y filtros.
-3. **Testing integral multi-rol del flujo Contratos→Operaciones**
-   - Smoke tests de permisos y de integridad de datos.
+### P1 (ahora) 🔄
+3. **Testing manual/E2E del flujo completo Visitas/Tratamientos**
+   - Crear Visita con y sin `contrato_id`
+   - Crear Tratamiento con múltiples parcelas
+   - Verificar listados y filtros (`campana`, `parcela_id`, `cultivo_id`, `contrato_id`)
+   - Verificar errores esperados (IDs inválidos, inconsistencia de contrato)
+4. **Mejoras de legibilidad en tablas**
+   - (Opcional) En frontend: resolver y mostrar nombres (parcela/cultivo) en vez de IDs, o poblar en backend.
 
 ### P2
-4. Permisos por campo/sección + auditoría mínima de cambios
-5. Hardening de despliegue (WeasyPrint + env)
-6. Mejoras de consistencia de datos y simplificación de formularios (Irrigaciones/Recetas/Albaranes)
-7. Flujo de cambio/reset de password
+5. Permisos por campo/sección + auditoría mínima de cambios
+6. Hardening de despliegue (WeasyPrint + env)
+7. Mejoras de consistencia de datos y simplificación de formularios (Irrigaciones/Recetas/Albaranes)
+8. Flujo de cambio/reset de password
 
 ---
 
@@ -236,7 +243,8 @@
 - ✅ RBAC funciona sin filtrar datos ni permitir acciones indebidas (backend + UI).
 - ✅ Panel Admin permite gestionar usuarios y roles sin intervención técnica.
 - ✅ Contratos: formulario estable (crear/editar/borrar) usando **proveedor_id/cultivo_id**.
-- ⏳ Visitas/Tratamientos: quedan vinculados a **Parcela + Cultivo + Campaña** con integridad.
+- ✅ Visitas/Tratamientos: modelo y formularios garantizan vínculo a **Parcela + Cultivo + Campaña**.
+- ⏳ Testing: pruebas manuales/E2E completadas y documentadas para el flujo nuevo.
 - ✅ Subida/visualización de documentos estable (PDF/imagen) y vinculada a entidades.
 - ⏳ PDF/Excel export estable en despliegue (sin fallos por dependencias runtime) y con datos consistentes.
 - ⏳ IA genera reportes **útiles, reproducibles y guardables** a partir de datos reales.
