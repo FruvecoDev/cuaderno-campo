@@ -17,10 +17,10 @@
   },
   {
     "content": "Probar flujo completo: crear contrato, verificar en tabla, eliminar",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Verificar que no hay errores de compilación frontend (esbuild check)",
-    "status": "pending"
+    "status": "completed"
   }
 ]
