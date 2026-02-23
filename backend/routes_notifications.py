@@ -160,8 +160,7 @@ async def trigger_visit_reminders(
 @router.post("/send-daily-summary")
 async def trigger_daily_summary(
     target_date: Optional[str] = None,
-    current_user: dict = Depends(get_current_user),
-    _admin: dict = Depends(RequireAdminAccess)
+    current_user: dict = Depends(get_current_user)
 ):
     """
     Send a daily summary of planned visits.
