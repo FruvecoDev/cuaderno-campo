@@ -132,6 +132,8 @@ const Tratamientos = () => {
     superficie_aplicacion: '',
     caldo_superficie: '',
     parcelas_ids: [],
+    fecha_tratamiento: new Date().toISOString().split('T')[0], // Fecha actual por defecto
+    fecha_aplicacion: '',
     aplicador_nombre: '',
     maquina_id: ''
   });
