@@ -1,10 +1,6 @@
 [
   {
-    "content": "Verificar que el frontend compila sin errores",
-    "status": "completed"
-  },
-  {
     "content": "Generar informe final de mejoras implementadas",
-    "status": "in_progress"
+    "status": "completed"
   }
 ]
