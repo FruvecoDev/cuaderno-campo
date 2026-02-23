@@ -68,7 +68,10 @@ const Layout = ({ children }) => {
         <div className="sidebar-header">
           <div className="sidebar-title">
             <Wheat size={24} />
-            AgroGest Pro
+            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1.2' }}>
+              <span style={{ fontWeight: '700', fontSize: '1.25rem' }}>FRUVECO</span>
+              <span style={{ fontSize: '0.7rem', fontWeight: '400', color: 'hsl(var(--muted-foreground))' }}>Cuaderno de Campo</span>
+            </div>
           </div>
         </div>
         <nav className="sidebar-nav">
