@@ -241,7 +241,10 @@ const Parcelas = () => {
     
     try {
       const response = await fetch(`${BACKEND_URL}/api/parcelas/${parcelaId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       
       if (response.ok) {
