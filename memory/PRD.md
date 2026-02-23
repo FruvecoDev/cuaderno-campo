@@ -316,6 +316,27 @@ Módulos actualizados para seguir patrón consistente:
 - **Navegación**: Administración > Informes Gastos
 - **Estado**: ✅ COMPLETADO
 
+## Soporte Multi-idioma (24/02/2026)
+- **Configuración i18n**: `/app/frontend/src/i18n/index.js`
+- **Archivos de traducción**:
+  - `/app/frontend/src/i18n/locales/es.json` - Español (predeterminado)
+  - `/app/frontend/src/i18n/locales/en.json` - English
+  - `/app/frontend/src/i18n/locales/fr.json` - Français
+  - `/app/frontend/src/i18n/locales/de.json` - Deutsch
+  - `/app/frontend/src/i18n/locales/it.json` - Italiano
+- **Componente**: `/app/frontend/src/components/LanguageSelector.js`
+- **Funcionalidades**:
+  - Selector de idioma con banderas en la página de login (esquina superior derecha)
+  - Selector de idioma compacto en el sidebar (junto al perfil de usuario)
+  - Persistencia del idioma seleccionado en localStorage
+  - Traducciones para:
+    - Menú de navegación completo
+    - Página de login
+    - Mensajes comunes (guardar, cancelar, eliminar, etc.)
+    - Nombres de módulos y campos
+- **Dependencias añadidas**: i18next, react-i18next, i18next-browser-languagedetector
+- **Estado**: ✅ COMPLETADO (estructura base, algunas páginas pendientes de traducir)
+
 ## Historial de Tratamientos por Parcela (23/02/2026)
 - **Ubicación**: Modal en `/app/frontend/src/pages/Parcelas.js`
 - **Backend**: Endpoint `/api/tratamientos/parcela/{parcela_id}/historial`
