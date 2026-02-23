@@ -993,24 +993,24 @@ const Tratamientos = () => {
               <tbody>
                 {filteredTratamientos.map((tratamiento) => (
                   <tr key={tratamiento._id}>
-                    {tableConfig.tipo && <td className="font-semibold">{tratamiento.tipo_tratamiento}</td>}
-                    {(tableConfig.subtipo) ? <td>{tratamiento.subtipo || '—'}</td> : null}
-                    {(tableConfig.metodo) ? <td>{tratamiento.metodo_aplicacion}</td> : null}
-                    {(tableConfig.campana) ? <td>{tratamiento.campana || 'N/A'}</td> : null}
-                    {(tableConfig.fecha_tratamiento) ? <td>{tratamiento.fecha_tratamiento || '—'}</td> : null}
-                    {(tableConfig.fecha_aplicacion) ? <td>{tratamiento.fecha_aplicacion || '—'}</td> : null}
-                    {(tableConfig.superficie) ? <td>{tratamiento.superficie_aplicacion} ha</td> : null}
-                    {(tableConfig.parcelas) ? <td>{tratamiento.parcelas_ids?.length || 0} parcela(s)</td> : null}
-                    {(tableConfig.aplicador) ? <td>{tratamiento.aplicador_nombre || '—'}</td> : null}
-                    {(tableConfig.maquina) ? <td>{tratamiento.maquina_nombre || '—'}</td> : null}
-                    {tableConfig.estado && (
+                    {tableConfig.tipo ? <td className="font-semibold">{tratamiento.tipo_tratamiento}</td> : null}
+                    {tableConfig.subtipo ? <td>{tratamiento.subtipo || '—'}</td> : null}
+                    {tableConfig.metodo ? <td>{tratamiento.metodo_aplicacion}</td> : null}
+                    {tableConfig.campana ? <td>{tratamiento.campana || 'N/A'}</td> : null}
+                    {tableConfig.fecha_tratamiento ? <td>{tratamiento.fecha_tratamiento || '—'}</td> : null}
+                    {tableConfig.fecha_aplicacion ? <td>{tratamiento.fecha_aplicacion || '—'}</td> : null}
+                    {tableConfig.superficie ? <td>{tratamiento.superficie_aplicacion} ha</td> : null}
+                    {tableConfig.parcelas ? <td>{tratamiento.parcelas_ids?.length || 0} parcela(s)</td> : null}
+                    {tableConfig.aplicador ? <td>{tratamiento.aplicador_nombre || '—'}</td> : null}
+                    {tableConfig.maquina ? <td>{tratamiento.maquina_nombre || '—'}</td> : null}
+                    {tableConfig.estado ? (
                       <td>
                         <span className={`badge ${tratamiento.realizado ? 'badge-success' : 'badge-default'}`}>
                           {tratamiento.realizado ? 'Realizado' : 'Pendiente'}
                         </span>
                       </td>
-                    )}
-                    {(canEdit || canDelete) && (
+                    ) : null}
+                    {(canEdit || canDelete) ? (
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                           {canEdit && (
