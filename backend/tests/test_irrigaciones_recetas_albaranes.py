@@ -359,8 +359,7 @@ class TestAlbaranesCRUD:
             "items": [
                 {"descripcion": "Fertilizante NPK", "cantidad": 10, "precio_unitario": 25.00, "total": 250.00},
                 {"descripcion": "Insecticida Bio", "cantidad": 5, "precio_unitario": 40.00, "total": 200.00}
-            ],
-            "observaciones": "TEST_albaran_items"
+            ]
         }
         
         response = requests.post(f"{BASE_URL}/api/albaranes", json=payload, headers=headers)
@@ -380,7 +379,6 @@ class TestAlbaranesCRUD:
         
         print(f"✓ Albaran created successfully: {albaran.get('_id')}")
         print(f"  - Items: {len(albaran.get('items', []))}, Total: €{albaran.get('total_general')}")
-        return albaran["_id"]
     
     def test_list_albaranes(self, headers):
         """Test listing albaranes"""
