@@ -129,6 +129,7 @@ const Evaluaciones = () => {
   useEffect(() => {
     fetchEvaluaciones();
     fetchParcelas();
+    fetchContratos();
     fetchPreguntasConfig();
   }, []);
   
