@@ -873,6 +873,41 @@ const Tratamientos = () => {
               )}
             </div>
             
+            {/* Fechas */}
+            <div className="grid-2">
+              {fieldsConfig.fecha_tratamiento && (
+                <div className="form-group">
+                  <label className="form-label">Fecha Tratamiento</label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    value={formData.fecha_tratamiento}
+                    onChange={(e) => setFormData({...formData, fecha_tratamiento: e.target.value})}
+                    data-testid="input-fecha-tratamiento"
+                  />
+                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
+                    Fecha cuando se genera/registra el tratamiento
+                  </small>
+                </div>
+              )}
+              
+              {fieldsConfig.fecha_aplicacion && (
+                <div className="form-group">
+                  <label className="form-label">Fecha Aplicación</label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    value={formData.fecha_aplicacion}
+                    onChange={(e) => setFormData({...formData, fecha_aplicacion: e.target.value})}
+                    data-testid="input-fecha-aplicacion"
+                  />
+                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
+                    Fecha cuando se realiza la aplicación (aplicador y máquina)
+                  </small>
+                </div>
+              )}
+            </div>
+            
             {/* Aplicador y Máquina */}
             <div className="grid-2">
               {fieldsConfig.aplicador_nombre && (
