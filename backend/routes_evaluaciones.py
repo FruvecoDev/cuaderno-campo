@@ -793,6 +793,59 @@ async def generate_evaluacion_pdf(
                 <div class="index-empty">No hay tratamientos registrados</div>
         """
     
+    # Índice de Irrigaciones
+    html_content += """
+            </div>
+            
+            <!-- Índice de Irrigaciones -->
+            <div class="index-section">
+                <div class="index-section-title irrigaciones">IRRIGACIONES (""" + str(len(irrigaciones)) + """)</div>
+    """
+    
+    if irrigaciones:
+        for idx, irrigacion in enumerate(irrigaciones, 1):
+            page_num = 1 + len(visitas) + len(tratamientos) + idx
+            fecha = format_fecha(irrigacion.get('fecha'))
+            sistema = irrigacion.get('sistema', 'Sin sistema')[:25]
+            volumen = irrigacion.get('volumen', 0)
+            html_content += f"""
+                <div class="index-item">
+                    <span class="index-item-name">{idx}. {sistema} - {volumen} m³</span>
+                    <span class="index-item-date">{fecha}</span>
+                    <span class="index-item-page">Pág. {page_num}</span>
+                </div>
+            """
+    else:
+        html_content += """
+                <div class="index-empty">No hay irrigaciones registradas</div>
+        """
+    
+    # Índice de Cosechas
+    html_content += """
+            </div>
+            
+            <!-- Índice de Cosechas -->
+            <div class="index-section">
+                <div class="index-section-title cosechas">COSECHAS (""" + str(len(cosechas)) + """)</div>
+    """
+    
+    if cosechas:
+        for idx, cosecha in enumerate(cosechas, 1):
+            page_num = 1 + len(visitas) + len(tratamientos) + len(irrigaciones) + idx
+            nombre = cosecha.get('nombre', 'Sin nombre')[:30]
+            total_kg = cosecha.get('cosecha_total', 0)
+            html_content += f"""
+                <div class="index-item">
+                    <span class="index-item-name">{idx}. {nombre} - {total_kg:,.0f} kg</span>
+                    <span class="index-item-date"></span>
+                    <span class="index-item-page">Pág. {page_num}</span>
+                </div>
+            """
+    else:
+        html_content += """
+                <div class="index-empty">No hay cosechas registradas</div>
+        """
+    
     html_content += f"""
             </div>
         </div>
