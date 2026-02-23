@@ -137,6 +137,12 @@ const Parcelas = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Validar contrato obligatorio
+    if (!formData.contrato_id) {
+      alert('Debes seleccionar un contrato. Toda parcela debe estar asociada a un contrato.');
+      return;
+    }
+    
     // Si estamos editando, no requerir polígono nuevo
     if (!editingId && polygon.length < 3) {
       alert('Dibuja un polígono en el mapa primero');
