@@ -58,7 +58,7 @@ class AgriculturalAPITester:
         print("\n🔐 Testing Authentication...")
         
         login_data = {
-            "username": "admin@agrogest.com",
+            "email": "admin@agrogest.com",
             "password": "admin123"
         }
         
