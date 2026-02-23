@@ -60,6 +60,199 @@ const getCultivoColor = (cultivo) => {
   return CULTIVO_COLORS[cultivo] || CULTIVO_COLORS.default;
 };
 
+// Componente Calendario de Visitas
+function VisitasCalendar({ visitas, onDateClick }) {
+  const [currentDate, setCurrentDate] = useState(new Date());
+  
+  // Obtener días con visitas
+  const visitasPorDia = useMemo(() => {
+    const map = {};
+    visitas.forEach(v => {
+      if (v.fecha_planificada) {
+        const dateKey = v.fecha_planificada.split('T')[0];
+        if (!map[dateKey]) map[dateKey] = [];
+        map[dateKey].push(v);
+      }
+    });
+    return map;
+  }, [visitas]);
+  
+  const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  const dayNames = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  
+  // Primer día del mes (ajustado para que Lunes = 0)
+  const firstDay = new Date(year, month, 1);
+  let startDay = firstDay.getDay() - 1;
+  if (startDay < 0) startDay = 6;
+  
+  // Días en el mes
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  
+  // Generar días del calendario
+  const calendarDays = [];
+  for (let i = 0; i < startDay; i++) {
+    calendarDays.push(null);
+  }
+  for (let i = 1; i <= daysInMonth; i++) {
+    calendarDays.push(i);
+  }
+  
+  const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
+  const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
+  const goToToday = () => setCurrentDate(new Date());
+  
+  const today = new Date();
+  const isToday = (day) => day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+  
+  const getDateKey = (day) => {
+    const d = new Date(year, month, day);
+    return d.toISOString().split('T')[0];
+  };
+  
+  const hasVisitas = (day) => {
+    if (!day) return false;
+    return visitasPorDia[getDateKey(day)]?.length > 0;
+  };
+  
+  const getVisitasForDay = (day) => {
+    if (!day) return [];
+    return visitasPorDia[getDateKey(day)] || [];
+  };
+  
+  return (
+    <div style={{ padding: '0.5rem' }}>
+      {/* Header del calendario */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <button onClick={prevMonth} className="btn btn-sm btn-secondary" style={{ padding: '0.4rem' }}>
+          <ChevronLeft size={16} />
+        </button>
+        <div style={{ textAlign: 'center' }}>
+          <span style={{ fontWeight: '600', fontSize: '1rem' }}>{monthNames[month]} {year}</span>
+          <button onClick={goToToday} className="btn btn-sm" style={{ marginLeft: '0.5rem', padding: '0.2rem 0.5rem', fontSize: '0.7rem' }}>
+            Hoy
+          </button>
+        </div>
+        <button onClick={nextMonth} className="btn btn-sm btn-secondary" style={{ padding: '0.4rem' }}>
+          <ChevronRight size={16} />
+        </button>
+      </div>
+      
+      {/* Días de la semana */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', marginBottom: '0.5rem' }}>
+        {dayNames.map(d => (
+          <div key={d} style={{ 
+            textAlign: 'center', 
+            fontSize: '0.7rem', 
+            fontWeight: '600', 
+            color: 'hsl(var(--muted-foreground))',
+            padding: '0.25rem'
+          }}>
+            {d}
+          </div>
+        ))}
+      </div>
+      
+      {/* Grid de días */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}>
+        {calendarDays.map((day, idx) => {
+          const visitasDelDia = getVisitasForDay(day);
+          const tieneVisitas = visitasDelDia.length > 0;
+          
+          return (
+            <div 
+              key={idx}
+              onClick={() => day && onDateClick && onDateClick(new Date(year, month, day))}
+              style={{
+                aspectRatio: '1',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '6px',
+                cursor: day ? 'pointer' : 'default',
+                backgroundColor: isToday(day) ? '#2d5a27' : tieneVisitas ? '#e8f5e9' : 'transparent',
+                color: isToday(day) ? 'white' : 'inherit',
+                border: tieneVisitas && !isToday(day) ? '2px solid #4CAF50' : '1px solid transparent',
+                transition: 'all 0.15s ease',
+                position: 'relative',
+                minHeight: '40px'
+              }}
+              onMouseEnter={(e) => {
+                if (day && !isToday(day)) {
+                  e.currentTarget.style.backgroundColor = '#f0f0f0';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (day && !isToday(day)) {
+                  e.currentTarget.style.backgroundColor = tieneVisitas ? '#e8f5e9' : 'transparent';
+                }
+              }}
+              title={tieneVisitas ? `${visitasDelDia.length} visita(s): ${visitasDelDia.map(v => v.objetivo).join(', ')}` : ''}
+            >
+              {day && (
+                <>
+                  <span style={{ fontSize: '0.85rem', fontWeight: isToday(day) || tieneVisitas ? '600' : '400' }}>
+                    {day}
+                  </span>
+                  {tieneVisitas && (
+                    <div style={{ 
+                      display: 'flex', 
+                      gap: '2px', 
+                      marginTop: '2px',
+                      flexWrap: 'wrap',
+                      justifyContent: 'center'
+                    }}>
+                      {visitasDelDia.slice(0, 3).map((_, i) => (
+                        <div 
+                          key={i} 
+                          style={{ 
+                            width: '6px', 
+                            height: '6px', 
+                            borderRadius: '50%', 
+                            backgroundColor: isToday(day) ? 'white' : '#4CAF50'
+                          }} 
+                        />
+                      ))}
+                      {visitasDelDia.length > 3 && (
+                        <span style={{ fontSize: '0.6rem', color: isToday(day) ? 'white' : '#2d5a27' }}>+</span>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      
+      {/* Leyenda */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        gap: '1rem', 
+        marginTop: '1rem',
+        padding: '0.5rem',
+        backgroundColor: 'hsl(var(--muted))',
+        borderRadius: '6px',
+        fontSize: '0.75rem'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+          <div style={{ width: '12px', height: '12px', backgroundColor: '#2d5a27', borderRadius: '4px' }} />
+          <span>Hoy</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+          <div style={{ width: '12px', height: '12px', backgroundColor: '#e8f5e9', border: '2px solid #4CAF50', borderRadius: '4px' }} />
+          <span>Con visitas</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const Dashboard = () => {
   const [kpis, setKpis] = useState(null);
   const [parcelas, setParcelas] = useState([]);
