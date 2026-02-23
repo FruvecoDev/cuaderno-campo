@@ -11,15 +11,37 @@ const DEFAULT_FIELDS_CONFIG = {
   objetivo: true,
   fecha_visita: true,
   parcela_id: true,
-  observaciones: true
+  observaciones: true,
+  cuestionario_plagas: true
 };
 
 const FIELD_LABELS = {
   objetivo: 'Objetivo',
   fecha_visita: 'Fecha Visita',
   parcela_id: 'Parcela',
-  observaciones: 'Observaciones'
+  observaciones: 'Observaciones',
+  cuestionario_plagas: 'Cuest. Plagas'
 };
+
+// Cuestionario de Plagas y Enfermedades
+const PLAGAS_ENFERMEDADES = [
+  { key: 'trips', label: 'Trips' },
+  { key: 'mosca_blanca', label: 'Mosca blanca' },
+  { key: 'minador', label: 'Minador' },
+  { key: 'arana_roja', label: 'Araña roja' },
+  { key: 'oruga', label: 'Oruga' },
+  { key: 'pulgon', label: 'Pulgón' },
+  { key: 'botrytis', label: 'Botrytis' },
+  { key: 'mildiu', label: 'Mildiu' },
+  { key: 'oidio', label: 'Oídio' },
+  { key: 'ascochyta', label: 'Ascochyta' }
+];
+
+const VALORES_CUESTIONARIO = [
+  { value: 0, label: '0 - Sin presencia' },
+  { value: 1, label: '1 - Presencia baja' },
+  { value: 2, label: '2 - Presencia alta' }
+];
 
 // Table columns config
 const DEFAULT_TABLE_CONFIG = {
