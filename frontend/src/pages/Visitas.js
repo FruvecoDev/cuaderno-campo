@@ -310,6 +310,24 @@ const Visitas = () => {
     }
   };
   
+  // Función para resetear el formulario
+  const resetForm = () => {
+    setFormData({
+      objetivo: 'Control Rutinario',
+      fecha_visita: '',
+      parcela_id: '',
+      observaciones: ''
+    });
+    // Resetear cuestionario de plagas
+    const initialPlagas = {};
+    PLAGAS_ENFERMEDADES.forEach(p => {
+      initialPlagas[p.key] = 0;
+    });
+    setCuestionarioPlagas(initialPlagas);
+    setSelectedParcelaInfo(null);
+    setParcelaSearch({ proveedor: '', cultivo: '', campana: '' });
+  };
+  
   const handleEdit = (visita) => {
     setEditingId(visita._id);
     setFormData({
@@ -318,20 +336,23 @@ const Visitas = () => {
       parcela_id: visita.parcela_id || '',
       observaciones: visita.observaciones || ''
     });
+    // Si tiene cuestionario de plagas, cargarlo
+    if (visita.cuestionario_plagas) {
+      setCuestionarioPlagas(visita.cuestionario_plagas);
+    } else {
+      const initialPlagas = {};
+      PLAGAS_ENFERMEDADES.forEach(p => {
+        initialPlagas[p.key] = 0;
+      });
+      setCuestionarioPlagas(initialPlagas);
+    }
     setShowForm(true);
   };
   
   const handleCancelEdit = () => {
     setEditingId(null);
     setShowForm(false);
-    setSelectedParcelaInfo(null);
-    setParcelaSearch({ proveedor: '', cultivo: '', campana: '' });
-    setFormData({
-      objetivo: 'Control Rutinario',
-      fecha_visita: '',
-      parcela_id: '',
-      observaciones: ''
-    });
+    resetForm();
   };
   
   const handleDelete = async (visitaId) => {
