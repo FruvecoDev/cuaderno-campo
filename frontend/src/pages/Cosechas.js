@@ -33,6 +33,7 @@ const Cosechas = () => {
     kilos_reales: '',
     es_descuento: false,
     tipo_descuento: '',
+    valor_tenderometria: '',
     num_albaran: '',
     observaciones: ''
   });
