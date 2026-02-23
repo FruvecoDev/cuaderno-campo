@@ -125,6 +125,10 @@ class TratamientoCreate(BaseModel):
     # MODELO SIMPLIFICADO: solo parcelas_ids obligatorio
     # El resto (cultivo_id, campana, contrato_id) se hereda desde la primera parcela
     parcelas_ids: List[str]  # OBLIGATORIO
+    
+    # Nuevos campos para Aplicador y Máquina
+    aplicador_nombre: Optional[str] = None  # Nombre del aplicador (texto libre)
+    maquina_id: Optional[str] = None  # ObjectId ref a maquinaria
 
 class TratamientoInDB(TratamientoBase):
     id: str = Field(alias="_id")
