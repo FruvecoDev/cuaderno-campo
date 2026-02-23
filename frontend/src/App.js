@@ -22,6 +22,7 @@ import Cultivos from './pages/Cultivos';
 import Maquinaria from './pages/Maquinaria';
 import Evaluaciones from './pages/Evaluaciones';
 import Fitosanitarios from './pages/Fitosanitarios';
+import InformesGastos from './pages/InformesGastos';
 
 function App() {
   return (
