@@ -521,19 +521,32 @@ const Fitosanitarios = () => {
             <div>
               <h4 style={{ fontWeight: '500', marginBottom: '0.75rem' }}>Instrucciones:</h4>
               <ol style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', lineHeight: '1.75' }}>
+                <li>Visita el <strong>Registro Oficial del MAPA</strong> para consultar productos autorizados</li>
                 <li>Descarga la <strong>plantilla Excel</strong> con el formato correcto</li>
-                <li>Rellena los datos de los productos (las columnas obligatorias son: <code>numero_registro</code> y <code>nombre_comercial</code>)</li>
-                <li>Guarda el archivo como <strong>.xlsx</strong> o <strong>.csv</strong></li>
-                <li>Sube el archivo usando el botón de abajo</li>
+                <li>Rellena los datos de los productos (columnas obligatorias: <code>numero_registro</code> y <code>nombre_comercial</code>)</li>
+                <li>Sube el archivo (.xlsx o .csv)</li>
               </ol>
-              <button
-                type="button"
-                className="btn btn-secondary mt-4"
-                onClick={handleDownloadTemplate}
-                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-              >
-                <Download size={16} /> Descargar Plantilla
-              </button>
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={openMapaRegistry}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                >
+                  <ExternalLink size={16} /> Registro MAPA
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleDownloadTemplate}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                >
+                  <Download size={16} /> Plantilla
+                </button>
+              </div>
+              <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginTop: '0.75rem' }}>
+                El MAPA actualiza semanalmente su registro oficial de productos fitosanitarios autorizados en España.
+              </p>
             </div>
             
             {/* Upload area */}
