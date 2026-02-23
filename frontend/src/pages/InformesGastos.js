@@ -402,8 +402,96 @@ const InformesGastos = () => {
         </div>
       )}
 
-      {/* Main Content - Accordion Sections */}
-      {resumen && (
+      {/* Charts View */}
+      {resumen && viewMode === 'chart' && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+          {/* Bar Chart - Por Proveedor */}
+          <div className="card">
+            <h3 style={{ fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Building2 size={18} style={{ color: '#7c3aed' }} />
+              Gastos por Proveedor
+            </h3>
+            <div style={{ height: '300px' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={getChartDataProveedor()} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" tickFormatter={(v) => `${(v/1000).toFixed(0)}k€`} />
+                  <YAxis dataKey="name" type="category" width={100} tick={{ fontSize: 11 }} />
+                  <Tooltip 
+                    formatter={(value) => formatCurrency(value)}
+                    labelStyle={{ fontWeight: 600 }}
+                  />
+                  <Bar dataKey="total" radius={[0, 4, 4, 0]}>
+                    {getChartDataProveedor().map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          
+          {/* Pie Chart - Por Cultivo */}
+          <div className="card">
+            <h3 style={{ fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Leaf size={18} style={{ color: '#ea580c' }} />
+              Distribución por Cultivo
+            </h3>
+            <div style={{ height: '300px' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsPieChart>
+                  <Pie
+                    data={getChartDataCultivo()}
+                    dataKey="total"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                    labelLine={{ strokeWidth: 1 }}
+                  >
+                    {getChartDataCultivo().map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => formatCurrency(value)} />
+                  <Legend />
+                </RechartsPieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          
+          {/* Bar Chart - Por Parcela */}
+          <div className="card" style={{ gridColumn: 'span 2' }}>
+            <h3 style={{ fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <MapPin size={18} style={{ color: '#059669' }} />
+              Gastos por Parcela (Top 10)
+            </h3>
+            <div style={{ height: '250px' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={resumen.por_parcela?.slice(0, 10).map((item, idx) => ({
+                  name: item.parcela.length > 12 ? item.parcela.slice(0, 12) + '...' : item.parcela,
+                  total: item.total,
+                  fill: CHART_COLORS[idx % CHART_COLORS.length]
+                })) || []}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                  <YAxis tickFormatter={(v) => `${(v/1000).toFixed(0)}k€`} />
+                  <Tooltip formatter={(value) => formatCurrency(value)} />
+                  <Bar dataKey="total" radius={[4, 4, 0, 0]}>
+                    {(resumen.por_parcela?.slice(0, 10) || []).map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content - Accordion Sections (Table View) */}
+      {resumen && viewMode === 'table' && (
         <div style={{ display: 'grid', gridTemplateColumns: detalleView ? '1fr 1fr' : '1fr', gap: '1.5rem' }}>
           {/* Left Column - Summary Tables */}
           <div>
