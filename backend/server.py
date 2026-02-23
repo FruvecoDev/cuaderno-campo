@@ -1,12 +1,12 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse, Response
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from datetime import datetime
+from bson import ObjectId
 import os
 from dotenv import load_dotenv
-import asyncio
 import json
 from io import BytesIO
 
@@ -24,7 +24,18 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.utils import get_column_letter
 
-app = FastAPI(title="Agricultural Management POC API")
+# Import routes
+from routes_main import router as main_router
+from routes_extended import router as extended_router
+
+# Import database
+from database import (
+    parcelas_collection, contratos_collection, tratamientos_collection,
+    irrigaciones_collection, cosechas_collection, visitas_collection,
+    tareas_collection, fincas_collection, serialize_doc, serialize_docs
+)
+
+app = FastAPI(title="Agricultural Management System V1")
 
 # CORS
 app.add_middleware(
@@ -35,185 +46,109 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ============================================================================
-# DATA MODELS
-# ============================================================================
-
-class PolygonCoordinate(BaseModel):
-    lat: float
-    lng: float
-
-class ParcelaCreate(BaseModel):
-    nombre: str
-    finca: str
-    cultivo: str
-    variedad: str
-    superficie: float
-    num_plantas: int
-    polygon: List[PolygonCoordinate]
-
-class ContratoCreate(BaseModel):
-    parcela_id: str
-    proveedor: str
-    cultivo: str
-    campana: str
-    cantidad: float
-    precio: float
-
-class TratamientoCreate(BaseModel):
-    parcela_id: str
-    fecha: str
-    tipo: str
-    producto: str
-    dosis: str
-    coste: float
-    plazo_seguridad: int
-
-class RiegoCreate(BaseModel):
-    parcela_id: str
-    fecha: str
-    volumen: float
-    duracion: float
-    coste: float
-
-class VisitaCreate(BaseModel):
-    parcela_id: str
-    fecha: str
-    tipo: str
-    observaciones: str
-
-class CosechaCreate(BaseModel):
-    parcela_id: str
-    fecha: str
-    cantidad: float
-    precio: float
-    calidad: str
-
-class ReportRequest(BaseModel):
-    parcela_id: str
+# Include routers
+app.include_router(main_router)
+app.include_router(extended_router)
 
 # ============================================================================
-# IN-MEMORY STORAGE (POC only)
-# ============================================================================
-
-parcelas_db = {}
-contratos_db = {}
-tratamientos_db = []
-riegos_db = []
-visitas_db = []
-cosechas_db = []
-
-# ============================================================================
-# ENDPOINTS
+# ROOT
 # ============================================================================
 
 @app.get("/")
 async def root():
-    return {"message": "Agricultural Management POC API", "status": "running"}
-
-@app.post("/api/poc/parcelas")
-async def create_parcela(parcela: ParcelaCreate):
-    parcela_id = f"PAR-{len(parcelas_db) + 1:03d}"
-    parcelas_db[parcela_id] = {
-        "id": parcela_id,
-        "nombre": parcela.nombre,
-        "finca": parcela.finca,
-        "cultivo": parcela.cultivo,
-        "variedad": parcela.variedad,
-        "superficie": parcela.superficie,
-        "num_plantas": parcela.num_plantas,
-        "polygon": [p.dict() for p in parcela.polygon],
-        "created_at": datetime.now().isoformat()
+    return {
+        "message": "Agricultural Management System V1 API",
+        "version": "1.0.0",
+        "status": "running"
     }
-    return {"success": True, "parcela_id": parcela_id, "data": parcelas_db[parcela_id]}
 
-@app.get("/api/poc/parcelas")
-async def get_parcelas():
-    return {"parcelas": list(parcelas_db.values())}
+# ============================================================================
+# DASHBOARD - KPIs
+# ============================================================================
 
-@app.post("/api/poc/contratos")
-async def create_contrato(contrato: ContratoCreate):
-    if contrato.parcela_id not in parcelas_db:
-        raise HTTPException(status_code=404, detail="Parcela not found")
+@app.get("/api/dashboard/kpis")
+async def get_dashboard_kpis():
+    # Count documents
+    total_contratos = await contratos_collection.count_documents({})
+    total_parcelas = await parcelas_collection.count_documents({})
+    parcelas_activas = await parcelas_collection.count_documents({"activo": True})
+    total_fincas = await fincas_collection.count_documents({})
+    total_tratamientos = await tratamientos_collection.count_documents({})
+    total_riegos = await irrigaciones_collection.count_documents({})
+    total_visitas = await visitas_collection.count_documents({})
+    total_cosechas = await cosechas_collection.count_documents({})
     
-    contrato_id = f"MP-2026-{len(contratos_db) + 1:03d}"
-    contratos_db[contrato_id] = {
-        "id": contrato_id,
-        "parcela_id": contrato.parcela_id,
-        "proveedor": contrato.proveedor,
-        "cultivo": contrato.cultivo,
-        "campana": contrato.campana,
-        "cantidad": contrato.cantidad,
-        "precio": contrato.precio,
-        "created_at": datetime.now().isoformat()
-    }
-    return {"success": True, "contrato_id": contrato_id, "data": contratos_db[contrato_id]}
-
-@app.post("/api/poc/tratamientos")
-async def create_tratamiento(tratamiento: TratamientoCreate):
-    tratamientos_db.append({
-        "id": len(tratamientos_db) + 1,
-        **tratamiento.dict(),
-        "created_at": datetime.now().isoformat()
-    })
-    return {"success": True, "data": tratamientos_db[-1]}
-
-@app.post("/api/poc/riegos")
-async def create_riego(riego: RiegoCreate):
-    riegos_db.append({
-        "id": len(riegos_db) + 1,
-        **riego.dict(),
-        "created_at": datetime.now().isoformat()
-    })
-    return {"success": True, "data": riegos_db[-1]}
-
-@app.post("/api/poc/visitas")
-async def create_visita(visita: VisitaCreate):
-    visitas_db.append({
-        "id": len(visitas_db) + 1,
-        **visita.dict(),
-        "created_at": datetime.now().isoformat()
-    })
-    return {"success": True, "data": visitas_db[-1]}
-
-@app.post("/api/poc/cosechas")
-async def create_cosecha(cosecha: CosechaCreate):
-    cosechas_db.append({
-        "id": len(cosechas_db) + 1,
-        **cosecha.dict(),
-        "created_at": datetime.now().isoformat()
-    })
-    return {"success": True, "data": cosechas_db[-1]}
-
-@app.get("/api/poc/parcelas/{parcela_id}/data")
-async def get_parcela_data(parcela_id: str):
-    if parcela_id not in parcelas_db:
-        raise HTTPException(status_code=404, detail="Parcela not found")
+    # Calculate production
+    cosechas = await cosechas_collection.find().to_list(1000)
+    total_produccion = sum(c.get("cosecha_total", 0) for c in cosechas)
+    total_ingresos = sum(c.get("ingreso_total", 0) for c in cosechas)
     
-    # Get all related data
-    parcela = parcelas_db[parcela_id]
-    contrato = next((c for c in contratos_db.values() if c["parcela_id"] == parcela_id), None)
-    tratamientos = [t for t in tratamientos_db if t["parcela_id"] == parcela_id]
-    riegos = [r for r in riegos_db if r["parcela_id"] == parcela_id]
-    visitas = [v for v in visitas_db if v["parcela_id"] == parcela_id]
-    cosechas = [c for c in cosechas_db if c["parcela_id"] == parcela_id]
+    # Calculate costs
+    tratamientos = await tratamientos_collection.find().to_list(1000)
+    total_coste_tratamientos = sum(t.get("coste_total", 0) for t in tratamientos)
     
-    # Calculate totals
-    total_tratamientos = sum(t["coste"] for t in tratamientos)
-    total_riegos = sum(r["coste"] for r in riegos)
-    total_cosechas = sum(c["cantidad"] * c["precio"] for c in cosechas)
+    riegos = await irrigaciones_collection.find().to_list(1000)
+    total_coste_riegos = sum(r.get("coste", 0) for r in riegos)
+    
+    tareas = await tareas_collection.find().to_list(1000)
+    total_coste_tareas = sum(t.get("coste_total", 0) for t in tareas)
+    
+    total_costes = total_coste_tratamientos + total_coste_riegos + total_coste_tareas
+    
+    # Calculate surface
+    parcelas = await parcelas_collection.find().to_list(1000)
+    total_superficie = sum(p.get("superficie_total", 0) for p in parcelas)
+    
+    # Production by crop
+    produccion_por_cultivo = {}
+    for parcela in parcelas:
+        cultivo = parcela.get("cultivo", "Unknown")
+        if cultivo not in produccion_por_cultivo:
+            produccion_por_cultivo[cultivo] = {
+                "superficie": 0,
+                "parcelas": 0,
+                "produccion": 0
+            }
+        produccion_por_cultivo[cultivo]["superficie"] += parcela.get("superficie_total", 0)
+        produccion_por_cultivo[cultivo]["parcelas"] += 1
+    
+    # Recent activity
+    recent_visitas = await visitas_collection.find().sort("created_at", -1).limit(5).to_list(5)
+    recent_tratamientos = await tratamientos_collection.find().sort("created_at", -1).limit(5).to_list(5)
     
     return {
-        "parcela": parcela,
-        "contrato": contrato,
-        "tratamientos": tratamientos,
-        "riegos": riegos,
-        "visitas": visitas,
-        "cosechas": cosechas,
         "totales": {
+            "contratos": total_contratos,
+            "parcelas": total_parcelas,
+            "parcelas_activas": parcelas_activas,
+            "fincas": total_fincas,
             "tratamientos": total_tratamientos,
             "riegos": total_riegos,
-            "ingresos": total_cosechas
+            "visitas": total_visitas,
+            "cosechas": total_cosechas
+        },
+        "produccion": {
+            "total_kg": total_produccion,
+            "total_ingresos": total_ingresos,
+            "por_cultivo": produccion_por_cultivo
+        },
+        "costes": {
+            "tratamientos": total_coste_tratamientos,
+            "riegos": total_coste_riegos,
+            "tareas": total_coste_tareas,
+            "total": total_costes
+        },
+        "superficie": {
+            "total_ha": total_superficie,
+            "promedio_ha_parcela": total_superficie / total_parcelas if total_parcelas > 0 else 0
+        },
+        "rentabilidad": {
+            "margen_bruto": total_ingresos - total_costes,
+            "margen_por_ha": (total_ingresos - total_costes) / total_superficie if total_superficie > 0 else 0
+        },
+        "actividad_reciente": {
+            "visitas": serialize_docs(recent_visitas),
+            "tratamientos": serialize_docs(recent_tratamientos)
         }
     }
 
@@ -221,32 +156,42 @@ async def get_parcela_data(parcela_id: str):
 # AI REPORT GENERATION
 # ============================================================================
 
-@app.post("/api/poc/generate-ai-report")
-async def generate_ai_report(request: ReportRequest):
+class AIReportRequest(BaseModel):
+    parcela_id: Optional[str] = None
+    contrato_id: Optional[str] = None
+    tipo: str = "parcela"  # parcela, contrato, finca, general
+
+@app.post("/api/generate-ai-report")
+async def generate_ai_report(request: AIReportRequest):
     try:
-        # Get all data for the parcela
-        if request.parcela_id not in parcelas_db:
-            raise HTTPException(status_code=404, detail="Parcela not found")
+        api_key = os.getenv('EMERGENT_LLM_KEY')
+        if not api_key:
+            raise HTTPException(status_code=500, detail="AI API key not configured")
         
-        parcela = parcelas_db[request.parcela_id]
-        contrato = next((c for c in contratos_db.values() if c["parcela_id"] == request.parcela_id), None)
-        tratamientos = [t for t in tratamientos_db if t["parcela_id"] == request.parcela_id]
-        riegos = [r for r in riegos_db if r["parcela_id"] == request.parcela_id]
-        visitas = [v for v in visitas_db if v["parcela_id"] == request.parcela_id]
-        cosechas = [c for c in cosechas_db if c["parcela_id"] == request.parcela_id]
-        
-        # Prepare data
-        campaign_data = {
-            "parcela": parcela,
-            "contrato": contrato,
-            "tratamientos": tratamientos,
-            "riegos": riegos,
-            "visitas": visitas,
-            "cosechas": cosechas
-        }
-        
-        # Create AI prompt
-        prompt = f"""Actúa como un agrónomo experto. Analiza estos datos agrícolas y genera un INFORME EJECUTIVO:
+        # Gather data based on type
+        if request.tipo == "parcela" and request.parcela_id:
+            if not ObjectId.is_valid(request.parcela_id):
+                raise HTTPException(status_code=400, detail="Invalid parcela ID")
+            
+            parcela = await parcelas_collection.find_one({"_id": ObjectId(request.parcela_id)})
+            if not parcela:
+                raise HTTPException(status_code=404, detail="Parcela not found")
+            
+            # Get related data
+            tratamientos = await tratamientos_collection.find({"parcelas_ids": request.parcela_id}).to_list(100)
+            riegos = await irrigaciones_collection.find({"parcela_id": request.parcela_id}).to_list(100)
+            visitas = await visitas_collection.find({"parcela_id": request.parcela_id}).to_list(100)
+            
+            campaign_data = {
+                "parcela": serialize_doc(parcela),
+                "tratamientos": serialize_docs(tratamientos),
+                "riegos": serialize_docs(riegos),
+                "visitas": serialize_docs(visitas),
+                "total_tratamientos": len(tratamientos),
+                "total_riegos": len(riegos)
+            }
+            
+            prompt = f"""Actúa como un agrónomo experto. Analiza estos datos de la parcela {parcela.get('codigo_plantacion')} y genera un INFORME EJECUTIVO:
 
 **DATOS:**
 ```json
@@ -255,23 +200,60 @@ async def generate_ai_report(request: ReportRequest):
 
 **GENERA UN INFORME CON:**
 1. Resumen ejecutivo (3-4 líneas)
-2. Análisis de producción y rendimiento
-3. Análisis de costes por categoría
-4. Análisis de tratamientos aplicados
-5. Análisis de riegos y eficiencia hídrica
-6. Rentabilidad y ROI
-7. Recomendaciones para próxima campaña
+2. Análisis de la parcela (superficie, cultivo, estado)
+3. Análisis de tratamientos aplicados (eficacia, cumplimiento)
+4. Análisis de riegos (eficiencia hídrica, optimización)
+5. Actividades y visitas realizadas
+6. Recomendaciones específicas para esta parcela
 
 Usa markdown con secciones claras. Sé preciso con los números."""
         
-        # Call AI
-        api_key = os.getenv('EMERGENT_LLM_KEY')
-        if not api_key:
-            raise HTTPException(status_code=500, detail="AI API key not configured")
+        elif request.tipo == "general":
+            # General report of all operations
+            total_parcelas = await parcelas_collection.count_documents({})
+            total_tratamientos = await tratamientos_collection.count_documents({})
+            total_riegos = await irrigaciones_collection.count_documents({})
+            total_cosechas = await cosechas_collection.count_documents({})
+            
+            cosechas = await cosechas_collection.find().to_list(100)
+            total_produccion = sum(c.get("cosecha_total", 0) for c in cosechas)
+            total_ingresos = sum(c.get("ingreso_total", 0) for c in cosechas)
+            
+            campaign_data = {
+                "totales": {
+                    "parcelas": total_parcelas,
+                    "tratamientos": total_tratamientos,
+                    "riegos": total_riegos,
+                    "cosechas": total_cosechas,
+                    "produccion_kg": total_produccion,
+                    "ingresos_euros": total_ingresos
+                }
+            }
+            
+            prompt = f"""Actúa como un gerente agrícola experto. Analiza estos datos generales de la explotación y genera un INFORME EJECUTIVO:
+
+**DATOS:**
+```json
+{json.dumps(campaign_data, indent=2, ensure_ascii=False)}
+```
+
+**GENERA UN INFORME CON:**
+1. Resumen ejecutivo general
+2. Análisis de producción global
+3. Análisis de gestión de cultivos
+4. Eficiencia operacional
+5. Indicadores clave de rendimiento (KPIs)
+6. Recomendaciones estratégicas
+
+Usa markdown con secciones claras."""
         
+        else:
+            raise HTTPException(status_code=400, detail="Invalid report type or missing IDs")
+        
+        # Call AI
         chat = LlmChat(
             api_key=api_key,
-            session_id=f"report-{request.parcela_id}",
+            session_id=f"report-{request.tipo}-{datetime.now().timestamp()}",
             system_message="Eres un agrónomo experto en análisis de datos agrícolas."
         )
         chat.with_model("openai", "gpt-5.2")
@@ -288,17 +270,38 @@ Usa markdown con secciones claras. Sé preciso con los números."""
 # PDF GENERATION
 # ============================================================================
 
-@app.post("/api/poc/generate-pdf")
-async def generate_pdf(request: ReportRequest):
+class PDFRequest(BaseModel):
+    parcela_id: str
+    incluir_tratamientos: bool = True
+    incluir_riegos: bool = True
+    incluir_visitas: bool = True
+    incluir_cosechas: bool = True
+
+@app.post("/api/generate-pdf")
+async def generate_pdf(request: PDFRequest):
     try:
-        if request.parcela_id not in parcelas_db:
+        if not ObjectId.is_valid(request.parcela_id):
+            raise HTTPException(status_code=400, detail="Invalid parcela ID")
+        
+        parcela = await parcelas_collection.find_one({"_id": ObjectId(request.parcela_id)})
+        if not parcela:
             raise HTTPException(status_code=404, detail="Parcela not found")
         
-        parcela = parcelas_db[request.parcela_id]
-        contrato = next((c for c in contratos_db.values() if c["parcela_id"] == request.parcela_id), None)
-        tratamientos = [t for t in tratamientos_db if t["parcela_id"] == request.parcela_id]
-        riegos = [r for r in riegos_db if r["parcela_id"] == request.parcela_id]
-        cosechas = [c for c in cosechas_db if c["parcela_id"] == request.parcela_id]
+        # Get related data
+        tratamientos = []
+        riegos = []
+        visitas = []
+        cosechas = []
+        
+        if request.incluir_tratamientos:
+            tratamientos = await tratamientos_collection.find({"parcelas_ids": request.parcela_id}).to_list(100)
+        if request.incluir_riegos:
+            riegos = await irrigaciones_collection.find({"parcela_id": request.parcela_id}).to_list(100)
+        if request.incluir_visitas:
+            visitas = await visitas_collection.find({"parcela_id": request.parcela_id}).to_list(100)
+        if request.incluir_cosechas:
+            # Note: cosechas link to parcelas via parcelas_ids array
+            cosechas = await cosechas_collection.find({"parcelas_ids": request.parcela_id}).to_list(100)
         
         # Create HTML
         html_content = f"""
@@ -308,55 +311,111 @@ async def generate_pdf(request: ReportRequest):
             <meta charset="UTF-8">
             <style>
                 @page {{ size: A4; margin: 2cm; }}
-                body {{ font-family: Arial, sans-serif; font-size: 11pt; color: #333; }}
-                h1 {{ color: #2c5f2d; border-bottom: 3px solid #97bf0d; padding-bottom: 10px; }}
-                h2 {{ color: #2c5f2d; margin-top: 20px; border-bottom: 1px solid #ddd; }}
+                body {{ font-family: Arial, sans-serif; font-size: 10pt; color: #333; }}
+                h1 {{ color: #2c5f2d; border-bottom: 3px solid #97bf0d; padding-bottom: 10px; font-size: 20pt; }}
+                h2 {{ color: #2c5f2d; margin-top: 20px; font-size: 14pt; border-bottom: 1px solid #ddd; padding-bottom: 5px; }}
                 .header-info {{ background-color: #f0f8f0; padding: 15px; border-radius: 5px; margin-bottom: 20px; }}
-                .info-row {{ margin-bottom: 5px; }}
+                .info-row {{ margin-bottom: 5px; font-size: 9pt; }}
                 .info-label {{ font-weight: bold; display: inline-block; width: 150px; }}
-                table {{ width: 100%; border-collapse: collapse; margin: 10px 0 20px 0; }}
-                th {{ background-color: #2c5f2d; color: white; padding: 10px; text-align: left; }}
-                td {{ border: 1px solid #ddd; padding: 8px; }}
+                table {{ width: 100%; border-collapse: collapse; margin: 10px 0 20px 0; font-size: 8pt; }}
+                th {{ background-color: #2c5f2d; color: white; padding: 8px; text-align: left; }}
+                td {{ border: 1px solid #ddd; padding: 6px; }}
                 tr:nth-child(even) {{ background-color: #f9f9f9; }}
+                .footer {{ margin-top: 30px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 8pt; color: #666; text-align: center; }}
             </style>
         </head>
         <body>
-            <h1>📋 CUADERNO DE CAMPO</h1>
+            <h1>📋 CUADERNO DE CAMPO - Sistema de Gestión Agrícola</h1>
             <div class="header-info">
-                <div class="info-row"><span class="info-label">Parcela:</span> {parcela['nombre']}</div>
-                <div class="info-row"><span class="info-label">Finca:</span> {parcela['finca']}</div>
-                <div class="info-row"><span class="info-label">Cultivo:</span> {parcela['cultivo']} - {parcela['variedad']}</div>
-                <div class="info-row"><span class="info-label">Superficie:</span> {parcela['superficie']} ha</div>
-                {f'<div class="info-row"><span class="info-label">Contrato:</span> {contrato["id"]}</div>' if contrato else ''}
+                <div class="info-row"><span class="info-label">Código Plantación:</span> {parcela.get('codigo_plantacion', 'N/A')}</div>
+                <div class="info-row"><span class="info-label">Proveedor:</span> {parcela.get('proveedor', 'N/A')}</div>
+                <div class="info-row"><span class="info-label">Finca:</span> {parcela.get('finca', 'N/A')}</div>
+                <div class="info-row"><span class="info-label">Cultivo:</span> {parcela.get('cultivo', 'N/A')} - {parcela.get('variedad', 'N/A')}</div>
+                <div class="info-row"><span class="info-label">Campaña:</span> {parcela.get('campana', 'N/A')}</div>
+                <div class="info-row"><span class="info-label">Superficie:</span> {parcela.get('superficie_total', 0)} {parcela.get('unidad_medida', 'ha')}</div>
+                <div class="info-row"><span class="info-label">Nº Plantas:</span> {parcela.get('num_plantas', 0)}</div>
+                <div class="info-row"><span class="info-label">Estado:</span> {'Activa' if parcela.get('activo') else 'Inactiva'}</div>
             </div>
-            
+        """
+        
+        if tratamientos:
+            html_content += """
             <h2>🌿 Tratamientos Fitosanitarios</h2>
             <table>
-                <thead><tr><th>Fecha</th><th>Tipo</th><th>Producto</th><th>Dosis</th><th>Coste (€)</th><th>P.S.</th></tr></thead>
+                <thead><tr><th>Fecha</th><th>Tipo</th><th>Método</th><th>Superficie</th><th>Coste Total</th></tr></thead>
                 <tbody>
-                    {''.join(f'<tr><td>{t["fecha"]}</td><td>{t["tipo"]}</td><td>{t["producto"]}</td><td>{t["dosis"]}</td><td>{t["coste"]:.2f}</td><td>{t["plazo_seguridad"]} días</td></tr>' for t in tratamientos)}
-                </tbody>
-            </table>
-            
+            """
+            for t in tratamientos:
+                html_content += f"""
+                    <tr>
+                        <td>{t.get('fecha_inicio', 'N/A')}</td>
+                        <td>{t.get('tipo_tratamiento', 'N/A')} - {t.get('subtipo', '')}</td>
+                        <td>{t.get('metodo_aplicacion', 'N/A')}</td>
+                        <td>{t.get('superficie_aplicacion', 0)} ha</td>
+                        <td>{t.get('coste_total', 0):.2f} €</td>
+                    </tr>
+                """
+            html_content += "</tbody></table>"
+        
+        if riegos:
+            html_content += """
             <h2>💧 Irrigaciones</h2>
             <table>
-                <thead><tr><th>Fecha</th><th>Volumen (m³)</th><th>Duración (h)</th><th>Coste (€)</th></tr></thead>
+                <thead><tr><th>Fecha</th><th>Sistema</th><th>Duración (h)</th><th>Volumen (m³)</th><th>Coste (€)</th></tr></thead>
                 <tbody>
-                    {''.join(f'<tr><td>{r["fecha"]}</td><td>{r["volumen"]}</td><td>{r["duracion"]}</td><td>{r["coste"]:.2f}</td></tr>' for r in riegos)}
-                </tbody>
-            </table>
-            
+            """
+            for r in riegos:
+                html_content += f"""
+                    <tr>
+                        <td>{r.get('fecha', 'N/A')}</td>
+                        <td>{r.get('sistema', 'N/A')}</td>
+                        <td>{r.get('duracion', 0)}</td>
+                        <td>{r.get('volumen', 0)}</td>
+                        <td>{r.get('coste', 0):.2f}</td>
+                    </tr>
+                """
+            html_content += "</tbody></table>"
+        
+        if visitas:
+            html_content += """
+            <h2>👨‍🌾 Visitas</h2>
+            <table>
+                <thead><tr><th>Fecha</th><th>Objetivo</th><th>Realizado</th><th>Observaciones</th></tr></thead>
+                <tbody>
+            """
+            for v in visitas:
+                html_content += f"""
+                    <tr>
+                        <td>{v.get('fecha_visita', 'N/A')}</td>
+                        <td>{v.get('objetivo', 'N/A')}</td>
+                        <td>{'Sí' if v.get('realizado') else 'No'}</td>
+                        <td>{v.get('observaciones', '')[:50]}...</td>
+                    </tr>
+                """
+            html_content += "</tbody></table>"
+        
+        if cosechas:
+            html_content += """
             <h2>🌾 Cosechas</h2>
             <table>
-                <thead><tr><th>Fecha</th><th>Cantidad (kg)</th><th>Precio (€/kg)</th><th>Ingreso (€)</th><th>Calidad</th></tr></thead>
+                <thead><tr><th>Nombre</th><th>Superficie</th><th>Total Cosecha</th><th>Ingreso Total</th></tr></thead>
                 <tbody>
-                    {''.join(f'<tr><td>{c["fecha"]}</td><td>{c["cantidad"]:.0f}</td><td>{c["precio"]:.2f}</td><td>{c["cantidad"] * c["precio"]:.2f}</td><td>{c["calidad"]}</td></tr>' for c in cosechas)}
-                </tbody>
-            </table>
-            
-            <div style="margin-top: 30px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 9pt; color: #666; text-align: center;">
-                Generado el {datetime.now().strftime('%d/%m/%Y %H:%M')}<br>
-                Sistema de Gestión Agrícola - Cuaderno de Campo Digital
+            """
+            for c in cosechas:
+                html_content += f"""
+                    <tr>
+                        <td>{c.get('nombre', 'N/A')}</td>
+                        <td>{c.get('superficie_total', 0)} {c.get('unidad_medida', 'ha')}</td>
+                        <td>{c.get('cosecha_total', 0):.0f} kg</td>
+                        <td>{c.get('ingreso_total', 0):.2f} €</td>
+                    </tr>
+                """
+            html_content += "</tbody></table>"
+        
+        html_content += f"""
+            <div class="footer">
+                Documento generado el {datetime.now().strftime('%d/%m/%Y %H:%M')}<br>
+                Sistema de Gestión Agrícola V1 - Cuaderno de Campo Digital
             </div>
         </body>
         </html>
@@ -369,68 +428,100 @@ async def generate_pdf(request: ReportRequest):
         return StreamingResponse(
             BytesIO(pdf_bytes),
             media_type="application/pdf",
-            headers={"Content-Disposition": f"attachment; filename=cuaderno_{parcela['nombre']}.pdf"}
+            headers={"Content-Disposition": f"attachment; filename=cuaderno_{parcela.get('codigo_plantacion', 'parcela')}.pdf"}
         )
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# ============================================================================
-# EXCEL GENERATION
+# ============================================================================\n# EXCEL GENERATION
 # ============================================================================
 
-@app.post("/api/poc/generate-excel")
-async def generate_excel(request: ReportRequest):
+class ExcelRequest(BaseModel):
+    parcela_id: Optional[str] = None
+    tipo: str = "parcela"  # parcela, general
+
+@app.post("/api/generate-excel")
+async def generate_excel(request: ExcelRequest):
     try:
-        if request.parcela_id not in parcelas_db:
-            raise HTTPException(status_code=404, detail="Parcela not found")
-        
-        tratamientos = [t for t in tratamientos_db if t["parcela_id"] == request.parcela_id]
-        riegos = [r for r in riegos_db if r["parcela_id"] == request.parcela_id]
-        cosechas = [c for c in cosechas_db if c["parcela_id"] == request.parcela_id]
-        
-        # Create workbook
         wb = Workbook()
         
-        # Treatments sheet
-        ws = wb.active
-        ws.title = "Tratamientos"
-        headers = ["Fecha", "Tipo", "Producto", "Dosis", "Coste (€)", "P.S. (días)"]
-        ws.append(headers)
+        # Header style
+        header_fill = PatternFill(start_color="2C5F2D", end_color="2C5F2D", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF")
         
-        # Style
-        for col in range(1, len(headers) + 1):
-            cell = ws.cell(1, col)
-            cell.fill = PatternFill(start_color="2C5F2D", end_color="2C5F2D", fill_type="solid")
-            cell.font = Font(bold=True, color="FFFFFF")
-            ws.column_dimensions[get_column_letter(col)].width = 15
+        if request.tipo == "parcela" and request.parcela_id:
+            if not ObjectId.is_valid(request.parcela_id):
+                raise HTTPException(status_code=400, detail="Invalid parcela ID")
+            
+            # Get data
+            tratamientos = await tratamientos_collection.find({"parcelas_ids": request.parcela_id}).to_list(100)
+            riegos = await irrigaciones_collection.find({"parcela_id": request.parcela_id}).to_list(100)
+            
+            # Tratamientos sheet
+            ws = wb.active
+            ws.title = "Tratamientos"
+            headers = ["Fecha", "Tipo", "Subtipo", "Método", "Superficie (ha)", "Coste (€)"]
+            ws.append(headers)
+            for col in range(1, len(headers) + 1):
+                cell = ws.cell(1, col)
+                cell.fill = header_fill
+                cell.font = header_font
+                ws.column_dimensions[get_column_letter(col)].width = 15
+            
+            for t in tratamientos:
+                ws.append([
+                    t.get("fecha_inicio", ""),
+                    t.get("tipo_tratamiento", ""),
+                    t.get("subtipo", ""),
+                    t.get("metodo_aplicacion", ""),
+                    t.get("superficie_aplicacion", 0),
+                    t.get("coste_total", 0)
+                ])
+            
+            # Riegos sheet
+            ws2 = wb.create_sheet("Irrigaciones")
+            headers2 = ["Fecha", "Sistema", "Duración (h)", "Volumen (m³)", "Coste (€)"]
+            ws2.append(headers2)
+            for col in range(1, len(headers2) + 1):
+                cell = ws2.cell(1, col)
+                cell.fill = header_fill
+                cell.font = header_font
+                ws2.column_dimensions[get_column_letter(col)].width = 15
+            
+            for r in riegos:
+                ws2.append([
+                    r.get("fecha", ""),
+                    r.get("sistema", ""),
+                    r.get("duracion", 0),
+                    r.get("volumen", 0),
+                    r.get("coste", 0)
+                ])
         
-        for t in tratamientos:
-            ws.append([t["fecha"], t["tipo"], t["producto"], t["dosis"], t["coste"], t["plazo_seguridad"]])
-        
-        # Irrigations sheet
-        ws2 = wb.create_sheet("Irrigaciones")
-        headers2 = ["Fecha", "Volumen (m³)", "Duración (h)", "Coste (€)"]
-        ws2.append(headers2)
-        for col in range(1, len(headers2) + 1):
-            cell = ws2.cell(1, col)
-            cell.fill = PatternFill(start_color="2C5F2D", end_color="2C5F2D", fill_type="solid")
-            cell.font = Font(bold=True, color="FFFFFF")
-            ws2.column_dimensions[get_column_letter(col)].width = 15
-        for r in riegos:
-            ws2.append([r["fecha"], r["volumen"], r["duracion"], r["coste"]])
-        
-        # Harvests sheet
-        ws3 = wb.create_sheet("Cosechas")
-        headers3 = ["Fecha", "Cantidad (kg)", "Precio (€/kg)", "Ingreso (€)", "Calidad"]
-        ws3.append(headers3)
-        for col in range(1, len(headers3) + 1):
-            cell = ws3.cell(1, col)
-            cell.fill = PatternFill(start_color="2C5F2D", end_color="2C5F2D", fill_type="solid")
-            cell.font = Font(bold=True, color="FFFFFF")
-            ws3.column_dimensions[get_column_letter(col)].width = 15
-        for c in cosechas:
-            ws3.append([c["fecha"], c["cantidad"], c["precio"], c["cantidad"] * c["precio"], c["calidad"]])
+        else:
+            # General export - all parcelas
+            parcelas = await parcelas_collection.find().to_list(1000)
+            
+            ws = wb.active
+            ws.title = "Parcelas"
+            headers = ["Código", "Proveedor", "Cultivo", "Variedad", "Campaña", "Superficie", "Activo"]
+            ws.append(headers)
+            for col in range(1, len(headers) + 1):
+                cell = ws.cell(1, col)
+                cell.fill = header_fill
+                cell.font = header_font
+                ws.column_dimensions[get_column_letter(col)].width = 18
+            
+            for p in parcelas:
+                ws.append([
+                    p.get("codigo_plantacion", ""),
+                    p.get("proveedor", ""),
+                    p.get("cultivo", ""),
+                    p.get("variedad", ""),
+                    p.get("campana", ""),
+                    p.get("superficie_total", 0),
+                    "Sí" if p.get("activo") else "No"
+                ])
         
         # Save to bytes
         excel_bytes = BytesIO()
@@ -440,7 +531,7 @@ async def generate_excel(request: ReportRequest):
         return StreamingResponse(
             excel_bytes,
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={"Content-Disposition": f"attachment; filename=datos_agricolas.xlsx"}
+            headers={"Content-Disposition": "attachment; filename=datos_agricolas.xlsx"}
         )
         
     except Exception as e:
