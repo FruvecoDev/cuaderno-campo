@@ -174,6 +174,11 @@ Visita/Tratamiento → realizados sobre → Parcela
 - **Viewer**: `viewer@test.com` / (check DB)
 
 ## Test Reports
-- `/app/test_reports/iteration_9.json` - Latest test results (100% pass - PDF con Visitas y Tratamientos)
+- `/app/test_reports/iteration_9.json` - (100% pass - PDF con Visitas y Tratamientos)
 - `/app/test_reports/iteration_8.json` - (100% pass - Filtros Hoja de Evaluación)
 - `/app/test_reports/iteration_7.json` - (100% pass - Maquinaria + Tratamientos integration)
+
+## UI/UX Consistency Updates (23/02/2026)
+Módulos actualizados para seguir patrón consistente:
+- **Fincas**: Filtros (buscar, campaña, provincia), resumen KPIs, tabla mejorada con editar/eliminar
+- **Tareas**: Filtros (buscar, estado), 5 KPIs, toggle de estado con click, tabla mejorada
