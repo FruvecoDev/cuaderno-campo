@@ -234,6 +234,30 @@ async def delete_irrigacion(
     
     return {"success": True, "message": "Irrigacion deleted"}
 
+@router.put("/irrigaciones/{irrigacion_id}")
+async def update_irrigacion(
+    irrigacion_id: str,
+    irrigacion: IrrigacionCreate,
+    current_user: dict = Depends(RequireEdit),
+    _access: dict = Depends(RequireIrrigacionesAccess)
+):
+    if not ObjectId.is_valid(irrigacion_id):
+        raise HTTPException(status_code=400, detail="Invalid ID")
+    
+    update_data = irrigacion.dict()
+    update_data["updated_at"] = datetime.now()
+    
+    result = await irrigaciones_collection.update_one(
+        {"_id": ObjectId(irrigacion_id)},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Irrigacion not found")
+    
+    updated = await irrigaciones_collection.find_one({"_id": ObjectId(irrigacion_id)})
+    return {"success": True, "data": serialize_doc(updated)}
+
 # ============================================================================
 # RECETAS
 # ============================================================================
