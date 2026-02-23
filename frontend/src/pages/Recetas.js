@@ -362,19 +362,19 @@ const Recetas = () => {
             <table data-testid="recetas-table">
               <thead>
                 <tr>
-                  {fieldsConfig.nombre && <th>Nombre</th>}
-                  {fieldsConfig.cultivo_objetivo && <th>Cultivo Objetivo</th>}
-                  {fieldsConfig.plazo_seguridad && <th>P.S. (días)</th>}
-                  {fieldsConfig.instrucciones && <th>Instrucciones</th>}
-                  {(canEdit || canDelete) && <th>Acciones</th>}
+                  {fieldsConfig.nombre ? <th>Nombre</th> : null}
+                  {fieldsConfig.cultivo_objetivo ? <th>Cultivo Objetivo</th> : null}
+                  {fieldsConfig.plazo_seguridad ? <th>P.S. (días)</th> : null}
+                  {fieldsConfig.instrucciones ? <th>Instrucciones</th> : null}
+                  {(canEdit || canDelete) ? <th>Acciones</th> : null}
                 </tr>
               </thead>
               <tbody>
                 {filteredRecetas.map((receta) => (
                   <tr key={receta._id}>
                     {fieldsConfig.nombre && <td className="font-semibold">{receta.nombre}</td>}
-                    {fieldsConfig.cultivo_objetivo && <td><span className="badge badge-default">{receta.cultivo_objetivo}</span></td>}
-                    {fieldsConfig.plazo_seguridad && <td>{receta.plazo_seguridad}</td>}
+                    {(fieldsConfig.cultivo_objetivo) ? <td><span className="badge badge-default">{receta.cultivo_objetivo}</span></td>}
+                    {(fieldsConfig.plazo_seguridad) ? <td>{receta.plazo_seguridad}</td>}
                     {fieldsConfig.instrucciones && <td style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{receta.instrucciones || '—'}</td>}
                     {(canEdit || canDelete) && (
                       <td>

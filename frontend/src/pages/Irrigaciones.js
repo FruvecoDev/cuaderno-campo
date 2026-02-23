@@ -387,24 +387,24 @@ const Irrigaciones = () => {
             <table data-testid="irrigaciones-table">
               <thead>
                 <tr>
-                  {fieldsConfig.fecha && <th>Fecha</th>}
-                  {fieldsConfig.sistema && <th>Sistema</th>}
-                  {fieldsConfig.duracion && <th>Duración (h)</th>}
-                  {fieldsConfig.volumen && <th>Volumen (m³)</th>}
-                  {fieldsConfig.coste && <th>Coste</th>}
-                  {fieldsConfig.parcela_id && <th>Parcela</th>}
-                  {(canEdit || canDelete) && <th>Acciones</th>}
+                  {fieldsConfig.fecha ? <th>Fecha</th> : null}
+                  {fieldsConfig.sistema ? <th>Sistema</th> : null}
+                  {fieldsConfig.duracion ? <th>Duración (h)</th> : null}
+                  {fieldsConfig.volumen ? <th>Volumen (m³)</th> : null}
+                  {fieldsConfig.coste ? <th>Coste</th> : null}
+                  {fieldsConfig.parcela_id ? <th>Parcela</th> : null}
+                  {(canEdit || canDelete) ? <th>Acciones</th> : null}
                 </tr>
               </thead>
               <tbody>
                 {filteredIrrigaciones.map((irrigacion) => (
                   <tr key={irrigacion._id}>
-                    {fieldsConfig.fecha && <td>{irrigacion.fecha ? new Date(irrigacion.fecha).toLocaleDateString() : '—'}</td>}
-                    {fieldsConfig.sistema && <td><span className="badge badge-default">{irrigacion.sistema}</span></td>}
-                    {fieldsConfig.duracion && <td>{irrigacion.duracion}</td>}
-                    {fieldsConfig.volumen && <td>{irrigacion.volumen}</td>}
-                    {fieldsConfig.coste && <td>€{(irrigacion.coste || 0).toFixed(2)}</td>}
-                    {fieldsConfig.parcela_id && <td>{getParcelaCodigo(irrigacion.parcela_id)}</td>}
+                    {(fieldsConfig.fecha) ? <td>{irrigacion.fecha ? new Date(irrigacion.fecha).toLocaleDateString() : '—'}</td>}
+                    {(fieldsConfig.sistema) ? <td><span className="badge badge-default">{irrigacion.sistema}</span></td>}
+                    {(fieldsConfig.duracion) ? <td>{irrigacion.duracion}</td>}
+                    {(fieldsConfig.volumen) ? <td>{irrigacion.volumen}</td>}
+                    {(fieldsConfig.coste) ? <td>€{(irrigacion.coste || 0).toFixed(2)}</td>}
+                    {(fieldsConfig.parcela_id) ? <td>{getParcelaCodigo(irrigacion.parcela_id)}</td>}
                     {(canEdit || canDelete) && (
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>

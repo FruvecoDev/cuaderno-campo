@@ -313,7 +313,7 @@ const Cultivos = () => {
                   <th>Unidad Medida</th>
                   <th>Ciclo</th>
                   <th>Estado</th>
-                  {(canEdit || canDelete) && <th>Acciones</th>}
+                  {(canEdit || canDelete) ? <th>Acciones</th> : null}
                 </tr>
               </thead>
               <tbody>

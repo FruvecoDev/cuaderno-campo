@@ -620,23 +620,23 @@ const Maquinaria = () => {
             <table data-testid="maquinaria-table">
               <thead>
                 <tr>
-                  {tableConfig.nombre && <th>Nombre</th>}
-                  {tableConfig.tipo && <th>Tipo</th>}
-                  {tableConfig.marca && <th>Marca</th>}
-                  {tableConfig.modelo && <th>Modelo</th>}
-                  {tableConfig.matricula && <th>Matrícula</th>}
-                  {tableConfig.estado && <th>Estado</th>}
-                  {(canEdit || canDelete) && <th>Acciones</th>}
+                  {tableConfig.nombre ? <th>Nombre</th> : null}
+                  {tableConfig.tipo ? <th>Tipo</th> : null}
+                  {tableConfig.marca ? <th>Marca</th> : null}
+                  {tableConfig.modelo ? <th>Modelo</th> : null}
+                  {tableConfig.matricula ? <th>Matrícula</th> : null}
+                  {tableConfig.estado ? <th>Estado</th> : null}
+                  {(canEdit || canDelete) ? <th>Acciones</th> : null}
                 </tr>
               </thead>
               <tbody>
                 {filteredMaquinaria.map((item) => (
                   <tr key={item._id}>
                     {tableConfig.nombre && <td className="font-semibold">{item.nombre}</td>}
-                    {tableConfig.tipo && <td>{item.tipo}</td>}
-                    {tableConfig.marca && <td>{item.marca || '—'}</td>}
-                    {tableConfig.modelo && <td>{item.modelo || '—'}</td>}
-                    {tableConfig.matricula && <td>{item.matricula || '—'}</td>}
+                    {(tableConfig.tipo) ? <td>{item.tipo}</td>}
+                    {(tableConfig.marca) ? <td>{item.marca || '—'}</td>}
+                    {(tableConfig.modelo) ? <td>{item.modelo || '—'}</td>}
+                    {(tableConfig.matricula) ? <td>{item.matricula || '—'}</td>}
                     {tableConfig.estado && (
                       <td>
                         <span className={`badge ${getEstadoBadgeClass(item.estado)}`}>

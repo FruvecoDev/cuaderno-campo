@@ -1029,7 +1029,7 @@ const Evaluaciones = () => {
                   <th>Fecha Inicio</th>
                   <th>Técnico</th>
                   <th>Estado</th>
-                  {(canEdit || canDelete) && <th>Acciones</th>}
+                  {(canEdit || canDelete) ? <th>Acciones</th> : null}
                 </tr>
               </thead>
               <tbody>

@@ -343,7 +343,7 @@ const Proveedores = () => {
                   <th>Email</th>
                   <th>Población</th>
                   <th>Estado</th>
-                  {(canEdit || canDelete) && <th>Acciones</th>}
+                  {(canEdit || canDelete) ? <th>Acciones</th> : null}
                 </tr>
               </thead>
               <tbody>

@@ -496,12 +496,12 @@ const Albaranes = () => {
             <table data-testid="albaranes-table">
               <thead>
                 <tr>
-                  {fieldsConfig.tipo && <th>Tipo</th>}
-                  {fieldsConfig.fecha && <th>Fecha</th>}
-                  {fieldsConfig.proveedor_cliente && <th>Proveedor/Cliente</th>}
-                  {fieldsConfig.items && <th>Líneas</th>}
+                  {fieldsConfig.tipo ? <th>Tipo</th> : null}
+                  {fieldsConfig.fecha ? <th>Fecha</th> : null}
+                  {fieldsConfig.proveedor_cliente ? <th>Proveedor/Cliente</th> : null}
+                  {fieldsConfig.items ? <th>Líneas</th> : null}
                   <th>Total</th>
-                  {(canEdit || canDelete) && <th>Acciones</th>}
+                  {(canEdit || canDelete) ? <th>Acciones</th> : null}
                 </tr>
               </thead>
               <tbody>
@@ -514,9 +514,9 @@ const Albaranes = () => {
                         </span>
                       </td>
                     )}
-                    {fieldsConfig.fecha && <td>{albaran.fecha ? new Date(albaran.fecha).toLocaleDateString() : '—'}</td>}
+                    {(fieldsConfig.fecha) ? <td>{albaran.fecha ? new Date(albaran.fecha).toLocaleDateString() : '—'}</td>}
                     {fieldsConfig.proveedor_cliente && <td className="font-semibold">{albaran.proveedor_cliente}</td>}
-                    {fieldsConfig.items && <td>{albaran.items?.length || 0}</td>}
+                    {(fieldsConfig.items) ? <td>{albaran.items?.length || 0}</td>}
                     <td style={{ fontWeight: '600' }}>€{(albaran.total_general || 0).toFixed(2)}</td>
                     {(canEdit || canDelete) && (
                       <td>

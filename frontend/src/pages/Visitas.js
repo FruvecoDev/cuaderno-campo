@@ -859,25 +859,25 @@ const Visitas = () => {
             <table data-testid="visitas-table">
               <thead>
                 <tr>
-                  {tableConfig.objetivo && <th>Objetivo</th>}
-                  {tableConfig.parcela && <th>Parcela</th>}
-                  {tableConfig.proveedor && <th>Proveedor</th>}
-                  {tableConfig.cultivo && <th>Cultivo</th>}
-                  {tableConfig.campana && <th>Campaña</th>}
-                  {tableConfig.fecha && <th>Fecha</th>}
-                  {tableConfig.estado && <th>Estado</th>}
-                  {(canEdit || canDelete) && <th>Acciones</th>}
+                  {tableConfig.objetivo ? <th>Objetivo</th> : null}
+                  {tableConfig.parcela ? <th>Parcela</th> : null}
+                  {tableConfig.proveedor ? <th>Proveedor</th> : null}
+                  {tableConfig.cultivo ? <th>Cultivo</th> : null}
+                  {tableConfig.campana ? <th>Campaña</th> : null}
+                  {tableConfig.fecha ? <th>Fecha</th> : null}
+                  {tableConfig.estado ? <th>Estado</th> : null}
+                  {(canEdit || canDelete) ? <th>Acciones</th> : null}
                 </tr>
               </thead>
               <tbody>
                 {filteredVisitas.map((visita) => (
                   <tr key={visita._id}>
                     {tableConfig.objetivo && <td className="font-semibold">{visita.objetivo}</td>}
-                    {tableConfig.parcela && <td>{visita.codigo_plantacion || 'N/A'}</td>}
-                    {tableConfig.proveedor && <td>{visita.proveedor || 'N/A'}</td>}
-                    {tableConfig.cultivo && <td>{visita.cultivo || 'N/A'}</td>}
-                    {tableConfig.campana && <td>{visita.campana || 'N/A'}</td>}
-                    {tableConfig.fecha && <td>{visita.fecha_visita ? new Date(visita.fecha_visita).toLocaleDateString() : 'Sin fecha'}</td>}
+                    {(tableConfig.parcela) ? <td>{visita.codigo_plantacion || 'N/A'}</td>}
+                    {(tableConfig.proveedor) ? <td>{visita.proveedor || 'N/A'}</td>}
+                    {(tableConfig.cultivo) ? <td>{visita.cultivo || 'N/A'}</td>}
+                    {(tableConfig.campana) ? <td>{visita.campana || 'N/A'}</td>}
+                    {(tableConfig.fecha) ? <td>{visita.fecha_visita ? new Date(visita.fecha_visita).toLocaleDateString() : 'Sin fecha'}</td>}
                     {tableConfig.estado && (
                       <td>
                         <span className={`badge ${visita.realizado ? 'badge-success' : 'badge-default'}`}>
