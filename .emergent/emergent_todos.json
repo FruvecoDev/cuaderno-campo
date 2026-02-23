@@ -1,26 +1,30 @@
 [
   {
-    "content": "Reescribir formulario de Contratos eliminando código duplicado (líneas 279-310)",
-    "status": "completed"
+    "content": "Actualizar modelo VisitaBase en models.py: agregar contrato_id, parcela_id (obligatorio), cultivo_id (obligatorio), campana (obligatorio)",
+    "status": "pending"
   },
   {
-    "content": "Implementar dropdowns para Proveedor (proveedor_id) y Cultivo (cultivo_id)",
-    "status": "completed"
+    "content": "Actualizar modelo TratamientoBase: agregar contrato_id, parcela_id, cultivo_id, campana",
+    "status": "pending"
   },
   {
-    "content": "Hacer campo 'Artículo MP' opcional y con placeholder claro",
-    "status": "completed"
+    "content": "Actualizar endpoints backend de Visitas: validar nuevos campos y consistencia con contrato",
+    "status": "pending"
   },
   {
-    "content": "Verificar que el payload enviado al backend incluye proveedor_id y cultivo_id",
-    "status": "completed"
+    "content": "Actualizar endpoints backend de Tratamientos: validar nuevos campos y consistencia",
+    "status": "pending"
   },
   {
-    "content": "Probar flujo completo: crear contrato, verificar en tabla, eliminar",
-    "status": "completed"
+    "content": "Actualizar formulario frontend de Visitas: flujo guiado Contrato → Parcela → Cultivo → Campaña",
+    "status": "pending"
   },
   {
-    "content": "Verificar que no hay errores de compilación frontend (esbuild check)",
-    "status": "completed"
+    "content": "Actualizar formulario frontend de Tratamientos: flujo guiado similar",
+    "status": "pending"
+  },
+  {
+    "content": "Probar flujo completo de Visitas y Tratamientos con nuevos vínculos",
+    "status": "pending"
   }
 ]
