@@ -1,6 +1,9 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
+import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Contratos from './pages/Contratos';
 import Parcelas from './pages/Parcelas';
@@ -16,23 +19,91 @@ import Documentos from './pages/Documentos';
 
 function App() {
   return (
-    <Layout>
+    <AuthProvider>
       <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/contratos" element={<Contratos />} />
-        <Route path="/parcelas" element={<Parcelas />} />
-        <Route path="/fincas" element={<Fincas />} />
-        <Route path="/visitas" element={<Visitas />} />
-        <Route path="/tareas" element={<Tareas />} />
-        <Route path="/tratamientos" element={<Tratamientos />} />
-        <Route path="/irrigaciones" element={<Irrigaciones />} />
-        <Route path="/recetas" element={<Recetas />} />
-        <Route path="/albaranes" element={<Albaranes />} />
-        <Route path="/cosechas" element={<Cosechas />} />
-        <Route path="/documentos" element={<Documentos />} />
+        <Route path="/login" element={<Login />} />
+        
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Layout>
+              <Navigate to="/dashboard" replace />
+            </Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <Layout><Dashboard /></Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/contratos" element={
+          <ProtectedRoute>
+            <Layout><Contratos /></Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/parcelas" element={
+          <ProtectedRoute>
+            <Layout><Parcelas /></Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/fincas" element={
+          <ProtectedRoute>
+            <Layout><Fincas /></Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/visitas" element={
+          <ProtectedRoute>
+            <Layout><Visitas /></Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/tareas" element={
+          <ProtectedRoute>
+            <Layout><Tareas /></Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/tratamientos" element={
+          <ProtectedRoute>
+            <Layout><Tratamientos /></Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/irrigaciones" element={
+          <ProtectedRoute>
+            <Layout><Irrigaciones /></Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/recetas" element={
+          <ProtectedRoute>
+            <Layout><Recetas /></Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/albaranes" element={
+          <ProtectedRoute>
+            <Layout><Albaranes /></Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/cosechas" element={
+          <ProtectedRoute>
+            <Layout><Cosechas /></Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/documentos" element={
+          <ProtectedRoute>
+            <Layout><Documentos /></Layout>
+          </ProtectedRoute>
+        } />
       </Routes>
-    </Layout>
+    </AuthProvider>
   );
 }
 
