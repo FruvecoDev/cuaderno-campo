@@ -114,15 +114,18 @@ Visita/Tratamiento → realizados sobre → Parcela
 ## Key Files
 - `/app/backend/routes_main.py` - CRUD Contratos, Parcelas, Visitas, Fincas
 - `/app/backend/routes_extended.py` - CRUD Tratamientos, Irrigaciones, Recetas, Albaranes, Tareas, Cosechas
+- `/app/backend/routes_maquinaria.py` - CRUD Maquinaria (Nuevo)
 - `/app/backend/routes_ai.py` - Endpoints IA
+- `/app/frontend/src/pages/Maquinaria.js` - Gestión de maquinaria (Nuevo)
 - `/app/frontend/src/pages/Visitas.js` - Formulario simplificado
-- `/app/frontend/src/pages/Tratamientos.js` - Formulario simplificado
+- `/app/frontend/src/pages/Tratamientos.js` - Formulario con Aplicador y Máquina
 
 ## Test Credentials
-- **Admin**: `testadmin@agrogest.com` / `Test123!`
+- **Admin**: `admin@agrogest.com` / `admin123`
+- **Test**: `test@agrogest.com` / `test1234`
 - **Manager**: `manager@test.com` / (check DB)
 - **Technician**: `technician@test.com` / (check DB)
 - **Viewer**: `viewer@test.com` / (check DB)
 
 ## Test Reports
-- `/app/test_reports/iteration_4.json` - Latest test results (100% pass)
+- `/app/test_reports/iteration_7.json` - Latest test results (100% pass - Maquinaria + Tratamientos integration)
