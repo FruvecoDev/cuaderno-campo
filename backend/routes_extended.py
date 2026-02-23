@@ -416,6 +416,33 @@ async def delete_albaran(
     
     return {"success": True, "message": "Albaran deleted"}
 
+@router.put("/albaranes/{albaran_id}")
+async def update_albaran(
+    albaran_id: str,
+    albaran: AlbaranCreate,
+    current_user: dict = Depends(RequireEdit),
+    _access: dict = Depends(RequireAlbaranesAccess)
+):
+    if not ObjectId.is_valid(albaran_id):
+        raise HTTPException(status_code=400, detail="Invalid ID")
+    
+    update_data = albaran.dict()
+    # Recalculate total
+    total = sum(item["total"] for item in update_data.get("items", []))
+    update_data["total_general"] = total
+    update_data["updated_at"] = datetime.now()
+    
+    result = await albaranes_collection.update_one(
+        {"_id": ObjectId(albaran_id)},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Albaran not found")
+    
+    updated = await albaranes_collection.find_one({"_id": ObjectId(albaran_id)})
+    return {"success": True, "data": serialize_doc(updated)}
+
 # ============================================================================
 # TAREAS
 # ============================================================================
