@@ -288,13 +288,21 @@ Módulos actualizados para seguir patrón consistente:
 - **Funcionalidades**:
   - Dashboard con KPIs: Total Gastos, Albaranes, Proveedores, Cultivos
   - Filtros por fecha (desde/hasta) y campaña
-  - **Gastos por Proveedor**: Tabla con nombre, nº albaranes, total y porcentaje
-  - **Gastos por Contrato**: Tabla con contrato, proveedor, cultivo, albaranes y total
-  - **Gastos por Cultivo**: Tabla con cultivo, nº albaranes, total y porcentaje
-  - **Gastos por Parcela**: Tabla con parcela, cultivo, albaranes, total y coste/ha
-  - Secciones expandibles/colapsables (acordeón)
-  - Detalle de albaranes: Al hacer clic en cualquier fila, muestra panel lateral con listado de albaranes
-  - Totales calculados automáticamente
+  - **Vista Tabla** (por defecto):
+    - Gastos por Proveedor: Tabla con nombre, nº albaranes, total y porcentaje
+    - Gastos por Contrato: Tabla con contrato, proveedor, cultivo, albaranes y total
+    - Gastos por Cultivo: Tabla con cultivo, nº albaranes, total y porcentaje
+    - Gastos por Parcela: Tabla con parcela, cultivo, albaranes, total y coste/ha
+    - Secciones expandibles/colapsables (acordeón)
+    - Detalle de albaranes: Al hacer clic en cualquier fila, muestra panel lateral con listado
+  - **Vista Gráficos** (toggle en header):
+    - Gráfico de barras horizontal: Gastos por Proveedor
+    - Gráfico de pie: Distribución por Cultivo con leyenda
+    - Gráfico de barras vertical: Gastos por Parcela (Top 10)
+    - Usando librería Recharts
+  - **Exportación**:
+    - Excel (.xlsx): 5 hojas (Resumen, Por Proveedor, Por Cultivo, Por Parcela, Detalle Albaranes)
+    - PDF: Informe formateado con KPIs, tablas por dimensión y footer
 - **Endpoints API**:
   - `GET /api/gastos/resumen` - Resumen general con totales por dimensión
   - `GET /api/gastos/por-proveedor` - Detalle por proveedor
@@ -303,6 +311,8 @@ Módulos actualizados para seguir patrón consistente:
   - `GET /api/gastos/por-parcela` - Detalle por parcela (con coste/ha)
   - `GET /api/gastos/detalle-albaranes` - Lista filtrada de albaranes
   - `GET /api/gastos/campanas` - Lista de campañas disponibles
+  - `GET /api/gastos/export/excel` - Exporta a Excel
+  - `GET /api/gastos/export/pdf` - Exporta a PDF
 - **Navegación**: Administración > Informes Gastos
 - **Estado**: ✅ COMPLETADO
 
