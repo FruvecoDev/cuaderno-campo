@@ -45,6 +45,7 @@ const Layout = ({ children }) => {
       { path: '/proveedores', label: 'Proveedores', icon: Package },
       { path: '/cultivos', label: 'Cultivos', icon: Leaf },
       { path: '/maquinaria', label: 'Maquinaria', icon: Cog },
+      { path: '/fitosanitarios', label: 'Fitosanitarios', icon: Beaker },
     ]},
     { section: 'Sistema', items: [
       { path: '/usuarios', label: 'Usuarios', icon: Users, requireAdmin: true },
