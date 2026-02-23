@@ -58,9 +58,10 @@ Visita/Tratamiento → realizados sobre → Parcela
    - Checkboxes para mostrar/ocultar campos del formulario y columnas de tabla
    - Preferencias guardadas en localStorage (persisten entre sesiones)
 
-5. **Buscador de Parcelas en Formularios (Nuevo)**
+5. **Buscador de Parcelas/Contratos en Formularios (Nuevo)**
    - En Visitas: buscar parcela por Proveedor, Cultivo, Campaña
    - En Tratamientos: buscar parcelas por Proveedor, Cultivo, Campaña
+   - En Parcelas: buscar contrato por Proveedor, Cultivo, Campaña
    - Filtros dentro del formulario que reducen las opciones del selector
    - Contador de resultados filtrados
 
