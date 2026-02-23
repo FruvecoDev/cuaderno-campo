@@ -17,8 +17,6 @@ from email_service import (
     get_email_template,
     RESEND_API_KEY
 )
-from auth_routes import get_current_user
-from permissions import RequireAdminAccess
 from database import visitas_collection, users_collection
 
 logger = logging.getLogger(__name__)
