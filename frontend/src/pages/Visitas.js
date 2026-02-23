@@ -20,6 +20,10 @@ const Visitas = () => {
   const [parcelas, setParcelas] = useState([]);
   const [cultivos, setCultivos] = useState([]);
   
+  // Maps para resolver IDs a nombres en tablas
+  const [parcelasMap, setParcelasMap] = useState({});
+  const [cultivosMap, setCultivosMap] = useState({});
+  
   // Form data con nuevos campos obligatorios
   const [formData, setFormData] = useState({
     objetivo: 'Control Rutinario',
