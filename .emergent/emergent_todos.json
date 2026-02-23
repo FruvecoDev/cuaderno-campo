@@ -1,10 +1,6 @@
 [
   {
-    "content": "Crear página de gestión de usuarios para Admins - Backend endpoints listos, crear UI",
-    "status": "completed"
-  },
-  {
     "content": "Testing E2E multi-rol (Admin, Manager, Technician, Viewer)",
-    "status": "in_progress"
+    "status": "completed"
   }
 ]

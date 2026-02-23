@@ -6,15 +6,18 @@
 - **Dashboard KPI** (producción, costes, tratamientos, cumplimiento) + **informes PDF/Excel**.
 - **IA** para **reportes personalizados** y **análisis de datos** (resúmenes, alertas, insights, comparativas).
 - **Seguridad end-to-end**: autenticación + **roles/permisos (RBAC)** por módulo/acción y (futuro) por campo/sección.
-- **Gestión de usuarios** (Admins) y gobernanza básica: activación/desactivación, auditoría mínima.
+- **Gestión de usuarios** (Admins) y gobernanza básica: activación/desactivación y edición de rol.
 - **Subida de documentos** (PDF/imagenes) vinculados a finca/parcela/contrato.
+- **Calidad/operación**: suite smoke/E2E multi-rol y hardening de dependencias (PDF/WeasyPrint) para despliegues estables.
 
-> Estado actual (resumen):
+> Estado actual (resumen actualizado):
 > - ✅ Fase 1 (POC): completada.
 > - ✅ Fase 2 (V1 Build): completada.
 > - ✅ Fase 3A (Autenticación): completada y verificada E2E.
-> - ✅ Fase 3B (RBAC por módulo/acción): **completada** (backend + frontend con control de visibilidad/acciones).
-> - ⏳ Fase 3B (Gestión de usuarios): pendiente (panel admin + operaciones avanzadas).
+> - ✅ Fase 3B-1 (RBAC por módulo/acción): completada (backend + frontend).
+> - ✅ Fase 3B-2 (Gestión de usuarios): completada (panel Admin + creación/rol/estado).
+> - ✅ Testing multi-rol: completado (Admin/Manager/Technician/Viewer).
+> - ⏳ Próximo foco: hardening, permisos por campo/sección, mejora de UX/consistencia y expansión IA.
 
 ---
 
@@ -50,8 +53,8 @@
 **IMPLEMENTADO COMPLETAMENTE:**
 
 **Backend FastAPI + MongoDB:**
-- ✅ 10+ colecciones MongoDB con modelos completos
-- ✅ CRUD APIs para TODOS los módulos (histórico: ~95% test success)
+- ✅ Colecciones MongoDB y modelos completos
+- ✅ CRUD APIs para todos los módulos
 - ✅ Dashboard KPIs endpoint con agregaciones
 - ✅ AI report generation
 - ✅ PDF generation (WeasyPrint)
@@ -71,17 +74,18 @@
   - Documentos
 
 **Frontend React + Leaflet:**
-- ✅ Navegación completa con sidebar profesional (12 módulos)
+- ✅ Navegación completa con sidebar profesional
 - ✅ Dashboard con KPIs + gráficas
 - ✅ Páginas por módulo funcionales con CRUD
 - ✅ Diseño profesional
 
 **Notas de estabilidad (actualización):**
-- ✅ Se resolvió un bloqueo del backend instalando dependencias runtime necesarias para WeasyPrint (libs del sistema). Recomendación: consolidarlo en la imagen/infra (ver Phase 5).
+- ✅ Se resolvió un bloqueo del backend instalando dependencias runtime necesarias para WeasyPrint.
+- ⏳ Recomendación: consolidarlo en la imagen/infra (ver Phase 5).
 
 ---
 
-### Phase 3 — Seguridad, permisos y configuración (Auth + RBAC + campos)
+### Phase 3 — Seguridad, permisos y configuración (Auth + RBAC + usuarios)
 **Meta:** activar autenticación y control fino sin romper el core.
 
 #### Phase 3A — Autenticación (email/password + sesiones) ✅ COMPLETADA Y VERIFICADA
@@ -90,7 +94,7 @@
 - ✅ `/api/auth/me` (sesión vigente)
 - ✅ Rutas protegidas en frontend (redirige a `/login` si no autenticado)
 - ✅ Inicialización Admin (`/api/auth/init-admin`) y credenciales por defecto
-- ✅ Registro de usuarios (endpoint existente; creación solo Admin)
+- ✅ Registro de usuarios (creación solo Admin)
 - ✅ Corrección warning React Hook (AuthContext) con `useCallback`
 
 **User stories (Phase 3A)**
@@ -98,34 +102,29 @@
 2. ✅ Como usuario, quiero cerrar sesión y que se elimine mi token.
 3. ✅ Como usuario, quiero que al entrar a rutas protegidas sin sesión me lleve al login.
 
-#### Phase 3B — RBAC por módulo/acción + Gestión de usuarios (P0/P1)
+#### Phase 3B — RBAC por módulo/acción + Gestión de usuarios ✅ COMPLETADA
 
 **3B-1 RBAC por módulo/acción ✅ COMPLETADO**
-- ✅ Matriz de permisos por rol centralizada (backend)
-- ✅ Guards/dependencies aplicados a todos los endpoints CRUD:
-  - Contratos, Parcelas, Fincas, Visitas
-  - Tratamientos, Irrigaciones, Recetas, Albaranes
-  - Tareas, Cosechas
+- ✅ Matriz de permisos por rol centralizada (backend) (`rbac_config.py`)
+- ✅ Guards/dependencies aplicados a endpoints CRUD (FastAPI) (`rbac_guards.py`)
 - ✅ Verificación funcional:
   - Sin token → 401/"Not authenticated"
   - Con token y rol adecuado → 200
 - ✅ Frontend:
-  - Sidebar filtrado por `modules_access`
-  - Botones/acciones condicionadas por permisos (`can_create`, etc.)
-  - Utilidades de permisos (`utils/permissions.js`) para reutilización
+  - Sidebar filtrado por `modules_access` y secciones dinámicas
+  - Botones/acciones condicionadas por permisos (`can_create`, `can_edit`, `can_delete`, `can_export`)
+  - Utilidades de permisos reutilizables (`src/utils/permissions.js`)
 
-**3B-2 Gestión de usuarios ⏳ PRÓXIMO (P1)**
-- Panel Admin: gestión de usuarios
-  - listar usuarios
-  - crear usuario (Admin only)
-  - editar rol/estado (activar/desactivar)
-  - reset password / cambio de password (definir enfoque)
-- Alinear modelo de permisos:
-  - fuente de verdad en backend
-  - reflejo en UI desde `/me`
-- Testing E2E multi-rol (Admin/Manager/Technician/Viewer)
+**3B-2 Gestión de usuarios ✅ COMPLETADA (P1)**
+- ✅ Nueva página **/usuarios** (solo Admin)
+  - ✅ Listar usuarios
+  - ✅ Crear usuario (Admin only) usando `/api/auth/register`
+  - ✅ Editar rol
+  - ✅ Activar/desactivar usuario
+- ✅ Enlace “Usuarios” en sidebar solo para Admin
+- ✅ Ajuste/migración: asegurar que Admin tenga `can_manage_users` (consistencia de permisos)
 
-#### Phase 3C — Permisos por campo/sección (P2) ⏳ FUTURO
+#### Phase 3C — Permisos por campo/sección + auditoría mínima (P2) ⏳ FUTURO
 - Ocultar campos sensibles (p.ej., costes) por rol
 - Secciones configurables por rol
 - (Opcional) Multi-empresa ligero: separar datos por organización
@@ -134,15 +133,15 @@
 **User stories (Phase 3B/3C)**
 1. ✅ Como admin/manager/viewer, quiero que el sistema respete permisos por acción (crear/editar/borrar/exportar).
 2. ✅ Como usuario, quiero que el menú muestre solo los módulos permitidos.
-3. Como admin, quiero crear usuarios y asignar roles para controlar accesos.
-4. Como manager, quiero que un técnico solo edite operaciones de campo y no contratos.
-5. Como viewer, quiero consultar informes sin poder modificar datos.
+3. ✅ Como admin, quiero crear usuarios y asignar roles para controlar accesos.
+4. ✅ Como manager, quiero que un técnico solo edite operaciones de campo y no contratos.
+5. ✅ Como viewer, quiero consultar informes sin poder modificar datos.
 6. Como admin, quiero ocultar campos sensibles (costes) para ciertos roles.
 7. Como manager, quiero trazabilidad de cambios en tratamientos para auditoría.
 
 ---
 
-### Phase 4 — IA en producto (reportes, análisis, asistentes)
+### Phase 4 — IA en producto (reportes, análisis, asistentes) ⏳ PRÓXIMO
 **Meta:** convertir la IA en funcionalidad recurrente y accionable.
 - Reportes IA guardables por contrato/parcela/finca:
   - resumen ejecutivo, incidencias, desviaciones de coste, comparativas campañas.
@@ -155,7 +154,7 @@
 
 ---
 
-### Phase 5 — Hardening, rendimiento y calidad de datos
+### Phase 5 — Hardening, rendimiento y calidad de datos ⏳ PRÓXIMO
 - Consolidar dependencias de WeasyPrint en build/infra (evitar fallos por libs faltantes).
 - Validaciones (unidades, rangos, fechas), catálogos (productos, variedades, maquinaria).
 - Importación CSV/Excel (parcelas, eventos) + deduplicación.
@@ -169,29 +168,31 @@
 
 ### P0 (inmediato) ✅ COMPLETADO
 1. ✅ **Corregir issues menores**
-   - ✅ Albaranes: verificado modelo consistente (`proveedor_cliente`).
-   - ✅ Warnings menores React/dev-server: mitigados/no bloqueantes.
-2. ✅ **RBAC por módulo/acción (mínimo viable)**
-   - ✅ Matriz permisos por rol.
-   - ✅ Guards backend para acciones críticas y acceso por módulo.
-   - ✅ Control UI (sidebar + botones) usando `user.can_*` + `modules_access`.
+   - ✅ Albaranes: modelo consistente (`proveedor_cliente`).
+   - ✅ Warnings menores React/dev-server: no bloqueantes.
+2. ✅ **Seguridad completa (Auth + RBAC + UI)**
+   - ✅ Autenticación verificada E2E.
+   - ✅ RBAC backend (guards) y frontend (visibilidad + acciones).
+3. ✅ **Gestión de usuarios**
+   - ✅ Panel Admin /usuarios
+   - ✅ Crear/editar rol/activar-desactivar
+4. ✅ **Testing multi-rol**
+   - ✅ Admin/Manager/Technician/Viewer con verificación de UI y permisos.
 
 ### P1 (siguiente)
-3. **Panel Admin de usuarios**
-   - Vista lista + edición de rol/estado.
-   - Crear usuario (Admin only) usando endpoint `/api/auth/register`.
-   - Desactivar usuario y validar login bloqueado.
-   - Definir y construir flujo de cambio/reset de password.
-4. **E2E multi-rol**
-   - Scripts Playwright (o smoke tests) para:
-     - Viewer read-only (sin create/edit/delete)
-     - Technician sin delete/export y sin acceso a contratos
-     - Manager sin delete ni user-management
-     - Admin full access
+5. **Hardening de despliegue (WeasyPrint + env)**
+   - Incluir libs del sistema en imagen/infra.
+   - Añadir verificación de arranque (healthcheck) y logs claros.
+6. **Mejorar UX de permisos**
+   - Deshabilitar acciones no permitidas con tooltip/feedback.
+   - Mensajes consistentes cuando backend responde 403.
+7. **Flujo de cambio/reset de password**
+   - Definir enfoque: reset por admin vs. self-service.
+   - Implementar endpoint(s) y UI.
 
 ### P2
-5. Permisos por campo/sección + auditoría mínima de cambios
-6. Mejoras módulos simplificados (Irrigaciones, Recetas, Albaranes) y consistencia de datos
+8. Permisos por campo/sección + auditoría mínima de cambios
+9. Mejoras de consistencia de datos y simplificación de formularios (Irrigaciones/Recetas/Albaranes)
 
 ---
 
@@ -199,7 +200,7 @@
 - ✅ Flujo principal completo: **Finca→Parcela (mapa)→Contrato+Cultivo→eventos→costes→PDF/Excel→dashboard**.
 - ✅ Autenticación robusta: **login/logout**, rutas protegidas, `/me` estable.
 - ✅ RBAC funciona sin filtrar datos ni permitir acciones indebidas (backend + UI).
-- Panel Admin permite gestionar usuarios y roles sin intervención técnica.
-- PDF/Excel export estable (sin fallos por dependencias runtime) y con datos consistentes.
-- IA genera reportes **útiles, reproducibles y guardables** a partir de datos reales.
-- Subida/visualización de documentos estable (PDF/imagen) y vinculada a entidades.
+- ✅ Panel Admin permite gestionar usuarios y roles sin intervención técnica.
+- ⏳ PDF/Excel export estable en despliegue (sin fallos por dependencias runtime) y con datos consistentes.
+- ⏳ IA genera reportes **útiles, reproducibles y guardables** a partir de datos reales.
+- ✅ Subida/visualización de documentos estable (PDF/imagen) y vinculada a entidades.
