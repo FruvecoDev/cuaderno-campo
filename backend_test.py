@@ -170,12 +170,17 @@ class AgriculturalAPITester:
         return success and "totales" in response
 
     def test_contratos_crud(self):
-        """Test contratos CRUD operations"""
-        print("\n📋 Testing Contratos CRUD...")
+        """Test contratos CRUD operations with new model (proveedor_id, cultivo_id)"""
+        print("\n📋 Testing Contratos CRUD (New Model)...")
         
-        # 1. Test GET empty list
+        # Ensure we have catalog IDs
+        if not self.catalog_ids.get("proveedor_id") or not self.catalog_ids.get("cultivo_id"):
+            print("   ❌ Missing catalog IDs for testing")
+            return False
+        
+        # 1. Test GET list
         success, response = self.run_test(
-            "Get Contratos (Empty)",
+            "Get Contratos",
             "GET",
             "api/contratos",
             200
@@ -183,24 +188,24 @@ class AgriculturalAPITester:
         if not success:
             return False
         
-        # 2. Test CREATE contrato
+        # 2. Test CREATE contrato with new model
         contrato_data = {
             "campana": "2025/26",
             "procedencia": "Campo",
             "fecha_contrato": "2025-01-15",
-            "proveedor": "Test Proveedor",
-            "cultivo": "Test Cultivo",
-            "articulo_mp": "Test Articulo",
+            "proveedor_id": self.catalog_ids["proveedor_id"],  # New: using catalog reference
+            "cultivo_id": self.catalog_ids["cultivo_id"],      # New: using catalog reference
+            "articulo_mp": "TEST-001",
             "cantidad": 1000.50,
             "precio": 2.75,
             "periodo_desde": "2025-02-01",
             "periodo_hasta": "2025-12-31",
             "moneda": "EUR",
-            "observaciones": "Test contrato"
+            "observaciones": "Test contrato with catalog references"
         }
         
         success, response = self.run_test(
-            "Create Contrato",
+            "Create Contrato (New Model)",
             "POST",
             "api/contratos",
             200,
@@ -213,33 +218,35 @@ class AgriculturalAPITester:
         if contrato_id:
             self.created_ids["contrato"] = contrato_id
             print(f"   Created contrato ID: {contrato_id}")
+            
+            # Store for testing consistency in visitas/tratamientos
+            self.catalog_ids["contrato_id"] = contrato_id
         else:
             print("   ⚠️  No contrato ID returned")
+            return False
         
         # 3. Test GET by ID
-        if contrato_id:
-            success, _ = self.run_test(
-                "Get Contrato by ID",
-                "GET",
-                f"api/contratos/{contrato_id}",
-                200
-            )
-            if not success:
-                return False
+        success, _ = self.run_test(
+            "Get Contrato by ID",
+            "GET",
+            f"api/contratos/{contrato_id}",
+            200
+        )
+        if not success:
+            return False
         
-        # 4. Test UPDATE
-        if contrato_id:
-            update_data = contrato_data.copy()
-            update_data["observaciones"] = "Updated contrato"
-            success, _ = self.run_test(
-                "Update Contrato",
-                "PUT", 
-                f"api/contratos/{contrato_id}",
-                200,
-                update_data
-            )
-            if not success:
-                return False
+        # 4. Test UPDATE with new model
+        update_data = contrato_data.copy()
+        update_data["observaciones"] = "Updated contrato with catalog references"
+        success, _ = self.run_test(
+            "Update Contrato (New Model)",
+            "PUT", 
+            f"api/contratos/{contrato_id}",
+            200,
+            update_data
+        )
+        if not success:
+            return False
         
         return True
 
