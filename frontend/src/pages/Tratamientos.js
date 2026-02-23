@@ -196,6 +196,20 @@ const Tratamientos = () => {
     }
   };
   
+  const fetchMaquinaria = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/maquinaria`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setMaquinaria(data.maquinaria || []);
+      }
+    } catch (error) {
+      console.error('Error fetching maquinaria:', error);
+    }
+  };
+  
   const fetchTratamientos = async () => {
     try {
       setError(null);
