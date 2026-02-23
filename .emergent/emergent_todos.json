@@ -1,14 +1,14 @@
 [
   {
-    "content": "Crear endpoints backend para reportes IA",
-    "status": "completed"
-  },
-  {
-    "content": "Crear página frontend para reportes IA con historial",
+    "content": "Arreglar funcionalidad de editar contrato",
     "status": "in_progress"
   },
   {
-    "content": "Testing de funcionalidades IA",
+    "content": "Agregar selector de contrato en formulario de crear parcela",
+    "status": "pending"
+  },
+  {
+    "content": "Testing de ambas funcionalidades",
     "status": "pending"
   }
 ]
