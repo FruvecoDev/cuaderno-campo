@@ -127,7 +127,11 @@ async def delete_tratamiento(
 # ============================================================================
 
 @router.post("/irrigaciones", response_model=dict)
-async def create_irrigacion(irrigacion: IrrigacionCreate):
+async def create_irrigacion(
+    irrigacion: IrrigacionCreate,
+    current_user: dict = Depends(RequireCreate),
+    _access: dict = Depends(RequireIrrigacionesAccess)
+):
     irrigacion_dict = irrigacion.dict()
     irrigacion_dict.update({
         "created_at": datetime.now(),
@@ -149,7 +153,11 @@ async def get_irrigaciones(skip: int = 0, limit: int = 100, parcela_id: Optional
     return {"irrigaciones": serialize_docs(irrigaciones), "total": await irrigaciones_collection.count_documents(query)}
 
 @router.get("/irrigaciones/{irrigacion_id}")
-async def get_irrigacion(irrigacion_id: str):
+async def get_irrigacion(
+    irrigacion_id: str,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireIrrigacionesAccess)
+):
     if not ObjectId.is_valid(irrigacion_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
@@ -160,7 +168,11 @@ async def get_irrigacion(irrigacion_id: str):
     return serialize_doc(irrigacion)
 
 @router.delete("/irrigaciones/{irrigacion_id}")
-async def delete_irrigacion(irrigacion_id: str):
+async def delete_irrigacion(
+    irrigacion_id: str,
+    current_user: dict = Depends(RequireDelete),
+    _access: dict = Depends(RequireIrrigacionesAccess)
+):
     if not ObjectId.is_valid(irrigacion_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
