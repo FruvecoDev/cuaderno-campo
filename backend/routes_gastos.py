@@ -14,7 +14,7 @@ def parse_date(date_str: str) -> datetime:
     """Parse date string to datetime"""
     try:
         return datetime.strptime(date_str, "%Y-%m-%d")
-    except:
+    except ValueError:
         return None
 
 # ============================================================================
