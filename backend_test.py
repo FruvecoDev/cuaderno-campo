@@ -756,7 +756,7 @@ class AgriculturalAPITester:
         )
         
         # This should "fail" (404) which means deletion worked
-        if not success:
+        if response.status_code == 404:
             print(f"   ✅ Contrato successfully deleted (404 confirmed)")
             return True
         else:
