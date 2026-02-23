@@ -19,6 +19,7 @@ import Documentos from './pages/Documentos';
 import Usuarios from './pages/Usuarios';
 import Proveedores from './pages/Proveedores';
 import Cultivos from './pages/Cultivos';
+import Maquinaria from './pages/Maquinaria';
 
 function App() {
   return (
