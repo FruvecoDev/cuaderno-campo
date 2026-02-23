@@ -252,14 +252,18 @@ class VisitaBase(BaseModel):
     fecha_visita: Optional[str] = None
     hora_visita: Optional[str] = None
     
-    # Relacionado
-    proveedor: str
-    campana: str
+    # Vínculos obligatorios al contexto agronómico
+    contrato_id: Optional[str] = None  # ObjectId ref a contratos (recomendado)
+    parcela_id: str  # ObjectId ref a parcelas (OBLIGATORIO)
+    cultivo_id: str  # ObjectId ref a cultivos (OBLIGATORIO)
+    campana: str  # OBLIGATORIO - campaña asociada
+    
+    # Campos legacy/adicionales (mantener compatibilidad)
+    proveedor: Optional[str] = None  # Nombre (se puede poblar desde contrato)
     productor: Optional[str] = None
-    cultivo: str
+    cultivo: Optional[str] = None  # Nombre (se puede poblar desde cultivo_id)
     variedad: Optional[str] = None
     codigo_plantacion: Optional[str] = None
-    parcela_id: Optional[str] = None
     finca: Optional[str] = None
     
     # Observaciones y documentos
