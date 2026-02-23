@@ -1,7 +1,7 @@
 [
   {
     "content": "Corregir inconsistencia en modelo backend de albaranes",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Corregir warnings menores de React (webpack dev-server deprecation)",
