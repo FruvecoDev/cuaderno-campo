@@ -100,9 +100,9 @@ Visita/Tratamiento → realizados sobre → Parcela
    - Preguntas personalizables (Admin/Manager pueden agregar)
    - Hereda datos automáticamente de la parcela seleccionada
    - **PDF Cuaderno de Campo Completo** (actualizado 23/02/2026):
-     - Página 1: Resumen con conteo de visitas y tratamientos + datos de evaluación
-     - Páginas de Visitas: Una página por cada visita registrada (fecha, objetivo, observaciones, cuestionario plagas)
-     - Páginas de Tratamientos: Una página por cada tratamiento (fecha, tipo, aplicador, máquina, dosis, coste, productos)
+     - Página 1: Resumen + **Índice de Contenidos** con enlaces a visitas y tratamientos
+     - Páginas de Visitas: Una página por cada visita registrada
+     - Páginas de Tratamientos: Una página por cada tratamiento
    - Acceso rápido desde Parcelas (botón "Crear Evaluación")
 
 9. **Filtros Hoja de Evaluación (Nuevo - 23/02/2026)**
