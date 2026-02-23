@@ -265,6 +265,7 @@ const Dashboard = () => {
   const [notificationResult, setNotificationResult] = useState(null);
   const { token, user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   useEffect(() => {
     fetchDashboardData();
