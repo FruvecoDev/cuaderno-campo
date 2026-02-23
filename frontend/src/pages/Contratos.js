@@ -97,8 +97,14 @@ const Contratos = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${BACKEND_URL}/api/contratos`, {
-        method: 'POST',
+      const url = editingId 
+        ? `${BACKEND_URL}/api/contratos/${editingId}`
+        : `${BACKEND_URL}/api/contratos`;
+      
+      const method = editingId ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method: method,
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
@@ -112,6 +118,7 @@ const Contratos = () => {
       const data = await response.json();
       if (data.success) {
         setShowForm(false);
+        setEditingId(null);
         fetchContratos();
         setFormData({
           campana: '2025/26',
@@ -129,8 +136,46 @@ const Contratos = () => {
         });
       }
     } catch (error) {
-      console.error('Error creating contrato:', error);
+      console.error('Error saving contrato:', error);
     }
+  };
+  
+  const handleEdit = (contrato) => {
+    setEditingId(contrato._id);
+    setFormData({
+      campana: contrato.campana || '2025/26',
+      procedencia: contrato.procedencia || 'Campo',
+      fecha_contrato: contrato.fecha_contrato || new Date().toISOString().split('T')[0],
+      proveedor_id: contrato.proveedor_id || '',
+      cultivo_id: contrato.cultivo_id || '',
+      articulo_mp: contrato.articulo_mp || '',
+      cantidad: contrato.cantidad || '',
+      precio: contrato.precio || '',
+      periodo_desde: contrato.periodo_desde || '',
+      periodo_hasta: contrato.periodo_hasta || '',
+      moneda: contrato.moneda || 'EUR',
+      observaciones: contrato.observaciones || ''
+    });
+    setShowForm(true);
+  };
+  
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setShowForm(false);
+    setFormData({
+      campana: '2025/26',
+      procedencia: 'Campo',
+      fecha_contrato: new Date().toISOString().split('T')[0],
+      proveedor_id: '',
+      cultivo_id: '',
+      articulo_mp: '',
+      cantidad: '',
+      precio: '',
+      periodo_desde: '',
+      periodo_hasta: '',
+      moneda: 'EUR',
+      observaciones: ''
+    });
   };
   
   const handleDelete = async (contratoId) => {
