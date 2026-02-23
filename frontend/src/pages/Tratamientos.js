@@ -321,7 +321,7 @@ const Tratamientos = () => {
       
       {showForm && (
         <div className="card mb-6" data-testid="tratamiento-form">
-          <h2 className="card-title">Crear Tratamiento</h2>
+          <h2 className="card-title">{editingId ? 'Editar Tratamiento' : 'Crear Tratamiento'}</h2>
           <form onSubmit={handleSubmit}>
             {/* Información de la alerta sobre el flujo */}
             <div className="card" style={{ backgroundColor: 'hsl(var(--muted))', marginBottom: '1.5rem', padding: '1rem' }}>
