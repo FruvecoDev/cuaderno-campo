@@ -192,6 +192,20 @@ const Evaluaciones = () => {
     }
   };
   
+  const fetchContratos = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/contratos`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setContratos(data.contratos || []);
+      }
+    } catch (error) {
+      console.error('Error fetching contratos:', error);
+    }
+  };
+  
   const fetchPreguntasConfig = async () => {
     try {
       const response = await fetch(`${BACKEND_URL}/api/evaluaciones/config/preguntas`, {
