@@ -209,7 +209,8 @@ const Contratos = () => {
       periodo_desde: '',
       periodo_hasta: '',
       moneda: 'EUR',
-      observaciones: ''
+      observaciones: '',
+      precios_calidad: []
     });
   };
   
