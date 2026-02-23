@@ -106,11 +106,20 @@ const Albaranes = () => {
   }, []);
   
   useEffect(() => {
-    // Extraer opciones de filtro
+    // Extraer opciones de filtro de albaranes existentes
     const proveedores = [...new Set(albaranes.map(a => a.proveedor).filter(Boolean))];
     const cultivos = [...new Set(albaranes.map(a => a.cultivo).filter(Boolean))];
     setFilterOptions({ proveedores, cultivos });
   }, [albaranes]);
+  
+  useEffect(() => {
+    // Extraer opciones de filtro de contratos para el buscador del formulario
+    const proveedores = [...new Set(contratos.map(c => c.proveedor).filter(Boolean))].sort();
+    const cultivos = [...new Set(contratos.map(c => c.cultivo).filter(Boolean))].sort();
+    const campanas = [...new Set(contratos.map(c => c.campana).filter(Boolean))].sort();
+    const parcelas = [...new Set(contratos.map(c => c.parcela || c.parcela_codigo).filter(Boolean))].sort();
+    setContratoOptions({ proveedores, cultivos, campanas, parcelas });
+  }, [contratos]);
   
   useEffect(() => {
     localStorage.setItem('albaranes_fields_config_v2', JSON.stringify(fieldsConfig));
