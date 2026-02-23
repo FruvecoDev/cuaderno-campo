@@ -1027,7 +1027,13 @@ const Tratamientos = () => {
           fecha_tratamiento: new Date().toISOString().split('T')[0],
           fecha_aplicacion: '',
           aplicador_nombre: '',
-          maquina_id: ''
+          maquina_id: '',
+          producto_fitosanitario_id: '',
+          producto_fitosanitario_nombre: '',
+          producto_fitosanitario_dosis: '',
+          producto_fitosanitario_unidad: '',
+          producto_materia_activa: '',
+          producto_plazo_seguridad: ''
         });
         setSelectedParcelas([]);
         setSelectedParcelasInfo(null);
