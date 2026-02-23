@@ -82,7 +82,15 @@ const Visitas = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        setParcelas(data.parcelas || []);
+        const parcelasList = data.parcelas || [];
+        setParcelas(parcelasList);
+        
+        // Construir map de parcela_id -> nombre
+        const map = {};
+        parcelasList.forEach(p => {
+          map[p._id] = `${p.codigo_plantacion} - ${p.variedad}`;
+        });
+        setParcelasMap(map);
       }
     } catch (error) {
       console.error('Error fetching parcelas:', error);
@@ -96,7 +104,15 @@ const Visitas = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        setCultivos(data.cultivos || []);
+        const cultivosList = data.cultivos || [];
+        setCultivos(cultivosList);
+        
+        // Construir map de cultivo_id -> nombre
+        const map = {};
+        cultivosList.forEach(c => {
+          map[c._id] = `${c.nombre} ${c.variedad ? `- ${c.variedad}` : ''}`.trim();
+        });
+        setCultivosMap(map);
       }
     } catch (error) {
       console.error('Error fetching cultivos:', error);
