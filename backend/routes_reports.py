@@ -18,8 +18,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
 
-from emergentintegrations.llm import LlmChat
-from emergentintegrations.llm.chat import UserMessage
+from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 from database import (
     parcelas_collection, contratos_collection, tratamientos_collection,
