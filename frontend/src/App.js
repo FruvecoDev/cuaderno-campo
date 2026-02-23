@@ -145,6 +145,12 @@ function App() {
             <Layout><Fitosanitarios /></Layout>
           </ProtectedRoute>
         } />
+        
+        <Route path="/informes-gastos" element={
+          <ProtectedRoute>
+            <Layout><InformesGastos /></Layout>
+          </ProtectedRoute>
+        } />
       </Routes>
     </AuthProvider>
   );
