@@ -172,6 +172,12 @@ const Tratamientos = () => {
     
     try {
       setError(null);
+      const url = editingId 
+        ? `${BACKEND_URL}/api/tratamientos/${editingId}`
+        : `${BACKEND_URL}/api/tratamientos`;
+      
+      const method = editingId ? 'PUT' : 'POST';
+      
       const payload = {
         ...formData,
         superficie_aplicacion: parseFloat(formData.superficie_aplicacion),
@@ -180,8 +186,8 @@ const Tratamientos = () => {
         volumen_cuba: 0
       };
       
-      const response = await fetch(`${BACKEND_URL}/api/tratamientos`, {
-        method: 'POST',
+      const response = await fetch(url, {
+        method: method,
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
@@ -197,6 +203,7 @@ const Tratamientos = () => {
       const data = await response.json();
       if (data.success) {
         setShowForm(false);
+        setEditingId(null);
         fetchTratamientos();
         // Reset form
         setFormData({
@@ -214,11 +221,47 @@ const Tratamientos = () => {
         setSelectedParcelas([]);
       }
     } catch (error) {
-      console.error('Error creating tratamiento:', error);
-      const errorMsg = handlePermissionError(error, 'crear el tratamiento');
+      console.error('Error saving tratamiento:', error);
+      const errorMsg = handlePermissionError(error, editingId ? 'actualizar el tratamiento' : 'crear el tratamiento');
       setError(errorMsg);
       setTimeout(() => setError(null), 5000);
     }
+  };
+  
+  const handleEdit = (tratamiento) => {
+    setEditingId(tratamiento._id);
+    setFormData({
+      tipo_tratamiento: tratamiento.tipo_tratamiento || 'FITOSANITARIOS',
+      subtipo: tratamiento.subtipo || 'Insecticida',
+      aplicacion_numero: tratamiento.aplicacion_numero || 1,
+      metodo_aplicacion: tratamiento.metodo_aplicacion || 'Pulverización',
+      superficie_aplicacion: tratamiento.superficie_aplicacion || '',
+      caldo_superficie: tratamiento.caldo_superficie || '',
+      contrato_id: tratamiento.contrato_id || '',
+      cultivo_id: tratamiento.cultivo_id || '',
+      campana: tratamiento.campana || '',
+      parcelas_ids: tratamiento.parcelas_ids || []
+    });
+    setSelectedParcelas(tratamiento.parcelas_ids || []);
+    setShowForm(true);
+  };
+  
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setShowForm(false);
+    setSelectedParcelas([]);
+    setFormData({
+      tipo_tratamiento: 'FITOSANITARIOS',
+      subtipo: 'Insecticida',
+      aplicacion_numero: 1,
+      metodo_aplicacion: 'Pulverización',
+      superficie_aplicacion: '',
+      caldo_superficie: '',
+      contrato_id: '',
+      cultivo_id: '',
+      campana: '',
+      parcelas_ids: []
+    });
   };
   
   const handleDelete = async (tratamientoId) => {
