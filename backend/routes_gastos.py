@@ -367,7 +367,7 @@ async def get_gastos_por_parcela(
                         "superficie": parcela.get("superficie"),
                         "finca": parcela.get("finca")
                     }
-            except:
+            except Exception:
                 pass
         
         coste_por_ha = None
