@@ -100,9 +100,11 @@ Visita/Tratamiento → realizados sobre → Parcela
    - Preguntas personalizables (Admin/Manager pueden agregar)
    - Hereda datos automáticamente de la parcela seleccionada
    - **PDF Cuaderno de Campo Completo** (actualizado 23/02/2026):
-     - Página 1: Resumen + **Índice de Contenidos** con enlaces a visitas y tratamientos
-     - Páginas de Visitas: Una página por cada visita registrada
-     - Páginas de Tratamientos: Una página por cada tratamiento
+     - Página 1: Resumen + **Índice de Contenidos** completo
+     - Páginas de Visitas (azul): Una por cada visita registrada
+     - Páginas de Tratamientos (naranja): Una por cada tratamiento
+     - Páginas de Irrigaciones (azul agua): Una por cada riego
+     - Páginas de Cosechas (verde): Una por cada cosecha con tabla de registros
    - Acceso rápido desde Parcelas (botón "Crear Evaluación")
 
 9. **Filtros Hoja de Evaluación (Nuevo - 23/02/2026)**
