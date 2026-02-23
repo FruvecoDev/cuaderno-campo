@@ -17,6 +17,8 @@ import Albaranes from './pages/Albaranes';
 import Cosechas from './pages/Cosechas';
 import Documentos from './pages/Documentos';
 import Usuarios from './pages/Usuarios';
+import Proveedores from './pages/Proveedores';
+import Cultivos from './pages/Cultivos';
 
 function App() {
   return (
@@ -107,6 +109,18 @@ function App() {
         <Route path="/usuarios" element={
           <ProtectedRoute>
             <Layout><Usuarios /></Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/proveedores" element={
+          <ProtectedRoute>
+            <Layout><Proveedores /></Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/cultivos" element={
+          <ProtectedRoute>
+            <Layout><Cultivos /></Layout>
           </ProtectedRoute>
         } />
       </Routes>
