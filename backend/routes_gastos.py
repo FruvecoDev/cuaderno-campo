@@ -233,7 +233,7 @@ async def get_gastos_por_contrato(
                         "precio": contrato.get("precio"),
                         "superficie": contrato.get("superficie")
                     }
-            except:
+            except Exception:
                 pass
         
         enriched_results.append({
