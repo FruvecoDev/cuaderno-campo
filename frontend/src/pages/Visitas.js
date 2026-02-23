@@ -591,6 +591,32 @@ const Visitas = () => {
                   />
                 </div>
               )}
+              
+              {/* Campo para planificar visitas futuras */}
+              <div className="form-group">
+                <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  Fecha Planificada
+                  <span style={{ 
+                    fontSize: '0.7rem', 
+                    backgroundColor: '#e3f2fd', 
+                    color: '#1976d2', 
+                    padding: '2px 6px', 
+                    borderRadius: '4px' 
+                  }}>
+                    Opcional - Para calendario
+                  </span>
+                </label>
+                <input
+                  type="date"
+                  className="form-input"
+                  value={formData.fecha_planificada}
+                  onChange={(e) => setFormData({...formData, fecha_planificada: e.target.value})}
+                  data-testid="input-fecha-planificada"
+                />
+                <small style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.75rem' }}>
+                  Si planificas una fecha, aparecerá en el calendario del Dashboard
+                </small>
+              </div>
             </div>
             
             {/* SELECTOR DE PARCELA CON BÚSQUEDA - Siempre visible (obligatorio) */}
