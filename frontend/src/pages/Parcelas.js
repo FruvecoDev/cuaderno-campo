@@ -370,8 +370,10 @@ const Parcelas = () => {
                 </div>
               </div>
               <div className="flex gap-2">
-                <button type="submit" className="btn btn-primary" data-testid="btn-guardar-parcela">Guardar Parcela</button>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>Cancelar</button>
+                <button type="submit" className="btn btn-primary" data-testid="btn-guardar-parcela">
+                  {editingId ? 'Actualizar Parcela' : 'Guardar Parcela'}
+                </button>
+                <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>Cancelar</button>
               </div>
             </form>
           </div>
