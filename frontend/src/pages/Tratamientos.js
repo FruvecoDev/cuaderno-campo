@@ -116,6 +116,51 @@ const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
     setAlerts(newAlerts);
   }, [calcData, resultados]);
   
+  // Fetch products from database when tipo changes
+  useEffect(() => {
+    const fetchProductos = async () => {
+      if (!token) return;
+      setLoadingProductos(true);
+      try {
+        const tipoMap = {
+          'insecticida': 'Insecticida',
+          'herbicida': 'Herbicida',
+          'fungicida': 'Fungicida',
+          'fertilizante': 'Fertilizante'
+        };
+        const tipo = tipoMap[calcData.tipoProducto] || calcData.tipoProducto;
+        const response = await fetch(`${BACKEND_URL}/api/fitosanitarios?tipo=${tipo}&activo=true`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setProductosDB(data.productos || []);
+        }
+      } catch (error) {
+        console.error('Error loading productos:', error);
+      } finally {
+        setLoadingProductos(false);
+      }
+    };
+    
+    if (showCalculator) {
+      fetchProductos();
+    }
+  }, [calcData.tipoProducto, showCalculator, token]);
+  
+  // Handle product selection from DB
+  const handleSelectProducto = (producto) => {
+    setSelectedProducto(producto);
+    setCalcData(prev => ({
+      ...prev,
+      nombreProducto: producto.nombre_comercial,
+      dosisProducto: producto.dosis_max ? producto.dosis_max.toString() : prev.dosisProducto,
+      unidadDosis: producto.unidad_dosis || 'L/ha',
+      volumenAgua: producto.volumen_agua_max ? producto.volumen_agua_max.toString() : prev.volumenAgua,
+      plagaObjetivo: (producto.plagas_objetivo || []).join(', ')
+    }));
+  };
+  
   const resetCalculator = () => {
     setCalcData({
       superficie: '',
@@ -128,6 +173,7 @@ const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
       tipoProducto: 'insecticida',
       plagaObjetivo: ''
     });
+    setSelectedProducto(null);
     setAlerts({});
   };
   
