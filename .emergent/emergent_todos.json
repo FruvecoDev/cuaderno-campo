@@ -1,22 +1,26 @@
 [
   {
-    "content": "Modificar modelo backend Contratos: usar proveedor_id y cultivo_id",
-    "status": "completed"
-  },
-  {
-    "content": "Actualizar endpoints Contratos para manejar referencias",
-    "status": "completed"
-  },
-  {
-    "content": "Actualizar formulario frontend Contratos con selectores",
-    "status": "in_progress"
-  },
-  {
-    "content": "Testing crear contrato con referencias",
+    "content": "Reescribir formulario de Contratos eliminando código duplicado (líneas 279-310)",
     "status": "pending"
   },
   {
-    "content": "Actualizar Visitas y Tratamientos: añadir relaciones contrato",
+    "content": "Implementar dropdowns para Proveedor (proveedor_id) y Cultivo (cultivo_id)",
+    "status": "pending"
+  },
+  {
+    "content": "Hacer campo 'Artículo MP' opcional y con placeholder claro",
+    "status": "pending"
+  },
+  {
+    "content": "Verificar que el payload enviado al backend incluye proveedor_id y cultivo_id",
+    "status": "pending"
+  },
+  {
+    "content": "Probar flujo completo: crear contrato, verificar en tabla, eliminar",
+    "status": "pending"
+  },
+  {
+    "content": "Verificar que no hay errores de compilación frontend (esbuild check)",
     "status": "pending"
   }
 ]
