@@ -1,18 +1,14 @@
 [
   {
-    "content": "Completar edición en Tratamientos",
-    "status": "completed"
-  },
-  {
-    "content": "Completar CRUD en Irrigaciones",
+    "content": "Ajustar formulario Parcelas: contrato OBLIGATORIO (no opcional)",
     "status": "in_progress"
   },
   {
-    "content": "Completar CRUD en Recetas",
+    "content": "Ajustar formulario Visitas: solo seleccionar Parcela, autocompleta todo",
     "status": "pending"
   },
   {
-    "content": "Completar CRUD en Albaranes",
+    "content": "Ajustar formulario Tratamientos: solo seleccionar Parcela(s), autocompleta todo",
     "status": "pending"
   }
 ]
