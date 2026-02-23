@@ -107,17 +107,26 @@ const Contratos = () => {
       
       const method = editingId ? 'PUT' : 'POST';
       
+      // Preparar datos incluyendo precios_calidad si es guisante
+      const submitData = {
+        ...formData,
+        cantidad: parseFloat(formData.cantidad),
+        precio: parseFloat(formData.precio),
+        precios_calidad: isGuisante ? formData.precios_calidad.map(pc => ({
+          ...pc,
+          min_tenderometria: parseFloat(pc.min_tenderometria),
+          max_tenderometria: parseFloat(pc.max_tenderometria),
+          precio: parseFloat(pc.precio)
+        })) : []
+      };
+      
       const response = await fetch(url, {
         method: method,
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          ...formData,
-          cantidad: parseFloat(formData.cantidad),
-          precio: parseFloat(formData.precio)
-        })
+        body: JSON.stringify(submitData)
       });
       const data = await response.json();
       if (data.success) {
@@ -135,12 +144,37 @@ const Contratos = () => {
           periodo_desde: '',
           periodo_hasta: '',
           moneda: 'EUR',
-          observaciones: ''
+          observaciones: '',
+          precios_calidad: []
         });
       }
     } catch (error) {
       console.error('Error saving contrato:', error);
     }
+  };
+  
+  // Funciones para manejar tabla de precios por tenderometría
+  const addPrecioTenderometria = () => {
+    setFormData({
+      ...formData,
+      precios_calidad: [
+        ...formData.precios_calidad,
+        { min_tenderometria: '', max_tenderometria: '', precio: '', calidad: 'standard' }
+      ]
+    });
+  };
+  
+  const removePrecioTenderometria = (index) => {
+    setFormData({
+      ...formData,
+      precios_calidad: formData.precios_calidad.filter((_, i) => i !== index)
+    });
+  };
+  
+  const updatePrecioTenderometria = (index, field, value) => {
+    const updated = [...formData.precios_calidad];
+    updated[index][field] = value;
+    setFormData({ ...formData, precios_calidad: updated });
   };
   
   const handleEdit = (contrato) => {
