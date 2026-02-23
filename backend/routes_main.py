@@ -412,12 +412,21 @@ async def get_visitas(
     skip: int = 0,
     limit: int = 100,
     parcela_id: Optional[str] = None,
+    campana: Optional[str] = None,
+    cultivo_id: Optional[str] = None,
+    contrato_id: Optional[str] = None,
     current_user: dict = Depends(get_current_user),
     _access: dict = Depends(RequireVisitasAccess)
 ):
     query = {}
     if parcela_id:
         query["parcela_id"] = parcela_id
+    if campana:
+        query["campana"] = campana
+    if cultivo_id:
+        query["cultivo_id"] = cultivo_id
+    if contrato_id:
+        query["contrato_id"] = contrato_id
     
     visitas = await visitas_collection.find(query).skip(skip).limit(limit).to_list(limit)
     return {"visitas": serialize_docs(visitas), "total": await visitas_collection.count_documents(query)}
