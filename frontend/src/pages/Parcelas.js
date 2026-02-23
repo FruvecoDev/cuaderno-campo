@@ -56,6 +56,7 @@ function DrawControl({ onPolygonCreated }) {
 const Parcelas = () => {
   const [parcelas, setParcelas] = useState([]);
   const [contratos, setContratos] = useState([]);
+  const [searchContrato, setSearchContrato] = useState('');
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [polygon, setPolygon] = useState([]);
