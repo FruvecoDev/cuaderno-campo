@@ -659,6 +659,14 @@ async def generate_evaluacion_pdf(
             background-color: #b9770e;
             color: white;
         }
+        .index-section-title.irrigaciones {
+            background-color: #2874a6;
+            color: white;
+        }
+        .index-section-title.cosechas {
+            background-color: #1e8449;
+            color: white;
+        }
         .index-item {
             display: flex;
             justify-content: space-between;
