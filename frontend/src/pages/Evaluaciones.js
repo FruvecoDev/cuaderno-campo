@@ -626,8 +626,6 @@ const Evaluaciones = () => {
     );
   };
   
-  const campanas = [...new Set(evaluaciones.map(e => e.campana).filter(Boolean))];
-  
   return (
     <div data-testid="evaluaciones-page">
       <div className="flex justify-between items-center mb-6">
