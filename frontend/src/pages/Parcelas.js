@@ -308,8 +308,9 @@ const Parcelas = () => {
                   className="form-select"
                   value={formData.contrato_id}
                   onChange={(e) => setFormData({...formData, contrato_id: e.target.value})}
+                  required
                 >
-                  <option value="">Sin contrato asociado</option>
+                  <option value="">-- Seleccionar contrato --</option>
                   {contratos
                     .filter(c => {
                       if (!searchContrato) return true;
