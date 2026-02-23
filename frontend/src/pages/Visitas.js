@@ -158,8 +158,14 @@ const Visitas = () => {
     
     try {
       setError(null);
-      const response = await fetch(`${BACKEND_URL}/api/visitas`, {
-        method: 'POST',
+      const url = editingId 
+        ? `${BACKEND_URL}/api/visitas/${editingId}`
+        : `${BACKEND_URL}/api/visitas`;
+      
+      const method = editingId ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method: method,
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
@@ -175,6 +181,7 @@ const Visitas = () => {
       const data = await response.json();
       if (data.success) {
         setShowForm(false);
+        setEditingId(null);
         fetchVisitas();
         // Reset form
         setFormData({
@@ -188,11 +195,39 @@ const Visitas = () => {
         });
       }
     } catch (error) {
-      console.error('Error creating visita:', error);
-      const errorMsg = handlePermissionError(error, 'crear la visita');
+      console.error('Error saving visita:', error);
+      const errorMsg = handlePermissionError(error, editingId ? 'actualizar la visita' : 'crear la visita');
       setError(errorMsg);
       setTimeout(() => setError(null), 5000);
     }
+  };
+  
+  const handleEdit = (visita) => {
+    setEditingId(visita._id);
+    setFormData({
+      objetivo: visita.objetivo || 'Control Rutinario',
+      fecha_visita: visita.fecha_visita || '',
+      contrato_id: visita.contrato_id || '',
+      parcela_id: visita.parcela_id || '',
+      cultivo_id: visita.cultivo_id || '',
+      campana: visita.campana || '',
+      observaciones: visita.observaciones || ''
+    });
+    setShowForm(true);
+  };
+  
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setShowForm(false);
+    setFormData({
+      objetivo: 'Control Rutinario',
+      fecha_visita: '',
+      contrato_id: '',
+      parcela_id: '',
+      cultivo_id: '',
+      campana: '',
+      observaciones: ''
+    });
   };
   
   const handleDelete = async (visitaId) => {
