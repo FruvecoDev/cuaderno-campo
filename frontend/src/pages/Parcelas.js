@@ -178,6 +178,28 @@ const Parcelas = () => {
             </div>
             
             <form onSubmit={handleSubmit}>
+              <div className="card" style={{ backgroundColor: 'hsl(var(--muted))', marginBottom: '1rem', padding: '0.75rem' }}>
+                <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
+                  💡 <strong>Tip:</strong> Selecciona un Contrato para autocompletar Proveedor, Cultivo y Campaña
+                </p>
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">Contrato (Opcional - ayuda a autocompletar)</label>
+                <select
+                  className="form-select"
+                  value={formData.contrato_id}
+                  onChange={(e) => setFormData({...formData, contrato_id: e.target.value})}
+                >
+                  <option value="">Sin contrato asociado</option>
+                  {contratos.map(c => (
+                    <option key={c._id} value={c._id}>
+                      {c.serie}-{c.año}-{String(c.numero).padStart(3, '0')} - {c.proveedor} - {c.cultivo} ({c.campana})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
               <div className="form-group">
                 <label className="form-label">Código Plantación *</label>
                 <input type="text" className="form-input" value={formData.codigo_plantacion} onChange={(e) => setFormData({...formData, codigo_plantacion: e.target.value})} required />
