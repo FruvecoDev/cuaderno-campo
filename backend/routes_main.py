@@ -354,6 +354,40 @@ async def create_visita(
     current_user: dict = Depends(RequireCreate),
     _access: dict = Depends(RequireVisitasAccess)
 ):
+    # Validar referencias obligatorias
+    parcelas_collection_ref = db['parcelas']
+    cultivos_collection = db['cultivos']
+    contratos_collection_ref = db['contratos']
+    
+    # Validar parcela existe
+    if not ObjectId.is_valid(visita.parcela_id):
+        raise HTTPException(status_code=400, detail="parcela_id inválido")
+    parcela = await parcelas_collection_ref.find_one({"_id": ObjectId(visita.parcela_id)})
+    if not parcela:
+        raise HTTPException(status_code=400, detail="Parcela no encontrada")
+    
+    # Validar cultivo existe
+    if not ObjectId.is_valid(visita.cultivo_id):
+        raise HTTPException(status_code=400, detail="cultivo_id inválido")
+    cultivo = await cultivos_collection.find_one({"_id": ObjectId(visita.cultivo_id)})
+    if not cultivo:
+        raise HTTPException(status_code=400, detail="Cultivo no encontrado")
+    
+    # Validar contrato (si se proporciona)
+    contrato = None
+    if visita.contrato_id:
+        if not ObjectId.is_valid(visita.contrato_id):
+            raise HTTPException(status_code=400, detail="contrato_id inválido")
+        contrato = await contratos_collection_ref.find_one({"_id": ObjectId(visita.contrato_id)})
+        if not contrato:
+            raise HTTPException(status_code=400, detail="Contrato no encontrado")
+        
+        # Validar consistencia: campaña, cultivo deben coincidir con contrato
+        if visita.campana != contrato.get('campana'):
+            raise HTTPException(status_code=400, detail="La campaña no coincide con el contrato")
+        if visita.cultivo_id != contrato.get('cultivo_id'):
+            raise HTTPException(status_code=400, detail="El cultivo no coincide con el contrato")
+    
     visita_dict = visita.dict()
     visita_dict.update({
         "realizado": False,
@@ -361,6 +395,12 @@ async def create_visita(
         "created_at": datetime.now(),
         "updated_at": datetime.now()
     })
+    
+    # Poblar nombres para compatibilidad/reportes
+    if cultivo:
+        visita_dict['cultivo'] = f"{cultivo['nombre']} {cultivo.get('variedad', '')}".strip()
+    if contrato:
+        visita_dict['proveedor'] = contrato.get('proveedor', '')
     
     result = await visitas_collection.insert_one(visita_dict)
     created = await visitas_collection.find_one({"_id": result.inserted_id})
