@@ -316,11 +316,17 @@ const Albaranes = () => {
     const contrato = contratos.find(c => c._id === albaran.contrato_id);
     setSelectedContrato(contrato);
     
+    // Determinar si usa otro proveedor (diferente al del contrato)
+    const proveedorContrato = contrato?.proveedor || '';
+    const usarOtroProveedor = albaran.proveedor && albaran.proveedor !== proveedorContrato;
+    
     setFormData({
       tipo: albaran.tipo || 'Entrada',
       fecha: albaran.fecha || '',
       contrato_id: albaran.contrato_id || '',
-      proveedor: albaran.proveedor || '',
+      proveedor_contrato: proveedorContrato,
+      proveedor: albaran.proveedor || proveedorContrato,
+      usar_otro_proveedor: usarOtroProveedor,
       cultivo: albaran.cultivo || '',
       parcela_codigo: albaran.parcela_codigo || '',
       parcela_id: albaran.parcela_id || '',
