@@ -30,6 +30,7 @@ from routes_extended import router as extended_router
 from routes_auth import router as auth_router
 from routes_catalogos import router as catalogos_router
 from routes_ai import router as ai_router
+from routes_maquinaria import router as maquinaria_router
 
 # Import database
 from database import (
@@ -55,6 +56,7 @@ app.include_router(main_router)
 app.include_router(extended_router)
 app.include_router(catalogos_router)
 app.include_router(ai_router)
+app.include_router(maquinaria_router)
 
 # ============================================================================
 # ROOT
