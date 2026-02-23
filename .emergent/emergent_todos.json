@@ -1,50 +1,58 @@
 [
   {
-    "content": "Phase 1 POC: Research best practices for PDF/Excel generation and AI prompts",
+    "content": "Phase 1 POC: All completed",
     "status": "completed"
   },
   {
-    "content": "Phase 1 POC: Create comprehensive test script for AI + PDF + Excel generation",
-    "status": "completed"
+    "content": "Phase 2: Install additional dependencies",
+    "status": "in_progress"
   },
   {
-    "content": "Phase 1 POC: Test Leaflet Maps with polygon drawing",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 1 POC: Build minimal UI for POC testing",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 1 POC: All user stories covered and tested",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 2: Backend - Complete data models and CRUD APIs",
+    "content": "Phase 2: Create MongoDB models for all entities",
     "status": "pending"
   },
   {
-    "content": "Phase 2: Frontend - Build all module views and components",
+    "content": "Phase 2: Backend - Complete CRUD APIs for all modules",
     "status": "pending"
   },
   {
-    "content": "Phase 2: Implement Leaflet Maps integration with polygon drawing",
+    "content": "Phase 2: Frontend - Navigation and layout structure",
     "status": "pending"
   },
   {
-    "content": "Phase 2: Implement PDF/Excel export functionality",
+    "content": "Phase 2: Frontend - Contratos module (complete fields)",
     "status": "pending"
   },
   {
-    "content": "Phase 2: Build Dashboard with KPIs",
+    "content": "Phase 2: Frontend - Parcelas module with map",
     "status": "pending"
   },
   {
-    "content": "Phase 2: Implement document upload system",
+    "content": "Phase 2: Frontend - Fincas module",
     "status": "pending"
   },
   {
-    "content": "Phase 2: All user stories covered in Development and testing",
+    "content": "Phase 2: Frontend - Visitas, Tareas, Cosechas modules",
+    "status": "pending"
+  },
+  {
+    "content": "Phase 2: Frontend - Tratamientos module (complete)",
+    "status": "pending"
+  },
+  {
+    "content": "Phase 2: Frontend - Irrigaciones, Recetas, Albaranes modules",
+    "status": "pending"
+  },
+  {
+    "content": "Phase 2: Document upload system",
+    "status": "pending"
+  },
+  {
+    "content": "Phase 2: Dashboard with KPIs",
+    "status": "pending"
+  },
+  {
+    "content": "Phase 2: Enhanced PDF/Excel exports",
     "status": "pending"
   },
   {
