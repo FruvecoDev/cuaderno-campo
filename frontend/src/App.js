@@ -124,6 +124,12 @@ function App() {
             <Layout><Cultivos /></Layout>
           </ProtectedRoute>
         } />
+        
+        <Route path="/maquinaria" element={
+          <ProtectedRoute>
+            <Layout><Maquinaria /></Layout>
+          </ProtectedRoute>
+        } />
       </Routes>
     </AuthProvider>
   );
