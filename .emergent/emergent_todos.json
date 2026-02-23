@@ -1,10 +1,10 @@
 [
   {
-    "content": "Mejorar visualización de registros legacy en Tratamientos (mostrar mensaje informativo en vez de N/A)",
+    "content": "Mejorar legibilidad de tablas: mostrar nombres de parcelas en vez de IDs",
     "status": "completed"
   },
   {
-    "content": "Mejorar legibilidad de tablas: mostrar nombres de parcelas en vez de IDs",
+    "content": "Verificar que el frontend compila sin errores",
     "status": "in_progress"
   },
   {
