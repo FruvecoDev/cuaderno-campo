@@ -1,14 +1,10 @@
 [
   {
-    "content": "Mejorar legibilidad de tablas: mostrar nombres de parcelas en vez de IDs",
+    "content": "Verificar que el frontend compila sin errores",
     "status": "completed"
   },
   {
-    "content": "Verificar que el frontend compila sin errores",
+    "content": "Generar informe final de mejoras implementadas",
     "status": "in_progress"
-  },
-  {
-    "content": "Resolver warnings de hidratación en tablas (estructura DOM)",
-    "status": "pending"
   }
 ]
