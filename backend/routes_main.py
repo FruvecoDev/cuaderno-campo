@@ -15,7 +15,7 @@ from models import (
 from database import (
     contratos_collection, parcelas_collection, fincas_collection,
     visitas_collection, tareas_collection, cosechas_collection,
-    serialize_doc, serialize_docs
+    serialize_doc, serialize_docs, db
 )
 from rbac_guards import (
     RequireCreate, RequireEdit, RequireDelete,
