@@ -219,12 +219,12 @@ const Contratos = () => {
   
   const handleDelete = async (contratoId) => {
     if (!canDelete) {
-      setError('No tienes permisos para eliminar contratos');
+      setError(t('messages.errorDeleting'));
       setTimeout(() => setError(null), 5000);
       return;
     }
     
-    if (!window.confirm('¿Estás seguro de que quieres eliminar este contrato?')) {
+    if (!window.confirm(t('messages.confirmDelete'))) {
       return;
     }
     
@@ -245,7 +245,7 @@ const Contratos = () => {
       fetchContratos();
     } catch (error) {
       console.error('Error deleting contrato:', error);
-      const errorMsg = handlePermissionError(error, 'eliminar el contrato');
+      const errorMsg = handlePermissionError(error, t('common.delete'));
       setError(errorMsg);
       setTimeout(() => setError(null), 5000);
     }
@@ -254,7 +254,7 @@ const Contratos = () => {
   return (
     <div data-testid="contratos-page">
       <div className="flex justify-between items-center mb-6">
-        <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>Contratos</h1>
+        <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>{t('contracts.title')}</h1>
         <PermissionButton
           permission="create"
           onClick={() => setShowForm(!showForm)}
