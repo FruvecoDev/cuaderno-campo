@@ -1510,10 +1510,59 @@ const Tratamientos = () => {
                 setFormData(prev => ({
                   ...prev,
                   superficie_aplicacion: values.superficie_aplicacion || prev.superficie_aplicacion,
-                  caldo_superficie: values.caldo_superficie || prev.caldo_superficie
+                  caldo_superficie: values.caldo_superficie || prev.caldo_superficie,
+                  // Producto fitosanitario
+                  producto_fitosanitario_id: values.producto_fitosanitario_id || prev.producto_fitosanitario_id,
+                  producto_fitosanitario_nombre: values.producto_fitosanitario_nombre || prev.producto_fitosanitario_nombre,
+                  producto_fitosanitario_dosis: values.producto_fitosanitario_dosis || prev.producto_fitosanitario_dosis,
+                  producto_fitosanitario_unidad: values.producto_fitosanitario_unidad || prev.producto_fitosanitario_unidad,
+                  producto_materia_activa: values.producto_materia_activa || prev.producto_materia_activa,
+                  producto_plazo_seguridad: values.producto_plazo_seguridad || prev.producto_plazo_seguridad
                 }));
               }}
             />
+            
+            {/* Mostrar producto seleccionado */}
+            {formData.producto_fitosanitario_nombre && (
+              <div className="card" style={{ 
+                backgroundColor: '#f0fdf4', 
+                border: '2px solid #86efac', 
+                marginBottom: '1.5rem', 
+                padding: '1rem' 
+              }}>
+                <h4 style={{ marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '600', color: '#166534', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Beaker size={16} /> Producto Fitosanitario Seleccionado
+                </h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.5rem', fontSize: '0.875rem' }}>
+                  <div><strong>Producto:</strong> {formData.producto_fitosanitario_nombre}</div>
+                  {formData.producto_materia_activa && (
+                    <div><strong>Materia Activa:</strong> {formData.producto_materia_activa}</div>
+                  )}
+                  {formData.producto_fitosanitario_dosis && (
+                    <div><strong>Dosis:</strong> {formData.producto_fitosanitario_dosis} {formData.producto_fitosanitario_unidad}</div>
+                  )}
+                  {formData.producto_plazo_seguridad && (
+                    <div><strong>Plazo Seguridad:</strong> {formData.producto_plazo_seguridad} días</div>
+                  )}
+                </div>
+                <button 
+                  type="button"
+                  className="btn btn-sm btn-secondary mt-2"
+                  onClick={() => setFormData(prev => ({
+                    ...prev,
+                    producto_fitosanitario_id: '',
+                    producto_fitosanitario_nombre: '',
+                    producto_fitosanitario_dosis: '',
+                    producto_fitosanitario_unidad: '',
+                    producto_materia_activa: '',
+                    producto_plazo_seguridad: ''
+                  }))}
+                  style={{ fontSize: '0.75rem' }}
+                >
+                  <X size={14} /> Quitar producto
+                </button>
+              </div>
+            )}
             
             {/* Datos técnicos */}
             <div className="grid-2">
