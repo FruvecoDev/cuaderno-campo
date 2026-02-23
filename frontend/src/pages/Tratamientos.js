@@ -152,6 +152,7 @@ const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
     <div className="mb-6">
       {/* Botón para mostrar/ocultar calculadora */}
       <button
+        type="button"
         onClick={() => setShowCalculator(!showCalculator)}
         className={`btn ${showCalculator ? 'btn-primary' : 'btn-secondary'}`}
         style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}
