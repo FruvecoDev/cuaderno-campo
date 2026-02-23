@@ -129,6 +129,15 @@ const Visitas = () => {
     observaciones: ''
   });
   
+  // Estado para el cuestionario de plagas y enfermedades
+  const [cuestionarioPlagas, setCuestionarioPlagas] = useState(() => {
+    const initial = {};
+    PLAGAS_ENFERMEDADES.forEach(p => {
+      initial[p.key] = 0;
+    });
+    return initial;
+  });
+  
   useEffect(() => {
     fetchVisitas();
     fetchParcelas();
