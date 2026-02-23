@@ -1,15 +1,11 @@
 [
   {
-    "content": "Crear servicio de IA (ai_service.py) con plantillas de prompts",
+    "content": "Crear endpoints backend para reportes IA",
     "status": "completed"
   },
   {
-    "content": "Crear endpoints backend para reportes IA",
-    "status": "in_progress"
-  },
-  {
     "content": "Crear página frontend para reportes IA con historial",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Testing de funcionalidades IA",
