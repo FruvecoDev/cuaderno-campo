@@ -10,6 +10,7 @@ from auth_utils import (
     decode_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 )
 from database import db, serialize_doc
+from rbac_config import get_role_permissions
 
 router = APIRouter(prefix="/api/auth", tags=["authentication"])
 security = HTTPBearer()
@@ -65,13 +66,8 @@ async def register(user_data: UserCreate, current_user: dict = Depends(get_curre
     # Create user
     hashed_password = get_password_hash(user_data.password)
     
-    # Set permissions based on role
-    permissions = {
-        UserRole.ADMIN: {"can_create": True, "can_edit": True, "can_delete": True, "can_export": True},
-        UserRole.MANAGER: {"can_create": True, "can_edit": True, "can_delete": False, "can_export": True},
-        UserRole.TECHNICIAN: {"can_create": True, "can_edit": True, "can_delete": False, "can_export": False},
-        UserRole.VIEWER: {"can_create": False, "can_edit": False, "can_delete": False, "can_export": True}
-    }
+    # Get permissions from RBAC matrix
+    role_permissions = get_role_permissions(user_data.role)
     
     user_dict = {
         "email": user_data.email,
@@ -79,12 +75,7 @@ async def register(user_data: UserCreate, current_user: dict = Depends(get_curre
         "role": user_data.role,
         "hashed_password": hashed_password,
         "is_active": True,
-        **permissions.get(user_data.role, permissions[UserRole.VIEWER]),
-        "modules_access": [
-            "dashboard", "contratos", "parcelas", "fincas",
-            "visitas", "tareas", "tratamientos", "irrigaciones",
-            "recetas", "albaranes", "cosechas", "documentos"
-        ],
+        **role_permissions,
         "created_at": datetime.now(),
         "updated_at": datetime.now()
     }
@@ -202,22 +193,16 @@ async def initialize_admin():
     if user_count > 0:
         raise HTTPException(status_code=400, detail="Admin already exists")
     
-    # Create default admin
+    # Create default admin with permissions from RBAC matrix
+    admin_permissions = get_role_permissions(UserRole.ADMIN)
+    
     admin_data = {
         "email": "admin@agrogest.com",
         "full_name": "Administrator",
         "role": UserRole.ADMIN,
         "hashed_password": get_password_hash("admin123"),
         "is_active": True,
-        "can_create": True,
-        "can_edit": True,
-        "can_delete": True,
-        "can_export": True,
-        "modules_access": [
-            "dashboard", "contratos", "parcelas", "fincas",
-            "visitas", "tareas", "tratamientos", "irrigaciones",
-            "recetas", "albaranes", "cosechas", "documentos"
-        ],
+        **admin_permissions,
         "created_at": datetime.now(),
         "updated_at": datetime.now()
     }
