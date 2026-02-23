@@ -259,6 +259,25 @@ Módulos actualizados para seguir patrón consistente:
 - **Test IDs**: `btn-calculadora`, `btn-reset-calculadora`
 - **Estado**: ✅ COMPLETADO Y TESTEADO
 
+## Historial de Tratamientos por Parcela (23/02/2026)
+- **Ubicación**: Modal en `/app/frontend/src/pages/Parcelas.js`
+- **Backend**: Endpoint `/api/tratamientos/parcela/{parcela_id}/historial`
+- **Funcionalidades**:
+  - Botón de historial (icono reloj verde) en cada fila de parcela
+  - Modal con información completa de la parcela
+  - KPIs: Total tratamientos, Productos diferentes, Tipos de tratamiento
+  - Tabla cronológica de todos los tratamientos:
+    - Fecha de tratamiento y aplicación
+    - Producto fitosanitario aplicado
+    - Tipo de tratamiento (Herbicida/Insecticida/Fungicida/etc.)
+    - Dosis aplicada
+    - Superficie tratada
+    - Nombre del aplicador
+  - Lista de productos utilizados (badges)
+  - Endpoint adicional `/api/tratamientos/resumen-campana/{campana}` para informes
+- **Uso**: Cumplimiento normativo del cuaderno de campo
+- **Estado**: ✅ COMPLETADO
+
 ## Base de Datos de Productos Fitosanitarios (23/02/2026)
 - **Nuevo Módulo**: `/app/frontend/src/pages/Fitosanitarios.js`
 - **Backend Router**: `/app/backend/routes_fitosanitarios.py`
