@@ -99,7 +99,10 @@ Visita/Tratamiento → realizados sobre → Parcela
    - Tipos de respuesta: Sí/No, Texto, Número, Fecha
    - Preguntas personalizables (Admin/Manager pueden agregar)
    - Hereda datos automáticamente de la parcela seleccionada
-   - Generación de PDF profesional con WeasyPrint
+   - **PDF Cuaderno de Campo Completo** (actualizado 23/02/2026):
+     - Página 1: Resumen con conteo de visitas y tratamientos + datos de evaluación
+     - Páginas de Visitas: Una página por cada visita registrada (fecha, objetivo, observaciones, cuestionario plagas)
+     - Páginas de Tratamientos: Una página por cada tratamiento (fecha, tipo, aplicador, máquina, dosis, coste, productos)
    - Acceso rápido desde Parcelas (botón "Crear Evaluación")
 
 9. **Filtros Hoja de Evaluación (Nuevo - 23/02/2026)**
@@ -148,5 +151,6 @@ Visita/Tratamiento → realizados sobre → Parcela
 - **Viewer**: `viewer@test.com` / (check DB)
 
 ## Test Reports
-- `/app/test_reports/iteration_8.json` - Latest test results (100% pass - Filtros Hoja de Evaluación)
+- `/app/test_reports/iteration_9.json` - Latest test results (100% pass - PDF con Visitas y Tratamientos)
+- `/app/test_reports/iteration_8.json` - (100% pass - Filtros Hoja de Evaluación)
 - `/app/test_reports/iteration_7.json` - (100% pass - Maquinaria + Tratamientos integration)
