@@ -157,7 +157,7 @@ Visita/Tratamiento → realizados sobre → Parcela
 
 ## Key Files
 - `/app/backend/routes_main.py` - CRUD Contratos, Parcelas, Visitas, Fincas
-- `/app/backend/routes_extended.py` - CRUD Tratamientos, Irrigaciones, Recetas, Albaranes, Tareas, Cosechas
+- `/app/backend/routes_extended.py` - CRUD Tratamientos, Irrigaciones, Recetas, Albaranes, Tareas, **Cosechas (rediseñado)**
 - `/app/backend/routes_maquinaria.py` - CRUD Maquinaria
 - `/app/backend/routes_evaluaciones.py` - CRUD Evaluaciones + PDF generation
 - `/app/backend/routes_ai.py` - Endpoints IA
@@ -165,6 +165,7 @@ Visita/Tratamiento → realizados sobre → Parcela
 - `/app/frontend/src/pages/Evaluaciones.js` - Hojas de Evaluación con filtros completos
 - `/app/frontend/src/pages/Visitas.js` - Formulario simplificado + Plagas/Enfermedades
 - `/app/frontend/src/pages/Tratamientos.js` - Formulario con Aplicador y Máquina
+- `/app/frontend/src/pages/Cosechas.js` - **Nuevo módulo de cosechas asociado a contratos**
 
 ## Test Credentials
 - **Admin**: `admin@fruveco.com` / `admin123`
