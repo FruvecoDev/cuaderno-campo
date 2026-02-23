@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, FileText, MapPin, Home, Calendar, ListTodo,
   Sprout, Droplets, BookOpen, FileBarChart, Wheat, FolderOpen,
-  LogOut, User, Users
+  LogOut, User, Users, Package, Leaf
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
@@ -38,6 +38,10 @@ const Layout = ({ children }) => {
       { path: '/albaranes', label: 'Albaranes', icon: FileBarChart, module: 'albaranes' },
       { path: '/cosechas', label: 'Cosechas', icon: Wheat, module: 'cosechas' },
       { path: '/documentos', label: 'Documentos', icon: FolderOpen, module: 'documentos' },
+    ]},
+    { section: 'Catálogos', items: [
+      { path: '/proveedores', label: 'Proveedores', icon: Package },
+      { path: '/cultivos', label: 'Cultivos', icon: Leaf },
     ]},
     { section: 'Sistema', items: [
       { path: '/usuarios', label: 'Usuarios', icon: Users, requireAdmin: true },
