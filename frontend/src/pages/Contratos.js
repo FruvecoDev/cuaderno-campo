@@ -437,6 +437,7 @@ const Contratos = () => {
                           {canEdit && (
                             <button
                               className="btn btn-sm btn-secondary"
+                              onClick={() => handleEdit(contrato)}
                               title="Editar contrato"
                               data-testid={`edit-contrato-${contrato._id}`}
                             >
