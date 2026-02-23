@@ -252,14 +252,54 @@ const InformesGastos = () => {
             Análisis de gastos por proveedor, contrato, cultivo y parcela
           </p>
         </div>
-        <button
-          className="btn btn-secondary"
-          onClick={fetchResumen}
-          disabled={loading}
-        >
-          <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-          Actualizar
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          {/* View toggle */}
+          <div style={{ display: 'flex', borderRadius: '6px', overflow: 'hidden', border: '1px solid hsl(var(--border))' }}>
+            <button
+              className={`btn btn-sm ${viewMode === 'table' ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setViewMode('table')}
+              style={{ borderRadius: 0 }}
+              title="Vista tabla"
+            >
+              <FileSpreadsheet size={16} />
+            </button>
+            <button
+              className={`btn btn-sm ${viewMode === 'chart' ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setViewMode('chart')}
+              style={{ borderRadius: 0 }}
+              title="Vista gráficos"
+            >
+              <PieChart size={16} />
+            </button>
+          </div>
+          
+          {/* Export buttons */}
+          <button
+            className="btn btn-secondary"
+            onClick={exportToExcel}
+            disabled={exportingExcel}
+            title="Exportar a Excel"
+          >
+            <FileDown size={18} />
+            {exportingExcel ? 'Exportando...' : 'Excel'}
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={exportToPdf}
+            disabled={exportingPdf}
+            title="Exportar a PDF"
+          >
+            <Download size={18} />
+            {exportingPdf ? 'Exportando...' : 'PDF'}
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={fetchResumen}
+            disabled={loading}
+          >
+            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+          </button>
+        </div>
       </div>
 
       {error && (
