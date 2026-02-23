@@ -1,14 +1,10 @@
 [
   {
-    "content": "Actualizar formulario frontend de Tratamientos: flujo guiado similar",
+    "content": "Verificar compilación frontend sin errores",
     "status": "completed"
   },
   {
-    "content": "Verificar compilación frontend sin errores",
-    "status": "in_progress"
-  },
-  {
     "content": "Probar flujo completo de Visitas y Tratamientos con nuevos vínculos",
-    "status": "pending"
+    "status": "in_progress"
   }
 ]
