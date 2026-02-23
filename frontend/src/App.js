@@ -21,6 +21,7 @@ import Proveedores from './pages/Proveedores';
 import Cultivos from './pages/Cultivos';
 import Maquinaria from './pages/Maquinaria';
 import Evaluaciones from './pages/Evaluaciones';
+import Fitosanitarios from './pages/Fitosanitarios';
 
 function App() {
   return (
