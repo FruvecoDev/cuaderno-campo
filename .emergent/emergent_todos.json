@@ -1,18 +1,30 @@
 [
   {
-    "content": "P1.1: Ocultar/deshabilitar botones Delete en listados según can_delete",
-    "status": "completed"
+    "content": "Crear modelo y CRUD backend para Proveedores",
+    "status": "in_progress"
   },
   {
-    "content": "P1.2: Mostrar mensajes 403 amigables cuando backend rechaza operación",
-    "status": "completed"
-  },
-  {
-    "content": "P1.3: Implementar cambio/reset de contraseña",
+    "content": "Crear modelo y CRUD backend para Cultivos",
     "status": "pending"
   },
   {
-    "content": "P2: Ocultar campos de costes para roles sin can_view_costs",
+    "content": "Crear página frontend de gestión de Proveedores",
+    "status": "pending"
+  },
+  {
+    "content": "Crear página frontend de gestión de Cultivos",
+    "status": "pending"
+  },
+  {
+    "content": "Modificar modelo Contratos: usar cultivo_id en lugar de articulo_mp",
+    "status": "pending"
+  },
+  {
+    "content": "Actualizar Visitas y Tratamientos: añadir relaciones parcela+cultivo+campaña+contrato",
+    "status": "pending"
+  },
+  {
+    "content": "Actualizar formularios frontend con selectores de Proveedores y Cultivos",
     "status": "pending"
   }
 ]
