@@ -632,19 +632,19 @@ const Maquinaria = () => {
               <tbody>
                 {filteredMaquinaria.map((item) => (
                   <tr key={item._id}>
-                    {tableConfig.nombre && <td className="font-semibold">{item.nombre}</td>}
-                    {(tableConfig.tipo) ? <td>{item.tipo}</td>}
-                    {(tableConfig.marca) ? <td>{item.marca || '—'}</td>}
-                    {(tableConfig.modelo) ? <td>{item.modelo || '—'}</td>}
-                    {(tableConfig.matricula) ? <td>{item.matricula || '—'}</td>}
-                    {tableConfig.estado && (
+                    {tableConfig.nombre ? <td className="font-semibold">{item.nombre}</td> : null}
+                    {tableConfig.tipo ? <td>{item.tipo}</td> : null}
+                    {tableConfig.marca ? <td>{item.marca || '—'}</td> : null}
+                    {tableConfig.modelo ? <td>{item.modelo || '—'}</td> : null}
+                    {tableConfig.matricula ? <td>{item.matricula || '—'}</td> : null}
+                    {tableConfig.estado ? (
                       <td>
                         <span className={`badge ${getEstadoBadgeClass(item.estado)}`}>
                           {item.estado}
                         </span>
                       </td>
-                    )}
-                    {(canEdit || canDelete) && (
+                    ) : null}
+                    {(canEdit || canDelete) ? (
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                           {canEdit && (
