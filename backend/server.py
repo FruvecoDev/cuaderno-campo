@@ -28,6 +28,7 @@ from openpyxl.utils import get_column_letter
 from routes_main import router as main_router
 from routes_extended import router as extended_router
 from routes_auth import router as auth_router
+from routes_catalogos import router as catalogos_router
 
 # Import database
 from database import (
