@@ -99,7 +99,15 @@ const Tratamientos = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        setCultivos(data.cultivos || []);
+        const cultivosList = data.cultivos || [];
+        setCultivos(cultivosList);
+        
+        // Construir map de cultivo_id -> nombre
+        const map = {};
+        cultivosList.forEach(c => {
+          map[c._id] = `${c.nombre} ${c.variedad ? `- ${c.variedad}` : ''}`.trim();
+        });
+        setCultivosMap(map);
       }
     } catch (error) {
       console.error('Error fetching cultivos:', error);
