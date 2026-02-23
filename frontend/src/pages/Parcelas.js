@@ -62,6 +62,8 @@ const Parcelas = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [polygon, setPolygon] = useState([]);
+  const { token } = useAuth();
+  
   const [formData, setFormData] = useState({
     contrato_id: '',
     proveedor: '',
