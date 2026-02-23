@@ -283,16 +283,16 @@ const InformesGastos = () => {
             title="Exportar a Excel"
           >
             <FileDown size={18} />
-            {exportingExcel ? 'Exportando...' : 'Excel'}
+            {exportingExcel ? t('common.loading') : t('expenseReports.exportExcel')}
           </button>
           <button
             className="btn btn-secondary"
             onClick={exportToPdf}
             disabled={exportingPdf}
-            title="Exportar a PDF"
+            title={t('expenseReports.exportPdf')}
           >
             <Download size={18} />
-            {exportingPdf ? 'Exportando...' : 'PDF'}
+            {exportingPdf ? t('common.loading') : t('expenseReports.exportPdf')}
           </button>
           <button
             className="btn btn-secondary"
@@ -314,17 +314,17 @@ const InformesGastos = () => {
       <div className="card mb-6">
         <div className="flex justify-between items-center mb-4">
           <h3 style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Filter size={18} /> Filtros
+            <Filter size={18} /> {t('common.filters')}
           </h3>
           {hasActiveFilters && (
             <button className="btn btn-sm btn-secondary" onClick={clearFilters}>
-              <X size={14} /> Limpiar
+              <X size={14} /> {t('common.clear')}
             </button>
           )}
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Desde</label>
+            <label className="form-label">{t('common.from')}</label>
             <input
               type="date"
               className="form-input"
@@ -333,7 +333,7 @@ const InformesGastos = () => {
             />
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Hasta</label>
+            <label className="form-label">{t('common.to')}</label>
             <input
               type="date"
               className="form-input"
@@ -342,7 +342,7 @@ const InformesGastos = () => {
             />
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Campaña</label>
+            <label className="form-label">{t('contracts.campaign')}</label>
             <select
               className="form-select"
               value={filters.campana}
