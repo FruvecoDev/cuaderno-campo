@@ -17,6 +17,8 @@ class AgriculturalAPITester:
         """Run a single API test"""
         url = f"{self.base_url}/{endpoint}"
         headers = {'Content-Type': 'application/json'}
+        if self.token:
+            headers['Authorization'] = f'Bearer {self.token}'
 
         self.tests_run += 1
         print(f"\n🔍 Testing {name}...")
@@ -50,6 +52,102 @@ class AgriculturalAPITester:
         except Exception as e:
             print(f"   ❌ Failed - Error: {str(e)}")
             return False, {}
+
+    def test_login(self):
+        """Test login with admin credentials"""
+        print("\n🔐 Testing Authentication...")
+        
+        login_data = {
+            "username": "admin@agrogest.com",
+            "password": "admin123"
+        }
+        
+        success, response = self.run_test(
+            "Admin Login",
+            "POST",
+            "api/auth/login",
+            200,
+            login_data
+        )
+        
+        if success and response.get("success") and response.get("token"):
+            self.token = response["token"]
+            print(f"   🎯 Token obtained successfully")
+            return True
+        else:
+            print(f"   ❌ Login failed: {response}")
+            return False
+
+    def setup_test_catalogs(self):
+        """Setup required catalog data for testing"""
+        print("\n📚 Setting up test catalogs...")
+        
+        # Check if proveedores exist, create if needed
+        success, response = self.run_test(
+            "Get Proveedores",
+            "GET",
+            "api/proveedores?activo=true",
+            200
+        )
+        
+        if success:
+            proveedores = response.get("proveedores", [])
+            if proveedores:
+                self.catalog_ids["proveedor_id"] = proveedores[0]["_id"]
+                print(f"   Using existing proveedor: {proveedores[0].get('nombre')}")
+            else:
+                # Create test proveedor
+                proveedor_data = {
+                    "nombre": "Test Agricultural Provider",
+                    "cif_nif": "TEST123456",
+                    "telefono": "123456789",
+                    "email": "test@provider.com",
+                    "activo": True
+                }
+                success, response = self.run_test(
+                    "Create Test Proveedor",
+                    "POST",
+                    "api/proveedores",
+                    200,
+                    proveedor_data
+                )
+                if success and response.get("data"):
+                    self.catalog_ids["proveedor_id"] = response["data"]["_id"]
+                    print(f"   Created test proveedor")
+        
+        # Check if cultivos exist, create if needed
+        success, response = self.run_test(
+            "Get Cultivos",
+            "GET", 
+            "api/cultivos?activo=true",
+            200
+        )
+        
+        if success:
+            cultivos = response.get("cultivos", [])
+            if cultivos:
+                self.catalog_ids["cultivo_id"] = cultivos[0]["_id"]
+                print(f"   Using existing cultivo: {cultivos[0].get('nombre')}")
+            else:
+                # Create test cultivo
+                cultivo_data = {
+                    "nombre": "Tomate Test",
+                    "tipo": "Hortaliza",
+                    "variedad": "RAF Test",
+                    "activo": True
+                }
+                success, response = self.run_test(
+                    "Create Test Cultivo",
+                    "POST",
+                    "api/cultivos",
+                    200,
+                    cultivo_data
+                )
+                if success and response.get("data"):
+                    self.catalog_ids["cultivo_id"] = response["data"]["_id"]
+                    print(f"   Created test cultivo")
+        
+        return bool(self.catalog_ids.get("proveedor_id") and self.catalog_ids.get("cultivo_id"))
 
     def test_root(self):
         """Test root endpoint"""
