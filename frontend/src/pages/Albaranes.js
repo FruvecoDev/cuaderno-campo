@@ -265,6 +265,11 @@ const Albaranes = () => {
       return;
     }
     
+    if (formData.usar_otro_proveedor && !formData.proveedor) {
+      setError('Debe seleccionar un proveedor para el albarán');
+      return;
+    }
+    
     try {
       setError(null);
       const url = editingId 
@@ -275,6 +280,9 @@ const Albaranes = () => {
       
       const payload = {
         ...formData,
+        // No enviar campos temporales del frontend
+        usar_otro_proveedor: undefined,
+        proveedor_contrato: undefined,
         items: formData.items.map(item => ({
           ...item,
           cantidad: parseFloat(item.cantidad) || 0,
@@ -283,6 +291,10 @@ const Albaranes = () => {
         })),
         total_albaran: calculateGrandTotal()
       };
+      
+      // Limpiar campos undefined del payload
+      delete payload.usar_otro_proveedor;
+      delete payload.proveedor_contrato;
       
       const response = await fetch(url, {
         method,
