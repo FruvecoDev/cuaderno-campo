@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { Lock, User, AlertCircle } from 'lucide-react';
+import LanguageSelector from '../components/LanguageSelector';
 import '../App.css';
 import logo from '../assets/logo.png';
 
@@ -13,6 +15,7 @@ const Login = () => {
   const [showInitAdmin, setShowInitAdmin] = useState(false);
   const { login, initializeAdmin, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   useEffect(() => {
     if (isAuthenticated) {
