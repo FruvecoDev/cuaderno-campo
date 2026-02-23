@@ -15,6 +15,8 @@ const DEFAULT_FIELDS_CONFIG = {
   parcelas_ids: true,
   superficie_aplicacion: true,
   caldo_superficie: true,
+  fecha_tratamiento: true,
+  fecha_aplicacion: true,
   aplicador_nombre: true,
   maquina_id: true
 };
@@ -27,6 +29,8 @@ const FIELD_LABELS = {
   parcelas_ids: 'Parcelas',
   superficie_aplicacion: 'Superficie',
   caldo_superficie: 'Caldo/Superficie',
+  fecha_tratamiento: 'Fecha Tratamiento',
+  fecha_aplicacion: 'Fecha Aplicación',
   aplicador_nombre: 'Aplicador',
   maquina_id: 'Máquina'
 };
@@ -37,6 +41,8 @@ const DEFAULT_TABLE_CONFIG = {
   subtipo: true,
   metodo: true,
   campana: true,
+  fecha_tratamiento: true,
+  fecha_aplicacion: true,
   superficie: true,
   parcelas: true,
   aplicador: true,
@@ -49,6 +55,8 @@ const TABLE_LABELS = {
   subtipo: 'Subtipo',
   metodo: 'Método',
   campana: 'Campaña',
+  fecha_tratamiento: 'F. Tratamiento',
+  fecha_aplicacion: 'F. Aplicación',
   superficie: 'Superficie',
   parcelas: 'Parcelas',
   aplicador: 'Aplicador',
