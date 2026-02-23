@@ -7,9 +7,11 @@ import time
 class AgriculturalAPITester:
     def __init__(self, base_url="https://parcelas-hub.preview.emergentagent.com"):
         self.base_url = base_url
+        self.token = None
         self.tests_run = 0
         self.tests_passed = 0
         self.created_ids = {}
+        self.catalog_ids = {}
 
     def run_test(self, name, method, endpoint, expected_status, data=None, params=None):
         """Run a single API test"""
