@@ -89,7 +89,12 @@ class TratamientoBase(BaseModel):
     coste_superficie: float = 0.0
     coste_total: float = 0.0
     
-    # Aplicador y maquinaria
+    # Aplicador y maquinaria (versión simplificada)
+    aplicador_nombre: Optional[str] = None  # Texto libre con nombre del aplicador
+    maquina_id: Optional[str] = None  # ObjectId ref a maquinaria
+    maquina_nombre: Optional[str] = None  # Nombre de la máquina (denormalizado para display)
+    
+    # Aplicador y maquinaria (versión completa - legacy)
     aplicador: Optional[TratamientoAplicador] = None
     maquinaria: Optional[TratamientoMaquinaria] = None
     
