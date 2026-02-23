@@ -141,6 +141,90 @@ const InformesGastos = () => {
     }).format(value || 0);
   };
   
+  // Export functions
+  const exportToExcel = async () => {
+    try {
+      setExportingExcel(true);
+      const params = new URLSearchParams();
+      if (filters.fecha_desde) params.append('fecha_desde', filters.fecha_desde);
+      if (filters.fecha_hasta) params.append('fecha_hasta', filters.fecha_hasta);
+      if (filters.campana) params.append('campana', filters.campana);
+      
+      const response = await fetch(`${BACKEND_URL}/api/gastos/export/excel?${params}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `informe_gastos_${new Date().toISOString().slice(0,10)}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Error exporting Excel:', error);
+      setError('Error al exportar a Excel');
+    } finally {
+      setExportingExcel(false);
+    }
+  };
+  
+  const exportToPdf = async () => {
+    try {
+      setExportingPdf(true);
+      const params = new URLSearchParams();
+      if (filters.fecha_desde) params.append('fecha_desde', filters.fecha_desde);
+      if (filters.fecha_hasta) params.append('fecha_hasta', filters.fecha_hasta);
+      if (filters.campana) params.append('campana', filters.campana);
+      
+      const response = await fetch(`${BACKEND_URL}/api/gastos/export/pdf?${params}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `informe_gastos_${new Date().toISOString().slice(0,10)}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      setError('Error al exportar a PDF');
+    } finally {
+      setExportingPdf(false);
+    }
+  };
+  
+  // Prepare chart data
+  const getChartDataProveedor = () => {
+    if (!resumen?.por_proveedor) return [];
+    return resumen.por_proveedor.slice(0, 8).map((item, idx) => ({
+      name: item.proveedor.length > 15 ? item.proveedor.slice(0, 15) + '...' : item.proveedor,
+      total: item.total,
+      count: item.count,
+      fill: CHART_COLORS[idx % CHART_COLORS.length]
+    }));
+  };
+  
+  const getChartDataCultivo = () => {
+    if (!resumen?.por_cultivo) return [];
+    return resumen.por_cultivo.slice(0, 8).map((item, idx) => ({
+      name: item.cultivo.length > 15 ? item.cultivo.slice(0, 15) + '...' : item.cultivo,
+      total: item.total,
+      count: item.count,
+      fill: CHART_COLORS[idx % CHART_COLORS.length]
+    }));
+  };
+  
   const hasActiveFilters = filters.fecha_desde || filters.fecha_hasta || filters.campana;
 
   const toggleSection = (section) => {
