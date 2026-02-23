@@ -194,7 +194,11 @@ async def delete_irrigacion(
 # ============================================================================
 
 @router.post("/recetas", response_model=dict)
-async def create_receta(receta: RecetaCreate):
+async def create_receta(
+    receta: RecetaCreate,
+    current_user: dict = Depends(RequireCreate),
+    _access: dict = Depends(RequireRecetasAccess)
+):
     receta_dict = receta.dict()
     receta_dict.update({
         "productos": [],
@@ -208,12 +212,21 @@ async def create_receta(receta: RecetaCreate):
     return {"success": True, "data": serialize_doc(created)}
 
 @router.get("/recetas")
-async def get_recetas(skip: int = 0, limit: int = 100):
+async def get_recetas(
+    skip: int = 0,
+    limit: int = 100,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireRecetasAccess)
+):
     recetas = await recetas_collection.find().skip(skip).limit(limit).to_list(limit)
     return {"recetas": serialize_docs(recetas), "total": await recetas_collection.count_documents({})}
 
 @router.get("/recetas/{receta_id}")
-async def get_receta(receta_id: str):
+async def get_receta(
+    receta_id: str,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireRecetasAccess)
+):
     if not ObjectId.is_valid(receta_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
@@ -224,7 +237,11 @@ async def get_receta(receta_id: str):
     return serialize_doc(receta)
 
 @router.delete("/recetas/{receta_id}")
-async def delete_receta(receta_id: str):
+async def delete_receta(
+    receta_id: str,
+    current_user: dict = Depends(RequireDelete),
+    _access: dict = Depends(RequireRecetasAccess)
+):
     if not ObjectId.is_valid(receta_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
@@ -240,7 +257,11 @@ async def delete_receta(receta_id: str):
 # ============================================================================
 
 @router.post("/albaranes", response_model=dict)
-async def create_albaran(albaran: AlbaranCreate):
+async def create_albaran(
+    albaran: AlbaranCreate,
+    current_user: dict = Depends(RequireCreate),
+    _access: dict = Depends(RequireAlbaranesAccess)
+):
     albaran_dict = albaran.dict()
     # Calculate total
     total = sum(item["total"] for item in albaran_dict.get("items", []))
@@ -257,7 +278,13 @@ async def create_albaran(albaran: AlbaranCreate):
     return {"success": True, "data": serialize_doc(created)}
 
 @router.get("/albaranes")
-async def get_albaranes(skip: int = 0, limit: int = 100, tipo: Optional[str] = None):
+async def get_albaranes(
+    skip: int = 0,
+    limit: int = 100,
+    tipo: Optional[str] = None,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireAlbaranesAccess)
+):
     query = {}
     if tipo:
         query["tipo"] = tipo
@@ -266,7 +293,11 @@ async def get_albaranes(skip: int = 0, limit: int = 100, tipo: Optional[str] = N
     return {"albaranes": serialize_docs(albaranes), "total": await albaranes_collection.count_documents(query)}
 
 @router.get("/albaranes/{albaran_id}")
-async def get_albaran(albaran_id: str):
+async def get_albaran(
+    albaran_id: str,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireAlbaranesAccess)
+):
     if not ObjectId.is_valid(albaran_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
@@ -277,7 +308,11 @@ async def get_albaran(albaran_id: str):
     return serialize_doc(albaran)
 
 @router.delete("/albaranes/{albaran_id}")
-async def delete_albaran(albaran_id: str):
+async def delete_albaran(
+    albaran_id: str,
+    current_user: dict = Depends(RequireDelete),
+    _access: dict = Depends(RequireAlbaranesAccess)
+):
     if not ObjectId.is_valid(albaran_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
