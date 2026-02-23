@@ -30,7 +30,11 @@ router = APIRouter(prefix="/api", tags=["extended"])
 # ============================================================================
 
 @router.post("/tratamientos", response_model=dict)
-async def create_tratamiento(tratamiento: TratamientoCreate):
+async def create_tratamiento(
+    tratamiento: TratamientoCreate,
+    current_user: dict = Depends(RequireCreate),
+    _access: dict = Depends(RequireTratamientosAccess)
+):
     tratamiento_dict = tratamiento.dict()
     tratamiento_dict.update({
         "realizado": False,
@@ -49,7 +53,13 @@ async def create_tratamiento(tratamiento: TratamientoCreate):
     return {"success": True, "data": serialize_doc(created)}
 
 @router.get("/tratamientos")
-async def get_tratamientos(skip: int = 0, limit: int = 100, parcela_id: Optional[str] = None):
+async def get_tratamientos(
+    skip: int = 0,
+    limit: int = 100,
+    parcela_id: Optional[str] = None,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireTratamientosAccess)
+):
     query = {}
     if parcela_id:
         query["parcelas_ids"] = parcela_id
@@ -58,7 +68,11 @@ async def get_tratamientos(skip: int = 0, limit: int = 100, parcela_id: Optional
     return {"tratamientos": serialize_docs(tratamientos), "total": await tratamientos_collection.count_documents(query)}
 
 @router.get("/tratamientos/{tratamiento_id}")
-async def get_tratamiento(tratamiento_id: str):
+async def get_tratamiento(
+    tratamiento_id: str,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireTratamientosAccess)
+):
     if not ObjectId.is_valid(tratamiento_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
@@ -69,7 +83,12 @@ async def get_tratamiento(tratamiento_id: str):
     return serialize_doc(tratamiento)
 
 @router.put("/tratamientos/{tratamiento_id}")
-async def update_tratamiento(tratamiento_id: str, tratamiento: TratamientoCreate):
+async def update_tratamiento(
+    tratamiento_id: str,
+    tratamiento: TratamientoCreate,
+    current_user: dict = Depends(RequireEdit),
+    _access: dict = Depends(RequireTratamientosAccess)
+):
     if not ObjectId.is_valid(tratamiento_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
@@ -88,7 +107,11 @@ async def update_tratamiento(tratamiento_id: str, tratamiento: TratamientoCreate
     return {"success": True, "data": serialize_doc(updated)}
 
 @router.delete("/tratamientos/{tratamiento_id}")
-async def delete_tratamiento(tratamiento_id: str):
+async def delete_tratamiento(
+    tratamiento_id: str,
+    current_user: dict = Depends(RequireDelete),
+    _access: dict = Depends(RequireTratamientosAccess)
+):
     if not ObjectId.is_valid(tratamiento_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
