@@ -125,7 +125,6 @@ const Contratos = () => {
           fecha_contrato: new Date().toISOString().split('T')[0],
           proveedor_id: '',
           cultivo_id: '',
-          articulo_mp: '',
           cantidad: '',
           precio: '',
           periodo_desde: '',
