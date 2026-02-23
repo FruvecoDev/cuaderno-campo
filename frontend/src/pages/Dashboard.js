@@ -244,6 +244,203 @@ const Dashboard = () => {
         </div>
       </div>
       
+      {/* Mapa de Parcelas */}
+      <div className="card mb-6" data-testid="mapa-parcelas">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <MapPin size={20} /> Mapa de Parcelas
+          </h2>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+              {parcelas.filter(p => p.recintos?.[0]?.geometria).length} parcelas con geometría
+            </span>
+            <button
+              onClick={() => setMapType(mapType === 'satellite' ? 'osm' : 'satellite')}
+              className="btn btn-sm btn-secondary"
+              title={mapType === 'satellite' ? 'Cambiar a Mapa Base' : 'Cambiar a Satélite'}
+            >
+              {mapType === 'satellite' ? <Layers size={14} /> : <Satellite size={14} />}
+            </button>
+          </div>
+        </div>
+        
+        {parcelas.filter(p => p.recintos?.[0]?.geometria).length > 0 ? (
+          <>
+            <MapContainer 
+              center={[37.0886, -2.3170]} 
+              zoom={12} 
+              style={{ height: '400px', width: '100%', borderRadius: '8px' }}
+              key={mapType}
+            >
+              <TileLayer url={TILE_LAYERS[mapType].url} />
+              <FitAllBounds parcelas={parcelas} />
+              {parcelas.map(parcela => {
+                if (!parcela.recintos?.[0]?.geometria) return null;
+                const coords = parcela.recintos[0].geometria.map(c => [c.lat, c.lng]);
+                return (
+                  <Polygon 
+                    key={parcela._id}
+                    positions={coords}
+                    pathOptions={{ 
+                      color: getCultivoColor(parcela.cultivo),
+                      fillColor: getCultivoColor(parcela.cultivo),
+                      fillOpacity: 0.4,
+                      weight: 2
+                    }}
+                  >
+                    <Popup>
+                      <div style={{ minWidth: '200px' }}>
+                        <strong style={{ fontSize: '1rem' }}>{parcela.codigo_plantacion}</strong>
+                        <div style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
+                          <div><strong>Cultivo:</strong> {parcela.cultivo}</div>
+                          <div><strong>Proveedor:</strong> {parcela.proveedor}</div>
+                          <div><strong>Finca:</strong> {parcela.finca}</div>
+                          <div><strong>Superficie:</strong> {parcela.superficie_total} ha</div>
+                          <div><strong>Campaña:</strong> {parcela.campana}</div>
+                        </div>
+                        <button 
+                          onClick={() => navigate(`/parcelas`)}
+                          style={{
+                            marginTop: '0.75rem',
+                            padding: '0.4rem 0.75rem',
+                            backgroundColor: '#2d5a27',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '0.8rem'
+                          }}
+                        >
+                          Ver detalles
+                        </button>
+                      </div>
+                    </Popup>
+                  </Polygon>
+                );
+              })}
+            </MapContainer>
+            
+            {/* Leyenda de cultivos */}
+            <div style={{ 
+              marginTop: '0.75rem', 
+              display: 'flex', 
+              flexWrap: 'wrap', 
+              gap: '1rem',
+              padding: '0.75rem',
+              backgroundColor: 'hsl(var(--muted))',
+              borderRadius: '6px'
+            }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))' }}>Cultivos:</span>
+              {[...new Set(parcelas.map(p => p.cultivo).filter(Boolean))].map(cultivo => (
+                <div key={cultivo} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <div style={{ 
+                    width: '12px', 
+                    height: '12px', 
+                    backgroundColor: getCultivoColor(cultivo),
+                    borderRadius: '2px'
+                  }} />
+                  <span style={{ fontSize: '0.75rem' }}>{cultivo}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div style={{ 
+            height: '200px', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            backgroundColor: 'hsl(var(--muted))',
+            borderRadius: '8px'
+          }}>
+            <p className="text-muted">No hay parcelas con geometría definida</p>
+          </div>
+        )}
+      </div>
+      
+      {/* Planificador de Visitas y Notificaciones */}
+      <div className="card mb-6" data-testid="planificador-visitas">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Calendar size={20} /> Visitas Planificadas
+          </h2>
+          <button 
+            onClick={() => navigate('/visitas?planificar=true')}
+            className="btn btn-sm btn-primary"
+          >
+            <Calendar size={14} style={{ marginRight: '0.25rem' }} /> Planificar Visita
+          </button>
+        </div>
+        
+        {visitasPlanificadas.length > 0 ? (
+          <div style={{ display: 'grid', gap: '0.75rem' }}>
+            {visitasPlanificadas.slice(0, 5).map((visita, idx) => {
+              const fechaVisita = new Date(visita.fecha_planificada);
+              const hoy = new Date();
+              const diasRestantes = Math.ceil((fechaVisita - hoy) / (1000 * 60 * 60 * 24));
+              const esUrgente = diasRestantes <= 2;
+              const esProxima = diasRestantes <= 7 && diasRestantes > 2;
+              
+              return (
+                <div 
+                  key={idx}
+                  style={{ 
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '1rem',
+                    backgroundColor: esUrgente ? '#fee2e2' : esProxima ? '#fff3e0' : 'hsl(var(--muted))',
+                    borderRadius: '8px',
+                    borderLeft: `4px solid ${esUrgente ? '#dc2626' : esProxima ? '#f57c00' : '#2d5a27'}`
+                  }}
+                >
+                  <div>
+                    <div style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      {esUrgente && <Bell size={16} style={{ color: '#dc2626' }} />}
+                      {visita.objetivo}
+                    </div>
+                    <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
+                      {visita.proveedor} - {visita.cultivo} | {visita.parcela}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ 
+                      fontWeight: '600',
+                      color: esUrgente ? '#dc2626' : esProxima ? '#f57c00' : '#2d5a27'
+                    }}>
+                      {fechaVisita.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                      {diasRestantes === 0 ? '¡Hoy!' : 
+                       diasRestantes === 1 ? 'Mañana' : 
+                       diasRestantes < 0 ? 'Vencida' :
+                       `En ${diasRestantes} días`}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div style={{ 
+            padding: '2rem',
+            textAlign: 'center',
+            backgroundColor: 'hsl(var(--muted))',
+            borderRadius: '8px'
+          }}>
+            <Calendar size={48} style={{ color: 'hsl(var(--muted-foreground))', marginBottom: '0.5rem' }} />
+            <p className="text-muted">No hay visitas planificadas</p>
+            <button 
+              onClick={() => navigate('/visitas?planificar=true')}
+              className="btn btn-primary"
+              style={{ marginTop: '1rem' }}
+            >
+              Planificar primera visita
+            </button>
+          </div>
+        )}
+      </div>
+      
       {/* Recent Activity */}
       {kpis.actividad_reciente && (
         <div className="grid-2">
