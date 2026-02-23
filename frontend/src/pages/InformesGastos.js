@@ -348,7 +348,7 @@ const InformesGastos = () => {
               value={filters.campana}
               onChange={(e) => setFilters({...filters, campana: e.target.value})}
             >
-              <option value="">Todas</option>
+              <option value="">{t('common.all')}</option>
               {campanas.map(c => (
                 <option key={c} value={c}>{c}</option>
               ))}
@@ -356,7 +356,7 @@ const InformesGastos = () => {
           </div>
           <div className="form-group" style={{ marginBottom: 0, display: 'flex', alignItems: 'flex-end' }}>
             <button className="btn btn-primary" onClick={applyFilters} style={{ width: '100%' }}>
-              Aplicar Filtros
+              {t('common.apply')} {t('common.filters')}
             </button>
           </div>
         </div>
@@ -368,7 +368,7 @@ const InformesGastos = () => {
           <div className="card" style={{ textAlign: 'center', padding: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
               <DollarSign size={20} style={{ color: '#16a34a' }} />
-              <span style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Total Gastos</span>
+              <span style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>{t('expenseReports.totalExpenses')}</span>
             </div>
             <p style={{ fontSize: '1.75rem', fontWeight: '700', color: '#16a34a' }}>
               {formatCurrency(resumen.total_general)}
@@ -377,7 +377,7 @@ const InformesGastos = () => {
           <div className="card" style={{ textAlign: 'center', padding: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
               <FileSpreadsheet size={20} style={{ color: '#2563eb' }} />
-              <span style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Albaranes</span>
+              <span style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>{t('expenseReports.deliveryNotes')}</span>
             </div>
             <p style={{ fontSize: '1.75rem', fontWeight: '700', color: '#2563eb' }}>
               {resumen.total_albaranes}
@@ -386,7 +386,7 @@ const InformesGastos = () => {
           <div className="card" style={{ textAlign: 'center', padding: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
               <Building2 size={20} style={{ color: '#7c3aed' }} />
-              <span style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Proveedores</span>
+              <span style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>{t('expenseReports.providers')}</span>
             </div>
             <p style={{ fontSize: '1.75rem', fontWeight: '700', color: '#7c3aed' }}>
               {resumen.por_proveedor?.length || 0}
@@ -395,7 +395,7 @@ const InformesGastos = () => {
           <div className="card" style={{ textAlign: 'center', padding: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
               <Leaf size={20} style={{ color: '#ea580c' }} />
-              <span style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Cultivos</span>
+              <span style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>{t('expenseReports.crops')}</span>
             </div>
             <p style={{ fontSize: '1.75rem', fontWeight: '700', color: '#ea580c' }}>
               {resumen.por_cultivo?.length || 0}
