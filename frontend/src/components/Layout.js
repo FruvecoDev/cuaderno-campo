@@ -142,6 +142,7 @@ const Layout = ({ children }) => {
                 {user?.role || 'Viewer'}
               </div>
             </div>
+            <LanguageSelector variant="minimal" />
           </div>
           <button
             onClick={handleLogout}
@@ -164,7 +165,7 @@ const Layout = ({ children }) => {
             data-testid="logout-button"
           >
             <LogOut size={16} />
-            Cerrar Sesión
+            {t('auth.logout')}
           </button>
         </div>
       </aside>
