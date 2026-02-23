@@ -509,7 +509,7 @@ async def import_productos(
         
         return {
             "success": True,
-            "message": f"Importación completada",
+            "message": "Importación completada",
             "inserted": inserted_count,
             "skipped": skipped,
             "errors": errors[:10] if errors else [],
