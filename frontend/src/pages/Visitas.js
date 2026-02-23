@@ -38,6 +38,7 @@ const Visitas = () => {
   useEffect(() => {
     fetchVisitas();
     fetchContratos();
+    fetchParcelas(); // Cargar TODAS las parcelas para el map
     fetchCultivos();
   }, []);
   
