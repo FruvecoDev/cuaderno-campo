@@ -271,6 +271,7 @@ const Visitas = () => {
           observaciones: ''
         });
         setSelectedParcelaInfo(null);
+        setParcelaSearch({ proveedor: '', cultivo: '', campana: '' });
       }
     } catch (error) {
       console.error('Error saving visita:', error);
