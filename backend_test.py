@@ -644,6 +644,274 @@ class AgriculturalAPITester:
         )
         
         return success
+    def test_contratos_edit_functionality(self):
+        """Test specific edit functionality for contratos"""
+        print("\n✏️  Testing Contratos Edit Functionality...")
+        
+        # First create a contrato to edit
+        if not self.created_ids.get("contrato"):
+            print("   ❌ No contrato available for edit testing")
+            return False
+            
+        contrato_id = self.created_ids["contrato"]
+        
+        # Test editing with updated data
+        updated_data = {
+            "campana": "2025/26",
+            "procedencia": "Almacén con tratamiento",  # Changed
+            "fecha_contrato": "2025-01-20",  # Changed
+            "proveedor_id": self.catalog_ids["proveedor_id"],
+            "cultivo_id": self.catalog_ids["cultivo_id"],
+            "cantidad": 2000.75,  # Changed
+            "precio": 3.50,  # Changed
+            "periodo_desde": "2025-02-01",
+            "periodo_hasta": "2025-12-31", 
+            "moneda": "EUR",
+            "observaciones": "EDITED: Test contrato updated via PUT endpoint"  # Changed
+        }
+        
+        success, response = self.run_test(
+            "Edit Contrato via PUT",
+            "PUT",
+            f"api/contratos/{contrato_id}",
+            200,
+            updated_data
+        )
+        
+        if not success:
+            return False
+            
+        # Verify the changes were saved
+        success, response = self.run_test(
+            "Get Edited Contrato",
+            "GET", 
+            f"api/contratos/{contrato_id}",
+            200
+        )
+        
+        if success and response:
+            if (response.get("observaciones") == "EDITED: Test contrato updated via PUT endpoint" and
+                response.get("procedencia") == "Almacén con tratamiento" and
+                response.get("cantidad") == 2000.75):
+                print(f"   ✅ Edit changes verified successfully")
+                return True
+            else:
+                print(f"   ❌ Edit changes not reflected in database")
+                return False
+        
+        return False
+        
+    def test_contratos_delete_functionality(self):
+        """Test delete functionality for contratos"""
+        print("\n🗑️  Testing Contratos Delete Functionality...")
+        
+        # Create a temporary contrato to delete
+        temp_contrato = {
+            "campana": "2025/26",
+            "procedencia": "Campo",
+            "fecha_contrato": "2025-01-15",
+            "proveedor_id": self.catalog_ids["proveedor_id"],
+            "cultivo_id": self.catalog_ids["cultivo_id"],
+            "cantidad": 500.0,
+            "precio": 2.00,
+            "periodo_desde": "2025-02-01",
+            "periodo_hasta": "2025-12-31",
+            "moneda": "EUR",
+            "observaciones": "Temporary contrato for deletion test"
+        }
+        
+        success, response = self.run_test(
+            "Create Temp Contrato for Deletion",
+            "POST",
+            "api/contratos",
+            200,
+            temp_contrato
+        )
+        
+        if not success:
+            return False
+            
+        temp_id = response.get("data", {}).get("_id")
+        if not temp_id:
+            print("   ❌ No ID returned from temp contrato creation")
+            return False
+            
+        # Test deletion
+        success, response = self.run_test(
+            "Delete Contrato",
+            "DELETE",
+            f"api/contratos/{temp_id}",
+            200
+        )
+        
+        if not success:
+            return False
+            
+        # Verify deletion - should return 404
+        success, response = self.run_test(
+            "Verify Contrato Deleted",
+            "GET",
+            f"api/contratos/{temp_id}",
+            404
+        )
+        
+        # This should "fail" (404) which means deletion worked
+        if not success:
+            print(f"   ✅ Contrato successfully deleted (404 confirmed)")
+            return True
+        else:
+            print(f"   ❌ Contrato still exists after deletion")
+            return False
+
+    def test_parcelas_edit_functionality(self):
+        """Test specific edit functionality for parcelas"""
+        print("\n✏️  Testing Parcelas Edit Functionality...")
+        
+        # First check if we have a parcela to edit
+        if not self.created_ids.get("parcela"):
+            print("   ❌ No parcela available for edit testing")
+            return False
+            
+        parcela_id = self.created_ids["parcela"]
+        contrato_id = self.catalog_ids.get("contrato_id")
+        
+        # Test editing with updated data including contract assignment
+        updated_data = {
+            "contrato_id": contrato_id,  # Assign contract to parcela
+            "proveedor": "EDITED: Updated Proveedor",  # Changed
+            "cultivo": "EDITED: Updated Cultivo",  # Changed 
+            "campana": "2025/26",
+            "variedad": "EDITED: Updated Variedad",  # Changed
+            "superficie_total": 10.50,  # Changed
+            "codigo_plantacion": "EDIT001",  # Changed
+            "num_plantas": 5000,  # Changed
+            "finca": "EDITED: Updated Finca"  # Changed
+        }
+        
+        success, response = self.run_test(
+            "Edit Parcela via PUT",
+            "PUT",
+            f"api/parcelas/{parcela_id}",
+            200,
+            updated_data
+        )
+        
+        if not success:
+            return False
+            
+        # Verify the changes were saved
+        success, response = self.run_test(
+            "Get Edited Parcela",
+            "GET", 
+            f"api/parcelas/{parcela_id}",
+            200
+        )
+        
+        if success and response:
+            if (response.get("proveedor") == "EDITED: Updated Proveedor" and
+                response.get("contrato_id") == contrato_id and
+                response.get("superficie_total") == 10.50):
+                print(f"   ✅ Edit changes and contract assignment verified")
+                return True
+            else:
+                print(f"   ❌ Edit changes not reflected in database")
+                return False
+        
+        return False
+
+    def test_parcelas_delete_functionality(self):
+        """Test delete functionality for parcelas"""
+        print("\n🗑️  Testing Parcelas Delete Functionality...")
+        
+        # Create a temporary parcela to delete
+        temp_parcela = {
+            "proveedor": "Temp Proveedor",
+            "cultivo": "Temp Cultivo", 
+            "campana": "2025/26",
+            "variedad": "Temp Variedad",
+            "superficie_total": 2.5,
+            "codigo_plantacion": "TEMP001",
+            "num_plantas": 1000,
+            "finca": "Temp Finca",
+            "recintos": [{"geometria": [{"lat": 37.0886, "lng": -2.3170}]}]
+        }
+        
+        success, response = self.run_test(
+            "Create Temp Parcela for Deletion",
+            "POST",
+            "api/parcelas",
+            200,
+            temp_parcela
+        )
+        
+        if not success:
+            return False
+            
+        temp_id = response.get("data", {}).get("_id")
+        if not temp_id:
+            print("   ❌ No ID returned from temp parcela creation")
+            return False
+            
+        # Test deletion
+        success, response = self.run_test(
+            "Delete Parcela",
+            "DELETE",
+            f"api/parcelas/{temp_id}",
+            200
+        )
+        
+        if not success:
+            return False
+            
+        # Verify deletion - should return 404
+        success, response = self.run_test(
+            "Verify Parcela Deleted",
+            "GET",
+            f"api/parcelas/{temp_id}",
+            404
+        )
+        
+        # This should "fail" (404) which means deletion worked
+        if not success:
+            print(f"   ✅ Parcela successfully deleted (404 confirmed)")
+            return True
+        else:
+            print(f"   ❌ Parcela still exists after deletion")
+            return False
+
+    def test_contratos_search_functionality(self):
+        """Test contract search functionality used in parcelas form"""
+        print("\n🔍 Testing Contratos Search Functionality...")
+        
+        # Test GET contratos for search (this endpoint is used by parcela form)
+        success, response = self.run_test(
+            "Get All Contratos for Search",
+            "GET",
+            "api/contratos",
+            200
+        )
+        
+        if not success:
+            return False
+            
+        contratos = response.get("contratos", [])
+        if len(contratos) > 0:
+            print(f"   ✅ Found {len(contratos)} contratos available for search")
+            
+            # Verify each contract has required search fields
+            first_contrato = contratos[0]
+            required_fields = ["serie", "año", "numero", "proveedor", "cultivo", "campana"]
+            missing_fields = [field for field in required_fields if not first_contrato.get(field)]
+            
+            if missing_fields:
+                print(f"   ❌ Missing search fields: {missing_fields}")
+                return False
+            else:
+                print(f"   ✅ All required search fields present")
+                return True
+        else:
+            print(f"   ❌ No contratos found for search")
+            return False
 
 def main():
     print("🚀 Starting Agricultural Management API Testing (Refactored Model)...")
