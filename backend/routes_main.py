@@ -412,6 +412,13 @@ async def update_visita(
     if visita.observaciones is not None:
         update_data["observaciones"] = visita.observaciones
     
+    # Actualizar cuestionario de plagas si el objetivo es "Plagas y Enfermedades"
+    if visita.objetivo == "Plagas y Enfermedades" and visita.cuestionario_plagas:
+        update_data["cuestionario_plagas"] = visita.cuestionario_plagas
+    elif visita.objetivo != "Plagas y Enfermedades":
+        # Si el objetivo cambió, eliminar el cuestionario
+        update_data["cuestionario_plagas"] = None
+    
     result = await visitas_collection.update_one(
         {"_id": ObjectId(visita_id)},
         {"$set": update_data}
