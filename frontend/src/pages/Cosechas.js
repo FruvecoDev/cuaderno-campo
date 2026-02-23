@@ -403,6 +403,34 @@ const Cosechas = () => {
         <h3 style={{ fontWeight: '600', marginBottom: '1rem' }}>Filtros</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
           <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Contrato</label>
+            <select
+              className="form-select"
+              value={filters.contrato}
+              onChange={(e) => setFilters({ ...filters, contrato: e.target.value })}
+              data-testid="filter-contrato"
+            >
+              <option value="">Todos</option>
+              {contratos.map(c => (
+                <option key={c._id} value={c._id}>
+                  {c.proveedor} - {c.cultivo} ({c.campana})
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Cultivo</label>
+            <select
+              className="form-select"
+              value={filters.cultivo}
+              onChange={(e) => setFilters({ ...filters, cultivo: e.target.value })}
+              data-testid="filter-cultivo"
+            >
+              <option value="">Todos</option>
+              {filterOptions.cultivos.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label">Proveedor</label>
             <input
               type="text"
