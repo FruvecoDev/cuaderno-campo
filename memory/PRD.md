@@ -233,3 +233,17 @@ Módulos actualizados para seguir patrón consistente:
 - **Templates HTML**: Emails con diseño profesional y branding FRUVECO
 - Archivos: `/app/backend/email_service.py`, `/app/backend/routes_notifications.py`
 - **Configuración**: Añadir RESEND_API_KEY en .env para activar
+
+## Refactorización Backend (23/02/2026)
+- **server.py optimizado**: Reducido de 556 líneas a 61 líneas
+- **Nuevos routers**:
+  - `routes_dashboard.py` - KPIs y estadísticas del dashboard
+  - `routes_reports.py` - Generación de reportes AI, PDF y Excel
+- **Arquitectura modular**: 10 routers independientes para mejor mantenibilidad
+- Archivos: `/app/backend/server.py`, `/app/backend/routes_dashboard.py`, `/app/backend/routes_reports.py`
+
+## Corrección React Hydration Warnings (23/02/2026)
+- **Problema corregido**: Patrones `{condition && <element>}` en tablas que causaban mismatch servidor/cliente
+- **Solución aplicada**: Reemplazo por `{condition ? <element> : null}` en todos los archivos afectados
+- **Archivos corregidos**: Contratos.js, Parcelas.js, Visitas.js, Tratamientos.js, Irrigaciones.js, Recetas.js, Albaranes.js, Maquinaria.js
+- **Resultado**: Eliminación completa de warnings de hidratación en la consola
