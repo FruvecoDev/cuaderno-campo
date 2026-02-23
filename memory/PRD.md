@@ -182,3 +182,8 @@ Visita/Tratamiento → realizados sobre → Parcela
 Módulos actualizados para seguir patrón consistente:
 - **Fincas**: Filtros (buscar, campaña, provincia), resumen KPIs, tabla mejorada con editar/eliminar
 - **Tareas**: Filtros (buscar, estado), 5 KPIs, toggle de estado con click, tabla mejorada
+
+## Branding Update (23/02/2026)
+- **Logo en Sidebar**: Reemplazado texto "FRUVECO" por imagen del logo corporativo
+- Archivo: `/app/frontend/src/assets/logo.png`
+- Componente: `/app/frontend/src/components/Layout.js`
