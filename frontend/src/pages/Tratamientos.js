@@ -192,7 +192,15 @@ const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
     if (onApplyToForm && resultados.superficieHa > 0) {
       onApplyToForm({
         superficie_aplicacion: resultados.superficieHa,
-        caldo_superficie: parseFloat(calcData.volumenAgua) || 0
+        caldo_superficie: parseFloat(calcData.volumenAgua) || 0,
+        // Producto fitosanitario seleccionado
+        producto_fitosanitario_id: selectedProducto?._id || null,
+        producto_fitosanitario_nombre: selectedProducto?.nombre_comercial || calcData.nombreProducto || null,
+        producto_fitosanitario_dosis: parseFloat(calcData.dosisProducto) || null,
+        producto_fitosanitario_unidad: calcData.unidadDosis || null,
+        // Datos adicionales del producto para mostrar
+        producto_materia_activa: selectedProducto?.materia_activa || null,
+        producto_plazo_seguridad: selectedProducto?.plazo_seguridad || null
       });
       setShowCalculator(false);
     }
