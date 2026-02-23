@@ -232,22 +232,50 @@ const Contratos = () => {
             <div className="grid-2">
               <div className="form-group">
                 <label className="form-label">Proveedor *</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.proveedor}
-                  onChange={(e) => setFormData({...formData, proveedor: e.target.value})}
-                  placeholder="Nombre del proveedor"
+                <select
+                  className="form-select"
+                  value={formData.proveedor_id}
+                  onChange={(e) => setFormData({...formData, proveedor_id: e.target.value})}
                   required
-                />
+                >
+                  <option value="">Seleccionar proveedor...</option>
+                  {proveedores.map(p => (
+                    <option key={p._id} value={p._id}>
+                      {p.nombre} {p.cif_nif ? `(${p.cif_nif})` : ''}
+                    </option>
+                  ))}
+                </select>
               </div>
               
               <div className="form-group">
                 <label className="form-label">Cultivo *</label>
+                <select
+                  className="form-select"
+                  value={formData.cultivo_id}
+                  onChange={(e) => setFormData({...formData, cultivo_id: e.target.value})}
+                  required
+                >
+                  <option value="">Seleccionar cultivo...</option>
+                  {cultivos.map(c => (
+                    <option key={c._id} value={c._id}>
+                      {c.nombre} {c.variedad ? `- ${c.variedad}` : ''} ({c.tipo})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
+            <div className="grid-2">
+              <div className="form-group">
+                <label className="form-label">Artículo MP (Opcional)</label>
                 <input
                   type="text"
                   className="form-input"
-                  value={formData.cultivo}
+                  value={formData.articulo_mp}
+                  onChange={(e) => setFormData({...formData, articulo_mp: e.target.value})}
+                  placeholder="Código artículo MP"
+                />
+              </div>
                   onChange={(e) => setFormData({...formData, cultivo: e.target.value})}
                   placeholder="Tipo de cultivo"
                   required
