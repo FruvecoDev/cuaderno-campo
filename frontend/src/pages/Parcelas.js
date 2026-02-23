@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, Polygon, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Polygon, useMap, LayersControl } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
-import { Plus, Map as MapIcon, Edit2, Trash2, Filter, Settings, X, ClipboardCheck } from 'lucide-react';
+import { Plus, Map as MapIcon, Edit2, Trash2, Filter, Settings, X, ClipboardCheck, Layers, Satellite } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 
@@ -19,38 +19,146 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
-function DrawControl({ onPolygonCreated }) {
+// Tile layers para diferentes vistas
+const TILE_LAYERS = {
+  osm: {
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; OpenStreetMap contributors',
+    name: 'Mapa Base'
+  },
+  satellite: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: '&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP',
+    name: 'Satélite'
+  },
+  hybrid: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: '&copy; Esri',
+    name: 'Híbrido'
+  },
+  topo: {
+    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; OpenTopoMap',
+    name: 'Topográfico'
+  }
+};
+
+function DrawControl({ onPolygonCreated, onPolygonEdited, editablePolygon, isEditing }) {
   const map = useMap();
+  const drawnItemsRef = useRef(null);
+  const drawControlRef = useRef(null);
   
   useEffect(() => {
     if (!map) return;
     
+    // Limpiar controles anteriores
+    if (drawControlRef.current) {
+      map.removeControl(drawControlRef.current);
+    }
+    if (drawnItemsRef.current) {
+      map.removeLayer(drawnItemsRef.current);
+    }
+    
     const drawnItems = new L.FeatureGroup();
+    drawnItemsRef.current = drawnItems;
     map.addLayer(drawnItems);
     
+    // Si hay un polígono editable, añadirlo al grupo
+    if (editablePolygon && editablePolygon.length > 0 && isEditing) {
+      const latlngs = editablePolygon.map(p => [p.lat, p.lng]);
+      const polygon = L.polygon(latlngs, { color: '#2d5a27', fillColor: '#4CAF50', fillOpacity: 0.3 });
+      drawnItems.addLayer(polygon);
+    }
+    
     const drawControl = new L.Control.Draw({
+      position: 'topright',
       draw: {
-        polygon: { allowIntersection: false, showArea: true, metric: true },
-        polyline: false, circle: false, rectangle: false, marker: false, circlemarker: false
+        polygon: { 
+          allowIntersection: false, 
+          showArea: true, 
+          metric: true,
+          shapeOptions: {
+            color: '#2d5a27',
+            fillColor: '#4CAF50',
+            fillOpacity: 0.3
+          }
+        },
+        polyline: false, 
+        circle: false, 
+        rectangle: false, 
+        marker: false, 
+        circlemarker: false
       },
-      edit: { featureGroup: drawnItems, remove: true }
+      edit: { 
+        featureGroup: drawnItems, 
+        remove: true,
+        edit: true
+      }
     });
     
+    drawControlRef.current = drawControl;
     map.addControl(drawControl);
     
-    map.on(L.Draw.Event.CREATED, (e) => {
+    // Evento: Polígono creado
+    const handleCreated = (e) => {
       const layer = e.layer;
+      // Limpiar polígonos anteriores (solo permitir uno)
+      drawnItems.clearLayers();
       drawnItems.addLayer(layer);
       const latlngs = layer.getLatLngs()[0];
       const coordinates = latlngs.map(point => ({ lat: point.lat, lng: point.lng }));
       onPolygonCreated(coordinates);
-    });
+    };
+    
+    // Evento: Polígono editado
+    const handleEdited = (e) => {
+      const layers = e.layers;
+      layers.eachLayer((layer) => {
+        const latlngs = layer.getLatLngs()[0];
+        const coordinates = latlngs.map(point => ({ lat: point.lat, lng: point.lng }));
+        if (onPolygonEdited) {
+          onPolygonEdited(coordinates);
+        } else {
+          onPolygonCreated(coordinates);
+        }
+      });
+    };
+    
+    // Evento: Polígono eliminado
+    const handleDeleted = () => {
+      onPolygonCreated([]);
+    };
+    
+    map.on(L.Draw.Event.CREATED, handleCreated);
+    map.on(L.Draw.Event.EDITED, handleEdited);
+    map.on(L.Draw.Event.DELETED, handleDeleted);
     
     return () => {
-      map.removeControl(drawControl);
-      map.removeLayer(drawnItems);
+      map.off(L.Draw.Event.CREATED, handleCreated);
+      map.off(L.Draw.Event.EDITED, handleEdited);
+      map.off(L.Draw.Event.DELETED, handleDeleted);
+      if (drawControlRef.current) {
+        map.removeControl(drawControlRef.current);
+      }
+      if (drawnItemsRef.current) {
+        map.removeLayer(drawnItemsRef.current);
+      }
     };
-  }, [map, onPolygonCreated]);
+  }, [map, onPolygonCreated, onPolygonEdited, editablePolygon, isEditing]);
+  
+  return null;
+}
+
+// Componente para centrar el mapa en el polígono
+function FitBounds({ polygon }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (polygon && polygon.length > 0) {
+      const bounds = L.latLngBounds(polygon.map(p => [p.lat, p.lng]));
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [map, polygon]);
   
   return null;
 }
