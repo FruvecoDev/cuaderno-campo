@@ -259,6 +259,22 @@ Módulos actualizados para seguir patrón consistente:
 - **Test IDs**: `btn-calculadora`, `btn-reset-calculadora`
 - **Estado**: ✅ COMPLETADO Y TESTEADO
 
+## Albaranes vinculados a Contratos (23/02/2026)
+- **Archivo modificado**: `/app/frontend/src/pages/Albaranes.js` (reescrito completamente)
+- **Modelo actualizado**: `/app/backend/models_tratamientos.py` - `AlbaranCreate`
+- **Cambios principales**:
+  - Albaranes ahora se vinculan obligatoriamente a un Contrato
+  - Al seleccionar un contrato, se heredan automáticamente:
+    - Proveedor
+    - Cultivo
+    - Parcela
+    - Campaña
+  - Panel verde "Datos del Contrato (heredados automáticamente)" muestra los datos heredados
+  - Filtros mejorados: Tipo, Contrato, Proveedor, Cultivo
+  - Líneas del albarán con unidades (kg, ud, L, cajas, pallets)
+  - Cálculo automático de totales por línea y total del albarán
+- **Estado**: ✅ COMPLETADO
+
 ## Historial de Tratamientos por Parcela (23/02/2026)
 - **Ubicación**: Modal en `/app/frontend/src/pages/Parcelas.js`
 - **Backend**: Endpoint `/api/tratamientos/parcela/{parcela_id}/historial`
