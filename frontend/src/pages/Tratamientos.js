@@ -308,6 +308,7 @@ const Tratamientos = () => {
         });
         setSelectedParcelas([]);
         setSelectedParcelasInfo(null);
+        setParcelaSearch({ proveedor: '', cultivo: '', campana: '' });
       }
     } catch (error) {
       console.error('Error saving tratamiento:', error);
