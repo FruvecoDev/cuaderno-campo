@@ -20,26 +20,35 @@ const Layout = ({ children }) => {
   
   const navItems = [
     { section: 'General', items: [
-      { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, module: 'dashboard' },
     ]},
     { section: 'Gestión Principal', items: [
-      { path: '/contratos', label: 'Contratos', icon: FileText },
-      { path: '/parcelas', label: 'Parcelas', icon: MapPin },
-      { path: '/fincas', label: 'Fincas', icon: Home },
+      { path: '/contratos', label: 'Contratos', icon: FileText, module: 'contratos' },
+      { path: '/parcelas', label: 'Parcelas', icon: MapPin, module: 'parcelas' },
+      { path: '/fincas', label: 'Fincas', icon: Home, module: 'fincas' },
     ]},
     { section: 'Actividades', items: [
-      { path: '/visitas', label: 'Visitas', icon: Calendar },
-      { path: '/tareas', label: 'Tareas', icon: ListTodo },
-      { path: '/tratamientos', label: 'Tratamientos', icon: Sprout },
-      { path: '/irrigaciones', label: 'Irrigaciones', icon: Droplets },
+      { path: '/visitas', label: 'Visitas', icon: Calendar, module: 'visitas' },
+      { path: '/tareas', label: 'Tareas', icon: ListTodo, module: 'tareas' },
+      { path: '/tratamientos', label: 'Tratamientos', icon: Sprout, module: 'tratamientos' },
+      { path: '/irrigaciones', label: 'Irrigaciones', icon: Droplets, module: 'irrigaciones' },
     ]},
     { section: 'Administración', items: [
-      { path: '/recetas', label: 'Recetas', icon: BookOpen },
-      { path: '/albaranes', label: 'Albaranes', icon: FileBarChart },
-      { path: '/cosechas', label: 'Cosechas', icon: Wheat },
-      { path: '/documentos', label: 'Documentos', icon: FolderOpen },
+      { path: '/recetas', label: 'Recetas', icon: BookOpen, module: 'recetas' },
+      { path: '/albaranes', label: 'Albaranes', icon: FileBarChart, module: 'albaranes' },
+      { path: '/cosechas', label: 'Cosechas', icon: Wheat, module: 'cosechas' },
+      { path: '/documentos', label: 'Documentos', icon: FolderOpen, module: 'documentos' },
     ]}
   ];
+  
+  // Filter nav items based on user's module access
+  const filteredNavItems = navItems.map(section => ({
+    ...section,
+    items: section.items.filter(item => {
+      // If no module specified or user has access to this module
+      return !item.module || user?.modules_access?.includes(item.module);
+    })
+  })).filter(section => section.items.length > 0); // Remove empty sections
   
   return (
     <div className="layout">
@@ -51,7 +60,7 @@ const Layout = ({ children }) => {
           </div>
         </div>
         <nav className="sidebar-nav">
-          {navItems.map((section, idx) => (
+          {filteredNavItems.map((section, idx) => (
             <div key={idx} className="nav-section">
               <div className="nav-section-title">{section.section}</div>
               {section.items.map((item) => {
