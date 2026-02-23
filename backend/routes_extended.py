@@ -142,10 +142,20 @@ async def update_tratamiento(
     current_user: dict = Depends(RequireEdit),
     _access: dict = Depends(RequireTratamientosAccess)
 ):
+    from database import maquinaria_collection
+    
     if not ObjectId.is_valid(tratamiento_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
+    # Obtener nombre de máquina si se proporciona maquina_id
+    maquina_nombre = None
+    if tratamiento.maquina_id and ObjectId.is_valid(tratamiento.maquina_id):
+        maquina = await maquinaria_collection.find_one({"_id": ObjectId(tratamiento.maquina_id)})
+        if maquina:
+            maquina_nombre = maquina.get("nombre", "")
+    
     update_data = tratamiento.dict()
+    update_data["maquina_nombre"] = maquina_nombre
     update_data["updated_at"] = datetime.now()
     
     result = await tratamientos_collection.update_one(
