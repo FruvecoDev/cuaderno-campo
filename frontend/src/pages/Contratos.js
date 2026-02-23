@@ -437,7 +437,7 @@ const Contratos = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {formData.precios_calidad.map((pc, idx) => (
+                      {(formData.precios_calidad || []).map((pc, idx) => (
                         <tr key={idx}>
                           <td style={{ padding: '4px' }}>
                             <input
