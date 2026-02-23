@@ -1175,12 +1175,158 @@ async def generate_evaluacion_pdf(
         </div>
             """
     
+    # ========================================================================
+    # PÁGINAS DE IRRIGACIONES - Una página por cada irrigación
+    # ========================================================================
+    for idx, irrigacion in enumerate(irrigaciones, 1):
+        page_num = 1 + len(visitas) + len(tratamientos) + idx
+        html_content += f"""
+        <div class="page-break"></div>
+        <div class="header">
+            <h1>FRUVECO</h1>
+            <h2>REGISTRO DE IRRIGACIÓN</h2>
+            <h3>Irrigación {idx} de {len(irrigaciones)} | Página {page_num} de {total_pages}</h3>
+        </div>
+        
+        <div class="irrigacion-header">
+            <h3>IRRIGACIÓN #{idx} - {format_fecha(irrigacion.get('fecha'))}</h3>
+        </div>
+        
+        <div class="section">
+            <div class="section-title section-title-water">DATOS DE LA IRRIGACIÓN</div>
+            <div class="section-content">
+                <div class="datos-grid">
+                    <div class="dato-item">
+                        <div class="dato-label">Fecha</div>
+                        <div class="dato-value">{format_fecha(irrigacion.get('fecha'))}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Sistema</div>
+                        <div class="dato-value">{irrigacion.get('sistema', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Duración</div>
+                        <div class="dato-value">{irrigacion.get('duracion', 0)} horas</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Volumen</div>
+                        <div class="dato-value">{irrigacion.get('volumen', 0)} m³</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Coste</div>
+                        <div class="dato-value">{irrigacion.get('coste', 0):.2f} €</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Fuente</div>
+                        <div class="dato-value">{irrigacion.get('fuente', '—')}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title section-title-water">OBSERVACIONES</div>
+            <div class="section-content">
+                <p>{irrigacion.get('observaciones') or 'Sin observaciones registradas.'}</p>
+            </div>
+        </div>
+        """
+    
+    # ========================================================================
+    # PÁGINAS DE COSECHAS - Una página por cada cosecha
+    # ========================================================================
+    for idx, cosecha in enumerate(cosechas, 1):
+        page_num = 1 + len(visitas) + len(tratamientos) + len(irrigaciones) + idx
+        html_content += f"""
+        <div class="page-break"></div>
+        <div class="header">
+            <h1>FRUVECO</h1>
+            <h2>REGISTRO DE COSECHA</h2>
+            <h3>Cosecha {idx} de {len(cosechas)} | Página {page_num} de {total_pages}</h3>
+        </div>
+        
+        <div class="cosecha-header">
+            <h3>COSECHA #{idx} - {cosecha.get('nombre', 'Sin nombre')}</h3>
+        </div>
+        
+        <div class="section">
+            <div class="section-title section-title-harvest">DATOS DE LA COSECHA</div>
+            <div class="section-content">
+                <div class="datos-grid">
+                    <div class="dato-item">
+                        <div class="dato-label">Nombre</div>
+                        <div class="dato-value">{cosecha.get('nombre', '—')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Superficie Total</div>
+                        <div class="dato-value">{cosecha.get('superficie_total', 0)} {cosecha.get('unidad_medida', 'ha')}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Nº Plantas</div>
+                        <div class="dato-value">{cosecha.get('num_plantas', 0):,}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Cosecha Total</div>
+                        <div class="dato-value" style="font-weight: bold; color: #1e8449;">{cosecha.get('cosecha_total', 0):,.0f} kg</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Ingreso Total</div>
+                        <div class="dato-value" style="font-weight: bold; color: #1e8449;">{cosecha.get('ingreso_total', 0):,.2f} €</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Realizado</div>
+                        <div class="dato-value">{'Sí' if cosecha.get('realizado') else 'No'}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """
+        
+        # Registros de cosecha (detalles de cada recogida)
+        registros = cosecha.get('cosechas', [])
+        if registros:
+            html_content += """
+        <div class="section">
+            <div class="section-title section-title-harvest">REGISTROS DE RECOGIDA</div>
+            <div class="section-content">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Albarán</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            """
+            for reg in registros:
+                cantidad = reg.get('cantidad', 0)
+                precio = reg.get('precio_venta', 0)
+                total = cantidad * precio
+                html_content += f"""
+                        <tr>
+                            <td>{reg.get('fecha_fin', '—')}</td>
+                            <td>{reg.get('num_albaran', '—')}</td>
+                            <td>{cantidad:,.0f} {reg.get('unidad', 'kg')}</td>
+                            <td>{precio:.2f} €/{reg.get('unidad', 'kg')}</td>
+                            <td style="font-weight: bold;">{total:,.2f} €</td>
+                        </tr>
+                """
+            html_content += """
+                    </tbody>
+                </table>
+            </div>
+        </div>
+            """
+    
     # Footer final
     html_content += f"""
         <div class="footer">
             <p>Documento generado automáticamente por FRUVECO - Cuaderno de Campo</p>
             <p>Fecha de generación: {datetime.now().strftime('%d/%m/%Y %H:%M')}</p>
-            <p>Total: {1 + len(visitas) + len(tratamientos)} páginas | {len(visitas)} visitas | {len(tratamientos)} tratamientos</p>
+            <p>Total: {total_pages} páginas | {len(visitas)} visitas | {len(tratamientos)} tratamientos | {len(irrigaciones)} irrigaciones | {len(cosechas)} cosechas</p>
         </div>
     </body>
     </html>
