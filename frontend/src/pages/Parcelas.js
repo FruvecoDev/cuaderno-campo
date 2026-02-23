@@ -125,34 +125,119 @@ const Parcelas = () => {
   
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (polygon.length < 3) {
+    
+    // Si estamos editando, no requerir polígono nuevo
+    if (!editingId && polygon.length < 3) {
       alert('Dibuja un polígono en el mapa primero');
       return;
     }
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/parcelas`, {
-        method: 'POST',
+      const url = editingId 
+        ? `${BACKEND_URL}/api/parcelas/${editingId}`
+        : `${BACKEND_URL}/api/parcelas`;
+      
+      const method = editingId ? 'PUT' : 'POST';
+      
+      const payload = {
+        ...formData,
+        superficie_total: parseFloat(formData.superficie_total),
+        num_plantas: parseInt(formData.num_plantas)
+      };
+      
+      // Solo agregar geometría si estamos creando nueva o hay polígono nuevo
+      if (!editingId || polygon.length >= 3) {
+        payload.recintos = [{ geometria: polygon }];
+      }
+      
+      const response = await fetch(url, {
+        method: method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          superficie_total: parseFloat(formData.superficie_total),
-          num_plantas: parseInt(formData.num_plantas),
-          recintos: [{ geometria: polygon }]
-        })
+        body: JSON.stringify(payload)
       });
+      
       const data = await response.json();
       if (data.success) {
         setShowForm(false);
+        setEditingId(null);
         fetchParcelas();
         setPolygon([]);
+        setSearchContrato('');
         setFormData({
-          proveedor: '', cultivo: '', campana: '2025/26', variedad: '',
-          superficie_total: '', codigo_plantacion: '', num_plantas: '', finca: ''
+          contrato_id: '',
+          proveedor: '', 
+          cultivo: '', 
+          campana: '2025/26', 
+          variedad: '',
+          superficie_total: '', 
+          codigo_plantacion: '', 
+          num_plantas: '', 
+          finca: ''
         });
       }
     } catch (error) {
-      console.error('Error creating parcela:', error);
+      console.error('Error saving parcela:', error);
+    }
+  };
+  
+  const handleEdit = (parcela) => {
+    setEditingId(parcela._id);
+    setFormData({
+      contrato_id: parcela.contrato_id || '',
+      proveedor: parcela.proveedor || '',
+      cultivo: parcela.cultivo || '',
+      campana: parcela.campana || '2025/26',
+      variedad: parcela.variedad || '',
+      superficie_total: parcela.superficie_total || '',
+      codigo_plantacion: parcela.codigo_plantacion || '',
+      num_plantas: parcela.num_plantas || '',
+      finca: parcela.finca || ''
+    });
+    
+    // Si tiene geometría, cargarla
+    if (parcela.recintos && parcela.recintos.length > 0 && parcela.recintos[0].geometria) {
+      setPolygon(parcela.recintos[0].geometria);
+    }
+    
+    setShowForm(true);
+  };
+  
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setShowForm(false);
+    setPolygon([]);
+    setSearchContrato('');
+    setFormData({
+      contrato_id: '',
+      proveedor: '', 
+      cultivo: '', 
+      campana: '2025/26', 
+      variedad: '',
+      superficie_total: '', 
+      codigo_plantacion: '', 
+      num_plantas: '', 
+      finca: ''
+    });
+  };
+  
+  const handleDelete = async (parcelaId) => {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar esta parcela?')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/parcelas/${parcelaId}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        fetchParcelas();
+      } else {
+        alert('Error eliminando parcela');
+      }
+    } catch (error) {
+      console.error('Error deleting parcela:', error);
+      alert('Error eliminando parcela');
     }
   };
   
