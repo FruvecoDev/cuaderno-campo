@@ -358,87 +358,106 @@ const Dashboard = () => {
         )}
       </div>
       
-      {/* Planificador de Visitas y Notificaciones */}
-      <div className="card mb-6" data-testid="planificador-visitas">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Calendar size={20} /> Visitas Planificadas
+      {/* Calendario y Planificador de Visitas */}
+      <div className="grid-2 mb-6">
+        {/* Calendario Visual */}
+        <div className="card" data-testid="calendario-visitas">
+          <h2 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <CalendarIcon size={20} /> Calendario de Visitas
           </h2>
-          <button 
-            onClick={() => navigate('/visitas?planificar=true')}
-            className="btn btn-sm btn-primary"
-          >
-            <Calendar size={14} style={{ marginRight: '0.25rem' }} /> Planificar Visita
-          </button>
+          <VisitasCalendar 
+            visitas={visitasPlanificadas} 
+            onDateClick={(date) => {
+              const dateStr = date.toISOString().split('T')[0];
+              navigate(`/visitas?fecha=${dateStr}`);
+            }}
+          />
         </div>
         
-        {visitasPlanificadas.length > 0 ? (
-          <div style={{ display: 'grid', gap: '0.75rem' }}>
-            {visitasPlanificadas.slice(0, 5).map((visita, idx) => {
-              const fechaVisita = new Date(visita.fecha_planificada);
-              const hoy = new Date();
-              const diasRestantes = Math.ceil((fechaVisita - hoy) / (1000 * 60 * 60 * 24));
-              const esUrgente = diasRestantes <= 2;
-              const esProxima = diasRestantes <= 7 && diasRestantes > 2;
-              
-              return (
-                <div 
-                  key={idx}
-                  style={{ 
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '1rem',
-                    backgroundColor: esUrgente ? '#fee2e2' : esProxima ? '#fff3e0' : 'hsl(var(--muted))',
-                    borderRadius: '8px',
-                    borderLeft: `4px solid ${esUrgente ? '#dc2626' : esProxima ? '#f57c00' : '#2d5a27'}`
-                  }}
-                >
-                  <div>
-                    <div style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      {esUrgente && <Bell size={16} style={{ color: '#dc2626' }} />}
-                      {visita.objetivo}
-                    </div>
-                    <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
-                      {visita.proveedor} - {visita.cultivo} | {visita.parcela}
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ 
-                      fontWeight: '600',
-                      color: esUrgente ? '#dc2626' : esProxima ? '#f57c00' : '#2d5a27'
-                    }}>
-                      {fechaVisita.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
-                      {diasRestantes === 0 ? '¡Hoy!' : 
-                       diasRestantes === 1 ? 'Mañana' : 
-                       diasRestantes < 0 ? 'Vencida' :
-                       `En ${diasRestantes} días`}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div style={{ 
-            padding: '2rem',
-            textAlign: 'center',
-            backgroundColor: 'hsl(var(--muted))',
-            borderRadius: '8px'
-          }}>
-            <Calendar size={48} style={{ color: 'hsl(var(--muted-foreground))', marginBottom: '0.5rem' }} />
-            <p className="text-muted">No hay visitas planificadas</p>
+        {/* Lista de Visitas Planificadas */}
+        <div className="card" data-testid="planificador-visitas">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Bell size={20} /> Próximas Visitas
+            </h2>
             <button 
               onClick={() => navigate('/visitas?planificar=true')}
-              className="btn btn-primary"
-              style={{ marginTop: '1rem' }}
+              className="btn btn-sm btn-primary"
             >
-              Planificar primera visita
+              <CalendarIcon size={14} style={{ marginRight: '0.25rem' }} /> Nueva
             </button>
           </div>
-        )}
+          
+          {visitasPlanificadas.length > 0 ? (
+            <div style={{ display: 'grid', gap: '0.75rem', maxHeight: '380px', overflowY: 'auto' }}>
+              {visitasPlanificadas.map((visita, idx) => {
+                const fechaVisita = new Date(visita.fecha_planificada);
+                const hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+                const diasRestantes = Math.ceil((fechaVisita - hoy) / (1000 * 60 * 60 * 24));
+                const esUrgente = diasRestantes <= 2 && diasRestantes >= 0;
+                const esProxima = diasRestantes <= 7 && diasRestantes > 2;
+                const esVencida = diasRestantes < 0;
+                
+                return (
+                  <div 
+                    key={idx}
+                    style={{ 
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0.75rem',
+                      backgroundColor: esVencida ? '#fecaca' : esUrgente ? '#fee2e2' : esProxima ? '#fff3e0' : 'hsl(var(--muted))',
+                      borderRadius: '8px',
+                      borderLeft: `4px solid ${esVencida ? '#991b1b' : esUrgente ? '#dc2626' : esProxima ? '#f57c00' : '#2d5a27'}`
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: '600', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        {(esUrgente || esVencida) && <Bell size={14} style={{ color: esVencida ? '#991b1b' : '#dc2626' }} />}
+                        {visita.objetivo}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
+                        {visita.proveedor} - {visita.cultivo}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ 
+                        fontWeight: '600',
+                        fontSize: '0.85rem',
+                        color: esVencida ? '#991b1b' : esUrgente ? '#dc2626' : esProxima ? '#f57c00' : '#2d5a27'
+                      }}>
+                        {fechaVisita.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))' }}>
+                        {diasRestantes === 0 ? '¡Hoy!' : 
+                         diasRestantes === 1 ? 'Mañana' : 
+                         esVencida ? `Hace ${Math.abs(diasRestantes)} días` :
+                         `En ${diasRestantes} días`}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div style={{ 
+              padding: '2rem',
+              textAlign: 'center',
+              backgroundColor: 'hsl(var(--muted))',
+              borderRadius: '8px'
+            }}>
+              <CalendarIcon size={40} style={{ color: 'hsl(var(--muted-foreground))', marginBottom: '0.5rem' }} />
+              <p className="text-muted" style={{ marginBottom: '0.75rem' }}>No hay visitas planificadas</p>
+              <button 
+                onClick={() => navigate('/visitas?planificar=true')}
+                className="btn btn-primary btn-sm"
+              >
+                Planificar primera visita
+              </button>
+            </div>
+          )}
+        </div>
       </div>
       
       {/* Recent Activity */}
