@@ -1,18 +1,18 @@
 [
   {
-    "content": "Crear página frontend de gestión de Proveedores",
-    "status": "completed"
+    "content": "Modificar modelo backend Contratos: usar proveedor_id y cultivo_id",
+    "status": "in_progress"
   },
   {
-    "content": "Crear página frontend de gestión de Cultivos",
-    "status": "completed"
-  },
-  {
-    "content": "Modificar modelo Contratos: usar cultivo_id/proveedor_id",
+    "content": "Actualizar endpoints Contratos para manejar referencias",
     "status": "pending"
   },
   {
-    "content": "Actualizar formulario Contratos con selectores",
+    "content": "Actualizar formulario frontend Contratos con selectores",
+    "status": "pending"
+  },
+  {
+    "content": "Testing crear contrato con referencias",
     "status": "pending"
   },
   {
