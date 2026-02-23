@@ -399,6 +399,26 @@ const Parcelas = () => {
                     <td>{p.superficie_total} ha</td>
                     <td>{p.num_plantas.toLocaleString()}</td>
                     <td><span className={`badge ${p.activo ? 'badge-success' : 'badge-default'}`}>{p.activo ? 'Activa' : 'Inactiva'}</span></td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button
+                          className="btn btn-sm btn-secondary"
+                          onClick={() => handleEdit(p)}
+                          title="Editar parcela"
+                          data-testid={`edit-parcela-${p._id}`}
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                        <button
+                          className="btn btn-sm btn-error"
+                          onClick={() => handleDelete(p._id)}
+                          title="Eliminar parcela"
+                          data-testid={`delete-parcela-${p._id}`}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
