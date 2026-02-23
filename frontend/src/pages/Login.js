@@ -79,7 +79,8 @@ const Login = () => {
             }}>
               <Lock size={32} color="white" />
             </div>
-            <h1 style={{ fontSize: '1.75rem', fontWeight: '700', marginBottom: '0.5rem' }}>AgroGest Pro</h1>
+            <h1 style={{ fontSize: '1.75rem', fontWeight: '700', marginBottom: '0.25rem' }}>FRUVECO</h1>
+            <p style={{ fontSize: '0.875rem', fontWeight: '500', color: 'hsl(var(--muted-foreground))', marginBottom: '0.5rem' }}>Cuaderno de Campo</p>
             <p className="text-muted">Inicia sesión para continuar</p>
           </div>
           
