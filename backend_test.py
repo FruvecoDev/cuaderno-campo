@@ -193,11 +193,12 @@ class AgriculturalAPITester:
         
         # Test CREATE finca
         finca_data = {
+            "campana": "2025/26",
             "nombre": "Test Finca",
-            "propietario": "Test Owner",
-            "ubicacion": "Test Location",
             "superficie_total": 100.0,
-            "descripcion": "Test finca description"
+            "num_plantas": 5000,
+            "provincia": "Test Province",
+            "poblacion": "Test Population"
         }
         
         success, response = self.run_test(
