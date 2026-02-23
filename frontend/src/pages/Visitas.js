@@ -722,6 +722,72 @@ const Visitas = () => {
               </div>
             )}
             
+            {/* CUESTIONARIO DE PLAGAS Y ENFERMEDADES - Solo visible cuando objetivo = "Plagas y Enfermedades" */}
+            {formData.objetivo === 'Plagas y Enfermedades' && fieldsConfig.cuestionario_plagas && (
+              <div className="card" style={{ 
+                backgroundColor: 'hsl(var(--warning) / 0.1)', 
+                marginBottom: '1.5rem', 
+                padding: '1.5rem', 
+                border: '1px solid hsl(var(--warning) / 0.3)',
+                borderRadius: '0.5rem'
+              }} data-testid="cuestionario-plagas">
+                <h4 style={{ marginBottom: '1rem', fontSize: '1rem', fontWeight: '600', color: 'hsl(var(--warning))' }}>
+                  Cuestionario de Plagas y Enfermedades
+                </h4>
+                <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))', marginBottom: '1rem' }}>
+                  Evalúe cada plaga/enfermedad: <strong>0</strong> = Sin presencia, <strong>1</strong> = Presencia baja, <strong>2</strong> = Presencia alta
+                </p>
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+                  gap: '1rem' 
+                }}>
+                  {PLAGAS_ENFERMEDADES.map((plaga) => (
+                    <div key={plaga.key} style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'space-between',
+                      padding: '0.75rem',
+                      backgroundColor: 'hsl(var(--background))',
+                      borderRadius: '0.375rem',
+                      border: '1px solid hsl(var(--border))'
+                    }}>
+                      <label style={{ fontWeight: '500', fontSize: '0.875rem' }}>{plaga.label}</label>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        {[0, 1, 2].map((valor) => (
+                          <button
+                            key={valor}
+                            type="button"
+                            onClick={() => setCuestionarioPlagas(prev => ({...prev, [plaga.key]: valor}))}
+                            style={{
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: '50%',
+                              border: cuestionarioPlagas[plaga.key] === valor 
+                                ? '2px solid hsl(var(--primary))' 
+                                : '1px solid hsl(var(--border))',
+                              backgroundColor: cuestionarioPlagas[plaga.key] === valor 
+                                ? valor === 0 ? 'hsl(142, 76%, 36%)' 
+                                  : valor === 1 ? 'hsl(38, 92%, 50%)' 
+                                  : 'hsl(0, 84%, 60%)'
+                                : 'hsl(var(--background))',
+                              color: cuestionarioPlagas[plaga.key] === valor ? 'white' : 'inherit',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease'
+                            }}
+                            data-testid={`plaga-${plaga.key}-${valor}`}
+                          >
+                            {valor}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
             {fieldsConfig.observaciones && (
               <div className="form-group">
                 <label className="form-label">Observaciones</label>
