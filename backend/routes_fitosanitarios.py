@@ -5,6 +5,8 @@ from bson import ObjectId
 from datetime import datetime
 import pandas as pd
 import io
+import httpx
+from bs4 import BeautifulSoup
 
 from database import db
 from routes_auth import get_current_user
