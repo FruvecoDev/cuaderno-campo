@@ -40,6 +40,9 @@ async def create_contrato(
     proveedores_collection = db['proveedores']
     cultivos_collection = db['cultivos']
     
+    proveedor = None
+    cultivo = None
+    
     # Validar proveedor existe
     if contrato.proveedor_id:
         proveedor = await proveedores_collection.find_one({"_id": ObjectId(contrato.proveedor_id)})
@@ -70,9 +73,9 @@ async def create_contrato(
     })
     
     # Poblar nombres para compatibilidad/reportes
-    if contrato.proveedor_id and proveedor:
+    if proveedor:
         contrato_dict['proveedor'] = proveedor['nombre']
-    if contrato.cultivo_id and cultivo:
+    if cultivo:
         contrato_dict['cultivo'] = f"{cultivo['nombre']} {cultivo.get('variedad', '')}".strip()
     
     result = await contratos_collection.insert_one(contrato_dict)
