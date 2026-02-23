@@ -372,6 +372,8 @@ const Tratamientos = () => {
       superficie_aplicacion: tratamiento.superficie_aplicacion || '',
       caldo_superficie: tratamiento.caldo_superficie || '',
       parcelas_ids: tratamiento.parcelas_ids || [],
+      fecha_tratamiento: tratamiento.fecha_tratamiento || '',
+      fecha_aplicacion: tratamiento.fecha_aplicacion || '',
       aplicador_nombre: tratamiento.aplicador_nombre || '',
       maquina_id: tratamiento.maquina_id || ''
     });
@@ -393,6 +395,8 @@ const Tratamientos = () => {
       superficie_aplicacion: '',
       caldo_superficie: '',
       parcelas_ids: [],
+      fecha_tratamiento: new Date().toISOString().split('T')[0],
+      fecha_aplicacion: '',
       aplicador_nombre: '',
       maquina_id: ''
     });
