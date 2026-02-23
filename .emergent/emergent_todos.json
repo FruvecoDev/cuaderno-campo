@@ -8,7 +8,7 @@
     "status": "completed"
   },
   {
-    "content": "Phase 1 POC: Test Google Maps with polygon drawing",
+    "content": "Phase 1 POC: Test Leaflet Maps with polygon drawing",
     "status": "in_progress"
   },
   {
@@ -28,7 +28,7 @@
     "status": "pending"
   },
   {
-    "content": "Phase 2: Implement Google Maps integration with polygon drawing",
+    "content": "Phase 2: Implement Leaflet Maps integration with polygon drawing",
     "status": "pending"
   },
   {
