@@ -78,6 +78,21 @@ Visita/Tratamiento → realizados sobre → Parcela
    - PDF con WeasyPrint
    - Excel con openpyxl
 
+6. **Módulo Maquinaria (Nuevo - 23/02/2026)**
+   - CRUD completo de maquinaria agrícola
+   - Campos: nombre, tipo, marca, modelo, matrícula, nº serie, año fabricación, capacidad, estado, observaciones
+   - Tipos predefinidos: Tractor, Pulverizador, Cosechadora, etc.
+   - Estados: Operativo, En mantenimiento, Averiado, Fuera de servicio
+   - Filtros por Tipo y Estado
+   - Configuración de campos/columnas (localStorage)
+   - Navegación en sidebar (sección Catálogos)
+
+7. **Integración Maquinaria-Tratamientos (Nuevo - 23/02/2026)**
+   - Campo "Aplicador" (texto libre) en formulario de Tratamientos
+   - Campo "Máquina" (dropdown) - solo muestra máquinas operativas
+   - Columnas Aplicador y Máquina en tabla de Tratamientos
+   - Backend denormaliza maquina_nombre automáticamente
+
 ### Pending/In Progress
 1. **Frontend IA** (P0)
    - Página para generar y ver reportes IA
