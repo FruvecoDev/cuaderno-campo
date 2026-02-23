@@ -514,11 +514,11 @@ const Albaranes = () => {
                         </span>
                       </td>
                     )}
-                    {(fieldsConfig.fecha) ? <td>{albaran.fecha ? new Date(albaran.fecha).toLocaleDateString() : '—'}</td>}
-                    {fieldsConfig.proveedor_cliente && <td className="font-semibold">{albaran.proveedor_cliente}</td>}
-                    {(fieldsConfig.items) ? <td>{albaran.items?.length || 0}</td>}
+                    {fieldsConfig.fecha ? <td>{albaran.fecha ? new Date(albaran.fecha).toLocaleDateString() : '—'}</td> : null}
+                    {fieldsConfig.proveedor_cliente ? <td className="font-semibold">{albaran.proveedor_cliente}</td> : null}
+                    {fieldsConfig.items ? <td>{albaran.items?.length || 0}</td> : null}
                     <td style={{ fontWeight: '600' }}>€{(albaran.total_general || 0).toFixed(2)}</td>
-                    {(canEdit || canDelete) && (
+                    {(canEdit || canDelete) ? (
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                           {canEdit && (
