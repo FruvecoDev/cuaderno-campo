@@ -14,7 +14,9 @@ const DEFAULT_FIELDS_CONFIG = {
   aplicacion_numero: true,
   parcelas_ids: true,
   superficie_aplicacion: true,
-  caldo_superficie: true
+  caldo_superficie: true,
+  aplicador_nombre: true,
+  maquina_id: true
 };
 
 const FIELD_LABELS = {
@@ -24,7 +26,9 @@ const FIELD_LABELS = {
   aplicacion_numero: 'Nº Aplicación',
   parcelas_ids: 'Parcelas',
   superficie_aplicacion: 'Superficie',
-  caldo_superficie: 'Caldo/Superficie'
+  caldo_superficie: 'Caldo/Superficie',
+  aplicador_nombre: 'Aplicador',
+  maquina_id: 'Máquina'
 };
 
 // Table columns config
@@ -35,6 +39,8 @@ const DEFAULT_TABLE_CONFIG = {
   campana: true,
   superficie: true,
   parcelas: true,
+  aplicador: true,
+  maquina: true,
   estado: true
 };
 
@@ -45,6 +51,8 @@ const TABLE_LABELS = {
   campana: 'Campaña',
   superficie: 'Superficie',
   parcelas: 'Parcelas',
+  aplicador: 'Aplicador',
+  maquina: 'Máquina',
   estado: 'Estado'
 };
 
