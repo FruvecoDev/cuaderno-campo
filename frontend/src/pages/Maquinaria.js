@@ -669,7 +669,7 @@ const Maquinaria = () => {
                           )}
                         </div>
                       </td>
-                    )}
+                    ) : null}
                   </tr>
                 ))}
               </tbody>
