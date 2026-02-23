@@ -249,23 +249,39 @@ Módulos actualizados para seguir patrón consistente:
 - **Resultado**: Eliminación completa de warnings de hidratación en la consola
 
 ## Calculadora de Fitosanitarios (23/02/2026)
-- **Ubicación**: Componente `CalculadoraFitosanitarios` en `/app/frontend/src/pages/Tratamientos.js` (líneas 12-561)
+- **Ubicación**: Componente `CalculadoraFitosanitarios` en `/app/frontend/src/pages/Tratamientos.js` (líneas 12-600+)
 - **Funcionalidades implementadas**:
-  - **Campos de entrada**: Tipo de fitosanitario (Insecticida/Herbicida/Fungicida/Fertilizante), Nombre del producto, Superficie (Ha/m²), Volumen de agua (L/ha), Dosis del producto, Concentración (%), Plaga/Enfermedad objetivo
-  - **Cálculos automáticos**:
-    - Superficie total en hectáreas (con conversión m² a Ha)
-    - Cantidad total de producto necesario
-    - Volumen total de agua
-    - Producto por litro de agua (ml o g/L)
-    - Concentración de la mezcla final (%)
-  - **Sistema de alertas**:
-    - Alertas amarillas (warning): Valores por debajo del mínimo recomendado
-    - Alertas rojas (danger): Valores excesivos que superan límites de seguridad
-    - Límites por tipo: Insecticida (0.1-3 L/ha), Herbicida (0.5-5 L/ha), Fungicida (0.2-4 L/ha), Fertilizante (1-50 kg/ha)
-    - Límites de agua: 100-1000 L/ha
-  - **Botón Restablecer**: Limpia todos los campos y alertas
-  - **Historial de cálculos**: Guarda hasta 10 registros con fecha, producto, superficie, cantidad y agua
-  - **Integración con formulario**: Botón "Aplicar al Tratamiento" pasa valores de superficie_aplicacion y caldo_superficie al formulario padre
-  - **Consideraciones de seguridad**: Panel informativo con recomendaciones de uso seguro
+  - **Campos de entrada**: Tipo de fitosanitario (Insecticida/Herbicida/Fungicida/Fertilizante), Nombre del producto, Superficie (Ha/m²), Volumen agua, Dosis producto, Concentración, Plaga objetivo
+  - **Integración con Base de Datos**: Selector de productos registrados que auto-rellena campos con dosis recomendadas
+  - **Cálculos automáticos**: Superficie en Ha, cantidad producto, volumen total agua, producto por litro, concentración mezcla
+  - **Sistema de alertas**: Rojas para valores excesivos, amarillas para valores bajos
+  - **Botones**: "Restablecer" (limpia campos), "Aplicar al Tratamiento" (transfiere valores al formulario)
 - **Test IDs**: `btn-calculadora`, `btn-reset-calculadora`
-- **Estado**: ✅ COMPLETADO Y TESTEADO (iteration_10.json - 100% pass)
+- **Estado**: ✅ COMPLETADO Y TESTEADO
+
+## Base de Datos de Productos Fitosanitarios (23/02/2026)
+- **Nuevo Módulo**: `/app/frontend/src/pages/Fitosanitarios.js`
+- **Backend Router**: `/app/backend/routes_fitosanitarios.py`
+- **Funcionalidades**:
+  - CRUD completo de productos fitosanitarios
+  - Filtros por tipo, búsqueda, estado
+  - KPIs visuales por tipo de producto
+  - Columnas configurables en tabla
+  - Datos pre-cargados de productos oficiales españoles (32 productos)
+  - Endpoint `/api/fitosanitarios/seed` para cargar datos iniciales
+- **Modelo de datos**:
+  - `numero_registro`: Número de registro oficial
+  - `nombre_comercial`: Nombre comercial del producto
+  - `denominacion_comun`: Denominación alternativa
+  - `empresa`: Empresa concesionaria
+  - `tipo`: Herbicida/Insecticida/Fungicida/Acaricida/Molusquicida/Fertilizante
+  - `materia_activa`: Composición
+  - `dosis_min`, `dosis_max`: Rango de dosis recomendada
+  - `unidad_dosis`: L/ha, kg/ha, ml/ha, g/ha, %
+  - `volumen_agua_min`, `volumen_agua_max`: Volumen de agua recomendado
+  - `plagas_objetivo`: Array de plagas/enfermedades
+  - `plazo_seguridad`: Días antes de cosecha
+  - `observaciones`: Notas adicionales
+- **Integración con Calculadora**: Al seleccionar un producto en la calculadora, se auto-rellenan los campos con las dosis recomendadas
+- **Enlace en menú**: Catálogos > Fitosanitarios
+- **Estado**: ✅ COMPLETADO
