@@ -1,15 +1,15 @@
 [
   {
     "content": "Modificar modelo backend Contratos: usar proveedor_id y cultivo_id",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Actualizar endpoints Contratos para manejar referencias",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "Actualizar formulario frontend Contratos con selectores",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Testing crear contrato con referencias",
