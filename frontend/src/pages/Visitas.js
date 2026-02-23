@@ -424,7 +424,7 @@ const Visitas = () => {
                     <td className="font-semibold">{visita.objetivo}</td>
                     <td>
                       {visita.parcela_id ? (
-                        visita.parcela_id
+                        parcelasMap[visita.parcela_id] || visita.parcela_id
                       ) : (
                         <span style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }} title="Registro anterior a la implementación de catálogos">
                           No especificado
@@ -432,7 +432,9 @@ const Visitas = () => {
                       )}
                     </td>
                     <td>
-                      {visita.cultivo ? (
+                      {visita.cultivo_id ? (
+                        cultivosMap[visita.cultivo_id] || visita.cultivo
+                      ) : visita.cultivo ? (
                         visita.cultivo
                       ) : (
                         <span style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }} title="Registro anterior a la implementación de catálogos">
