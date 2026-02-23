@@ -980,6 +980,8 @@ const Tratamientos = () => {
                   {tableConfig.subtipo && <th>Subtipo</th>}
                   {tableConfig.metodo && <th>Método</th>}
                   {tableConfig.campana && <th>Campaña</th>}
+                  {tableConfig.fecha_tratamiento && <th>F. Tratamiento</th>}
+                  {tableConfig.fecha_aplicacion && <th>F. Aplicación</th>}
                   {tableConfig.superficie && <th>Superficie</th>}
                   {tableConfig.parcelas && <th>Parcelas</th>}
                   {tableConfig.aplicador && <th>Aplicador</th>}
@@ -995,6 +997,8 @@ const Tratamientos = () => {
                     {tableConfig.subtipo && <td>{tratamiento.subtipo || '—'}</td>}
                     {tableConfig.metodo && <td>{tratamiento.metodo_aplicacion}</td>}
                     {tableConfig.campana && <td>{tratamiento.campana || 'N/A'}</td>}
+                    {tableConfig.fecha_tratamiento && <td>{tratamiento.fecha_tratamiento || '—'}</td>}
+                    {tableConfig.fecha_aplicacion && <td>{tratamiento.fecha_aplicacion || '—'}</td>}
                     {tableConfig.superficie && <td>{tratamiento.superficie_aplicacion} ha</td>}
                     {tableConfig.parcelas && <td>{tratamiento.parcelas_ids?.length || 0} parcela(s)</td>}
                     {tableConfig.aplicador && <td>{tratamiento.aplicador_nombre || '—'}</td>}
