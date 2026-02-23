@@ -68,20 +68,15 @@ const Login = () => {
       }}>
         <div className="card" style={{ padding: '2.5rem' }}>
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <div style={{
-              width: '64px',
-              height: '64px',
-              background: 'hsl(var(--primary))',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 1rem'
-            }}>
-              <Lock size={32} color="white" />
-            </div>
-            <h1 style={{ fontSize: '1.75rem', fontWeight: '700', marginBottom: '0.25rem' }}>FRUVECO</h1>
-            <p style={{ fontSize: '0.875rem', fontWeight: '500', color: 'hsl(var(--muted-foreground))', marginBottom: '0.5rem' }}>Cuaderno de Campo</p>
+            <img 
+              src={logo} 
+              alt="FRUVECO Logo" 
+              style={{ 
+                maxWidth: '180px', 
+                height: 'auto',
+                marginBottom: '1rem'
+              }} 
+            />
             <p className="text-muted">Inicia sesión para continuar</p>
           </div>
           
