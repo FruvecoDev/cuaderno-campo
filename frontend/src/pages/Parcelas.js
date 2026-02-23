@@ -958,14 +958,14 @@ const Parcelas = () => {
               <tbody>
                 {filteredParcelas.map((p) => (
                   <tr key={p._id}>
-                    {fieldsConfig.codigo_plantacion && <td className="font-semibold">{p.codigo_plantacion}</td>}
-                    {(fieldsConfig.proveedor) ? <td>{p.proveedor}</td>}
-                    {(fieldsConfig.finca) ? <td>{p.finca}</td>}
-                    {(fieldsConfig.cultivo) ? <td>{p.cultivo}</td>}
-                    {(fieldsConfig.variedad) ? <td>{p.variedad}</td>}
-                    {(fieldsConfig.superficie_total) ? <td>{p.superficie_total} ha</td>}
-                    {(fieldsConfig.num_plantas) ? <td>{p.num_plantas?.toLocaleString()}</td>}
-                    {(fieldsConfig.campana) ? <td>{p.campana}</td>}
+                    {fieldsConfig.codigo_plantacion ? <td className="font-semibold">{p.codigo_plantacion}</td> : null}
+                    {fieldsConfig.proveedor ? <td>{p.proveedor}</td> : null}
+                    {fieldsConfig.finca ? <td>{p.finca}</td> : null}
+                    {fieldsConfig.cultivo ? <td>{p.cultivo}</td> : null}
+                    {fieldsConfig.variedad ? <td>{p.variedad}</td> : null}
+                    {fieldsConfig.superficie_total ? <td>{p.superficie_total} ha</td> : null}
+                    {fieldsConfig.num_plantas ? <td>{p.num_plantas?.toLocaleString()}</td> : null}
+                    {fieldsConfig.campana ? <td>{p.campana}</td> : null}
                     <td><span className={`badge ${p.activo ? 'badge-success' : 'badge-default'}`}>{p.activo ? 'Activa' : 'Inactiva'}</span></td>
                     <td>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
