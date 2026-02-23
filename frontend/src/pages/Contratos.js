@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Download, FileText } from 'lucide-react';
+import { PermissionButton, usePermissions } from '../utils/permissions';
+import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
@@ -8,6 +10,8 @@ const Contratos = () => {
   const [contratos, setContratos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const { token } = useAuth();
+  const { canCreate, canEdit, canDelete, canExport } = usePermissions();
   const [formData, setFormData] = useState({
     campana: '2025/26',
     procedencia: 'Campo',
@@ -29,7 +33,11 @@ const Contratos = () => {
   
   const fetchContratos = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/contratos`);
+      const response = await fetch(`${BACKEND_URL}/api/contratos`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await response.json();
       setContratos(data.contratos || []);
     } catch (error) {
@@ -44,7 +52,10 @@ const Contratos = () => {
     try {
       const response = await fetch(`${BACKEND_URL}/api/contratos`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           ...formData,
           cantidad: parseFloat(formData.cantidad),
