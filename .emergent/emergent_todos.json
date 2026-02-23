@@ -9,15 +9,15 @@
   },
   {
     "content": "Phase 1 POC: Test Leaflet Maps with polygon drawing",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Phase 1 POC: Build minimal UI for POC testing",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "Phase 1 POC: All user stories covered and tested",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Phase 2: Backend - Complete data models and CRUD APIs",
