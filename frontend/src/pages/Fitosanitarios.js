@@ -163,6 +163,117 @@ const Fitosanitarios = () => {
     }
   };
 
+  // Download template
+  const handleDownloadTemplate = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/template`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        // Convert base64 to blob and download
+        const byteCharacters = atob(data.data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = data.filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Error downloading template:', error);
+      setError('Error al descargar la plantilla');
+    }
+  };
+
+  // Export to Excel
+  const handleExport = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (filters.tipo) params.append('tipo', filters.tipo);
+      
+      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/export?${params}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        const byteCharacters = atob(data.data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = data.filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        setSuccessMsg(`Exportados ${data.total} productos`);
+        setTimeout(() => setSuccessMsg(null), 3000);
+      }
+    } catch (error) {
+      console.error('Error exporting:', error);
+      setError('Error al exportar productos');
+    }
+  };
+
+  // Import from Excel/CSV
+  const handleFileSelect = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    setImportLoading(true);
+    setImportResult(null);
+    setError(null);
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/import`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setImportResult(data);
+        if (data.inserted > 0) {
+          fetchProductos();
+        }
+      } else {
+        setError(data.detail || 'Error en la importación');
+      }
+    } catch (error) {
+      console.error('Error importing:', error);
+      setError('Error al importar el archivo');
+    } finally {
+      setImportLoading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
