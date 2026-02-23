@@ -57,6 +57,7 @@ Visita/Tratamiento → realizados sobre → Parcela
 
 5. **Buscador de Parcelas en Formularios (Nuevo)**
    - En Visitas: buscar parcela por Proveedor, Cultivo, Campaña
+   - En Tratamientos: buscar parcelas por Proveedor, Cultivo, Campaña
    - Filtros dentro del formulario que reducen las opciones del selector
    - Contador de resultados filtrados
 
