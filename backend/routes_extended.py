@@ -191,6 +191,108 @@ async def delete_tratamiento(
     
     return {"success": True, "message": "Tratamiento deleted"}
 
+
+# Historial de tratamientos por parcela (para cuaderno de campo)
+@router.get("/tratamientos/parcela/{parcela_id}/historial")
+async def get_historial_tratamientos_parcela(
+    parcela_id: str,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireTratamientosAccess)
+):
+    """
+    Obtiene el historial completo de tratamientos fitosanitarios de una parcela.
+    Útil para el cumplimiento normativo del cuaderno de campo.
+    """
+    if not ObjectId.is_valid(parcela_id):
+        raise HTTPException(status_code=400, detail="ID de parcela inválido")
+    
+    # Get all treatments that include this parcela
+    tratamientos = await tratamientos_collection.find({
+        "parcelas_ids": parcela_id
+    }).sort("fecha_tratamiento", -1).to_list(length=500)
+    
+    # Enrich with additional data
+    historial = []
+    for t in tratamientos:
+        registro = {
+            "_id": str(t["_id"]),
+            "fecha_tratamiento": t.get("fecha_tratamiento"),
+            "fecha_aplicacion": t.get("fecha_aplicacion"),
+            "tipo_tratamiento": t.get("tipo_tratamiento"),
+            "subtipo": t.get("subtipo"),
+            "metodo_aplicacion": t.get("metodo_aplicacion"),
+            "superficie_aplicacion": t.get("superficie_aplicacion"),
+            "caldo_superficie": t.get("caldo_superficie"),
+            "aplicador_nombre": t.get("aplicador_nombre"),
+            # Producto fitosanitario
+            "producto_fitosanitario_id": t.get("producto_fitosanitario_id"),
+            "producto_fitosanitario_nombre": t.get("producto_fitosanitario_nombre"),
+            "producto_fitosanitario_dosis": t.get("producto_fitosanitario_dosis"),
+            "producto_fitosanitario_unidad": t.get("producto_fitosanitario_unidad"),
+            # Datos heredados
+            "proveedor": t.get("proveedor"),
+            "cultivo": t.get("cultivo"),
+            "campana": t.get("campana")
+        }
+        historial.append(registro)
+    
+    # Calculate statistics
+    total_tratamientos = len(historial)
+    productos_usados = list(set([h["producto_fitosanitario_nombre"] for h in historial if h.get("producto_fitosanitario_nombre")]))
+    tipos_aplicados = list(set([h["subtipo"] for h in historial if h.get("subtipo")]))
+    
+    return {
+        "success": True,
+        "parcela_id": parcela_id,
+        "historial": historial,
+        "estadisticas": {
+            "total_tratamientos": total_tratamientos,
+            "productos_usados": productos_usados,
+            "tipos_aplicados": tipos_aplicados
+        }
+    }
+
+
+# Resumen de tratamientos por campaña (para informes)
+@router.get("/tratamientos/resumen-campana/{campana}")
+async def get_resumen_tratamientos_campana(
+    campana: str,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireTratamientosAccess)
+):
+    """
+    Resumen de todos los tratamientos de una campaña.
+    Útil para generar informes del cuaderno de campo.
+    """
+    tratamientos = await tratamientos_collection.find({
+        "campana": campana
+    }).sort("fecha_tratamiento", -1).to_list(length=1000)
+    
+    # Group by product
+    productos_resumen = {}
+    for t in tratamientos:
+        producto = t.get("producto_fitosanitario_nombre") or "Sin producto registrado"
+        if producto not in productos_resumen:
+            productos_resumen[producto] = {
+                "nombre": producto,
+                "aplicaciones": 0,
+                "superficie_total": 0,
+                "fechas": []
+            }
+        productos_resumen[producto]["aplicaciones"] += 1
+        productos_resumen[producto]["superficie_total"] += t.get("superficie_aplicacion", 0)
+        if t.get("fecha_tratamiento"):
+            productos_resumen[producto]["fechas"].append(t.get("fecha_tratamiento"))
+    
+    return {
+        "success": True,
+        "campana": campana,
+        "total_tratamientos": len(tratamientos),
+        "productos": list(productos_resumen.values()),
+        "tratamientos": [serialize_doc(t) for t in tratamientos]
+    }
+
+
 # ============================================================================
 # IRRIGACIONES
 # ============================================================================
