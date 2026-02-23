@@ -46,6 +46,7 @@ app.include_router(evaluaciones_router)
 app.include_router(notifications_router)
 app.include_router(dashboard_router)
 app.include_router(reports_router)
+app.include_router(fitosanitarios_router)
 
 
 @app.get("/")
