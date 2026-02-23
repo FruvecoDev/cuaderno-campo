@@ -401,9 +401,33 @@ const Visitas = () => {
                 {visitas.map((visita) => (
                   <tr key={visita._id}>
                     <td className="font-semibold">{visita.objetivo}</td>
-                    <td>{visita.parcela_id || 'N/A'}</td>
-                    <td>{visita.cultivo || 'N/A'}</td>
-                    <td>{visita.campana || 'N/A'}</td>
+                    <td>
+                      {visita.parcela_id ? (
+                        visita.parcela_id
+                      ) : (
+                        <span style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }} title="Registro anterior a la implementación de catálogos">
+                          No especificado
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      {visita.cultivo ? (
+                        visita.cultivo
+                      ) : (
+                        <span style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }} title="Registro anterior a la implementación de catálogos">
+                          No especificado
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      {visita.campana ? (
+                        visita.campana
+                      ) : (
+                        <span style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }} title="Registro anterior a la implementación de catálogos">
+                          No especificado
+                        </span>
+                      )}
+                    </td>
                     <td>{visita.fecha_visita ? new Date(visita.fecha_visita).toLocaleDateString() : 'Sin fecha'}</td>
                     <td>
                       <span className={`badge ${visita.realizado ? 'badge-success' : 'badge-default'}`}>
