@@ -282,6 +282,30 @@ Módulos actualizados para seguir patrón consistente:
   - Mensaje informativo: "Este proveedor es diferente al del contrato. El gasto aún se imputará al contrato X"
 - **Estado**: ✅ COMPLETADO
 
+## Informes de Gastos (24/02/2026)
+- **Nuevo Módulo**: `/app/frontend/src/pages/InformesGastos.js`
+- **Backend Router**: `/app/backend/routes_gastos.py`
+- **Funcionalidades**:
+  - Dashboard con KPIs: Total Gastos, Albaranes, Proveedores, Cultivos
+  - Filtros por fecha (desde/hasta) y campaña
+  - **Gastos por Proveedor**: Tabla con nombre, nº albaranes, total y porcentaje
+  - **Gastos por Contrato**: Tabla con contrato, proveedor, cultivo, albaranes y total
+  - **Gastos por Cultivo**: Tabla con cultivo, nº albaranes, total y porcentaje
+  - **Gastos por Parcela**: Tabla con parcela, cultivo, albaranes, total y coste/ha
+  - Secciones expandibles/colapsables (acordeón)
+  - Detalle de albaranes: Al hacer clic en cualquier fila, muestra panel lateral con listado de albaranes
+  - Totales calculados automáticamente
+- **Endpoints API**:
+  - `GET /api/gastos/resumen` - Resumen general con totales por dimensión
+  - `GET /api/gastos/por-proveedor` - Detalle por proveedor
+  - `GET /api/gastos/por-contrato` - Detalle por contrato
+  - `GET /api/gastos/por-cultivo` - Detalle por cultivo
+  - `GET /api/gastos/por-parcela` - Detalle por parcela (con coste/ha)
+  - `GET /api/gastos/detalle-albaranes` - Lista filtrada de albaranes
+  - `GET /api/gastos/campanas` - Lista de campañas disponibles
+- **Navegación**: Administración > Informes Gastos
+- **Estado**: ✅ COMPLETADO
+
 ## Historial de Tratamientos por Parcela (23/02/2026)
 - **Ubicación**: Modal en `/app/frontend/src/pages/Parcelas.js`
 - **Backend**: Endpoint `/api/tratamientos/parcela/{parcela_id}/historial`
