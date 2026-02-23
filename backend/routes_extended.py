@@ -94,12 +94,21 @@ async def get_tratamientos(
     skip: int = 0,
     limit: int = 100,
     parcela_id: Optional[str] = None,
+    campana: Optional[str] = None,
+    cultivo_id: Optional[str] = None,
+    contrato_id: Optional[str] = None,
     current_user: dict = Depends(get_current_user),
     _access: dict = Depends(RequireTratamientosAccess)
 ):
     query = {}
     if parcela_id:
         query["parcelas_ids"] = parcela_id
+    if campana:
+        query["campana"] = campana
+    if cultivo_id:
+        query["cultivo_id"] = cultivo_id
+    if contrato_id:
+        query["contrato_id"] = contrato_id
     
     tratamientos = await tratamientos_collection.find(query).skip(skip).limit(limit).to_list(limit)
     return {"tratamientos": serialize_docs(tratamientos), "total": await tratamientos_collection.count_documents(query)}
