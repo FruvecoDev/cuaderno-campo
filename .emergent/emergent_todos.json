@@ -1,10 +1,10 @@
 [
   {
     "content": "Arreglar fetchContratos en Parcelas.js - agregar header de autorización",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
-    "content": "Aplicar patrón de edición a otros módulos",
-    "status": "pending"
+    "content": "Aplicar patrón de edición a otros módulos: Visitas y Tratamientos",
+    "status": "in_progress"
   }
 ]
