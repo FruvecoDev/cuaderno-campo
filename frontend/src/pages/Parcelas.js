@@ -289,6 +289,7 @@ const Parcelas = () => {
         fetchParcelas();
         setPolygon([]);
         setSearchContrato('');
+        setContratoSearch({ proveedor: '', cultivo: '', campana: '' });
         setFormData({
           contrato_id: '',
           proveedor: '', 
