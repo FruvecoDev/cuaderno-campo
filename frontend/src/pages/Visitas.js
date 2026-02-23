@@ -499,6 +499,7 @@ const Visitas = () => {
                           {canEdit && (
                             <button
                               className="btn btn-sm btn-secondary"
+                              onClick={() => handleEdit(visita)}
                               title="Editar visita"
                               data-testid={`edit-visita-${visita._id}`}
                             >
