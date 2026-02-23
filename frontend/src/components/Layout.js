@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, FileText, MapPin, Home, Calendar, ListTodo,
   Sprout, Droplets, BookOpen, FileBarChart, Wheat, FolderOpen,
-  LogOut, User
+  LogOut, User, Users
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
@@ -38,6 +38,9 @@ const Layout = ({ children }) => {
       { path: '/albaranes', label: 'Albaranes', icon: FileBarChart, module: 'albaranes' },
       { path: '/cosechas', label: 'Cosechas', icon: Wheat, module: 'cosechas' },
       { path: '/documentos', label: 'Documentos', icon: FolderOpen, module: 'documentos' },
+    ]},
+    { section: 'Sistema', items: [
+      { path: '/usuarios', label: 'Usuarios', icon: Users, requireAdmin: true },
     ]}
   ];
   
@@ -45,6 +48,10 @@ const Layout = ({ children }) => {
   const filteredNavItems = navItems.map(section => ({
     ...section,
     items: section.items.filter(item => {
+      // Check admin requirement
+      if (item.requireAdmin && user?.role !== 'Admin') {
+        return false;
+      }
       // If no module specified or user has access to this module
       return !item.module || user?.modules_access?.includes(item.module);
     })
