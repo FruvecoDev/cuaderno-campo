@@ -321,6 +321,7 @@ async def create_visita(
         "planificado": False,
         "documentos": [],
         "formularios": [],
+        "cuestionario_plagas": visita.cuestionario_plagas if visita.objetivo == "Plagas y Enfermedades" else None,
         "created_at": datetime.now(),
         "updated_at": datetime.now()
     }
