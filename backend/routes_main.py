@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
 from typing import List, Optional
 from bson import ObjectId
 from datetime import datetime
@@ -17,6 +17,12 @@ from database import (
     visitas_collection, tareas_collection, cosechas_collection,
     serialize_doc, serialize_docs
 )
+from rbac_guards import (
+    RequireCreate, RequireEdit, RequireDelete,
+    RequireContratosAccess, RequireParcelasAccess, RequireFincasAccess,
+    RequireVisitasAccess, RequireTareasAccess, RequireCosechasAccess,
+    get_current_user
+)
 
 router = APIRouter(prefix="/api", tags=["main"])
 
@@ -25,7 +31,11 @@ router = APIRouter(prefix="/api", tags=["main"])
 # ============================================================================
 
 @router.post("/contratos", response_model=dict)
-async def create_contrato(contrato: ContratoCreate):
+async def create_contrato(
+    contrato: ContratoCreate,
+    current_user: dict = Depends(RequireCreate),
+    _access: dict = Depends(RequireContratosAccess)
+):
     # Get next numero
     last_contrato = await contratos_collection.find_one(
         {"año": datetime.now().year},
@@ -49,12 +59,21 @@ async def create_contrato(contrato: ContratoCreate):
     return {"success": True, "data": serialize_doc(created)}
 
 @router.get("/contratos")
-async def get_contratos(skip: int = 0, limit: int = 100):
+async def get_contratos(
+    skip: int = 0,
+    limit: int = 100,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireContratosAccess)
+):
     contratos = await contratos_collection.find().skip(skip).limit(limit).to_list(limit)
     return {"contratos": serialize_docs(contratos), "total": await contratos_collection.count_documents({})}
 
 @router.get("/contratos/{contrato_id}")
-async def get_contrato(contrato_id: str):
+async def get_contrato(
+    contrato_id: str,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireContratosAccess)
+):
     if not ObjectId.is_valid(contrato_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
@@ -65,7 +84,12 @@ async def get_contrato(contrato_id: str):
     return serialize_doc(contrato)
 
 @router.put("/contratos/{contrato_id}")
-async def update_contrato(contrato_id: str, contrato: ContratoCreate):
+async def update_contrato(
+    contrato_id: str,
+    contrato: ContratoCreate,
+    current_user: dict = Depends(RequireEdit),
+    _access: dict = Depends(RequireContratosAccess)
+):
     if not ObjectId.is_valid(contrato_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
@@ -84,7 +108,11 @@ async def update_contrato(contrato_id: str, contrato: ContratoCreate):
     return {"success": True, "data": serialize_doc(updated)}
 
 @router.delete("/contratos/{contrato_id}")
-async def delete_contrato(contrato_id: str):
+async def delete_contrato(
+    contrato_id: str,
+    current_user: dict = Depends(RequireDelete),
+    _access: dict = Depends(RequireContratosAccess)
+):
     if not ObjectId.is_valid(contrato_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
