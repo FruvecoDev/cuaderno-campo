@@ -88,6 +88,24 @@ async def get_contratos(
     _access: dict = Depends(RequireContratosAccess)
 ):
     contratos = await contratos_collection.find().skip(skip).limit(limit).to_list(limit)
+    
+    # Poblar datos de proveedor y cultivo
+    proveedores_collection = db['proveedores']
+    cultivos_collection = db['cultivos']
+    
+    for contrato in contratos:
+        # Poblar proveedor
+        if contrato.get('proveedor_id'):
+            proveedor = await proveedores_collection.find_one({"_id": ObjectId(contrato['proveedor_id'])})
+            if proveedor:
+                contrato['proveedor_data'] = serialize_doc(proveedor)
+        
+        # Poblar cultivo
+        if contrato.get('cultivo_id'):
+            cultivo = await cultivos_collection.find_one({"_id": ObjectId(contrato['cultivo_id'])})
+            if cultivo:
+                contrato['cultivo_data'] = serialize_doc(cultivo)
+    
     return {"contratos": serialize_docs(contratos), "total": await contratos_collection.count_documents({})}
 
 @router.get("/contratos/{contrato_id}")
