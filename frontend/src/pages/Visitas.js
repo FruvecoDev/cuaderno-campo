@@ -295,6 +295,7 @@ const Visitas = () => {
     setEditingId(null);
     setShowForm(false);
     setSelectedParcelaInfo(null);
+    setParcelaSearch({ proveedor: '', cultivo: '', campana: '' });
     setFormData({
       objetivo: 'Control Rutinario',
       fecha_visita: '',
