@@ -286,3 +286,237 @@ async def get_productos_by_tipo(
         "success": True,
         "productos": [serialize_producto(p) for p in productos]
     }
+
+
+
+# IMPORT products from Excel/CSV
+@router.post("/import")
+async def import_productos(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    if current_user.get("role") not in ["Admin", "Manager"]:
+        raise HTTPException(status_code=403, detail="No tienes permisos para importar productos")
+    
+    # Validate file type
+    filename = file.filename.lower()
+    if not (filename.endswith('.xlsx') or filename.endswith('.xls') or filename.endswith('.csv')):
+        raise HTTPException(status_code=400, detail="Formato de archivo no soportado. Use .xlsx, .xls o .csv")
+    
+    try:
+        contents = await file.read()
+        
+        # Read file based on type
+        if filename.endswith('.csv'):
+            df = pd.read_csv(io.BytesIO(contents), encoding='utf-8')
+        else:
+            df = pd.read_excel(io.BytesIO(contents))
+        
+        # Clean column names (lowercase, strip, replace spaces)
+        df.columns = df.columns.str.lower().str.strip().str.replace(' ', '_')
+        
+        # Map common column names
+        column_mapping = {
+            'nº_registro': 'numero_registro',
+            'n_registro': 'numero_registro',
+            'no_registro': 'numero_registro',
+            'registro': 'numero_registro',
+            'nombre': 'nombre_comercial',
+            'producto': 'nombre_comercial',
+            'denominacion': 'denominacion_comun',
+            'denominación': 'denominacion_comun',
+            'empresa_concesionaria': 'empresa',
+            'fabricante': 'empresa',
+            'tipo_producto': 'tipo',
+            'categoria': 'tipo',
+            'materia': 'materia_activa',
+            'composicion': 'materia_activa',
+            'dosis_minima': 'dosis_min',
+            'dosis_min': 'dosis_min',
+            'dosis_maxima': 'dosis_max',
+            'dosis_max': 'dosis_max',
+            'unidad': 'unidad_dosis',
+            'volumen_agua_minimo': 'volumen_agua_min',
+            'volumen_agua_maximo': 'volumen_agua_max',
+            'plagas': 'plagas_objetivo',
+            'enfermedades': 'plagas_objetivo',
+            'plazo': 'plazo_seguridad',
+            'plazo_de_seguridad': 'plazo_seguridad',
+            'notas': 'observaciones',
+            'comentarios': 'observaciones'
+        }
+        
+        df.rename(columns=column_mapping, inplace=True)
+        
+        # Validate required columns
+        required_cols = ['numero_registro', 'nombre_comercial']
+        missing_cols = [col for col in required_cols if col not in df.columns]
+        if missing_cols:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Columnas requeridas no encontradas: {', '.join(missing_cols)}. Columnas disponibles: {', '.join(df.columns.tolist())}"
+            )
+        
+        # Process rows
+        productos_to_insert = []
+        errors = []
+        skipped = 0
+        
+        for idx, row in df.iterrows():
+            try:
+                # Skip rows without required data
+                if pd.isna(row.get('numero_registro')) or pd.isna(row.get('nombre_comercial')):
+                    skipped += 1
+                    continue
+                
+                # Check if product already exists
+                existing = await fitosanitarios_collection.find_one({
+                    "numero_registro": str(row['numero_registro']).strip()
+                })
+                if existing:
+                    skipped += 1
+                    continue
+                
+                # Build product object
+                producto = {
+                    "numero_registro": str(row['numero_registro']).strip(),
+                    "nombre_comercial": str(row['nombre_comercial']).strip(),
+                    "denominacion_comun": str(row.get('denominacion_comun', '')).strip() if pd.notna(row.get('denominacion_comun')) else None,
+                    "empresa": str(row.get('empresa', '')).strip() if pd.notna(row.get('empresa')) else None,
+                    "tipo": str(row.get('tipo', 'Herbicida')).strip() if pd.notna(row.get('tipo')) else 'Herbicida',
+                    "materia_activa": str(row.get('materia_activa', '')).strip() if pd.notna(row.get('materia_activa')) else None,
+                    "dosis_min": float(row['dosis_min']) if pd.notna(row.get('dosis_min')) else None,
+                    "dosis_max": float(row['dosis_max']) if pd.notna(row.get('dosis_max')) else None,
+                    "unidad_dosis": str(row.get('unidad_dosis', 'L/ha')).strip() if pd.notna(row.get('unidad_dosis')) else 'L/ha',
+                    "volumen_agua_min": float(row['volumen_agua_min']) if pd.notna(row.get('volumen_agua_min')) else 200,
+                    "volumen_agua_max": float(row['volumen_agua_max']) if pd.notna(row.get('volumen_agua_max')) else 600,
+                    "plagas_objetivo": str(row.get('plagas_objetivo', '')).split(',') if pd.notna(row.get('plagas_objetivo')) else [],
+                    "plazo_seguridad": int(row['plazo_seguridad']) if pd.notna(row.get('plazo_seguridad')) else None,
+                    "observaciones": str(row.get('observaciones', '')).strip() if pd.notna(row.get('observaciones')) else None,
+                    "activo": True,
+                    "created_at": datetime.utcnow(),
+                    "created_by": current_user.get("email"),
+                    "imported": True
+                }
+                
+                # Clean plagas_objetivo
+                if producto["plagas_objetivo"]:
+                    producto["plagas_objetivo"] = [p.strip() for p in producto["plagas_objetivo"] if p.strip()]
+                
+                productos_to_insert.append(producto)
+                
+            except Exception as e:
+                errors.append(f"Fila {idx + 2}: {str(e)}")
+        
+        # Insert products
+        inserted_count = 0
+        if productos_to_insert:
+            result = await fitosanitarios_collection.insert_many(productos_to_insert)
+            inserted_count = len(result.inserted_ids)
+        
+        return {
+            "success": True,
+            "message": f"Importación completada",
+            "inserted": inserted_count,
+            "skipped": skipped,
+            "errors": errors[:10] if errors else [],
+            "total_errors": len(errors)
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error procesando archivo: {str(e)}")
+
+
+# EXPORT products to Excel
+@router.get("/export")
+async def export_productos(
+    tipo: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    query = {"activo": True}
+    if tipo:
+        query["tipo"] = tipo
+    
+    productos = await fitosanitarios_collection.find(query).sort("nombre_comercial", 1).to_list(length=5000)
+    
+    # Convert to DataFrame
+    data = []
+    for p in productos:
+        data.append({
+            "Nº Registro": p.get("numero_registro", ""),
+            "Nombre Comercial": p.get("nombre_comercial", ""),
+            "Denominación": p.get("denominacion_comun", ""),
+            "Empresa": p.get("empresa", ""),
+            "Tipo": p.get("tipo", ""),
+            "Materia Activa": p.get("materia_activa", ""),
+            "Dosis Mín": p.get("dosis_min", ""),
+            "Dosis Máx": p.get("dosis_max", ""),
+            "Unidad Dosis": p.get("unidad_dosis", ""),
+            "Vol. Agua Mín": p.get("volumen_agua_min", ""),
+            "Vol. Agua Máx": p.get("volumen_agua_max", ""),
+            "Plagas Objetivo": ", ".join(p.get("plagas_objetivo", [])),
+            "Plazo Seguridad": p.get("plazo_seguridad", ""),
+            "Observaciones": p.get("observaciones", "")
+        })
+    
+    df = pd.DataFrame(data)
+    
+    # Create Excel file in memory
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Productos')
+    output.seek(0)
+    
+    # Return as base64
+    import base64
+    excel_base64 = base64.b64encode(output.read()).decode('utf-8')
+    
+    return {
+        "success": True,
+        "filename": f"fitosanitarios_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+        "data": excel_base64,
+        "total": len(productos)
+    }
+
+
+# GET template for import
+@router.get("/template")
+async def get_import_template(
+    current_user: dict = Depends(get_current_user)
+):
+    """Returns a base64 encoded Excel template for importing products"""
+    
+    template_data = {
+        "numero_registro": ["ES-00001", "ES-00002"],
+        "nombre_comercial": ["PRODUCTO EJEMPLO 1", "PRODUCTO EJEMPLO 2"],
+        "denominacion_comun": ["Nombre alternativo 1", "Nombre alternativo 2"],
+        "empresa": ["Empresa S.A.", "Otra Empresa S.L."],
+        "tipo": ["Herbicida", "Insecticida"],
+        "materia_activa": ["Glifosato 36%", "Cipermetrina 10%"],
+        "dosis_min": [1.0, 0.1],
+        "dosis_max": [3.0, 0.2],
+        "unidad_dosis": ["L/ha", "L/ha"],
+        "volumen_agua_min": [200, 200],
+        "volumen_agua_max": [400, 500],
+        "plagas_objetivo": ["Malas hierbas", "Pulgón, Trips"],
+        "plazo_seguridad": [21, 7],
+        "observaciones": ["", "Usar en horas frescas"]
+    }
+    
+    df = pd.DataFrame(template_data)
+    
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Plantilla')
+    output.seek(0)
+    
+    import base64
+    excel_base64 = base64.b64encode(output.read()).decode('utf-8')
+    
+    return {
+        "success": True,
+        "filename": "plantilla_fitosanitarios.xlsx",
+        "data": excel_base64
+    }
