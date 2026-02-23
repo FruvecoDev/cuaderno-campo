@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, FileText, ChevronDown, ChevronUp, Settings, Save, X, CheckCircle, Clock, Archive } from 'lucide-react';
+import { Plus, Edit2, Trash2, FileText, ChevronDown, ChevronUp, Settings, Save, X, CheckCircle, Clock, Archive, Download } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
