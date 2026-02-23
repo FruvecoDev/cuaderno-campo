@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Info } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
@@ -16,16 +16,12 @@ const Tratamientos = () => {
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   
-  // Catálogos para el formulario
-  const [contratos, setContratos] = useState([]);
+  // Solo necesitamos parcelas para el selector
   const [parcelas, setParcelas] = useState([]);
-  const [cultivos, setCultivos] = useState([]);
   const [selectedParcelas, setSelectedParcelas] = useState([]);
+  const [selectedParcelasInfo, setSelectedParcelasInfo] = useState(null);
   
-  // Maps para resolver IDs a nombres en tablas
-  const [cultivosMap, setCultivosMap] = useState({});
-  
-  // Form data con nuevos campos obligatorios
+  // Form data SIMPLIFICADO
   const [formData, setFormData] = useState({
     tipo_tratamiento: 'FITOSANITARIOS',
     subtipo: 'Insecticida',
@@ -33,55 +29,27 @@ const Tratamientos = () => {
     metodo_aplicacion: 'Pulverización',
     superficie_aplicacion: '',
     caldo_superficie: '',
-    contrato_id: '',
-    cultivo_id: '',
-    campana: '',
     parcelas_ids: []
   });
   
   useEffect(() => {
     fetchTratamientos();
-    fetchContratos();
-    fetchCultivos();
+    fetchParcelas();
   }, []);
   
+  // Cuando se seleccionan parcelas, mostrar info heredada de la primera
   useEffect(() => {
-    // Cuando se selecciona un contrato, autocompletar campaña y filtrar parcelas
-    if (formData.contrato_id) {
-      const contrato = contratos.find(c => c._id === formData.contrato_id);
-      if (contrato) {
-        setFormData(prev => ({
-          ...prev,
-          campana: contrato.campana,
-          cultivo_id: contrato.cultivo_id || ''
-        }));
-        // Filtrar parcelas por campaña
-        fetchParcelas(contrato.campana);
-      }
+    if (selectedParcelas.length > 0) {
+      const firstParcela = parcelas.find(p => p._id === selectedParcelas[0]);
+      setSelectedParcelasInfo(firstParcela || null);
+    } else {
+      setSelectedParcelasInfo(null);
     }
-  }, [formData.contrato_id, contratos]);
+  }, [selectedParcelas, parcelas]);
   
-  const fetchContratos = async () => {
+  const fetchParcelas = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/contratos`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setContratos(data.contratos || []);
-      }
-    } catch (error) {
-      console.error('Error fetching contratos:', error);
-    }
-  };
-  
-  const fetchParcelas = async (campana = null) => {
-    try {
-      let url = `${BACKEND_URL}/api/parcelas`;
-      if (campana) {
-        url += `?campana=${encodeURIComponent(campana)}`;
-      }
-      const response = await fetch(url, {
+      const response = await fetch(`${BACKEND_URL}/api/parcelas`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
@@ -90,28 +58,6 @@ const Tratamientos = () => {
       }
     } catch (error) {
       console.error('Error fetching parcelas:', error);
-    }
-  };
-  
-  const fetchCultivos = async () => {
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/cultivos?activo=true`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        const cultivosList = data.cultivos || [];
-        setCultivos(cultivosList);
-        
-        // Construir map de cultivo_id -> nombre
-        const map = {};
-        cultivosList.forEach(c => {
-          map[c._id] = `${c.nombre} ${c.variedad ? `- ${c.variedad}` : ''}`.trim();
-        });
-        setCultivosMap(map);
-      }
-    } catch (error) {
-      console.error('Error fetching cultivos:', error);
     }
   };
   
@@ -157,13 +103,7 @@ const Tratamientos = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validar campos obligatorios
-    if (!formData.cultivo_id || !formData.campana) {
-      setError('Debe seleccionar Cultivo y Campaña');
-      setTimeout(() => setError(null), 5000);
-      return;
-    }
-    
+    // Validar solo parcelas_ids (obligatorio)
     if (formData.parcelas_ids.length === 0) {
       setError('Debe seleccionar al menos una Parcela');
       setTimeout(() => setError(null), 5000);
@@ -178,12 +118,15 @@ const Tratamientos = () => {
       
       const method = editingId ? 'PUT' : 'POST';
       
+      // Payload simplificado - el backend hereda el resto
       const payload = {
-        ...formData,
-        superficie_aplicacion: parseFloat(formData.superficie_aplicacion),
-        caldo_superficie: parseFloat(formData.caldo_superficie),
-        caldo_total: 0,
-        volumen_cuba: 0
+        tipo_tratamiento: formData.tipo_tratamiento,
+        subtipo: formData.subtipo,
+        aplicacion_numero: parseInt(formData.aplicacion_numero),
+        metodo_aplicacion: formData.metodo_aplicacion,
+        superficie_aplicacion: parseFloat(formData.superficie_aplicacion) || 0,
+        caldo_superficie: parseFloat(formData.caldo_superficie) || 0,
+        parcelas_ids: formData.parcelas_ids
       };
       
       const response = await fetch(url, {
@@ -205,7 +148,6 @@ const Tratamientos = () => {
         setShowForm(false);
         setEditingId(null);
         fetchTratamientos();
-        // Reset form
         setFormData({
           tipo_tratamiento: 'FITOSANITARIOS',
           subtipo: 'Insecticida',
@@ -213,12 +155,10 @@ const Tratamientos = () => {
           metodo_aplicacion: 'Pulverización',
           superficie_aplicacion: '',
           caldo_superficie: '',
-          contrato_id: '',
-          cultivo_id: '',
-          campana: '',
           parcelas_ids: []
         });
         setSelectedParcelas([]);
+        setSelectedParcelasInfo(null);
       }
     } catch (error) {
       console.error('Error saving tratamiento:', error);
@@ -237,9 +177,6 @@ const Tratamientos = () => {
       metodo_aplicacion: tratamiento.metodo_aplicacion || 'Pulverización',
       superficie_aplicacion: tratamiento.superficie_aplicacion || '',
       caldo_superficie: tratamiento.caldo_superficie || '',
-      contrato_id: tratamiento.contrato_id || '',
-      cultivo_id: tratamiento.cultivo_id || '',
-      campana: tratamiento.campana || '',
       parcelas_ids: tratamiento.parcelas_ids || []
     });
     setSelectedParcelas(tratamiento.parcelas_ids || []);
@@ -250,6 +187,7 @@ const Tratamientos = () => {
     setEditingId(null);
     setShowForm(false);
     setSelectedParcelas([]);
+    setSelectedParcelasInfo(null);
     setFormData({
       tipo_tratamiento: 'FITOSANITARIOS',
       subtipo: 'Insecticida',
@@ -257,9 +195,6 @@ const Tratamientos = () => {
       metodo_aplicacion: 'Pulverización',
       superficie_aplicacion: '',
       caldo_superficie: '',
-      contrato_id: '',
-      cultivo_id: '',
-      campana: '',
       parcelas_ids: []
     });
   };
@@ -323,28 +258,12 @@ const Tratamientos = () => {
         <div className="card mb-6" data-testid="tratamiento-form">
           <h2 className="card-title">{editingId ? 'Editar Tratamiento' : 'Crear Tratamiento'}</h2>
           <form onSubmit={handleSubmit}>
-            {/* Información de la alerta sobre el flujo */}
+            {/* Información del modelo simplificado */}
             <div className="card" style={{ backgroundColor: 'hsl(var(--muted))', marginBottom: '1.5rem', padding: '1rem' }}>
               <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
-                💡 <strong>Flujo guiado:</strong> Selecciona un Contrato (opcional) para autocompletar la Campaña y Cultivo, o completa manualmente. Puedes seleccionar múltiples parcelas.
+                <Info size={16} style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: 'middle' }} />
+                <strong>Modelo simplificado:</strong> Solo selecciona las Parcelas. El Contrato, Cultivo y Campaña se heredan automáticamente de la primera parcela seleccionada.
               </p>
-            </div>
-            
-            {/* Contrato (opcional - ayuda a autocompletar) */}
-            <div className="form-group">
-              <label className="form-label">Contrato (Opcional - autocompletará Campaña y Cultivo)</label>
-              <select
-                className="form-select"
-                value={formData.contrato_id}
-                onChange={(e) => setFormData({...formData, contrato_id: e.target.value})}
-              >
-                <option value="">Seleccionar contrato...</option>
-                {contratos.map(c => (
-                  <option key={c._id} value={c._id}>
-                    {c.serie}-{c.año}-{String(c.numero).padStart(3, '0')} - {c.proveedor} - {c.cultivo} ({c.campana})
-                  </option>
-                ))}
-              </select>
             </div>
             
             {/* Tipo de tratamiento */}
@@ -356,6 +275,7 @@ const Tratamientos = () => {
                   value={formData.tipo_tratamiento}
                   onChange={(e) => setFormData({...formData, tipo_tratamiento: e.target.value})}
                   required
+                  data-testid="select-tipo-tratamiento"
                 >
                   <option value="FITOSANITARIOS">Fitosanitarios</option>
                   <option value="NUTRICIÓN">Nutrición</option>
@@ -369,6 +289,7 @@ const Tratamientos = () => {
                   className="form-select"
                   value={formData.subtipo}
                   onChange={(e) => setFormData({...formData, subtipo: e.target.value})}
+                  data-testid="select-subtipo"
                 >
                   <option value="Insecticida">Insecticida</option>
                   <option value="Fungicida">Fungicida</option>
@@ -386,6 +307,7 @@ const Tratamientos = () => {
                   value={formData.metodo_aplicacion}
                   onChange={(e) => setFormData({...formData, metodo_aplicacion: e.target.value})}
                   required
+                  data-testid="select-metodo-aplicacion"
                 >
                   <option value="Pulverización">Pulverización</option>
                   <option value="Quimigación">Quimigación (fertirrigación)</option>
@@ -396,65 +318,23 @@ const Tratamientos = () => {
               </div>
             </div>
             
-            {/* Contexto agronómico obligatorio */}
-            <div className="grid-3">
-              <div className="form-group">
-                <label className="form-label">Cultivo *</label>
-                <select
-                  className="form-select"
-                  value={formData.cultivo_id}
-                  onChange={(e) => setFormData({...formData, cultivo_id: e.target.value})}
-                  required
-                  disabled={formData.contrato_id !== ''}
-                >
-                  <option value="">Seleccionar cultivo...</option>
-                  {cultivos.map(c => (
-                    <option key={c._id} value={c._id}>
-                      {c.nombre} {c.variedad ? `- ${c.variedad}` : ''} ({c.tipo})
-                    </option>
-                  ))}
-                </select>
-                {formData.contrato_id && (
-                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
-                    Autocompletado desde contrato
-                  </small>
-                )}
-              </div>
-              
-              <div className="form-group">
-                <label className="form-label">Campaña *</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.campana}
-                  onChange={(e) => setFormData({...formData, campana: e.target.value})}
-                  placeholder="Ej: 2025/26"
-                  required
-                  disabled={formData.contrato_id !== ''}
-                />
-                {formData.contrato_id && (
-                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
-                    Autocompletado desde contrato
-                  </small>
-                )}
-              </div>
-              
-              <div className="form-group">
-                <label className="form-label">Nº Aplicación *</label>
-                <input
-                  type="number"
-                  min="1"
-                  className="form-input"
-                  value={formData.aplicacion_numero}
-                  onChange={(e) => setFormData({...formData, aplicacion_numero: parseInt(e.target.value)})}
-                  required
-                />
-              </div>
+            <div className="form-group">
+              <label className="form-label">Nº Aplicación *</label>
+              <input
+                type="number"
+                min="1"
+                className="form-input"
+                value={formData.aplicacion_numero}
+                onChange={(e) => setFormData({...formData, aplicacion_numero: parseInt(e.target.value)})}
+                required
+                style={{ maxWidth: '150px' }}
+                data-testid="input-aplicacion-numero"
+              />
             </div>
             
-            {/* Selección de parcelas (múltiple) */}
+            {/* Selección de parcelas (múltiple) - ÚNICO CAMPO OBLIGATORIO */}
             <div className="form-group">
-              <label className="form-label">Parcelas a Tratar * (selecciona una o varias)</label>
+              <label className="form-label">Parcelas a Tratar * (Obligatorio - selecciona una o varias)</label>
               <div style={{ 
                 border: '1px solid hsl(var(--border))', 
                 borderRadius: '0.5rem', 
@@ -465,7 +345,7 @@ const Tratamientos = () => {
               }}>
                 {parcelas.length === 0 ? (
                   <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }}>
-                    {formData.campana ? `No hay parcelas para la campaña ${formData.campana}` : 'Selecciona un contrato o campaña para ver parcelas'}
+                    No hay parcelas disponibles. Crea una parcela primero.
                   </p>
                 ) : (
                   parcelas.map(p => (
@@ -484,9 +364,10 @@ const Tratamientos = () => {
                         checked={selectedParcelas.includes(p._id)}
                         onChange={() => handleParcelaSelection(p._id)}
                         style={{ marginRight: '0.75rem' }}
+                        data-testid={`checkbox-parcela-${p._id}`}
                       />
                       <span>
-                        <strong>{p.codigo_plantacion}</strong> - {p.variedad} ({p.superficie_total} {p.unidad_medida})
+                        <strong>{p.codigo_plantacion}</strong> - {p.proveedor} - {p.cultivo} ({p.variedad}) - {p.superficie_total} ha
                       </span>
                     </label>
                   ))
@@ -498,6 +379,19 @@ const Tratamientos = () => {
                 </small>
               )}
             </div>
+            
+            {/* Mostrar información heredada de la primera parcela seleccionada */}
+            {selectedParcelasInfo && (
+              <div className="card" style={{ backgroundColor: 'hsl(var(--primary) / 0.1)', marginBottom: '1.5rem', padding: '1rem', border: '1px solid hsl(var(--primary) / 0.3)' }}>
+                <h4 style={{ marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '600' }}>Datos heredados (de la primera parcela):</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.5rem', fontSize: '0.875rem' }}>
+                  <div><strong>Proveedor:</strong> {selectedParcelasInfo.proveedor}</div>
+                  <div><strong>Cultivo:</strong> {selectedParcelasInfo.cultivo}</div>
+                  <div><strong>Campaña:</strong> {selectedParcelasInfo.campana}</div>
+                  <div><strong>Finca:</strong> {selectedParcelasInfo.finca}</div>
+                </div>
+              </div>
+            )}
             
             {/* Datos técnicos */}
             <div className="grid-2">
@@ -511,6 +405,7 @@ const Tratamientos = () => {
                   value={formData.superficie_aplicacion}
                   onChange={(e) => setFormData({...formData, superficie_aplicacion: e.target.value})}
                   required
+                  data-testid="input-superficie-aplicacion"
                 />
               </div>
               
@@ -525,6 +420,7 @@ const Tratamientos = () => {
                   onChange={(e) => setFormData({...formData, caldo_superficie: e.target.value})}
                   placeholder="Litros por hectárea"
                   required
+                  data-testid="input-caldo-superficie"
                 />
               </div>
             </div>
@@ -559,10 +455,9 @@ const Tratamientos = () => {
                   <th>Tipo</th>
                   <th>Subtipo</th>
                   <th>Método</th>
-                  <th>Cultivo</th>
                   <th>Campaña</th>
                   <th>Superficie</th>
-                  <th>Coste</th>
+                  <th>Parcelas</th>
                   <th>Estado</th>
                   {(canEdit || canDelete) && <th>Acciones</th>}
                 </tr>
@@ -573,26 +468,9 @@ const Tratamientos = () => {
                     <td className="font-semibold">{tratamiento.tipo_tratamiento}</td>
                     <td>{tratamiento.subtipo || '—'}</td>
                     <td>{tratamiento.metodo_aplicacion}</td>
-                    <td>
-                      {tratamiento.cultivo_id ? (
-                        cultivosMap[tratamiento.cultivo_id] || tratamiento.cultivo_id
-                      ) : (
-                        <span style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }} title="Registro anterior a la implementación de catálogos">
-                          No especificado
-                        </span>
-                      )}
-                    </td>
-                    <td>
-                      {tratamiento.campana ? (
-                        tratamiento.campana
-                      ) : (
-                        <span style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }} title="Registro anterior a la implementación de catálogos">
-                          No especificado
-                        </span>
-                      )}
-                    </td>
+                    <td>{tratamiento.campana || 'N/A'}</td>
                     <td>{tratamiento.superficie_aplicacion} ha</td>
-                    <td>€{tratamiento.coste_total ? tratamiento.coste_total.toFixed(2) : '0.00'}</td>
+                    <td>{tratamiento.parcelas_ids?.length || 0} parcela(s)</td>
                     <td>
                       <span className={`badge ${tratamiento.realizado ? 'badge-success' : 'badge-default'}`}>
                         {tratamiento.realizado ? 'Realizado' : 'Pendiente'}
