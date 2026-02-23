@@ -45,6 +45,16 @@ Visita/Tratamiento → realizados sobre → Parcela
    - Visitas (modelo simplificado)
    - Tratamientos (modelo simplificado)
 
+3. **Filtros de Búsqueda (Nuevo)**
+   - Parcelas: filtrar por Proveedor, Cultivo, Campaña, Parcela
+   - Visitas: filtrar por Proveedor, Cultivo, Campaña, Parcela
+   - Tratamientos: filtrar por Proveedor, Cultivo, Campaña, Tipo
+
+4. **Configuración de Campos por Usuario (Nuevo)**
+   - Panel de configuración accesible con botón ⚙️
+   - Checkboxes para mostrar/ocultar campos del formulario y columnas de tabla
+   - Preferencias guardadas en localStorage (persisten entre sesiones)
+
 3. **Dashboard**
    - KPIs: Contratos, Parcelas, Superficie, Tratamientos, Producción
    - Gráficos: Superficie por Cultivo, Distribución de Costes
