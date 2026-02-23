@@ -272,6 +272,9 @@ class VisitaBase(BaseModel):
     documentos: List[str] = []  # IDs de documentos
     formularios: List[Dict[str, Any]] = []
     
+    # Cuestionario de Plagas y Enfermedades
+    cuestionario_plagas: Optional[Dict[str, int]] = None
+    
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
 
