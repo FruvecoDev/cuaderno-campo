@@ -727,6 +727,9 @@ const Cosechas = () => {
                               <th style={{ padding: '8px', textAlign: 'left' }}>ID Carga</th>
                               <th style={{ padding: '8px', textAlign: 'left' }}>Fecha</th>
                               <th style={{ padding: '8px', textAlign: 'right' }}>Kilos</th>
+                              {(cosecha.cultivo || '').toLowerCase().includes('guisante') && (
+                                <th style={{ padding: '8px', textAlign: 'center', backgroundColor: '#e3f2fd', color: '#1a5276' }}>Tend.</th>
+                              )}
                               <th style={{ padding: '8px', textAlign: 'right' }}>Precio</th>
                               <th style={{ padding: '8px', textAlign: 'right' }}>Importe</th>
                               <th style={{ padding: '8px', textAlign: 'left' }}>Albarán</th>
@@ -757,6 +760,17 @@ const Cosechas = () => {
                                     </span>
                                   )}
                                 </td>
+                                {(cosecha.cultivo || '').toLowerCase().includes('guisante') && (
+                                  <td style={{ 
+                                    padding: '8px', 
+                                    textAlign: 'center',
+                                    backgroundColor: '#e3f2fd',
+                                    fontWeight: carga.valor_tenderometria ? '600' : 'normal',
+                                    color: '#1a5276'
+                                  }}>
+                                    {carga.valor_tenderometria || '-'}
+                                  </td>
+                                )}
                                 <td style={{ padding: '8px', textAlign: 'right' }}>{carga.precio} €/kg</td>
                                 <td style={{ 
                                   padding: '8px', 
