@@ -785,7 +785,8 @@ class AgriculturalAPITester:
             "superficie_total": 10.50,  # Changed
             "codigo_plantacion": "EDIT001",  # Changed
             "num_plantas": 5000,  # Changed
-            "finca": "EDITED: Updated Finca"  # Changed
+            "finca": "EDITED: Updated Finca",  # Changed
+            "recintos": [{"geometria": [{"lat": 37.0886, "lng": -2.3170}]}]  # Required field
         }
         
         success, response = self.run_test(
