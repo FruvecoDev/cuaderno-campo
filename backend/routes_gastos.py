@@ -501,7 +501,6 @@ async def export_gastos_excel(
     
     # Aggregate data
     por_proveedor = {}
-    por_contrato = {}
     por_cultivo = {}
     por_parcela = {}
     total_general = 0
