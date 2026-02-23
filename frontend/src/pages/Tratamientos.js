@@ -989,7 +989,12 @@ const Tratamientos = () => {
         fecha_tratamiento: formData.fecha_tratamiento || null,
         fecha_aplicacion: formData.fecha_aplicacion || null,
         aplicador_nombre: formData.aplicador_nombre || null,
-        maquina_id: formData.maquina_id || null
+        maquina_id: formData.maquina_id || null,
+        // Producto fitosanitario
+        producto_fitosanitario_id: formData.producto_fitosanitario_id || null,
+        producto_fitosanitario_nombre: formData.producto_fitosanitario_nombre || null,
+        producto_fitosanitario_dosis: parseFloat(formData.producto_fitosanitario_dosis) || null,
+        producto_fitosanitario_unidad: formData.producto_fitosanitario_unidad || null
       };
       
       const response = await fetch(url, {
