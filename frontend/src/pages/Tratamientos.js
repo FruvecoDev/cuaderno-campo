@@ -123,12 +123,15 @@ const Tratamientos = () => {
     metodo_aplicacion: 'Pulverización',
     superficie_aplicacion: '',
     caldo_superficie: '',
-    parcelas_ids: []
+    parcelas_ids: [],
+    aplicador_nombre: '',
+    maquina_id: ''
   });
   
   useEffect(() => {
     fetchTratamientos();
     fetchParcelas();
+    fetchMaquinaria();
   }, []);
   
   // Extraer opciones únicas cuando cambian los tratamientos
