@@ -1391,6 +1391,17 @@ const Tratamientos = () => {
               </div>
             )}
             
+            {/* Calculadora de Fitosanitarios */}
+            <CalculadoraFitosanitarios 
+              onApplyToForm={(values) => {
+                setFormData(prev => ({
+                  ...prev,
+                  superficie_aplicacion: values.superficie_aplicacion || prev.superficie_aplicacion,
+                  caldo_superficie: values.caldo_superficie || prev.caldo_superficie
+                }));
+              }}
+            />
+            
             {/* Datos técnicos */}
             <div className="grid-2">
               {fieldsConfig.superficie_aplicacion && (
