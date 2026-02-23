@@ -66,7 +66,6 @@ async def get_productos(
     search: Optional[str] = None,
     current_user: dict = Depends(get_current_user)
 ):
-    db = get_database()
     
     query = {}
     if tipo:
@@ -96,7 +95,6 @@ async def get_producto(
     producto_id: str,
     current_user: dict = Depends(get_current_user)
 ):
-    db = get_database()
     
     try:
         producto = await fitosanitarios_collection.find_one({"_id": ObjectId(producto_id)})
@@ -118,7 +116,6 @@ async def create_producto(
     if current_user.get("role") not in ["Admin", "Manager"]:
         raise HTTPException(status_code=403, detail="No tienes permisos para crear productos")
     
-    db = get_database()
     
     producto_dict = producto.model_dump()
     producto_dict["created_at"] = datetime.utcnow()
@@ -143,7 +140,6 @@ async def update_producto(
     if current_user.get("role") not in ["Admin", "Manager"]:
         raise HTTPException(status_code=403, detail="No tienes permisos para editar productos")
     
-    db = get_database()
     
     try:
         existing = await fitosanitarios_collection.find_one({"_id": ObjectId(producto_id)})
@@ -174,7 +170,6 @@ async def delete_producto(
     if current_user.get("role") != "Admin":
         raise HTTPException(status_code=403, detail="Solo Admin puede eliminar productos")
     
-    db = get_database()
     
     try:
         result = await fitosanitarios_collection.delete_one({"_id": ObjectId(producto_id)})
@@ -195,7 +190,6 @@ async def seed_productos(
     if current_user.get("role") != "Admin":
         raise HTTPException(status_code=403, detail="Solo Admin puede cargar datos iniciales")
     
-    db = get_database()
     
     # Check if already seeded
     count = await fitosanitarios_collection.count_documents({})
@@ -268,7 +262,6 @@ async def get_productos_by_tipo(
     tipo: str,
     current_user: dict = Depends(get_current_user)
 ):
-    db = get_database()
     
     # Map calculator types to database types
     tipo_map = {
