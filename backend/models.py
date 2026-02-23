@@ -108,6 +108,9 @@ class ContratoCreate(BaseModel):
     periodo_hasta: str
     moneda: str = "EUR"
     observaciones: Optional[str] = None
+    
+    # Tabla de precios por calidad/tenderometría (para guisante)
+    precios_calidad: List[ContratoPrecios] = []
 
 class ContratoInDB(ContratoBase):
     id: str = Field(alias="_id")
