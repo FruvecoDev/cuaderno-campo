@@ -329,6 +329,7 @@ const Albaranes = () => {
   
   const resetForm = () => {
     setSelectedContrato(null);
+    setContratoSearch({ proveedor: '', cultivo: '', campana: '', parcela: '' });
     setFormData({
       tipo: 'Entrada',
       fecha: new Date().toISOString().split('T')[0],
@@ -347,9 +348,24 @@ const Albaranes = () => {
     setFilters({ tipo: '', contrato_id: '', proveedor: '', cultivo: '' });
   };
   
+  const clearContratoSearch = () => {
+    setContratoSearch({ proveedor: '', cultivo: '', campana: '', parcela: '' });
+  };
+  
   const toggleFieldConfig = (field) => {
     setFieldsConfig(prev => ({ ...prev, [field]: !prev[field] }));
   };
+  
+  // Filtrar contratos para el selector según búsqueda
+  const filteredContratos = contratos.filter(c => {
+    if (contratoSearch.proveedor && c.proveedor !== contratoSearch.proveedor) return false;
+    if (contratoSearch.cultivo && c.cultivo !== contratoSearch.cultivo) return false;
+    if (contratoSearch.campana && c.campana !== contratoSearch.campana) return false;
+    if (contratoSearch.parcela && (c.parcela || c.parcela_codigo) !== contratoSearch.parcela) return false;
+    return true;
+  });
+  
+  const hasContratoSearchActive = contratoSearch.proveedor || contratoSearch.cultivo || contratoSearch.campana || contratoSearch.parcela;
   
   // Filtrar albaranes
   const filteredAlbaranes = albaranes.filter(a => {
