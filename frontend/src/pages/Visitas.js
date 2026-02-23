@@ -125,6 +125,7 @@ const Visitas = () => {
   const [formData, setFormData] = useState({
     objetivo: 'Control Rutinario',
     fecha_visita: '',
+    fecha_planificada: '',
     parcela_id: '',
     observaciones: ''
   });
