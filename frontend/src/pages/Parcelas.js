@@ -89,6 +89,7 @@ const Parcelas = () => {
   const [editingId, setEditingId] = useState(null);
   const [polygon, setPolygon] = useState([]);
   const { token } = useAuth();
+  const navigate = useNavigate();
   
   // Filtros de búsqueda de contratos (dentro del formulario)
   const [contratoSearch, setContratoSearch] = useState({
