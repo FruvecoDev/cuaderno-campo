@@ -94,6 +94,9 @@ const Evaluaciones = () => {
   const [newQuestionText, setNewQuestionText] = useState('');
   const [newQuestionType, setNewQuestionType] = useState('texto');
   
+  // URL params para preselección de parcela
+  const [searchParams, setSearchParams] = useSearchParams();
+  
   // Form data
   const [formData, setFormData] = useState({
     parcela_id: '',
