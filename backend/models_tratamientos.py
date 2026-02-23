@@ -70,6 +70,12 @@ class TratamientoBase(BaseModel):
     tipo_tratamiento: str  # FITOSANITARIOS, NUTRICIÓN, etc.
     subtipo: Optional[str] = None  # Insecticida, Fungicida, etc.
     
+    # Vínculos obligatorios al contexto agronómico
+    contrato_id: Optional[str] = None  # ObjectId ref a contratos (recomendado)
+    parcela_id: Optional[str] = None  # Se puede derivar de parcelas_ids, pero mejor explícito
+    cultivo_id: Optional[str] = None  # ObjectId ref a cultivos (OBLIGATORIO si no hay parcela_id clara)
+    campana: Optional[str] = None  # OBLIGATORIO - campaña asociada
+    
     # Info general
     aplicacion_numero: int
     realizado: bool = False
@@ -87,7 +93,7 @@ class TratamientoBase(BaseModel):
     aplicador: Optional[TratamientoAplicador] = None
     maquinaria: Optional[TratamientoMaquinaria] = None
     
-    # Parcelas asociadas
+    # Parcelas asociadas (lista para tratamientos multi-parcela)
     parcelas_ids: List[str] = []
     
     # Cuestionarios
