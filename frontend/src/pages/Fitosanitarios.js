@@ -274,6 +274,11 @@ const Fitosanitarios = () => {
     }
   };
 
+  // Open MAPA official registry
+  const openMapaRegistry = () => {
+    window.open('https://www.mapa.gob.es/es/agricultura/temas/sanidad-vegetal/productos-fitosanitarios/registro-productos/', '_blank');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
