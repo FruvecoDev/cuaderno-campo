@@ -198,3 +198,25 @@ Módulos actualizados para seguir patrón consistente:
   - Indicador visual del estado del polígono
   - Botón para limpiar polígono dibujado
 - Archivo: `/app/frontend/src/pages/Parcelas.js`
+
+## Mapa de Parcelas en Dashboard (23/02/2026)
+- **Mapa General**: Visualización de todas las parcelas con geometría en el Dashboard
+- **Vista Satélite por defecto**: Toggle para cambiar entre satélite y mapa base
+- **Colores por cultivo**: Cada parcela tiene un color según su cultivo
+- **Popups informativos**: Click en parcela muestra info completa (código, cultivo, proveedor, finca, superficie)
+- **Leyenda de cultivos**: Identificación visual de cada cultivo
+- **Auto-ajuste de bounds**: El mapa se ajusta automáticamente para mostrar todas las parcelas
+- Archivo: `/app/frontend/src/pages/Dashboard.js`
+
+## Planificador de Visitas y Notificaciones (23/02/2026)
+- **Panel en Dashboard**: Sección "Visitas Planificadas" mostrando próximas visitas
+- **Campo fecha_planificada**: Nuevo campo en el modelo de Visitas para planificar fechas futuras
+- **Indicadores visuales**:
+  - Rojo: Visitas urgentes (menos de 2 días)
+  - Naranja: Visitas próximas (2-7 días)
+  - Verde: Visitas con más tiempo
+- **Cálculo de días restantes**: Muestra "¡Hoy!", "Mañana", "En X días" o "Vencida"
+- **Endpoint nuevo**: `GET /api/visitas/planificadas` - Devuelve visitas con fecha_planificada
+- **Integración con módulo Visitas**: Campo fecha_planificada en formulario de visitas
+- Archivos: `/app/frontend/src/pages/Dashboard.js`, `/app/frontend/src/pages/Visitas.js`, `/app/backend/routes_main.py`, `/app/backend/models.py`
+
