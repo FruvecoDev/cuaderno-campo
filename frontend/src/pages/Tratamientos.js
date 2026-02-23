@@ -332,7 +332,9 @@ const Tratamientos = () => {
           metodo_aplicacion: 'Pulverización',
           superficie_aplicacion: '',
           caldo_superficie: '',
-          parcelas_ids: []
+          parcelas_ids: [],
+          aplicador_nombre: '',
+          maquina_id: ''
         });
         setSelectedParcelas([]);
         setSelectedParcelasInfo(null);
@@ -355,7 +357,9 @@ const Tratamientos = () => {
       metodo_aplicacion: tratamiento.metodo_aplicacion || 'Pulverización',
       superficie_aplicacion: tratamiento.superficie_aplicacion || '',
       caldo_superficie: tratamiento.caldo_superficie || '',
-      parcelas_ids: tratamiento.parcelas_ids || []
+      parcelas_ids: tratamiento.parcelas_ids || [],
+      aplicador_nombre: tratamiento.aplicador_nombre || '',
+      maquina_id: tratamiento.maquina_id || ''
     });
     setSelectedParcelas(tratamiento.parcelas_ids || []);
     setShowForm(true);
@@ -374,7 +378,9 @@ const Tratamientos = () => {
       metodo_aplicacion: 'Pulverización',
       superficie_aplicacion: '',
       caldo_superficie: '',
-      parcelas_ids: []
+      parcelas_ids: [],
+      aplicador_nombre: '',
+      maquina_id: ''
     });
   };
   
