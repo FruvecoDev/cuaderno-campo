@@ -531,15 +531,12 @@ const Tratamientos = () => {
             
             <div className="flex gap-2">
               <button type="submit" className="btn btn-primary" data-testid="btn-guardar-tratamiento">
-                Guardar Tratamiento
+                {editingId ? 'Actualizar Tratamiento' : 'Guardar Tratamiento'}
               </button>
               <button
                 type="button"
                 className="btn btn-secondary"
-                onClick={() => {
-                  setShowForm(false);
-                  setSelectedParcelas([]);
-                }}
+                onClick={handleCancelEdit}
               >
                 Cancelar
               </button>
