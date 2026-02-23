@@ -320,17 +320,6 @@ const Contratos = () => {
                   required
                 />
               </div>
-              
-              <div className="form-group">
-                <label className="form-label">Artículo MP (Opcional)</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.articulo_mp}
-                  onChange={(e) => setFormData({...formData, articulo_mp: e.target.value})}
-                  placeholder="Código de referencia interna (opcional)"
-                />
-              </div>
             </div>
             
             <div className="grid-3">
