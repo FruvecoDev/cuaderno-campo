@@ -178,6 +178,7 @@ const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
               Calculadora de Dosis de Fitosanitarios
             </h3>
             <button
+              type="button"
               onClick={resetCalculator}
               className="btn btn-sm"
               style={{ 
