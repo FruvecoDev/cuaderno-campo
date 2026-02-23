@@ -308,6 +308,80 @@ const Dashboard = () => {
     }
   };
   
+  const fetchNotificationStatus = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/notifications/status`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setNotificationStatus(data);
+    } catch (error) {
+      console.error('Error fetching notification status:', error);
+    }
+  };
+  
+  const sendVisitReminders = async () => {
+    setSendingNotification(true);
+    setNotificationResult(null);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/notifications/send-visit-reminders?days_ahead=7`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setNotificationResult({
+        success: data.success,
+        message: data.message,
+        sent: data.reminders_sent
+      });
+    } catch (error) {
+      setNotificationResult({
+        success: false,
+        message: 'Error al enviar notificaciones'
+      });
+    } finally {
+      setSendingNotification(false);
+      // Clear result after 5 seconds
+      setTimeout(() => setNotificationResult(null), 5000);
+    }
+  };
+  
+  const sendTestEmail = async () => {
+    if (!user?.email) {
+      setNotificationResult({
+        success: false,
+        message: 'No se encontró email del usuario'
+      });
+      return;
+    }
+    
+    setSendingNotification(true);
+    setNotificationResult(null);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/notifications/test`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: user.email })
+      });
+      const data = await response.json();
+      setNotificationResult({
+        success: data.success !== false,
+        message: data.message || 'Email de prueba enviado'
+      });
+    } catch (error) {
+      setNotificationResult({
+        success: false,
+        message: 'Error al enviar email de prueba'
+      });
+    } finally {
+      setSendingNotification(false);
+      setTimeout(() => setNotificationResult(null), 5000);
+    }
+  };
+  
   if (loading) {
     return (
       <div data-testid="dashboard-loading">
