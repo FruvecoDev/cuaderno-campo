@@ -872,12 +872,12 @@ class AgriculturalAPITester:
             404
         )
         
-        # This should "fail" (404) which means deletion worked
-        if response.status_code == 404:
+        # For 404 verification, success means we got the expected 404
+        if success:
             print(f"   ✅ Parcela successfully deleted (404 confirmed)")
             return True
         else:
-            print(f"   ❌ Parcela still exists after deletion")
+            print(f"   ❌ Parcela still exists after deletion (should be 404)")
             return False
 
     def test_contratos_search_functionality(self):
