@@ -1,7 +1,7 @@
 [
   {
     "content": "Reescribir formulario de Contratos eliminando código duplicado (líneas 279-310)",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Implementar dropdowns para Proveedor (proveedor_id) y Cultivo (cultivo_id)",
