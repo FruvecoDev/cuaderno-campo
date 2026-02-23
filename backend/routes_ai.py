@@ -8,11 +8,10 @@ from datetime import datetime
 from bson import ObjectId
 
 from models import AIReportCreate, AIReportInDB
-from database import db
+from database import db, serialize_doc, serialize_docs
 from routes_auth import get_current_user
 from rbac_guards import RequireAIAccess
 from ai_service import ai_service
-from utils import serialize_doc, serialize_docs
 
 router = APIRouter()
 
