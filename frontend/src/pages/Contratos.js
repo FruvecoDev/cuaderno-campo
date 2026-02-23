@@ -389,7 +389,7 @@ const Contratos = () => {
               <button
                 type="button"
                 className="btn btn-secondary"
-                onClick={() => setShowForm(false)}
+                onClick={handleCancelEdit}
               >
                 Cancelar
               </button>
