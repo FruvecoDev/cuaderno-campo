@@ -44,6 +44,9 @@ Visita/Tratamiento → realizados sobre → Parcela
    - Parcelas (con mapa interactivo)
    - Visitas (modelo simplificado)
    - Tratamientos (modelo simplificado)
+   - Irrigaciones (CRUD, filtros, config campos)
+   - Recetas (CRUD, filtros, config campos)
+   - Albaranes (CRUD con líneas, filtros, config campos)
 
 3. **Filtros de Búsqueda (Nuevo)**
    - Parcelas: filtrar por Proveedor, Cultivo, Campaña, Parcela
