@@ -18,6 +18,8 @@ from email_service import (
     RESEND_API_KEY
 )
 from database import visitas_collection, users_collection
+from routes_auth import get_current_user
+from rbac_guards import RequireAdminAccess
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/notifications", tags=["notifications"])
