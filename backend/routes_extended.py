@@ -35,6 +35,43 @@ async def create_tratamiento(
     current_user: dict = Depends(RequireCreate),
     _access: dict = Depends(RequireTratamientosAccess)
 ):
+    from database import db
+    from bson import ObjectId
+    
+    # Validar referencias obligatorias (si se proporcionan)
+    if tratamiento.cultivo_id:
+        cultivos_collection = db['cultivos']
+        if not ObjectId.is_valid(tratamiento.cultivo_id):
+            raise HTTPException(status_code=400, detail="cultivo_id inválido")
+        cultivo = await cultivos_collection.find_one({"_id": ObjectId(tratamiento.cultivo_id)})
+        if not cultivo:
+            raise HTTPException(status_code=400, detail="Cultivo no encontrado")
+    
+    # Validar contrato (si se proporciona)
+    if tratamiento.contrato_id:
+        contratos_collection_ref = db['contratos']
+        if not ObjectId.is_valid(tratamiento.contrato_id):
+            raise HTTPException(status_code=400, detail="contrato_id inválido")
+        contrato = await contratos_collection_ref.find_one({"_id": ObjectId(tratamiento.contrato_id)})
+        if not contrato:
+            raise HTTPException(status_code=400, detail="Contrato no encontrado")
+        
+        # Validar consistencia: campaña, cultivo deben coincidir con contrato
+        if tratamiento.campana and tratamiento.campana != contrato.get('campana'):
+            raise HTTPException(status_code=400, detail="La campaña no coincide con el contrato")
+        if tratamiento.cultivo_id and tratamiento.cultivo_id != contrato.get('cultivo_id'):
+            raise HTTPException(status_code=400, detail="El cultivo no coincide con el contrato")
+    
+    # Validar parcelas existen
+    if tratamiento.parcelas_ids:
+        parcelas_collection_ref = db['parcelas']
+        for parcela_id in tratamiento.parcelas_ids:
+            if not ObjectId.is_valid(parcela_id):
+                raise HTTPException(status_code=400, detail=f"parcela_id inválido: {parcela_id}")
+            parcela = await parcelas_collection_ref.find_one({"_id": ObjectId(parcela_id)})
+            if not parcela:
+                raise HTTPException(status_code=400, detail=f"Parcela no encontrada: {parcela_id}")
+    
     tratamiento_dict = tratamiento.dict()
     tratamiento_dict.update({
         "realizado": False,
