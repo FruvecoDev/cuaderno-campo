@@ -535,7 +535,7 @@ const Contratos = () => {
                   <th>Precio (€/kg)</th>
                   <th>Total (€)</th>
                   <th>Fecha</th>
-                  {(canEdit || canDelete) && <th>Acciones</th>}
+                  {(canEdit || canDelete) ? <th>Acciones</th> : null}
                 </tr>
               </thead>
               <tbody>
@@ -549,7 +549,7 @@ const Contratos = () => {
                     <td>€{contrato.precio.toFixed(2)}</td>
                     <td className="font-semibold">€{(contrato.cantidad * contrato.precio).toFixed(2)}</td>
                     <td>{new Date(contrato.fecha_contrato).toLocaleDateString()}</td>
-                    {(canEdit || canDelete) && (
+                    {(canEdit || canDelete) ? (
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                           {canEdit && (
@@ -574,7 +574,7 @@ const Contratos = () => {
                           )}
                         </div>
                       </td>
-                    )}
+                    ) : null}
                   </tr>
                 ))}
               </tbody>
