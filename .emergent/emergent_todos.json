@@ -13,6 +13,10 @@
   },
   {
     "content": "Actualizar endpoints backend de Tratamientos: validar nuevos campos y consistencia",
+    "status": "completed"
+  },
+  {
+    "content": "Verificar backend funciona correctamente después de cambios",
     "status": "in_progress"
   },
   {
