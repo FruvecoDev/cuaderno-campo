@@ -252,7 +252,7 @@ const Parcelas = () => {
       
       {showForm && (
         <div className="card mb-6">
-          <h2 className="card-title">Crear Parcela</h2>
+          <h2 className="card-title">{editingId ? 'Editar Parcela' : 'Crear Parcela'}</h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
             <div>
               <h3 style={{ marginBottom: '1rem' }}><MapIcon size={18} style={{ display: 'inline', marginRight: '0.5rem' }} />Mapa - Dibuja el polígono</h3>
