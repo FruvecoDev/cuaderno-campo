@@ -267,36 +267,6 @@ const Contratos = () => {
             
             <div className="grid-2">
               <div className="form-group">
-                <label className="form-label">Artículo MP (Opcional)</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.articulo_mp}
-                  onChange={(e) => setFormData({...formData, articulo_mp: e.target.value})}
-                  placeholder="Código artículo MP"
-                />
-              </div>
-                  onChange={(e) => setFormData({...formData, cultivo: e.target.value})}
-                  placeholder="Tipo de cultivo"
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className="grid-2">
-              <div className="form-group">
-                <label className="form-label">Artículo MP *</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.articulo_mp}
-                  onChange={(e) => setFormData({...formData, articulo_mp: e.target.value})}
-                  placeholder="Artículo de materia prima"
-                  required
-                />
-              </div>
-              
-              <div className="form-group">
                 <label className="form-label">Cantidad (kg) *</label>
                 <input
                   type="number"
@@ -305,6 +275,17 @@ const Contratos = () => {
                   value={formData.cantidad}
                   onChange={(e) => setFormData({...formData, cantidad: e.target.value})}
                   required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">Artículo MP (Opcional)</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={formData.articulo_mp}
+                  onChange={(e) => setFormData({...formData, articulo_mp: e.target.value})}
+                  placeholder="Código de referencia interna (opcional)"
                 />
               </div>
             </div>
