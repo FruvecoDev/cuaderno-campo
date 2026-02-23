@@ -387,8 +387,8 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div data-testid="dashboard-loading">
-        <h1 style={{ marginBottom: '2rem' }}>Dashboard</h1>
-        <p>Cargando datos...</p>
+        <h1 style={{ marginBottom: '2rem' }}>{t('dashboard.title')}</h1>
+        <p>{t('common.loading')}</p>
       </div>
     );
   }
@@ -396,8 +396,8 @@ const Dashboard = () => {
   if (!kpis) {
     return (
       <div data-testid="dashboard-error">
-        <h1>Dashboard</h1>
-        <p>Error al cargar los datos</p>
+        <h1>{t('dashboard.title')}</h1>
+        <p>{t('messages.errorLoading')}</p>
       </div>
     );
   }
@@ -414,7 +414,7 @@ const Dashboard = () => {
   return (
     <div data-testid="dashboard-page">
       <div className="flex justify-between items-center mb-6">
-        <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>Dashboard</h1>
+        <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>{t('dashboard.title')}</h1>
       </div>
       
       {/* KPI Cards */}
