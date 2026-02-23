@@ -328,7 +328,11 @@ async def delete_albaran(
 # ============================================================================
 
 @router.post("/tareas", response_model=dict)
-async def create_tarea(tarea: TareaCreate):
+async def create_tarea(
+    tarea: TareaCreate,
+    current_user: dict = Depends(RequireCreate),
+    _access: dict = Depends(RequireTareasAccess)
+):
     tarea_dict = tarea.dict()
     tarea_dict.update({
         "realizada": False,
@@ -349,12 +353,21 @@ async def create_tarea(tarea: TareaCreate):
     return {"success": True, "data": serialize_doc(created)}
 
 @router.get("/tareas")
-async def get_tareas(skip: int = 0, limit: int = 100):
+async def get_tareas(
+    skip: int = 0,
+    limit: int = 100,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireTareasAccess)
+):
     tareas = await tareas_collection.find().skip(skip).limit(limit).to_list(limit)
     return {"tareas": serialize_docs(tareas), "total": await tareas_collection.count_documents({})}
 
 @router.get("/tareas/{tarea_id}")
-async def get_tarea(tarea_id: str):
+async def get_tarea(
+    tarea_id: str,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireTareasAccess)
+):
     if not ObjectId.is_valid(tarea_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
@@ -365,7 +378,11 @@ async def get_tarea(tarea_id: str):
     return serialize_doc(tarea)
 
 @router.delete("/tareas/{tarea_id}")
-async def delete_tarea(tarea_id: str):
+async def delete_tarea(
+    tarea_id: str,
+    current_user: dict = Depends(RequireDelete),
+    _access: dict = Depends(RequireTareasAccess)
+):
     if not ObjectId.is_valid(tarea_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
@@ -381,7 +398,11 @@ async def delete_tarea(tarea_id: str):
 # ============================================================================
 
 @router.post("/cosechas", response_model=dict)
-async def create_cosecha(cosecha: CosechaCreate):
+async def create_cosecha(
+    cosecha: CosechaCreate,
+    current_user: dict = Depends(RequireCreate),
+    _access: dict = Depends(RequireCosechasAccess)
+):
     cosecha_dict = cosecha.dict()
     cosecha_dict.update({
         "realizado": False,
@@ -399,12 +420,21 @@ async def create_cosecha(cosecha: CosechaCreate):
     return {"success": True, "data": serialize_doc(created)}
 
 @router.get("/cosechas")
-async def get_cosechas(skip: int = 0, limit: int = 100):
+async def get_cosechas(
+    skip: int = 0,
+    limit: int = 100,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireCosechasAccess)
+):
     cosechas = await cosechas_collection.find().skip(skip).limit(limit).to_list(limit)
     return {"cosechas": serialize_docs(cosechas), "total": await cosechas_collection.count_documents({})}
 
 @router.get("/cosechas/{cosecha_id}")
-async def get_cosecha(cosecha_id: str):
+async def get_cosecha(
+    cosecha_id: str,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireCosechasAccess)
+):
     if not ObjectId.is_valid(cosecha_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
@@ -415,7 +445,11 @@ async def get_cosecha(cosecha_id: str):
     return serialize_doc(cosecha)
 
 @router.delete("/cosechas/{cosecha_id}")
-async def delete_cosecha(cosecha_id: str):
+async def delete_cosecha(
+    cosecha_id: str,
+    current_user: dict = Depends(RequireDelete),
+    _access: dict = Depends(RequireCosechasAccess)
+):
     if not ObjectId.is_valid(cosecha_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
