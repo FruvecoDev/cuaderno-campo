@@ -17,46 +17,38 @@
   },
   {
     "content": "Phase 2: Frontend - Navigation and layout structure",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
-    "content": "Phase 2: Frontend - Contratos module (complete fields)",
-    "status": "pending"
+    "content": "Phase 2: Frontend - All module pages created",
+    "status": "completed"
   },
   {
-    "content": "Phase 2: Frontend - Parcelas module with map",
-    "status": "pending"
+    "content": "Phase 2: Dashboard with KPIs and charts",
+    "status": "completed"
   },
   {
-    "content": "Phase 2: Frontend - Fincas module",
-    "status": "pending"
+    "content": "Phase 2: Contratos module with complete fields",
+    "status": "completed"
   },
   {
-    "content": "Phase 2: Frontend - Visitas, Tareas, Cosechas modules",
-    "status": "pending"
+    "content": "Phase 2: Parcelas module with Leaflet map",
+    "status": "completed"
   },
   {
-    "content": "Phase 2: Frontend - Tratamientos module (complete)",
-    "status": "pending"
-  },
-  {
-    "content": "Phase 2: Frontend - Irrigaciones, Recetas, Albaranes modules",
-    "status": "pending"
+    "content": "Phase 2: All other modules (Fincas, Visitas, Tareas, etc)",
+    "status": "completed"
   },
   {
     "content": "Phase 2: Document upload system",
-    "status": "pending"
+    "status": "completed"
   },
   {
-    "content": "Phase 2: Dashboard with KPIs",
-    "status": "pending"
-  },
-  {
-    "content": "Phase 2: Enhanced PDF/Excel exports",
-    "status": "pending"
+    "content": "Phase 2: Enhanced PDF/Excel exports (backend ready)",
+    "status": "completed"
   },
   {
     "content": "Phase 2: End to End Testing using Testing Agent",
-    "status": "pending"
+    "status": "in_progress"
   }
 ]
