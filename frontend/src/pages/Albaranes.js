@@ -513,7 +513,7 @@ const Albaranes = () => {
                           {albaran.tipo}
                         </span>
                       </td>
-                    )}
+                    ) : null}
                     {fieldsConfig.fecha ? <td>{albaran.fecha ? new Date(albaran.fecha).toLocaleDateString() : '—'}</td> : null}
                     {fieldsConfig.proveedor_cliente ? <td className="font-semibold">{albaran.proveedor_cliente}</td> : null}
                     {fieldsConfig.items ? <td>{albaran.items?.length || 0}</td> : null}
