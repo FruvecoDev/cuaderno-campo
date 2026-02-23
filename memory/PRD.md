@@ -117,6 +117,26 @@ Visita/Tratamiento → realizados sobre → Parcela
     - Cuestionario condicional cuando objetivo="Plagas y Enfermedades"
     - Preguntas dinámicas guardadas en campo formulario_plagas
 
+11. **Módulo Cosechas Rediseñado (Nuevo - 23/02/2026)**
+    - **Asociación a Contratos**: Hereda proveedor, cultivo, precio automáticamente
+    - **Planificación de Recolección**: Fechas planificadas y kilos estimados
+    - **Registro de Cargas**:
+      - ID de carga único
+      - Kilos reales recolectados
+      - Precio automático (del contrato)
+      - Importe calculado (kilos × precio)
+    - **Descuentos**: Líneas negativas para destare/calidad con tipo especificado
+    - **Totales automáticos**:
+      - Kilos brutos, descuentos, netos
+      - Importe bruto, descuentos, neto
+    - **Estados**: Planificada → En Curso → Completada
+    - **API Endpoints**:
+      - POST /api/cosechas - Crear cosecha (requiere contrato_id)
+      - POST /api/cosechas/{id}/cargas - Añadir carga positiva o descuento
+      - DELETE /api/cosechas/{id}/cargas/{id_carga} - Eliminar carga
+      - PUT /api/cosechas/{id}/completar - Marcar como completada
+    - **Frontend**: Lista expandible con planificaciones, cargas y acciones
+
 ### Pending/In Progress
 1. **Frontend IA** (P0)
    - Página para generar y ver reportes IA
