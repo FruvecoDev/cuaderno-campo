@@ -35,45 +35,44 @@ async def create_tratamiento(
     current_user: dict = Depends(RequireCreate),
     _access: dict = Depends(RequireTratamientosAccess)
 ):
-    from database import db
+    from database import db, contratos_collection, parcelas_collection
     from bson import ObjectId
     
-    # Validar referencias obligatorias (si se proporcionan)
-    if tratamiento.cultivo_id:
-        cultivos_collection = db['cultivos']
-        if not ObjectId.is_valid(tratamiento.cultivo_id):
-            raise HTTPException(status_code=400, detail="cultivo_id inválido")
-        cultivo = await cultivos_collection.find_one({"_id": ObjectId(tratamiento.cultivo_id)})
-        if not cultivo:
-            raise HTTPException(status_code=400, detail="Cultivo no encontrado")
+    # MODELO SIMPLIFICADO: parcelas_ids obligatorio, el resto se hereda
+    if not tratamiento.parcelas_ids or len(tratamiento.parcelas_ids) == 0:
+        raise HTTPException(status_code=400, detail="Debe seleccionar al menos una parcela")
     
-    # Validar contrato (si se proporciona)
-    if tratamiento.contrato_id:
-        contratos_collection_ref = db['contratos']
-        if not ObjectId.is_valid(tratamiento.contrato_id):
-            raise HTTPException(status_code=400, detail="contrato_id inválido")
-        contrato = await contratos_collection_ref.find_one({"_id": ObjectId(tratamiento.contrato_id)})
-        if not contrato:
-            raise HTTPException(status_code=400, detail="Contrato no encontrado")
-        
-        # Validar consistencia: campaña, cultivo deben coincidir con contrato
-        if tratamiento.campana and tratamiento.campana != contrato.get('campana'):
-            raise HTTPException(status_code=400, detail="La campaña no coincide con el contrato")
-        if tratamiento.cultivo_id and tratamiento.cultivo_id != contrato.get('cultivo_id'):
-            raise HTTPException(status_code=400, detail="El cultivo no coincide con el contrato")
+    # Validar todas las parcelas existen y obtener datos de la primera
+    parcelas_collection_ref = db['parcelas']
+    first_parcela = None
+    for parcela_id in tratamiento.parcelas_ids:
+        if not ObjectId.is_valid(parcela_id):
+            raise HTTPException(status_code=400, detail=f"parcela_id inválido: {parcela_id}")
+        parcela = await parcelas_collection_ref.find_one({"_id": ObjectId(parcela_id)})
+        if not parcela:
+            raise HTTPException(status_code=400, detail=f"Parcela no encontrada: {parcela_id}")
+        if first_parcela is None:
+            first_parcela = parcela
     
-    # Validar parcelas existen
-    if tratamiento.parcelas_ids:
-        parcelas_collection_ref = db['parcelas']
-        for parcela_id in tratamiento.parcelas_ids:
-            if not ObjectId.is_valid(parcela_id):
-                raise HTTPException(status_code=400, detail=f"parcela_id inválido: {parcela_id}")
-            parcela = await parcelas_collection_ref.find_one({"_id": ObjectId(parcela_id)})
-            if not parcela:
-                raise HTTPException(status_code=400, detail=f"Parcela no encontrada: {parcela_id}")
+    # Heredar datos desde la primera parcela
+    contrato_id = first_parcela.get("contrato_id", "")
+    cultivo = first_parcela.get("cultivo", "")
+    campana = first_parcela.get("campana", "")
+    cultivo_id = ""
+    
+    # Si hay contrato, obtener cultivo_id
+    if contrato_id:
+        contrato = await contratos_collection.find_one({"_id": ObjectId(contrato_id)})
+        if contrato:
+            cultivo_id = contrato.get("cultivo_id", "")
+            if not campana:
+                campana = contrato.get("campana", "")
     
     tratamiento_dict = tratamiento.dict()
     tratamiento_dict.update({
+        "contrato_id": contrato_id,
+        "cultivo_id": cultivo_id,
+        "campana": campana,
         "realizado": False,
         "planificado": False,
         "coste_superficie": 0.0,
