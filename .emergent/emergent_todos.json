@@ -1,11 +1,11 @@
 [
   {
     "content": "Mejorar visualización de registros legacy en Tratamientos (mostrar mensaje informativo en vez de N/A)",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Mejorar legibilidad de tablas: mostrar nombres de parcelas en vez de IDs",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Resolver warnings de hidratación en tablas (estructura DOM)",
