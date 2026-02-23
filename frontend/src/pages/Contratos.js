@@ -31,8 +31,13 @@ const Contratos = () => {
     periodo_desde: '',
     periodo_hasta: '',
     moneda: 'EUR',
-    observaciones: ''
+    observaciones: '',
+    precios_calidad: []
   });
+  
+  // Estado para saber si el cultivo seleccionado es guisante
+  const selectedCultivo = cultivos.find(c => c._id === formData.cultivo_id);
+  const isGuisante = selectedCultivo?.nombre?.toLowerCase().includes('guisante');
   
   useEffect(() => {
     fetchContratos();
