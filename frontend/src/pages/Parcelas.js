@@ -206,7 +206,19 @@ const Parcelas = () => {
               </div>
               <div className="form-group">
                 <label className="form-label">Proveedor *</label>
-                <input type="text" className="form-input" value={formData.proveedor} onChange={(e) => setFormData({...formData, proveedor: e.target.value})} required />
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  value={formData.proveedor} 
+                  onChange={(e) => setFormData({...formData, proveedor: e.target.value})} 
+                  disabled={formData.contrato_id !== ''}
+                  required 
+                />
+                {formData.contrato_id && (
+                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
+                    Autocompletado desde contrato
+                  </small>
+                )}
               </div>
               <div className="form-group">
                 <label className="form-label">Finca *</label>
@@ -214,7 +226,19 @@ const Parcelas = () => {
               </div>
               <div className="form-group">
                 <label className="form-label">Cultivo *</label>
-                <input type="text" className="form-input" value={formData.cultivo} onChange={(e) => setFormData({...formData, cultivo: e.target.value})} required />
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  value={formData.cultivo} 
+                  onChange={(e) => setFormData({...formData, cultivo: e.target.value})} 
+                  disabled={formData.contrato_id !== ''}
+                  required 
+                />
+                {formData.contrato_id && (
+                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
+                    Autocompletado desde contrato
+                  </small>
+                )}
               </div>
               <div className="form-group">
                 <label className="form-label">Variedad *</label>
