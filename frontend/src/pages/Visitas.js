@@ -276,6 +276,11 @@ const Visitas = () => {
         observaciones: formData.observaciones
       };
       
+      // Si el objetivo es "Plagas y Enfermedades", incluir el cuestionario
+      if (formData.objetivo === 'Plagas y Enfermedades') {
+        payload.cuestionario_plagas = cuestionarioPlagas;
+      }
+      
       const response = await fetch(url, {
         method: method,
         headers: { 
@@ -295,14 +300,7 @@ const Visitas = () => {
         setShowForm(false);
         setEditingId(null);
         fetchVisitas();
-        setFormData({
-          objetivo: 'Control Rutinario',
-          fecha_visita: '',
-          parcela_id: '',
-          observaciones: ''
-        });
-        setSelectedParcelaInfo(null);
-        setParcelaSearch({ proveedor: '', cultivo: '', campana: '' });
+        resetForm();
       }
     } catch (error) {
       console.error('Error saving visita:', error);
