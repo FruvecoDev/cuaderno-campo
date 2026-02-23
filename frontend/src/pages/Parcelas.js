@@ -187,18 +187,46 @@ const Parcelas = () => {
               
               <div className="form-group">
                 <label className="form-label">Contrato (Opcional - ayuda a autocompletar)</label>
+                
+                {/* Input de búsqueda */}
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="🔍 Buscar contrato por número, proveedor o cultivo..."
+                  value={searchContrato}
+                  onChange={(e) => setSearchContrato(e.target.value)}
+                  style={{ marginBottom: '0.5rem' }}
+                />
+                
                 <select
                   className="form-select"
                   value={formData.contrato_id}
                   onChange={(e) => setFormData({...formData, contrato_id: e.target.value})}
                 >
                   <option value="">Sin contrato asociado</option>
-                  {contratos.map(c => (
-                    <option key={c._id} value={c._id}>
-                      {c.serie}-{c.año}-{String(c.numero).padStart(3, '0')} - {c.proveedor} - {c.cultivo} ({c.campana})
-                    </option>
-                  ))}
+                  {contratos
+                    .filter(c => {
+                      if (!searchContrato) return true;
+                      const search = searchContrato.toLowerCase();
+                      const contratoText = `${c.serie}-${c.año}-${String(c.numero).padStart(3, '0')} ${c.proveedor} ${c.cultivo} ${c.campana}`.toLowerCase();
+                      return contratoText.includes(search);
+                    })
+                    .map(c => (
+                      <option key={c._id} value={c._id}>
+                        {c.serie}-{c.año}-{String(c.numero).padStart(3, '0')} - {c.proveedor} - {c.cultivo} ({c.campana})
+                      </option>
+                    ))
+                  }
                 </select>
+                {searchContrato && (
+                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
+                    Mostrando {contratos.filter(c => {
+                      const search = searchContrato.toLowerCase();
+                      const contratoText = `${c.serie}-${c.año}-${String(c.numero).padStart(3, '0')} ${c.proveedor} ${c.cultivo} ${c.campana}`.toLowerCase();
+                      return contratoText.includes(search);
+                    }).length} de {contratos.length} contratos
+                  </small>
+                )}
               </div>
               
               <div className="form-group">
