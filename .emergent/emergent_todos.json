@@ -1,15 +1,15 @@
 [
   {
     "content": "Crear modelo y CRUD backend para Proveedores",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Crear modelo y CRUD backend para Cultivos",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "Crear página frontend de gestión de Proveedores",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Crear página frontend de gestión de Cultivos",
