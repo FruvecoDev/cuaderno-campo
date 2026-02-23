@@ -70,8 +70,8 @@ class AgriculturalAPITester:
             login_data
         )
         
-        if success and response.get("success") and response.get("token"):
-            self.token = response["token"]
+        if success and response.get("access_token"):
+            self.token = response["access_token"]
             print(f"   🎯 Token obtained successfully")
             return True
         else:
