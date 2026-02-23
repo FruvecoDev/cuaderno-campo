@@ -986,7 +986,7 @@ async def generate_evaluacion_pdf(
         <div class="header">
             <h1>FRUVECO</h1>
             <h2>REGISTRO DE VISITA</h2>
-            <h3>Visita {idx} de {len(visitas)} | Página {page_num} de {1 + len(visitas) + len(tratamientos)}</h3>
+            <h3>Visita {idx} de {len(visitas)} | Página {page_num} de {total_pages}</h3>
         </div>
         
         <div class="visita-header">
