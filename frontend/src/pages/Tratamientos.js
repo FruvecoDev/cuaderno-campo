@@ -855,6 +855,47 @@ const Tratamientos = () => {
               )}
             </div>
             
+            {/* Aplicador y Máquina */}
+            <div className="grid-2">
+              {fieldsConfig.aplicador_nombre && (
+                <div className="form-group">
+                  <label className="form-label">Aplicador</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={formData.aplicador_nombre}
+                    onChange={(e) => setFormData({...formData, aplicador_nombre: e.target.value})}
+                    placeholder="Nombre del aplicador"
+                    data-testid="input-aplicador-nombre"
+                  />
+                </div>
+              )}
+              
+              {fieldsConfig.maquina_id && (
+                <div className="form-group">
+                  <label className="form-label">Máquina</label>
+                  <select
+                    className="form-select"
+                    value={formData.maquina_id}
+                    onChange={(e) => setFormData({...formData, maquina_id: e.target.value})}
+                    data-testid="select-maquina"
+                  >
+                    <option value="">-- Seleccionar máquina --</option>
+                    {maquinaria.filter(m => m.estado === 'Operativo').map(m => (
+                      <option key={m._id} value={m._id}>
+                        {m.nombre} {m.tipo && `(${m.tipo})`} {m.matricula && `- ${m.matricula}`}
+                      </option>
+                    ))}
+                  </select>
+                  {maquinaria.length === 0 && (
+                    <small style={{ color: 'hsl(var(--muted-foreground))' }}>
+                      No hay maquinaria registrada. Puedes añadirla desde el catálogo de Maquinaria.
+                    </small>
+                  )}
+                </div>
+              )}
+            </div>
+            
             <div className="flex gap-2">
               <button type="submit" className="btn btn-primary" data-testid="btn-guardar-tratamiento">
                 {editingId ? 'Actualizar Tratamiento' : 'Guardar Tratamiento'}
