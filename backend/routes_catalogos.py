@@ -16,7 +16,7 @@ from rbac_guards import (
     get_current_user
 )
 
-router = APIRouter()
+router = APIRouter(prefix="/api", tags=["catalogos"])
 
 # Collections
 proveedores_collection = db['proveedores']
