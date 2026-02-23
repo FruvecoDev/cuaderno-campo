@@ -52,3 +52,4 @@ RequireIrrigacionesAccess = require_module_access("irrigaciones")
 RequireRecetasAccess = require_module_access("recetas")
 RequireAlbaranesAccess = require_module_access("albaranes")
 RequireCosechasAccess = require_module_access("cosechas")
+RequireAIAccess = require_permission("can_create")  # AI reports require create permission
