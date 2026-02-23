@@ -4,7 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
-import { Plus, Map as MapIcon, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Map as MapIcon, Edit2, Trash2, Filter, Settings, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 
@@ -54,6 +54,31 @@ function DrawControl({ onPolygonCreated }) {
   return null;
 }
 
+// Default field configuration
+const DEFAULT_FIELDS_CONFIG = {
+  contrato_id: true,
+  codigo_plantacion: true,
+  proveedor: true,
+  finca: true,
+  cultivo: true,
+  variedad: true,
+  superficie_total: true,
+  num_plantas: true,
+  campana: true
+};
+
+const FIELD_LABELS = {
+  contrato_id: 'Contrato',
+  codigo_plantacion: 'Código Plantación',
+  proveedor: 'Proveedor',
+  finca: 'Finca',
+  cultivo: 'Cultivo',
+  variedad: 'Variedad',
+  superficie_total: 'Superficie',
+  num_plantas: 'Nº Plantas',
+  campana: 'Campaña'
+};
+
 const Parcelas = () => {
   const [parcelas, setParcelas] = useState([]);
   const [contratos, setContratos] = useState([]);
@@ -63,6 +88,29 @@ const Parcelas = () => {
   const [editingId, setEditingId] = useState(null);
   const [polygon, setPolygon] = useState([]);
   const { token } = useAuth();
+  
+  // Filtros
+  const [filters, setFilters] = useState({
+    proveedor: '',
+    cultivo: '',
+    campana: '',
+    codigo_plantacion: ''
+  });
+  
+  // Configuración de campos
+  const [showFieldsConfig, setShowFieldsConfig] = useState(false);
+  const [fieldsConfig, setFieldsConfig] = useState(() => {
+    const saved = localStorage.getItem('parcelas_fields_config');
+    return saved ? JSON.parse(saved) : DEFAULT_FIELDS_CONFIG;
+  });
+  
+  // Opciones únicas para filtros
+  const [filterOptions, setFilterOptions] = useState({
+    proveedores: [],
+    cultivos: [],
+    campanas: [],
+    parcelas: []
+  });
   
   const [formData, setFormData] = useState({
     contrato_id: '',
@@ -80,6 +128,26 @@ const Parcelas = () => {
     fetchParcelas();
     fetchContratos();
   }, []);
+  
+  // Extraer opciones únicas cuando cambian las parcelas
+  useEffect(() => {
+    const proveedores = [...new Set(parcelas.map(p => p.proveedor).filter(Boolean))];
+    const cultivos = [...new Set(parcelas.map(p => p.cultivo).filter(Boolean))];
+    const campanas = [...new Set(parcelas.map(p => p.campana).filter(Boolean))];
+    const parcelasCodigos = [...new Set(parcelas.map(p => p.codigo_plantacion).filter(Boolean))];
+    
+    setFilterOptions({
+      proveedores,
+      cultivos,
+      campanas,
+      parcelas: parcelasCodigos
+    });
+  }, [parcelas]);
+  
+  // Guardar configuración de campos en localStorage
+  useEffect(() => {
+    localStorage.setItem('parcelas_fields_config', JSON.stringify(fieldsConfig));
+  }, [fieldsConfig]);
   
   const fetchParcelas = async () => {
     try {
@@ -111,6 +179,22 @@ const Parcelas = () => {
     }
   };
 
+  // Filtrar parcelas
+  const filteredParcelas = parcelas.filter(p => {
+    if (filters.proveedor && p.proveedor !== filters.proveedor) return false;
+    if (filters.cultivo && p.cultivo !== filters.cultivo) return false;
+    if (filters.campana && p.campana !== filters.campana) return false;
+    if (filters.codigo_plantacion && p.codigo_plantacion !== filters.codigo_plantacion) return false;
+    return true;
+  });
+  
+  const clearFilters = () => {
+    setFilters({ proveedor: '', cultivo: '', campana: '', codigo_plantacion: '' });
+  };
+  
+  const toggleFieldConfig = (field) => {
+    setFieldsConfig(prev => ({ ...prev, [field]: !prev[field] }));
+  };
   
   // Autocompletar campos cuando se selecciona un contrato
   useEffect(() => {
@@ -127,8 +211,6 @@ const Parcelas = () => {
     }
   }, [formData.contrato_id, contratos]);
 
-
-  
   const handlePolygonCreated = (coords) => {
     setPolygon(coords);
     alert(`Polígono dibujado con ${coords.length} puntos`);
@@ -137,13 +219,11 @@ const Parcelas = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validar contrato obligatorio
     if (!formData.contrato_id) {
       alert('Debes seleccionar un contrato. Toda parcela debe estar asociada a un contrato.');
       return;
     }
     
-    // Si estamos editando, no requerir polígono nuevo
     if (!editingId && polygon.length < 3) {
       alert('Dibuja un polígono en el mapa primero');
       return;
@@ -162,7 +242,6 @@ const Parcelas = () => {
         num_plantas: parseInt(formData.num_plantas)
       };
       
-      // Solo agregar geometría si estamos creando nueva o hay polígono nuevo
       if (!editingId || polygon.length >= 3) {
         payload.recintos = [{ geometria: polygon }];
       }
@@ -214,7 +293,6 @@ const Parcelas = () => {
       finca: parcela.finca || ''
     });
     
-    // Si tiene geometría, cargarla
     if (parcela.recintos && parcela.recintos.length > 0 && parcela.recintos[0].geometria) {
       setPolygon(parcela.recintos[0].geometria);
     }
@@ -264,13 +342,127 @@ const Parcelas = () => {
     }
   };
   
+  const hasActiveFilters = Object.values(filters).some(v => v !== '');
+  
   return (
     <div data-testid="parcelas-page">
       <div className="flex justify-between items-center mb-6">
         <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>Parcelas</h1>
-        <button className="btn btn-primary" onClick={() => setShowForm(!showForm)} data-testid="btn-nueva-parcela">
-          <Plus size={18} /> Nueva Parcela
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button 
+            className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setShowFieldsConfig(!showFieldsConfig)}
+            title="Configurar campos visibles"
+            data-testid="btn-config-fields"
+          >
+            <Settings size={18} />
+          </button>
+          <button className="btn btn-primary" onClick={() => setShowForm(!showForm)} data-testid="btn-nueva-parcela">
+            <Plus size={18} /> Nueva Parcela
+          </button>
+        </div>
+      </div>
+      
+      {/* Panel de configuración de campos */}
+      {showFieldsConfig && (
+        <div className="card mb-6" data-testid="fields-config-panel">
+          <div className="flex justify-between items-center mb-4">
+            <h3 style={{ fontWeight: '600' }}>Configurar Campos Visibles</h3>
+            <button className="btn btn-sm btn-secondary" onClick={() => setShowFieldsConfig(false)}>
+              <X size={16} />
+            </button>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem' }}>
+            {Object.entries(FIELD_LABELS).map(([key, label]) => (
+              <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={fieldsConfig[key]}
+                  onChange={() => toggleFieldConfig(key)}
+                  style={{ width: '18px', height: '18px' }}
+                />
+                <span style={{ fontSize: '0.875rem' }}>{label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* Filtros de búsqueda */}
+      <div className="card mb-6" data-testid="filters-panel">
+        <div className="flex justify-between items-center mb-4">
+          <h3 style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Filter size={18} /> Filtros de Búsqueda
+          </h3>
+          {hasActiveFilters && (
+            <button className="btn btn-sm btn-secondary" onClick={clearFilters}>
+              Limpiar filtros
+            </button>
+          )}
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Proveedor</label>
+            <select
+              className="form-select"
+              value={filters.proveedor}
+              onChange={(e) => setFilters({...filters, proveedor: e.target.value})}
+              data-testid="filter-proveedor"
+            >
+              <option value="">Todos</option>
+              {filterOptions.proveedores.map(p => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Cultivo</label>
+            <select
+              className="form-select"
+              value={filters.cultivo}
+              onChange={(e) => setFilters({...filters, cultivo: e.target.value})}
+              data-testid="filter-cultivo"
+            >
+              <option value="">Todos</option>
+              {filterOptions.cultivos.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Campaña</label>
+            <select
+              className="form-select"
+              value={filters.campana}
+              onChange={(e) => setFilters({...filters, campana: e.target.value})}
+              data-testid="filter-campana"
+            >
+              <option value="">Todas</option>
+              {filterOptions.campanas.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Parcela</label>
+            <select
+              className="form-select"
+              value={filters.codigo_plantacion}
+              onChange={(e) => setFilters({...filters, codigo_plantacion: e.target.value})}
+              data-testid="filter-parcela"
+            >
+              <option value="">Todas</option>
+              {filterOptions.parcelas.map(p => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        {hasActiveFilters && (
+          <p style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
+            Mostrando {filteredParcelas.length} de {parcelas.length} parcelas
+          </p>
+        )}
       </div>
       
       {showForm && (
@@ -284,118 +476,117 @@ const Parcelas = () => {
                 <DrawControl onPolygonCreated={handlePolygonCreated} />
                 {polygon.length > 0 && <Polygon positions={polygon.map(p => [p.lat, p.lng])} color="green" />}
               </MapContainer>
-              {polygon.length > 0 && <p className="text-sm text-muted" style={{ marginTop: '0.5rem' }}>✓ Polígono: {polygon.length} puntos</p>}
+              {polygon.length > 0 && <p className="text-sm text-muted" style={{ marginTop: '0.5rem' }}>Polígono: {polygon.length} puntos</p>}
             </div>
             
             <form onSubmit={handleSubmit}>
               <div className="card" style={{ backgroundColor: 'hsl(var(--muted))', marginBottom: '1rem', padding: '0.75rem' }}>
                 <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
-                  ⚠️ <strong>Importante:</strong> Toda parcela debe asociarse a un contrato. Busca y selecciona el contrato correspondiente.
-                  {editingId && (
-                    <><br />✏️ <strong>Editando:</strong> El mapa es opcional. Solo dibuja si quieres cambiar la geometría.</>
-                  )}
+                  Toda parcela debe asociarse a un contrato.
+                  {editingId && ' El mapa es opcional. Solo dibuja si quieres cambiar la geometría.'}
                 </p>
               </div>
               
-              <div className="form-group">
-                <label className="form-label">Contrato * (Obligatorio - define proveedor y cultivo)</label>
-                
-                {/* Input de búsqueda */}
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="🔍 Buscar contrato por número, proveedor o cultivo..."
-                  value={searchContrato}
-                  onChange={(e) => setSearchContrato(e.target.value)}
-                  style={{ marginBottom: '0.5rem' }}
-                />
-                
-                <select
-                  className="form-select"
-                  value={formData.contrato_id}
-                  onChange={(e) => setFormData({...formData, contrato_id: e.target.value})}
-                  required
-                >
-                  <option value="">-- Seleccionar contrato --</option>
-                  {contratos
-                    .filter(c => {
-                      if (!searchContrato) return true;
-                      const search = searchContrato.toLowerCase();
-                      const contratoText = `${c.serie}-${c.año}-${String(c.numero).padStart(3, '0')} ${c.proveedor} ${c.cultivo} ${c.campana}`.toLowerCase();
-                      return contratoText.includes(search);
-                    })
-                    .map(c => (
-                      <option key={c._id} value={c._id}>
-                        {c.serie}-{c.año}-{String(c.numero).padStart(3, '0')} - {c.proveedor} - {c.cultivo} ({c.campana})
-                      </option>
-                    ))
-                  }
-                </select>
-                {searchContrato && (
-                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
-                    Mostrando {contratos.filter(c => {
-                      const search = searchContrato.toLowerCase();
-                      const contratoText = `${c.serie}-${c.año}-${String(c.numero).padStart(3, '0')} ${c.proveedor} ${c.cultivo} ${c.campana}`.toLowerCase();
-                      return contratoText.includes(search);
-                    }).length} de {contratos.length} contratos
-                  </small>
+              {fieldsConfig.contrato_id && (
+                <div className="form-group">
+                  <label className="form-label">Contrato * (Obligatorio)</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Buscar contrato..."
+                    value={searchContrato}
+                    onChange={(e) => setSearchContrato(e.target.value)}
+                    style={{ marginBottom: '0.5rem' }}
+                  />
+                  <select
+                    className="form-select"
+                    value={formData.contrato_id}
+                    onChange={(e) => setFormData({...formData, contrato_id: e.target.value})}
+                    required
+                  >
+                    <option value="">-- Seleccionar contrato --</option>
+                    {contratos
+                      .filter(c => {
+                        if (!searchContrato) return true;
+                        const search = searchContrato.toLowerCase();
+                        return `${c.serie}-${c.año}-${c.numero} ${c.proveedor} ${c.cultivo}`.toLowerCase().includes(search);
+                      })
+                      .map(c => (
+                        <option key={c._id} value={c._id}>
+                          {c.serie}-{c.año}-{String(c.numero).padStart(3, '0')} - {c.proveedor} - {c.cultivo} ({c.campana})
+                        </option>
+                      ))
+                    }
+                  </select>
+                </div>
+              )}
+              
+              {fieldsConfig.codigo_plantacion && (
+                <div className="form-group">
+                  <label className="form-label">Código Plantación *</label>
+                  <input type="text" className="form-input" value={formData.codigo_plantacion} onChange={(e) => setFormData({...formData, codigo_plantacion: e.target.value})} required />
+                </div>
+              )}
+              
+              {fieldsConfig.proveedor && (
+                <div className="form-group">
+                  <label className="form-label">Proveedor *</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    value={formData.proveedor} 
+                    onChange={(e) => setFormData({...formData, proveedor: e.target.value})} 
+                    disabled={formData.contrato_id !== ''}
+                    required 
+                  />
+                  {formData.contrato_id && <small style={{ color: 'hsl(var(--muted-foreground))' }}>Autocompletado desde contrato</small>}
+                </div>
+              )}
+              
+              {fieldsConfig.finca && (
+                <div className="form-group">
+                  <label className="form-label">Finca *</label>
+                  <input type="text" className="form-input" value={formData.finca} onChange={(e) => setFormData({...formData, finca: e.target.value})} required />
+                </div>
+              )}
+              
+              {fieldsConfig.cultivo && (
+                <div className="form-group">
+                  <label className="form-label">Cultivo *</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    value={formData.cultivo} 
+                    onChange={(e) => setFormData({...formData, cultivo: e.target.value})} 
+                    disabled={formData.contrato_id !== ''}
+                    required 
+                  />
+                  {formData.contrato_id && <small style={{ color: 'hsl(var(--muted-foreground))' }}>Autocompletado desde contrato</small>}
+                </div>
+              )}
+              
+              {fieldsConfig.variedad && (
+                <div className="form-group">
+                  <label className="form-label">Variedad *</label>
+                  <input type="text" className="form-input" value={formData.variedad} onChange={(e) => setFormData({...formData, variedad: e.target.value})} required />
+                </div>
+              )}
+              
+              <div className="grid-2">
+                {fieldsConfig.superficie_total && (
+                  <div className="form-group">
+                    <label className="form-label">Superficie (ha) *</label>
+                    <input type="number" step="0.01" className="form-input" value={formData.superficie_total} onChange={(e) => setFormData({...formData, superficie_total: e.target.value})} required />
+                  </div>
+                )}
+                {fieldsConfig.num_plantas && (
+                  <div className="form-group">
+                    <label className="form-label">Nº Plantas *</label>
+                    <input type="number" className="form-input" value={formData.num_plantas} onChange={(e) => setFormData({...formData, num_plantas: e.target.value})} required />
+                  </div>
                 )}
               </div>
               
-              <div className="form-group">
-                <label className="form-label">Código Plantación *</label>
-                <input type="text" className="form-input" value={formData.codigo_plantacion} onChange={(e) => setFormData({...formData, codigo_plantacion: e.target.value})} required />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Proveedor *</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  value={formData.proveedor} 
-                  onChange={(e) => setFormData({...formData, proveedor: e.target.value})} 
-                  disabled={formData.contrato_id !== ''}
-                  required 
-                />
-                {formData.contrato_id && (
-                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
-                    Autocompletado desde contrato
-                  </small>
-                )}
-              </div>
-              <div className="form-group">
-                <label className="form-label">Finca *</label>
-                <input type="text" className="form-input" value={formData.finca} onChange={(e) => setFormData({...formData, finca: e.target.value})} required />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Cultivo *</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  value={formData.cultivo} 
-                  onChange={(e) => setFormData({...formData, cultivo: e.target.value})} 
-                  disabled={formData.contrato_id !== ''}
-                  required 
-                />
-                {formData.contrato_id && (
-                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
-                    Autocompletado desde contrato
-                  </small>
-                )}
-              </div>
-              <div className="form-group">
-                <label className="form-label">Variedad *</label>
-                <input type="text" className="form-input" value={formData.variedad} onChange={(e) => setFormData({...formData, variedad: e.target.value})} required />
-              </div>
-              <div className="grid-2">
-                <div className="form-group">
-                  <label className="form-label">Superficie (ha) *</label>
-                  <input type="number" step="0.01" className="form-input" value={formData.superficie_total} onChange={(e) => setFormData({...formData, superficie_total: e.target.value})} required />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Nº Plantas *</label>
-                  <input type="number" className="form-input" value={formData.num_plantas} onChange={(e) => setFormData({...formData, num_plantas: e.target.value})} required />
-                </div>
-              </div>
               <div className="flex gap-2">
                 <button type="submit" className="btn btn-primary" data-testid="btn-guardar-parcela">
                   {editingId ? 'Actualizar Parcela' : 'Guardar Parcela'}
@@ -408,40 +599,44 @@ const Parcelas = () => {
       )}
       
       <div className="card">
-        <h2 className="card-title">Lista de Parcelas</h2>
-        {loading ? <p>Cargando...</p> : parcelas.length === 0 ? <p className="text-muted">No hay parcelas registradas</p> : (
+        <h2 className="card-title">Lista de Parcelas ({filteredParcelas.length})</h2>
+        {loading ? <p>Cargando...</p> : filteredParcelas.length === 0 ? (
+          <p className="text-muted">{hasActiveFilters ? 'No hay parcelas que coincidan con los filtros' : 'No hay parcelas registradas'}</p>
+        ) : (
           <div className="table-container">
             <table data-testid="parcelas-table">
               <thead>
-                <tr><th>Código</th><th>Proveedor</th><th>Finca</th><th>Cultivo</th><th>Variedad</th><th>Superficie</th><th>Plantas</th><th>Estado</th><th>Acciones</th></tr>
+                <tr>
+                  {fieldsConfig.codigo_plantacion && <th>Código</th>}
+                  {fieldsConfig.proveedor && <th>Proveedor</th>}
+                  {fieldsConfig.finca && <th>Finca</th>}
+                  {fieldsConfig.cultivo && <th>Cultivo</th>}
+                  {fieldsConfig.variedad && <th>Variedad</th>}
+                  {fieldsConfig.superficie_total && <th>Superficie</th>}
+                  {fieldsConfig.num_plantas && <th>Plantas</th>}
+                  {fieldsConfig.campana && <th>Campaña</th>}
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
               </thead>
               <tbody>
-                {parcelas.map((p) => (
+                {filteredParcelas.map((p) => (
                   <tr key={p._id}>
-                    <td className="font-semibold">{p.codigo_plantacion}</td>
-                    <td>{p.proveedor}</td>
-                    <td>{p.finca}</td>
-                    <td>{p.cultivo}</td>
-                    <td>{p.variedad}</td>
-                    <td>{p.superficie_total} ha</td>
-                    <td>{p.num_plantas.toLocaleString()}</td>
+                    {fieldsConfig.codigo_plantacion && <td className="font-semibold">{p.codigo_plantacion}</td>}
+                    {fieldsConfig.proveedor && <td>{p.proveedor}</td>}
+                    {fieldsConfig.finca && <td>{p.finca}</td>}
+                    {fieldsConfig.cultivo && <td>{p.cultivo}</td>}
+                    {fieldsConfig.variedad && <td>{p.variedad}</td>}
+                    {fieldsConfig.superficie_total && <td>{p.superficie_total} ha</td>}
+                    {fieldsConfig.num_plantas && <td>{p.num_plantas?.toLocaleString()}</td>}
+                    {fieldsConfig.campana && <td>{p.campana}</td>}
                     <td><span className={`badge ${p.activo ? 'badge-success' : 'badge-default'}`}>{p.activo ? 'Activa' : 'Inactiva'}</span></td>
                     <td>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button
-                          className="btn btn-sm btn-secondary"
-                          onClick={() => handleEdit(p)}
-                          title="Editar parcela"
-                          data-testid={`edit-parcela-${p._id}`}
-                        >
+                        <button className="btn btn-sm btn-secondary" onClick={() => handleEdit(p)} title="Editar" data-testid={`edit-parcela-${p._id}`}>
                           <Edit2 size={14} />
                         </button>
-                        <button
-                          className="btn btn-sm btn-error"
-                          onClick={() => handleDelete(p._id)}
-                          title="Eliminar parcela"
-                          data-testid={`delete-parcela-${p._id}`}
-                        >
+                        <button className="btn btn-sm btn-error" onClick={() => handleDelete(p._id)} title="Eliminar" data-testid={`delete-parcela-${p._id}`}>
                           <Trash2 size={14} />
                         </button>
                       </div>
