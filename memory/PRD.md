@@ -220,3 +220,16 @@ Módulos actualizados para seguir patrón consistente:
 - **Integración con módulo Visitas**: Campo fecha_planificada en formulario de visitas
 - Archivos: `/app/frontend/src/pages/Dashboard.js`, `/app/frontend/src/pages/Visitas.js`, `/app/backend/routes_main.py`, `/app/backend/models.py`
 
+## Notificaciones por Email (23/02/2026)
+- **Servicio de Email**: Integración con Resend para envío de notificaciones
+- **Recordatorios de Visitas**: Emails automáticos para visitas próximas con diseño responsive
+- **Panel en Dashboard**: Sección "Notificaciones por Email" con estado de configuración
+- **Endpoints nuevos**:
+  - `GET /api/notifications/status` - Estado del servicio
+  - `POST /api/notifications/test` - Email de prueba
+  - `POST /api/notifications/send-visit-reminders` - Enviar recordatorios
+  - `POST /api/notifications/send-daily-summary` - Resumen diario
+  - `GET /api/notifications/upcoming-visits` - Preview de visitas a notificar
+- **Templates HTML**: Emails con diseño profesional y branding FRUVECO
+- Archivos: `/app/backend/email_service.py`, `/app/backend/routes_notifications.py`
+- **Configuración**: Añadir RESEND_API_KEY en .env para activar
