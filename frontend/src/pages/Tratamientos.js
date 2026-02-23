@@ -802,7 +802,14 @@ const Tratamientos = () => {
     fecha_tratamiento: new Date().toISOString().split('T')[0], // Fecha actual por defecto
     fecha_aplicacion: '',
     aplicador_nombre: '',
-    maquina_id: ''
+    maquina_id: '',
+    // Producto fitosanitario desde calculadora
+    producto_fitosanitario_id: '',
+    producto_fitosanitario_nombre: '',
+    producto_fitosanitario_dosis: '',
+    producto_fitosanitario_unidad: '',
+    producto_materia_activa: '',
+    producto_plazo_seguridad: ''
   });
   
   useEffect(() => {
