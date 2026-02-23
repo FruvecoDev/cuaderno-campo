@@ -265,14 +265,21 @@ Módulos actualizados para seguir patrón consistente:
 - **Cambios principales**:
   - Albaranes ahora se vinculan obligatoriamente a un Contrato
   - Al seleccionar un contrato, se heredan automáticamente:
-    - Proveedor
+    - Proveedor (referencia)
     - Cultivo
     - Parcela
     - Campaña
-  - Panel verde "Datos del Contrato (heredados automáticamente)" muestra los datos heredados
-  - Filtros mejorados: Tipo, Contrato, Proveedor, Cultivo
+  - Panel verde "Datos del Contrato (referencia)" muestra los datos heredados
+  - Filtros de búsqueda de contratos: Proveedor, Cultivo, Campaña, Parcela
+  - Filtros de búsqueda de albaranes: Tipo, Contrato, Proveedor, Cultivo
   - Líneas del albarán con unidades (kg, ud, L, cajas, pallets)
   - Cálculo automático de totales por línea y total del albarán
+- **Proveedor alternativo (24/02/2026)**:
+  - Checkbox "Usar otro proveedor" permite seleccionar un proveedor diferente al del contrato
+  - El albarán puede ser de una compra a otro proveedor pero el gasto repercute en el contrato
+  - Dropdown de proveedores disponibles (registrados + de contratos existentes)
+  - Indicador visual (fondo amarillo) cuando se usa un proveedor diferente
+  - Mensaje informativo: "Este proveedor es diferente al del contrato. El gasto aún se imputará al contrato X"
 - **Estado**: ✅ COMPLETADO
 
 ## Historial de Tratamientos por Parcela (23/02/2026)
