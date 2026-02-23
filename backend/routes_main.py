@@ -220,7 +220,11 @@ async def delete_parcela(
 # ============================================================================
 
 @router.post("/fincas", response_model=dict)
-async def create_finca(finca: FincaCreate):
+async def create_finca(
+    finca: FincaCreate,
+    current_user: dict = Depends(RequireCreate),
+    _access: dict = Depends(RequireFincasAccess)
+):
     finca_dict = finca.dict()
     finca_dict.update({
         "created_at": datetime.now(),
@@ -233,12 +237,21 @@ async def create_finca(finca: FincaCreate):
     return {"success": True, "data": serialize_doc(created)}
 
 @router.get("/fincas")
-async def get_fincas(skip: int = 0, limit: int = 100):
+async def get_fincas(
+    skip: int = 0,
+    limit: int = 100,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireFincasAccess)
+):
     fincas = await fincas_collection.find().skip(skip).limit(limit).to_list(limit)
     return {"fincas": serialize_docs(fincas), "total": await fincas_collection.count_documents({})}
 
 @router.get("/fincas/{finca_id}")
-async def get_finca(finca_id: str):
+async def get_finca(
+    finca_id: str,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireFincasAccess)
+):
     if not ObjectId.is_valid(finca_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
@@ -249,7 +262,12 @@ async def get_finca(finca_id: str):
     return serialize_doc(finca)
 
 @router.put("/fincas/{finca_id}")
-async def update_finca(finca_id: str, finca: FincaCreate):
+async def update_finca(
+    finca_id: str,
+    finca: FincaCreate,
+    current_user: dict = Depends(RequireEdit),
+    _access: dict = Depends(RequireFincasAccess)
+):
     if not ObjectId.is_valid(finca_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
@@ -268,7 +286,11 @@ async def update_finca(finca_id: str, finca: FincaCreate):
     return {"success": True, "data": serialize_doc(updated)}
 
 @router.delete("/fincas/{finca_id}")
-async def delete_finca(finca_id: str):
+async def delete_finca(
+    finca_id: str,
+    current_user: dict = Depends(RequireDelete),
+    _access: dict = Depends(RequireFincasAccess)
+):
     if not ObjectId.is_valid(finca_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
@@ -284,7 +306,11 @@ async def delete_finca(finca_id: str):
 # ============================================================================
 
 @router.post("/visitas", response_model=dict)
-async def create_visita(visita: VisitaCreate):
+async def create_visita(
+    visita: VisitaCreate,
+    current_user: dict = Depends(RequireCreate),
+    _access: dict = Depends(RequireVisitasAccess)
+):
     visita_dict = visita.dict()
     visita_dict.update({
         "realizado": False,
