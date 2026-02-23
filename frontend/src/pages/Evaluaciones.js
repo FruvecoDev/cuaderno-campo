@@ -239,14 +239,23 @@ const Evaluaciones = () => {
     setRespuestas(newRespuestas);
   };
   
-  // Opciones de filtro de parcelas
+  // Opciones de filtro de parcelas (para el formulario de búsqueda)
   const parcelaFilterOptions = {
     proveedores: [...new Set(parcelas.map(p => p.proveedor).filter(Boolean))],
     cultivos: [...new Set(parcelas.map(p => p.cultivo).filter(Boolean))],
     campanas: [...new Set(parcelas.map(p => p.campana).filter(Boolean))]
   };
   
-  // Parcelas filtradas
+  // Opciones de filtro de evaluaciones (para la lista)
+  const evaluacionFilterOptions = {
+    parcelas: [...new Set(evaluaciones.map(e => e.codigo_plantacion).filter(Boolean))],
+    cultivos: [...new Set(evaluaciones.map(e => e.cultivo).filter(Boolean))],
+    proveedores: [...new Set(evaluaciones.map(e => e.proveedor).filter(Boolean))],
+    campanas: [...new Set(evaluaciones.map(e => e.campana).filter(Boolean))],
+    contratos: contratos.map(c => ({ id: c._id, nombre: c.nombre || `${c.proveedor} - ${c.cultivo}` }))
+  };
+  
+  // Parcelas filtradas (para el formulario)
   const filteredParcelas = parcelas.filter(p => {
     if (parcelaSearch.proveedor && p.proveedor !== parcelaSearch.proveedor) return false;
     if (parcelaSearch.cultivo && p.cultivo !== parcelaSearch.cultivo) return false;
@@ -256,10 +265,21 @@ const Evaluaciones = () => {
   
   // Evaluaciones filtradas
   const filteredEvaluaciones = evaluaciones.filter(e => {
+    if (filters.parcela && e.codigo_plantacion !== filters.parcela) return false;
+    if (filters.cultivo && e.cultivo !== filters.cultivo) return false;
+    if (filters.proveedor && e.proveedor !== filters.proveedor) return false;
     if (filters.campana && e.campana !== filters.campana) return false;
+    if (filters.contrato && e.contrato_id !== filters.contrato) return false;
     if (filters.estado && e.estado !== filters.estado) return false;
     return true;
   });
+  
+  // Limpiar filtros
+  const clearFilters = () => {
+    setFilters({ parcela: '', cultivo: '', proveedor: '', campana: '', contrato: '', estado: '' });
+  };
+  
+  const hasActiveFilters = Object.values(filters).some(v => v !== '');
   
   // Cuando se selecciona una parcela
   const handleParcelaSelect = (parcelaId) => {
