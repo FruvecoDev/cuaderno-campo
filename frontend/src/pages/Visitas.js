@@ -540,9 +540,87 @@ const Visitas = () => {
               )}
             </div>
             
-            {/* SELECTOR DE PARCELA - Siempre visible (obligatorio) */}
+            {/* SELECTOR DE PARCELA CON BÚSQUEDA - Siempre visible (obligatorio) */}
             <div className="form-group">
               <label className="form-label">Parcela * (Obligatorio - define el contexto)</label>
+              
+              {/* Filtros de búsqueda de parcelas */}
+              <div style={{ 
+                backgroundColor: 'hsl(var(--muted))', 
+                padding: '1rem', 
+                borderRadius: '0.5rem', 
+                marginBottom: '0.75rem' 
+              }}>
+                <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>
+                  Buscar parcela por:
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', fontWeight: '500' }}>Proveedor</label>
+                    <select
+                      className="form-select"
+                      value={parcelaSearch.proveedor}
+                      onChange={(e) => setParcelaSearch({...parcelaSearch, proveedor: e.target.value})}
+                      style={{ fontSize: '0.875rem' }}
+                      data-testid="parcela-search-proveedor"
+                    >
+                      <option value="">Todos</option>
+                      {parcelaFilterOptions.proveedores.map(p => (
+                        <option key={p} value={p}>{p}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', fontWeight: '500' }}>Cultivo</label>
+                    <select
+                      className="form-select"
+                      value={parcelaSearch.cultivo}
+                      onChange={(e) => setParcelaSearch({...parcelaSearch, cultivo: e.target.value})}
+                      style={{ fontSize: '0.875rem' }}
+                      data-testid="parcela-search-cultivo"
+                    >
+                      <option value="">Todos</option>
+                      {parcelaFilterOptions.cultivos.map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', fontWeight: '500' }}>Campaña</label>
+                    <select
+                      className="form-select"
+                      value={parcelaSearch.campana}
+                      onChange={(e) => setParcelaSearch({...parcelaSearch, campana: e.target.value})}
+                      style={{ fontSize: '0.875rem' }}
+                      data-testid="parcela-search-campana"
+                    >
+                      <option value="">Todas</option>
+                      {parcelaFilterOptions.campanas.map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                {(parcelaSearch.proveedor || parcelaSearch.cultivo || parcelaSearch.campana) && (
+                  <button
+                    type="button"
+                    onClick={() => setParcelaSearch({ proveedor: '', cultivo: '', campana: '' })}
+                    style={{ 
+                      marginTop: '0.5rem', 
+                      fontSize: '0.75rem', 
+                      color: 'hsl(var(--primary))',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      textDecoration: 'underline'
+                    }}
+                  >
+                    Limpiar filtros de búsqueda
+                  </button>
+                )}
+              </div>
+              
+              {/* Selector de parcela filtrado */}
               <select
                 className="form-select"
                 value={formData.parcela_id}
@@ -551,12 +629,30 @@ const Visitas = () => {
                 data-testid="select-parcela"
               >
                 <option value="">Seleccionar parcela...</option>
-                {parcelas.map(p => (
-                  <option key={p._id} value={p._id}>
-                    {p.codigo_plantacion} - {p.proveedor} - {p.cultivo} ({p.variedad}) - {p.campana}
-                  </option>
-                ))}
+                {parcelas
+                  .filter(p => {
+                    if (parcelaSearch.proveedor && p.proveedor !== parcelaSearch.proveedor) return false;
+                    if (parcelaSearch.cultivo && p.cultivo !== parcelaSearch.cultivo) return false;
+                    if (parcelaSearch.campana && p.campana !== parcelaSearch.campana) return false;
+                    return true;
+                  })
+                  .map(p => (
+                    <option key={p._id} value={p._id}>
+                      {p.codigo_plantacion} - {p.proveedor} - {p.cultivo} ({p.variedad}) - {p.campana}
+                    </option>
+                  ))
+                }
               </select>
+              {(parcelaSearch.proveedor || parcelaSearch.cultivo || parcelaSearch.campana) && (
+                <small style={{ color: 'hsl(var(--muted-foreground))' }}>
+                  Mostrando {parcelas.filter(p => {
+                    if (parcelaSearch.proveedor && p.proveedor !== parcelaSearch.proveedor) return false;
+                    if (parcelaSearch.cultivo && p.cultivo !== parcelaSearch.cultivo) return false;
+                    if (parcelaSearch.campana && p.campana !== parcelaSearch.campana) return false;
+                    return true;
+                  }).length} de {parcelas.length} parcelas
+                </small>
+              )}
             </div>
             
             {/* Mostrar información heredada de la parcela seleccionada */}
