@@ -327,6 +327,7 @@ const Contratos = () => {
                   <th>Precio (€/kg)</th>
                   <th>Total (€)</th>
                   <th>Fecha</th>
+                  {(canEdit || canDelete) && <th>Acciones</th>}
                 </tr>
               </thead>
               <tbody>
@@ -340,6 +341,31 @@ const Contratos = () => {
                     <td>€{contrato.precio.toFixed(2)}</td>
                     <td className="font-semibold">€{(contrato.cantidad * contrato.precio).toFixed(2)}</td>
                     <td>{new Date(contrato.fecha_contrato).toLocaleDateString()}</td>
+                    {(canEdit || canDelete) && (
+                      <td>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          {canEdit && (
+                            <button
+                              className="btn btn-sm btn-secondary"
+                              title="Editar contrato"
+                              data-testid={`edit-contrato-${contrato._id}`}
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                          )}
+                          {canDelete && (
+                            <button
+                              className="btn btn-sm btn-error"
+                              onClick={() => handleDelete(contrato._id)}
+                              title="Eliminar contrato"
+                              data-testid={`delete-contrato-${contrato._id}`}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
