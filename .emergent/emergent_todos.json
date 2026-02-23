@@ -1,23 +1,11 @@
 [
   {
-    "content": "Crear modelos de datos para reportes IA (AIReport en models.py)",
+    "content": "Crear servicio de IA (ai_service.py) con plantillas de prompts",
     "status": "completed"
   },
   {
-    "content": "Crear servicio de IA (ai_service.py) con plantillas de prompts",
+    "content": "Crear endpoints backend para reportes IA",
     "status": "in_progress"
-  },
-  {
-    "content": "Crear endpoints backend para generar reportes (/api/ai/report/parcel, /api/ai/report/contract)",
-    "status": "pending"
-  },
-  {
-    "content": "Crear endpoint para análisis de costes y anomalías",
-    "status": "pending"
-  },
-  {
-    "content": "Crear endpoint para recomendaciones agronómicas",
-    "status": "pending"
   },
   {
     "content": "Crear página frontend para reportes IA con historial",
