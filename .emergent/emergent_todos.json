@@ -1,6 +1,34 @@
 [
   {
-    "content": "Generar informe final de mejoras implementadas",
-    "status": "completed"
+    "content": "Instalar emergentintegrations library y agregar EMERGENT_LLM_KEY a .env",
+    "status": "in_progress"
+  },
+  {
+    "content": "Crear modelos de datos para reportes IA (AIReport en models.py)",
+    "status": "pending"
+  },
+  {
+    "content": "Crear servicio de IA (ai_service.py) con plantillas de prompts",
+    "status": "pending"
+  },
+  {
+    "content": "Crear endpoints backend para generar reportes (/api/ai/report/parcel, /api/ai/report/contract)",
+    "status": "pending"
+  },
+  {
+    "content": "Crear endpoint para análisis de costes y anomalías",
+    "status": "pending"
+  },
+  {
+    "content": "Crear endpoint para recomendaciones agronómicas",
+    "status": "pending"
+  },
+  {
+    "content": "Crear página frontend para reportes IA con historial",
+    "status": "pending"
+  },
+  {
+    "content": "Testing de funcionalidades IA",
+    "status": "pending"
   }
 ]
