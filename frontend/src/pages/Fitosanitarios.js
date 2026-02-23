@@ -499,6 +499,104 @@ const Fitosanitarios = () => {
         </div>
       )}
 
+      {/* Import Panel */}
+      {showImport && (
+        <div className="card mb-6" style={{ border: '2px dashed hsl(var(--primary))' }}>
+          <div className="flex justify-between items-center mb-4">
+            <h3 style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <FileSpreadsheet size={20} /> Importar Productos desde Excel/CSV
+            </h3>
+            <button className="btn btn-sm btn-secondary" onClick={() => { setShowImport(false); setImportResult(null); }}>
+              <X size={16} />
+            </button>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+            {/* Instructions */}
+            <div>
+              <h4 style={{ fontWeight: '500', marginBottom: '0.75rem' }}>Instrucciones:</h4>
+              <ol style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', lineHeight: '1.75' }}>
+                <li>Descarga la <strong>plantilla Excel</strong> con el formato correcto</li>
+                <li>Rellena los datos de los productos (las columnas obligatorias son: <code>numero_registro</code> y <code>nombre_comercial</code>)</li>
+                <li>Guarda el archivo como <strong>.xlsx</strong> o <strong>.csv</strong></li>
+                <li>Sube el archivo usando el botón de abajo</li>
+              </ol>
+              <button
+                type="button"
+                className="btn btn-secondary mt-4"
+                onClick={handleDownloadTemplate}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              >
+                <Download size={16} /> Descargar Plantilla
+              </button>
+            </div>
+            
+            {/* Upload area */}
+            <div>
+              <div
+                style={{
+                  border: '2px dashed hsl(var(--border))',
+                  borderRadius: '8px',
+                  padding: '2rem',
+                  textAlign: 'center',
+                  backgroundColor: 'hsl(var(--muted) / 0.3)',
+                  cursor: 'pointer'
+                }}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload size={40} style={{ color: 'hsl(var(--muted-foreground))', marginBottom: '0.5rem' }} />
+                <p style={{ fontWeight: '500' }}>Arrastra o haz clic para subir</p>
+                <p style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
+                  Formatos: .xlsx, .xls, .csv
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  onChange={handleFileSelect}
+                  style={{ display: 'none' }}
+                  data-testid="file-input"
+                />
+              </div>
+              
+              {importLoading && (
+                <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+                  <p style={{ color: 'hsl(var(--primary))' }}>Procesando archivo...</p>
+                </div>
+              )}
+              
+              {importResult && (
+                <div style={{ 
+                  marginTop: '1rem', 
+                  padding: '1rem', 
+                  borderRadius: '8px',
+                  backgroundColor: importResult.inserted > 0 ? '#dcfce7' : '#fef3c7',
+                  border: `1px solid ${importResult.inserted > 0 ? '#86efac' : '#fcd34d'}`
+                }}>
+                  <h4 style={{ fontWeight: '600', marginBottom: '0.5rem', color: importResult.inserted > 0 ? '#166534' : '#92400e' }}>
+                    Resultado de la importación
+                  </h4>
+                  <div style={{ fontSize: '0.875rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                    <div><strong>Insertados:</strong> {importResult.inserted}</div>
+                    <div><strong>Omitidos:</strong> {importResult.skipped}</div>
+                  </div>
+                  {importResult.errors && importResult.errors.length > 0 && (
+                    <div style={{ marginTop: '0.75rem' }}>
+                      <strong style={{ color: '#991b1b' }}>Errores ({importResult.total_errors}):</strong>
+                      <ul style={{ fontSize: '0.75rem', color: '#991b1b', marginTop: '0.25rem', paddingLeft: '1rem' }}>
+                        {importResult.errors.slice(0, 5).map((err, i) => (
+                          <li key={i}>{err}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* KPIs by type */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
         {TIPOS_PRODUCTO.map(tipo => (
