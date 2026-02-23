@@ -127,6 +127,19 @@ const Visitas = () => {
     });
   }, [visitas]);
   
+  // Extraer opciones únicas de parcelas para el buscador del formulario
+  useEffect(() => {
+    const proveedores = [...new Set(parcelas.map(p => p.proveedor).filter(Boolean))];
+    const cultivos = [...new Set(parcelas.map(p => p.cultivo).filter(Boolean))];
+    const campanas = [...new Set(parcelas.map(p => p.campana).filter(Boolean))];
+    
+    setParcelaFilterOptions({
+      proveedores,
+      cultivos,
+      campanas
+    });
+  }, [parcelas]);
+  
   // Guardar configuración en localStorage
   useEffect(() => {
     localStorage.setItem('visitas_fields_config', JSON.stringify(fieldsConfig));
