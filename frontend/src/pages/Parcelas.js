@@ -89,6 +89,20 @@ const Parcelas = () => {
   const [polygon, setPolygon] = useState([]);
   const { token } = useAuth();
   
+  // Filtros de búsqueda de contratos (dentro del formulario)
+  const [contratoSearch, setContratoSearch] = useState({
+    proveedor: '',
+    cultivo: '',
+    campana: ''
+  });
+  
+  // Opciones únicas para filtros de contratos (dentro del formulario)
+  const [contratoFilterOptions, setContratoFilterOptions] = useState({
+    proveedores: [],
+    cultivos: [],
+    campanas: []
+  });
+  
   // Filtros
   const [filters, setFilters] = useState({
     proveedor: '',
