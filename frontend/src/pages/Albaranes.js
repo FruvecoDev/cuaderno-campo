@@ -668,12 +668,12 @@ const Albaranes = () => {
                 border: '1px solid #86efac'
               }}>
                 <h4 style={{ fontWeight: '600', marginBottom: '0.75rem', color: '#166534' }}>
-                  Datos del Contrato (heredados automáticamente)
+                  Datos del Contrato (referencia)
                 </h4>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
                   <div>
-                    <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Proveedor</span>
-                    <p style={{ fontWeight: '500' }}>{formData.proveedor || '-'}</p>
+                    <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Proveedor del Contrato</span>
+                    <p style={{ fontWeight: '500' }}>{formData.proveedor_contrato || '-'}</p>
                   </div>
                   <div>
                     <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Cultivo</span>
@@ -688,6 +688,87 @@ const Albaranes = () => {
                     <p style={{ fontWeight: '500' }}>{formData.campana || '-'}</p>
                   </div>
                 </div>
+              </div>
+            )}
+            
+            {/* Selección de Proveedor del Albarán */}
+            {selectedContrato && (
+              <div style={{ 
+                backgroundColor: formData.usar_otro_proveedor ? '#fef3c7' : '#f8fafc', 
+                padding: '1rem', 
+                borderRadius: '8px', 
+                marginBottom: '1.5rem',
+                border: `1px solid ${formData.usar_otro_proveedor ? '#fcd34d' : 'hsl(var(--border))'}`
+              }}>
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h4 style={{ fontWeight: '600', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      2. Proveedor del Albarán
+                    </h4>
+                    <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginTop: '0.25rem' }}>
+                      El gasto se imputará al contrato seleccionado
+                    </p>
+                  </div>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.875rem' }}>
+                    <input
+                      type="checkbox"
+                      checked={formData.usar_otro_proveedor}
+                      onChange={(e) => handleUsarOtroProveedorChange(e.target.checked)}
+                      style={{ width: '18px', height: '18px' }}
+                      data-testid="checkbox-otro-proveedor"
+                    />
+                    <span style={{ color: formData.usar_otro_proveedor ? '#92400e' : 'inherit' }}>
+                      Usar otro proveedor
+                    </span>
+                  </label>
+                </div>
+                
+                {formData.usar_otro_proveedor ? (
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Seleccionar Proveedor *</label>
+                    <select
+                      className="form-select"
+                      value={formData.proveedor}
+                      onChange={(e) => setFormData({...formData, proveedor: e.target.value})}
+                      required
+                      data-testid="select-proveedor-alternativo"
+                      style={{ backgroundColor: '#fffbeb' }}
+                    >
+                      <option value="">-- Seleccionar proveedor --</option>
+                      {proveedores.map(p => (
+                        <option key={p._id} value={p.nombre || p.razon_social}>
+                          {p.nombre || p.razon_social} {p.nif ? `(${p.nif})` : ''}
+                        </option>
+                      ))}
+                      {/* También incluir proveedores de contratos existentes */}
+                      {contratoOptions.proveedores
+                        .filter(prov => !proveedores.some(p => (p.nombre || p.razon_social) === prov))
+                        .map(prov => (
+                          <option key={prov} value={prov}>{prov}</option>
+                        ))
+                      }
+                    </select>
+                    <p style={{ fontSize: '0.75rem', color: '#92400e', marginTop: '0.5rem' }}>
+                      Este proveedor es diferente al del contrato. El gasto aún se imputará al contrato "{selectedContrato?.numero_contrato || selectedContrato?._id?.slice(-6)}".
+                    </p>
+                  </div>
+                ) : (
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.5rem',
+                    padding: '0.75rem',
+                    backgroundColor: 'white',
+                    borderRadius: '6px',
+                    border: '1px solid hsl(var(--border))'
+                  }}>
+                    <span style={{ fontWeight: '500' }}>Proveedor:</span>
+                    <span>{formData.proveedor || formData.proveedor_contrato || '-'}</span>
+                    <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginLeft: 'auto' }}>
+                      (mismo que el contrato)
+                    </span>
+                  </div>
+                )}
               </div>
             )}
             
