@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, Edit2, Package, TrendingUp, TrendingDown, Check, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -6,6 +7,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001'
 
 const Cosechas = () => {
   const { token } = useAuth();
+  const { t } = useTranslation();
   const [cosechas, setCosechas] = useState([]);
   const [contratos, setContratos] = useState([]);
   const [loading, setLoading] = useState(true);

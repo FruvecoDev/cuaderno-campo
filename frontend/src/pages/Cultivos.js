@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, Search } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
@@ -13,6 +14,7 @@ const Cultivos = () => {
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const { t } = useTranslation();
   
   const { token } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
