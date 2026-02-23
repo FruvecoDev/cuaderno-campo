@@ -1,0 +1,129 @@
+{
+  "summary": "Complete frontend testing of Calculadora de Fitosanitarios feature in Tratamientos module. All features tested and working correctly: calculator button opens/closes panel, input fields (Tipo Fitosanitario, Nombre Producto, Superficie, Volumen Agua, Dosis, Concentración, Plaga Objetivo), automatic calculations, alert system (yellow for low values, red for excessive values), reset button clears all fields, historial saves calculations, and 'Aplicar al Tratamiento' correctly passes superficie_aplicacion and caldo_superficie values to the parent form.",
+
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Tratamientos page with tables/selects",
+        "issues": ["Console hydration warnings caused by visual editor metadata injection (span inside tr/th/td/select) - cosmetic only, not affecting functionality"],
+        "priority": "LOW"
+      }
+    ]
+  },
+
+  "passed_tests": [
+    "Calculator button 'Calculadora de Fitosanitarios' visible and clickable",
+    "Calculator panel opens when button clicked",
+    "Calculator header 'Calculadora de Dosis de Fitosanitarios' displayed",
+    "Reset button 'Restablecer' visible with data-testid='btn-reset-calculadora'",
+    "Tipo de Fitosanitario dropdown with options: Insecticida, Herbicida, Fungicida, Fertilizante",
+    "Nombre del Producto text input field working",
+    "Superficie input field with Ha/m² unit selector",
+    "Volumen de Agua (L/ha) input field working",
+    "Dosis del Producto input field with unit selector (L/ha, kg/ha, ml/ha, g/ha)",
+    "Concentración del Producto (%) input field working",
+    "Plaga/Enfermedad Objetivo text input field working",
+    "Calculation: Superficie Total in Ha correct (5 Ha displayed for input 5)",
+    "Calculation: Cantidad Total de Producto correct (5 Ha × 1.5 L/ha = 7.50 L)",
+    "Calculation: Volumen Total de Agua correct (5 Ha × 400 L/ha = 2000 L)",
+    "Calculation: Producto por Litro correct (7.5L / 2000L × 1000 = 3.75 ml/L)",
+    "RED ALERT: '¡Dosis excesiva!' displayed when dosis > max limit (5 L/ha > 3 L/ha for insecticida)",
+    "YELLOW ALERT: 'Dosis baja' displayed when dosis < min limit (0.05 L/ha < 0.1 L/ha for insecticida)",
+    "WATER ALERT: 'Volumen excesivo' displayed when water > 1000 L/ha",
+    "Alert styling: Red alerts have #dc2626 color, Yellow alerts have #f59e0b color",
+    "Reset button clears all input fields to empty",
+    "Reset button resets all results to 0.00",
+    "Guardar en Historial button saves calculation",
+    "Historial de Cálculos section appears after saving",
+    "Historial shows: Fecha, Producto, Superficie, Cantidad, Agua Total columns",
+    "Aplicar al Tratamiento button correctly passes superficie_aplicacion (7.5 Ha)",
+    "Aplicar al Tratamiento button correctly passes caldo_superficie (500 L/ha)",
+    "Calculator panel closes after clicking Aplicar al Tratamiento",
+    "Product type change updates range info text",
+    "Herbicida range: 0.5-5 L/ha",
+    "Fungicida range: 0.2-4 L/ha",
+    "Fertilizante range: 1-50 kg/ha (shows kg instead of L)",
+    "m² to Ha conversion: 20000 m² = 2.00 Ha correctly calculated",
+    "m² info text displayed: (20,000 m²)",
+    "Resumen de la Mezcla section shows: Tipo, Dosis aplicada, Caldo/ha",
+    "Consideraciones importantes section with safety guidelines"
+  ],
+
+  "test_report_links": [
+    "/app/test_reports/iteration_10.json"
+  ],
+
+  "action_items": [],
+
+  "critical_code_review_comments": [],
+
+  "updated_files": [],
+
+  "success_rate": {
+    "backend": "N/A (frontend-only testing)",
+    "frontend": "100% (All calculator features working)"
+  },
+
+  "test_credentials": {
+    "email": "admin@fruveco.com",
+    "password": "admin123"
+  },
+
+  "seed_data_creation": "No new seed data created. Used existing parcelas for testing.",
+
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+
+  "context_for_next_testing_agent": "Calculadora de Fitosanitarios fully tested and working. Component location: /app/frontend/src/pages/Tratamientos.js lines 12-561. Integration with form at line 1395. Key data-testid attributes: btn-calculadora (main button), btn-reset-calculadora (reset button). The calculator calculates doses based on superficie, dosis producto, and volumen de agua. Alerts triggered when values exceed limits defined in LIMITES_DOSIS and LIMITES_AGUA constants. 'Aplicar al Tratamiento' passes superficie_aplicacion and caldo_superficie to parent form via onApplyToForm callback.",
+
+  "verified_features": {
+    "calculator_button": {
+      "testid": "btn-calculadora",
+      "status": "working",
+      "opens_panel": true
+    },
+    "input_fields": {
+      "tipo_fitosanitario": "working - select with 4 options",
+      "nombre_producto": "working - text input",
+      "superficie": "working - number input with Ha/m² selector",
+      "volumen_agua": "working - number input (L/ha)",
+      "dosis_producto": "working - number input with unit selector",
+      "concentracion": "working - percentage input",
+      "plaga_objetivo": "working - text input"
+    },
+    "calculations": {
+      "superficie_ha": "correct",
+      "cantidad_producto": "correct",
+      "volumen_total_agua": "correct",
+      "producto_por_litro": "correct",
+      "m2_to_ha_conversion": "correct"
+    },
+    "alert_system": {
+      "red_alerts_excessive": "working",
+      "yellow_alerts_low": "working",
+      "water_volume_alerts": "working"
+    },
+    "reset_button": {
+      "testid": "btn-reset-calculadora",
+      "status": "working",
+      "clears_all_fields": true
+    },
+    "historial": {
+      "save_button": "working",
+      "displays_records": true
+    },
+    "apply_to_form": {
+      "button_text": "Aplicar al Tratamiento",
+      "passes_superficie": true,
+      "passes_caldo": true,
+      "closes_panel": true
+    }
+  }
+}
