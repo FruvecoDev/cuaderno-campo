@@ -62,10 +62,17 @@ const getCultivoColor = (cultivo) => {
 
 const Dashboard = () => {
   const [kpis, setKpis] = useState(null);
+  const [parcelas, setParcelas] = useState([]);
+  const [visitasPlanificadas, setVisitasPlanificadas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [mapType, setMapType] = useState('satellite');
+  const { token } = useAuth();
+  const navigate = useNavigate();
   
   useEffect(() => {
     fetchDashboardData();
+    fetchParcelas();
+    fetchVisitasPlanificadas();
   }, []);
   
   const fetchDashboardData = async () => {
@@ -77,6 +84,30 @@ const Dashboard = () => {
       console.error('Error fetching dashboard:', error);
     } finally {
       setLoading(false);
+    }
+  };
+  
+  const fetchParcelas = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/parcelas`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setParcelas(data.parcelas || []);
+    } catch (error) {
+      console.error('Error fetching parcelas:', error);
+    }
+  };
+  
+  const fetchVisitasPlanificadas = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/visitas/planificadas`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setVisitasPlanificadas(data.visitas || []);
+    } catch (error) {
+      console.error('Error fetching visitas planificadas:', error);
     }
   };
   
