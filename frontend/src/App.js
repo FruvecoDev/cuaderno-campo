@@ -16,6 +16,7 @@ import Recetas from './pages/Recetas';
 import Albaranes from './pages/Albaranes';
 import Cosechas from './pages/Cosechas';
 import Documentos from './pages/Documentos';
+import Usuarios from './pages/Usuarios';
 
 function App() {
   return (
@@ -100,6 +101,12 @@ function App() {
         <Route path="/documentos" element={
           <ProtectedRoute>
             <Layout><Documentos /></Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/usuarios" element={
+          <ProtectedRoute>
+            <Layout><Usuarios /></Layout>
           </ProtectedRoute>
         } />
       </Routes>
