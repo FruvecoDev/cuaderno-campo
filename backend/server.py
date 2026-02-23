@@ -60,6 +60,10 @@ app.include_router(ai_router)
 app.include_router(maquinaria_router)
 app.include_router(evaluaciones_router)
 
+# Import and include notifications router
+from routes_notifications import router as notifications_router
+app.include_router(notifications_router)
+
 # ============================================================================
 # ROOT
 # ============================================================================
