@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Download, FileText } from 'lucide-react';
-import { PermissionButton, usePermissions } from '../utils/permissions';
+import { Plus, Download, FileText, Edit2, Trash2 } from 'lucide-react';
+import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 
@@ -10,8 +10,10 @@ const Contratos = () => {
   const [contratos, setContratos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [error, setError] = useState(null);
   const { token } = useAuth();
   const { canCreate, canEdit, canDelete, canExport } = usePermissions();
+  const { handlePermissionError } = usePermissionError();
   const [formData, setFormData] = useState({
     campana: '2025/26',
     procedencia: 'Campo',
@@ -33,15 +35,24 @@ const Contratos = () => {
   
   const fetchContratos = async () => {
     try {
+      setError(null);
       const response = await fetch(`${BACKEND_URL}/api/contratos`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw { status: response.status, message: errorData.detail };
+      }
+      
       const data = await response.json();
       setContratos(data.contratos || []);
     } catch (error) {
       console.error('Error fetching contratos:', error);
+      const errorMsg = handlePermissionError(error, 'ver los contratos');
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
