@@ -293,6 +293,32 @@ const Parcelas = () => {
     localStorage.setItem('parcelas_fields_config', JSON.stringify(fieldsConfig));
   }, [fieldsConfig]);
   
+  // Cargar historial de tratamientos de una parcela
+  const fetchHistorialTratamientos = async (parcela) => {
+    setHistorialLoading(true);
+    setHistorialParcela(parcela);
+    setShowHistorial(true);
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/tratamientos/parcela/${parcela._id}/historial`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setHistorialData(data);
+      } else {
+        console.error('Error fetching historial');
+        setHistorialData(null);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setHistorialData(null);
+    } finally {
+      setHistorialLoading(false);
+    }
+  };
+  
   const fetchParcelas = async () => {
     try {
       const response = await fetch(`${BACKEND_URL}/api/parcelas`, {
