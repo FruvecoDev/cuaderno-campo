@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   LayoutDashboard, FileText, MapPin, Home, Calendar, ListTodo,
   Sprout, Droplets, BookOpen, FileBarChart, Wheat, FolderOpen,
   LogOut, User, Users, Package, Leaf, Cog, ClipboardCheck, Beaker, BarChart3
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import LanguageSelector from './LanguageSelector';
 import '../App.css';
 import logo from '../assets/logo.png';
 
@@ -13,6 +15,7 @@ const Layout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   
   const handleLogout = () => {
     logout();
@@ -20,13 +23,13 @@ const Layout = ({ children }) => {
   };
   
   const navItems = [
-    { section: 'General', items: [
-      { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, module: 'dashboard' },
+    { section: t('nav.general'), items: [
+      { path: '/dashboard', label: t('nav.dashboard'), icon: LayoutDashboard, module: 'dashboard' },
     ]},
-    { section: 'Gestión Principal', items: [
-      { path: '/contratos', label: 'Contratos', icon: FileText, module: 'contratos' },
-      { path: '/parcelas', label: 'Parcelas', icon: MapPin, module: 'parcelas' },
-      { path: '/fincas', label: 'Fincas', icon: Home, module: 'fincas' },
+    { section: t('nav.mainManagement'), items: [
+      { path: '/contratos', label: t('nav.contracts'), icon: FileText, module: 'contratos' },
+      { path: '/parcelas', label: t('nav.parcels'), icon: MapPin, module: 'parcelas' },
+      { path: '/fincas', label: t('nav.farms'), icon: Home, module: 'fincas' },
     ]},
     { section: 'Actividades', items: [
       { path: '/visitas', label: 'Visitas', icon: Calendar, module: 'visitas' },
