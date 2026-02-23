@@ -55,6 +55,11 @@ Visita/Tratamiento → realizados sobre → Parcela
    - Checkboxes para mostrar/ocultar campos del formulario y columnas de tabla
    - Preferencias guardadas en localStorage (persisten entre sesiones)
 
+5. **Buscador de Parcelas en Formularios (Nuevo)**
+   - En Visitas: buscar parcela por Proveedor, Cultivo, Campaña
+   - Filtros dentro del formulario que reducen las opciones del selector
+   - Contador de resultados filtrados
+
 3. **Dashboard**
    - KPIs: Contratos, Parcelas, Superficie, Tratamientos, Producción
    - Gráficos: Superficie por Cultivo, Distribución de Costes
