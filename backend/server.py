@@ -48,6 +48,7 @@ app.include_router(notifications_router)
 app.include_router(dashboard_router)
 app.include_router(reports_router)
 app.include_router(fitosanitarios_router)
+app.include_router(gastos_router)
 
 
 @app.get("/")
