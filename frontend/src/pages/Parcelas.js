@@ -95,7 +95,11 @@ const Parcelas = () => {
   
   const fetchContratos = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/contratos`);
+      const response = await fetch(`${BACKEND_URL}/api/contratos`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await response.json();
       setContratos(data.contratos || []);
     } catch (error) {
