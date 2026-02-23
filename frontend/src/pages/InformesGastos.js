@@ -2,12 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { 
   DollarSign, TrendingUp, Filter, X, BarChart3, FileSpreadsheet,
   Building2, Leaf, MapPin, FileText, ChevronDown, ChevronUp,
-  Calendar, Download, RefreshCw
+  Calendar, Download, RefreshCw, FileDown, PieChart
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart as RechartsPieChart, Pie, Cell, Legend
+} from 'recharts';
 import '../App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+
+// Colores para los gráficos
+const CHART_COLORS = ['#16a34a', '#2563eb', '#7c3aed', '#ea580c', '#dc2626', '#0891b2', '#4f46e5', '#be185d'];
 
 const InformesGastos = () => {
   const [resumen, setResumen] = useState(null);
@@ -27,10 +34,17 @@ const InformesGastos = () => {
   // Expanded sections
   const [expandedSection, setExpandedSection] = useState('proveedor');
   
+  // View mode: 'table' or 'chart'
+  const [viewMode, setViewMode] = useState('table');
+  
   // Detail view
   const [detalleView, setDetalleView] = useState(null);
   const [detalleAlbaranes, setDetalleAlbaranes] = useState([]);
   const [loadingDetalle, setLoadingDetalle] = useState(false);
+  
+  // Export loading states
+  const [exportingExcel, setExportingExcel] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
 
   useEffect(() => {
     fetchResumen();
