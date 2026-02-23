@@ -415,6 +415,35 @@ const Evaluaciones = () => {
     }
   };
   
+  // Descargar PDF
+  const handleDownloadPDF = async (id) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/evaluaciones/${id}/pdf`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw { status: response.status, message: errorData.detail };
+      }
+      
+      // Descargar el archivo
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `evaluacion_${id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      const errorMsg = handlePermissionError(error, 'descargar el PDF');
+      setError(errorMsg);
+      setTimeout(() => setError(null), 5000);
+    }
+  };
+  
   // Agregar nueva pregunta
   const handleAddQuestion = async () => {
     if (!newQuestionText.trim() || !newQuestionSection) {
