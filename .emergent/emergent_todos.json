@@ -1,15 +1,11 @@
 [
   {
     "content": "Phase 1 POC: Research best practices for PDF/Excel generation and AI prompts",
+    "status": "completed"
+  },
+  {
+    "content": "Phase 1 POC: Create comprehensive test script for AI + PDF + Excel generation",
     "status": "in_progress"
-  },
-  {
-    "content": "Phase 1 POC: Create test script for AI report generation",
-    "status": "pending"
-  },
-  {
-    "content": "Phase 1 POC: Create test script for PDF/Excel generation",
-    "status": "pending"
   },
   {
     "content": "Phase 1 POC: Test Google Maps with polygon drawing",
