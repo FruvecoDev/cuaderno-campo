@@ -402,6 +402,21 @@ async def generate_evaluacion_pdf(
     if parcela_id:
         tratamientos = await tratamientos_collection.find({"parcelas_ids": parcela_id}).sort("fecha_tratamiento", -1).to_list(100)
     
+    # Obtener irrigaciones de la parcela
+    irrigaciones = []
+    if parcela_id:
+        from database import irrigaciones_collection
+        irrigaciones = await irrigaciones_collection.find({"parcela_id": parcela_id}).sort("fecha", -1).to_list(100)
+    
+    # Obtener cosechas de la parcela
+    cosechas = []
+    if parcela_id:
+        from database import cosechas_collection
+        cosechas = await cosechas_collection.find({"parcelas_ids": parcela_id}).sort("created_at", -1).to_list(100)
+    
+    # Calcular total de páginas
+    total_pages = 1 + len(visitas) + len(tratamientos) + len(irrigaciones) + len(cosechas)
+    
     # Función helper para formatear respuestas
     def format_respuesta(resp):
         if resp is True:
