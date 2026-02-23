@@ -158,6 +158,19 @@ const Parcelas = () => {
     });
   }, [parcelas]);
   
+  // Extraer opciones únicas de contratos para el buscador del formulario
+  useEffect(() => {
+    const proveedores = [...new Set(contratos.map(c => c.proveedor).filter(Boolean))];
+    const cultivos = [...new Set(contratos.map(c => c.cultivo).filter(Boolean))];
+    const campanas = [...new Set(contratos.map(c => c.campana).filter(Boolean))];
+    
+    setContratoFilterOptions({
+      proveedores,
+      cultivos,
+      campanas
+    });
+  }, [contratos]);
+  
   // Guardar configuración de campos en localStorage
   useEffect(() => {
     localStorage.setItem('parcelas_fields_config', JSON.stringify(fieldsConfig));
