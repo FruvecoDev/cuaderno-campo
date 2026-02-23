@@ -625,9 +625,87 @@ const Tratamientos = () => {
               </div>
             )}
             
-            {/* Selección de parcelas (múltiple) - SIEMPRE VISIBLE */}
+            {/* Selección de parcelas (múltiple) CON BÚSQUEDA - SIEMPRE VISIBLE */}
             <div className="form-group">
               <label className="form-label">Parcelas a Tratar * (Obligatorio - selecciona una o varias)</label>
+              
+              {/* Filtros de búsqueda de parcelas */}
+              <div style={{ 
+                backgroundColor: 'hsl(var(--muted))', 
+                padding: '1rem', 
+                borderRadius: '0.5rem', 
+                marginBottom: '0.75rem' 
+              }}>
+                <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>
+                  Buscar parcelas por:
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', fontWeight: '500' }}>Proveedor</label>
+                    <select
+                      className="form-select"
+                      value={parcelaSearch.proveedor}
+                      onChange={(e) => setParcelaSearch({...parcelaSearch, proveedor: e.target.value})}
+                      style={{ fontSize: '0.875rem' }}
+                      data-testid="parcela-search-proveedor"
+                    >
+                      <option value="">Todos</option>
+                      {parcelaFilterOptions.proveedores.map(p => (
+                        <option key={p} value={p}>{p}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', fontWeight: '500' }}>Cultivo</label>
+                    <select
+                      className="form-select"
+                      value={parcelaSearch.cultivo}
+                      onChange={(e) => setParcelaSearch({...parcelaSearch, cultivo: e.target.value})}
+                      style={{ fontSize: '0.875rem' }}
+                      data-testid="parcela-search-cultivo"
+                    >
+                      <option value="">Todos</option>
+                      {parcelaFilterOptions.cultivos.map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', fontWeight: '500' }}>Campaña</label>
+                    <select
+                      className="form-select"
+                      value={parcelaSearch.campana}
+                      onChange={(e) => setParcelaSearch({...parcelaSearch, campana: e.target.value})}
+                      style={{ fontSize: '0.875rem' }}
+                      data-testid="parcela-search-campana"
+                    >
+                      <option value="">Todas</option>
+                      {parcelaFilterOptions.campanas.map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                {(parcelaSearch.proveedor || parcelaSearch.cultivo || parcelaSearch.campana) && (
+                  <button
+                    type="button"
+                    onClick={() => setParcelaSearch({ proveedor: '', cultivo: '', campana: '' })}
+                    style={{ 
+                      marginTop: '0.5rem', 
+                      fontSize: '0.75rem', 
+                      color: 'hsl(var(--primary))',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      textDecoration: 'underline'
+                    }}
+                  >
+                    Limpiar filtros de búsqueda
+                  </button>
+                )}
+              </div>
+              
+              {/* Lista de parcelas filtrada */}
               <div style={{ 
                 border: '1px solid hsl(var(--border))', 
                 borderRadius: '0.5rem', 
@@ -641,36 +719,55 @@ const Tratamientos = () => {
                     No hay parcelas disponibles. Crea una parcela primero.
                   </p>
                 ) : (
-                  parcelas.map(p => (
-                    <label 
-                      key={p._id} 
-                      style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        padding: '0.5rem', 
-                        cursor: 'pointer',
-                        borderBottom: '1px solid hsl(var(--border))'
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedParcelas.includes(p._id)}
-                        onChange={() => handleParcelaSelection(p._id)}
-                        style={{ marginRight: '0.75rem' }}
-                        data-testid={`checkbox-parcela-${p._id}`}
-                      />
-                      <span>
-                        <strong>{p.codigo_plantacion}</strong> - {p.proveedor} - {p.cultivo} ({p.variedad}) - {p.superficie_total} ha
-                      </span>
-                    </label>
-                  ))
+                  parcelas
+                    .filter(p => {
+                      if (parcelaSearch.proveedor && p.proveedor !== parcelaSearch.proveedor) return false;
+                      if (parcelaSearch.cultivo && p.cultivo !== parcelaSearch.cultivo) return false;
+                      if (parcelaSearch.campana && p.campana !== parcelaSearch.campana) return false;
+                      return true;
+                    })
+                    .map(p => (
+                      <label 
+                        key={p._id} 
+                        style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          padding: '0.5rem', 
+                          cursor: 'pointer',
+                          borderBottom: '1px solid hsl(var(--border))'
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedParcelas.includes(p._id)}
+                          onChange={() => handleParcelaSelection(p._id)}
+                          style={{ marginRight: '0.75rem' }}
+                          data-testid={`checkbox-parcela-${p._id}`}
+                        />
+                        <span>
+                          <strong>{p.codigo_plantacion}</strong> - {p.proveedor} - {p.cultivo} ({p.variedad}) - {p.superficie_total} ha
+                        </span>
+                      </label>
+                    ))
                 )}
               </div>
-              {selectedParcelas.length > 0 && (
-                <small style={{ color: 'hsl(var(--primary))' }}>
-                  {selectedParcelas.length} parcela(s) seleccionada(s)
-                </small>
-              )}
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem' }}>
+                {selectedParcelas.length > 0 && (
+                  <small style={{ color: 'hsl(var(--primary))' }}>
+                    {selectedParcelas.length} parcela(s) seleccionada(s)
+                  </small>
+                )}
+                {(parcelaSearch.proveedor || parcelaSearch.cultivo || parcelaSearch.campana) && (
+                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
+                    Mostrando {parcelas.filter(p => {
+                      if (parcelaSearch.proveedor && p.proveedor !== parcelaSearch.proveedor) return false;
+                      if (parcelaSearch.cultivo && p.cultivo !== parcelaSearch.cultivo) return false;
+                      if (parcelaSearch.campana && p.campana !== parcelaSearch.campana) return false;
+                      return true;
+                    }).length} de {parcelas.length} parcelas
+                  </small>
+                )}
+              </div>
             </div>
             
             {/* Mostrar información heredada de la primera parcela seleccionada */}
