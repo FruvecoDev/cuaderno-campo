@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Info } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
@@ -16,109 +16,44 @@ const Visitas = () => {
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   
-  // Catálogos para el formulario
-  const [contratos, setContratos] = useState([]);
+  // Solo necesitamos parcelas para el selector
   const [parcelas, setParcelas] = useState([]);
-  const [cultivos, setCultivos] = useState([]);
+  const [selectedParcelaInfo, setSelectedParcelaInfo] = useState(null);
   
-  // Maps para resolver IDs a nombres en tablas
-  const [parcelasMap, setParcelasMap] = useState({});
-  const [cultivosMap, setCultivosMap] = useState({});
-  
-  // Form data con nuevos campos obligatorios
+  // Form data SIMPLIFICADO - solo parcela_id es obligatorio
   const [formData, setFormData] = useState({
     objetivo: 'Control Rutinario',
     fecha_visita: '',
-    contrato_id: '',
     parcela_id: '',
-    cultivo_id: '',
-    campana: '',
     observaciones: ''
   });
   
   useEffect(() => {
     fetchVisitas();
-    fetchContratos();
-    fetchParcelas(); // Cargar TODAS las parcelas para el map
-    fetchCultivos();
+    fetchParcelas();
   }, []);
   
+  // Cuando se selecciona una parcela, mostrar info heredada
   useEffect(() => {
-    // Cuando se selecciona una parcela, autocompletar todo desde ella
     if (formData.parcela_id) {
       const parcela = parcelas.find(p => p._id === formData.parcela_id);
-      if (parcela) {
-        setFormData(prev => ({
-          ...prev,
-          contrato_id: parcela.contrato_id || '',
-          proveedor: parcela.proveedor || '',
-          cultivo: parcela.cultivo || '',
-          cultivo_id: parcela.cultivo_id || '',
-          campana: parcela.campana || ''
-        }));
-      }
+      setSelectedParcelaInfo(parcela || null);
+    } else {
+      setSelectedParcelaInfo(null);
     }
   }, [formData.parcela_id, parcelas]);
   
-  const fetchContratos = async () => {
+  const fetchParcelas = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/contratos`, {
+      const response = await fetch(`${BACKEND_URL}/api/parcelas`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
         const data = await response.json();
-        setContratos(data.contratos || []);
-      }
-    } catch (error) {
-      console.error('Error fetching contratos:', error);
-    }
-  };
-  
-  const fetchParcelas = async (campana = null) => {
-    try {
-      let url = `${BACKEND_URL}/api/parcelas`;
-      if (campana) {
-        url += `?campana=${encodeURIComponent(campana)}`;
-      }
-      const response = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        const parcelasList = data.parcelas || [];
-        setParcelas(parcelasList);
-        
-        // Construir map de parcela_id -> nombre
-        const map = {};
-        parcelasList.forEach(p => {
-          map[p._id] = `${p.codigo_plantacion} - ${p.variedad}`;
-        });
-        setParcelasMap(map);
+        setParcelas(data.parcelas || []);
       }
     } catch (error) {
       console.error('Error fetching parcelas:', error);
-    }
-  };
-  
-  const fetchCultivos = async () => {
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/cultivos?activo=true`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        const cultivosList = data.cultivos || [];
-        setCultivos(cultivosList);
-        
-        // Construir map de cultivo_id -> nombre
-        const map = {};
-        cultivosList.forEach(c => {
-          map[c._id] = `${c.nombre} ${c.variedad ? `- ${c.variedad}` : ''}`.trim();
-        });
-        setCultivosMap(map);
-      }
-    } catch (error) {
-      console.error('Error fetching cultivos:', error);
     }
   };
   
@@ -150,9 +85,9 @@ const Visitas = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validar campos obligatorios
-    if (!formData.parcela_id || !formData.cultivo_id || !formData.campana) {
-      setError('Debe seleccionar Parcela, Cultivo y Campaña');
+    // Validar solo parcela_id (obligatorio)
+    if (!formData.parcela_id) {
+      setError('Debe seleccionar una Parcela');
       setTimeout(() => setError(null), 5000);
       return;
     }
@@ -165,13 +100,21 @@ const Visitas = () => {
       
       const method = editingId ? 'PUT' : 'POST';
       
+      // Payload simplificado - el backend hereda el resto
+      const payload = {
+        objetivo: formData.objetivo,
+        parcela_id: formData.parcela_id,
+        fecha_visita: formData.fecha_visita,
+        observaciones: formData.observaciones
+      };
+      
       const response = await fetch(url, {
         method: method,
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
       
       if (!response.ok) {
@@ -184,16 +127,13 @@ const Visitas = () => {
         setShowForm(false);
         setEditingId(null);
         fetchVisitas();
-        // Reset form
         setFormData({
           objetivo: 'Control Rutinario',
           fecha_visita: '',
-          contrato_id: '',
           parcela_id: '',
-          cultivo_id: '',
-          campana: '',
           observaciones: ''
         });
+        setSelectedParcelaInfo(null);
       }
     } catch (error) {
       console.error('Error saving visita:', error);
@@ -208,10 +148,7 @@ const Visitas = () => {
     setFormData({
       objetivo: visita.objetivo || 'Control Rutinario',
       fecha_visita: visita.fecha_visita || '',
-      contrato_id: visita.contrato_id || '',
       parcela_id: visita.parcela_id || '',
-      cultivo_id: visita.cultivo_id || '',
-      campana: visita.campana || '',
       observaciones: visita.observaciones || ''
     });
     setShowForm(true);
@@ -220,13 +157,11 @@ const Visitas = () => {
   const handleCancelEdit = () => {
     setEditingId(null);
     setShowForm(false);
+    setSelectedParcelaInfo(null);
     setFormData({
       objetivo: 'Control Rutinario',
       fecha_visita: '',
-      contrato_id: '',
       parcela_id: '',
-      cultivo_id: '',
-      campana: '',
       observaciones: ''
     });
   };
@@ -290,10 +225,11 @@ const Visitas = () => {
         <div className="card mb-6" data-testid="visita-form">
           <h2 className="card-title">{editingId ? 'Editar Visita' : 'Crear Visita'}</h2>
           <form onSubmit={handleSubmit}>
-            {/* Información de la alerta sobre el flujo */}
+            {/* Información del modelo simplificado */}
             <div className="card" style={{ backgroundColor: 'hsl(var(--muted))', marginBottom: '1.5rem', padding: '1rem' }}>
               <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
-                💡 <strong>Flujo guiado:</strong> Selecciona un Contrato (opcional) para autocompletar la Campaña y Cultivo, o completa manualmente los campos obligatorios.
+                <Info size={16} style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: 'middle' }} />
+                <strong>Modelo simplificado:</strong> Solo selecciona la Parcela. El Contrato, Proveedor, Cultivo y Campaña se heredan automáticamente.
               </p>
             </div>
             
@@ -305,6 +241,7 @@ const Visitas = () => {
                   value={formData.objetivo}
                   onChange={(e) => setFormData({...formData, objetivo: e.target.value})}
                   required
+                  data-testid="select-objetivo"
                 >
                   <option value="Control Rutinario">Control Rutinario</option>
                   <option value="Informe">Informe</option>
@@ -321,92 +258,44 @@ const Visitas = () => {
                   className="form-input"
                   value={formData.fecha_visita}
                   onChange={(e) => setFormData({...formData, fecha_visita: e.target.value})}
+                  data-testid="input-fecha-visita"
                 />
               </div>
             </div>
             
-            {/* Contrato (opcional - ayuda a autocompletar) */}
+            {/* SELECTOR DE PARCELA - Único campo obligatorio */}
             <div className="form-group">
-              <label className="form-label">Contrato (Opcional - autocompletará Campaña y Cultivo)</label>
+              <label className="form-label">Parcela * (Obligatorio - define el contexto)</label>
               <select
                 className="form-select"
-                value={formData.contrato_id}
-                onChange={(e) => setFormData({...formData, contrato_id: e.target.value})}
+                value={formData.parcela_id}
+                onChange={(e) => setFormData({...formData, parcela_id: e.target.value})}
+                required
+                data-testid="select-parcela"
               >
-                <option value="">Seleccionar contrato...</option>
-                {contratos.map(c => (
-                  <option key={c._id} value={c._id}>
-                    {c.serie}-{c.año}-{String(c.numero).padStart(3, '0')} - {c.proveedor} - {c.cultivo} ({c.campana})
+                <option value="">Seleccionar parcela...</option>
+                {parcelas.map(p => (
+                  <option key={p._id} value={p._id}>
+                    {p.codigo_plantacion} - {p.proveedor} - {p.cultivo} ({p.variedad}) - {p.campana}
                   </option>
                 ))}
               </select>
             </div>
             
-            {/* Campos obligatorios */}
-            <div className="grid-3">
-              <div className="form-group">
-                <label className="form-label">Parcela *</label>
-                <select
-                  className="form-select"
-                  value={formData.parcela_id}
-                  onChange={(e) => setFormData({...formData, parcela_id: e.target.value})}
-                  required
-                >
-                  <option value="">Seleccionar parcela...</option>
-                  {parcelas.map(p => (
-                    <option key={p._id} value={p._id}>
-                      {p.codigo_plantacion} - {p.variedad} ({p.superficie_total} {p.unidad_medida})
-                    </option>
-                  ))}
-                </select>
-                {parcelas.length === 0 && formData.campana && (
-                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
-                    No hay parcelas para la campaña {formData.campana}
-                  </small>
-                )}
+            {/* Mostrar información heredada de la parcela seleccionada */}
+            {selectedParcelaInfo && (
+              <div className="card" style={{ backgroundColor: 'hsl(var(--primary) / 0.1)', marginBottom: '1.5rem', padding: '1rem', border: '1px solid hsl(var(--primary) / 0.3)' }}>
+                <h4 style={{ marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '600' }}>Datos heredados de la parcela:</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.5rem', fontSize: '0.875rem' }}>
+                  <div><strong>Proveedor:</strong> {selectedParcelaInfo.proveedor}</div>
+                  <div><strong>Cultivo:</strong> {selectedParcelaInfo.cultivo}</div>
+                  <div><strong>Variedad:</strong> {selectedParcelaInfo.variedad}</div>
+                  <div><strong>Campaña:</strong> {selectedParcelaInfo.campana}</div>
+                  <div><strong>Finca:</strong> {selectedParcelaInfo.finca}</div>
+                  <div><strong>Superficie:</strong> {selectedParcelaInfo.superficie_total} ha</div>
+                </div>
               </div>
-              
-              <div className="form-group">
-                <label className="form-label">Cultivo *</label>
-                <select
-                  className="form-select"
-                  value={formData.cultivo_id}
-                  onChange={(e) => setFormData({...formData, cultivo_id: e.target.value})}
-                  required
-                  disabled={formData.contrato_id !== ''}
-                >
-                  <option value="">Seleccionar cultivo...</option>
-                  {cultivos.map(c => (
-                    <option key={c._id} value={c._id}>
-                      {c.nombre} {c.variedad ? `- ${c.variedad}` : ''} ({c.tipo})
-                    </option>
-                  ))}
-                </select>
-                {formData.contrato_id && (
-                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
-                    Autocompletado desde contrato
-                  </small>
-                )}
-              </div>
-              
-              <div className="form-group">
-                <label className="form-label">Campaña *</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.campana}
-                  onChange={(e) => setFormData({...formData, campana: e.target.value})}
-                  placeholder="Ej: 2025/26"
-                  required
-                  disabled={formData.contrato_id !== ''}
-                />
-                {formData.contrato_id && (
-                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
-                    Autocompletado desde contrato
-                  </small>
-                )}
-              </div>
-            </div>
+            )}
             
             <div className="form-group">
               <label className="form-label">Observaciones</label>
@@ -416,6 +305,7 @@ const Visitas = () => {
                 onChange={(e) => setFormData({...formData, observaciones: e.target.value})}
                 placeholder="Notas, incidencias observadas, recomendaciones..."
                 rows="4"
+                data-testid="textarea-observaciones"
               />
             </div>
             
@@ -448,6 +338,7 @@ const Visitas = () => {
                 <tr>
                   <th>Objetivo</th>
                   <th>Parcela</th>
+                  <th>Proveedor</th>
                   <th>Cultivo</th>
                   <th>Campaña</th>
                   <th>Fecha</th>
@@ -459,35 +350,10 @@ const Visitas = () => {
                 {visitas.map((visita) => (
                   <tr key={visita._id}>
                     <td className="font-semibold">{visita.objetivo}</td>
-                    <td>
-                      {visita.parcela_id ? (
-                        parcelasMap[visita.parcela_id] || visita.parcela_id
-                      ) : (
-                        <span style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }} title="Registro anterior a la implementación de catálogos">
-                          No especificado
-                        </span>
-                      )}
-                    </td>
-                    <td>
-                      {visita.cultivo_id ? (
-                        cultivosMap[visita.cultivo_id] || visita.cultivo
-                      ) : visita.cultivo ? (
-                        visita.cultivo
-                      ) : (
-                        <span style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }} title="Registro anterior a la implementación de catálogos">
-                          No especificado
-                        </span>
-                      )}
-                    </td>
-                    <td>
-                      {visita.campana ? (
-                        visita.campana
-                      ) : (
-                        <span style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }} title="Registro anterior a la implementación de catálogos">
-                          No especificado
-                        </span>
-                      )}
-                    </td>
+                    <td>{visita.codigo_plantacion || 'N/A'}</td>
+                    <td>{visita.proveedor || 'N/A'}</td>
+                    <td>{visita.cultivo || 'N/A'}</td>
+                    <td>{visita.campana || 'N/A'}</td>
                     <td>{visita.fecha_visita ? new Date(visita.fecha_visita).toLocaleDateString() : 'Sin fecha'}</td>
                     <td>
                       <span className={`badge ${visita.realizado ? 'badge-success' : 'badge-default'}`}>
