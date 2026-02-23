@@ -325,7 +325,13 @@ async def create_visita(
     return {"success": True, "data": serialize_doc(created)}
 
 @router.get("/visitas")
-async def get_visitas(skip: int = 0, limit: int = 100, parcela_id: Optional[str] = None):
+async def get_visitas(
+    skip: int = 0,
+    limit: int = 100,
+    parcela_id: Optional[str] = None,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireVisitasAccess)
+):
     query = {}
     if parcela_id:
         query["parcela_id"] = parcela_id
@@ -334,7 +340,11 @@ async def get_visitas(skip: int = 0, limit: int = 100, parcela_id: Optional[str]
     return {"visitas": serialize_docs(visitas), "total": await visitas_collection.count_documents(query)}
 
 @router.get("/visitas/{visita_id}")
-async def get_visita(visita_id: str):
+async def get_visita(
+    visita_id: str,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireVisitasAccess)
+):
     if not ObjectId.is_valid(visita_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
@@ -345,7 +355,12 @@ async def get_visita(visita_id: str):
     return serialize_doc(visita)
 
 @router.put("/visitas/{visita_id}")
-async def update_visita(visita_id: str, visita: VisitaCreate):
+async def update_visita(
+    visita_id: str,
+    visita: VisitaCreate,
+    current_user: dict = Depends(RequireEdit),
+    _access: dict = Depends(RequireVisitasAccess)
+):
     if not ObjectId.is_valid(visita_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
@@ -364,7 +379,11 @@ async def update_visita(visita_id: str, visita: VisitaCreate):
     return {"success": True, "data": serialize_doc(updated)}
 
 @router.delete("/visitas/{visita_id}")
-async def delete_visita(visita_id: str):
+async def delete_visita(
+    visita_id: str,
+    current_user: dict = Depends(RequireDelete),
+    _access: dict = Depends(RequireVisitasAccess)
+):
     if not ObjectId.is_valid(visita_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
