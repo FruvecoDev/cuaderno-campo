@@ -312,6 +312,8 @@ const Tratamientos = () => {
         superficie_aplicacion: parseFloat(formData.superficie_aplicacion) || 0,
         caldo_superficie: parseFloat(formData.caldo_superficie) || 0,
         parcelas_ids: formData.parcelas_ids,
+        fecha_tratamiento: formData.fecha_tratamiento || null,
+        fecha_aplicacion: formData.fecha_aplicacion || null,
         aplicador_nombre: formData.aplicador_nombre || null,
         maquina_id: formData.maquina_id || null
       };
@@ -343,6 +345,8 @@ const Tratamientos = () => {
           superficie_aplicacion: '',
           caldo_superficie: '',
           parcelas_ids: [],
+          fecha_tratamiento: new Date().toISOString().split('T')[0],
+          fecha_aplicacion: '',
           aplicador_nombre: '',
           maquina_id: ''
         });
