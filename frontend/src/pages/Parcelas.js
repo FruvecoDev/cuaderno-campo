@@ -268,6 +268,9 @@ const Parcelas = () => {
               <div className="card" style={{ backgroundColor: 'hsl(var(--muted))', marginBottom: '1rem', padding: '0.75rem' }}>
                 <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
                   💡 <strong>Tip:</strong> Selecciona un Contrato para autocompletar Proveedor, Cultivo y Campaña
+                  {editingId && (
+                    <><br />✏️ <strong>Editando:</strong> El mapa es opcional. Solo dibuja si quieres cambiar la geometría.</>
+                  )}
                 </p>
               </div>
               
