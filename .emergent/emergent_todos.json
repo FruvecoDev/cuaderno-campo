@@ -1,6 +1,10 @@
 [
   {
-    "content": "Agregar funcionalidad de editar parcelas para asignar contratos",
-    "status": "completed"
+    "content": "Arreglar fetchContratos en Parcelas.js - agregar header de autorización",
+    "status": "in_progress"
+  },
+  {
+    "content": "Aplicar patrón de edición a otros módulos",
+    "status": "pending"
   }
 ]
