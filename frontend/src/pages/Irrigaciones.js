@@ -399,13 +399,13 @@ const Irrigaciones = () => {
               <tbody>
                 {filteredIrrigaciones.map((irrigacion) => (
                   <tr key={irrigacion._id}>
-                    {(fieldsConfig.fecha) ? <td>{irrigacion.fecha ? new Date(irrigacion.fecha).toLocaleDateString() : '—'}</td>}
-                    {(fieldsConfig.sistema) ? <td><span className="badge badge-default">{irrigacion.sistema}</span></td>}
-                    {(fieldsConfig.duracion) ? <td>{irrigacion.duracion}</td>}
-                    {(fieldsConfig.volumen) ? <td>{irrigacion.volumen}</td>}
-                    {(fieldsConfig.coste) ? <td>€{(irrigacion.coste || 0).toFixed(2)}</td>}
-                    {(fieldsConfig.parcela_id) ? <td>{getParcelaCodigo(irrigacion.parcela_id)}</td>}
-                    {(canEdit || canDelete) && (
+                    {fieldsConfig.fecha ? <td>{irrigacion.fecha ? new Date(irrigacion.fecha).toLocaleDateString() : '—'}</td> : null}
+                    {fieldsConfig.sistema ? <td><span className="badge badge-default">{irrigacion.sistema}</span></td> : null}
+                    {fieldsConfig.duracion ? <td>{irrigacion.duracion}</td> : null}
+                    {fieldsConfig.volumen ? <td>{irrigacion.volumen}</td> : null}
+                    {fieldsConfig.coste ? <td>€{(irrigacion.coste || 0).toFixed(2)}</td> : null}
+                    {fieldsConfig.parcela_id ? <td>{getParcelaCodigo(irrigacion.parcela_id)}</td> : null}
+                    {(canEdit || canDelete) ? (
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                           {canEdit && (
