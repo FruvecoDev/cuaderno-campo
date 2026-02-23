@@ -420,12 +420,12 @@ const Visitas = () => {
             
             <div className="flex gap-2">
               <button type="submit" className="btn btn-primary" data-testid="btn-guardar-visita">
-                Guardar Visita
+                {editingId ? 'Actualizar Visita' : 'Guardar Visita'}
               </button>
               <button
                 type="button"
                 className="btn btn-secondary"
-                onClick={() => setShowForm(false)}
+                onClick={handleCancelEdit}
               >
                 Cancelar
               </button>
