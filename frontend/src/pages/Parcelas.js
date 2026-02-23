@@ -386,7 +386,7 @@ const Parcelas = () => {
           <div className="table-container">
             <table data-testid="parcelas-table">
               <thead>
-                <tr><th>Código</th><th>Proveedor</th><th>Finca</th><th>Cultivo</th><th>Variedad</th><th>Superficie</th><th>Plantas</th><th>Estado</th></tr>
+                <tr><th>Código</th><th>Proveedor</th><th>Finca</th><th>Cultivo</th><th>Variedad</th><th>Superficie</th><th>Plantas</th><th>Estado</th><th>Acciones</th></tr>
               </thead>
               <tbody>
                 {parcelas.map((p) => (
