@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
+import logo from '../assets/logo.png';
 
 const Layout = ({ children }) => {
   const location = useLocation();
