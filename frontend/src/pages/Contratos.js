@@ -422,7 +422,7 @@ const Contratos = () => {
                   Define rangos de tenderometría y su precio correspondiente en €/kg
                 </p>
                 
-                {formData.precios_calidad.length === 0 ? (
+                {(formData.precios_calidad || []).length === 0 ? (
                   <p style={{ color: '#6c757d', fontStyle: 'italic', fontSize: '0.85rem' }}>
                     No hay rangos definidos. Se usará el precio base del contrato.
                   </p>
