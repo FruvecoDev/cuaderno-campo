@@ -1,13 +1,22 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, FileText, MapPin, Home, Calendar, ListTodo,
-  Sprout, Droplets, BookOpen, FileBarChart, Wheat, FolderOpen
+  Sprout, Droplets, BookOpen, FileBarChart, Wheat, FolderOpen,
+  LogOut, User
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 
 const Layout = ({ children }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
   
   const navItems = [
     { section: 'General', items: [

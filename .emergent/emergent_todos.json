@@ -17,15 +17,15 @@
   },
   {
     "content": "Phase 3: Add authentication to frontend (login page, context)",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Phase 3: Protect routes with authentication",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "Phase 3: Add PDF/Excel export buttons in frontend",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Phase 3: Implement advanced filters in main tables",
