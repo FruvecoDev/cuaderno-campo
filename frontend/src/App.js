@@ -131,6 +131,12 @@ function App() {
             <Layout><Maquinaria /></Layout>
           </ProtectedRoute>
         } />
+        
+        <Route path="/evaluaciones" element={
+          <ProtectedRoute>
+            <Layout><Evaluaciones /></Layout>
+          </ProtectedRoute>
+        } />
       </Routes>
     </AuthProvider>
   );
