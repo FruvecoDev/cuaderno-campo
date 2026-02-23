@@ -456,7 +456,7 @@ async def get_campanas_disponibles(
     Obtiene lista de campañas disponibles para filtrar.
     """
     pipeline = [
-        {"$match": {"campana": {"$ne": None, "$ne": ""}}},
+        {"$match": {"$and": [{"campana": {"$ne": None}}, {"campana": {"$ne": ""}}]}},
         {"$group": {"_id": "$campana"}},
         {"$sort": {"_id": -1}}
     ]
