@@ -64,7 +64,12 @@
     "forgotPassword": "Mot de passe oublié ?",
     "rememberMe": "Se souvenir de moi",
     "loginTitle": "Connectez-vous pour continuer",
-    "defaultCredentials": "Identifiants par défaut"
+    "defaultCredentials": "Identifiants par défaut",
+    "fieldNotebook": "Carnet de terrain",
+    "firstTime": "Première fois ? Créez l'utilisateur admin",
+    "initAdmin": "Initialiser Admin",
+    "adminCreated": "Admin créé",
+    "useCredentials": "Utilisez ces identifiants pour vous connecter"
   },
   "nav": {
     "general": "Général",
