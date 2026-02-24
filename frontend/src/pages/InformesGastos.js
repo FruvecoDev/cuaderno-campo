@@ -47,8 +47,6 @@ const InformesGastos = () => {
   // Export loading states
   const [exportingExcel, setExportingExcel] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
-  
-  const { t } = useTranslation();
 
   useEffect(() => {
     fetchResumen();
