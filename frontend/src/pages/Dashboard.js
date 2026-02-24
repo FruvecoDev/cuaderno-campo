@@ -694,19 +694,61 @@ const Dashboard = () => {
                         {visita.proveedor} - {visita.cultivo}
                       </div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ 
-                        fontWeight: '600',
-                        fontSize: '0.85rem',
-                        color: esVencida ? '#991b1b' : esUrgente ? '#dc2626' : esProxima ? '#f57c00' : '#2d5a27'
-                      }}>
-                        {fechaVisita.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ 
+                          fontWeight: '600',
+                          fontSize: '0.85rem',
+                          color: esVencida ? '#991b1b' : esUrgente ? '#dc2626' : esProxima ? '#f57c00' : '#2d5a27'
+                        }}>
+                          {fechaVisita.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))' }}>
+                          {diasRestantes === 0 ? '¡Hoy!' : 
+                           diasRestantes === 1 ? 'Mañana' : 
+                           esVencida ? `Hace ${Math.abs(diasRestantes)} días` :
+                           `En ${diasRestantes} días`}
+                        </div>
                       </div>
-                      <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))' }}>
-                        {diasRestantes === 0 ? '¡Hoy!' : 
-                         diasRestantes === 1 ? 'Mañana' : 
-                         esVencida ? `Hace ${Math.abs(diasRestantes)} días` :
-                         `En ${diasRestantes} días`}
+                      <div style={{ display: 'flex', gap: '0.25rem' }}>
+                        <button
+                          onClick={() => navigate(`/visitas?ver=${visita._id}`)}
+                          className="btn btn-sm"
+                          style={{ 
+                            padding: '0.35rem 0.5rem',
+                            backgroundColor: 'hsl(var(--primary))',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.25rem'
+                          }}
+                          title="Ver visita"
+                          data-testid={`ver-visita-${visita._id}`}
+                        >
+                          <Eye size={14} />
+                        </button>
+                        <button
+                          onClick={() => navigate(`/visitas?editar=${visita._id}`)}
+                          className="btn btn-sm"
+                          style={{ 
+                            padding: '0.35rem 0.5rem',
+                            backgroundColor: 'hsl(var(--secondary))',
+                            color: 'hsl(var(--secondary-foreground))',
+                            border: '1px solid hsl(var(--border))',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.25rem'
+                          }}
+                          title="Editar visita"
+                          data-testid={`editar-visita-${visita._id}`}
+                        >
+                          <Edit2 size={14} />
+                        </button>
                       </div>
                     </div>
                   </div>
