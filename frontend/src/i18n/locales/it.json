@@ -109,6 +109,8 @@
     "upcomingVisits": "Visite imminenti",
     "stats": {
       "totalContracts": "Contratti totali",
+      "purchaseContracts": "Contratti d'acquisto",
+      "saleContracts": "Contratti di vendita",
       "activeParcels": "Parcelle attive",
       "pendingVisits": "Visite in sospeso",
       "treatments": "Trattamenti",
