@@ -46,6 +46,12 @@ function App() {
           </ProtectedRoute>
         } />
         
+        <Route path="/asistente-ia" element={
+          <ProtectedRoute>
+            <Layout><AsistenteIA /></Layout>
+          </ProtectedRoute>
+        } />
+        
         <Route path="/contratos" element={
           <ProtectedRoute>
             <Layout><Contratos /></Layout>
