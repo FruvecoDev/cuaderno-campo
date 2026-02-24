@@ -55,6 +55,11 @@ const Clientes = () => {
   const [tipos, setTipos] = useState([]);
   const [provincias, setProvincias] = useState([]);
   const [uploadingFoto, setUploadingFoto] = useState(false);
+  const [showFieldsConfig, setShowFieldsConfig] = useState(false);
+  const [fieldsConfig, setFieldsConfig] = useState(() => {
+    const saved = localStorage.getItem('clientes_fields_config');
+    return saved ? JSON.parse(saved) : DEFAULT_FIELDS_CONFIG;
+  });
   
   // Estado para el resumen de ventas
   const [showResumenVentas, setShowResumenVentas] = useState(false);
