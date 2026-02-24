@@ -1110,24 +1110,44 @@ const Evaluaciones = () => {
                                   </label>
                                   {renderCampoRespuesta(pregunta)}
                                 </div>
-                                {pregunta.id.startsWith('custom_') && user?.role === 'Admin' && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleDeleteQuestion(pregunta.id, seccion.key)}
-                                    style={{
-                                      padding: '0.25rem',
-                                      borderRadius: '0.25rem',
-                                      backgroundColor: 'hsl(var(--destructive) / 0.1)',
-                                      color: 'hsl(var(--destructive))',
-                                      border: '1px solid hsl(var(--destructive) / 0.3)',
-                                      cursor: 'pointer',
-                                      flexShrink: 0
-                                    }}
-                                    title={t('evaluations.deleteQuestion')}
-                                    data-testid={`btn-delete-question-${pregunta.id}`}
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
+                                <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0 }}>
+                                  {/* Botón Duplicar - visible para Admin y Manager */}
+                                  {(user?.role === 'Admin' || user?.role === 'Manager') && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDuplicateQuestion(pregunta, seccion.key)}
+                                      style={{
+                                        padding: '0.25rem',
+                                        borderRadius: '0.25rem',
+                                        backgroundColor: 'hsl(var(--primary) / 0.1)',
+                                        color: 'hsl(var(--primary))',
+                                        border: '1px solid hsl(var(--primary) / 0.3)',
+                                        cursor: 'pointer'
+                                      }}
+                                      title={t('evaluations.duplicateQuestion')}
+                                      data-testid={`btn-duplicate-question-${pregunta.id}`}
+                                    >
+                                      <Copy size={14} />
+                                    </button>
+                                  )}
+                                  {/* Botón Eliminar - solo para preguntas custom y Admin */}
+                                  {pregunta.id.startsWith('custom_') && user?.role === 'Admin' && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteQuestion(pregunta.id, seccion.key)}
+                                      style={{
+                                        padding: '0.25rem',
+                                        borderRadius: '0.25rem',
+                                        backgroundColor: 'hsl(var(--destructive) / 0.1)',
+                                        color: 'hsl(var(--destructive))',
+                                        border: '1px solid hsl(var(--destructive) / 0.3)',
+                                        cursor: 'pointer'
+                                      }}
+                                      title={t('evaluations.deleteQuestion')}
+                                      data-testid={`btn-delete-question-${pregunta.id}`}
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
                                 )}
                               </div>
                             ))
