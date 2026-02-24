@@ -5,16 +5,26 @@ test.describe('Artículos de Explotación - CRUD', () => {
   const baseUrl = 'https://farm-hub-15.preview.emergentagent.com';
   
   test.beforeEach(async ({ page }) => {
-    await login(page);
+    // Login manually with correct flow
+    await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Fill login
+    await page.locator('input').first().fill('admin@fruveco.com');
+    await page.locator('input[type="password"]').first().fill('admin123');
+    await page.getByRole('button', { name: /Iniciar Sesión|Login/i }).click();
+    
+    // Wait for dashboard
+    await page.waitForURL(/dashboard/, { timeout: 15000 });
     await removeEmergentBadge(page);
   });
 
   test('should navigate to Artículos page and display list', async ({ page }) => {
-    // Navigate to Artículos de Explotación
-    await page.goto(`${baseUrl}/articulos`, { waitUntil: 'domcontentloaded' });
+    // Navigate to Artículos de Explotación using correct route
+    await page.goto(`${baseUrl}/articulos-explotacion`, { waitUntil: 'domcontentloaded' });
     
-    // Wait for page to load
-    await expect(page.getByText('Artículos de Explotación')).toBeVisible({ timeout: 15000 });
+    // Wait for page to load - use text that appears on the page
+    await expect(page.locator('h1').filter({ hasText: /Artículos de Explotación/i })).toBeVisible({ timeout: 15000 });
     
     // Check table exists
     await expect(page.getByTestId('articulos-table')).toBeVisible();
@@ -28,7 +38,7 @@ test.describe('Artículos de Explotación - CRUD', () => {
     const testCodigo = `TART${uniqueId.slice(-6)}`;
     const testNombre = `Artículo Test ${uniqueId}`;
     
-    await page.goto(`${baseUrl}/articulos`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${baseUrl}/articulos-explotacion`, { waitUntil: 'domcontentloaded' });
     await expect(page.getByTestId('btn-nuevo-articulo')).toBeVisible({ timeout: 15000 });
     
     // Click "Nuevo Artículo" button
@@ -70,7 +80,7 @@ test.describe('Artículos de Explotación - CRUD', () => {
     const testNombre = `Edit Test ${uniqueId}`;
     const updatedNombre = `Updated Test ${uniqueId}`;
     
-    await page.goto(`${baseUrl}/articulos`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${baseUrl}/articulos-explotacion`, { waitUntil: 'domcontentloaded' });
     await expect(page.getByTestId('btn-nuevo-articulo')).toBeVisible({ timeout: 15000 });
     
     // Create a new articulo first
@@ -107,8 +117,8 @@ test.describe('Artículos de Explotación - CRUD', () => {
   });
 
   test('should filter articulos by category', async ({ page }) => {
-    await page.goto(`${baseUrl}/articulos`, { waitUntil: 'domcontentloaded' });
-    await expect(page.getByText('Artículos de Explotación')).toBeVisible({ timeout: 15000 });
+    await page.goto(`${baseUrl}/articulos-explotacion`, { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('h1').filter({ hasText: /Artículos de Explotación/i })).toBeVisible({ timeout: 15000 });
     
     // Click on Filtros button to show filters
     const filtrosBtn = page.locator('button').filter({ hasText: 'Filtros' });
