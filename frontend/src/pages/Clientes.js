@@ -391,6 +391,31 @@ const Clientes = () => {
         </div>
       )}
       
+      {/* Configuración de campos */}
+      {showFieldsConfig && (
+        <div className="card mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 style={{ fontWeight: '600' }}>Configurar Columnas Visibles</h3>
+            <button className="btn btn-sm btn-secondary" onClick={() => setShowFieldsConfig(false)}>
+              <X size={16} />
+            </button>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '0.75rem' }}>
+            {Object.entries(FIELD_LABELS).map(([key, label]) => (
+              <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={fieldsConfig[key]}
+                  onChange={() => toggleFieldConfig(key)}
+                  style={{ width: '18px', height: '18px' }}
+                />
+                <span style={{ fontSize: '0.875rem' }}>{label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+      
       {/* KPIs */}
       <div className="grid-3 mb-6">
         <div className="card" style={{ textAlign: 'center', padding: '1rem' }}>
