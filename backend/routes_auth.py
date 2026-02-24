@@ -185,6 +185,47 @@ async def update_user(user_id: str, user_update: dict, current_user: dict = Depe
     
     return {"success": True, "user": user_response}
 
+
+@router.get("/menu-items")
+async def get_menu_items(current_user: dict = Depends(get_current_user)):
+    """Get all available menu items for permission configuration"""
+    if current_user.get("role") != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return {"menu_items": ALL_MENU_ITEMS}
+
+@router.put("/users/{user_id}/menu-permissions")
+async def update_menu_permissions(
+    user_id: str, 
+    permissions: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update menu permissions for a user (Admin only)"""
+    if current_user.get("role") != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    if not ObjectId.is_valid(user_id):
+        raise HTTPException(status_code=400, detail="Invalid user ID")
+    
+    # Get current user to check if exists
+    user = await users_collection.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Merge with default permissions to ensure all paths are covered
+    menu_permissions = {**DEFAULT_MENU_PERMISSIONS, **permissions.get("menu_permissions", {})}
+    
+    result = await users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"menu_permissions": menu_permissions, "updated_at": datetime.now()}}
+    )
+    
+    updated_user = await users_collection.find_one({"_id": ObjectId(user_id)})
+    user_response = serialize_doc(updated_user)
+    user_response.pop("hashed_password", None)
+    
+    return {"success": True, "user": user_response}
+
+
 @router.post("/init-admin")
 async def initialize_admin():
     """Initialize first admin user - only works if no users exist"""
