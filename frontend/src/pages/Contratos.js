@@ -150,6 +150,7 @@ const Contratos = () => {
         ...formData,
         cantidad: parseFloat(formData.cantidad),
         precio: parseFloat(formData.precio),
+        comision_valor: formData.comision_valor ? parseFloat(formData.comision_valor) : null,
         precios_calidad: isGuisante ? (formData.precios_calidad || []).map(pc => ({
           ...pc,
           min_tenderometria: parseFloat(pc.min_tenderometria),
