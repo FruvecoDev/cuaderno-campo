@@ -196,6 +196,31 @@ Visita/Tratamiento → realizados sobre → Parcela
     - **Frontend**: Evaluaciones.js con DndContext, SortableContext, SortableQuestion
     - **Backend**: routes_evaluaciones.py con endpoint reorder
 
+15. **Técnicos Aplicadores** ✅
+    - **Nuevo módulo completo** para gestión de técnicos aplicadores certificados
+    - **Campos de ficha**:
+      - Nombre / Apellidos / D.N.I.
+      - Nivel de Capacitación (Básico, Cualificado, Fumigador, Piloto Aplicador)
+      - Nº Carnet
+      - Fecha Certificación
+      - Fecha Validez (calculada automáticamente: +10 años)
+      - Imagen Certificado (upload)
+      - Estado activo/inactivo
+    - **Estados visuales**: Vigente (verde), Próximo a vencer (amarillo), Caducado (rojo), Inactivo (gris)
+    - **Integración con Tratamientos**: Selector de técnico aplicador en lugar de texto libre
+      - Solo muestra técnicos con certificación vigente
+    - **API Endpoints**:
+      - `GET /api/tecnicos-aplicadores` - Listar con filtros
+      - `GET /api/tecnicos-aplicadores/activos` - Para selector en tratamientos
+      - `GET /api/tecnicos-aplicadores/niveles` - Niveles de capacitación
+      - `POST /api/tecnicos-aplicadores` - Crear
+      - `PUT /api/tecnicos-aplicadores/{id}` - Actualizar
+      - `POST /api/tecnicos-aplicadores/{id}/certificado` - Subir imagen
+      - `DELETE /api/tecnicos-aplicadores/{id}` - Eliminar
+    - **Backend**: `/app/backend/routes_tecnicos_aplicadores.py`
+    - **Frontend**: `/app/frontend/src/pages/TecnicosAplicadores.js`
+    - **Navegación**: Catálogos > Técnicos Aplicadores
+
 ### Completed Refactoring (24/02/2026)
 13. **Refactorización Modular del Backend** ✅
     - Dividido `routes_main.py` en módulos separados:
