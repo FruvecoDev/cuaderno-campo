@@ -125,6 +125,13 @@ const Maquinaria = () => {
     observaciones: ''
   });
   
+  // Estado para imagen de placa CE
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [modalImageUrl, setModalImageUrl] = useState(null);
+  
   useEffect(() => {
     fetchMaquinaria();
   }, []);
