@@ -1150,7 +1150,7 @@ const Albaranes = () => {
                   {fieldsConfig.tipo && <th>Tipo</th>}
                   {fieldsConfig.fecha && <th>Fecha</th>}
                   {fieldsConfig.contrato && <th>Contrato</th>}
-                  {fieldsConfig.proveedor && <th>Proveedor</th>}
+                  {fieldsConfig.proveedor && <th>Proveedor/Cliente</th>}
                   {fieldsConfig.cultivo && <th>Cultivo</th>}
                   {fieldsConfig.parcela && <th>Parcela</th>}
                   {fieldsConfig.items && <th>Líneas</th>}
