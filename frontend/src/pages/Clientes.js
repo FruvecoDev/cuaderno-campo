@@ -84,12 +84,12 @@ const Clientes = () => {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
+      const data = await response.json();
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
+        throw { status: response.status, message: data.detail };
       }
       
-      const data = await response.json();
       setClientes(data.clientes || []);
     } catch (err) {
       console.error('Error fetching clientes:', err);
