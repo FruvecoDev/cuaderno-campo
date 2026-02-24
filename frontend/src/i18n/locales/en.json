@@ -110,6 +110,8 @@
     "upcomingVisits": "Upcoming Visits",
     "stats": {
       "totalContracts": "Total Contracts",
+      "purchaseContracts": "Purchase Contracts",
+      "saleContracts": "Sale Contracts",
       "activeParcels": "Active Parcels",
       "pendingVisits": "Pending Visits",
       "treatments": "Treatments",
