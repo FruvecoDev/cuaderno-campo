@@ -1694,13 +1694,21 @@ const Tratamientos = () => {
                   <label className="form-label">Técnico Aplicador</label>
                   <select
                     className="form-select"
-                    value={formData.aplicador_nombre}
-                    onChange={(e) => setFormData({...formData, aplicador_nombre: e.target.value})}
+                    value={formData.tecnico_aplicador_id}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      const selectedTecnico = tecnicosAplicadores.find(t => t._id === selectedId);
+                      setFormData({
+                        ...formData,
+                        tecnico_aplicador_id: selectedId,
+                        aplicador_nombre: selectedTecnico ? selectedTecnico.nombre_completo : ''
+                      });
+                    }}
                     data-testid="select-aplicador"
                   >
                     <option value="">-- Seleccionar técnico aplicador --</option>
                     {tecnicosAplicadores.map(tecnico => (
-                      <option key={tecnico._id} value={tecnico.nombre_completo}>
+                      <option key={tecnico._id} value={tecnico._id}>
                         {tecnico.nombre_completo} ({tecnico.nivel_capacitacion}) - Válido hasta: {tecnico.fecha_validez}
                       </option>
                     ))}
@@ -1717,7 +1725,15 @@ const Tratamientos = () => {
                   <select
                     className="form-select"
                     value={formData.maquina_id}
-                    onChange={(e) => setFormData({...formData, maquina_id: e.target.value})}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      const selectedMaquina = maquinaria.find(m => m._id === selectedId);
+                      setFormData({
+                        ...formData,
+                        maquina_id: selectedId,
+                        maquina_nombre: selectedMaquina ? selectedMaquina.nombre : ''
+                      });
+                    }}
                     data-testid="select-maquina"
                   >
                     <option value="">-- Seleccionar máquina --</option>
