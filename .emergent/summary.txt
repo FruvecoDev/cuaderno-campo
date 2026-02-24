@@ -6,47 +6,65 @@ Un contrato siempre estará asignado a una parcela y un cultivo. Sobre una parce
 Cada sección puede ser configurable pudiendo habilitar o deshabilitar secciones por usuario. También los campos de cada sección son configurables.
 
 **PRODUCT REQUIREMENTS:**
--   **Modules:** Contracts, Parcels, Maps, Farms, Visits, Tasks, Harvests, Treatments, Irrigations, Recipes, Delivery Notes, Suppliers, Crops, Machinery, Evaluation Sheets, Applicator Technicians.
+-   **Modules:** Contracts, Parcels, Maps, Farms, Visits, Tasks, Harvests, Treatments, Irrigations, Recipes, Delivery Notes, Suppliers, Crops, Machinery, Evaluation Sheets, Applicator Technicians, Farm Articles.
 -   **Core Features:**
-    -   Dashboard with KPIs.
+    -   Dashboard with KPIs and upcoming events.
     -   PDF and Excel report generation.
     -   User and permissions management panel (RBAC).
     -   User authentication (login).
     -   Advanced search filters and configurable columns/fields per module.
-    -   Dynamically generated questionnaires within modules (with custom questions, duplication, and reordering).
+    -   Dynamically generated questionnaires within modules.
+    -   Collapsible side menu.
     -   Multi-language support (Spanish, English, French, German, Italian).
     -   Custom translation dictionary for agricultural terms.
-    -   Smart Field Notebook generation (PDF with AI summary).
+    -   Smart Field Notebook generation (PDF with AI summary), including images.
+    -   Drag-and-drop file uploads.
 -   **AI Integrations:**
     -   AI-powered summary reports for contracts.
     -   AI Assistant for treatment suggestions and harvest yield predictions.
-    -   AI summary for the Smart Field Notebook.
 
 **User's preferred language**: Español
 
 **what currently exists?**
-A comprehensive full-stack agricultural management application built with FastAPI, React, and MongoDB. The application is fully internationalized (5 languages) and features a stable, modular backend architecture.
+A comprehensive full-stack agricultural management application built with FastAPI, React, and MongoDB. The app is internationalized and features a modular architecture.
 
 Key functionalities include:
--   **AI Assistant**: A dedicated page providing AI-driven treatment suggestions and harvest predictions.
--   **Dynamic Evaluation Sheets**: A highly configurable module for evaluation questionnaires, allowing users to add, delete, duplicate, and reorder custom questions via drag-and-drop.
--   **Smart Field Notebook**: Generates a complete PDF report for a contract, including an AI-powered summary.
--   **Core Modules**: Full CRUD functionality for managing Contracts, Parcels, Visits, Treatments, etc.
--   **New Técnico Aplicador Module**: A recently added module to manage applicator technicians, fully integrated into the Treatments workflow.
+-   Full CRUD for core modules like Contracts, Parcels, Visits, Treatments, Machinery, and Applicator Technicians.
+-   An AI Assistant for treatment suggestions and harvest predictions.
+-   A Smart Field Notebook that generates a detailed PDF report for a contract, including an AI summary and images of technician certificates and machinery plates.
+-   Image uploads with drag-and-drop support for Machinery and Technicians.
+-   A dynamic dashboard showing upcoming visits with quick-action buttons (view/edit).
+-   A collapsible side navigation menu that saves its state.
+-   A newly created (but not fully integrated) Artículos de Explotación (Farm Articles) module.
 
 **Last working item**:
--   **Last item agent was working**: Creation of the Técnico Aplicador (Applicator Technician) module. This involved building a new backend router and a complete frontend interface (list, create, edit, delete). The agent also integrated this new entity into the Tratamientos (Treatments) form, replacing a free-text input with a dropdown selector that pulls from the list of registered and certified technicians.
--   **Status**: USER VERIFICATION PENDING
--   **Agent Testing Done**: Y
--   **Which testing method agent to use?**: Manual user verification. The user should be prompted to test the new Técnicos Aplicadores page and confirm that the selector works correctly in the Tratamientos form.
+-   **Last item agent was working**: The agent was creating a new full-stack module for Artículos de Explotación (Farm Articles), intended to be used in delivery notes (Albaranes). The work involved creating the backend model and API endpoints (), the frontend page (), and adding the link to the side menu. The agent verified that the new, empty page was accessible.
+-   **Status**: IN PROGRESS
+-   **Agent Testing Done**: N
+-   **Which testing method agent to use?**: manual testing by curl and screenshot tool
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Finalizar implementación de notificaciones por email (P1)**
+-   **Issue 1: Las imágenes adjuntas no se guardan (P0)**
+-   **Issue 2: Finalizar implementación de notificaciones por email (P1)**
 
 **Issues Detail**:
--   **Issue 1: Finalizar implementación de notificaciones por email**
-    -   **Attempted fixes**: The scaffolding for Resend integration exists (, , frontend panel).
+-   **Issue 1: Las imágenes adjuntas no se guardan**
+    -   **Attempted fixes**: The agent verified backend endpoints with , checked frontend  logic, corrected  configuration handling to prevent outdated field settings, and added better logging. Despite these efforts and screenshots showing the upload preview working, the user continued to report that images were not saving, particularly when editing an existing record.
+    -   **Next debug checklist**:
+        1.  Carefully replicate the user's reported flow: Edit an existing item in Maquinaria or Técnicos Aplicadores that does **not** have an image.
+        2.  Use the file uploader (drag-and-drop or click) to select an image.
+        3.  Click Actualizar (Update).
+        4.  Verify in the database and the UI if the  or  field was correctly updated and if the image file exists in .
+        5.  Check the browser's developer console for any state management issues (e.g.,  state being reset before submission) during the interaction.
+    -   **Why fix this issue and what will be achieved with the fix?**: This is a core functionality for compliance and record-keeping (CE plates, certificates). Fixing it is critical for user trust and data integrity.
+    -   **Status**: IN PROGRESS
+    -   **Is recurring issue?**: Y
+    -   **Should Test frontend/backend/both after fix?**: both
+    -   **Blocked on other issue**: None
+
+-   **Issue 2: Finalizar implementación de notificaciones por email**
+    -   **Attempted fixes**: Scaffolding for Resend integration exists (, ).
     -   **Next debug checklist**:
         1.  Request the  from the user.
         2.  Add the key to the  file.
@@ -58,104 +76,114 @@ Key functionalities include:
     -   **Blocked on other issue**: User input is required for the .
 
 **In progress Task List**:
--   None.
+-   **Task 1: Finalizar módulo Artículos de Explotación (P0)**
+
+**Task Detail**:
+-   **Task 1: Finalizar módulo Artículos de Explotación**
+    -   **Where to resume**: The basic frontend page () and backend API () exist. The next steps are:
+        1.  Implement and test the full CRUD (Create, Read, Update, Delete) functionality on the  page.
+        2.  Integrate this new catalog into the Albaranes (Delivery Notes) module. This will likely involve replacing a free-text input with a searchable dropdown that pulls data from the  endpoint.
+    -   **What will be achieved with this?**: Users will have a centralized catalog of farm articles, making it faster and more consistent to create delivery notes.
+    -   **Status**: IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?**: both
+    -   **Blocked on something**: None.
 
 **Upcoming and Future Tasks**
--   **Upcoming Tasks**:
-    -   None.
 -   **Future Tasks**:
     -   **P2**: Enhance the interactive map with advanced editing features for existing parcels.
 
 **Completed work in this session**
--   **New Module: Técnico Aplicador (DONE)**: Implemented the full-stack module for managing applicator technicians and integrated it with the Treatments form.
--   **Evaluation Sheets Enhancement (DONE)**: Added functionality to add, delete, duplicate, and reorder custom questions in evaluation sheets. Fixed a bug where new questions did not render immediately.
--   **Backend Refactoring (DONE)**: Refactored the backend by splitting  and  into smaller, single-responsibility router files (, , etc.), greatly improving maintainability.
--   **AI Assistant Frontend (DONE)**: Created the frontend page () to interact with the backend AI endpoints for treatment suggestions and harvest predictions.
--   **Bug Fix: Albaranes Unit Field (DONE)**: Corrected a CSS/layout issue where the selected unit was not visible in the delivery notes form.
--   **Bug Fix: Add Question Functionality (DONE)**: Investigated and resolved a bug where adding a new question to an evaluation sheet was not working as expected. The fix involved making the modal a floating overlay and ensuring the component state was updated immediately.
+-   **Module Verification**: Verified the Técnico Aplicador module and its integration into the Treatments form.
+-   **Image Uploads for Machinery**: Added functionality to upload a Placa CE image to the Machinery module.
+-   **PDF Notebook Enhancements**:
+    -   Added Technician and Machine details to the treatments section.
+    -   Added a dedicated section summarizing all machinery and technicians used.
+    -   Embedded the technician's certificate image and machine's CE plate image directly into the PDF.
+-   **UI/UX Improvements**:
+    -   Added drag-and-drop support for all image upload fields.
+    -   Made the main sidebar menu collapsible, with state saved to .
+    -   Added View and Edit buttons to the Upcoming Visits widget on the Dashboard, opening a modal directly without navigation.
+-   **Visits Module Enhancements**:
+    -   Made the Fecha Visita (Visit Date) field mandatory, defaulting to the current date.
+    -   The Fecha Visita now automatically syncs with the Fecha Planificada (Planned Date) when it's set.
+-   **Bug Fixes**:
+    -   Fixed a bug where planned visits were not appearing on the Dashboard.
+    -   Resolved a  on the Expense Reports page.
+    -   Fixed an AI summary generation error ().
 
 **Earlier issues found/mentioned but not fixed**
--   None.
+-   The image upload issue () is a persistent problem reported multiple times by the user in this session. Despite several attempted fixes, the user's feedback indicates it is not resolved.
 
 **Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork**: Backend failure due to missing WeasyPrint dependency ().
--   **Recurrence count**: 1
--   **Status**: RESOLVED. The fix is Hit:1 https://cloudfront.debian.net/debian bookworm InRelease
-Get:2 https://cloudfront.debian.net/debian bookworm-updates InRelease [55.4 kB]
-Hit:3 https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 InRelease
-Hit:4 https://deb.nodesource.com/node_20.x nodistro InRelease
-Get:5 https://cloudfront.debian.net/debian-security bookworm-security InRelease [48.0 kB]
-Fetched 103 kB in 1s (104 kB/s)
-Reading package lists...
-Reading package lists...
-Building dependency tree...
-Reading state information...
-libpango-1.0-0 is already the newest version (1.50.12+ds-1).
-libpangoft2-1.0-0 is already the newest version (1.50.12+ds-1).
-libpangoft2-1.0-0 set to manually installed.
-0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.. This might be needed again on a pod reset.
+-   None observed in this session.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
 -   **Stack**: FARM (FastAPI, React, MongoDB)
--   **UI**: shadcn/ui, Recharts, react-router
--   **Drag & Drop**: 
+-   **UI**: shadcn/ui, Recharts, react-router, 
+-   **State Management**: React Hooks (, )
 -   **Internationalization (i18n)**: 
 -   **PDF Generation**: 
 -   **AI**: OpenAI GPT-4o via 
 -   **Authentication**: JWT & Role-Based Access Control (RBAC)
 
 **key DB schema**
--   **translations**: 
--   **tecnicos_aplicadores**: 
--   **evaluation_questions_config**: 
+-   **articulos_explotacion**: 
+-   **maquinaria**: Modified to include 
+-   **tecnicos_aplicadores**: Modified to include 
+-   **tratamientos**: Modified to include 
+-   **visitas**:  is now a mandatory Tue Feb 24 11:39:07 UTC 2026 field.
 
 **All files of reference**
--   : New backend router for applicator technicians.
--   : Modified to add question reordering endpoint.
--   : Modified to include all new modular routers.
--   : New frontend page for applicator technicians.
--   : Modified to integrate the technician selector.
--   : Heavily modified to implement add, duplicate, and reorder functionality for questions.
--   : Modified to fix a display bug in the unit selector.
--   : New frontend page for the AI Assistant.
--   : Updated with all new features.
+-   : New router for farm articles.
+-   : New frontend page for farm articles.
+-   : Modified to add image upload endpoint.
+-   : Modified to add image upload field with drag-and-drop.
+-   : Modified for image upload.
+-   : Modified for image upload with drag-and-drop.
+-   : Heavily modified to include technician/machine data and images in the PDF.
+-   : Modified to add visit action buttons and modal.
+-   : Modified to implement the collapsible sidebar.
+-   : Modified to make date mandatory and handle auto-update logic.
+-   : Modified to fix the query for upcoming visits.
+-   : Modified to fix  bug.
+-   : Modified to fix  instantiation.
 
 **Areas that need refactoring**:
--   None. The major backend refactoring has been completed.
+-   None identified.
 
 **key api endpoints**
--   : Generates AI-based treatment suggestions.
--   : Predicts crop yield based on provided data.
--   : Updates the display order of custom evaluation questions.
--   : CRUD operations for applicator technicians.
--   : Update and delete operations for applicator technicians.
+-   : CRUD for farm articles.
+-   : Uploads CE plate image.
+-   : Uploads certificate image.
+-   : Generates the field notebook PDF (now includes images).
+-   : Retrieves upcoming visits for the dashboard.
 
 **Critical Info for New Agent**
-1.  Your first action should be to present the newly completed **Técnico Aplicador** module to the user for verification. Confirm that the new page works and that the dropdown is correctly integrated into the Tratamientos form.
-2.  After user confirmation, the highest priority is to address the last remaining pending issue: **Email Notifications**. This is blocked pending the user providing a . You must ask the user for this key to proceed.
-3.  The application is in a very stable state. Major work has been done on backend architecture (modular routers) and frontend UX (dynamic questionnaires), resolving multiple user requests and bugs in this session.
+1.  **Image Upload Bug (P0)**: Your top priority is to definitively fix the recurring issue where users report images are not being saved, especially when editing an existing item. The user has reported this multiple times, and it's a critical blocker. Do not assume previous fixes worked; test the entire flow manually from the user's perspective.
+2.  **Finish Farm Articles Module (P0)**: Once the image bug is resolved, complete the Artículos de Explotación module. This involves implementing full CRUD on the frontend page and then integrating it into the Albaranes (Delivery Notes) page, likely via a searchable dropdown.
+3.  **Email Notifications (P1)**: After the above tasks are done, ask the user for the  to unblock and implement the email notification feature.
 
 **documents and test reports created in this job**
--   
--   
--   
+-   None.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User**:  (Request to create the Applicator Technician module) - **Status: COMPLETED**
-2.  **User**:  (Bug report for the delivery notes unit field) - **Status: COMPLETED**
-3.  **User**:  (Confirmation to proceed with reordering questions feature) - **Status: COMPLETED**
-4.  **User**:  (Confirmation to proceed with duplicate question feature) - **Status: COMPLETED**
-5.  **User**:  (Bug report for adding a new question) - **Status: COMPLETED**
-6.  **User**:  (Request to add questions to evaluation sheets) - **Status: COMPLETED**
-7.  **User**:  (Approval of the backend refactoring task) - **Status: COMPLETED**
-8.  **User**:  (Choice to implement the AI frontend) - **Status: COMPLETED**
+1.   - **Request**: Add view/edit buttons to upcoming visits on the dashboard. **Status: COMPLETED**
+2.   - **Request**: Make the dashboard buttons open a modal instead of navigating away. **Status: COMPLETED**
+3.   - **Request**: Make the visit date field mandatory. **Status: COMPLETED**
+4.   - **Request**: Auto-update visit date from planned date. **Status: COMPLETED**
+5.   - **Bug Report**: Planned visits not showing on dashboard. **Status: COMPLETED**
+6.   - **Bug Report**: Javascript error on the expense reports page. **Status: COMPLETED**
+7.   - **Request**: Create a Farm Articles module. **Status: IN PROGRESS**
+8.   - **Request**: Add images to the PDF notebook. **Status: COMPLETED**
+9.   - **Bug Report**: AI Summary generation error. **Status: COMPLETED**
+10.  - **Bug Report**: Attached images are not saving. This was followed by clarifications that the issue happens on both create/edit, especially when editing. **Status: IN PROGRESS (Recurring Issue)**
 
 **Project Health Check:**
--   **Broken**: None
--   **Mocked**: Email notification system (requires API key and background scheduler).
+-   **Broken**: Image upload functionality is unreliable for the end-user.
+-   **Mocked**: Email notification system (pending API key and scheduler implementation).
 
 **3rd Party Integrations**
 -   **OpenAI GPT-4o**: Uses Emergent LLM Key.
@@ -163,19 +191,20 @@ libpangoft2-1.0-0 set to manually installed.
 -   **react-i18next / i18next**: Multi-language support.
 -   **WeasyPrint**: PDF generation.
 -   **openpyxl**: Excel file generation.
--   **Resend**: For email notifications (partially integrated, blocked on API key).
+-   **Resend**: For email notifications (partially integrated, blocked).
 -   **Leaflet.js / OpenStreetMap**: Maps.
--   **@dnd-kit/core**: For drag-and-drop functionality.
+-   **@dnd-kit/core**: For drag-and-drop functionality in evaluation sheets.
+-   **react-dropzone**: For drag-and-drop file uploads.
 
 **Testing status**
--   **Testing agent used after significant changes**: YES (for the AI Assistant feature).
+-   **Testing agent used after significant changes**: NO
 -   **Troubleshoot agent used after agent stuck in loop**: NO
 -   **Test files created**: []
--   **Known regressions**: None.
+-   **Known regressions**: None, but there is a persistent high-priority bug with image uploads.
 
 **Credentials to test flow:**
 -   **Admin**:  / 
 -   **Other Roles**: Users for Manager, Technician, and Viewer roles exist. Passwords are their role name in lowercase (e.g., role: Manager, password: manager).
 
 **What agent forgot to execute**
--   The agent successfully completed all user-requested tasks and planned work for this session. Nothing was forgotten.</analysis>
+-   The agent failed to definitively resolve the user-reported bug with image uploads, leading to multiple user reports on the same issue. While several fixes were attempted, the problem was not fully diagnosed and fixed from the user's perspective.</analysis>
