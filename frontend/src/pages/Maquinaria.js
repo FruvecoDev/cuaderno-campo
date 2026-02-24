@@ -18,7 +18,8 @@ const DEFAULT_FIELDS_CONFIG = {
   año_fabricacion: true,
   capacidad: true,
   estado: true,
-  observaciones: true
+  observaciones: true,
+  imagen_placa_ce: true
 };
 
 const FIELD_LABELS = {
@@ -31,7 +32,8 @@ const FIELD_LABELS = {
   año_fabricacion: 'Año Fabricación',
   capacidad: 'Capacidad',
   estado: 'Estado',
-  observaciones: 'Observaciones'
+  observaciones: 'Observaciones',
+  imagen_placa_ce: 'Imagen Placa CE'
 };
 
 // Configuración de columnas de la tabla
@@ -41,7 +43,8 @@ const DEFAULT_TABLE_CONFIG = {
   marca: true,
   modelo: true,
   matricula: true,
-  estado: true
+  estado: true,
+  imagen_placa_ce: true
 };
 
 const TABLE_LABELS = {
@@ -50,7 +53,8 @@ const TABLE_LABELS = {
   marca: 'Marca',
   modelo: 'Modelo',
   matricula: 'Matrícula',
-  estado: 'Estado'
+  estado: 'Estado',
+  imagen_placa_ce: 'Placa CE'
 };
 
 // Tipos de maquinaria predefinidos
