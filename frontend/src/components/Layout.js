@@ -93,6 +93,12 @@ const Layout = ({ children }) => {
       if (item.requireAdmin) {
         return false;
       }
+      // Check operation type permission (compra/venta)
+      if (item.operacion) {
+        if (!canDoOperacion(item.operacion)) {
+          return false;
+        }
+      }
       // Check menu_permissions if they exist
       if (user?.menu_permissions) {
         return user.menu_permissions[item.path] !== false;
