@@ -534,19 +534,25 @@ Módulos actualizados para seguir patrón consistente:
 - **Estado**: ✅ COMPLETADO
 
 
-## Bug Fix: Subida de Imágenes (24/02/2026) - COMPLETADO
-- **Problema**: Las imágenes de Placa CE (Maquinaria) y Certificados (Técnicos Aplicadores) no se guardaban de forma persistente
-- **Causa raíz**: Las imágenes se guardaban en `/tmp/` que es un directorio temporal y se borra al reiniciar
+## Bug Fix: Subida de Imágenes (24/02/2026) - COMPLETADO Y RE-VERIFICADO
+- **Problema reportado**: Las imágenes de Placa CE (Maquinaria) y Certificados (Técnicos Aplicadores) no se guardaban ni visualizaban correctamente
+- **Causa raíz identificada**: 
+  1. Backend guardaba rutas de sistema (`/app/uploads/...` o `/tmp/...`) en lugar de URLs web
+  2. Frontend no construía URLs completas para visualizar las imágenes
+  3. Registros antiguos tenían rutas inconsistentes en la BD
 - **Solución implementada**:
-  - Cambiado directorio de uploads a `/app/uploads/` (persistente)
-  - `/app/uploads/maquinaria_placas/` para imágenes de placas CE
-  - `/app/uploads/certificados/` para certificados de técnicos
-  - Agregado montaje de archivos estáticos en server.py: `app.mount("/api/uploads", StaticFiles(...))`
+  - Backend ahora guarda URLs relativas web: `/api/uploads/certificados/...` y `/api/uploads/maquinaria_placas/...`
+  - Frontend construye URL completa: `${BACKEND_URL}${imagen_url}`
+  - Endpoint `GET /api/maquinaria/{id}/imagen-placa-ce` mejorado para manejar URLs antiguas
+  - Archivos estáticos servidos en `/api/uploads/` sin autenticación
 - **Archivos modificados**:
-  - `/app/backend/routes_maquinaria.py` - línea 152
-  - `/app/backend/routes_tecnicos_aplicadores.py` - línea 240
-  - `/app/backend/server.py` - añadido StaticFiles mount
-- **Estado**: ✅ COMPLETADO Y TESTEADO
+  - `/app/backend/routes_maquinaria.py` - upload y get de imagen
+  - `/app/backend/routes_tecnicos_aplicadores.py` - upload de certificado
+  - `/app/frontend/src/pages/Maquinaria.js` - viewImage y handleEdit
+  - `/app/frontend/src/pages/TecnicosAplicadores.js` - vista certificado y handleEdit
+- **Test Report**: `/app/test_reports/iteration_14.json` - 100% backend, 86% frontend (1 flaky)
+- **Estado**: ✅ COMPLETADO Y VERIFICADO CON TESTING AGENT
+
 
 ## Módulo Artículos de Explotación (24/02/2026) - COMPLETADO
 - **Nuevo Módulo**: Catálogo de artículos para usar en albaranes
