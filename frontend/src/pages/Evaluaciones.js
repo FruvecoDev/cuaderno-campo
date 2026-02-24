@@ -79,6 +79,56 @@ const SECCIONES = [
   { key: 'calibracion_mantenimiento', label: 'Calibración y Mantenimiento', icon: '⚙️' },
 ];
 
+// Componente para pregunta arrastrable
+const SortableQuestion = ({ pregunta, idx, isCustom, canDrag, children }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: pregunta.id, disabled: !canDrag || !isCustom });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    padding: '0.75rem',
+    backgroundColor: isDragging ? 'hsl(var(--primary) / 0.1)' : (idx % 2 === 0 ? 'hsl(var(--muted) / 0.3)' : 'transparent'),
+    borderRadius: '0.375rem',
+    marginBottom: '0.5rem',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: '1rem',
+    border: isDragging ? '2px dashed hsl(var(--primary))' : 'none',
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      {canDrag && isCustom && (
+        <div
+          {...attributes}
+          {...listeners}
+          style={{
+            cursor: 'grab',
+            padding: '0.25rem',
+            color: 'hsl(var(--muted-foreground))',
+            display: 'flex',
+            alignItems: 'center',
+            flexShrink: 0,
+          }}
+          title="Arrastrar para reordenar"
+        >
+          <GripVertical size={16} />
+        </div>
+      )}
+      {children}
+    </div>
+  );
+};
+
 const Evaluaciones = () => {
   const { t } = useTranslation();
   const [evaluaciones, setEvaluaciones] = useState([]);
