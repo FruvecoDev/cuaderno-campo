@@ -540,6 +540,106 @@ def generate_html_cuaderno(data: dict, ai_summary: str = "") -> str:
         </div>
     """
     
+    # Maquinaria Asociada Section - Extract from tratamientos
+    tratamientos_data = data.get("tratamientos", [])
+    maquinaria_usada = {}
+    tecnicos_usados = {}
+    
+    for t in tratamientos_data:
+        # Recopilar maquinaria
+        maquina_nombre = t.get('maquina_nombre')
+        if not maquina_nombre:
+            maquinaria_data = t.get('maquinaria')
+            if maquinaria_data and isinstance(maquinaria_data, dict):
+                maquina_nombre = f"{maquinaria_data.get('tipo', '')} {maquinaria_data.get('modelo', '')}".strip()
+        
+        if maquina_nombre and maquina_nombre != 'N/A':
+            if maquina_nombre not in maquinaria_usada:
+                maquinaria_usada[maquina_nombre] = {
+                    'nombre': maquina_nombre,
+                    'usos': 0,
+                    'fechas': []
+                }
+            maquinaria_usada[maquina_nombre]['usos'] += 1
+            fecha = t.get('fecha_aplicacion') or t.get('fecha_tratamiento')
+            if fecha:
+                maquinaria_usada[maquina_nombre]['fechas'].append(fecha)
+        
+        # Recopilar técnicos aplicadores
+        aplicador = t.get('aplicador_nombre') or t.get('tecnico')
+        if isinstance(aplicador, dict):
+            aplicador = f"{aplicador.get('nombre', '')} {aplicador.get('apellidos', '')}".strip()
+        
+        if aplicador and aplicador != 'N/A':
+            if aplicador not in tecnicos_usados:
+                tecnicos_usados[aplicador] = {
+                    'nombre': aplicador,
+                    'aplicaciones': 0
+                }
+            tecnicos_usados[aplicador]['aplicaciones'] += 1
+    
+    # Mostrar sección de Maquinaria y Técnicos si hay datos
+    if maquinaria_usada or tecnicos_usados:
+        html += """
+        <div class="section">
+            <div class="section-title">🚜 Maquinaria y Personal Asociado</div>
+        """
+        
+        if maquinaria_usada:
+            html += """
+            <h4 style="margin: 10px 0 5px 0; color: #2e7d32;">Maquinaria Utilizada</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Máquina</th>
+                        <th>Nº de Usos</th>
+                        <th>Última Utilización</th>
+                    </tr>
+                </thead>
+                <tbody>
+            """
+            for maq in sorted(maquinaria_usada.values(), key=lambda x: x['usos'], reverse=True):
+                ultima_fecha = max(maq['fechas']) if maq['fechas'] else 'N/A'
+                if ultima_fecha != 'N/A':
+                    ultima_fecha = format_date(ultima_fecha)
+                html += f"""
+                    <tr>
+                        <td><strong>{maq['nombre']}</strong></td>
+                        <td style="text-align: center;">{maq['usos']}</td>
+                        <td>{ultima_fecha}</td>
+                    </tr>
+                """
+            html += """
+                </tbody>
+            </table>
+            """
+        
+        if tecnicos_usados:
+            html += """
+            <h4 style="margin: 15px 0 5px 0; color: #2e7d32;">Técnicos Aplicadores</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Técnico Aplicador</th>
+                        <th>Nº de Aplicaciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+            """
+            for tec in sorted(tecnicos_usados.values(), key=lambda x: x['aplicaciones'], reverse=True):
+                html += f"""
+                    <tr>
+                        <td><strong>{tec['nombre']}</strong></td>
+                        <td style="text-align: center;">{tec['aplicaciones']}</td>
+                    </tr>
+                """
+            html += """
+                </tbody>
+            </table>
+            """
+        
+        html += "</div>"
+    
     # Visitas Section
     visitas = data.get("visitas", [])
     html += """
