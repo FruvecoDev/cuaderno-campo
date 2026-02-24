@@ -202,6 +202,9 @@ const Parcelas = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
   
+  // Cuaderno de campo
+  const [generatingCuaderno, setGeneratingCuaderno] = useState(null);
+  
   // Historial de tratamientos
   const [showHistorial, setShowHistorial] = useState(false);
   const [historialParcela, setHistorialParcela] = useState(null);
