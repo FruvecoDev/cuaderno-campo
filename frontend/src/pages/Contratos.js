@@ -623,6 +623,7 @@ const Contratos = () => {
               <thead>
                 <tr>
                   <th>{t('contracts.contractNumber')}</th>
+                  <th>Tipo</th>
                   <th>{t('contracts.campaign')}</th>
                   <th>{t('contracts.provider')}</th>
                   <th>{t('contracts.crop')}</th>
@@ -637,13 +638,25 @@ const Contratos = () => {
                 {contratos.map((contrato) => (
                   <tr key={contrato._id}>
                     <td className="font-semibold">{contrato.serie}-{contrato.año}-{String(contrato.numero).padStart(3, '0')}</td>
+                    <td>
+                      <span style={{
+                        padding: '0.125rem 0.5rem',
+                        borderRadius: '4px',
+                        fontSize: '0.75rem',
+                        fontWeight: '500',
+                        backgroundColor: contrato.tipo === 'Compra' ? '#dbeafe' : '#dcfce7',
+                        color: contrato.tipo === 'Compra' ? '#1e40af' : '#166534'
+                      }}>
+                        {contrato.tipo || 'Compra'}
+                      </span>
+                    </td>
                     <td>{contrato.campana}</td>
                     <td>{contrato.proveedor}</td>
                     <td>{contrato.cultivo}</td>
-                    <td>{contrato.cantidad.toLocaleString()}</td>
-                    <td>€{contrato.precio.toFixed(2)}</td>
-                    <td className="font-semibold">€{(contrato.cantidad * contrato.precio).toFixed(2)}</td>
-                    <td>{new Date(contrato.fecha_contrato).toLocaleDateString()}</td>
+                    <td>{contrato.cantidad?.toLocaleString()}</td>
+                    <td>€{contrato.precio?.toFixed(2)}</td>
+                    <td className="font-semibold">€{((contrato.cantidad || 0) * (contrato.precio || 0)).toFixed(2)}</td>
+                    <td>{contrato.fecha_contrato ? new Date(contrato.fecha_contrato).toLocaleDateString() : '-'}</td>
                     {(canEdit || canDelete) ? (
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
