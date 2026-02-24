@@ -96,7 +96,8 @@
     "machinery": "Machinery",
     "phytosanitary": "Phytosanitary",
     "configuration": "Configuration",
-    "users": "Users"
+    "users": "Users",
+    "translations": "Translations"
   },
   "dashboard": {
     "title": "Dashboard",

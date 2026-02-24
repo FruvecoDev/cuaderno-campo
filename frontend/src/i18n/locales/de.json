@@ -96,7 +96,8 @@
     "machinery": "Maschinen",
     "phytosanitary": "Pflanzenschutz",
     "configuration": "Konfiguration",
-    "users": "Benutzer"
+    "users": "Benutzer",
+    "translations": "Übersetzungen"
   },
   "dashboard": {
     "title": "Dashboard",

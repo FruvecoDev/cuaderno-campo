@@ -96,7 +96,8 @@
     "machinery": "Machines",
     "phytosanitary": "Phytosanitaires",
     "configuration": "Configuration",
-    "users": "Utilisateurs"
+    "users": "Utilisateurs",
+    "translations": "Traductions"
   },
   "dashboard": {
     "title": "Tableau de bord",

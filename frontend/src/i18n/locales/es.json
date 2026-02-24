@@ -96,7 +96,8 @@
     "machinery": "Maquinaria",
     "phytosanitary": "Fitosanitarios",
     "configuration": "Configuración",
-    "users": "Usuarios"
+    "users": "Usuarios",
+    "translations": "Traducciones"
   },
   "dashboard": {
     "title": "Dashboard",
