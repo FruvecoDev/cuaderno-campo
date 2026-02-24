@@ -6,19 +6,20 @@ import '../App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
-const ROLES = [
-  { value: 'Admin', label: 'Administrador', description: 'Acceso total + gestión usuarios' },
-  { value: 'Manager', label: 'Manager', description: 'Crear/Editar/Exportar (no Eliminar)' },
-  { value: 'Technician', label: 'Técnico', description: 'Operaciones de campo (sin contratos)' },
-  { value: 'Viewer', label: 'Visualizador', description: 'Solo lectura + exportar' }
-];
-
 const Usuarios = () => {
+  const { t } = useTranslation();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const { token, user: currentUser } = useAuth();
+  
+  const ROLES = [
+    { value: 'Admin', label: t('users.admin'), description: t('users.adminDesc') },
+    { value: 'Manager', label: t('users.manager'), description: t('users.managerDesc') },
+    { value: 'Technician', label: t('users.technician'), description: t('users.technicianDesc') },
+    { value: 'Viewer', label: t('users.viewer'), description: t('users.viewerDesc') }
+  ];
   
   const [formData, setFormData] = useState({
     email: '',
