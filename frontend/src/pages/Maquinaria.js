@@ -225,6 +225,12 @@ const Maquinaria = () => {
       
       const data = await response.json();
       if (data.success) {
+        // Si hay imagen seleccionada, subirla
+        const maquinariaId = data.data._id || editingId;
+        if (selectedImage && maquinariaId) {
+          await uploadImage(maquinariaId);
+        }
+        
         setShowForm(false);
         setEditingId(null);
         fetchMaquinaria();
