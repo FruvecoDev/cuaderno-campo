@@ -319,6 +319,52 @@ const Usuarios = () => {
     }
   };
 
+  // Tipo operacion functions
+  const openTipoOperacionModal = (user) => {
+    setSelectedUserForTipoOp(user);
+    setTipoOperacionValue(user.tipo_operacion || 'ambos');
+    setShowTipoOperacionModal(true);
+  };
+
+  const handleSaveTipoOperacion = async () => {
+    if (!selectedUserForTipoOp) return;
+    
+    setSavingTipoOp(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/auth/users/${selectedUserForTipoOp._id}/tipo-operacion`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ tipo_operacion: tipoOperacionValue })
+      });
+      
+      if (response.ok) {
+        setShowTipoOperacionModal(false);
+        setSelectedUserForTipoOp(null);
+        fetchUsers();
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.detail}`);
+      }
+    } catch (error) {
+      console.error('Error saving tipo operacion:', error);
+      alert('Error guardando tipo de operación');
+    } finally {
+      setSavingTipoOp(false);
+    }
+  };
+
+  const getTipoOperacionBadge = (tipo) => {
+    switch (tipo) {
+      case 'compra': return { label: 'Compra', color: '#3b82f6', bg: '#dbeafe' };
+      case 'venta': return { label: 'Venta', color: '#10b981', bg: '#d1fae5' };
+      case 'ambos': return { label: 'Ambos', color: '#8b5cf6', bg: '#ede9fe' };
+      default: return { label: 'Ambos', color: '#8b5cf6', bg: '#ede9fe' };
+    }
+  };
+
   if (!currentUser?.can_manage_users) {
     return (
       <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
