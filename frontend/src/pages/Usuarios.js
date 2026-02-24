@@ -24,6 +24,12 @@ const Usuarios = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [savingPassword, setSavingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState('');
+  // Edit user modal
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedUserForEdit, setSelectedUserForEdit] = useState(null);
+  const [editFormData, setEditFormData] = useState({ full_name: '', email: '', role: '' });
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState('');
   const { token, user: currentUser } = useAuth();
   
   const ROLES = [
