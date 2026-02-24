@@ -120,17 +120,30 @@ const Albaranes = () => {
   // Flag para evitar múltiples cargas
   const [isInitialized, setIsInitialized] = useState(false);
   
-  // Helper para hacer fetch de forma segura
-  const safeFetch = async (url) => {
-    const response = await fetch(url, {
-      headers: { 'Authorization': `Bearer ${token}` }
+  // Helper para hacer fetch usando XMLHttpRequest (evita interceptores de fetch)
+  const xhrFetch = (url) => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', url, true);
+      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            resolve({ ok: true, data });
+          } catch (e) {
+            reject(new Error('Error parsing JSON'));
+          }
+        } else {
+          resolve({ ok: false, status: xhr.status });
+        }
+      };
+      xhr.onerror = function() {
+        reject(new Error('Network error'));
+      };
+      xhr.send();
     });
-    const text = await response.text();
-    return {
-      ok: response.ok,
-      status: response.status,
-      data: text ? JSON.parse(text) : null
-    };
   };
   
   useEffect(() => {
@@ -141,20 +154,18 @@ const Albaranes = () => {
       setIsInitialized(true);
       
       try {
-        // Cargar secuencialmente para evitar problemas
-        const albaranes = await safeFetch(`${BACKEND_URL}/api/albaranes`);
+        const [albaranes, contratos, proveedoresRes, clientesRes, articulosRes] = await Promise.all([
+          xhrFetch(`${BACKEND_URL}/api/albaranes`),
+          xhrFetch(`${BACKEND_URL}/api/contratos`),
+          xhrFetch(`${BACKEND_URL}/api/proveedores?limit=500`),
+          xhrFetch(`${BACKEND_URL}/api/clientes/activos`),
+          xhrFetch(`${BACKEND_URL}/api/articulos/activos`)
+        ]);
+        
         if (albaranes.ok) setAlbaranes(albaranes.data?.albaranes || []);
-        
-        const contratos = await safeFetch(`${BACKEND_URL}/api/contratos`);
         if (contratos.ok) setContratos(contratos.data?.contratos || []);
-        
-        const proveedoresRes = await safeFetch(`${BACKEND_URL}/api/proveedores?limit=500`);
         if (proveedoresRes.ok) setProveedores(proveedoresRes.data?.proveedores || []);
-        
-        const clientesRes = await safeFetch(`${BACKEND_URL}/api/clientes/activos`);
         if (clientesRes.ok) setClientes(clientesRes.data?.clientes || []);
-        
-        const articulosRes = await safeFetch(`${BACKEND_URL}/api/articulos/activos`);
         if (articulosRes.ok) setArticulosCatalogo(articulosRes.data?.articulos || []);
         
       } catch (error) {
@@ -171,7 +182,7 @@ const Albaranes = () => {
   // Función para recargar albaranes (después de crear/editar/eliminar)
   const reloadAlbaranes = async () => {
     try {
-      const result = await safeFetch(`${BACKEND_URL}/api/albaranes`);
+      const result = await xhrFetch(`${BACKEND_URL}/api/albaranes`);
       if (result.ok) {
         setAlbaranes(result.data?.albaranes || []);
       }
