@@ -100,6 +100,9 @@ class ContratoCreate(BaseModel):
     procedencia: str
     fecha_contrato: str
     
+    # Tipo de contrato: Compra o Venta
+    tipo: str = "Compra"
+    
     # Nuevos campos (catálogos)
     proveedor_id: Optional[str] = None  # ObjectId ref a proveedores
     cultivo_id: Optional[str] = None    # ObjectId ref a cultivos
@@ -115,6 +118,14 @@ class ContratoCreate(BaseModel):
     periodo_hasta: str
     moneda: str = "EUR"
     observaciones: Optional[str] = None
+    
+    # Agentes según tipo de contrato
+    agente_compra: Optional[str] = None  # Solo si tipo = "Compra"
+    agente_venta: Optional[str] = None   # Solo si tipo = "Venta"
+    
+    # Comisión del agente
+    comision_tipo: Optional[str] = None  # "porcentaje" o "euro_kilo"
+    comision_valor: Optional[float] = None  # Valor de la comisión
     
     # Tabla de precios por calidad/tenderometría (para guisante)
     precios_calidad: List[ContratoPrecios] = []
