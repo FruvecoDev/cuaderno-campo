@@ -250,6 +250,46 @@ const Contratos = () => {
       setTimeout(() => setError(null), 5000);
     }
   };
+
+  // Generate Field Notebook (Cuaderno de Campo)
+  const handleGenerateCuaderno = async (contratoId) => {
+    setGeneratingCuaderno(contratoId);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/cuaderno-campo/generar`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          contrato_id: contratoId,
+          include_ai_summary: true
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Error generando cuaderno');
+      }
+
+      // Download PDF
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = response.headers.get('content-disposition')?.split('filename=')[1] || 'Cuaderno_Campo.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error generating cuaderno:', error);
+      setError(error.message || t('fieldNotebook.errorGenerating'));
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setGeneratingCuaderno(null);
+    }
+  };
   
   return (
     <div data-testid="contratos-page">
