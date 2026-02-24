@@ -35,12 +35,19 @@ class ContratoBase(BaseModel):
     año: int = Field(default_factory=lambda: datetime.now().year)
     numero: int
     
+    # Tipo de contrato: Compra o Venta
+    tipo: str = "Compra"  # Compra o Venta
+    
     # Campos principales
     tipo_contrato: str = "Por Kilos"
     campana: str
     procedencia: str  # Campo / Almacén con tratamiento / Almacén sin tratamiento
     fecha_contrato: str
     fecha_baja: Optional[str] = None
+    
+    # Agentes según tipo de contrato
+    agente_compra: Optional[str] = None  # Solo si tipo = "Compra"
+    agente_venta: Optional[str] = None   # Solo si tipo = "Venta"
     
     # Proveedor y cultivo (referencias a catálogos)
     proveedor_id: str  # ObjectId ref a proveedores collection
