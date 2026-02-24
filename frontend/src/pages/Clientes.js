@@ -1,11 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, Search, X, Upload, User, Phone, Mail, MapPin, Building, Globe, TrendingUp, FileText, Package, Eye } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, X, Upload, User, Phone, Mail, MapPin, Building, Globe, TrendingUp, FileText, Package, Eye, Settings } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+
+// Configuración de campos visibles en tabla
+const DEFAULT_FIELDS_CONFIG = {
+  codigo: true,
+  nombre: true,
+  nif: true,
+  tipo: true,
+  poblacion: true,
+  provincia: false,
+  telefono: true,
+  email: true,
+  direccion: false,
+  cod_postal: false,
+  contacto: false,
+  web: false,
+  observaciones: false,
+  estado: true
+};
+
+const FIELD_LABELS = {
+  codigo: 'Código',
+  nombre: 'Nombre',
+  nif: 'NIF/CIF',
+  tipo: 'Tipo',
+  poblacion: 'Población',
+  provincia: 'Provincia',
+  telefono: 'Teléfono',
+  email: 'Email',
+  direccion: 'Dirección',
+  cod_postal: 'Código Postal',
+  contacto: 'Contacto',
+  web: 'Web',
+  observaciones: 'Observaciones',
+  estado: 'Estado'
+};
 
 const Clientes = () => {
   const [clientes, setClientes] = useState([]);
