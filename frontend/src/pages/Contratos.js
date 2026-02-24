@@ -498,7 +498,7 @@ const Contratos = () => {
                 className="form-textarea"
                 value={formData.observaciones}
                 onChange={(e) => setFormData({...formData, observaciones: e.target.value})}
-                placeholder={t('common.observations')}...
+                placeholder={t('common.observations')}
               />
             </div>
             
