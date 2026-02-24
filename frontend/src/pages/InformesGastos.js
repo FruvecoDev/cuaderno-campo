@@ -102,6 +102,10 @@ const InformesGastos = () => {
       if (filters.fecha_desde) params.append('fecha_desde', filters.fecha_desde);
       if (filters.fecha_hasta) params.append('fecha_hasta', filters.fecha_hasta);
       if (filters.campana) params.append('campana', filters.campana);
+      if (filters.contrato_id) params.append('contrato_id', filters.contrato_id);
+      if (filters.cultivo) params.append('cultivo', filters.cultivo);
+      if (filters.proveedor) params.append('proveedor', filters.proveedor);
+      if (filters.parcela_codigo) params.append('parcela_codigo', filters.parcela_codigo);
       
       const response = await fetch(`${BACKEND_URL}/api/gastos/resumen?${params}`, {
         headers: { 'Authorization': `Bearer ${token}` }
