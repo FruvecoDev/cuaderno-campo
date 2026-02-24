@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, Search, X, Upload, User, Phone, Mail, MapPin, Building, Globe } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, X, Upload, User, Phone, Mail, MapPin, Building, Globe, TrendingUp, FileText, Package, Eye } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
@@ -20,6 +20,12 @@ const Clientes = () => {
   const [tipos, setTipos] = useState([]);
   const [provincias, setProvincias] = useState([]);
   const [uploadingFoto, setUploadingFoto] = useState(false);
+  
+  // Estado para el resumen de ventas
+  const [showResumenVentas, setShowResumenVentas] = useState(false);
+  const [selectedCliente, setSelectedCliente] = useState(null);
+  const [resumenVentas, setResumenVentas] = useState(null);
+  const [loadingResumen, setLoadingResumen] = useState(false);
   
   const { token } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
