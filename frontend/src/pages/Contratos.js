@@ -401,8 +401,8 @@ const Contratos = () => {
                   required
                   data-testid="select-tipo-contrato"
                 >
-                  <option value="Compra">Compra</option>
-                  <option value="Venta">Venta</option>
+                  {puedeCompra && <option value="Compra">Compra</option>}
+                  {puedeVenta && <option value="Venta">Venta</option>}
                 </select>
               </div>
               
