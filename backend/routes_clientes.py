@@ -246,6 +246,90 @@ async def upload_foto_cliente(
     return {"success": True, "foto_url": foto_url}
 
 
+@router.get("/clientes/{cliente_id}/resumen-ventas")
+async def get_resumen_ventas_cliente(
+    cliente_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener resumen de ventas de un cliente"""
+    if not ObjectId.is_valid(cliente_id):
+        raise HTTPException(status_code=400, detail="ID inválido")
+    
+    cliente = await clientes_collection.find_one({"_id": ObjectId(cliente_id)})
+    if not cliente:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+    
+    # Buscar contratos de venta asociados al cliente
+    contratos = await contratos_collection.find({
+        "$or": [
+            {"cliente_id": cliente_id},
+            {"cliente": cliente.get("nombre", "")}
+        ],
+        "tipo": "Venta"
+    }).to_list(500)
+    
+    # Agrupar por campaña
+    ventas_por_campana = {}
+    total_cantidad = 0
+    total_importe = 0
+    
+    for contrato in contratos:
+        campana = contrato.get("campana", "Sin campaña")
+        cantidad = contrato.get("cantidad", 0) or 0
+        precio = contrato.get("precio", 0) or 0
+        importe = cantidad * precio
+        
+        if campana not in ventas_por_campana:
+            ventas_por_campana[campana] = {
+                "campana": campana,
+                "num_contratos": 0,
+                "cantidad_total": 0,
+                "importe_total": 0,
+                "cultivos": set()
+            }
+        
+        ventas_por_campana[campana]["num_contratos"] += 1
+        ventas_por_campana[campana]["cantidad_total"] += cantidad
+        ventas_por_campana[campana]["importe_total"] += importe
+        ventas_por_campana[campana]["cultivos"].add(contrato.get("cultivo", ""))
+        
+        total_cantidad += cantidad
+        total_importe += importe
+    
+    # Convertir sets a listas para serialización
+    for campana in ventas_por_campana:
+        ventas_por_campana[campana]["cultivos"] = list(ventas_por_campana[campana]["cultivos"])
+    
+    # Buscar albaranes de venta asociados
+    albaranes = await albaranes_collection.find({
+        "$or": [
+            {"cliente": cliente.get("nombre", "")},
+            {"cliente_contrato": cliente.get("nombre", "")}
+        ],
+        "tipo": "Albarán de venta"
+    }).to_list(500)
+    
+    total_albaranes = len(albaranes)
+    importe_albaranes = sum(
+        sum(item.get("total", 0) or 0 for item in alb.get("items", []))
+        for alb in albaranes
+    )
+    
+    return {
+        "cliente_id": cliente_id,
+        "cliente_nombre": cliente.get("nombre", ""),
+        "resumen": {
+            "total_contratos": len(contratos),
+            "total_cantidad_kg": total_cantidad,
+            "total_importe": total_importe,
+            "total_albaranes": total_albaranes,
+            "importe_albaranes": importe_albaranes
+        },
+        "ventas_por_campana": list(ventas_por_campana.values()),
+        "contratos": serialize_docs(contratos)
+    }
+
+
 @router.delete("/clientes/{cliente_id}")
 async def delete_cliente(
     cliente_id: str,
