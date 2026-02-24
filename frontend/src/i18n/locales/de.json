@@ -419,5 +419,33 @@
     "fr": "Français",
     "de": "Deutsch",
     "it": "Italiano"
+  },
+  "translations": {
+    "title": "Landwirtschaftliches Wörterbuch",
+    "subtitle": "Verwalten Sie benutzerdefinierte Übersetzungen für Ihre Region",
+    "newTranslation": "Neue Übersetzung",
+    "editTranslation": "Übersetzung Bearbeiten",
+    "key": "Schlüssel",
+    "keyRequired": "Schlüssel ist erforderlich",
+    "keyHelp": "Format verwenden: kategorie.begriff (z.B. crop.tomato)",
+    "category": "Kategorie",
+    "description": "Beschreibung",
+    "descriptionPlaceholder": "Beschreiben Sie, was dieser Begriff bedeutet",
+    "region": "Region",
+    "regionPlaceholder": "Verwendungsregion (z.B. Bayern, Niedersachsen)",
+    "translations": "Übersetzungen",
+    "translationIn": "Übersetzung in",
+    "atLeastOneTranslation": "Sie müssen mindestens eine Übersetzung angeben",
+    "dictionary": "Wörterbuch",
+    "noTranslations": "Keine benutzerdefinierten Übersetzungen. Laden Sie Standardbegriffe oder erstellen Sie neue.",
+    "loadDefaults": "Standardbegriffe Laden",
+    "confirmSeed": "Standard-Landwirtschaftsbegriffe laden?",
+    "created": "Übersetzung erfolgreich erstellt",
+    "confirmDelete": "Sind Sie sicher, dass Sie diese Übersetzung löschen möchten?",
+    "approved": "Genehmigt",
+    "pending": "Ausstehend",
+    "approve": "Genehmigen",
+    "approvedOnly": "Nur genehmigte",
+    "searchPlaceholder": "Nach Schlüssel oder Beschreibung suchen..."
   }
 }
