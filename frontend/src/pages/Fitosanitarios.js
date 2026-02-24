@@ -285,7 +285,7 @@ const Fitosanitarios = () => {
     e.preventDefault();
 
     if (!formData.numero_registro || !formData.nombre_comercial) {
-      setError('Número de registro y nombre comercial son obligatorios');
+      setError(t('phytosanitary.requiredFields'));
       return;
     }
 
@@ -326,7 +326,7 @@ const Fitosanitarios = () => {
         throw { status: response.status, message: errorData.detail };
       }
 
-      setSuccessMsg(editingId ? 'Producto actualizado correctamente' : 'Producto creado correctamente');
+      setSuccessMsg(editingId ? t('messages.savedSuccessfully') : t('messages.savedSuccessfully'));
       setShowForm(false);
       setEditingId(null);
       resetForm();
@@ -335,7 +335,7 @@ const Fitosanitarios = () => {
       setTimeout(() => setSuccessMsg(null), 3000);
     } catch (error) {
       console.error('Error saving producto:', error);
-      const errorMsg = handlePermissionError(error, editingId ? 'actualizar el producto' : 'crear el producto');
+      const errorMsg = handlePermissionError(error, editingId ? t('phytosanitary.updateProduct') : t('phytosanitary.createProduct'));
       setError(errorMsg);
     }
   };
