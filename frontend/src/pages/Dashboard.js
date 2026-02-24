@@ -603,7 +603,7 @@ const Dashboard = () => {
               backgroundColor: 'hsl(var(--muted))',
               borderRadius: '6px'
             }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))' }}>Cultivos:</span>
+              <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))' }}>{t('dashboard.map.crops')}:</span>
               {[...new Set(parcelas.map(p => p.cultivo).filter(Boolean))].map(cultivo => (
                 <div key={cultivo} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                   <div style={{ 
