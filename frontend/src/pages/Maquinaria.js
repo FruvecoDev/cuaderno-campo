@@ -78,6 +78,7 @@ const ESTADOS_MAQUINARIA = [
 ];
 
 const Maquinaria = () => {
+  const { t } = useTranslation();
   const [maquinaria, setMaquinaria] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
