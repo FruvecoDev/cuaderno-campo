@@ -475,7 +475,7 @@ const Dashboard = () => {
       <div className="grid-2" style={{ marginBottom: '2rem' }}>
         {cultivoData.length > 0 && (
           <div className="card">
-            <h2 className="card-title">Superficie por Cultivo</h2>
+            <h2 className="card-title">{t('dashboard.charts.surfaceByCrop')}</h2>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={cultivoData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -483,21 +483,21 @@ const Dashboard = () => {
                 <YAxis style={{ fontSize: '12px' }} />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="superficie" fill="hsl(var(--chart-1))" name="Superficie (ha)" />
+                <Bar dataKey="superficie" fill="hsl(var(--chart-1))" name={`${t('parcels.surface')} (ha)`} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         )}
         
         <div className="card">
-          <h2 className="card-title">Distribución de Costes</h2>
+          <h2 className="card-title">{t('dashboard.charts.costDistribution')}</h2>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
                 data={[
-                  { name: 'Tratamientos', value: kpis.costes.tratamientos },
-                  { name: 'Riegos', value: kpis.costes.riegos },
-                  { name: 'Tareas', value: kpis.costes.tareas }
+                  { name: t('dashboard.charts.treatmentsCosts'), value: kpis.costes.tratamientos },
+                  { name: t('dashboard.charts.irrigationCosts'), value: kpis.costes.riegos },
+                  { name: t('dashboard.charts.tasksCosts'), value: kpis.costes.tareas }
                 ]}
                 cx="50%"
                 cy="50%"
