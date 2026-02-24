@@ -1148,7 +1148,8 @@ const Evaluaciones = () => {
                                     >
                                       <Trash2 size={14} />
                                     </button>
-                                )}
+                                  )}
+                                </div>
                               </div>
                             ))
                           )}
