@@ -686,7 +686,11 @@ const Albaranes = () => {
                     name="tipo_albaran"
                     value="Albarán de compra"
                     checked={formData.tipo === 'Albarán de compra'}
-                    onChange={(e) => setFormData({...formData, tipo: e.target.value, cliente: '', proveedor: ''})}
+                    onChange={(e) => {
+                      setFormData({...formData, tipo: e.target.value, cliente: '', proveedor: '', contrato_id: ''});
+                      setSelectedContrato(null);
+                      setContratoSearch({ proveedor: '', cultivo: '', campana: '', parcela: '' });
+                    }}
                     style={{ width: '20px', height: '20px' }}
                     data-testid="radio-albaran-compra"
                   />
