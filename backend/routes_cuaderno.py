@@ -28,12 +28,8 @@ from routes_auth import get_current_user
 
 router = APIRouter(tags=["cuaderno-campo"])
 
-# Get API Key - supports both Emergent key and direct OpenAI key
+# Get API Key
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
-OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
-
-# Use whichever key is available
-AI_API_KEY = OPENAI_API_KEY or EMERGENT_LLM_KEY
 
 # Collection for tecnicos aplicadores
 tecnicos_aplicadores_collection = db['tecnicos_aplicadores']
