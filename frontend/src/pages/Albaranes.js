@@ -478,7 +478,7 @@ const Albaranes = () => {
       setShowForm(false);
       setEditingId(null);
       resetForm();
-      fetchAlbaranes();
+      reloadAlbaranes();
     } catch (error) {
       console.error('Error saving albaran:', error);
       const errorMsg = handlePermissionError(error, editingId ? 'actualizar el albarán' : 'crear el albarán');
@@ -538,7 +538,7 @@ const Albaranes = () => {
         throw { status: response.status, message: data.detail || 'Error al eliminar' };
       }
       
-      fetchAlbaranes();
+      reloadAlbaranes();
     } catch (error) {
       console.error('Error deleting albaran:', error);
       const errorMsg = handlePermissionError(error, 'eliminar el albarán');
