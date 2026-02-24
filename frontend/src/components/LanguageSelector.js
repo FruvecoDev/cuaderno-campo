@@ -61,16 +61,18 @@ const LanguageSelector = ({ variant = 'default' }) => {
           <div
             style={{
               position: 'absolute',
-              top: '100%',
+              bottom: '100%',
               right: 0,
-              marginTop: '0.25rem',
+              marginBottom: '0.25rem',
               backgroundColor: 'hsl(var(--background))',
               border: '1px solid hsl(var(--border))',
               borderRadius: '8px',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              boxShadow: '0 -4px 12px rgba(0,0,0,0.15)',
               zIndex: 1000,
               minWidth: '160px',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              maxHeight: '250px',
+              overflowY: 'auto'
             }}
             data-testid="language-dropdown"
           >
