@@ -186,6 +186,7 @@ const Contratos = () => {
   const handleEdit = (contrato) => {
     setEditingId(contrato._id);
     setFormData({
+      tipo: contrato.tipo || 'Compra',
       campana: contrato.campana || '2025/26',
       procedencia: contrato.procedencia || 'Campo',
       fecha_contrato: contrato.fecha_contrato || new Date().toISOString().split('T')[0],
@@ -196,7 +197,9 @@ const Contratos = () => {
       periodo_desde: contrato.periodo_desde || '',
       periodo_hasta: contrato.periodo_hasta || '',
       moneda: contrato.moneda || 'EUR',
-      observaciones: contrato.observaciones || ''
+      observaciones: contrato.observaciones || '',
+      agente_compra: contrato.agente_compra || '',
+      agente_venta: contrato.agente_venta || ''
     });
     setShowForm(true);
   };
@@ -205,6 +208,7 @@ const Contratos = () => {
     setEditingId(null);
     setShowForm(false);
     setFormData({
+      tipo: 'Compra',
       campana: '2025/26',
       procedencia: 'Campo',
       fecha_contrato: new Date().toISOString().split('T')[0],
@@ -216,7 +220,9 @@ const Contratos = () => {
       periodo_hasta: '',
       moneda: 'EUR',
       observaciones: '',
-      precios_calidad: []
+      precios_calidad: [],
+      agente_compra: '',
+      agente_venta: ''
     });
   };
   
