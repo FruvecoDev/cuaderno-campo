@@ -877,7 +877,7 @@ const Dashboard = () => {
       {kpis.actividad_reciente && (
         <div className="grid-2">
           <div className="card">
-            <h2 className="card-title">Visitas Recientes</h2>
+            <h2 className="card-title">{t('dashboard.visits.recentVisits')}</h2>
             {kpis.actividad_reciente.visitas.length > 0 ? (
               <div>
                 {kpis.actividad_reciente.visitas.slice(0, 5).map((visita, idx) => (
@@ -893,12 +893,12 @@ const Dashboard = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-muted">No hay visitas registradas</p>
+              <p className="text-muted">{t('dashboard.visits.noVisitsRecorded')}</p>
             )}
           </div>
           
           <div className="card">
-            <h2 className="card-title">Tratamientos Recientes</h2>
+            <h2 className="card-title">{t('dashboard.treatments.recentTreatments')}</h2>
             {kpis.actividad_reciente.tratamientos.length > 0 ? (
               <div>
                 {kpis.actividad_reciente.tratamientos.slice(0, 5).map((trat, idx) => (
@@ -914,7 +914,7 @@ const Dashboard = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-muted">No hay tratamientos registrados</p>
+              <p className="text-muted">{t('dashboard.treatments.noTreatmentsRecorded')}</p>
             )}
           </div>
         </div>
