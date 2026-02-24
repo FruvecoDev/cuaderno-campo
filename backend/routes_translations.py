@@ -304,7 +304,7 @@ async def bulk_approve_translations(translation_ids: List[str]):
             )
             if result.modified_count > 0:
                 approved_count += 1
-        except:
+        except Exception:
             continue
     
     return {
