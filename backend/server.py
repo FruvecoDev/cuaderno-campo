@@ -54,6 +54,7 @@ app.include_router(fitosanitarios_router)
 app.include_router(gastos_router)
 app.include_router(translations_router)
 app.include_router(cuaderno_router)
+app.include_router(ai_suggestions_router)
 
 
 @app.get("/")
