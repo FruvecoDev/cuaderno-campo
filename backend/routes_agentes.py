@@ -11,7 +11,7 @@ import os
 import uuid
 
 from database import db, serialize_doc
-from auth_utils import get_current_user
+from routes_auth import get_current_user
 from rbac_config import RequireView, RequireCreate, RequireEdit, RequireDelete
 
 router = APIRouter(prefix="/api", tags=["agentes"])
