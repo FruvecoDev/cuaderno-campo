@@ -11,7 +11,7 @@ import os
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 if not BASE_URL:
-    BASE_URL = "https://agro-field.preview.emergentagent.com"
+    BASE_URL = "https://agri-field-app.preview.emergentagent.com"
 
 # Test credentials
 TEST_EMAIL = "testadmin@agrogest.com"

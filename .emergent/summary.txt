@@ -6,7 +6,7 @@ Un contrato siempre estará asignado a una parcela y un cultivo. Sobre una parce
 Cada sección puede ser configurable pudiendo habilitar o deshabilitar secciones por usuario. También los campos de cada sección son configurables.
 
 **PRODUCT REQUIREMENTS:**
--   **Modules:** Contracts, Parcels, Maps, Farms, Visits, Tasks, Harvests, Treatments, Irrigations, Recipes, Delivery Notes, Suppliers, Crops, Machinery, Evaluation Sheets, Applicator Technicians, Farm Articles, Purchase/Sale Agents.
+-   **Modules:** Contracts, Parcels, Maps, Farms, Visits, Tasks, Harvests, Treatments, Irrigations, Recipes, Delivery Notes, Suppliers, Crops, Machinery, Evaluation Sheets, Applicator Technicians, Farm Articles, Purchase/Sale Agents, **Clients**.
 -   **Core Features:**
     -   Dashboard with KPIs and upcoming events.
     -   PDF and Excel report generation.
@@ -27,71 +27,66 @@ Cada sección puede ser configurable pudiendo habilitar o deshabilitar secciones
 **User's preferred language**: Español
 
 **what currently exists?**
-Una aplicación full-stack muy completa para la gestión agrícola con FastAPI, React y MongoDB. La aplicación es modular y ha sido internacionalizada.
-
-Funcionalidades clave:
--   CRUD completo para módulos: Contratos, Artículos de Explotación, Maquinaria, Técnicos Aplicadores, y un nuevo módulo para Agentes de Compra/Venta.
--   Gestión de usuarios avanzada: Los administradores pueden editar nombre/email, cambiar contraseñas y configurar la visibilidad de cada elemento del menú para cada usuario.
--   Corrección del bug de subida de imágenes: Las imágenes ahora se guardan en un directorio persistente ().
--   Módulo Artículos de Explotación finalizado, con códigos auto-generados e integrado en los Albaranes mediante un selector con autocompletado.
--   Mejoras en Informes de Gastos con nuevos filtros (contrato, cultivo, etc.) y una vista detallada de los artículos en los albaranes.
--   Tipos de contrato (Compra/Venta) y de albarán (Albarán de compra/Albarán de venta) implementados.
--   Corregido un error en la generación de resúmenes con IA.
+Una aplicación full-stack (FastAPI, React, MongoDB) para la gestión agrícola. Se ha implementado un nuevo módulo de Clientes y se ha modificado la lógica de Contratos y Albaranes para distinguir entre Compra (con Proveedores) y Venta (con Clientes). El formulario de Albaranes ha sido rediseñado para un flujo más intuitivo, preguntando primero el tipo (Compra/Venta) y mostrando los campos correspondientes. Sin embargo, la página de Albaranes sufre un error crítico de carga de datos que impide su uso.
 
 **Last working item**:
--   **Last item agent was working**: El agente estaba añadiendo los campos de comisión ( y ) al módulo de Contratos. El backend fue actualizado, y se estaba modificando el formulario del frontend, pero un error del navegador impidió la verificación final.
--   **Status**: IN PROGRESS
--   **Agent Testing Done**: N
--   **Which testing method agent to use?**: manual testing by curl and screenshot tool
--   **User Testing Done**: N
+-   **Last item agent was working**: Depurando un error persistente ( o variaciones) que ocurre al cargar la página de Albaranes (). El agente intentó múltiples soluciones (refactorización de , eliminación de , uso de ) sin éxito, ya que el usuario sigue reportando el error en el entorno de previsualización.
+-   **Status**: BLOCKED
+-   **Agent Testing Done**: N (Las pruebas del agente no reproducen el error reportado por el usuario, por lo que no son válidas.)
+-   **Which testing method agent to use?**: troubleshoot_agent (Este es un bug recurrente y el agente principal está atascado).
+-   **User Testing Done**: N (El usuario confirma que la página sigue rota).
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Finalizar implementación de notificaciones por email (P1)**
+-   **Issue 1: Error crítico al cargar la página de Albaranes (P0)**
+-   **Issue 2: Finalizar implementación de notificaciones por email (P1)**
 
 **Issues Detail**:
--   **Issue 1: Finalizar implementación de notificaciones por email**
-    -   **Attempted fixes**: Existe la estructura para la integración con Resend (, ).
+-   **Issue 1: Error crítico al cargar la página de Albaranes**
+    -   **Attempted fixes**:
+        -   Refactorización de todas las llamadas  en  y otros archivos (, , ) para asegurar que el cuerpo de la respuesta (, ) se lea una sola vez.
+        -   Reestructuración del  de carga inicial en  para usar  con un flag  y evitar ejecuciones múltiples.
+        -   Eliminación de  de  para descartar que el problema fuera el doble renderizado en desarrollo.
+        -   Reemplazo de  por  como último recurso.
+        -   El mensaje de error ha variado entre , , y , lo que indica que el problema subyacente persiste a pesar de los cambios.
+    -   **Next debug checklist**:
+        1.  El agente no puede reproducir el error, pero el usuario sí. Esto es un bloqueo crítico. La primera acción debe ser invocar al  para obtener una nueva perspectiva sobre el problema.
+        2.  Re-habilitar . Su eliminación es una mala práctica y oculta el problema real, que probablemente es un efecto secundario en un  que no es idempotente.
+        3.  En , comentar temporalmente las llamadas a las funciones de carga de datos dentro del  una por una para aislar qué  específico está causando la corrupción de la respuesta.
+        4.  Utilizar las herramientas de desarrollador del navegador para inspeccionar la pestaña Network y ver el estado, la respuesta y las cabeceras de la petición que falla.
+    -   **Why fix this issue and what will be achieved with the fix?**: La página de Albaranes es inutilizable. Solucionarlo es crucial para la funcionalidad principal de la aplicación.
+    -   **Status**: BLOCKED
+    -   **Is recurring issue?**: Y
+    -   **Should Test frontend/backend/both after fix?**: frontend
+    -   **Blocked on other issue**: None
+-   **Issue 2: Finalizar implementación de notificaciones por email**
+    -   **Attempted fixes**: La estructura básica existe (, ).
     -   **Next debug checklist**:
         1.  Solicitar la  al usuario.
         2.  Añadir la clave al fichero .
-        3.  Implementar un planificador en segundo plano (ej: ) para comprobar los próximos eventos y enviar notificaciones.
-    -   **Why fix this issue and what will be achieved with the fix?**: Permitirá enviar recordatorios proactivos por email para eventos importantes, completando un requisito clave del usuario.
+        3.  Implementar un planificador en segundo plano (ej: ) para enviar notificaciones.
+    -   **Why fix this issue and what will be achieved with the fix?**: Permitirá enviar recordatorios proactivos por email.
     -   **Status**: BLOCKED
     -   **Is recurring issue?**: N
     -   **Should Test frontend/backend/both after fix?**: both
-    -   **Blocked on other issue**: Se necesita la  del usuario.
+    -   **Blocked on other issue**: Necesita la  del usuario.
 
 **In progress Task List**:
--   **Task 1: Finalizar la adición de comisiones a los contratos (P0)**
-
-**Task Detail**:
--   **Task 1: Finalizar la adición de comisiones a los contratos**
-    -   **Where to resume**: El modelo de backend y el formulario frontend en  han sido modificados. El último paso falló por un error del navegador. El siguiente paso es verificar que los nuevos campos ( y ) son aceptados por el backend (vía ) y se muestran correctamente en el formulario de contratos al lado del selector de agente (vía ).
-    -   **What will be achieved with this?**: Los contratos podrán almacenar los detalles de la comisión del agente asociado.
-    -   **Status**: IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?**: both
-    -   **Blocked on something**: None
+-   None.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks**:
-    -   **P0**: Implementar el sistema de aplicación de comisiones a un contrato, cultivo o parcela, como solicitó el usuario. Esto implica expandir el módulo de Agentes para definir reglas de comisión que se puedan vincular a diferentes entidades.
+    -   **P1**: Implementar el sistema de aplicación de comisiones a un contrato, cultivo o parcela.
 -   **Future Tasks**:
-    -   **P2**: Mejorar el mapa interactivo con funciones avanzadas de edición para las parcelas existentes.
+    -   **P2**: Mejorar el mapa interactivo con funciones avanzadas de edición para las parcelas.
 
 **Completed work in this session**
--   **Bug Fix**: Resuelto el bug persistente de subida de imágenes. La causa raíz era el almacenamiento en un directorio temporal (); se cambió a una ruta persistente ().
--   **Bug Fix**: Corregido el error en la generación de resúmenes con IA () actualizando la librería  y la instanciación de la clase.
--   **Feature Completion**: Finalizado el módulo Artículos de Explotación, incluyendo CRUD completo, generación automática de códigos por categoría, y ajustes de UI.
--   **Feature Integration**: Integrado el catálogo de Artículos de Explotación en los Albaranes a través de un selector con autocompletado.
--   **User Management Enhancements**:
-    -   Se implementó un sistema de permisos para que el administrador pueda ocultar/mostrar opciones del menú a cada usuario.
-    -   Se añadió la función para que el administrador pueda cambiar la contraseña, el nombre y el email de los usuarios.
--   **Module Enhancements**:
-    -   **Informes de Gastos**: Añadidos filtros por contrato, cultivo, proveedor y parcela. Se mejoró la vista de detalle para mostrar los artículos de los albaranes.
-    -   **Albaranes**: Se cambiaron las opciones del campo Tipo a Albarán de compra / Albarán de venta.
-    -   **Contratos**: Añadido el campo Tipo Contrato (Compra/Venta) con campos condicionales para Agente de Compra/Venta.
--   **New Module**: Creado el módulo completo para Agentes de Compra y Venta, incluyendo CRUD, formulario detallado con subida de foto y gestión de comisiones.
--   **Testing**: Se ejecutó el , que validó con éxito las correcciones y nuevas funcionalidades implementadas.
+-   **Feature**: Se completó la adición de campos de comisión (, ) al módulo de Contratos.
+-   **Feature**: Se creó un nuevo módulo Clientes con CRUD completo y una página de gestión en el frontend.
+-   **Feature**: Se implementó una vista de Resumen de Ventas por cliente, con KPIs y contratos asociados.
+-   **Feature**: Se refactorizó la lógica de Contratos y Albaranes para manejar la dualidad Proveedor (Compras) vs. Cliente (Ventas).
+-   **Feature**: Se rediseñó completamente el formulario de creación de Albaranes para un flujo más intuitivo, donde primero se elige el tipo (Compra/Venta) y el contrato es opcional.
+-   **User Support**: Se proporcionaron instrucciones detalladas para ejecutar el proyecto localmente y se aclararon dudas sobre las APIs de OpenAI vs. suscripciones de ChatGPT.
+-   **Bugfix (Attempted)**: Múltiples intentos fallidos para resolver el error  en la página de Albaranes.
 
 **Earlier issues found/mentioned but not fixed**
 -   None.
@@ -105,72 +100,58 @@ Funcionalidades clave:
 **Key Technical Concepts**
 -   **Stack**: FARM (FastAPI, React, MongoDB)
 -   **UI**: shadcn/ui, 
--   **State Management**: React Hooks (, )
--   **Authentication**: JWT & RBAC con gestión de permisos a nivel de menú.
--   **File Storage**: Se movieron los uploads a un directorio persistente .
+-   **State Management**: React Hooks (, , )
+-   **Bug**: La aplicación sufre un error persistente relacionado con la lectura del cuerpo de las respuestas  (), probablemente causado por un  no idempotente que  estaba detectando.
 
 **key DB schema**
--   **agentes**:  (New Collection)
--   **users**: 
+-   **clientes**:  (New Collection)
 -   **contratos**: 
--   **articulos_explotacion**:  (código ahora es auto-generado)
--   **albaranes**:  (ahora Albarán de compra o Albarán de venta)
+-   **albaranes**: 
+
+**changes in tech stack**
+-   None.
 
 **All files of reference**
--    (New)
--    (New)
--    (Heavily modified for permissions and password changes)
--    (Heavily modified for new management modals)
--    (Modified)
--    (Modified)
--    (Modified)
--    (Modified)
--    (Modified)
--    (Modified)
--    (Modified)
--    (Modified)
--    (Modified for AI fix)
--    (Modified for persistent storage path)
--    (Modified for persistent storage path)
--    (Modified to register new routers)
--    (Modified for menu permissions)
--    (Modified to add new page route)
+-   : Archivo principal modificado y donde reside el bug actual.
+-   : Nueva página para la gestión de clientes.
+-   : Nuevo router para el CRUD de clientes.
+-   : Modificado para la lógica de cliente/proveedor.
+-   : Modificado para aceptar .
+-   : Actualizado con los nuevos campos y colecciones.
+-   : Se eliminó  como intento de solución.
 
 **Areas that need refactoring**:
--   None identified.
+-   ****: Este componente se ha vuelto excesivamente grande y complejo. Maneja la lógica y el estado de albaranes, proveedores, clientes y contratos. Debería descomponerse en componentes más pequeños y manejables.
+-   ** de carga de datos**: El  en  es propenso a errores y ha sido la fuente de una depuración extensiva. Necesita ser refactorizado para ser robusto e idempotente, permitiendo que  se vuelva a habilitar.
 
 **key api endpoints**
--    (CRUD for Agents)
+-    (CRUD para Clientes)
 -   
--   
--   
--    (now accepts more filters)
--   
--    (Fixed)
+-    (ahora  es opcional y acepta )
 
 **Critical Info for New Agent**
-1.  **Finalizar Comisiones en Contratos (P0)**: Tu prioridad inmediata es verificar y completar la implementación de los campos de comisión en el formulario de Contratos. El trabajo está casi terminado, solo necesita una verificación final de la UI.
-2.  **Implementar Lógica de Comisiones (P0)**: Inmediatamente después, aborda el requisito del usuario de aplicar comisiones a contratos, cultivos o parcelas. Esto requerirá diseñar un sistema más robusto que el simple almacenamiento de valores en el contrato.
-3.  **Notificaciones por Email (P1 - Bloqueado)**: No olvides que esta tarea sigue pendiente y bloqueada. Cuando termines las tareas de comisiones, pregunta al usuario por la  para poder continuar.
+1.  **P0 BLOCKER: FIX ALBARANES PAGE**: Tu prioridad absoluta es resolver el error  (o sus variantes) en la página de Albaranes. El agente anterior no pudo solucionarlo. **NO ASUMAS QUE ESTÁ RESUELTO**. Usa el  inmediatamente.
+2.  **REACT STRICT MODE**:  fue eliminado de  como un parche. Esto es una mala práctica. El objetivo es arreglar el  en  para que sea idempotente y luego **re-habilitar **.
+3.  **USER'S LOCAL ENVIRONMENT**: El usuario está configurando el proyecto localmente. Prepárate para más preguntas sobre dependencias (, ) y configuración de .
 
 **documents and test reports created in this job**
--   
+-    (actualizado)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.   - **Request**: Add agent commission fields to contracts. **Status: IN PROGRESS**
-2.   - **Request**: Create Agent management module. **Status: COMPLETED**
-3.   - **Request**: Add contract types (Buy/Sell) with conditional agent fields. **Status: COMPLETED**
-4.   - **Request**: Change delivery note types. **Status: COMPLETED**
-5.   - **Request**: Enhance expense reports detail view. **Status: COMPLETED**
-6.   - **Request**: Add new filters to expense reports. **Status: COMPLETED**
-7.   - **Bug Report**: AI Summary error. **Status: COMPLETED**
-8.   - **Request**: Allow admin to edit user name/email. **Status: COMPLETED**
-9.   - **Bug Report**: Password change button not visible. **Status: COMPLETED**
-10.  - **Request**: Allow admin to manage user passwords. **Status: COMPLETED**
+1.   - **Request**: Filter contracts in Delivery Notes form. **Status: COMPLETED**.
+2.   - **Bug Report**: User reports the error persists. **Status: PENDING**.
+3.   - **Bug Report**: User reports error on page load. **Status: PENDING**.
+4.   - **Bug Report**: User reports error again after a fix attempt. **Status: PENDING**.
+5.   - **Bug Report**: User confirms error persists after multiple fixes. **Status: PENDING**.
+6.   - **Bug Report & Clarification**: User confirms error persists and clarifies business logic. **Status: PENDING**.
+7.   - **Bug Report**: User confirms error again. **Status: PENDING**.
+8.   - **Bug Report**: User reports a new variation of the same error. **Status: PENDING**.
+9.   - **Bug Report**: User reports another variation of the error. **Status: PENDING**.
+10.  - **Clarification**: User confirms the error is happening in the Emergent preview environment, not just locally. **Status: PENDING**.
 
 **Project Health Check:**
--   **Broken**: None
--   **Mocked**: Email notification system (pending API key and scheduler implementation).
+-   **Broken**: La página de Albaranes () es inutilizable debido a un error crítico de carga de datos.
+-   **Mocked**: Sistema de notificaciones por email.
 
 **3rd Party Integrations**
 -   **OpenAI GPT-4o**: Uses Emergent LLM Key.
@@ -178,19 +159,20 @@ Funcionalidades clave:
 -   **react-i18next / i18next**: Multi-language support.
 -   **WeasyPrint**: PDF generation.
 -   **openpyxl**: Excel file generation.
--   **Resend**: For email notifications (partially integrated, blocked).
+-   **Resend**: For email notifications (parcialmente integrado, bloqueado).
 -   **Leaflet.js / OpenStreetMap**: Maps.
 -   **react-dropzone**: For drag-and-drop file uploads.
 
 **Testing status**
--   **Testing agent used after significant changes**: YES
+-   **Testing agent used after significant changes**: NO
 -   **Troubleshoot agent used after agent stuck in loop**: NO
--   **Test files created**: Yes, by the testing agent.
--   **Known regressions**: None.
+-   **Test files created**: No
+-   **Known regressions**: La página de Albaranes funcionaba y ahora está rota.
 
 **Credentials to test flow:**
 -   **Admin**:  / 
--   **Manager**:  /  (password was changed successfully).
+-   **Manager**:  / 
 
 **What agent forgot to execute**
--   The agent did not re-verify the UI for the contract commission fields after encountering a browser error, leaving the last atomic task in an unverified state.</analysis>
+-   El agente no utilizó el  a pesar de estar claramente atascado en un bucle de depuración con el error .
+-   El agente eliminó  como una solución, en lugar de abordar la causa raíz del problema que  estaba señalando (un efecto no idempotente).</analysis>
