@@ -228,17 +228,13 @@ const Albaranes = () => {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
-      // Clone response before reading to avoid "body stream already read" error
-      const responseClone = response.clone();
-      
+      const text = await response.text();
       let data;
       try {
-        data = await response.json();
-      } catch (jsonError) {
-        console.error('Error parsing JSON:', jsonError);
-        const text = await responseClone.text();
-        console.error('Response text:', text);
-        throw new Error('Error al procesar respuesta del servidor');
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error('Error parsing albaranes JSON:', e);
+        throw new Error('Error al procesar respuesta');
       }
       
       if (!response.ok) {
