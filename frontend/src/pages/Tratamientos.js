@@ -821,6 +821,7 @@ const Tratamientos = () => {
     fetchTratamientos();
     fetchParcelas();
     fetchMaquinaria();
+    fetchTecnicosAplicadores();
   }, []);
   
   // Extraer opciones únicas cuando cambian los tratamientos
