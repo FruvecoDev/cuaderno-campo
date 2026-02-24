@@ -503,23 +503,74 @@ const TecnicosAplicadores = () => {
               </div>
               <div className="form-group">
                 <label className="form-label">Imagen Certificado</label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <input
-                    type="file"
-                    accept="image/*,.pdf"
-                    onChange={(e) => setSelectedFile(e.target.files[0])}
-                    style={{ flex: 1 }}
-                    data-testid="input-certificado"
-                  />
-                  {selectedFile && (
-                    <span style={{ fontSize: '0.875rem', color: 'hsl(var(--primary))' }}>
-                      {selectedFile.name}
-                    </span>
+                <div 
+                  style={{ 
+                    border: isDragging ? '2px solid hsl(var(--primary))' : '2px dashed hsl(var(--border))', 
+                    borderRadius: '8px', 
+                    padding: '1rem',
+                    backgroundColor: isDragging ? 'hsl(var(--primary) / 0.1)' : 'hsl(var(--muted) / 0.3)',
+                    transition: 'all 0.2s ease',
+                    minHeight: '120px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                >
+                  {selectedFile ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                      {filePreview ? (
+                        <img 
+                          src={filePreview} 
+                          alt="Preview" 
+                          style={{ maxWidth: '150px', maxHeight: '100px', objectFit: 'contain', borderRadius: '4px' }} 
+                        />
+                      ) : (
+                        <div style={{ padding: '0.5rem', backgroundColor: 'hsl(var(--muted))', borderRadius: '4px' }}>
+                          📄 PDF
+                        </div>
+                      )}
+                      <span style={{ fontSize: '0.75rem', color: 'hsl(var(--primary))' }}>
+                        {selectedFile.name}
+                      </span>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-secondary"
+                        onClick={() => { setSelectedFile(null); setFilePreview(null); }}
+                      >
+                        Cambiar
+                      </button>
+                    </div>
+                  ) : (
+                    <label style={{ cursor: 'pointer', textAlign: 'center', width: '100%' }}>
+                      <div style={{ marginBottom: '0.5rem' }}>
+                        <Upload size={28} style={{ color: isDragging ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }} />
+                      </div>
+                      <span style={{ 
+                        fontSize: '0.875rem', 
+                        color: isDragging ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))',
+                        fontWeight: isDragging ? '600' : '400',
+                        display: 'block'
+                      }}>
+                        {isDragging ? 'Suelta el archivo aquí' : 'Arrastra o haz clic'}
+                      </span>
+                      <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginTop: '0.25rem' }}>
+                        JPG, PNG, WEBP o PDF (máx. 10MB)
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,application/pdf"
+                        onChange={handleFileSelect}
+                        style={{ display: 'none' }}
+                        data-testid="input-certificado"
+                      />
+                    </label>
                   )}
                 </div>
-                <small style={{ color: 'hsl(var(--muted-foreground))' }}>
-                  Formatos: JPG, PNG, PDF
-                </small>
               </div>
             </div>
             
