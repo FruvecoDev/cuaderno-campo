@@ -5,6 +5,7 @@ Generates comprehensive PDF reports with all activities for a parcel/contract ca
 
 import os
 import json
+import base64
 from io import BytesIO
 from datetime import datetime
 from typing import Optional, List
@@ -20,8 +21,8 @@ from emergentintegrations.llm.chat import LlmChat, UserMessage
 from database import (
     parcelas_collection, contratos_collection, tratamientos_collection,
     irrigaciones_collection, visitas_collection, cosechas_collection,
-    fincas_collection, evaluaciones_collection,
-    serialize_doc, serialize_docs
+    fincas_collection, evaluaciones_collection, maquinaria_collection,
+    db, serialize_doc, serialize_docs
 )
 from routes_auth import get_current_user
 
@@ -29,6 +30,37 @@ router = APIRouter(tags=["cuaderno-campo"])
 
 # Get API Key
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
+
+# Collection for tecnicos aplicadores
+tecnicos_aplicadores_collection = db['tecnicos_aplicadores']
+
+
+def get_image_as_base64(file_path: str) -> Optional[str]:
+    """Convert an image file to base64 data URI for embedding in HTML"""
+    if not file_path or not os.path.exists(file_path):
+        return None
+    
+    try:
+        with open(file_path, 'rb') as f:
+            image_data = f.read()
+        
+        # Determine mime type from extension
+        ext = file_path.lower().split('.')[-1]
+        mime_types = {
+            'jpg': 'image/jpeg',
+            'jpeg': 'image/jpeg',
+            'png': 'image/png',
+            'webp': 'image/webp',
+            'pdf': 'application/pdf'
+        }
+        mime_type = mime_types.get(ext, 'image/jpeg')
+        
+        # Convert to base64
+        b64_data = base64.b64encode(image_data).decode('utf-8')
+        return f"data:{mime_type};base64,{b64_data}"
+    except Exception as e:
+        print(f"Error reading image {file_path}: {e}")
+        return None
 
 
 class CuadernoCampoRequest(BaseModel):
