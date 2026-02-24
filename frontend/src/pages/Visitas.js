@@ -129,7 +129,7 @@ const Visitas = () => {
   // Form data SIMPLIFICADO - solo parcela_id es obligatorio
   const [formData, setFormData] = useState({
     objetivo: 'Control Rutinario',
-    fecha_visita: '',
+    fecha_visita: new Date().toISOString().split('T')[0], // Fecha actual por defecto (OBLIGATORIO)
     fecha_planificada: '',
     parcela_id: '',
     observaciones: ''
