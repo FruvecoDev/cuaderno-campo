@@ -331,11 +331,6 @@ const Maquinaria = () => {
       validateAndSetImage(files[0]);
     }
   };
-      }
-      setSelectedImage(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
   
   const uploadImage = async (maquinariaId) => {
     if (!selectedImage) {
