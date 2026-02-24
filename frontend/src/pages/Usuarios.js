@@ -422,6 +422,15 @@ const Usuarios = () => {
                               <Settings size={14} />
                             </button>
                             <button
+                              className="btn btn-sm btn-warning"
+                              onClick={() => openPasswordModal(user)}
+                              title="Cambiar contraseña"
+                              data-testid={`btn-password-${user._id}`}
+                              style={{ backgroundColor: 'hsl(var(--warning))', color: 'white' }}
+                            >
+                              <Key size={14} />
+                            </button>
+                            <button
                               className={`btn btn-sm ${user.is_active ? 'btn-error' : 'btn-success'}`}
                               onClick={() => handleToggleActive(user._id, user.is_active)}
                               title={user.is_active ? t('users.deactivate') : t('users.activate')}
