@@ -101,10 +101,11 @@ const TecnicosAplicadores = () => {
         throw { status: res.status, message: errorData.detail };
       }
       
-      // Si hay archivo seleccionado y es nuevo registro o edición, subir certificado
+      // Si hay archivo seleccionado, subir certificado
       const result = await res.json();
-      if (selectedFile && result.data?._id) {
-        await uploadCertificado(result.data._id);
+      const tecnicoId = result.data?._id || editingId;
+      if (selectedFile && tecnicoId) {
+        await uploadCertificado(tecnicoId);
       }
       
       resetForm();
