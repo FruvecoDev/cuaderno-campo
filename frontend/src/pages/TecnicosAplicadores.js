@@ -534,9 +534,9 @@ const TecnicosAplicadores = () => {
                   onDragOver={handleDragOver}
                   onDrop={handleDrop}
                 >
-                  {selectedFile ? (
+                  {(selectedFile || filePreview) ? (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                      {filePreview ? (
+                      {filePreview && !filePreview.endsWith('.pdf') ? (
                         <img 
                           src={filePreview} 
                           alt="Preview" 
@@ -547,16 +547,25 @@ const TecnicosAplicadores = () => {
                           📄 PDF
                         </div>
                       )}
-                      <span style={{ fontSize: '0.75rem', color: 'hsl(var(--primary))' }}>
-                        {selectedFile.name}
-                      </span>
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-secondary"
-                        onClick={() => { setSelectedFile(null); setFilePreview(null); }}
-                      >
+                      {selectedFile && (
+                        <span style={{ fontSize: '0.75rem', color: 'hsl(var(--primary))' }}>
+                          Nueva imagen: {selectedFile.name}
+                        </span>
+                      )}
+                      {!selectedFile && editingId && (
+                        <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                          Imagen actual
+                        </span>
+                      )}
+                      <label className="btn btn-sm btn-secondary" style={{ cursor: 'pointer' }}>
                         Cambiar
-                      </button>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp,application/pdf"
+                          onChange={handleFileSelect}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
                     </div>
                   ) : (
                     <label style={{ cursor: 'pointer', textAlign: 'center', width: '100%' }}>
