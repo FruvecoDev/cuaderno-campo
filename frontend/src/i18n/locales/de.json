@@ -64,7 +64,12 @@
     "forgotPassword": "Passwort vergessen?",
     "rememberMe": "Angemeldet bleiben",
     "loginTitle": "Melden Sie sich an, um fortzufahren",
-    "defaultCredentials": "Standard-Anmeldedaten"
+    "defaultCredentials": "Standard-Anmeldedaten",
+    "fieldNotebook": "Feldbuch",
+    "firstTime": "Erstes Mal? Admin-Benutzer erstellen",
+    "initAdmin": "Admin initialisieren",
+    "adminCreated": "Admin erstellt",
+    "useCredentials": "Verwenden Sie diese Anmeldedaten"
   },
   "nav": {
     "general": "Allgemein",
