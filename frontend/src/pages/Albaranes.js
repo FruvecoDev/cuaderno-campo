@@ -149,9 +149,14 @@ const Albaranes = () => {
       const response = await fetch(`${BACKEND_URL}/api/articulos/activos`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const data = await response.json();
-      if (response.ok) {
-        setArticulosCatalogo(data.articulos || []);
+      const text = await response.text();
+      try {
+        const data = JSON.parse(text);
+        if (response.ok) {
+          setArticulosCatalogo(data.articulos || []);
+        }
+      } catch (e) {
+        console.error('Error parsing articulos JSON:', e, 'Response:', text);
       }
     } catch (error) {
       console.error('Error fetching artículos catálogo:', error);
