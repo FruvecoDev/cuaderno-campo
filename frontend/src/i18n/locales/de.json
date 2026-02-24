@@ -135,6 +135,7 @@
     "subtitle": "Parzellen- und Grundstücksverwaltung",
     "newParcel": "Neue Parzelle",
     "parcelCode": "Parzellencode",
+    "code": "Code",
     "farm": "Betrieb",
     "crop": "Kultur",
     "surface": "Fläche",
