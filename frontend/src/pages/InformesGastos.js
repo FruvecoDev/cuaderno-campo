@@ -356,54 +356,129 @@ const InformesGastos = () => {
 
       {/* Filters */}
       <div className="card mb-6">
-        <div className="flex justify-between items-center mb-4">
+        <div 
+          className="flex justify-between items-center" 
+          style={{ cursor: 'pointer', marginBottom: showFilters ? '1rem' : 0 }}
+          onClick={() => setShowFilters(!showFilters)}
+        >
           <h3 style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Filter size={18} /> {t('common.filters')}
+            {hasActiveFiltersCount > 0 && (
+              <span className="badge badge-primary" style={{ marginLeft: '0.5rem' }}>{hasActiveFiltersCount}</span>
+            )}
           </h3>
-          {hasActiveFilters && (
-            <button className="btn btn-sm btn-secondary" onClick={clearFilters}>
-              <X size={14} /> {t('common.clear')}
-            </button>
-          )}
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">{t('common.from')}</label>
-            <input
-              type="date"
-              className="form-input"
-              value={filters.fecha_desde}
-              onChange={(e) => setFilters({...filters, fecha_desde: e.target.value})}
-            />
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">{t('common.to')}</label>
-            <input
-              type="date"
-              className="form-input"
-              value={filters.fecha_hasta}
-              onChange={(e) => setFilters({...filters, fecha_hasta: e.target.value})}
-            />
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">{t('contracts.campaign')}</label>
-            <select
-              className="form-select"
-              value={filters.campana}
-              onChange={(e) => setFilters({...filters, campana: e.target.value})}
-            >
-              <option value="">{t('common.all')}</option>
-              {campanas.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </div>
-          <div className="form-group" style={{ marginBottom: 0, display: 'flex', alignItems: 'flex-end' }}>
-            <button className="btn btn-primary" onClick={applyFilters} style={{ width: '100%' }}>
-              {t('common.apply')} {t('common.filters')}
-            </button>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            {hasActiveFilters && (
+              <button className="btn btn-sm btn-secondary" onClick={(e) => { e.stopPropagation(); clearFilters(); }}>
+                <X size={14} /> {t('common.clear')}
+              </button>
+            )}
+            {showFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
           </div>
         </div>
+        
+        {showFilters && (
+          <>
+            {/* Primera fila: Fechas y Campaña */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">{t('common.from')}</label>
+                <input
+                  type="date"
+                  className="form-input"
+                  value={filters.fecha_desde}
+                  onChange={(e) => setFilters({...filters, fecha_desde: e.target.value})}
+                />
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">{t('common.to')}</label>
+                <input
+                  type="date"
+                  className="form-input"
+                  value={filters.fecha_hasta}
+                  onChange={(e) => setFilters({...filters, fecha_hasta: e.target.value})}
+                />
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">{t('contracts.campaign')}</label>
+                <select
+                  className="form-select"
+                  value={filters.campana}
+                  onChange={(e) => setFilters({...filters, campana: e.target.value})}
+                >
+                  <option value="">{t('common.all')}</option>
+                  {campanas.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Contrato</label>
+                <select
+                  className="form-select"
+                  value={filters.contrato_id}
+                  onChange={(e) => setFilters({...filters, contrato_id: e.target.value})}
+                >
+                  <option value="">{t('common.all')}</option>
+                  {filtrosOpciones.contratos.map(c => (
+                    <option key={c.id} value={c.id}>
+                      {c.numero || c.id.slice(-6)} - {c.cultivo || 'Sin cultivo'}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
+            {/* Segunda fila: Proveedor, Cultivo, Parcela y Botón */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Proveedor</label>
+                <select
+                  className="form-select"
+                  value={filters.proveedor}
+                  onChange={(e) => setFilters({...filters, proveedor: e.target.value})}
+                >
+                  <option value="">{t('common.all')}</option>
+                  {filtrosOpciones.proveedores.map(p => (
+                    <option key={p} value={p}>{p}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Cultivo</label>
+                <select
+                  className="form-select"
+                  value={filters.cultivo}
+                  onChange={(e) => setFilters({...filters, cultivo: e.target.value})}
+                >
+                  <option value="">{t('common.all')}</option>
+                  {filtrosOpciones.cultivos.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Parcela</label>
+                <select
+                  className="form-select"
+                  value={filters.parcela_codigo}
+                  onChange={(e) => setFilters({...filters, parcela_codigo: e.target.value})}
+                >
+                  <option value="">{t('common.all')}</option>
+                  {filtrosOpciones.parcelas.map(p => (
+                    <option key={p} value={p}>{p}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group" style={{ marginBottom: 0, display: 'flex', alignItems: 'flex-end' }}>
+                <button className="btn btn-primary" onClick={applyFilters} style={{ width: '100%' }}>
+                  <Filter size={16} style={{ marginRight: '0.5rem' }} />
+                  {t('common.apply')} {t('common.filters')}
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* KPIs */}
