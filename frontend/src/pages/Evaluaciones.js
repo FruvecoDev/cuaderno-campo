@@ -820,56 +820,78 @@ const Evaluaciones = () => {
         </div>
       </div>
       
-      {/* Modal Agregar Pregunta */}
+      {/* Modal Agregar Pregunta - Overlay flotante */}
       {showAddQuestion && (
-        <div className="card mb-6" style={{ border: '2px solid hsl(var(--primary))' }}>
-          <div className="flex justify-between items-center mb-4">
-            <h3 style={{ fontWeight: '600' }}>{t('evaluations.addNewQuestion')}</h3>
-            <button className="btn btn-sm btn-secondary" onClick={() => setShowAddQuestion(false)}>
-              <X size={16} />
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div className="card" style={{ 
+            width: '90%',
+            maxWidth: '600px',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            border: '2px solid hsl(var(--primary))'
+          }}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 style={{ fontWeight: '600' }}>{t('evaluations.addNewQuestion')}</h3>
+              <button className="btn btn-sm btn-secondary" onClick={() => setShowAddQuestion(false)}>
+                <X size={16} />
+              </button>
+            </div>
+            <div className="grid-3">
+              <div className="form-group">
+                <label className="form-label">{t('evaluations.section')} *</label>
+                <select
+                  className="form-select"
+                  value={newQuestionSection}
+                  onChange={(e) => setNewQuestionSection(e.target.value)}
+                  data-testid="select-section"
+                >
+                  <option value="">{t('evaluations.selectSection')}</option>
+                  {SECCIONES.map(s => (
+                    <option key={s.key} value={s.key}>{s.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">{t('evaluations.answerType')} *</label>
+                <select
+                  className="form-select"
+                  value={newQuestionType}
+                  onChange={(e) => setNewQuestionType(e.target.value)}
+                  data-testid="select-type"
+                >
+                  <option value="texto">{t('evaluations.text')}</option>
+                  <option value="numero">{t('evaluations.number')}</option>
+                  <option value="si_no">{t('evaluations.yesNo')}</option>
+                  <option value="fecha">{t('common.date')}</option>
+                </select>
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">{t('evaluations.question')} *</label>
+              <input
+                type="text"
+                className="form-input"
+                value={newQuestionText}
+                onChange={(e) => setNewQuestionText(e.target.value)}
+                placeholder={t('evaluations.writeQuestion')}
+                data-testid="input-question"
+              />
+            </div>
+            <button className="btn btn-primary" onClick={handleAddQuestion} data-testid="btn-add-question">
+              <Plus size={16} /> {t('evaluations.addQuestion')}
             </button>
           </div>
-          <div className="grid-3">
-            <div className="form-group">
-              <label className="form-label">{t('evaluations.section')} *</label>
-              <select
-                className="form-select"
-                value={newQuestionSection}
-                onChange={(e) => setNewQuestionSection(e.target.value)}
-              >
-                <option value="">{t('evaluations.selectSection')}</option>
-                {SECCIONES.map(s => (
-                  <option key={s.key} value={s.key}>{s.label}</option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <label className="form-label">{t('evaluations.answerType')} *</label>
-              <select
-                className="form-select"
-                value={newQuestionType}
-                onChange={(e) => setNewQuestionType(e.target.value)}
-              >
-                <option value="texto">{t('evaluations.text')}</option>
-                <option value="numero">{t('evaluations.number')}</option>
-                <option value="si_no">{t('evaluations.yesNo')}</option>
-                <option value="fecha">{t('common.date')}</option>
-              </select>
-            </div>
-          </div>
-          <div className="form-group">
-            <label className="form-label">{t('evaluations.question')} *</label>
-            <input
-              type="text"
-              className="form-input"
-              value={newQuestionText}
-              onChange={(e) => setNewQuestionText(e.target.value)}
-              placeholder={t('evaluations.writeQuestion')}
-            />
-          </div>
-          <button className="btn btn-primary" onClick={handleAddQuestion}>
-            <Plus size={16} /> {t('evaluations.addQuestion')}
-          </button>
         </div>
       )}
       
