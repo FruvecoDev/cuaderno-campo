@@ -36,6 +36,7 @@ from routes_dashboard import router as dashboard_router
 from routes_reports import router as reports_router
 from routes_fitosanitarios import router as fitosanitarios_router
 from routes_gastos import router as gastos_router
+from routes_ingresos import router as ingresos_router
 from routes_translations import router as translations_router
 from routes_cuaderno import router as cuaderno_router
 from routes_tecnicos_aplicadores import router as tecnicos_aplicadores_router
