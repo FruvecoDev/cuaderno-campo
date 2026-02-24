@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   DollarSign, TrendingUp, Filter, X, BarChart3, FileSpreadsheet,
   Building2, Leaf, MapPin, FileText, ChevronDown, ChevronUp,
@@ -17,6 +18,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001'
 const CHART_COLORS = ['#16a34a', '#2563eb', '#7c3aed', '#ea580c', '#dc2626', '#0891b2', '#4f46e5', '#be185d'];
 
 const InformesGastos = () => {
+  const { t } = useTranslation();
   const [resumen, setResumen] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
