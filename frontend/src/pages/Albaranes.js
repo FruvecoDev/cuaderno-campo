@@ -851,8 +851,8 @@ const Albaranes = () => {
                   required 
                   data-testid="select-tipo"
                 >
-                  <option value="Entrada">Entrada</option>
-                  <option value="Salida">Salida</option>
+                  <option value="Albarán de compra">Albarán de compra</option>
+                  <option value="Albarán de venta">Albarán de venta</option>
                 </select>
               </div>
               <div className="form-group">
