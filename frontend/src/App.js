@@ -25,6 +25,7 @@ import Fitosanitarios from './pages/Fitosanitarios';
 import InformesGastos from './pages/InformesGastos';
 import Traducciones from './pages/Traducciones';
 import AsistenteIA from './pages/AsistenteIA';
+import TecnicosAplicadores from './pages/TecnicosAplicadores';
 
 function App() {
   return (
