@@ -385,6 +385,10 @@ Módulos actualizados para seguir patrón consistente:
   - Filtros de búsqueda de albaranes: Tipo, Contrato, Proveedor, Cultivo
   - Líneas del albarán con unidades (kg, ud, L, cajas, pallets)
   - Cálculo automático de totales por línea y total del albarán
+- **Filtrado de contratos por tipo (24/02/2026)**: 
+  - Albarán de Compra → Solo muestra contratos de Compra
+  - Albarán de Venta → Solo muestra contratos de Venta
+  - El selector de búsqueda cambia dinámicamente (Proveedor/Cliente)
 - **Proveedor alternativo (24/02/2026)**:
   - Checkbox "Usar otro proveedor" permite seleccionar un proveedor diferente al del contrato
   - El albarán puede ser de una compra a otro proveedor pero el gasto repercute en el contrato
