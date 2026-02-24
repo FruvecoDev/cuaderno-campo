@@ -368,6 +368,55 @@ async def delete_pregunta_config(
     return {"success": True, "message": "Pregunta eliminada"}
 
 
+@router.put("/evaluaciones/config/preguntas/reorder")
+async def reorder_preguntas(
+    seccion: str,
+    orden: list,  # Lista de IDs de preguntas en el nuevo orden
+    current_user: dict = Depends(RequireEdit)
+):
+    """
+    Reordena las preguntas personalizadas de una sección.
+    Solo afecta a preguntas custom, las preguntas default mantienen su orden original.
+    """
+    secciones_validas = list(PREGUNTAS_DEFAULT.keys())
+    if seccion not in secciones_validas:
+        raise HTTPException(status_code=400, detail=f"Sección inválida. Opciones: {secciones_validas}")
+    
+    # Obtener configuración actual
+    config = await evaluaciones_config_collection.find_one({"tipo": "preguntas"})
+    if not config:
+        return {"success": True, "message": "No hay preguntas personalizadas para reordenar"}
+    
+    secciones = config.get("secciones", {})
+    preguntas_seccion = secciones.get(seccion, [])
+    
+    # Filtrar solo preguntas custom que están en el nuevo orden
+    custom_preguntas = [p for p in preguntas_seccion if p.get("id", "").startswith("custom_")]
+    
+    # Crear diccionario para acceso rápido
+    preguntas_dict = {p["id"]: p for p in custom_preguntas}
+    
+    # Reordenar según el nuevo orden (solo IDs que existen)
+    nuevas_preguntas = []
+    for pregunta_id in orden:
+        if pregunta_id in preguntas_dict:
+            nuevas_preguntas.append(preguntas_dict[pregunta_id])
+    
+    # Añadir cualquier pregunta que no estaba en el orden (por seguridad)
+    ids_en_orden = set(orden)
+    for p in custom_preguntas:
+        if p["id"] not in ids_en_orden:
+            nuevas_preguntas.append(p)
+    
+    # Actualizar en la base de datos
+    await evaluaciones_config_collection.update_one(
+        {"tipo": "preguntas"},
+        {"$set": {f"secciones.{seccion}": nuevas_preguntas}}
+    )
+    
+    return {"success": True, "message": "Orden actualizado", "preguntas": nuevas_preguntas}
+
+
 # ============================================================================
 # GENERACIÓN DE PDF - CON VISITAS Y TRATAMIENTOS
 # ============================================================================
