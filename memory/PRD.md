@@ -183,6 +183,19 @@ Visita/Tratamiento → realizados sobre → Parcela
    - Consistencia en patrones de búsqueda/filtro
    - Corregir warnings de hydration de React (cosmético)
 
+### New Features (24/02/2026)
+14. **Gestión de Preguntas en Evaluaciones** ✅
+    - **Agregar preguntas**: Botón "+ Agregar Pregunta" en cada sección de cuestionario
+    - **Duplicar preguntas**: Botón de copiar abre modal con datos pre-rellenados + "(copia)"
+    - **Eliminar preguntas**: Solo Admin puede eliminar preguntas personalizadas
+    - **Reordenar preguntas (Drag & Drop)**: 
+      - Librería @dnd-kit para drag & drop moderno
+      - Icono de arrastre (⋮⋮) visible solo en preguntas personalizadas
+      - Orden persistido en MongoDB vía `PUT /api/evaluaciones/config/preguntas/reorder`
+    - **Permisos**: Admin y Manager pueden agregar/duplicar/reordenar, solo Admin puede eliminar
+    - **Frontend**: Evaluaciones.js con DndContext, SortableContext, SortableQuestion
+    - **Backend**: routes_evaluaciones.py con endpoint reorder
+
 ### Completed Refactoring (24/02/2026)
 13. **Refactorización Modular del Backend** ✅
     - Dividido `routes_main.py` en módulos separados:
