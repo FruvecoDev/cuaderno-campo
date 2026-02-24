@@ -836,10 +836,15 @@ const Albaranes = () => {
                     onChange={(e) => setContratoSearch({...contratoSearch, proveedor: e.target.value})}
                     style={{ fontSize: '0.875rem' }}
                   >
-                    <option value="">Proveedor/Cliente</option>
-                    {contratoOptions.proveedores.map(p => (
-                      <option key={p} value={p}>{p}</option>
-                    ))}
+                    <option value="">{formData.tipo === 'Albarán de venta' ? 'Cliente' : 'Proveedor'}</option>
+                    {formData.tipo === 'Albarán de venta' 
+                      ? clientes.map(c => (
+                          <option key={c._id} value={c.nombre}>{c.nombre}</option>
+                        ))
+                      : contratoOptions.proveedores.map(p => (
+                          <option key={p} value={p}>{p}</option>
+                        ))
+                    }
                   </select>
                   <select
                     className="form-select"
@@ -880,9 +885,9 @@ const Albaranes = () => {
               {/* Selector de contrato filtrado */}
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">
-                  Contrato
+                  Contrato {formData.tipo === 'Albarán de venta' ? 'de Venta' : 'de Compra'}
                   <span style={{ fontWeight: 'normal', fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginLeft: '0.5rem' }}>
-                    ({filteredContratos.length} {filteredContratos.length === 1 ? 'contrato' : 'contratos'} encontrados)
+                    ({filteredContratos.length} {filteredContratos.length === 1 ? 'contrato' : 'contratos'})
                   </span>
                 </label>
                 <select
@@ -894,7 +899,7 @@ const Albaranes = () => {
                   <option value="">-- Sin contrato vinculado --</option>
                   {filteredContratos.map(c => (
                     <option key={c._id} value={c._id}>
-                      {c.tipo === 'Venta' ? '🟢' : '🔵'} {c.numero_contrato || `CON-${c._id.slice(-6)}`} | {c.tipo === 'Venta' ? c.cliente : c.proveedor} | {c.cultivo} | {c.campana}
+                      {c.numero_contrato || `CON-${c._id.slice(-6)}`} | {c.tipo === 'Venta' ? c.cliente : c.proveedor} | {c.cultivo} | {c.campana}
                     </option>
                   ))}
                 </select>
