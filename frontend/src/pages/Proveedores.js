@@ -415,28 +415,44 @@ const Proveedores = () => {
             <table>
               <thead>
                 <tr>
-                  <th>Nombre</th>
-                  <th>CIF/NIF</th>
-                  <th>Teléfono</th>
-                  <th>Email</th>
-                  <th>Población</th>
-                  <th>Estado</th>
+                  {fieldsConfig.nombre && <th>Nombre</th>}
+                  {fieldsConfig.cif_nif && <th>CIF/NIF</th>}
+                  {fieldsConfig.telefono && <th>Teléfono</th>}
+                  {fieldsConfig.email && <th>Email</th>}
+                  {fieldsConfig.poblacion && <th>Población</th>}
+                  {fieldsConfig.provincia && <th>Provincia</th>}
+                  {fieldsConfig.direccion && <th>Dirección</th>}
+                  {fieldsConfig.codigo_postal && <th>C.P.</th>}
+                  {fieldsConfig.persona_contacto && <th>Contacto</th>}
+                  {fieldsConfig.observaciones && <th>Observaciones</th>}
+                  {fieldsConfig.estado && <th>Estado</th>}
                   {(canEdit || canDelete) ? <th>Acciones</th> : null}
                 </tr>
               </thead>
               <tbody>
                 {filteredProveedores.map((proveedor) => (
                   <tr key={proveedor._id}>
-                    <td style={{ fontWeight: '600' }}>{proveedor.nombre}</td>
-                    <td>{proveedor.cif_nif || '-'}</td>
-                    <td>{proveedor.telefono || '-'}</td>
-                    <td>{proveedor.email || '-'}</td>
-                    <td>{proveedor.poblacion || '-'}</td>
-                    <td>
-                      <span className={`badge ${proveedor.activo ? 'badge-success' : 'badge-secondary'}`}>
-                        {proveedor.activo ? 'Activo' : 'Inactivo'}
-                      </span>
-                    </td>
+                    {fieldsConfig.nombre && <td style={{ fontWeight: '600' }}>{proveedor.nombre}</td>}
+                    {fieldsConfig.cif_nif && <td>{proveedor.cif_nif || '-'}</td>}
+                    {fieldsConfig.telefono && <td>{proveedor.telefono || '-'}</td>}
+                    {fieldsConfig.email && <td>{proveedor.email || '-'}</td>}
+                    {fieldsConfig.poblacion && <td>{proveedor.poblacion || '-'}</td>}
+                    {fieldsConfig.provincia && <td>{proveedor.provincia || '-'}</td>}
+                    {fieldsConfig.direccion && <td>{proveedor.direccion || '-'}</td>}
+                    {fieldsConfig.codigo_postal && <td>{proveedor.codigo_postal || '-'}</td>}
+                    {fieldsConfig.persona_contacto && <td>{proveedor.persona_contacto || '-'}</td>}
+                    {fieldsConfig.observaciones && (
+                      <td style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {proveedor.observaciones || '-'}
+                      </td>
+                    )}
+                    {fieldsConfig.estado && (
+                      <td>
+                        <span className={`badge ${proveedor.activo ? 'badge-success' : 'badge-secondary'}`}>
+                          {proveedor.activo ? 'Activo' : 'Inactivo'}
+                        </span>
+                      </td>
+                    )}
                     {(canEdit || canDelete) && (
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
