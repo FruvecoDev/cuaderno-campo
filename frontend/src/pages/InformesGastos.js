@@ -28,10 +28,21 @@ const InformesGastos = () => {
   const [filters, setFilters] = useState({
     fecha_desde: '',
     fecha_hasta: '',
-    campana: ''
+    campana: '',
+    contrato_id: '',
+    cultivo: '',
+    proveedor: '',
+    parcela_codigo: ''
   });
   
   const [campanas, setCampanas] = useState([]);
+  const [filtrosOpciones, setFiltrosOpciones] = useState({
+    contratos: [],
+    cultivos: [],
+    proveedores: [],
+    parcelas: []
+  });
+  const [showFilters, setShowFilters] = useState(false);
   
   // Expanded sections
   const [expandedSection, setExpandedSection] = useState('proveedor');
