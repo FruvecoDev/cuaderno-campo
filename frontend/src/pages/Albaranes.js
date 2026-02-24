@@ -200,11 +200,16 @@ const Albaranes = () => {
   
   useEffect(() => {
     // Extraer opciones de filtro de contratos para el buscador del formulario
-    const proveedores = [...new Set(contratos.map(c => c.proveedor).filter(Boolean))].sort();
+    // Separar proveedores de contratos de compra y clientes de contratos de venta
+    const contratosCompra = contratos.filter(c => (c.tipo || 'Compra') === 'Compra');
+    const contratosVenta = contratos.filter(c => c.tipo === 'Venta');
+    
+    const proveedores = [...new Set(contratosCompra.map(c => c.proveedor).filter(Boolean))].sort();
+    const clientesVenta = [...new Set(contratosVenta.map(c => c.cliente).filter(Boolean))].sort();
     const cultivos = [...new Set(contratos.map(c => c.cultivo).filter(Boolean))].sort();
     const campanas = [...new Set(contratos.map(c => c.campana).filter(Boolean))].sort();
     const parcelas = [...new Set(contratos.map(c => c.parcela || c.parcela_codigo).filter(Boolean))].sort();
-    setContratoOptions({ proveedores, cultivos, campanas, parcelas });
+    setContratoOptions({ proveedores, clientesVenta, cultivos, campanas, parcelas });
   }, [contratos]);
   
   useEffect(() => {
