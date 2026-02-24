@@ -571,7 +571,7 @@ const Evaluaciones = () => {
               fontWeight: '500'
             }}
           >
-            Sí
+            {t('common.yes')}
           </button>
           <button
             type="button"
@@ -586,7 +586,7 @@ const Evaluaciones = () => {
               fontWeight: '500'
             }}
           >
-            No
+            {t('common.no')}
           </button>
         </div>
       );
@@ -623,7 +623,7 @@ const Evaluaciones = () => {
         className="form-input"
         value={valor || ''}
         onChange={(e) => handleRespuestaChange(pregunta.id, e.target.value)}
-        placeholder="Escriba su respuesta..."
+        placeholder={t('evaluations.writeAnswer')}
       />
     );
   };
