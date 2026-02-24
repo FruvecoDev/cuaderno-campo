@@ -35,6 +35,7 @@ const Usuarios = () => {
 
   useEffect(() => {
     fetchUsers();
+    fetchMenuItems();
   }, []);
 
   const fetchUsers = async () => {
@@ -49,6 +50,79 @@ const Usuarios = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchMenuItems = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/auth/menu-items`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setMenuItems(data.menu_items || []);
+      }
+    } catch (error) {
+      console.error('Error fetching menu items:', error);
+    }
+  };
+
+  const openPermissionsModal = (user) => {
+    setSelectedUserForPermissions(user);
+    // Initialize permissions from user or default to all true
+    const defaultPerms = {};
+    menuItems.forEach(item => {
+      defaultPerms[item.path] = true;
+    });
+    setMenuPermissions(user.menu_permissions || defaultPerms);
+    setShowPermissionsModal(true);
+  };
+
+  const handleSavePermissions = async () => {
+    if (!selectedUserForPermissions) return;
+    
+    setSavingPermissions(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/auth/users/${selectedUserForPermissions._id}/menu-permissions`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ menu_permissions: menuPermissions })
+      });
+      
+      if (response.ok) {
+        setShowPermissionsModal(false);
+        setSelectedUserForPermissions(null);
+        fetchUsers();
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.detail}`);
+      }
+    } catch (error) {
+      console.error('Error saving permissions:', error);
+      alert('Error guardando permisos');
+    } finally {
+      setSavingPermissions(false);
+    }
+  };
+
+  const togglePermission = (path) => {
+    setMenuPermissions(prev => ({
+      ...prev,
+      [path]: !prev[path]
+    }));
+  };
+
+  const toggleSection = (section) => {
+    const sectionItems = menuItems.filter(item => item.section === section);
+    const allEnabled = sectionItems.every(item => menuPermissions[item.path]);
+    
+    const newPerms = { ...menuPermissions };
+    sectionItems.forEach(item => {
+      newPerms[item.path] = !allEnabled;
+    });
+    setMenuPermissions(newPerms);
   };
 
   const handleSubmit = async (e) => {
