@@ -121,12 +121,20 @@ async def update_contrato(
     if not ObjectId.is_valid(contrato_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
-    # Lookup proveedor name
+    # Lookup proveedor name (para contratos de Compra)
     proveedor_name = contrato.proveedor or ""
     if contrato.proveedor_id:
         prov = await proveedores_collection.find_one({"_id": ObjectId(contrato.proveedor_id)})
         if prov:
             proveedor_name = prov.get("nombre", "")
+    
+    # Lookup cliente name (para contratos de Venta)
+    cliente_name = ""
+    cliente_id_str = getattr(contrato, 'cliente_id', None) or ""
+    if cliente_id_str:
+        cli = await clientes_collection.find_one({"_id": ObjectId(cliente_id_str)})
+        if cli:
+            cliente_name = cli.get("nombre", "")
     
     # Lookup cultivo name
     cultivo_name = contrato.cultivo or ""
@@ -138,6 +146,8 @@ async def update_contrato(
     update_data = contrato.dict()
     update_data.update({
         "proveedor": proveedor_name,
+        "cliente": cliente_name,
+        "cliente_id": cliente_id_str,
         "cultivo": cultivo_name,
         "updated_at": datetime.now()
     })
