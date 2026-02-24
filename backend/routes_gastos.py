@@ -26,6 +26,10 @@ async def get_resumen_gastos(
     fecha_desde: Optional[str] = None,
     fecha_hasta: Optional[str] = None,
     campana: Optional[str] = None,
+    contrato_id: Optional[str] = None,
+    cultivo: Optional[str] = None,
+    proveedor: Optional[str] = None,
+    parcela_codigo: Optional[str] = None,
     current_user: dict = Depends(get_current_user),
     _access: dict = Depends(RequireAlbaranesAccess)
 ):
@@ -44,6 +48,14 @@ async def get_resumen_gastos(
             match_query["fecha"] = {"$lte": fecha_hasta}
     if campana:
         match_query["campana"] = campana
+    if contrato_id:
+        match_query["contrato_id"] = contrato_id
+    if cultivo:
+        match_query["cultivo"] = cultivo
+    if proveedor:
+        match_query["proveedor"] = proveedor
+    if parcela_codigo:
+        match_query["parcela_codigo"] = parcela_codigo
     
     # Get all albaranes matching criteria
     albaranes = await albaranes_collection.find(match_query).to_list(1000)
