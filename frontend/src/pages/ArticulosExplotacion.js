@@ -242,7 +242,7 @@ const ArticulosExplotacion = () => {
 
   return (
     <div className="page-container">
-      <div className="page-header">
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 className="page-title">
           <Package size={28} style={{ display: 'inline', marginRight: '0.75rem', color: 'hsl(var(--primary))' }} />
           Artículos de Explotación
