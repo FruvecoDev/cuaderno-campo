@@ -631,13 +631,13 @@ const Evaluaciones = () => {
   return (
     <div data-testid="evaluaciones-page">
       <div className="flex justify-between items-center mb-6">
-        <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>Hojas de Evaluación</h1>
+        <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>{t('evaluations.title')}</h1>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           {(user?.role === 'Admin' || user?.role === 'Manager') && (
             <button
               className="btn btn-secondary"
               onClick={() => setShowAddQuestion(true)}
-              title="Agregar pregunta personalizada"
+              title={t('evaluations.addCustomQuestion')}
             >
               <Settings size={18} />
             </button>
@@ -649,7 +649,7 @@ const Evaluaciones = () => {
             data-testid="btn-nueva-evaluacion"
           >
             <Plus size={18} />
-            Nueva Evaluación
+            {t('evaluations.newEvaluation')}
           </PermissionButton>
         </div>
       </div>
@@ -663,7 +663,7 @@ const Evaluaciones = () => {
       {/* Filtros */}
       <div className="card mb-6" data-testid="filtros-evaluaciones">
         <div className="flex justify-between items-center mb-4">
-          <h3 style={{ fontWeight: '600', margin: 0 }}>Filtros</h3>
+          <h3 style={{ fontWeight: '600', margin: 0 }}>{t('common.filters')}</h3>
           {hasActiveFilters && (
             <button 
               className="btn btn-sm btn-secondary"
@@ -671,85 +671,85 @@ const Evaluaciones = () => {
               data-testid="btn-limpiar-filtros"
             >
               <X size={14} style={{ marginRight: '0.25rem' }} />
-              Limpiar filtros
+              {t('common.clear')} {t('common.filters').toLowerCase()}
             </button>
           )}
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Parcela</label>
+            <label className="form-label">{t('parcels.title')}</label>
             <select
               className="form-select"
               value={filters.parcela}
               onChange={(e) => setFilters({...filters, parcela: e.target.value})}
               data-testid="filter-parcela"
             >
-              <option value="">Todas</option>
+              <option value="">{t('common.all')}</option>
               {evaluacionFilterOptions.parcelas.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Cultivo</label>
+            <label className="form-label">{t('crops.title')}</label>
             <select
               className="form-select"
               value={filters.cultivo}
               onChange={(e) => setFilters({...filters, cultivo: e.target.value})}
               data-testid="filter-cultivo"
             >
-              <option value="">Todos</option>
+              <option value="">{t('common.all')}</option>
               {evaluacionFilterOptions.cultivos.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Proveedor</label>
+            <label className="form-label">{t('suppliers.title')}</label>
             <select
               className="form-select"
               value={filters.proveedor}
               onChange={(e) => setFilters({...filters, proveedor: e.target.value})}
               data-testid="filter-proveedor"
             >
-              <option value="">Todos</option>
+              <option value="">{t('common.all')}</option>
               {evaluacionFilterOptions.proveedores.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Campaña</label>
+            <label className="form-label">{t('contracts.campaign')}</label>
             <select
               className="form-select"
               value={filters.campana}
               onChange={(e) => setFilters({...filters, campana: e.target.value})}
               data-testid="filter-campana"
             >
-              <option value="">Todas</option>
+              <option value="">{t('common.all')}</option>
               {evaluacionFilterOptions.campanas.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Contrato</label>
+            <label className="form-label">{t('contracts.title')}</label>
             <select
               className="form-select"
               value={filters.contrato}
               onChange={(e) => setFilters({...filters, contrato: e.target.value})}
               data-testid="filter-contrato"
             >
-              <option value="">Todos</option>
+              <option value="">{t('common.all')}</option>
               {evaluacionFilterOptions.contratos.map(c => (
                 <option key={c.id} value={c.id}>{c.nombre}</option>
               ))}
             </select>
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Estado</label>
+            <label className="form-label">{t('common.status')}</label>
             <select
               className="form-select"
               value={filters.estado}
               onChange={(e) => setFilters({...filters, estado: e.target.value})}
               data-testid="filter-estado"
             >
-              <option value="">Todos</option>
-              <option value="borrador">Borrador</option>
-              <option value="completada">Completada</option>
-              <option value="archivada">Archivada</option>
+              <option value="">{t('common.all')}</option>
+              <option value="borrador">{t('evaluations.draft')}</option>
+              <option value="completada">{t('evaluations.completed')}</option>
+              <option value="archivada">{t('evaluations.archived')}</option>
             </select>
           </div>
         </div>
@@ -759,51 +759,51 @@ const Evaluaciones = () => {
       {showAddQuestion && (
         <div className="card mb-6" style={{ border: '2px solid hsl(var(--primary))' }}>
           <div className="flex justify-between items-center mb-4">
-            <h3 style={{ fontWeight: '600' }}>Agregar Nueva Pregunta</h3>
+            <h3 style={{ fontWeight: '600' }}>{t('evaluations.addNewQuestion')}</h3>
             <button className="btn btn-sm btn-secondary" onClick={() => setShowAddQuestion(false)}>
               <X size={16} />
             </button>
           </div>
           <div className="grid-3">
             <div className="form-group">
-              <label className="form-label">Sección *</label>
+              <label className="form-label">{t('evaluations.section')} *</label>
               <select
                 className="form-select"
                 value={newQuestionSection}
                 onChange={(e) => setNewQuestionSection(e.target.value)}
               >
-                <option value="">Seleccionar sección...</option>
+                <option value="">{t('evaluations.selectSection')}</option>
                 {SECCIONES.map(s => (
                   <option key={s.key} value={s.key}>{s.label}</option>
                 ))}
               </select>
             </div>
             <div className="form-group">
-              <label className="form-label">Tipo de Respuesta *</label>
+              <label className="form-label">{t('evaluations.answerType')} *</label>
               <select
                 className="form-select"
                 value={newQuestionType}
                 onChange={(e) => setNewQuestionType(e.target.value)}
               >
-                <option value="texto">Texto</option>
-                <option value="numero">Número</option>
-                <option value="si_no">Sí / No</option>
-                <option value="fecha">Fecha</option>
+                <option value="texto">{t('evaluations.text')}</option>
+                <option value="numero">{t('evaluations.number')}</option>
+                <option value="si_no">{t('evaluations.yesNo')}</option>
+                <option value="fecha">{t('common.date')}</option>
               </select>
             </div>
           </div>
           <div className="form-group">
-            <label className="form-label">Pregunta *</label>
+            <label className="form-label">{t('evaluations.question')} *</label>
             <input
               type="text"
               className="form-input"
               value={newQuestionText}
               onChange={(e) => setNewQuestionText(e.target.value)}
-              placeholder="Escriba la pregunta..."
+              placeholder={t('evaluations.writeQuestion')}
             />
           </div>
           <button className="btn btn-primary" onClick={handleAddQuestion}>
-            <Plus size={16} /> Agregar Pregunta
+            <Plus size={16} /> {t('evaluations.addQuestion')}
           </button>
         </div>
       )}
@@ -811,14 +811,14 @@ const Evaluaciones = () => {
       {/* Formulario */}
       {showForm && (
         <div className="card mb-6" data-testid="evaluacion-form">
-          <h2 className="card-title">{editingId ? 'Editar Hoja de Evaluación' : 'Nueva Hoja de Evaluación'}</h2>
+          <h2 className="card-title">{editingId ? t('evaluations.editEvaluation') : t('evaluations.newEvaluation')}</h2>
           <form onSubmit={handleSubmit}>
             {/* Datos Generales */}
             <div style={{ backgroundColor: 'hsl(var(--muted))', padding: '1rem', borderRadius: '0.5rem', marginBottom: '1.5rem' }}>
-              <h3 style={{ fontWeight: '600', marginBottom: '1rem' }}>Datos Generales</h3>
+              <h3 style={{ fontWeight: '600', marginBottom: '1rem' }}>{t('evaluations.generalData')}</h3>
               <div className="grid-3">
                 <div className="form-group">
-                  <label className="form-label">Fecha Inicio *</label>
+                  <label className="form-label">{t('evaluations.startDate')} *</label>
                   <input
                     type="date"
                     className="form-input"
@@ -828,7 +828,7 @@ const Evaluaciones = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Fecha Fin</label>
+                  <label className="form-label">{t('evaluations.endDate')}</label>
                   <input
                     type="date"
                     className="form-input"
@@ -837,13 +837,13 @@ const Evaluaciones = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Técnico</label>
+                  <label className="form-label">{t('evaluations.technician')}</label>
                   <input
                     type="text"
                     className="form-input"
                     value={formData.tecnico}
                     onChange={(e) => setFormData({...formData, tecnico: e.target.value})}
-                    placeholder={user?.full_name || user?.username || 'Nombre del técnico'}
+                    placeholder={user?.full_name || user?.username || t('evaluations.technicianName')}
                   />
                 </div>
               </div>
@@ -851,45 +851,45 @@ const Evaluaciones = () => {
             
             {/* Selector de Parcela */}
             <div style={{ backgroundColor: 'hsl(var(--primary) / 0.05)', padding: '1rem', borderRadius: '0.5rem', marginBottom: '1.5rem', border: '1px solid hsl(var(--primary) / 0.2)' }}>
-              <h3 style={{ fontWeight: '600', marginBottom: '1rem' }}>Plantación (Parcela) *</h3>
+              <h3 style={{ fontWeight: '600', marginBottom: '1rem' }}>{t('evaluations.plantation')} *</h3>
               <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))', marginBottom: '1rem' }}>
-                Buscar parcela por:
+                {t('evaluations.searchParcelBy')}
               </p>
               <div className="grid-3" style={{ marginBottom: '1rem' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">Proveedor</label>
+                  <label className="form-label">{t('suppliers.title')}</label>
                   <select
                     className="form-select"
                     value={parcelaSearch.proveedor}
                     onChange={(e) => setParcelaSearch({...parcelaSearch, proveedor: e.target.value})}
                   >
-                    <option value="">Todos</option>
+                    <option value="">{t('common.all')}</option>
                     {parcelaFilterOptions.proveedores.map(p => (
                       <option key={p} value={p}>{p}</option>
                     ))}
                   </select>
                 </div>
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">Cultivo</label>
+                  <label className="form-label">{t('crops.title')}</label>
                   <select
                     className="form-select"
                     value={parcelaSearch.cultivo}
                     onChange={(e) => setParcelaSearch({...parcelaSearch, cultivo: e.target.value})}
                   >
-                    <option value="">Todos</option>
+                    <option value="">{t('common.all')}</option>
                     {parcelaFilterOptions.cultivos.map(c => (
                       <option key={c} value={c}>{c}</option>
                     ))}
                   </select>
                 </div>
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">Campaña</label>
+                  <label className="form-label">{t('contracts.campaign')}</label>
                   <select
                     className="form-select"
                     value={parcelaSearch.campana}
                     onChange={(e) => setParcelaSearch({...parcelaSearch, campana: e.target.value})}
                   >
-                    <option value="">Todas</option>
+                    <option value="">{t('common.all')}</option>
                     {parcelaFilterOptions.campanas.map(c => (
                       <option key={c} value={c}>{c}</option>
                     ))}
@@ -902,7 +902,7 @@ const Evaluaciones = () => {
                 onChange={(e) => handleParcelaSelect(e.target.value)}
                 required
               >
-                <option value="">Seleccionar parcela...</option>
+                <option value="">{t('evaluations.selectParcel')}</option>
                 {filteredParcelas.map(p => (
                   <option key={p._id} value={p._id}>
                     {p.codigo_plantacion} - {p.proveedor} - {p.cultivo} ({p.variedad}) - {p.superficie_total} ha
@@ -914,15 +914,15 @@ const Evaluaciones = () => {
             {/* Info de Parcela Seleccionada */}
             {selectedParcelaInfo && (
               <div className="card" style={{ backgroundColor: 'hsl(var(--primary) / 0.1)', marginBottom: '1.5rem', padding: '1rem', border: '1px solid hsl(var(--primary) / 0.3)' }}>
-                <h4 style={{ marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '600' }}>Datos de Plantación:</h4>
+                <h4 style={{ marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '600' }}>{t('evaluations.plantationData')}:</h4>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.5rem', fontSize: '0.875rem' }}>
-                  <div><strong>Proveedor:</strong> {selectedParcelaInfo.proveedor}</div>
-                  <div><strong>Código:</strong> {selectedParcelaInfo.codigo_plantacion}</div>
-                  <div><strong>Finca:</strong> {selectedParcelaInfo.finca}</div>
-                  <div><strong>Cultivo:</strong> {selectedParcelaInfo.cultivo}</div>
-                  <div><strong>Variedad:</strong> {selectedParcelaInfo.variedad}</div>
-                  <div><strong>Superficie:</strong> {selectedParcelaInfo.superficie} ha</div>
-                  <div><strong>Campaña:</strong> {selectedParcelaInfo.campana}</div>
+                  <div><strong>{t('suppliers.title')}:</strong> {selectedParcelaInfo.proveedor}</div>
+                  <div><strong>{t('parcels.code')}:</strong> {selectedParcelaInfo.codigo_plantacion}</div>
+                  <div><strong>{t('farms.title')}:</strong> {selectedParcelaInfo.finca}</div>
+                  <div><strong>{t('crops.title')}:</strong> {selectedParcelaInfo.cultivo}</div>
+                  <div><strong>{t('crops.variety')}:</strong> {selectedParcelaInfo.variedad}</div>
+                  <div><strong>{t('parcels.surface')}:</strong> {selectedParcelaInfo.superficie} ha</div>
+                  <div><strong>{t('contracts.campaign')}:</strong> {selectedParcelaInfo.campana}</div>
                 </div>
               </div>
             )}
@@ -930,7 +930,7 @@ const Evaluaciones = () => {
             {/* Secciones de Cuestionarios */}
             {formData.parcela_id && (
               <div style={{ marginBottom: '1.5rem' }}>
-                <h3 style={{ fontWeight: '600', marginBottom: '1rem' }}>Cuestionarios</h3>
+                <h3 style={{ fontWeight: '600', marginBottom: '1rem' }}>{t('evaluations.questionnaires')}</h3>
                 
                 {SECCIONES.map(seccion => {
                   const preguntas = getPreguntasSeccion(seccion.key);
@@ -965,7 +965,7 @@ const Evaluaciones = () => {
                       {isExpanded && (
                         <div style={{ padding: '1rem' }}>
                           {preguntas.length === 0 ? (
-                            <p style={{ color: 'hsl(var(--muted-foreground))' }}>No hay preguntas en esta sección. Agregue una desde el botón de configuración.</p>
+                            <p style={{ color: 'hsl(var(--muted-foreground))' }}>{t('evaluations.noQuestions')}</p>
                           ) : (
                             preguntas.map((pregunta, idx) => (
                               <div key={pregunta.id} style={{ 
@@ -977,7 +977,7 @@ const Evaluaciones = () => {
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
                                   {idx + 1}. {pregunta.pregunta}
                                   {pregunta.id.startsWith('custom_') && (
-                                    <span style={{ fontSize: '0.75rem', color: 'hsl(var(--primary))', marginLeft: '0.5rem' }}>(Personalizada)</span>
+                                    <span style={{ fontSize: '0.75rem', color: 'hsl(var(--primary))', marginLeft: '0.5rem' }}>({t('evaluations.custom')})</span>
                                   )}
                                 </label>
                                 {renderCampoRespuesta(pregunta)}
@@ -995,14 +995,14 @@ const Evaluaciones = () => {
             <div className="flex gap-2">
               <button type="submit" className="btn btn-primary" data-testid="btn-guardar-evaluacion">
                 <Save size={16} style={{ marginRight: '0.5rem' }} />
-                {editingId ? 'Actualizar' : 'Guardar'}
+                {editingId ? t('common.update') : t('common.save')}
               </button>
               <button
                 type="button"
                 className="btn btn-secondary"
                 onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }}
               >
-                Cancelar
+                {t('common.cancel')}
               </button>
             </div>
           </form>
@@ -1013,25 +1013,25 @@ const Evaluaciones = () => {
       <div className="card">
         <h2 className="card-title">
           <FileText size={20} style={{ display: 'inline', marginRight: '0.5rem' }} />
-          Lista de Evaluaciones ({filteredEvaluaciones.length})
+          {t('evaluations.evaluationList')} ({filteredEvaluaciones.length})
         </h2>
         {loading ? (
-          <p>Cargando evaluaciones...</p>
+          <p>{t('common.loading')}</p>
         ) : filteredEvaluaciones.length === 0 ? (
-          <p className="text-muted">No hay hojas de evaluación registradas.</p>
+          <p className="text-muted">{t('evaluations.noEvaluations')}</p>
         ) : (
           <div className="table-container">
             <table data-testid="evaluaciones-table">
               <thead>
                 <tr>
-                  <th>Código</th>
-                  <th>Proveedor</th>
-                  <th>Cultivo</th>
-                  <th>Campaña</th>
-                  <th>Fecha Inicio</th>
-                  <th>Técnico</th>
-                  <th>Estado</th>
-                  {(canEdit || canDelete) ? <th>Acciones</th> : null}
+                  <th>{t('parcels.code')}</th>
+                  <th>{t('suppliers.title')}</th>
+                  <th>{t('crops.title')}</th>
+                  <th>{t('contracts.campaign')}</th>
+                  <th>{t('evaluations.startDate')}</th>
+                  <th>{t('evaluations.technician')}</th>
+                  <th>{t('common.status')}</th>
+                  {(canEdit || canDelete) ? <th>{t('common.actions')}</th> : null}
                 </tr>
               </thead>
               <tbody>
@@ -1047,7 +1047,7 @@ const Evaluaciones = () => {
                       <td>{evaluacion.tecnico}</td>
                       <td>
                         <span className={`badge ${estadoBadge.class}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                          {estadoBadge.icon} {evaluacion.estado || 'borrador'}
+                          {estadoBadge.icon} {evaluacion.estado || t('evaluations.draft')}
                         </span>
                       </td>
                       {(canEdit || canDelete) && (
@@ -1056,7 +1056,7 @@ const Evaluaciones = () => {
                             <button
                               className="btn btn-sm btn-primary"
                               onClick={() => handleDownloadPDF(evaluacion._id)}
-                              title="Descargar PDF"
+                              title={t('common.download')} PDF
                             >
                               <Download size={14} />
                             </button>
@@ -1064,7 +1064,7 @@ const Evaluaciones = () => {
                               <button
                                 className="btn btn-sm btn-secondary"
                                 onClick={() => handleEdit(evaluacion)}
-                                title="Editar"
+                                title={t('common.edit')}
                               >
                                 <Edit2 size={14} />
                               </button>
@@ -1073,7 +1073,7 @@ const Evaluaciones = () => {
                               <button
                                 className="btn btn-sm btn-error"
                                 onClick={() => handleDelete(evaluacion._id)}
-                                title="Eliminar"
+                                title={t('common.delete')}
                               >
                                 <Trash2 size={14} />
                               </button>
