@@ -764,12 +764,12 @@ const Dashboard = () => {
               borderRadius: '8px'
             }}>
               <CalendarIcon size={40} style={{ color: 'hsl(var(--muted-foreground))', marginBottom: '0.5rem' }} />
-              <p className="text-muted" style={{ marginBottom: '0.75rem' }}>No hay visitas planificadas</p>
+              <p className="text-muted" style={{ marginBottom: '0.75rem' }}>{t('dashboard.visits.noPlanned')}</p>
               <button 
                 onClick={() => navigate('/visitas?planificar=true')}
                 className="btn btn-primary btn-sm"
               >
-                Planificar primera visita
+                {t('dashboard.visits.planFirst')}
               </button>
             </div>
           )}
@@ -780,7 +780,7 @@ const Dashboard = () => {
       <div className="card mb-6" data-testid="panel-notificaciones">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Mail size={20} /> Notificaciones por Email
+            <Mail size={20} /> {t('dashboard.notifications.title')}
           </h2>
           {notificationStatus && (
             <span style={{ 
@@ -790,7 +790,7 @@ const Dashboard = () => {
               backgroundColor: notificationStatus.configured ? '#e8f5e9' : '#fff3e0',
               color: notificationStatus.configured ? '#2d5a27' : '#f57c00'
             }}>
-              {notificationStatus.configured ? '✓ Configurado' : '⚠ No configurado'}
+              {notificationStatus.configured ? `✓ ${t('dashboard.notifications.configured')}` : `⚠ ${t('dashboard.notifications.notConfigured')}`}
             </span>
           )}
         </div>
@@ -802,12 +802,12 @@ const Dashboard = () => {
           marginBottom: '1rem'
         }}>
           <p style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>
-            Envía recordatorios automáticos de visitas próximas a tu email.
+            {t('dashboard.notifications.description')}
           </p>
           <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
             {visitasPlanificadas.length > 0 
-              ? `Tienes ${visitasPlanificadas.length} visita(s) planificada(s) que recibirán notificación.`
-              : 'No hay visitas planificadas para notificar.'
+              ? t('dashboard.notifications.plannedVisits', { count: visitasPlanificadas.length })
+              : t('dashboard.notifications.noVisitsToNotify')
             }
           </p>
         </div>
