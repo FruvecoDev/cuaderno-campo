@@ -747,39 +747,6 @@ def generate_html_cuaderno(data: dict, ai_summary: str = "") -> str:
                 </tbody>
             </table>
         """
-        
-        # Detalle de técnicos y maquinaria utilizados (resumen)
-        tecnicos_usados = set()
-        maquinas_usadas = set()
-        for t in tratamientos:
-            aplicador = t.get('aplicador_nombre') or t.get('tecnico')
-            if aplicador and aplicador != 'N/A':
-                if isinstance(aplicador, dict):
-                    aplicador = f"{aplicador.get('nombre', '')} {aplicador.get('apellidos', '')}".strip()
-                if aplicador:
-                    tecnicos_usados.add(aplicador)
-            
-            maquina = t.get('maquina_nombre')
-            if maquina and maquina != 'N/A':
-                maquinas_usadas.add(maquina)
-        
-        if tecnicos_usados or maquinas_usadas:
-            html += '<div class="info-grid" style="margin-top: 15px;">'
-            if tecnicos_usados:
-                html += f'''
-                    <div class="info-box">
-                        <label>👤 Técnicos Aplicadores Utilizados</label>
-                        <div class="value">{", ".join(sorted(tecnicos_usados))}</div>
-                    </div>
-                '''
-            if maquinas_usadas:
-                html += f'''
-                    <div class="info-box">
-                        <label>🚜 Maquinaria Utilizada</label>
-                        <div class="value">{", ".join(sorted(maquinas_usadas))}</div>
-                    </div>
-                '''
-            html += '</div>'
     else:
         html += '<p class="no-data">No hay tratamientos registrados</p>'
     html += "</div>"
