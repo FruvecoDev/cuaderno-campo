@@ -121,8 +121,23 @@ const Albaranes = () => {
     fetchAlbaranes();
     fetchContratos();
     fetchProveedores();
+    fetchClientes();
     fetchArticulosCatalogo();
   }, []);
+  
+  const fetchClientes = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/clientes/activos`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setClientes(data.clientes || []);
+      }
+    } catch (error) {
+      console.error('Error fetching clientes:', error);
+    }
+  };
   
   const fetchArticulosCatalogo = async () => {
     try {
