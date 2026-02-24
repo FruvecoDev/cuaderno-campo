@@ -62,7 +62,22 @@ const InformesGastos = () => {
   useEffect(() => {
     fetchResumen();
     fetchCampanas();
+    fetchFiltrosOpciones();
   }, []);
+  
+  const fetchFiltrosOpciones = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/gastos/filtros-opciones`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setFiltrosOpciones(data);
+      }
+    } catch (error) {
+      console.error('Error fetching filtros opciones:', error);
+    }
+  };
   
   const fetchCampanas = async () => {
     try {
