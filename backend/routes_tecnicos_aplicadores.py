@@ -236,8 +236,8 @@ async def upload_certificado(
             detail=f"Tipo de archivo no permitido. Permitidos: {allowed_types}"
         )
     
-    # Crear directorio si no existe
-    upload_dir = "/tmp/certificados"
+    # Crear directorio si no existe - usando directorio persistente
+    upload_dir = "/app/uploads/certificados"
     os.makedirs(upload_dir, exist_ok=True)
     
     # Guardar archivo

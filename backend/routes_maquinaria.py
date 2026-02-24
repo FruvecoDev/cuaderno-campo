@@ -148,8 +148,8 @@ async def upload_imagen_placa_ce(
     if len(content) > 10 * 1024 * 1024:
         raise HTTPException(status_code=400, detail="El archivo excede el tamaño máximo de 10MB")
     
-    # Crear directorio si no existe
-    upload_dir = "/tmp/maquinaria_placas"
+    # Crear directorio si no existe - usando directorio persistente
+    upload_dir = "/app/uploads/maquinaria_placas"
     os.makedirs(upload_dir, exist_ok=True)
     
     # Eliminar imagen anterior si existe
