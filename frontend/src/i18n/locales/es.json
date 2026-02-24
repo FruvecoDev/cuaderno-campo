@@ -428,6 +428,7 @@
     "addQuestionToSection": "Agregar pregunta a esta sección",
     "deleteQuestion": "Eliminar pregunta",
     "duplicateQuestion": "Duplicar pregunta",
+    "dragToReorder": "Arrastrar para reordenar",
     "section": "Sección",
     "selectSection": "Seleccionar sección...",
     "answerType": "Tipo de Respuesta",
