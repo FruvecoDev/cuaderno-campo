@@ -79,15 +79,23 @@ const Layout = ({ children }) => {
     ]}
   ];
   
-  // Filter nav items based on user's module access
+  // Filter nav items based on user's menu_permissions
   const filteredNavItems = navItems.map(section => ({
     ...section,
     items: section.items.filter(item => {
+      // Admin always has access to everything
+      if (user?.role === 'Admin') {
+        return true;
+      }
       // Check admin requirement
-      if (item.requireAdmin && user?.role !== 'Admin') {
+      if (item.requireAdmin) {
         return false;
       }
-      // If no module specified or user has access to this module
+      // Check menu_permissions if they exist
+      if (user?.menu_permissions) {
+        return user.menu_permissions[item.path] !== false;
+      }
+      // Legacy: If no menu_permissions, use modules_access
       return !item.module || user?.modules_access?.includes(item.module);
     })
   })).filter(section => section.items.length > 0); // Remove empty sections
