@@ -959,7 +959,35 @@ const Evaluaciones = () => {
                         }}
                       >
                         <span>{seccion.icon} {seccion.label} ({preguntas.length})</span>
-                        {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          {(user?.role === 'Admin' || user?.role === 'Manager') && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setNewQuestionSection(seccion.key);
+                                setShowAddQuestion(true);
+                              }}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                borderRadius: '0.25rem',
+                                backgroundColor: 'hsl(var(--primary))',
+                                color: 'white',
+                                border: 'none',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                                fontSize: '0.75rem'
+                              }}
+                              title={t('evaluations.addQuestionToSection')}
+                              data-testid={`btn-add-question-${seccion.key}`}
+                            >
+                              <Plus size={14} /> {t('evaluations.addQuestion')}
+                            </button>
+                          )}
+                          {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                        </div>
                       </button>
                       
                       {isExpanded && (
@@ -972,15 +1000,40 @@ const Evaluaciones = () => {
                                 padding: '0.75rem', 
                                 backgroundColor: idx % 2 === 0 ? 'hsl(var(--muted) / 0.3)' : 'transparent',
                                 borderRadius: '0.375rem',
-                                marginBottom: '0.5rem'
+                                marginBottom: '0.5rem',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'flex-start',
+                                gap: '1rem'
                               }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                  {idx + 1}. {pregunta.pregunta}
-                                  {pregunta.id.startsWith('custom_') && (
-                                    <span style={{ fontSize: '0.75rem', color: 'hsl(var(--primary))', marginLeft: '0.5rem' }}>({t('evaluations.custom')})</span>
-                                  )}
-                                </label>
-                                {renderCampoRespuesta(pregunta)}
+                                <div style={{ flex: 1 }}>
+                                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                                    {idx + 1}. {pregunta.pregunta}
+                                    {pregunta.id.startsWith('custom_') && (
+                                      <span style={{ fontSize: '0.75rem', color: 'hsl(var(--primary))', marginLeft: '0.5rem' }}>({t('evaluations.custom')})</span>
+                                    )}
+                                  </label>
+                                  {renderCampoRespuesta(pregunta)}
+                                </div>
+                                {pregunta.id.startsWith('custom_') && user?.role === 'Admin' && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteQuestion(pregunta.id, seccion.key)}
+                                    style={{
+                                      padding: '0.25rem',
+                                      borderRadius: '0.25rem',
+                                      backgroundColor: 'hsl(var(--destructive) / 0.1)',
+                                      color: 'hsl(var(--destructive))',
+                                      border: '1px solid hsl(var(--destructive) / 0.3)',
+                                      cursor: 'pointer',
+                                      flexShrink: 0
+                                    }}
+                                    title={t('evaluations.deleteQuestion')}
+                                    data-testid={`btn-delete-question-${pregunta.id}`}
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                )}
                               </div>
                             ))
                           )}
