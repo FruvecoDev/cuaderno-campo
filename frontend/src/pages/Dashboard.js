@@ -705,10 +705,10 @@ const Dashboard = () => {
                           {fechaVisita.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
                         </div>
                         <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))' }}>
-                          {diasRestantes === 0 ? '¡Hoy!' : 
-                           diasRestantes === 1 ? 'Mañana' : 
-                           esVencida ? `Hace ${Math.abs(diasRestantes)} días` :
-                           `En ${diasRestantes} días`}
+                          {diasRestantes === 0 ? t('dashboard.calendar.today') + '!' : 
+                           diasRestantes === 1 ? t('dashboard.calendar.tomorrow') : 
+                           esVencida ? t('dashboard.calendar.daysAgo', { days: Math.abs(diasRestantes) }) :
+                           t('dashboard.calendar.inDays', { days: diasRestantes })}
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '0.25rem' }}>
