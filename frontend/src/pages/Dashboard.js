@@ -423,17 +423,21 @@ const Dashboard = () => {
       
       {/* KPI Cards */}
       <div className="stats-grid" data-testid="dashboard-kpis">
+        {puedeCompra && (
         <div className="stat-card">
           <div className="stat-label">{t('dashboard.stats.purchaseContracts')}</div>
           <div className="stat-value">{kpis.totales.contratos_compra || 0}</div>
           <div className="text-sm text-muted">{t('common.active')}</div>
         </div>
+        )}
         
+        {puedeVenta && (
         <div className="stat-card">
           <div className="stat-label">{t('dashboard.stats.saleContracts')}</div>
           <div className="stat-value">{kpis.totales.contratos_venta || 0}</div>
           <div className="text-sm text-muted">{t('common.active')}</div>
         </div>
+        )}
         
         <div className="stat-card">
           <div className="stat-label">{t('dashboard.stats.activeParcels')}</div>
