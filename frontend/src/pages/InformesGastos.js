@@ -161,9 +161,20 @@ const InformesGastos = () => {
   };
   
   const clearFilters = () => {
-    setFilters({ fecha_desde: '', fecha_hasta: '', campana: '' });
+    setFilters({ 
+      fecha_desde: '', 
+      fecha_hasta: '', 
+      campana: '',
+      contrato_id: '',
+      cultivo: '',
+      proveedor: '',
+      parcela_codigo: ''
+    });
     setTimeout(fetchResumen, 100);
   };
+  
+  const hasActiveFilters = filters.fecha_desde || filters.fecha_hasta || filters.campana || 
+    filters.contrato_id || filters.cultivo || filters.proveedor || filters.parcela_codigo;
   
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('es-ES', { 
