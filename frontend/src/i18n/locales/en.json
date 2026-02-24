@@ -286,6 +286,11 @@
     "email": "Email",
     "address": "Address"
   },
+  "suppliers": {
+    "title": "Suppliers",
+    "subtitle": "Supplier catalog",
+    "newSupplier": "New Supplier"
+  },
   "crops": {
     "title": "Crops",
     "subtitle": "Crop catalog",
