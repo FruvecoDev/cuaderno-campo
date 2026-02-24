@@ -689,6 +689,7 @@ const Albaranes = () => {
               </h3>
               
               <div className="grid-2" style={{ gap: '1rem' }}>
+                {puedeCompra && (
                 <label 
                   style={{ 
                     display: 'flex', 
@@ -724,7 +725,9 @@ const Albaranes = () => {
                     </div>
                   </div>
                 </label>
+                )}
                 
+                {puedeVenta && (
                 <label 
                   style={{ 
                     display: 'flex', 
@@ -760,6 +763,7 @@ const Albaranes = () => {
                     </div>
                   </div>
                 </label>
+                )}
               </div>
             </div>
             
