@@ -615,6 +615,111 @@ const Usuarios = () => {
           </div>
         </div>
       )}
+
+      {/* Modal de Cambio de Contraseña */}
+      {showPasswordModal && selectedUserForPassword && (
+        <div className="modal-overlay" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div className="modal-content" style={{
+            background: 'hsl(var(--card))',
+            borderRadius: '12px',
+            padding: '1.5rem',
+            width: '90%',
+            maxWidth: '450px',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ 
+                  width: '40px', 
+                  height: '40px', 
+                  borderRadius: '10px', 
+                  background: 'hsl(var(--warning) / 0.1)', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center' 
+                }}>
+                  <Key size={20} style={{ color: 'hsl(var(--warning))' }} />
+                </div>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: '1.1rem' }}>Cambiar Contraseña</h2>
+                  <p className="text-muted text-sm" style={{ margin: 0 }}>{selectedUserForPassword.full_name}</p>
+                </div>
+              </div>
+              <button 
+                className="btn btn-sm btn-secondary" 
+                onClick={() => setShowPasswordModal(false)}
+                style={{ padding: '0.5rem' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+            
+            {passwordError && (
+              <div style={{ 
+                padding: '0.75rem', 
+                background: 'hsl(var(--destructive) / 0.1)', 
+                border: '1px solid hsl(var(--destructive) / 0.3)',
+                borderRadius: '8px',
+                color: 'hsl(var(--destructive))',
+                marginBottom: '1rem',
+                fontSize: '0.875rem'
+              }}>
+                {passwordError}
+              </div>
+            )}
+            
+            <div className="form-group" style={{ marginBottom: '1rem' }}>
+              <label className="form-label">Nueva Contraseña</label>
+              <input
+                type="password"
+                className="form-input"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Mínimo 6 caracteres"
+                autoFocus
+              />
+            </div>
+            
+            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+              <label className="form-label">Confirmar Contraseña</label>
+              <input
+                type="password"
+                className="form-input"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Repita la contraseña"
+              />
+            </div>
+            
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button 
+                className="btn btn-secondary" 
+                onClick={() => setShowPasswordModal(false)}
+              >
+                Cancelar
+              </button>
+              <button 
+                className="btn btn-primary" 
+                onClick={handleSavePassword}
+                disabled={savingPassword || !newPassword || !confirmPassword}
+              >
+                {savingPassword ? 'Guardando...' : 'Cambiar Contraseña'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
