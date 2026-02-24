@@ -622,12 +622,15 @@ const Visitas = () => {
               
               {fieldsConfig.fecha_visita && (
                 <div className="form-group">
-                  <label className="form-label">Fecha Visita</label>
+                  <label className="form-label">
+                    Fecha Visita <span style={{ color: 'hsl(var(--destructive))' }}>*</span>
+                  </label>
                   <input
                     type="date"
                     className="form-input"
                     value={formData.fecha_visita}
                     onChange={(e) => setFormData({...formData, fecha_visita: e.target.value})}
+                    required
                     data-testid="input-fecha-visita"
                   />
                 </div>
