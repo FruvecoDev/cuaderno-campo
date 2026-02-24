@@ -19,7 +19,7 @@ from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 load_dotenv()
 
-router = APIRouter()
+router = APIRouter(prefix="/api", tags=["ai-suggestions"])
 
 # Collections
 parcelas_collection = db['parcelas']
