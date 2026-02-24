@@ -62,7 +62,7 @@ const getCultivoColor = (cultivo) => {
 };
 
 // Componente Calendario de Visitas
-function VisitasCalendar({ visitas, onDateClick }) {
+function VisitasCalendar({ visitas, onDateClick, t }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   
   // Obtener días con visitas
@@ -78,9 +78,8 @@ function VisitasCalendar({ visitas, onDateClick }) {
     return map;
   }, [visitas]);
   
-  const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-                      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-  const dayNames = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  const monthNames = t('dashboard.calendar.monthNames', { returnObjects: true }) || ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  const dayNames = t('dashboard.calendar.dayNames', { returnObjects: true }) || ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
