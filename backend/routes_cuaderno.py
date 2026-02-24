@@ -588,9 +588,9 @@ def generate_html_cuaderno(data: dict, ai_summary: str = "") -> str:
                 <thead>
                     <tr>
                         <th>Fecha</th>
-                        <th>Producto</th>
-                        <th>Dosis</th>
-                        <th>Motivo</th>
+                        <th>Tipo</th>
+                        <th>Productos</th>
+                        <th>Superficie</th>
                         <th>Técnico Aplicador</th>
                         <th>Máquina</th>
                     </tr>
@@ -599,7 +599,7 @@ def generate_html_cuaderno(data: dict, ai_summary: str = "") -> str:
         """
         for t in tratamientos:
             # Obtener nombre del aplicador (nuevo campo o legacy)
-            aplicador = t.get('aplicador_nombre') or t.get('tecnico') or t.get('aplicador', 'N/A')
+            aplicador = t.get('aplicador_nombre') or t.get('tecnico') or 'N/A'
             if isinstance(aplicador, dict):
                 aplicador = f"{aplicador.get('nombre', '')} {aplicador.get('apellidos', '')}".strip() or 'N/A'
             
@@ -610,20 +610,76 @@ def generate_html_cuaderno(data: dict, ai_summary: str = "") -> str:
                 if maquinaria_data and isinstance(maquinaria_data, dict):
                     maquina = f"{maquinaria_data.get('tipo', '')} {maquinaria_data.get('modelo', '')}".strip() or 'N/A'
             
+            # Obtener productos
+            productos = t.get('productos', [])
+            productos_str = 'N/A'
+            if productos:
+                productos_list = []
+                for p in productos:
+                    nombre = p.get('nombre_comercial', p.get('nombre', ''))
+                    dosis = p.get('dosis_superficie', p.get('dosis', ''))
+                    unidad = p.get('unidad_medida', '')
+                    if nombre:
+                        productos_list.append(f"{nombre} ({dosis} {unidad})".strip())
+                productos_str = ', '.join(productos_list) if productos_list else 'N/A'
+            elif t.get('producto'):
+                productos_str = f"{t.get('producto')} ({t.get('dosis', '')} {t.get('unidad_dosis', '')})".strip()
+            
+            # Tipo de tratamiento
+            tipo = t.get('tipo_tratamiento', t.get('tipo', 'N/A'))
+            subtipo = t.get('subtipo', '')
+            tipo_display = f"{tipo}" + (f" - {subtipo}" if subtipo else "")
+            
+            # Superficie
+            superficie = t.get('superficie_aplicacion', t.get('superficie', 'N/A'))
+            
             html += f"""
                     <tr>
-                        <td>{format_date(t.get('fecha_aplicacion'))}</td>
-                        <td>{t.get('producto', 'N/A')}</td>
-                        <td>{t.get('dosis', 'N/A')} {t.get('unidad_dosis', '')}</td>
-                        <td>{t.get('motivo', 'N/A')}</td>
-                        <td>{aplicador}</td>
-                        <td>{maquina}</td>
+                        <td>{format_date(t.get('fecha_aplicacion') or t.get('fecha_tratamiento'))}</td>
+                        <td>{tipo_display}</td>
+                        <td style="max-width: 200px; word-wrap: break-word;">{productos_str}</td>
+                        <td>{superficie} ha</td>
+                        <td><strong>{aplicador}</strong></td>
+                        <td><strong>{maquina}</strong></td>
                     </tr>
             """
         html += """
                 </tbody>
             </table>
         """
+        
+        # Detalle de técnicos y maquinaria utilizados (resumen)
+        tecnicos_usados = set()
+        maquinas_usadas = set()
+        for t in tratamientos:
+            aplicador = t.get('aplicador_nombre') or t.get('tecnico')
+            if aplicador and aplicador != 'N/A':
+                if isinstance(aplicador, dict):
+                    aplicador = f"{aplicador.get('nombre', '')} {aplicador.get('apellidos', '')}".strip()
+                if aplicador:
+                    tecnicos_usados.add(aplicador)
+            
+            maquina = t.get('maquina_nombre')
+            if maquina and maquina != 'N/A':
+                maquinas_usadas.add(maquina)
+        
+        if tecnicos_usados or maquinas_usadas:
+            html += '<div class="info-grid" style="margin-top: 15px;">'
+            if tecnicos_usados:
+                html += f'''
+                    <div class="info-box">
+                        <label>👤 Técnicos Aplicadores Utilizados</label>
+                        <div class="value">{", ".join(sorted(tecnicos_usados))}</div>
+                    </div>
+                '''
+            if maquinas_usadas:
+                html += f'''
+                    <div class="info-box">
+                        <label>🚜 Maquinaria Utilizada</label>
+                        <div class="value">{", ".join(sorted(maquinas_usadas))}</div>
+                    </div>
+                '''
+            html += '</div>'
     else:
         html += '<p class="no-data">No hay tratamientos registrados</p>'
     html += "</div>"
