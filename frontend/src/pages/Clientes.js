@@ -199,6 +199,33 @@ const Clientes = () => {
     setShowForm(true);
   };
   
+  // Función para ver resumen de ventas
+  const handleVerResumenVentas = async (cliente) => {
+    setSelectedCliente(cliente);
+    setShowResumenVentas(true);
+    setLoadingResumen(true);
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/clientes/${cliente._id}/resumen-ventas`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setResumenVentas(data);
+      } else {
+        setError('Error al cargar resumen de ventas');
+        setTimeout(() => setError(null), 5000);
+      }
+    } catch (err) {
+      console.error('Error fetching resumen ventas:', err);
+      setError('Error al cargar resumen de ventas');
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setLoadingResumen(false);
+    }
+  };
+  
   const handleDelete = async (clienteId) => {
     if (!canDelete) {
       setError('No tienes permiso para eliminar');
