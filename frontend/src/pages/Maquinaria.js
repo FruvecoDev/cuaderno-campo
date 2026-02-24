@@ -431,9 +431,15 @@ const Maquinaria = () => {
       estado: item.estado || 'Operativo',
       observaciones: item.observaciones || ''
     });
-    // Si tiene imagen, mostrar preview
+    // Si tiene imagen, mostrar preview usando la URL directa
     if (item.imagen_placa_ce_url) {
-      setImagePreview(`${BACKEND_URL}/api/maquinaria/${item._id}/imagen-placa-ce`);
+      let url = item.imagen_placa_ce_url;
+      if (url.startsWith('/api/uploads/')) {
+        url = `${BACKEND_URL}${url}`;
+      } else if (url.startsWith('/app/uploads/')) {
+        url = `${BACKEND_URL}/api/uploads${url.replace('/app/uploads', '')}`;
+      }
+      setImagePreview(url);
     } else {
       setImagePreview(null);
     }
