@@ -838,74 +838,106 @@ const Clientes = () => {
             <table data-testid="clientes-table">
               <thead>
                 <tr>
-                  <th>Código</th>
-                  <th>Nombre</th>
-                  <th>NIF</th>
-                  <th>Tipo</th>
-                  <th>Población</th>
-                  <th>Teléfono</th>
-                  <th>Email</th>
-                  <th>Estado</th>
+                  {fieldsConfig.codigo && <th>Código</th>}
+                  {fieldsConfig.nombre && <th>Nombre</th>}
+                  {fieldsConfig.nif && <th>NIF</th>}
+                  {fieldsConfig.tipo && <th>Tipo</th>}
+                  {fieldsConfig.poblacion && <th>Población</th>}
+                  {fieldsConfig.provincia && <th>Provincia</th>}
+                  {fieldsConfig.telefono && <th>Teléfono</th>}
+                  {fieldsConfig.email && <th>Email</th>}
+                  {fieldsConfig.direccion && <th>Dirección</th>}
+                  {fieldsConfig.cod_postal && <th>C.P.</th>}
+                  {fieldsConfig.contacto && <th>Contacto</th>}
+                  {fieldsConfig.web && <th>Web</th>}
+                  {fieldsConfig.observaciones && <th>Observaciones</th>}
+                  {fieldsConfig.estado && <th>Estado</th>}
                   <th>{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody>
                 {clientes.map((cliente) => (
                   <tr key={cliente._id}>
-                    <td className="font-semibold">{cliente.codigo}</td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        {cliente.foto_url ? (
-                          <img 
-                            src={`${BACKEND_URL}${cliente.foto_url}`} 
-                            alt="" 
-                            style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
-                          />
-                        ) : null}
-                        <div>
-                          <div>{cliente.nombre}</div>
-                          {cliente.razon ? <div style={{ fontSize: '0.75rem', color: '#666' }}>{cliente.razon}</div> : null}
+                    {fieldsConfig.codigo && <td className="font-semibold">{cliente.codigo}</td>}
+                    {fieldsConfig.nombre && (
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          {cliente.foto_url ? (
+                            <img 
+                              src={`${BACKEND_URL}${cliente.foto_url}`} 
+                              alt="" 
+                              style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
+                            />
+                          ) : null}
+                          <div>
+                            <div>{cliente.nombre}</div>
+                            {cliente.razon ? <div style={{ fontSize: '0.75rem', color: '#666' }}>{cliente.razon}</div> : null}
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td>{cliente.nif || '-'}</td>
-                    <td>
-                      {cliente.tipo ? (
-                        <span style={{
-                          padding: '0.125rem 0.5rem',
-                          borderRadius: '4px',
-                          fontSize: '0.75rem',
-                          backgroundColor: '#e0f2fe',
-                          color: '#0369a1'
-                        }}>
-                          {cliente.tipo}
+                      </td>
+                    )}
+                    {fieldsConfig.nif && <td>{cliente.nif || '-'}</td>}
+                    {fieldsConfig.tipo && (
+                      <td>
+                        {cliente.tipo ? (
+                          <span style={{
+                            padding: '0.125rem 0.5rem',
+                            borderRadius: '4px',
+                            fontSize: '0.75rem',
+                            backgroundColor: '#e0f2fe',
+                            color: '#0369a1'
+                          }}>
+                            {cliente.tipo}
+                          </span>
+                        ) : '-'}
+                      </td>
+                    )}
+                    {fieldsConfig.poblacion && <td>{cliente.poblacion || '-'}</td>}
+                    {fieldsConfig.provincia && <td>{cliente.provincia || '-'}</td>}
+                    {fieldsConfig.telefono && <td>{cliente.telefono || cliente.movil || '-'}</td>}
+                    {fieldsConfig.email && (
+                      <td>
+                        {cliente.email ? (
+                          <a href={`mailto:${cliente.email}`} style={{ color: 'var(--primary)' }}>
+                            {cliente.email}
+                          </a>
+                        ) : '-'}
+                      </td>
+                    )}
+                    {fieldsConfig.direccion && <td>{cliente.direccion || '-'}</td>}
+                    {fieldsConfig.cod_postal && <td>{cliente.cod_postal || '-'}</td>}
+                    {fieldsConfig.contacto && <td>{cliente.contacto || '-'}</td>}
+                    {fieldsConfig.web && (
+                      <td>
+                        {cliente.web ? (
+                          <a href={cliente.web} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>
+                            {cliente.web}
+                          </a>
+                        ) : '-'}
+                      </td>
+                    )}
+                    {fieldsConfig.observaciones && (
+                      <td style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {cliente.observaciones || '-'}
+                      </td>
+                    )}
+                    {fieldsConfig.estado && (
+                      <td>
+                        <span 
+                          onClick={() => canEdit && handleToggleActivo(cliente._id)}
+                          style={{
+                            padding: '0.125rem 0.5rem',
+                            borderRadius: '4px',
+                            fontSize: '0.75rem',
+                            cursor: canEdit ? 'pointer' : 'default',
+                            backgroundColor: cliente.activo ? '#dcfce7' : '#fee2e2',
+                            color: cliente.activo ? '#166534' : '#dc2626'
+                          }}
+                        >
+                          {cliente.activo ? 'Activo' : 'Inactivo'}
                         </span>
-                      ) : '-'}
-                    </td>
-                    <td>{cliente.poblacion || '-'}</td>
-                    <td>{cliente.telefono || cliente.movil || '-'}</td>
-                    <td>
-                      {cliente.email ? (
-                        <a href={`mailto:${cliente.email}`} style={{ color: 'var(--primary)' }}>
-                          {cliente.email}
-                        </a>
-                      ) : '-'}
-                    </td>
-                    <td>
-                      <span 
-                        onClick={() => canEdit && handleToggleActivo(cliente._id)}
-                        style={{
-                          padding: '0.125rem 0.5rem',
-                          borderRadius: '4px',
-                          fontSize: '0.75rem',
-                          cursor: canEdit ? 'pointer' : 'default',
-                          backgroundColor: cliente.activo ? '#dcfce7' : '#fee2e2',
-                          color: cliente.activo ? '#166534' : '#dc2626'
-                        }}
-                      >
-                        {cliente.activo ? 'Activo' : 'Inactivo'}
-                      </span>
-                    </td>
+                      </td>
+                    )}
                     <td>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <button
