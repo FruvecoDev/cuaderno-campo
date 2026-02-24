@@ -104,7 +104,8 @@ class ContratoCreate(BaseModel):
     tipo: str = "Compra"
     
     # Nuevos campos (catálogos)
-    proveedor_id: Optional[str] = None  # ObjectId ref a proveedores
+    proveedor_id: Optional[str] = None  # ObjectId ref a proveedores (Compra)
+    cliente_id: Optional[str] = None    # ObjectId ref a clientes (Venta)
     cultivo_id: Optional[str] = None    # ObjectId ref a cultivos
     
     # Campos legacy (mantener compatibilidad temporal)
