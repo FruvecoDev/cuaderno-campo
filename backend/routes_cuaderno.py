@@ -16,7 +16,13 @@ from pydantic import BaseModel
 from bson import ObjectId
 from weasyprint import HTML, CSS
 
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+# OpenAI integration - direct without emergentintegrations
+try:
+    from openai import AsyncOpenAI
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
+    AsyncOpenAI = None
 
 from database import (
     parcelas_collection, contratos_collection, tratamientos_collection,
