@@ -231,7 +231,9 @@ const Contratos = () => {
       moneda: contrato.moneda || 'EUR',
       observaciones: contrato.observaciones || '',
       agente_compra: contrato.agente_compra || '',
-      agente_venta: contrato.agente_venta || ''
+      agente_venta: contrato.agente_venta || '',
+      comision_tipo: contrato.comision_tipo || 'porcentaje',
+      comision_valor: contrato.comision_valor || ''
     });
     setShowForm(true);
   };
@@ -254,7 +256,9 @@ const Contratos = () => {
       observaciones: '',
       precios_calidad: [],
       agente_compra: '',
-      agente_venta: ''
+      agente_venta: '',
+      comision_tipo: 'porcentaje',
+      comision_valor: ''
     });
   };
   
