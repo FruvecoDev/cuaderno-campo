@@ -173,6 +173,7 @@ const Contratos = () => {
         setEditingId(null);
         fetchContratos();
         setFormData({
+          tipo: 'Compra',
           campana: '2025/26',
           procedencia: 'Campo',
           fecha_contrato: new Date().toISOString().split('T')[0],
@@ -184,7 +185,11 @@ const Contratos = () => {
           periodo_hasta: '',
           moneda: 'EUR',
           observaciones: '',
-          precios_calidad: []
+          precios_calidad: [],
+          agente_compra: '',
+          agente_venta: '',
+          comision_tipo: 'porcentaje',
+          comision_valor: ''
         });
       }
     } catch (error) {
