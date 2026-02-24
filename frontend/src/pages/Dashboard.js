@@ -258,6 +258,7 @@ const Dashboard = () => {
   const [kpis, setKpis] = useState(null);
   const [parcelas, setParcelas] = useState([]);
   const [visitasPlanificadas, setVisitasPlanificadas] = useState([]);
+  const [selectedVisita, setSelectedVisita] = useState(null); // Modal de visita
   const [loading, setLoading] = useState(true);
   const [mapType, setMapType] = useState('satellite');
   const [notificationStatus, setNotificationStatus] = useState(null);
