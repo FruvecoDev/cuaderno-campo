@@ -591,19 +591,33 @@ def generate_html_cuaderno(data: dict, ai_summary: str = "") -> str:
                         <th>Producto</th>
                         <th>Dosis</th>
                         <th>Motivo</th>
-                        <th>Aplicador</th>
+                        <th>Técnico Aplicador</th>
+                        <th>Máquina</th>
                     </tr>
                 </thead>
                 <tbody>
         """
         for t in tratamientos:
+            # Obtener nombre del aplicador (nuevo campo o legacy)
+            aplicador = t.get('aplicador_nombre') or t.get('tecnico') or t.get('aplicador', 'N/A')
+            if isinstance(aplicador, dict):
+                aplicador = f"{aplicador.get('nombre', '')} {aplicador.get('apellidos', '')}".strip() or 'N/A'
+            
+            # Obtener nombre de la máquina
+            maquina = t.get('maquina_nombre') or 'N/A'
+            if not maquina or maquina == 'N/A':
+                maquinaria_data = t.get('maquinaria')
+                if maquinaria_data and isinstance(maquinaria_data, dict):
+                    maquina = f"{maquinaria_data.get('tipo', '')} {maquinaria_data.get('modelo', '')}".strip() or 'N/A'
+            
             html += f"""
                     <tr>
                         <td>{format_date(t.get('fecha_aplicacion'))}</td>
                         <td>{t.get('producto', 'N/A')}</td>
                         <td>{t.get('dosis', 'N/A')} {t.get('unidad_dosis', '')}</td>
                         <td>{t.get('motivo', 'N/A')}</td>
-                        <td>{t.get('aplicador', 'N/A')}</td>
+                        <td>{aplicador}</td>
+                        <td>{maquina}</td>
                     </tr>
             """
         html += """
