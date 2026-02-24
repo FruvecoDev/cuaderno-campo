@@ -120,6 +120,19 @@ const Albaranes = () => {
   // Flag para evitar múltiples cargas
   const [isInitialized, setIsInitialized] = useState(false);
   
+  // Helper para hacer fetch de forma segura
+  const safeFetch = async (url) => {
+    const response = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const text = await response.text();
+    return {
+      ok: response.ok,
+      status: response.status,
+      data: text ? JSON.parse(text) : null
+    };
+  };
+  
   useEffect(() => {
     // Esperar a que el token esté disponible
     if (!token || isInitialized) return;
@@ -127,32 +140,22 @@ const Albaranes = () => {
     const loadData = async () => {
       setIsInitialized(true);
       
-      // Cargar todos los datos en paralelo
       try {
-        const headers = { 'Authorization': `Bearer ${token}` };
+        // Cargar secuencialmente para evitar problemas
+        const albaranes = await safeFetch(`${BACKEND_URL}/api/albaranes`);
+        if (albaranes.ok) setAlbaranes(albaranes.data?.albaranes || []);
         
-        const [albaranesRes, contratosRes, proveedoresRes, clientesRes, articulosRes] = await Promise.all([
-          fetch(`${BACKEND_URL}/api/albaranes`, { headers }),
-          fetch(`${BACKEND_URL}/api/contratos`, { headers }),
-          fetch(`${BACKEND_URL}/api/proveedores?limit=500`, { headers }),
-          fetch(`${BACKEND_URL}/api/clientes/activos`, { headers }),
-          fetch(`${BACKEND_URL}/api/articulos/activos`, { headers })
-        ]);
+        const contratos = await safeFetch(`${BACKEND_URL}/api/contratos`);
+        if (contratos.ok) setContratos(contratos.data?.contratos || []);
         
-        // Parsear respuestas
-        const [albaranesData, contratosData, proveedoresData, clientesData, articulosData] = await Promise.all([
-          albaranesRes.json(),
-          contratosRes.json(),
-          proveedoresRes.json(),
-          clientesRes.json(),
-          articulosRes.json()
-        ]);
+        const proveedoresRes = await safeFetch(`${BACKEND_URL}/api/proveedores?limit=500`);
+        if (proveedoresRes.ok) setProveedores(proveedoresRes.data?.proveedores || []);
         
-        if (albaranesRes.ok) setAlbaranes(albaranesData.albaranes || []);
-        if (contratosRes.ok) setContratos(contratosData.contratos || []);
-        if (proveedoresRes.ok) setProveedores(proveedoresData.proveedores || []);
-        if (clientesRes.ok) setClientes(clientesData.clientes || []);
-        if (articulosRes.ok) setArticulosCatalogo(articulosData.articulos || []);
+        const clientesRes = await safeFetch(`${BACKEND_URL}/api/clientes/activos`);
+        if (clientesRes.ok) setClientes(clientesRes.data?.clientes || []);
+        
+        const articulosRes = await safeFetch(`${BACKEND_URL}/api/articulos/activos`);
+        if (articulosRes.ok) setArticulosCatalogo(articulosRes.data?.articulos || []);
         
       } catch (error) {
         console.error('Error loading data:', error);
