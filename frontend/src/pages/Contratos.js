@@ -24,6 +24,7 @@ const Contratos = () => {
   const [cultivos, setCultivos] = useState([]);
   
   const [formData, setFormData] = useState({
+    tipo: 'Compra',  // Compra o Venta
     campana: '2025/26',
     procedencia: 'Campo',
     fecha_contrato: new Date().toISOString().split('T')[0],
@@ -35,7 +36,9 @@ const Contratos = () => {
     periodo_hasta: '',
     moneda: 'EUR',
     observaciones: '',
-    precios_calidad: []
+    precios_calidad: [],
+    agente_compra: '',
+    agente_venta: ''
   });
   
   // Estado para saber si el cultivo seleccionado es guisante
