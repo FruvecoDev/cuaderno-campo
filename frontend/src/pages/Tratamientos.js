@@ -1689,15 +1689,23 @@ const Tratamientos = () => {
             <div className="grid-2">
               {fieldsConfig.aplicador_nombre && (
                 <div className="form-group">
-                  <label className="form-label">Aplicador</label>
-                  <input
-                    type="text"
-                    className="form-input"
+                  <label className="form-label">Técnico Aplicador</label>
+                  <select
+                    className="form-select"
                     value={formData.aplicador_nombre}
                     onChange={(e) => setFormData({...formData, aplicador_nombre: e.target.value})}
-                    placeholder="Nombre del aplicador"
-                    data-testid="input-aplicador-nombre"
-                  />
+                    data-testid="select-aplicador"
+                  >
+                    <option value="">-- Seleccionar técnico aplicador --</option>
+                    {tecnicosAplicadores.map(tecnico => (
+                      <option key={tecnico._id} value={tecnico.nombre_completo}>
+                        {tecnico.nombre_completo} ({tecnico.nivel_capacitacion}) - Válido hasta: {tecnico.fecha_validez}
+                      </option>
+                    ))}
+                  </select>
+                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
+                    Solo se muestran técnicos con certificación vigente
+                  </small>
                 </div>
               )}
               
