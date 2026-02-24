@@ -113,6 +113,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
   
+  // Check if user can perform operation type (compra, venta, or both)
+  const canDoOperacion = (tipo) => {
+    if (!user) return false;
+    const userTipo = user.tipo_operacion || 'ambos';
+    if (userTipo === 'ambos') return true;
+    return userTipo === tipo;
+  };
+  
   const value = {
     user,
     token,
@@ -121,6 +129,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     initializeAdmin,
     hasPermission,
+    canDoOperacion,
     isAuthenticated: !!user
   };
   
