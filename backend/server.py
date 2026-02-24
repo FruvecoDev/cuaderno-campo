@@ -80,6 +80,11 @@ app.include_router(cuaderno_router)
 app.include_router(tecnicos_aplicadores_router)
 app.include_router(articulos_router)
 
+# Mount static files for uploaded images
+uploads_dir = "/app/uploads"
+os.makedirs(uploads_dir, exist_ok=True)
+app.mount("/api/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+
 
 @app.get("/")
 async def root():
