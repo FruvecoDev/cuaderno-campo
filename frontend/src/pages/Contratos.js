@@ -17,7 +17,6 @@ const Contratos = () => {
   const { canCreate, canEdit, canDelete, canExport } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   const { t } = useTranslation();
-  const { handlePermissionError } = usePermissionError();
   
   // Estados para catálogos
   const [proveedores, setProveedores] = useState([]);
@@ -262,7 +261,7 @@ const Contratos = () => {
           data-testid="btn-nuevo-contrato"
         >
           <Plus size={18} />
-          Nuevo Contrato
+          {t('contracts.newContract')}
         </PermissionButton>
       </div>
 
@@ -274,11 +273,11 @@ const Contratos = () => {
       
       {showForm && (
         <div className="card mb-6" data-testid="contrato-form">
-          <h2 className="card-title">{editingId ? 'Editar Contrato' : 'Crear Contrato'}</h2>
+          <h2 className="card-title">{editingId ? t('common.edit') + ' ' + t('contracts.title') : t('common.new') + ' ' + t('contracts.title')}</h2>
           <form onSubmit={handleSubmit}>
             <div className="grid-3">
               <div className="form-group">
-                <label className="form-label">Campaña *</label>
+                <label className="form-label">{t('contracts.campaign')} *</label>
                 <input
                   type="text"
                   className="form-input"
@@ -289,7 +288,7 @@ const Contratos = () => {
               </div>
               
               <div className="form-group">
-                <label className="form-label">Procedencia *</label>
+                <label className="form-label">{t('common.type')} *</label>
                 <select
                   className="form-select"
                   value={formData.procedencia}
@@ -303,7 +302,7 @@ const Contratos = () => {
               </div>
               
               <div className="form-group">
-                <label className="form-label">Fecha Contrato *</label>
+                <label className="form-label">{t('common.date')} *</label>
                 <input
                   type="date"
                   className="form-input"
@@ -316,14 +315,14 @@ const Contratos = () => {
             
             <div className="grid-2">
               <div className="form-group">
-                <label className="form-label">Proveedor *</label>
+                <label className="form-label">{t('contracts.provider')} *</label>
                 <select
                   className="form-select"
                   value={formData.proveedor_id}
                   onChange={(e) => setFormData({...formData, proveedor_id: e.target.value})}
                   required
                 >
-                  <option value="">Seleccionar proveedor...</option>
+                  <option value="">{t('common.selectOption')}...</option>
                   {proveedores.map(p => (
                     <option key={p._id} value={p._id}>
                       {p.nombre} {p.cif_nif ? `(${p.cif_nif})` : ''}
@@ -333,14 +332,14 @@ const Contratos = () => {
               </div>
               
               <div className="form-group">
-                <label className="form-label">Cultivo *</label>
+                <label className="form-label">{t('contracts.crop')} *</label>
                 <select
                   className="form-select"
                   value={formData.cultivo_id}
                   onChange={(e) => setFormData({...formData, cultivo_id: e.target.value})}
                   required
                 >
-                  <option value="">Seleccionar cultivo...</option>
+                  <option value="">{t('common.selectOption')}...</option>
                   {cultivos.map(c => (
                     <option key={c._id} value={c._id}>
                       {c.nombre} {c.variedad ? `- ${c.variedad}` : ''} ({c.tipo})
@@ -352,7 +351,7 @@ const Contratos = () => {
             
             <div className="grid-2">
               <div className="form-group">
-                <label className="form-label">Cantidad (kg) *</label>
+                <label className="form-label">{t('common.quantity')} (kg) *</label>
                 <input
                   type="number"
                   step="0.01"
@@ -366,7 +365,7 @@ const Contratos = () => {
             
             <div className="grid-3">
               <div className="form-group">
-                <label className="form-label">Precio (€/kg) *</label>
+                <label className="form-label">{t('contracts.price')} (€/kg) *</label>
                 <input
                   type="number"
                   step="0.01"
@@ -378,7 +377,7 @@ const Contratos = () => {
               </div>
               
               <div className="form-group">
-                <label className="form-label">Periodo Desde *</label>
+                <label className="form-label">{t('contracts.startDate')} *</label>
                 <input
                   type="date"
                   className="form-input"
@@ -389,7 +388,7 @@ const Contratos = () => {
               </div>
               
               <div className="form-group">
-                <label className="form-label">Periodo Hasta *</label>
+                <label className="form-label">{t('contracts.endDate')} *</label>
                 <input
                   type="date"
                   className="form-input"
@@ -494,25 +493,25 @@ const Contratos = () => {
             )}
             
             <div className="form-group">
-              <label className="form-label">Observaciones</label>
+              <label className="form-label">{t('common.observations')}</label>
               <textarea
                 className="form-textarea"
                 value={formData.observaciones}
                 onChange={(e) => setFormData({...formData, observaciones: e.target.value})}
-                placeholder="Observaciones adicionales..."
+                placeholder={t('common.observations')}...
               />
             </div>
             
             <div className="flex gap-2">
               <button type="submit" className="btn btn-primary" data-testid="btn-guardar-contrato">
-                {editingId ? 'Actualizar Contrato' : 'Guardar Contrato'}
+                {editingId ? t('common.edit') : t('common.save')}
               </button>
               <button
                 type="button"
                 className="btn btn-secondary"
                 onClick={handleCancelEdit}
               >
-                Cancelar
+                {t('common.cancel')}
               </button>
             </div>
           </form>
@@ -520,25 +519,25 @@ const Contratos = () => {
       )}
       
       <div className="card">
-        <h2 className="card-title">Lista de Contratos</h2>
+        <h2 className="card-title">{t('contracts.title')}</h2>
         {loading ? (
-          <p>Cargando contratos...</p>
+          <p>{t('common.loading')}</p>
         ) : contratos.length === 0 ? (
-          <p className="text-muted">No hay contratos registrados. Crea el primero!</p>
+          <p className="text-muted">{t('common.noData')}</p>
         ) : (
           <div className="table-container">
             <table data-testid="contratos-table">
               <thead>
                 <tr>
-                  <th>ID Contrato</th>
-                  <th>Campaña</th>
-                  <th>Proveedor</th>
-                  <th>Cultivo</th>
-                  <th>Cantidad (kg)</th>
-                  <th>Precio (€/kg)</th>
-                  <th>Total (€)</th>
-                  <th>Fecha</th>
-                  {(canEdit || canDelete) ? <th>Acciones</th> : null}
+                  <th>{t('contracts.contractNumber')}</th>
+                  <th>{t('contracts.campaign')}</th>
+                  <th>{t('contracts.provider')}</th>
+                  <th>{t('contracts.crop')}</th>
+                  <th>{t('common.quantity')} (kg)</th>
+                  <th>{t('contracts.price')} (€/kg)</th>
+                  <th>{t('common.total')} (€)</th>
+                  <th>{t('common.date')}</th>
+                  {(canEdit || canDelete) ? <th>{t('common.actions')}</th> : null}
                 </tr>
               </thead>
               <tbody>
