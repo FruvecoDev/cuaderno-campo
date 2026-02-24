@@ -48,6 +48,7 @@ const TABLE_LABELS = {
 };
 
 const Fitosanitarios = () => {
+  const { t } = useTranslation();
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
