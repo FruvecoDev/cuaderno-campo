@@ -51,12 +51,15 @@ class UserBase(BaseModel):
     can_delete: bool = False
     can_export: bool = True
     
-    # Module access
+    # Module access (legacy)
     modules_access: List[str] = [
         "dashboard", "contratos", "parcelas", "fincas",
         "visitas", "tareas", "tratamientos", "irrigaciones",
         "recetas", "albaranes", "cosechas", "documentos"
     ]
+    
+    # Menu permissions - dict with path as key and boolean as value
+    menu_permissions: Dict[str, bool] = Field(default_factory=lambda: DEFAULT_MENU_PERMISSIONS.copy())
     
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
