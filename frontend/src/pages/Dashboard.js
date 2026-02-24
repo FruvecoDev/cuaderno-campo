@@ -626,7 +626,7 @@ const Dashboard = () => {
             backgroundColor: 'hsl(var(--muted))',
             borderRadius: '8px'
           }}>
-            <p className="text-muted">No hay parcelas con geometría definida</p>
+            <p className="text-muted">{t('dashboard.map.noParcelsWithGeometry')}</p>
           </div>
         )}
       </div>
@@ -636,10 +636,11 @@ const Dashboard = () => {
         {/* Calendario Visual */}
         <div className="card" data-testid="calendario-visitas">
           <h2 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <CalendarIcon size={20} /> Calendario de Visitas
+            <CalendarIcon size={20} /> {t('dashboard.calendar.title')}
           </h2>
           <VisitasCalendar 
-            visitas={visitasPlanificadas} 
+            visitas={visitasPlanificadas}
+            t={t}
             onDateClick={(date) => {
               const dateStr = date.toISOString().split('T')[0];
               navigate(`/visitas?fecha=${dateStr}`);
@@ -651,13 +652,13 @@ const Dashboard = () => {
         <div className="card" data-testid="planificador-visitas">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Bell size={20} /> Próximas Visitas
+              <Bell size={20} /> {t('dashboard.visits.title')}
             </h2>
             <button 
               onClick={() => navigate('/visitas?planificar=true')}
               className="btn btn-sm btn-primary"
             >
-              <CalendarIcon size={14} style={{ marginRight: '0.25rem' }} /> Nueva
+              <CalendarIcon size={14} style={{ marginRight: '0.25rem' }} /> {t('dashboard.visits.new')}
             </button>
           </div>
           
