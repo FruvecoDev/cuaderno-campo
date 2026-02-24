@@ -198,7 +198,7 @@ async def delete_imagen_placa_ce(
         raise HTTPException(status_code=404, detail="Maquinaria no encontrada")
     
     # Eliminar archivo si existe
-    file_path = maquinaria.get("imagen_placa_ce_url")
+    file_path = maquinaria.get("imagen_placa_ce_path")
     if file_path and os.path.exists(file_path):
         os.remove(file_path)
     
@@ -207,6 +207,7 @@ async def delete_imagen_placa_ce(
         {"_id": ObjectId(maquinaria_id)},
         {"$set": {
             "imagen_placa_ce_url": None,
+            "imagen_placa_ce_path": None,
             "imagen_placa_ce_nombre": None,
             "updated_at": datetime.now()
         }}
