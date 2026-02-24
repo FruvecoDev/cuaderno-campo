@@ -272,22 +272,65 @@ const Maquinaria = () => {
     setImagePreview(null);
   };
   
+  // Estado para drag and drop
+  const [isDragging, setIsDragging] = useState(false);
+  
   // Funciones para manejo de imagen de placa CE
+  const validateAndSetImage = (file) => {
+    if (!file) return false;
+    
+    // Validar tipo
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setError('Tipo de archivo no permitido. Use JPEG, PNG o WEBP');
+      setTimeout(() => setError(null), 5000);
+      return false;
+    }
+    // Validar tamaño (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setError('El archivo excede el tamaño máximo de 10MB');
+      setTimeout(() => setError(null), 5000);
+      return false;
+    }
+    
+    setSelectedImage(file);
+    setImagePreview(URL.createObjectURL(file));
+    return true;
+  };
+  
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      // Validar tipo
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-      if (!allowedTypes.includes(file.type)) {
-        setError('Tipo de archivo no permitido. Use JPEG, PNG o WEBP');
-        setTimeout(() => setError(null), 5000);
-        return;
-      }
-      // Validar tamaño (10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        setError('El archivo excede el tamaño máximo de 10MB');
-        setTimeout(() => setError(null), 5000);
-        return;
+    validateAndSetImage(file);
+  };
+  
+  // Drag and drop handlers
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+  
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+  
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      validateAndSetImage(files[0]);
+    }
+  };
       }
       setSelectedImage(file);
       setImagePreview(URL.createObjectURL(file));
