@@ -764,7 +764,7 @@ const Clientes = () => {
                   <th>Teléfono</th>
                   <th>Email</th>
                   <th>Estado</th>
-                  {(canEdit || canDelete) ? <th>{t('common.actions')}</th> : null}
+                  <th>{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody>
