@@ -263,9 +263,13 @@ const Dashboard = () => {
   const [notificationStatus, setNotificationStatus] = useState(null);
   const [sendingNotification, setSendingNotification] = useState(false);
   const [notificationResult, setNotificationResult] = useState(null);
-  const { token, user } = useAuth();
+  const { token, user, canDoOperacion } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  
+  // Permisos de operación
+  const puedeCompra = canDoOperacion('compra');
+  const puedeVenta = canDoOperacion('venta');
   
   useEffect(() => {
     fetchDashboardData();
