@@ -240,13 +240,13 @@ const Irrigaciones = () => {
     <div data-testid="irrigaciones-page">
       <div className="flex justify-between items-center mb-6">
         <h1 style={{ fontSize: '2rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Droplets size={28} /> Irrigaciones
+          <Droplets size={28} /> {t('irrigations.title')}
         </h1>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button 
             className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setShowFieldsConfig(!showFieldsConfig)}
-            title="Configurar campos visibles"
+            title={t('common.settings')}
             data-testid="btn-config-fields"
           >
             <Settings size={18} />
@@ -257,7 +257,7 @@ const Irrigaciones = () => {
             className="btn btn-primary"
             data-testid="btn-nueva-irrigacion"
           >
-            <Plus size={18} /> Nueva Irrigación
+            <Plus size={18} /> {t('irrigations.newIrrigation')}
           </PermissionButton>
         </div>
       </div>
@@ -272,7 +272,7 @@ const Irrigaciones = () => {
       {showFieldsConfig && (
         <div className="card mb-6" data-testid="fields-config-panel">
           <div className="flex justify-between items-center mb-4">
-            <h3 style={{ fontWeight: '600' }}>Configurar Campos Visibles</h3>
+            <h3 style={{ fontWeight: '600' }}>{t('common.settings')}</h3>
             <button className="btn btn-sm btn-secondary" onClick={() => setShowFieldsConfig(false)}><X size={16} /></button>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '0.75rem' }}>
@@ -290,24 +290,24 @@ const Irrigaciones = () => {
       <div className="card mb-6" data-testid="filters-panel">
         <div className="flex justify-between items-center mb-4">
           <h3 style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Filter size={18} /> Filtros de Búsqueda
+            <Filter size={18} /> {t('common.filters')}
           </h3>
           {hasActiveFilters && (
-            <button className="btn btn-sm btn-secondary" onClick={clearFilters}>Limpiar filtros</button>
+            <button className="btn btn-sm btn-secondary" onClick={clearFilters}>{t('common.clear')}</button>
           )}
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Sistema</label>
+            <label className="form-label">{t('irrigations.method')}</label>
             <select className="form-select" value={filters.sistema} onChange={(e) => setFilters({...filters, sistema: e.target.value})} data-testid="filter-sistema">
-              <option value="">Todos</option>
+              <option value="">{t('common.all')}</option>
               {filterOptions.sistemas.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Parcela</label>
+            <label className="form-label">{t('parcels.title')}</label>
             <select className="form-select" value={filters.parcela} onChange={(e) => setFilters({...filters, parcela: e.target.value})} data-testid="filter-parcela">
-              <option value="">Todas</option>
+              <option value="">{t('common.all')}</option>
               {filterOptions.parcelas.map(p => <option key={p.id} value={p.id}>{p.codigo}</option>)}
             </select>
           </div>
@@ -321,80 +321,80 @@ const Irrigaciones = () => {
       
       {showForm && (
         <div className="card mb-6" data-testid="irrigacion-form">
-          <h2 className="card-title">{editingId ? 'Editar Irrigación' : 'Nueva Irrigación'}</h2>
+          <h2 className="card-title">{editingId ? t('common.edit') + ' ' + t('irrigations.title') : t('irrigations.newIrrigation')}</h2>
           <form onSubmit={handleSubmit}>
             <div className="grid-2">
               {fieldsConfig.fecha && (
                 <div className="form-group">
-                  <label className="form-label">Fecha *</label>
+                  <label className="form-label">{t('common.date')} *</label>
                   <input type="date" className="form-input" value={formData.fecha} onChange={(e) => setFormData({...formData, fecha: e.target.value})} required data-testid="input-fecha" />
                 </div>
               )}
               {fieldsConfig.sistema && (
                 <div className="form-group">
-                  <label className="form-label">Sistema *</label>
+                  <label className="form-label">{t('irrigations.method')} *</label>
                   <select className="form-select" value={formData.sistema} onChange={(e) => setFormData({...formData, sistema: e.target.value})} required data-testid="select-sistema">
-                    <option value="Goteo">Goteo</option>
-                    <option value="Aspersión">Aspersión</option>
-                    <option value="Inundación">Inundación</option>
+                    <option value="Goteo">{t('irrigations.drip')}</option>
+                    <option value="Aspersión">{t('irrigations.sprinkler')}</option>
+                    <option value="Inundación">{t('irrigations.flood')}</option>
                     <option value="Microaspersión">Microaspersión</option>
                   </select>
                 </div>
               )}
               {fieldsConfig.duracion && (
                 <div className="form-group">
-                  <label className="form-label">Duración (horas) *</label>
+                  <label className="form-label">{t('irrigations.duration')} (h) *</label>
                   <input type="number" step="0.1" min="0" className="form-input" value={formData.duracion} onChange={(e) => setFormData({...formData, duracion: e.target.value})} required data-testid="input-duracion" />
                 </div>
               )}
               {fieldsConfig.volumen && (
                 <div className="form-group">
-                  <label className="form-label">Volumen (m³) *</label>
+                  <label className="form-label">{t('irrigations.waterVolume')} (m³) *</label>
                   <input type="number" step="0.01" min="0" className="form-input" value={formData.volumen} onChange={(e) => setFormData({...formData, volumen: e.target.value})} required data-testid="input-volumen" />
                 </div>
               )}
               {fieldsConfig.coste && (
                 <div className="form-group">
-                  <label className="form-label">Coste (€) *</label>
+                  <label className="form-label">{t('common.price')} (€) *</label>
                   <input type="number" step="0.01" min="0" className="form-input" value={formData.coste} onChange={(e) => setFormData({...formData, coste: e.target.value})} required data-testid="input-coste" />
                 </div>
               )}
               {fieldsConfig.parcela_id && (
                 <div className="form-group">
-                  <label className="form-label">Parcela</label>
+                  <label className="form-label">{t('parcels.title')}</label>
                   <select className="form-select" value={formData.parcela_id} onChange={(e) => setFormData({...formData, parcela_id: e.target.value})} data-testid="select-parcela">
-                    <option value="">Sin parcela asignada</option>
+                    <option value="">{t('common.selectOption')}</option>
                     {parcelas.map(p => <option key={p._id} value={p._id}>{p.codigo_plantacion} - {p.cultivo}</option>)}
                   </select>
                 </div>
               )}
             </div>
             <div className="flex gap-2">
-              <button type="submit" className="btn btn-primary" data-testid="btn-guardar">{editingId ? 'Actualizar' : 'Guardar'}</button>
-              <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>Cancelar</button>
+              <button type="submit" className="btn btn-primary" data-testid="btn-guardar">{editingId ? t('common.edit') : t('common.save')}</button>
+              <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>{t('common.cancel')}</button>
             </div>
           </form>
         </div>
       )}
       
       <div className="card">
-        <h2 className="card-title">Lista de Irrigaciones ({filteredIrrigaciones.length})</h2>
+        <h2 className="card-title">{t('irrigations.title')} ({filteredIrrigaciones.length})</h2>
         {loading ? (
-          <p>Cargando...</p>
+          <p>{t('common.loading')}</p>
         ) : filteredIrrigaciones.length === 0 ? (
-          <p className="text-muted">{hasActiveFilters ? 'No hay irrigaciones que coincidan con los filtros' : 'No hay irrigaciones registradas'}</p>
+          <p className="text-muted">{hasActiveFilters ? t('messages.noResults') : t('common.noData')}</p>
         ) : (
           <div className="table-container">
             <table data-testid="irrigaciones-table">
               <thead>
                 <tr>
-                  {fieldsConfig.fecha ? <th>Fecha</th> : null}
-                  {fieldsConfig.sistema ? <th>Sistema</th> : null}
-                  {fieldsConfig.duracion ? <th>Duración (h)</th> : null}
-                  {fieldsConfig.volumen ? <th>Volumen (m³)</th> : null}
-                  {fieldsConfig.coste ? <th>Coste</th> : null}
-                  {fieldsConfig.parcela_id ? <th>Parcela</th> : null}
-                  {(canEdit || canDelete) ? <th>Acciones</th> : null}
+                  {fieldsConfig.fecha ? <th>{t('common.date')}</th> : null}
+                  {fieldsConfig.sistema ? <th>{t('irrigations.method')}</th> : null}
+                  {fieldsConfig.duracion ? <th>{t('irrigations.duration')} (h)</th> : null}
+                  {fieldsConfig.volumen ? <th>{t('irrigations.waterVolume')} (m³)</th> : null}
+                  {fieldsConfig.coste ? <th>{t('common.price')}</th> : null}
+                  {fieldsConfig.parcela_id ? <th>{t('parcels.title')}</th> : null}
+                  {(canEdit || canDelete) ? <th>{t('common.actions')}</th> : null}
                 </tr>
               </thead>
               <tbody>
