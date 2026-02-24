@@ -230,12 +230,23 @@ const Albaranes = () => {
     setSelectedContrato(contrato);
     
     if (contrato) {
+      const tipoContrato = contrato.tipo || 'Compra';
+      const esVenta = tipoContrato === 'Venta';
       const proveedorContrato = contrato.proveedor || '';
+      const clienteContrato = contrato.cliente || '';
+      
+      // El tipo de albarán se ajusta según el tipo de contrato
+      const tipoAlbaran = esVenta ? 'Albarán de venta' : 'Albarán de compra';
+      
       setFormData(prev => ({
         ...prev,
         contrato_id: contratoId,
+        tipo: tipoAlbaran,
+        tipo_contrato: tipoContrato,
         proveedor_contrato: proveedorContrato,
-        proveedor: proveedorContrato,  // Por defecto, mismo proveedor del contrato
+        cliente_contrato: clienteContrato,
+        proveedor: esVenta ? '' : proveedorContrato,  // Solo para compras
+        cliente: esVenta ? clienteContrato : '',       // Solo para ventas
         usar_otro_proveedor: false,
         cultivo: contrato.cultivo || '',
         parcela_codigo: contrato.parcela_codigo || contrato.parcela || '',
@@ -246,8 +257,11 @@ const Albaranes = () => {
       setFormData(prev => ({
         ...prev,
         contrato_id: '',
+        tipo_contrato: '',
         proveedor_contrato: '',
+        cliente_contrato: '',
         proveedor: '',
+        cliente: '',
         usar_otro_proveedor: false,
         cultivo: '',
         parcela_codigo: '',
