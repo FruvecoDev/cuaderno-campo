@@ -196,10 +196,6 @@ const Albaranes = () => {
   useEffect(() => {
     localStorage.setItem('albaranes_fields_config_v2', JSON.stringify(fieldsConfig));
   }, [fieldsConfig]);
-    } finally {
-      setLoading(false);
-    }
-  };
   
   // Cuando se selecciona un contrato, heredar datos
   const handleContratoSelect = (contratoId) => {
