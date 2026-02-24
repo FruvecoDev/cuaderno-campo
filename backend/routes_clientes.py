@@ -19,6 +19,8 @@ from rbac_guards import (
 router = APIRouter(prefix="/api", tags=["clientes"])
 
 clientes_collection = db['clientes']
+contratos_collection = db['contratos']
+albaranes_collection = db['albaranes']
 
 # Directorio para fotos de clientes
 UPLOAD_DIR = "/app/uploads/clientes"
