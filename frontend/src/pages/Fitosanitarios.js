@@ -263,11 +263,11 @@ const Fitosanitarios = () => {
           fetchProductos();
         }
       } else {
-        setError(data.detail || 'Error en la importación');
+        setError(data.detail || t('phytosanitary.errorImport'));
       }
     } catch (error) {
       console.error('Error importing:', error);
-      setError('Error al importar el archivo');
+      setError(t('phytosanitary.errorImportFile'));
     } finally {
       setImportLoading(false);
       if (fileInputRef.current) {
