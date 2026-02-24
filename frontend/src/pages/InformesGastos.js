@@ -862,37 +862,85 @@ const InformesGastos = () => {
               {loadingDetalle ? (
                 <p style={{ textAlign: 'center', padding: '2rem' }}>Cargando...</p>
               ) : (
-                <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
-                  <table className="table" style={{ fontSize: '0.875rem' }}>
-                    <thead>
-                      <tr>
-                        <th>Fecha</th>
-                        <th>Tipo</th>
-                        <th style={{ textAlign: 'right' }}>Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {detalleAlbaranes.map((albaran, idx) => (
-                        <tr key={idx}>
-                          <td>{albaran.fecha ? new Date(albaran.fecha).toLocaleDateString('es-ES') : '-'}</td>
-                          <td>
-                            <span style={{
-                              padding: '0.125rem 0.375rem',
-                              borderRadius: '4px',
-                              fontSize: '0.75rem',
-                              backgroundColor: albaran.tipo === 'Entrada' ? '#dcfce7' : '#fee2e2',
-                              color: albaran.tipo === 'Entrada' ? '#166534' : '#991b1b'
-                            }}>
-                              {albaran.tipo}
-                            </span>
-                          </td>
-                          <td style={{ textAlign: 'right', fontWeight: '500' }}>
-                            {formatCurrency(albaran.total_albaran)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
+                  {detalleAlbaranes.map((albaran, idx) => (
+                    <div 
+                      key={idx} 
+                      style={{ 
+                        marginBottom: '1rem', 
+                        border: '1px solid hsl(var(--border))', 
+                        borderRadius: '8px',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      {/* Cabecera del albarán */}
+                      <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        padding: '0.75rem',
+                        backgroundColor: 'hsl(var(--muted))'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <span style={{ fontWeight: '600' }}>
+                            {albaran.fecha ? new Date(albaran.fecha).toLocaleDateString('es-ES') : '-'}
+                          </span>
+                          <span style={{
+                            padding: '0.125rem 0.5rem',
+                            borderRadius: '4px',
+                            fontSize: '0.75rem',
+                            backgroundColor: albaran.tipo === 'Entrada' ? '#dcfce7' : '#fee2e2',
+                            color: albaran.tipo === 'Entrada' ? '#166534' : '#991b1b'
+                          }}>
+                            {albaran.tipo}
+                          </span>
+                        </div>
+                        <span style={{ fontWeight: '700', color: '#16a34a' }}>
+                          {formatCurrency(albaran.total_albaran)}
+                        </span>
+                      </div>
+                      
+                      {/* Artículos del albarán */}
+                      {albaran.items && albaran.items.length > 0 ? (
+                        <table className="table" style={{ fontSize: '0.8rem', marginBottom: 0 }}>
+                          <thead>
+                            <tr style={{ backgroundColor: 'hsl(var(--muted) / 0.5)' }}>
+                              <th style={{ padding: '0.5rem' }}>Descripción</th>
+                              <th style={{ padding: '0.5rem', textAlign: 'right', width: '70px' }}>Cant.</th>
+                              <th style={{ padding: '0.5rem', textAlign: 'center', width: '50px' }}>Ud.</th>
+                              <th style={{ padding: '0.5rem', textAlign: 'right', width: '80px' }}>P.Unit.</th>
+                              <th style={{ padding: '0.5rem', textAlign: 'right', width: '90px' }}>Total</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {albaran.items.map((item, itemIdx) => (
+                              <tr key={itemIdx}>
+                                <td style={{ padding: '0.5rem' }}>
+                                  {item.descripcion || 'Sin descripción'}
+                                </td>
+                                <td style={{ padding: '0.5rem', textAlign: 'right' }}>
+                                  {item.cantidad || '-'}
+                                </td>
+                                <td style={{ padding: '0.5rem', textAlign: 'center', fontSize: '0.75rem' }}>
+                                  {item.unidad || '-'}
+                                </td>
+                                <td style={{ padding: '0.5rem', textAlign: 'right' }}>
+                                  {item.precio_unitario ? `${parseFloat(item.precio_unitario).toFixed(2)} €` : '-'}
+                                </td>
+                                <td style={{ padding: '0.5rem', textAlign: 'right', fontWeight: '500' }}>
+                                  {item.total ? formatCurrency(item.total) : '-'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      ) : (
+                        <div style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
+                          Sin artículos detallados
+                        </div>
+                      )}
+                    </div>
+                  ))}
                   {detalleAlbaranes.length === 0 && (
                     <p style={{ textAlign: 'center', color: 'hsl(var(--muted-foreground))', padding: '1rem' }}>
                       No hay albaranes para mostrar
