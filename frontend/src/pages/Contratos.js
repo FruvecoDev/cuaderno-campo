@@ -137,12 +137,12 @@ const Contratos = () => {
         }
       });
       
+      const data = await response.json();
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
+        throw { status: response.status, message: data.detail };
       }
       
-      const data = await response.json();
       setContratos(data.contratos || []);
     } catch (error) {
       console.error('Error fetching contratos:', error);
