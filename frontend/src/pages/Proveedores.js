@@ -182,6 +182,14 @@ const Proveedores = () => {
     (p.cif_nif && p.cif_nif.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  useEffect(() => {
+    localStorage.setItem('proveedores_fields_config', JSON.stringify(fieldsConfig));
+  }, [fieldsConfig]);
+
+  const toggleFieldConfig = (field) => {
+    setFieldsConfig(prev => ({ ...prev, [field]: !prev[field] }));
+  };
+
   return (
     <div data-testid="proveedores-page">
       <div className="flex justify-between items-center mb-6">
