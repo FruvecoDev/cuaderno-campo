@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional, List
+from typing import Optional, List, Dict
 from datetime import datetime
 from enum import Enum
 
@@ -8,6 +8,36 @@ class UserRole(str, Enum):
     MANAGER = "Manager"
     TECHNICIAN = "Technician"
     VIEWER = "Viewer"
+
+# All available menu items with their paths
+ALL_MENU_ITEMS = [
+    {"path": "/dashboard", "label": "Dashboard", "section": "General"},
+    {"path": "/asistente-ia", "label": "Asistente IA", "section": "General"},
+    {"path": "/contratos", "label": "Contratos", "section": "Gestión Principal"},
+    {"path": "/parcelas", "label": "Parcelas", "section": "Gestión Principal"},
+    {"path": "/fincas", "label": "Fincas", "section": "Gestión Principal"},
+    {"path": "/visitas", "label": "Visitas", "section": "Actividades"},
+    {"path": "/tareas", "label": "Tareas", "section": "Actividades"},
+    {"path": "/tratamientos", "label": "Tratamientos", "section": "Actividades"},
+    {"path": "/irrigaciones", "label": "Irrigaciones", "section": "Actividades"},
+    {"path": "/evaluaciones", "label": "Evaluaciones", "section": "Actividades"},
+    {"path": "/recetas", "label": "Recetas", "section": "Administración"},
+    {"path": "/albaranes", "label": "Albaranes", "section": "Administración"},
+    {"path": "/cosechas", "label": "Cosechas", "section": "Administración"},
+    {"path": "/documentos", "label": "Documentos", "section": "Administración"},
+    {"path": "/informes-gastos", "label": "Informes Gastos", "section": "Administración"},
+    {"path": "/proveedores", "label": "Proveedores", "section": "Catálogos"},
+    {"path": "/cultivos", "label": "Cultivos", "section": "Catálogos"},
+    {"path": "/maquinaria", "label": "Maquinaria", "section": "Catálogos"},
+    {"path": "/fitosanitarios", "label": "Fitosanitarios", "section": "Catálogos"},
+    {"path": "/tecnicos-aplicadores", "label": "Técnicos Aplicadores", "section": "Catálogos"},
+    {"path": "/articulos-explotacion", "label": "Artículos Explotación", "section": "Catálogos"},
+    {"path": "/usuarios", "label": "Usuarios", "section": "Configuración"},
+    {"path": "/traducciones", "label": "Traducciones", "section": "Configuración"},
+]
+
+# Default menu permissions - all enabled
+DEFAULT_MENU_PERMISSIONS = {item["path"]: True for item in ALL_MENU_ITEMS}
 
 class UserBase(BaseModel):
     email: EmailStr
