@@ -172,6 +172,18 @@ const Evaluaciones = () => {
   const [newQuestionText, setNewQuestionText] = useState('');
   const [newQuestionType, setNewQuestionType] = useState('texto');
   
+  // DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+  
   // URL params para preselección de parcela
   const [searchParams, setSearchParams] = useSearchParams();
   
