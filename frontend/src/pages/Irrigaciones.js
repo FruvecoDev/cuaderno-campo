@@ -27,6 +27,7 @@ const FIELD_LABELS = {
 };
 
 const Irrigaciones = () => {
+  const { t } = useTranslation();
   const [irrigaciones, setIrrigaciones] = useState([]);
   const [parcelas, setParcelas] = useState([]);
   const [loading, setLoading] = useState(true);
