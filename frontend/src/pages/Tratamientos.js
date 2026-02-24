@@ -792,6 +792,9 @@ const Tratamientos = () => {
     tipos: []
   });
   
+  // Técnicos Aplicadores para selector
+  const [tecnicosAplicadores, setTecnicosAplicadores] = useState([]);
+  
   // Form data SIMPLIFICADO
   const [formData, setFormData] = useState({
     tipo_tratamiento: 'FITOSANITARIOS',
