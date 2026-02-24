@@ -413,34 +413,83 @@ const Contratos = () => {
               </div>
             </div>
             
-            {/* Agente según tipo de contrato */}
-            {formData.tipo === 'Compra' && (
-              <div className="form-group" style={{ marginBottom: '1rem' }}>
-                <label className="form-label">Agente de Compra</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.agente_compra}
-                  onChange={(e) => setFormData({...formData, agente_compra: e.target.value})}
-                  placeholder="Nombre del agente de compra"
-                  data-testid="input-agente-compra"
-                />
+            {/* Agente según tipo de contrato con selector y comisión */}
+            <div style={{ 
+              background: 'hsl(var(--muted))', 
+              padding: '1rem', 
+              borderRadius: '8px', 
+              marginBottom: '1rem' 
+            }}>
+              <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.9rem', fontWeight: '600' }}>
+                Agente {formData.tipo === 'Compra' ? 'de Compra' : 'de Venta'} y Comisión
+              </h4>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '1rem' }}>
+                {formData.tipo === 'Compra' ? (
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Agente de Compra</label>
+                    <select
+                      className="form-select"
+                      value={formData.agente_compra}
+                      onChange={(e) => setFormData({...formData, agente_compra: e.target.value})}
+                      data-testid="select-agente-compra"
+                    >
+                      <option value="">Sin agente</option>
+                      {agentesCompra.map(a => (
+                        <option key={a._id} value={a._id}>
+                          {a.codigo} - {a.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Agente de Venta</label>
+                    <select
+                      className="form-select"
+                      value={formData.agente_venta}
+                      onChange={(e) => setFormData({...formData, agente_venta: e.target.value})}
+                      data-testid="select-agente-venta"
+                    >
+                      <option value="">Sin agente</option>
+                      {agentesVenta.map(a => (
+                        <option key={a._id} value={a._id}>
+                          {a.codigo} - {a.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Tipo Comisión</label>
+                  <select
+                    className="form-select"
+                    value={formData.comision_tipo}
+                    onChange={(e) => setFormData({...formData, comision_tipo: e.target.value})}
+                    data-testid="select-comision-tipo"
+                  >
+                    <option value="porcentaje">Porcentaje (%)</option>
+                    <option value="euro_kilo">€ por Kilo</option>
+                  </select>
+                </div>
+                
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">
+                    Comisión {formData.comision_tipo === 'porcentaje' ? '(%)' : '(€/kg)'}
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    className="form-input"
+                    value={formData.comision_valor}
+                    onChange={(e) => setFormData({...formData, comision_valor: e.target.value})}
+                    placeholder={formData.comision_tipo === 'porcentaje' ? 'Ej: 2.5' : 'Ej: 0.05'}
+                    data-testid="input-comision-valor"
+                  />
+                </div>
               </div>
-            )}
-            
-            {formData.tipo === 'Venta' && (
-              <div className="form-group" style={{ marginBottom: '1rem' }}>
-                <label className="form-label">Agente de Venta</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.agente_venta}
-                  onChange={(e) => setFormData({...formData, agente_venta: e.target.value})}
-                  placeholder="Nombre del agente de venta"
-                  data-testid="input-agente-venta"
-                />
-              </div>
-            )}
+            </div>
             
             <div className="grid-2">
               <div className="form-group">
