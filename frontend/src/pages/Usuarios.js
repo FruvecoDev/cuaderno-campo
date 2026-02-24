@@ -538,6 +538,19 @@ const Usuarios = () => {
                             </button>
                             <button
                               className="btn btn-sm"
+                              onClick={() => openTipoOperacionModal(user)}
+                              title="Tipo de operación (Compra/Venta)"
+                              data-testid={`btn-tipo-op-${user._id}`}
+                              style={{ 
+                                backgroundColor: '#8b5cf6', 
+                                color: 'white',
+                                border: 'none'
+                              }}
+                            >
+                              <ShoppingBag size={14} />
+                            </button>
+                            <button
+                              className="btn btn-sm"
                               onClick={() => openPasswordModal(user)}
                               title="Cambiar contraseña"
                               data-testid={`btn-password-${user._id}`}
