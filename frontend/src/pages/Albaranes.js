@@ -565,8 +565,8 @@ const Albaranes = () => {
               onChange={(e) => setFilters({...filters, tipo: e.target.value})}
             >
               <option value="">Todos</option>
-              <option value="Entrada">Entrada</option>
-              <option value="Salida">Salida</option>
+              <option value="Albarán de compra">Albarán de compra</option>
+              <option value="Albarán de venta">Albarán de venta</option>
             </select>
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
