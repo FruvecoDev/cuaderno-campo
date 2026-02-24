@@ -115,7 +115,22 @@ const Albaranes = () => {
     fetchAlbaranes();
     fetchContratos();
     fetchProveedores();
+    fetchArticulosCatalogo();
   }, []);
+  
+  const fetchArticulosCatalogo = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/articulos/activos`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setArticulosCatalogo(data.articulos || []);
+      }
+    } catch (error) {
+      console.error('Error fetching artículos catálogo:', error);
+    }
+  };
   
   const fetchProveedores = async () => {
     try {
