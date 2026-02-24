@@ -63,7 +63,7 @@ test.describe('Albaranes - Artículos Integration', () => {
 
   test('should auto-fill price and unit when selecting articulo from catalog', async ({ page }) => {
     // First, check if there are active articulos
-    await page.goto(`${baseUrl}/articulos`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${baseUrl}/articulos-explotacion`, { waitUntil: 'domcontentloaded' });
     await expect(page.getByTestId('articulos-table')).toBeVisible({ timeout: 15000 });
     
     // Count existing articulos
