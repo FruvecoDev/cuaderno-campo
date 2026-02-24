@@ -768,6 +768,126 @@ const Usuarios = () => {
           </div>
         </div>
       )}
+
+      {/* Modal de Edición de Usuario */}
+      {showEditModal && selectedUserForEdit && (
+        <div className="modal-overlay" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div className="modal-content" style={{
+            background: 'hsl(var(--card))',
+            borderRadius: '12px',
+            padding: '1.5rem',
+            width: '90%',
+            maxWidth: '500px',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ 
+                  width: '40px', 
+                  height: '40px', 
+                  borderRadius: '10px', 
+                  background: 'hsl(var(--primary) / 0.1)', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center' 
+                }}>
+                  <Edit2 size={20} style={{ color: 'hsl(var(--primary))' }} />
+                </div>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: '1.1rem' }}>Editar Usuario</h2>
+                  <p className="text-muted text-sm" style={{ margin: 0 }}>Modificar datos del usuario</p>
+                </div>
+              </div>
+              <button 
+                className="btn btn-sm btn-secondary" 
+                onClick={() => setShowEditModal(false)}
+                style={{ padding: '0.5rem' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+            
+            {editError && (
+              <div style={{ 
+                padding: '0.75rem', 
+                background: 'hsl(var(--destructive) / 0.1)', 
+                border: '1px solid hsl(var(--destructive) / 0.3)',
+                borderRadius: '8px',
+                color: 'hsl(var(--destructive))',
+                marginBottom: '1rem',
+                fontSize: '0.875rem'
+              }}>
+                {editError}
+              </div>
+            )}
+            
+            <div className="form-group" style={{ marginBottom: '1rem' }}>
+              <label className="form-label">Nombre Completo *</label>
+              <input
+                type="text"
+                className="form-input"
+                value={editFormData.full_name}
+                onChange={(e) => setEditFormData({...editFormData, full_name: e.target.value})}
+                placeholder="Nombre del usuario"
+                autoFocus
+              />
+            </div>
+            
+            <div className="form-group" style={{ marginBottom: '1rem' }}>
+              <label className="form-label">Email *</label>
+              <input
+                type="email"
+                className="form-input"
+                value={editFormData.email}
+                onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
+                placeholder="email@ejemplo.com"
+              />
+            </div>
+            
+            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+              <label className="form-label">Rol</label>
+              <select
+                className="form-select"
+                value={editFormData.role}
+                onChange={(e) => setEditFormData({...editFormData, role: e.target.value})}
+              >
+                {ROLES.map(role => (
+                  <option key={role.value} value={role.value}>
+                    {role.label} - {role.description}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button 
+                className="btn btn-secondary" 
+                onClick={() => setShowEditModal(false)}
+              >
+                Cancelar
+              </button>
+              <button 
+                className="btn btn-primary" 
+                onClick={handleSaveEdit}
+                disabled={savingEdit}
+              >
+                {savingEdit ? 'Guardando...' : 'Guardar Cambios'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
