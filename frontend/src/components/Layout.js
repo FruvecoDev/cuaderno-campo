@@ -66,8 +66,8 @@ const Layout = ({ children }) => {
       { path: '/informes-gastos', label: t('nav.expenseReports'), icon: BarChart3, module: 'albaranes' },
     ]},
     { section: t('nav.catalogs'), items: [
-      { path: '/proveedores', label: t('nav.providers'), icon: Package },
-      { path: '/clientes', label: 'Clientes', icon: Users },
+      { path: '/proveedores', label: t('nav.providers'), icon: Package, operacion: 'compra' },
+      { path: '/clientes', label: 'Clientes', icon: Users, operacion: 'venta' },
       { path: '/cultivos', label: t('nav.crops'), icon: Leaf },
       { path: '/maquinaria', label: t('nav.machinery'), icon: Cog },
       { path: '/fitosanitarios', label: t('nav.phytosanitary'), icon: Beaker },
