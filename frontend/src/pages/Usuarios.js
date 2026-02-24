@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, UserX, UserCheck, Shield, Settings, X, Check, Eye, EyeOff } from 'lucide-react';
+import { Plus, Edit2, UserX, UserCheck, Shield, Settings, X, Check, Eye, EyeOff, Key } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 
@@ -17,6 +17,13 @@ const Usuarios = () => {
   const [menuItems, setMenuItems] = useState([]);
   const [menuPermissions, setMenuPermissions] = useState({});
   const [savingPermissions, setSavingPermissions] = useState(false);
+  // Password change modal
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [selectedUserForPassword, setSelectedUserForPassword] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
   const { token, user: currentUser } = useAuth();
   
   const ROLES = [
