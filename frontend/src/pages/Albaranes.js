@@ -117,13 +117,65 @@ const Albaranes = () => {
   // Estado para clientes (para albaranes de venta)
   const [clientes, setClientes] = useState([]);
   
+  // Flag para evitar múltiples cargas
+  const [isInitialized, setIsInitialized] = useState(false);
+  
   useEffect(() => {
-    fetchAlbaranes();
-    fetchContratos();
-    fetchProveedores();
-    fetchClientes();
-    fetchArticulosCatalogo();
-  }, []);
+    if (isInitialized) return;
+    
+    const loadData = async () => {
+      setIsInitialized(true);
+      
+      // Cargar todos los datos en paralelo
+      try {
+        const [albaranesRes, contratosRes, proveedoresRes, clientesRes, articulosRes] = await Promise.all([
+          fetch(`${BACKEND_URL}/api/albaranes`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`${BACKEND_URL}/api/contratos`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`${BACKEND_URL}/api/proveedores?limit=500`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`${BACKEND_URL}/api/clientes/activos`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`${BACKEND_URL}/api/articulos/activos`, { headers: { 'Authorization': `Bearer ${token}` } })
+        ]);
+        
+        // Parsear respuestas
+        const [albaranesData, contratosData, proveedoresData, clientesData, articulosData] = await Promise.all([
+          albaranesRes.json(),
+          contratosRes.json(),
+          proveedoresRes.json(),
+          clientesRes.json(),
+          articulosRes.json()
+        ]);
+        
+        if (albaranesRes.ok) setAlbaranes(albaranesData.albaranes || []);
+        if (contratosRes.ok) setContratos(contratosData.contratos || []);
+        if (proveedoresRes.ok) setProveedores(proveedoresData.proveedores || []);
+        if (clientesRes.ok) setClientes(clientesData.clientes || []);
+        if (articulosRes.ok) setArticulosCatalogo(articulosData.articulos || []);
+        
+      } catch (error) {
+        console.error('Error loading data:', error);
+        setError('Error al cargar datos');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadData();
+  }, [token, isInitialized]);
+  
+  // Función para recargar albaranes (después de crear/editar/eliminar)
+  const reloadAlbaranes = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/albaranes`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setAlbaranes(data.albaranes || []);
+      }
+    } catch (error) {
+      console.error('Error reloading albaranes:', error);
+    }
+  };
   
   const fetchClientes = async () => {
     try {
