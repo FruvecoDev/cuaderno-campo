@@ -1073,8 +1073,8 @@ const Albaranes = () => {
                           padding: '0.25rem 0.5rem',
                           borderRadius: '4px',
                           fontSize: '0.75rem',
-                          backgroundColor: albaran.tipo === 'Entrada' ? '#dcfce7' : '#fee2e2',
-                          color: albaran.tipo === 'Entrada' ? '#166534' : '#991b1b'
+                          backgroundColor: albaran.tipo === 'Albarán de compra' ? '#dcfce7' : '#fee2e2',
+                          color: albaran.tipo === 'Albarán de compra' ? '#166534' : '#991b1b'
                         }}>
                           {albaran.tipo}
                         </span>
