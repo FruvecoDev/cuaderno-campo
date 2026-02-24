@@ -364,11 +364,11 @@ const Fitosanitarios = () => {
 
   const handleDelete = async (productoId) => {
     if (!canDelete) {
-      setError('No tienes permisos para eliminar productos');
+      setError(t('phytosanitary.noDeletePermission'));
       return;
     }
 
-    if (!window.confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+    if (!window.confirm(t('phytosanitary.confirmDelete'))) {
       return;
     }
 
@@ -384,11 +384,11 @@ const Fitosanitarios = () => {
       }
 
       fetchProductos();
-      setSuccessMsg('Producto eliminado correctamente');
+      setSuccessMsg(t('messages.deletedSuccessfully'));
       setTimeout(() => setSuccessMsg(null), 3000);
     } catch (error) {
       console.error('Error deleting producto:', error);
-      const errorMsg = handlePermissionError(error, 'eliminar el producto');
+      const errorMsg = handlePermissionError(error, t('phytosanitary.deleteProduct'));
       setError(errorMsg);
     }
   };
