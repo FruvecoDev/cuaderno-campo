@@ -74,6 +74,7 @@
   "nav": {
     "general": "Général",
     "dashboard": "Tableau de bord",
+    "aiAssistant": "Assistant IA",
     "mainManagement": "Gestion Principale",
     "contracts": "Contrats",
     "parcels": "Parcelles",
