@@ -12,7 +12,7 @@ import uuid
 
 from database import db, serialize_doc
 from routes_auth import get_current_user
-from rbac_config import RequireView, RequireCreate, RequireEdit, RequireDelete
+from rbac_guards import RequireCreate, RequireEdit, RequireDelete
 
 router = APIRouter(prefix="/api", tags=["agentes"])
 
