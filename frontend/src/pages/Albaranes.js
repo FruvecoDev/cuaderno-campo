@@ -130,8 +130,8 @@ const Albaranes = () => {
       const response = await fetch(`${BACKEND_URL}/api/clientes/activos`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      const data = await response.json();
       if (response.ok) {
-        const data = await response.json();
         setClientes(data.clientes || []);
       }
     } catch (error) {
