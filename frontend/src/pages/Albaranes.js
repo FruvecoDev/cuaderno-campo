@@ -879,6 +879,8 @@ const Albaranes = () => {
                             className="form-select"
                             value={item.unidad || 'kg'}
                             onChange={(e) => updateItemTotal(index, 'unidad', e.target.value)}
+                            style={{ minWidth: '90px', padding: '0.5rem' }}
+                            data-testid={`item-unidad-${index}`}
                           >
                             <option value="kg">kg</option>
                             <option value="ud">ud</option>
