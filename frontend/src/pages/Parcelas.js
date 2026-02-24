@@ -496,7 +496,7 @@ const Parcelas = () => {
   };
   
   const handleDelete = async (parcelaId) => {
-    if (!window.confirm('¿Estás seguro de que quieres eliminar esta parcela?')) {
+    if (!window.confirm(t('parcels.confirmDelete') || '¿Estás seguro de que quieres eliminar esta parcela?')) {
       return;
     }
     
@@ -511,11 +511,51 @@ const Parcelas = () => {
       if (response.ok) {
         fetchParcelas();
       } else {
-        alert('Error eliminando parcela');
+        alert(t('messages.errorDeleting'));
       }
     } catch (error) {
       console.error('Error deleting parcela:', error);
-      alert('Error eliminando parcela');
+      alert(t('messages.errorDeleting'));
+    }
+  };
+  
+  // Generate Field Notebook (Cuaderno de Campo)
+  const handleGenerateCuaderno = async (parcelaId, campana) => {
+    setGeneratingCuaderno(parcelaId);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/cuaderno-campo/generar`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          parcela_id: parcelaId,
+          campana: campana,
+          include_ai_summary: true
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Error generando cuaderno');
+      }
+
+      // Download PDF
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = response.headers.get('content-disposition')?.split('filename=')[1] || 'Cuaderno_Campo.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error generating cuaderno:', error);
+      alert(error.message || t('fieldNotebook.errorGenerating'));
+    } finally {
+      setGeneratingCuaderno(null);
     }
   };
   
