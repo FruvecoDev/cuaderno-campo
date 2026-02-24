@@ -889,8 +889,8 @@ const InformesGastos = () => {
                             padding: '0.125rem 0.5rem',
                             borderRadius: '4px',
                             fontSize: '0.75rem',
-                            backgroundColor: albaran.tipo === 'Entrada' ? '#dcfce7' : '#fee2e2',
-                            color: albaran.tipo === 'Entrada' ? '#166534' : '#991b1b'
+                            backgroundColor: albaran.tipo === 'Albarán de compra' || albaran.tipo === 'Entrada' ? '#dcfce7' : '#fee2e2',
+                            color: albaran.tipo === 'Albarán de compra' || albaran.tipo === 'Entrada' ? '#166534' : '#991b1b'
                           }}>
                             {albaran.tipo}
                           </span>
