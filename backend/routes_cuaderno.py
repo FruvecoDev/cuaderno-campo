@@ -294,12 +294,16 @@ Usa etiquetas <h4>, <p>, <ul>, <li> para estructurar. Sé conciso y directo."""
         return f"<p><em>Error generando resumen IA: {str(e)}</em></p>"
 
 
-def generate_html_cuaderno(data: dict, ai_summary: str = "") -> str:
+def generate_html_cuaderno(data: dict, ai_summary: str = "", maquinaria_images: dict = None, tecnicos_images: dict = None) -> str:
     """Generate HTML content for the field notebook"""
     parcela = data.get("parcela") or (data.get("parcelas", [{}])[0] if data.get("parcelas") else {})
     contrato = data.get("contrato", {})
     finca = data.get("finca", {})
     campana = data.get("campana", "N/A")
+    
+    # Initialize image dicts if not provided
+    maquinaria_images = maquinaria_images or {}
+    tecnicos_images = tecnicos_images or {}
     
     # Format dates helper
     def format_date(date_str):
