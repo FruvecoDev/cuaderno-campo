@@ -382,9 +382,9 @@ class TestMaquinariaImageUpload:
         assert data["success"] == True
         assert "imagen_placa_ce_url" in data["data"]
         
-        # Verify the path is /app/uploads/maquinaria_placas/ (not /tmp/)
+        # Verify the URL is relative web path /api/uploads/maquinaria_placas/ (not /tmp/ or /app/uploads/)
         image_url = data["data"]["imagen_placa_ce_url"]
-        assert "/app/uploads/maquinaria_placas/" in image_url, f"Image saved to wrong path: {image_url}"
+        assert image_url.startswith("/api/uploads/maquinaria_placas/"), f"Image saved to wrong path: {image_url}"
         assert "/tmp/" not in image_url, f"Image incorrectly saved to /tmp/: {image_url}"
         
         # Verify we can retrieve the image
@@ -530,9 +530,9 @@ class TestTecnicosCertificadoUpload:
         assert data["success"] == True
         assert "imagen_certificado_url" in data["data"]
         
-        # Verify the path is /app/uploads/certificados/ (not /tmp/)
+        # Verify the URL is relative web path /api/uploads/certificados/ (not /tmp/ or /app/uploads/)
         cert_url = data["data"]["imagen_certificado_url"]
-        assert "/app/uploads/certificados/" in cert_url, f"Certificate saved to wrong path: {cert_url}"
+        assert cert_url.startswith("/api/uploads/certificados/"), f"Certificate saved to wrong path: {cert_url}"
         assert "/tmp/" not in cert_url, f"Certificate incorrectly saved to /tmp/: {cert_url}"
         
         # Cleanup
