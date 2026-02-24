@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 test.describe('Maquinaria - Image Upload', () => {
-  const baseUrl = 'https://farm-hub-15.preview.emergentagent.com';
+  const baseUrl = 'https://agro-field.preview.emergentagent.com';
   
   test.beforeEach(async ({ page }) => {
     // Login manually with correct flow
@@ -120,7 +120,7 @@ test.describe('Maquinaria - Image Upload', () => {
 });
 
 test.describe('Técnicos Aplicadores - Certificate Upload', () => {
-  const baseUrl = 'https://farm-hub-15.preview.emergentagent.com';
+  const baseUrl = 'https://agro-field.preview.emergentagent.com';
   
   test.beforeEach(async ({ page }) => {
     // Login manually with correct flow
