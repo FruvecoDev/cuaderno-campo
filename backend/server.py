@@ -6,7 +6,9 @@ Refactored: All modules split into individual router files for maintainability.
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
+import os
 
 # Load environment
 load_dotenv()
