@@ -38,8 +38,15 @@ const Contratos = () => {
     observaciones: '',
     precios_calidad: [],
     agente_compra: '',
-    agente_venta: ''
+    agente_venta: '',
+    // Comisión del agente
+    comision_tipo: 'porcentaje', // 'porcentaje' o 'euro_kilo'
+    comision_valor: ''
   });
+  
+  // Estado para agentes
+  const [agentesCompra, setAgentesCompra] = useState([]);
+  const [agentesVenta, setAgentesVenta] = useState([]);
   
   // Estado para saber si el cultivo seleccionado es guisante
   const selectedCultivo = cultivos.find(c => c._id === formData.cultivo_id);
@@ -49,7 +56,32 @@ const Contratos = () => {
     fetchContratos();
     fetchProveedores();
     fetchCultivos();
+    fetchAgentes();
   }, []);
+  
+  const fetchAgentes = async () => {
+    try {
+      // Agentes de Compra
+      const resCompra = await fetch(`${BACKEND_URL}/api/agentes/activos?tipo=Compra`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (resCompra.ok) {
+        const data = await resCompra.json();
+        setAgentesCompra(data.agentes || []);
+      }
+      
+      // Agentes de Venta
+      const resVenta = await fetch(`${BACKEND_URL}/api/agentes/activos?tipo=Venta`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (resVenta.ok) {
+        const data = await resVenta.json();
+        setAgentesVenta(data.agentes || []);
+      }
+    } catch (error) {
+      console.error('Error fetching agentes:', error);
+    }
+  };
   
   const fetchProveedores = async () => {
     try {
