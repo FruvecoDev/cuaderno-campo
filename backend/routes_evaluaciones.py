@@ -771,6 +771,79 @@ async def generate_evaluacion_pdf(
             padding: 10px;
             text-align: center;
         }
+        .aplicador-header {
+            background-color: #7b2cbf;
+            color: white;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        .aplicador-header h3 {
+            margin: 0;
+            color: white;
+        }
+        .section-title-purple {
+            background-color: #7b2cbf;
+        }
+        .maquina-header {
+            background-color: #495057;
+            color: white;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        .maquina-header h3 {
+            margin: 0;
+            color: white;
+        }
+        .section-title-gray {
+            background-color: #495057;
+        }
+        .certificate-image {
+            max-width: 100%;
+            max-height: 400px;
+            margin: 15px auto;
+            display: block;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+        .placa-ce-image {
+            max-width: 100%;
+            max-height: 350px;
+            margin: 15px auto;
+            display: block;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+        .ficha-datos {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .ficha-titulo {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid;
+        }
+        .ficha-titulo-aplicador {
+            color: #7b2cbf;
+            border-color: #7b2cbf;
+        }
+        .ficha-titulo-maquina {
+            color: #495057;
+            border-color: #495057;
+        }
+        .no-image-box {
+            background-color: #f0f0f0;
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            padding: 40px;
+            text-align: center;
+            color: #999;
+            font-style: italic;
+        }
     """
     
     # Generar HTML para el PDF
