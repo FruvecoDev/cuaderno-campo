@@ -307,6 +307,7 @@ class AlbaranCreate(BaseModel):
     contrato_id: Optional[str] = None
     # Datos heredados del contrato
     proveedor: Optional[str] = None
+    cliente: Optional[str] = None  # Para albaranes de venta
     cultivo: Optional[str] = None
     parcela_codigo: Optional[str] = None
     parcela_id: Optional[str] = None
