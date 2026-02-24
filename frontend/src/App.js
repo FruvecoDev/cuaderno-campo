@@ -152,6 +152,12 @@ function App() {
             <Layout><InformesGastos /></Layout>
           </ProtectedRoute>
         } />
+        
+        <Route path="/traducciones" element={
+          <ProtectedRoute>
+            <Layout><Traducciones /></Layout>
+          </ProtectedRoute>
+        } />
       </Routes>
     </AuthProvider>
   );
