@@ -132,6 +132,55 @@ const Usuarios = () => {
     setMenuPermissions(newPerms);
   };
 
+  // Password change functions
+  const openPasswordModal = (user) => {
+    setSelectedUserForPassword(user);
+    setNewPassword('');
+    setConfirmPassword('');
+    setPasswordError('');
+    setShowPasswordModal(true);
+  };
+
+  const handleSavePassword = async () => {
+    setPasswordError('');
+    
+    if (newPassword.length < 6) {
+      setPasswordError('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Las contraseñas no coinciden');
+      return;
+    }
+    
+    setSavingPassword(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/auth/users/${selectedUserForPassword._id}/password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ new_password: newPassword })
+      });
+      
+      if (response.ok) {
+        setShowPasswordModal(false);
+        setSelectedUserForPassword(null);
+        alert('Contraseña actualizada correctamente');
+      } else {
+        const error = await response.json();
+        setPasswordError(error.detail || 'Error al cambiar contraseña');
+      }
+    } catch (error) {
+      console.error('Error changing password:', error);
+      setPasswordError('Error al cambiar contraseña');
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
