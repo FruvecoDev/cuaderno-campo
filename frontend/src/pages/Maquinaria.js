@@ -697,9 +697,108 @@ const Maquinaria = () => {
               </div>
             )}
             
+            {/* Campo de imagen Placa CE */}
+            {fieldsConfig.imagen_placa_ce && (
+              <div className="form-group">
+                <label className="form-label">
+                  <Image size={16} style={{ display: 'inline', marginRight: '0.5rem' }} />
+                  Imagen Placa CE
+                </label>
+                <div style={{ 
+                  border: '2px dashed hsl(var(--border))', 
+                  borderRadius: '8px', 
+                  padding: '1rem',
+                  backgroundColor: 'hsl(var(--muted) / 0.3)'
+                }}>
+                  {imagePreview ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+                      <img 
+                        src={imagePreview} 
+                        alt="Placa CE Preview" 
+                        style={{ 
+                          maxWidth: '200px', 
+                          maxHeight: '150px', 
+                          objectFit: 'contain',
+                          borderRadius: '4px',
+                          border: '1px solid hsl(var(--border))'
+                        }} 
+                      />
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <label className="btn btn-sm btn-secondary" style={{ cursor: 'pointer' }}>
+                          <Upload size={14} style={{ marginRight: '0.25rem' }} />
+                          Cambiar
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            onChange={handleImageSelect}
+                            style={{ display: 'none' }}
+                            data-testid="input-imagen-change"
+                          />
+                        </label>
+                        {editingId && !selectedImage && (
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-error"
+                            onClick={() => deleteImage(editingId)}
+                            title="Eliminar imagen"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                        {selectedImage && (
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-secondary"
+                            onClick={() => { setSelectedImage(null); setImagePreview(null); }}
+                            title="Cancelar"
+                          >
+                            <X size={14} />
+                          </button>
+                        )}
+                      </div>
+                      {selectedImage && (
+                        <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                          Nueva imagen: {selectedImage.name}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <label style={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'center', 
+                      gap: '0.5rem',
+                      cursor: 'pointer',
+                      padding: '1rem'
+                    }}>
+                      <Upload size={32} style={{ color: 'hsl(var(--muted-foreground))' }} />
+                      <span style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
+                        Haz clic para subir imagen de la placa CE
+                      </span>
+                      <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                        JPEG, PNG o WEBP (máx. 10MB)
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={handleImageSelect}
+                        style={{ display: 'none' }}
+                        data-testid="input-imagen-placa"
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+            )}
+            
             <div className="flex gap-2">
-              <button type="submit" className="btn btn-primary" data-testid="btn-guardar">
-                {editingId ? 'Actualizar' : 'Guardar'}
+              <button 
+                type="submit" 
+                className="btn btn-primary" 
+                data-testid="btn-guardar"
+                disabled={uploadingImage}
+              >
+                {uploadingImage ? 'Subiendo imagen...' : (editingId ? 'Actualizar' : 'Guardar')}
               </button>
               <button
                 type="button"
@@ -710,6 +809,72 @@ const Maquinaria = () => {
               </button>
             </div>
           </form>
+        </div>
+      )}
+      
+      {/* Modal para ver imagen */}
+      {showImageModal && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}
+          onClick={() => setShowImageModal(false)}
+        >
+          <div 
+            style={{
+              position: 'relative',
+              maxWidth: '90vw',
+              maxHeight: '90vh',
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              padding: '1rem'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowImageModal(false)}
+              style={{
+                position: 'absolute',
+                top: '0.5rem',
+                right: '0.5rem',
+                background: 'hsl(var(--destructive))',
+                color: 'white',
+                border: 'none',
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <X size={18} />
+            </button>
+            <img 
+              src={`${modalImageUrl}?t=${Date.now()}`}
+              alt="Placa CE" 
+              style={{ 
+                maxWidth: '85vw', 
+                maxHeight: '85vh',
+                objectFit: 'contain'
+              }}
+              onError={(e) => {
+                e.target.src = '';
+                setError('No se pudo cargar la imagen');
+                setShowImageModal(false);
+              }}
+            />
+          </div>
         </div>
       )}
       
@@ -734,6 +899,7 @@ const Maquinaria = () => {
                   {tableConfig.modelo ? <th>Modelo</th> : null}
                   {tableConfig.matricula ? <th>Matrícula</th> : null}
                   {tableConfig.estado ? <th>Estado</th> : null}
+                  {tableConfig.imagen_placa_ce ? <th>Placa CE</th> : null}
                   {(canEdit || canDelete) ? <th>Acciones</th> : null}
                 </tr>
               </thead>
