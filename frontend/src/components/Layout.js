@@ -25,6 +25,7 @@ const Layout = ({ children }) => {
   const navItems = [
     { section: t('nav.general'), items: [
       { path: '/dashboard', label: t('nav.dashboard'), icon: LayoutDashboard, module: 'dashboard' },
+      { path: '/asistente-ia', label: t('nav.aiAssistant'), icon: Brain, module: 'dashboard' },
     ]},
     { section: t('nav.mainManagement'), items: [
       { path: '/contratos', label: t('nav.contracts'), icon: FileText, module: 'contratos' },
