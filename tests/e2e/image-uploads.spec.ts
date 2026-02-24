@@ -66,6 +66,9 @@ test.describe('Maquinaria - Image Upload Bug Fix', () => {
   });
 
   test('should upload image when creating maquinaria and view it', async ({ page }) => {
+    // Set up dialog handler BEFORE any actions
+    page.on('dialog', dialog => dialog.accept());
+    
     const uniqueId = Date.now().toString().slice(-8);
     const testNombre = `TEST_Maquinaria ${uniqueId}`;
     
@@ -108,11 +111,10 @@ test.describe('Maquinaria - Image Upload Bug Fix', () => {
     const modal = page.locator('img[alt*="Placa CE"]');
     await expect(modal).toBeVisible({ timeout: 5000 });
     
-    // Close modal
-    await page.keyboard.press('Escape');
+    // Close modal by clicking outside
+    await page.locator('div[style*="rgba(0,0,0"]').first().click({ position: { x: 10, y: 10 } });
     
     // Cleanup: delete the test maquinaria
-    page.on('dialog', dialog => dialog.accept());
     const deleteBtn = row.getByRole('button', { name: /Eliminar|delete/i }).first();
     await deleteBtn.click({ force: true });
     await expect(page.getByText(testNombre)).not.toBeVisible({ timeout: 10000 });
@@ -121,6 +123,9 @@ test.describe('Maquinaria - Image Upload Bug Fix', () => {
   });
 
   test('should show image preview when editing maquinaria with existing image', async ({ page }) => {
+    // Set up dialog handler BEFORE any actions
+    page.on('dialog', dialog => dialog.accept());
+    
     const uniqueId = Date.now().toString().slice(-8);
     const testNombre = `TEST_Preview ${uniqueId}`;
     
@@ -155,7 +160,6 @@ test.describe('Maquinaria - Image Upload Bug Fix', () => {
     await page.getByRole('button', { name: 'Cancelar' }).click();
     
     // Cleanup
-    page.on('dialog', dialog => dialog.accept());
     const deleteBtn = row.getByRole('button', { name: /Eliminar|delete/i }).first();
     await deleteBtn.click({ force: true });
     await expect(page.getByText(testNombre)).not.toBeVisible({ timeout: 10000 });
@@ -176,6 +180,9 @@ test.describe('Técnicos Aplicadores - Certificate Upload Bug Fix', () => {
   });
 
   test('should upload certificate when creating técnico', async ({ page }) => {
+    // Set up dialog handler BEFORE any actions
+    page.on('dialog', dialog => dialog.accept());
+    
     const uniqueId = Date.now().toString().slice(-8);
     const testNombre = 'TEST';
     const testApellidos = `Técnico ${uniqueId}`;
@@ -219,7 +226,6 @@ test.describe('Técnicos Aplicadores - Certificate Upload Bug Fix', () => {
     await expect(certBtn).toBeVisible();
     
     // Cleanup
-    page.on('dialog', dialog => dialog.accept());
     const deleteBtn = row.locator('button[title="Eliminar"]').first();
     await deleteBtn.click({ force: true });
     await expect(page.getByText(testApellidos)).not.toBeVisible({ timeout: 10000 });
@@ -228,6 +234,9 @@ test.describe('Técnicos Aplicadores - Certificate Upload Bug Fix', () => {
   });
 
   test('should show certificate preview when editing técnico with existing certificate', async ({ page }) => {
+    // Set up dialog handler BEFORE any actions
+    page.on('dialog', dialog => dialog.accept());
+    
     const uniqueId = Date.now().toString().slice(-8);
     const testNombre = 'TEST';
     const testApellidos = `Preview ${uniqueId}`;
@@ -269,7 +278,6 @@ test.describe('Técnicos Aplicadores - Certificate Upload Bug Fix', () => {
     await page.locator('button').filter({ hasText: 'Cancelar' }).click();
     
     // Cleanup
-    page.on('dialog', dialog => dialog.accept());
     const deleteBtn = row.locator('button[title="Eliminar"]').first();
     await deleteBtn.click({ force: true });
     await expect(page.getByText(testApellidos)).not.toBeVisible({ timeout: 10000 });
