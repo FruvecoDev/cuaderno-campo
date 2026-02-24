@@ -285,9 +285,16 @@ const Visitas = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validar solo parcela_id (obligatorio)
+    // Validar parcela_id (obligatorio)
     if (!formData.parcela_id) {
       setError('Debe seleccionar una Parcela');
+      setTimeout(() => setError(null), 5000);
+      return;
+    }
+    
+    // Validar fecha_visita (obligatorio)
+    if (!formData.fecha_visita) {
+      setError('La fecha de visita es obligatoria');
       setTimeout(() => setError(null), 5000);
       return;
     }
@@ -304,7 +311,7 @@ const Visitas = () => {
       const payload = {
         objetivo: formData.objetivo,
         parcela_id: formData.parcela_id,
-        fecha_visita: formData.fecha_visita,
+        fecha_visita: formData.fecha_visita, // OBLIGATORIO
         fecha_planificada: formData.fecha_planificada,
         observaciones: formData.observaciones
       };
