@@ -66,6 +66,7 @@ const TABLE_LABELS = {
 };
 
 const Visitas = () => {
+  const { t } = useTranslation();
   const [visitas, setVisitas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

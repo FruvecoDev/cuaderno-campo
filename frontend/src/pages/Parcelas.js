@@ -190,6 +190,7 @@ const FIELD_LABELS = {
 };
 
 const Parcelas = () => {
+  const { t } = useTranslation();
   const [parcelas, setParcelas] = useState([]);
   const [contratos, setContratos] = useState([]);
   const [searchContrato, setSearchContrato] = useState('');

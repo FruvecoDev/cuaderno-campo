@@ -733,6 +733,7 @@ const TABLE_LABELS = {
 };
 
 const Tratamientos = () => {
+  const { t } = useTranslation();
   const [tratamientos, setTratamientos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

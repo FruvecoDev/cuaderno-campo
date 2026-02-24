@@ -22,6 +22,7 @@ const FIELD_LABELS = {
 };
 
 const Recetas = () => {
+  const { t } = useTranslation();
   const [recetas, setRecetas] = useState([]);
   const [cultivos, setCultivos] = useState([]);
   const [loading, setLoading] = useState(true);
