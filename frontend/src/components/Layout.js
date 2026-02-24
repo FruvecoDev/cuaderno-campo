@@ -72,6 +72,7 @@ const Layout = ({ children }) => {
       { path: '/fitosanitarios', label: t('nav.phytosanitary'), icon: Beaker },
       { path: '/tecnicos-aplicadores', label: t('nav.applicatorTechnicians'), icon: UserCheck },
       { path: '/articulos-explotacion', label: 'Artículos Explotación', icon: Package },
+      { path: '/agentes', label: 'Agentes', icon: Users },
     ]},
     { section: t('nav.configuration'), items: [
       { path: '/usuarios', label: t('nav.users'), icon: Users, requireAdmin: true },
