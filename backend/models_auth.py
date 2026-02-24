@@ -32,6 +32,7 @@ ALL_MENU_ITEMS = [
     {"path": "/fitosanitarios", "label": "Fitosanitarios", "section": "Catálogos"},
     {"path": "/tecnicos-aplicadores", "label": "Técnicos Aplicadores", "section": "Catálogos"},
     {"path": "/articulos-explotacion", "label": "Artículos Explotación", "section": "Catálogos"},
+    {"path": "/agentes", "label": "Agentes", "section": "Catálogos"},
     {"path": "/usuarios", "label": "Usuarios", "section": "Configuración"},
     {"path": "/traducciones", "label": "Traducciones", "section": "Configuración"},
 ]
