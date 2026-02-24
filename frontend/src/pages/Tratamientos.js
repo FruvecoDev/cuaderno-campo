@@ -899,6 +899,20 @@ const Tratamientos = () => {
     }
   };
   
+  const fetchTecnicosAplicadores = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/tecnicos-aplicadores/activos`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setTecnicosAplicadores(data.tecnicos || []);
+      }
+    } catch (error) {
+      console.error('Error fetching tecnicos aplicadores:', error);
+    }
+  };
+  
   const fetchTratamientos = async () => {
     try {
       setError(null);
