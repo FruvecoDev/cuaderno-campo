@@ -354,7 +354,7 @@ const Visitas = () => {
   const resetForm = () => {
     setFormData({
       objetivo: 'Control Rutinario',
-      fecha_visita: '',
+      fecha_visita: new Date().toISOString().split('T')[0], // Fecha actual por defecto
       fecha_planificada: '',
       parcela_id: '',
       observaciones: ''
@@ -373,7 +373,7 @@ const Visitas = () => {
     setEditingId(visita._id);
     setFormData({
       objetivo: visita.objetivo || 'Control Rutinario',
-      fecha_visita: visita.fecha_visita || '',
+      fecha_visita: visita.fecha_visita || new Date().toISOString().split('T')[0], // Fecha actual si no tiene
       fecha_planificada: visita.fecha_planificada || '',
       parcela_id: visita.parcela_id || '',
       observaciones: visita.observaciones || ''
