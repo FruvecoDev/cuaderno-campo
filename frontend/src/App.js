@@ -27,6 +27,7 @@ import Traducciones from './pages/Traducciones';
 import AsistenteIA from './pages/AsistenteIA';
 import TecnicosAplicadores from './pages/TecnicosAplicadores';
 import ArticulosExplotacion from './pages/ArticulosExplotacion';
+import Agentes from './pages/Agentes';
 
 function App() {
   return (
