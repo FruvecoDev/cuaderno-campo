@@ -224,10 +224,13 @@ const Maquinaria = () => {
       }
       
       const data = await response.json();
+      console.log('Save maquinaria response:', data);
       if (data.success) {
         // Si hay imagen seleccionada, subirla
         const maquinariaId = data.data._id || editingId;
+        console.log('Maquinaria saved, ID:', maquinariaId, 'Has selected image:', !!selectedImage);
         if (selectedImage && maquinariaId) {
+          console.log('Starting image upload...');
           await uploadImage(maquinariaId);
         }
         
