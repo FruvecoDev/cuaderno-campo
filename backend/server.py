@@ -80,6 +80,7 @@ app.include_router(translations_router)
 app.include_router(cuaderno_router)
 app.include_router(tecnicos_aplicadores_router)
 app.include_router(articulos_router)
+app.include_router(agentes_router)
 
 # Mount static files for uploaded images
 uploads_dir = "/app/uploads"
