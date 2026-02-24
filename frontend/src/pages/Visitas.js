@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, Info, Filter, Settings, X } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { Plus, Edit2, Trash2, Info, Filter, Settings, X, Eye } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
