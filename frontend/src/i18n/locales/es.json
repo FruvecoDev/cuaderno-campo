@@ -427,6 +427,7 @@
     "addNewQuestion": "Agregar Nueva Pregunta",
     "addQuestionToSection": "Agregar pregunta a esta sección",
     "deleteQuestion": "Eliminar pregunta",
+    "duplicateQuestion": "Duplicar pregunta",
     "section": "Sección",
     "selectSection": "Seleccionar sección...",
     "answerType": "Tipo de Respuesta",
