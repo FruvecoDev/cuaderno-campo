@@ -1,11 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, Search } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Settings, X } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+
+// Configuración de campos visibles en tabla
+const DEFAULT_FIELDS_CONFIG = {
+  nombre: true,
+  cif_nif: true,
+  telefono: true,
+  email: true,
+  poblacion: true,
+  provincia: false,
+  direccion: false,
+  codigo_postal: false,
+  persona_contacto: false,
+  observaciones: false,
+  estado: true
+};
+
+const FIELD_LABELS = {
+  nombre: 'Nombre',
+  cif_nif: 'CIF/NIF',
+  telefono: 'Teléfono',
+  email: 'Email',
+  poblacion: 'Población',
+  provincia: 'Provincia',
+  direccion: 'Dirección',
+  codigo_postal: 'Código Postal',
+  persona_contacto: 'Persona Contacto',
+  observaciones: 'Observaciones',
+  estado: 'Estado'
+};
 
 const Proveedores = () => {
   const [proveedores, setProveedores] = useState([]);
@@ -14,6 +43,11 @@ const Proveedores = () => {
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showFieldsConfig, setShowFieldsConfig] = useState(false);
+  const [fieldsConfig, setFieldsConfig] = useState(() => {
+    const saved = localStorage.getItem('proveedores_fields_config');
+    return saved ? JSON.parse(saved) : DEFAULT_FIELDS_CONFIG;
+  });
   const { t } = useTranslation();
   
   const { token } = useAuth();
