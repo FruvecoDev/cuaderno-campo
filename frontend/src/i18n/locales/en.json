@@ -369,6 +369,7 @@
     "addNewQuestion": "Add New Question",
     "addQuestionToSection": "Add question to this section",
     "deleteQuestion": "Delete question",
+    "duplicateQuestion": "Duplicate question",
     "section": "Section",
     "selectSection": "Select section...",
     "answerType": "Answer Type",
