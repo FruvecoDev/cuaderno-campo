@@ -531,10 +531,30 @@ const Evaluaciones = () => {
         throw { status: response.status, message: errorData.detail };
       }
       
+      const result = await response.json();
+      
+      // Actualizar estado local inmediatamente
+      setCustomPreguntas(prev => {
+        const updated = { ...prev };
+        if (!updated[newQuestionSection]) {
+          updated[newQuestionSection] = [];
+        }
+        updated[newQuestionSection] = [...updated[newQuestionSection], result.pregunta];
+        return updated;
+      });
+      
+      // Inicializar respuesta para la nueva pregunta
+      setRespuestas(prev => ({
+        ...prev,
+        [result.pregunta.id]: result.pregunta.tipo === 'si_no' ? null : ''
+      }));
+      
       setShowAddQuestion(false);
       setNewQuestionSection('');
       setNewQuestionText('');
       setNewQuestionType('texto');
+      
+      // Refrescar config del servidor también
       fetchPreguntasConfig();
     } catch (error) {
       const errorMsg = handlePermissionError(error, 'agregar la pregunta');
