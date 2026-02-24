@@ -211,7 +211,7 @@ async def update_translation(translation_id: str, update: TranslationUpdate):
     """Update an existing translation"""
     try:
         obj_id = ObjectId(translation_id)
-    except:
+    except Exception:
         raise HTTPException(status_code=400, detail="Invalid translation ID")
     
     existing = await db.custom_translations.find_one({"_id": obj_id})
