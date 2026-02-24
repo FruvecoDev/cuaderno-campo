@@ -182,9 +182,11 @@ Visita/Tratamiento → realizados sobre → Parcela
 - `/app/backend/routes_extended.py` - CRUD Tratamientos, Irrigaciones, Recetas, Albaranes, Tareas, **Cosechas (rediseñado)**
 - `/app/backend/routes_maquinaria.py` - CRUD Maquinaria
 - `/app/backend/routes_evaluaciones.py` - CRUD Evaluaciones + PDF generation
-- `/app/backend/routes_ai.py` - Endpoints IA
+- `/app/backend/routes_ai.py` - Endpoints IA base (reportes, análisis de costes)
+- `/app/backend/routes_ai_suggestions.py` - **Nuevos endpoints IA (sugerencias tratamientos, predicción cosecha)**
 - `/app/frontend/src/pages/Maquinaria.js` - Gestión de maquinaria
 - `/app/frontend/src/pages/Evaluaciones.js` - Hojas de Evaluación con filtros completos
+- `/app/frontend/src/pages/AsistenteIA.js` - **Nueva página de Asistente IA**
 - `/app/frontend/src/pages/Visitas.js` - Formulario simplificado + Plagas/Enfermedades
 - `/app/frontend/src/pages/Tratamientos.js` - Formulario con Aplicador y Máquina
 - `/app/frontend/src/pages/Cosechas.js` - **Nuevo módulo de cosechas asociado a contratos**
