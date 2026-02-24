@@ -1006,7 +1006,7 @@ const Maquinaria = () => {
                         {item.imagen_placa_ce_url ? (
                           <button
                             className="btn btn-sm btn-secondary"
-                            onClick={() => viewImage(item._id)}
+                            onClick={() => viewImage(item)}
                             title="Ver imagen de placa CE"
                             data-testid={`view-placa-${item._id}`}
                           >
