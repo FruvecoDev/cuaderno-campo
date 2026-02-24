@@ -168,9 +168,14 @@ const Albaranes = () => {
       const response = await fetch(`${BACKEND_URL}/api/proveedores?limit=500`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const data = await response.json();
-      if (response.ok) {
-        setProveedores(data.proveedores || []);
+      const text = await response.text();
+      try {
+        const data = JSON.parse(text);
+        if (response.ok) {
+          setProveedores(data.proveedores || []);
+        }
+      } catch (e) {
+        console.error('Error parsing proveedores JSON:', e, 'Response:', text);
       }
     } catch (error) {
       console.error('Error fetching proveedores:', error);
