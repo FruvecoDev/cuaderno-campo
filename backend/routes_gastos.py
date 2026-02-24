@@ -476,6 +476,68 @@ async def get_campanas_disponibles(
     return {"campanas": [r["_id"] for r in results if r["_id"]]}
 
 
+@router.get("/filtros-opciones")
+async def get_filtros_opciones(
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireAlbaranesAccess)
+):
+    """
+    Obtiene las opciones disponibles para los filtros (contratos, cultivos, proveedores, parcelas).
+    """
+    # Proveedores únicos
+    proveedores_pipeline = [
+        {"$match": {"proveedor": {"$ne": None, "$ne": ""}}},
+        {"$group": {"_id": "$proveedor"}},
+        {"$sort": {"_id": 1}}
+    ]
+    proveedores_result = await albaranes_collection.aggregate(proveedores_pipeline).to_list(100)
+    
+    # Cultivos únicos
+    cultivos_pipeline = [
+        {"$match": {"cultivo": {"$ne": None, "$ne": ""}}},
+        {"$group": {"_id": "$cultivo"}},
+        {"$sort": {"_id": 1}}
+    ]
+    cultivos_result = await albaranes_collection.aggregate(cultivos_pipeline).to_list(100)
+    
+    # Parcelas únicas
+    parcelas_pipeline = [
+        {"$match": {"parcela_codigo": {"$ne": None, "$ne": ""}}},
+        {"$group": {"_id": "$parcela_codigo"}},
+        {"$sort": {"_id": 1}}
+    ]
+    parcelas_result = await albaranes_collection.aggregate(parcelas_pipeline).to_list(100)
+    
+    # Contratos con su número
+    contratos_pipeline = [
+        {"$match": {"contrato_id": {"$ne": None, "$ne": ""}}},
+        {"$group": {"_id": "$contrato_id"}},
+    ]
+    contratos_ids = await albaranes_collection.aggregate(contratos_pipeline).to_list(100)
+    
+    contratos_list = []
+    for c in contratos_ids:
+        if c["_id"]:
+            try:
+                contrato = await contratos_collection.find_one({"_id": ObjectId(c["_id"])})
+                if contrato:
+                    contratos_list.append({
+                        "id": c["_id"],
+                        "numero": contrato.get("numero_contrato"),
+                        "cultivo": contrato.get("cultivo"),
+                        "proveedor": contrato.get("proveedor")
+                    })
+            except Exception:
+                pass
+    
+    return {
+        "proveedores": [r["_id"] for r in proveedores_result if r["_id"]],
+        "cultivos": [r["_id"] for r in cultivos_result if r["_id"]],
+        "parcelas": [r["_id"] for r in parcelas_result if r["_id"]],
+        "contratos": sorted(contratos_list, key=lambda x: x.get("numero") or "")
+    }
+
+
 # ============================================================================
 # EXPORTACIÓN DE INFORMES
 # ============================================================================
