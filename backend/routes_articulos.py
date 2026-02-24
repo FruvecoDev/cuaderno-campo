@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 from database import db, serialize_doc, serialize_docs
 from rbac_guards import RequireCreate, RequireEdit, RequireDelete, get_current_user
 
-router = APIRouter(tags=["articulos"])
+router = APIRouter(prefix="/api", tags=["articulos"])
 
 # Collection
 articulos_collection = db['articulos_explotacion']
