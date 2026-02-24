@@ -21,6 +21,7 @@ const Contratos = () => {
   
   // Estados para catálogos
   const [proveedores, setProveedores] = useState([]);
+  const [clientes, setClientes] = useState([]);
   const [cultivos, setCultivos] = useState([]);
   
   const [formData, setFormData] = useState({
@@ -29,6 +30,7 @@ const Contratos = () => {
     procedencia: 'Campo',
     fecha_contrato: new Date().toISOString().split('T')[0],
     proveedor_id: '',
+    cliente_id: '',
     cultivo_id: '',
     cantidad: '',
     precio: '',
@@ -55,6 +57,7 @@ const Contratos = () => {
   useEffect(() => {
     fetchContratos();
     fetchProveedores();
+    fetchClientes();
     fetchCultivos();
     fetchAgentes();
   }, []);
