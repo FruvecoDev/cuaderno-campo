@@ -583,12 +583,24 @@ const Evaluaciones = () => {
         throw { status: response.status, message: errorData.detail };
       }
       
-      // Recargar preguntas
+      // Actualizar estado local inmediatamente
+      setCustomPreguntas(prev => {
+        const updated = { ...prev };
+        if (updated[seccion]) {
+          updated[seccion] = updated[seccion].filter(p => p.id !== preguntaId);
+        }
+        return updated;
+      });
+      
+      // Eliminar respuesta de la pregunta eliminada
+      setRespuestas(prev => {
+        const updated = { ...prev };
+        delete updated[preguntaId];
+        return updated;
+      });
+      
+      // Refrescar config del servidor también
       fetchPreguntasConfig();
-      // Reinicializar respuestas si estamos en modo edición
-      if (formData.parcela_id) {
-        initializeRespuestas();
-      }
     } catch (error) {
       const errorMsg = handlePermissionError(error, 'eliminar la pregunta');
       setError(errorMsg);
