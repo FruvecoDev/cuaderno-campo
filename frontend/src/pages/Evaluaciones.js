@@ -318,7 +318,7 @@ const Evaluaciones = () => {
     e.preventDefault();
     
     if (!formData.parcela_id) {
-      setError('Debe seleccionar una Parcela');
+      setError(t('evaluations.selectParcel'));
       setTimeout(() => setError(null), 5000);
       return;
     }
@@ -458,7 +458,7 @@ const Evaluaciones = () => {
   };
   
   const handleDelete = async (id) => {
-    if (!window.confirm('¿Estás seguro de que quieres eliminar esta hoja de evaluación?')) {
+    if (!window.confirm(t('evaluations.confirmDelete'))) {
       return;
     }
     
@@ -513,7 +513,7 @@ const Evaluaciones = () => {
   // Agregar nueva pregunta
   const handleAddQuestion = async () => {
     if (!newQuestionText.trim() || !newQuestionSection) {
-      setError('Debe completar todos los campos');
+      setError(t('messages.completeAllFields'));
       return;
     }
     
