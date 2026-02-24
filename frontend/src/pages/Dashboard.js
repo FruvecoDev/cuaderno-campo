@@ -133,7 +133,7 @@ function VisitasCalendar({ visitas, onDateClick, t }) {
         <div style={{ textAlign: 'center' }}>
           <span style={{ fontWeight: '600', fontSize: '1rem' }}>{monthNames[month]} {year}</span>
           <button onClick={goToToday} className="btn btn-sm" style={{ marginLeft: '0.5rem', padding: '0.2rem 0.5rem', fontSize: '0.7rem' }}>
-            Hoy
+            {t('dashboard.calendar.today')}
           </button>
         </div>
         <button onClick={nextMonth} className="btn btn-sm btn-secondary" style={{ padding: '0.4rem' }}>
