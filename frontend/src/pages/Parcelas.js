@@ -1063,6 +1063,19 @@ const Parcelas = () => {
                         >
                           <History size={14} />
                         </button>
+                        <button 
+                          className="btn btn-sm btn-primary" 
+                          onClick={() => handleGenerateCuaderno(p._id, p.campana)}
+                          title={t('fieldNotebook.generate')}
+                          disabled={generatingCuaderno === p._id}
+                          data-testid={`cuaderno-parcela-${p._id}`}
+                        >
+                          {generatingCuaderno === p._id ? (
+                            <Loader2 size={14} className="animate-spin" />
+                          ) : (
+                            <BookOpen size={14} />
+                          )}
+                        </button>
                         <button className="btn btn-sm btn-secondary" onClick={() => handleEdit(p)} title="Editar" data-testid={`edit-parcela-${p._id}`}>
                           <Edit2 size={14} />
                         </button>
