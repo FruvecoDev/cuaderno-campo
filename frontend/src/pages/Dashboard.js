@@ -242,11 +242,11 @@ function VisitasCalendar({ visitas, onDateClick, t }) {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
           <div style={{ width: '12px', height: '12px', backgroundColor: '#2d5a27', borderRadius: '4px' }} />
-          <span>Hoy</span>
+          <span>{t('dashboard.calendar.today')}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
           <div style={{ width: '12px', height: '12px', backgroundColor: '#e8f5e9', border: '2px solid #4CAF50', borderRadius: '4px' }} />
-          <span>Con visitas</span>
+          <span>{t('dashboard.calendar.withVisits')}</span>
         </div>
       </div>
     </div>
