@@ -64,7 +64,12 @@
     "forgotPassword": "Forgot your password?",
     "rememberMe": "Remember me",
     "loginTitle": "Sign in to continue",
-    "defaultCredentials": "Default credentials"
+    "defaultCredentials": "Default credentials",
+    "fieldNotebook": "Field Notebook",
+    "firstTime": "First time? Create the admin user",
+    "initAdmin": "Initialize Admin",
+    "adminCreated": "Admin created",
+    "useCredentials": "Use these credentials to log in"
   },
   "nav": {
     "general": "General",
