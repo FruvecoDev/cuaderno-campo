@@ -51,6 +51,7 @@ const Layout = ({ children }) => {
       { path: '/cultivos', label: t('nav.crops'), icon: Leaf },
       { path: '/maquinaria', label: t('nav.machinery'), icon: Cog },
       { path: '/fitosanitarios', label: t('nav.phytosanitary'), icon: Beaker },
+      { path: '/tecnicos-aplicadores', label: t('nav.applicatorTechnicians'), icon: UserCheck },
     ]},
     { section: t('nav.configuration'), items: [
       { path: '/usuarios', label: t('nav.users'), icon: Users, requireAdmin: true },
