@@ -137,7 +137,7 @@ Visita/Tratamiento → realizados sobre → Parcela
       - PUT /api/cosechas/{id}/completar - Marcar como completada
     - **Frontend**: Lista expandible con planificaciones, cargas y acciones
 
-12. **Asistente de Inteligencia Artificial (Nuevo - 24/02/2026)** ✅
+12. **Asistente de Inteligencia Artificial (24/02/2026)** ✅
     - **Sugerencias de Tratamientos IA**:
       - Seleccionar parcela y describir problema (plaga, enfermedad, deficiencia)
       - GPT-4o analiza datos de parcela, tratamientos recientes y productos disponibles
@@ -157,6 +157,21 @@ Visita/Tratamiento → realizados sobre → Parcela
     - **Frontend**: Nueva página `/asistente-ia` con dos tabs interactivas
     - **Backend**: `/app/backend/routes_ai_suggestions.py`
     - **Test Report**: `/app/test_reports/iteration_12.json` - 100% pass
+
+13. **Preguntas Personalizadas en Evaluaciones (24/02/2026)** ✅
+    - Botón "+ Agregar Pregunta" visible en cada sección de cuestionario
+    - Modal para agregar preguntas con:
+      - Selector de sección (pre-seleccionada si se abre desde una sección)
+      - Tipo de respuesta: Texto, Número, Sí/No, Fecha
+      - Campo de texto para la pregunta
+    - Preguntas personalizadas marcadas con etiqueta "(Personalizada)"
+    - Solo Admin puede eliminar preguntas personalizadas (botón de papelera)
+    - Admin y Manager pueden agregar preguntas
+    - **API Endpoints**:
+      - `GET /api/evaluaciones/config/preguntas` - Lista preguntas base + personalizadas
+      - `POST /api/evaluaciones/config/preguntas` - Agregar pregunta personalizada
+      - `DELETE /api/evaluaciones/config/preguntas/{id}` - Eliminar pregunta personalizada
+    - **Frontend**: Evaluaciones.js actualizado con botones en cada sección
 
 ### Pending/In Progress
 1. **Notificaciones por Email** (P1)
