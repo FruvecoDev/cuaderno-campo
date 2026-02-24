@@ -98,7 +98,7 @@ const Albaranes = () => {
   
   // Form data
   const [formData, setFormData] = useState({
-    tipo: 'Albarán de compra',
+    tipo: puedeCompra ? 'Albarán de compra' : 'Albarán de venta',
     fecha: new Date().toISOString().split('T')[0],
     contrato_id: '',
     // Datos heredados del contrato (referencia)
