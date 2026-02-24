@@ -18,6 +18,8 @@ async def get_dashboard_kpis():
     """Get all KPIs for the dashboard"""
     # Count documents
     total_contratos = await contratos_collection.count_documents({})
+    contratos_venta = await contratos_collection.count_documents({"tipo": "Venta"})
+    contratos_compra = await contratos_collection.count_documents({"tipo": {"$ne": "Venta"}})  # Compra o sin tipo
     total_parcelas = await parcelas_collection.count_documents({})
     parcelas_activas = await parcelas_collection.count_documents({"activo": True})
     total_fincas = await fincas_collection.count_documents({})
