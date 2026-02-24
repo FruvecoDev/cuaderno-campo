@@ -245,6 +245,34 @@ const Albaranes = () => {
     }));
   };
   
+  // Seleccionar artículo del catálogo
+  const handleArticuloSelect = (index, articuloId) => {
+    const articulo = articulosCatalogo.find(a => a._id === articuloId);
+    const newItems = [...formData.items];
+    
+    if (articulo) {
+      newItems[index] = {
+        ...newItems[index],
+        articulo_id: articulo._id,
+        descripcion: `${articulo.codigo} - ${articulo.nombre}`,
+        unidad: articulo.unidad_medida?.toLowerCase() || 'kg',
+        precio_unitario: articulo.precio_unitario?.toString() || ''
+      };
+      // Recalcular total si ya hay cantidad
+      const cantidad = parseFloat(newItems[index].cantidad) || 0;
+      const precio = parseFloat(newItems[index].precio_unitario) || 0;
+      newItems[index].total = cantidad * precio;
+    } else {
+      // Texto libre
+      newItems[index] = {
+        ...newItems[index],
+        articulo_id: null
+      };
+    }
+    
+    setFormData({ ...formData, items: newItems });
+  };
+  
   // Calcular total de líneas
   const updateItemTotal = (index, field, value) => {
     const newItems = [...formData.items];
@@ -262,7 +290,7 @@ const Albaranes = () => {
   const addItem = () => {
     setFormData({
       ...formData,
-      items: [...formData.items, { descripcion: '', cantidad: '', unidad: 'kg', precio_unitario: '', total: 0 }]
+      items: [...formData.items, { descripcion: '', cantidad: '', unidad: 'kg', precio_unitario: '', total: 0, articulo_id: null }]
     });
   };
   
