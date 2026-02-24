@@ -26,6 +26,7 @@ from routes_fitosanitarios import router as fitosanitarios_router
 from routes_gastos import router as gastos_router
 from routes_translations import router as translations_router
 from routes_cuaderno import router as cuaderno_router
+from routes_ai_suggestions import router as ai_suggestions_router
 
 app = FastAPI(title="FRUVECO - Agricultural Management System V1")
 
