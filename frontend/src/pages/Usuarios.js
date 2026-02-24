@@ -400,6 +400,156 @@ const Usuarios = () => {
           ))}
         </div>
       </div>
+
+      {/* Modal de Permisos de Menú */}
+      {showPermissionsModal && selectedUserForPermissions && (
+        <div className="modal-overlay" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div className="modal-content" style={{
+            background: 'hsl(var(--card))',
+            borderRadius: '12px',
+            padding: '1.5rem',
+            width: '90%',
+            maxWidth: '700px',
+            maxHeight: '85vh',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid hsl(var(--border))', paddingBottom: '1rem' }}>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Permisos de Menú</h2>
+                <p className="text-muted text-sm" style={{ margin: '0.25rem 0 0 0' }}>
+                  Usuario: <strong>{selectedUserForPermissions.full_name}</strong> ({selectedUserForPermissions.email})
+                </p>
+              </div>
+              <button 
+                className="btn btn-sm btn-secondary" 
+                onClick={() => setShowPermissionsModal(false)}
+                style={{ padding: '0.5rem' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+            
+            <div style={{ overflowY: 'auto', flex: 1, paddingRight: '0.5rem' }}>
+              {/* Group by section */}
+              {[...new Set(menuItems.map(item => item.section))].map(section => {
+                const sectionItems = menuItems.filter(item => item.section === section);
+                const enabledCount = sectionItems.filter(item => menuPermissions[item.path]).length;
+                const allEnabled = enabledCount === sectionItems.length;
+                const someEnabled = enabledCount > 0 && !allEnabled;
+                
+                return (
+                  <div key={section} style={{ marginBottom: '1rem' }}>
+                    <div 
+                      style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '0.75rem', 
+                        padding: '0.75rem',
+                        background: 'hsl(var(--muted))',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        marginBottom: '0.5rem'
+                      }}
+                      onClick={() => toggleSection(section)}
+                    >
+                      <div style={{
+                        width: '20px',
+                        height: '20px',
+                        borderRadius: '4px',
+                        border: '2px solid hsl(var(--primary))',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: allEnabled ? 'hsl(var(--primary))' : 'transparent'
+                      }}>
+                        {allEnabled && <Check size={14} color="white" />}
+                        {someEnabled && !allEnabled && <div style={{ width: '10px', height: '2px', background: 'hsl(var(--primary))' }} />}
+                      </div>
+                      <span style={{ fontWeight: '600', flex: 1 }}>{section}</span>
+                      <span className="badge badge-secondary">{enabledCount}/{sectionItems.length}</span>
+                    </div>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem', paddingLeft: '1rem' }}>
+                      {sectionItems.map(item => (
+                        <label
+                          key={item.path}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            padding: '0.5rem 0.75rem',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            background: menuPermissions[item.path] ? 'hsl(var(--primary) / 0.1)' : 'transparent',
+                            border: '1px solid',
+                            borderColor: menuPermissions[item.path] ? 'hsl(var(--primary) / 0.3)' : 'hsl(var(--border))',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={menuPermissions[item.path] || false}
+                            onChange={() => togglePermission(item.path)}
+                            style={{ display: 'none' }}
+                          />
+                          {menuPermissions[item.path] ? (
+                            <Eye size={16} style={{ color: 'hsl(var(--primary))' }} />
+                          ) : (
+                            <EyeOff size={16} style={{ color: 'hsl(var(--muted-foreground))' }} />
+                          )}
+                          <span style={{ 
+                            fontSize: '0.875rem',
+                            color: menuPermissions[item.path] ? 'inherit' : 'hsl(var(--muted-foreground))'
+                          }}>
+                            {item.label}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            
+            <div style={{ 
+              display: 'flex', 
+              gap: '0.75rem', 
+              justifyContent: 'flex-end', 
+              marginTop: '1rem', 
+              paddingTop: '1rem', 
+              borderTop: '1px solid hsl(var(--border))' 
+            }}>
+              <button 
+                className="btn btn-secondary" 
+                onClick={() => setShowPermissionsModal(false)}
+              >
+                Cancelar
+              </button>
+              <button 
+                className="btn btn-primary" 
+                onClick={handleSavePermissions}
+                disabled={savingPermissions}
+              >
+                {savingPermissions ? 'Guardando...' : 'Guardar Permisos'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
