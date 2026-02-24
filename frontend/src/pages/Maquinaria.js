@@ -251,6 +251,88 @@ const Maquinaria = () => {
       estado: 'Operativo',
       observaciones: ''
     });
+    setSelectedImage(null);
+    setImagePreview(null);
+  };
+  
+  // Funciones para manejo de imagen de placa CE
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validar tipo
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setError('Tipo de archivo no permitido. Use JPEG, PNG o WEBP');
+        setTimeout(() => setError(null), 5000);
+        return;
+      }
+      // Validar tamaño (10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        setError('El archivo excede el tamaño máximo de 10MB');
+        setTimeout(() => setError(null), 5000);
+        return;
+      }
+      setSelectedImage(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+  
+  const uploadImage = async (maquinariaId) => {
+    if (!selectedImage) return;
+    
+    setUploadingImage(true);
+    try {
+      const formDataImage = new FormData();
+      formDataImage.append('file', selectedImage);
+      
+      const response = await fetch(`${BACKEND_URL}/api/maquinaria/${maquinariaId}/imagen-placa-ce`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formDataImage
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw { status: response.status, message: errorData.detail };
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      setError('Error al subir la imagen de la placa CE');
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+  
+  const deleteImage = async (maquinariaId) => {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar la imagen de la placa CE?')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/maquinaria/${maquinariaId}/imagen-placa-ce`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw { status: response.status, message: errorData.detail };
+      }
+      
+      fetchMaquinaria();
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      setError('Error al eliminar la imagen');
+      setTimeout(() => setError(null), 5000);
+    }
+  };
+  
+  const viewImage = (maquinariaId) => {
+    setModalImageUrl(`${BACKEND_URL}/api/maquinaria/${maquinariaId}/imagen-placa-ce`);
+    setShowImageModal(true);
   };
   
   const handleEdit = (item) => {
@@ -267,6 +349,13 @@ const Maquinaria = () => {
       estado: item.estado || 'Operativo',
       observaciones: item.observaciones || ''
     });
+    // Si tiene imagen, mostrar preview
+    if (item.imagen_placa_ce_url) {
+      setImagePreview(`${BACKEND_URL}/api/maquinaria/${item._id}/imagen-placa-ce`);
+    } else {
+      setImagePreview(null);
+    }
+    setSelectedImage(null);
     setShowForm(true);
   };
   
