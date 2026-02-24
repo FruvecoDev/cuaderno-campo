@@ -30,6 +30,11 @@ const Usuarios = () => {
   const [editFormData, setEditFormData] = useState({ full_name: '', email: '', role: '' });
   const [savingEdit, setSavingEdit] = useState(false);
   const [editError, setEditError] = useState('');
+  // Tipo operacion modal
+  const [showTipoOperacionModal, setShowTipoOperacionModal] = useState(false);
+  const [selectedUserForTipoOp, setSelectedUserForTipoOp] = useState(null);
+  const [tipoOperacionValue, setTipoOperacionValue] = useState('ambos');
+  const [savingTipoOp, setSavingTipoOp] = useState(false);
   const { token, user: currentUser } = useAuth();
   
   const ROLES = [
