@@ -175,13 +175,18 @@ async def create_articulo(
     articulo: ArticuloCreate,
     current_user: dict = Depends(RequireCreate)
 ):
-    """Crear un nuevo artículo de explotación"""
-    # Verificar si ya existe un artículo con ese código
-    existing = await articulos_collection.find_one({"codigo": articulo.codigo})
-    if existing:
-        raise HTTPException(status_code=400, detail=f"Ya existe un artículo con el código '{articulo.codigo}'")
-    
+    """Crear un nuevo artículo de explotación con código auto-generado"""
     articulo_dict = articulo.model_dump()
+    
+    # Auto-generar código si no se proporciona
+    if not articulo_dict.get("codigo"):
+        articulo_dict["codigo"] = await generate_codigo(articulo_dict.get("categoria", "General"))
+    else:
+        # Si se proporciona código, verificar que no exista
+        existing = await articulos_collection.find_one({"codigo": articulo_dict["codigo"]})
+        if existing:
+            raise HTTPException(status_code=400, detail=f"Ya existe un artículo con el código '{articulo_dict['codigo']}'")
+    
     articulo_dict["created_at"] = datetime.now()
     articulo_dict["updated_at"] = datetime.now()
     
