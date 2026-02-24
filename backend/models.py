@@ -253,7 +253,7 @@ class VisitaBase(BaseModel):
     objetivo: str  # Control Rutinario, Informe, Evaluación, etc.
     realizado: bool = False
     planificado: bool = False
-    fecha_visita: Optional[str] = None
+    fecha_visita: str  # OBLIGATORIO - fecha de la visita
     hora_visita: Optional[str] = None
     
     # Vínculos obligatorios al contexto agronómico
@@ -288,8 +288,8 @@ class VisitaCreate(BaseModel):
     # El resto se hereda automáticamente desde la parcela y su contrato
     parcela_id: str  # OBLIGATORIO - el contexto se hereda de aquí
     
-    # Campos opcionales editables por el usuario
-    fecha_visita: Optional[str] = None
+    # Fecha visita OBLIGATORIA
+    fecha_visita: str  # OBLIGATORIO - fecha de la visita
     fecha_planificada: Optional[str] = None  # Para planificar visitas futuras
     observaciones: Optional[str] = None
     
