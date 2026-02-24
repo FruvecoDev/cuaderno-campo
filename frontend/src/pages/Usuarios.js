@@ -358,6 +358,14 @@ const Usuarios = () => {
                               <Edit2 size={14} />
                             </button>
                             <button
+                              className="btn btn-sm btn-secondary"
+                              onClick={() => openPermissionsModal(user)}
+                              title="Configurar permisos de menú"
+                              data-testid={`btn-permisos-${user._id}`}
+                            >
+                              <Settings size={14} />
+                            </button>
+                            <button
                               className={`btn btn-sm ${user.is_active ? 'btn-error' : 'btn-success'}`}
                               onClick={() => handleToggleActive(user._id, user.is_active)}
                               title={user.is_active ? t('users.deactivate') : t('users.activate')}
