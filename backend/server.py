@@ -41,6 +41,7 @@ from routes_cuaderno import router as cuaderno_router
 from routes_tecnicos_aplicadores import router as tecnicos_aplicadores_router
 from routes_articulos import router as articulos_router
 from routes_agentes import router as agentes_router
+from routes_clientes import router as clientes_router
 
 app = FastAPI(title="FRUVECO - Agricultural Management System V1")
 
