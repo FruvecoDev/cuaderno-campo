@@ -158,8 +158,8 @@ const Albaranes = () => {
       const response = await fetch(`${BACKEND_URL}/api/proveedores?limit=500`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      const data = await response.json();
       if (response.ok) {
-        const data = await response.json();
         setProveedores(data.proveedores || []);
       }
     } catch (error) {
