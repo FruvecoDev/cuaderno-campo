@@ -121,19 +121,22 @@ const Albaranes = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   
   useEffect(() => {
-    if (isInitialized) return;
+    // Esperar a que el token esté disponible
+    if (!token || isInitialized) return;
     
     const loadData = async () => {
       setIsInitialized(true);
       
       // Cargar todos los datos en paralelo
       try {
+        const headers = { 'Authorization': `Bearer ${token}` };
+        
         const [albaranesRes, contratosRes, proveedoresRes, clientesRes, articulosRes] = await Promise.all([
-          fetch(`${BACKEND_URL}/api/albaranes`, { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch(`${BACKEND_URL}/api/contratos`, { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch(`${BACKEND_URL}/api/proveedores?limit=500`, { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch(`${BACKEND_URL}/api/clientes/activos`, { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch(`${BACKEND_URL}/api/articulos/activos`, { headers: { 'Authorization': `Bearer ${token}` } })
+          fetch(`${BACKEND_URL}/api/albaranes`, { headers }),
+          fetch(`${BACKEND_URL}/api/contratos`, { headers }),
+          fetch(`${BACKEND_URL}/api/proveedores?limit=500`, { headers }),
+          fetch(`${BACKEND_URL}/api/clientes/activos`, { headers }),
+          fetch(`${BACKEND_URL}/api/articulos/activos`, { headers })
         ]);
         
         // Parsear respuestas
@@ -153,7 +156,7 @@ const Albaranes = () => {
         
       } catch (error) {
         console.error('Error loading data:', error);
-        setError('Error al cargar datos');
+        setError('Error al cargar datos: ' + error.message);
       } finally {
         setLoading(false);
       }
