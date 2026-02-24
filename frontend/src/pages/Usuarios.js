@@ -960,6 +960,150 @@ const Usuarios = () => {
           </div>
         </div>
       )}
+
+      {/* Modal de Tipo de Operación */}
+      {showTipoOperacionModal && selectedUserForTipoOp && (
+        <div className="modal-overlay" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div className="modal-content" style={{
+            background: 'hsl(var(--card))',
+            borderRadius: '12px',
+            padding: '1.5rem',
+            width: '90%',
+            maxWidth: '450px',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '1.1rem' }}>Tipo de Operación</h2>
+                <p className="text-muted text-sm" style={{ margin: '0.25rem 0 0 0' }}>
+                  {selectedUserForTipoOp.full_name}
+                </p>
+              </div>
+              <button 
+                className="btn btn-sm btn-secondary" 
+                onClick={() => setShowTipoOperacionModal(false)}
+                style={{ padding: '0.5rem' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+            
+            <p style={{ fontSize: '0.875rem', marginBottom: '1rem', color: 'hsl(var(--muted-foreground))' }}>
+              Define qué tipo de operaciones puede realizar este usuario:
+            </p>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
+              <label style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.75rem',
+                padding: '1rem',
+                borderRadius: '8px',
+                border: tipoOperacionValue === 'compra' ? '2px solid #3b82f6' : '1px solid hsl(var(--border))',
+                backgroundColor: tipoOperacionValue === 'compra' ? '#dbeafe' : 'transparent',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}>
+                <input
+                  type="radio"
+                  name="tipoOperacion"
+                  value="compra"
+                  checked={tipoOperacionValue === 'compra'}
+                  onChange={(e) => setTipoOperacionValue(e.target.value)}
+                  style={{ width: '18px', height: '18px' }}
+                />
+                <div>
+                  <div style={{ fontWeight: '600', color: '#3b82f6' }}>Compra</div>
+                  <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                    Albaranes de compra, Contratos de compra, Proveedores
+                  </div>
+                </div>
+              </label>
+              
+              <label style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.75rem',
+                padding: '1rem',
+                borderRadius: '8px',
+                border: tipoOperacionValue === 'venta' ? '2px solid #10b981' : '1px solid hsl(var(--border))',
+                backgroundColor: tipoOperacionValue === 'venta' ? '#d1fae5' : 'transparent',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}>
+                <input
+                  type="radio"
+                  name="tipoOperacion"
+                  value="venta"
+                  checked={tipoOperacionValue === 'venta'}
+                  onChange={(e) => setTipoOperacionValue(e.target.value)}
+                  style={{ width: '18px', height: '18px' }}
+                />
+                <div>
+                  <div style={{ fontWeight: '600', color: '#10b981' }}>Venta</div>
+                  <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                    Albaranes de venta, Contratos de venta, Clientes
+                  </div>
+                </div>
+              </label>
+              
+              <label style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.75rem',
+                padding: '1rem',
+                borderRadius: '8px',
+                border: tipoOperacionValue === 'ambos' ? '2px solid #8b5cf6' : '1px solid hsl(var(--border))',
+                backgroundColor: tipoOperacionValue === 'ambos' ? '#ede9fe' : 'transparent',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}>
+                <input
+                  type="radio"
+                  name="tipoOperacion"
+                  value="ambos"
+                  checked={tipoOperacionValue === 'ambos'}
+                  onChange={(e) => setTipoOperacionValue(e.target.value)}
+                  style={{ width: '18px', height: '18px' }}
+                />
+                <div>
+                  <div style={{ fontWeight: '600', color: '#8b5cf6' }}>Ambos</div>
+                  <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                    Acceso completo a operaciones de compra y venta
+                  </div>
+                </div>
+              </label>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button 
+                className="btn btn-secondary" 
+                onClick={() => setShowTipoOperacionModal(false)}
+              >
+                Cancelar
+              </button>
+              <button 
+                className="btn btn-primary" 
+                onClick={handleSaveTipoOperacion}
+                disabled={savingTipoOp}
+              >
+                {savingTipoOp ? 'Guardando...' : 'Guardar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
