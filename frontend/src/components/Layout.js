@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
   LayoutDashboard, FileText, MapPin, Home, Calendar, ListTodo,
   Sprout, Droplets, BookOpen, FileBarChart, Wheat, FolderOpen,
-  LogOut, User, Users, Package, Leaf, Cog, ClipboardCheck, Beaker, BarChart3, Globe, Brain, UserCheck
+  LogOut, User, Users, Package, Leaf, Cog, ClipboardCheck, Beaker, BarChart3, Globe, Brain, UserCheck,
+  ChevronDown, ChevronRight
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import LanguageSelector from './LanguageSelector';
@@ -16,6 +17,24 @@ const Layout = ({ children }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { t } = useTranslation();
+  
+  // Estado para secciones colapsadas
+  const [collapsedSections, setCollapsedSections] = useState(() => {
+    const saved = localStorage.getItem('menu_collapsed_sections');
+    return saved ? JSON.parse(saved) : {};
+  });
+  
+  // Guardar estado en localStorage
+  useEffect(() => {
+    localStorage.setItem('menu_collapsed_sections', JSON.stringify(collapsedSections));
+  }, [collapsedSections]);
+  
+  const toggleSection = (sectionName) => {
+    setCollapsedSections(prev => ({
+      ...prev,
+      [sectionName]: !prev[sectionName]
+    }));
+  };
   
   const handleLogout = () => {
     logout();
