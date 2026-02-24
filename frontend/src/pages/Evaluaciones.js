@@ -64,6 +64,7 @@ const SECCIONES = [
 ];
 
 const Evaluaciones = () => {
+  const { t } = useTranslation();
   const [evaluaciones, setEvaluaciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
