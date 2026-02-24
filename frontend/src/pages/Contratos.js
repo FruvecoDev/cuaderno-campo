@@ -325,7 +325,21 @@ const Contratos = () => {
         <div className="card mb-6" data-testid="contrato-form">
           <h2 className="card-title">{editingId ? t('common.edit') + ' ' + t('contracts.title') : t('common.new') + ' ' + t('contracts.title')}</h2>
           <form onSubmit={handleSubmit}>
-            <div className="grid-3">
+            <div className="grid-4" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+              <div className="form-group">
+                <label className="form-label">Tipo Contrato *</label>
+                <select
+                  className="form-select"
+                  value={formData.tipo}
+                  onChange={(e) => setFormData({...formData, tipo: e.target.value, agente_compra: '', agente_venta: ''})}
+                  required
+                  data-testid="select-tipo-contrato"
+                >
+                  <option value="Compra">Compra</option>
+                  <option value="Venta">Venta</option>
+                </select>
+              </div>
+              
               <div className="form-group">
                 <label className="form-label">{t('contracts.campaign')} *</label>
                 <input
@@ -338,7 +352,7 @@ const Contratos = () => {
               </div>
               
               <div className="form-group">
-                <label className="form-label">{t('common.type')} *</label>
+                <label className="form-label">Procedencia *</label>
                 <select
                   className="form-select"
                   value={formData.procedencia}
@@ -362,6 +376,35 @@ const Contratos = () => {
                 />
               </div>
             </div>
+            
+            {/* Agente según tipo de contrato */}
+            {formData.tipo === 'Compra' && (
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label className="form-label">Agente de Compra</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={formData.agente_compra}
+                  onChange={(e) => setFormData({...formData, agente_compra: e.target.value})}
+                  placeholder="Nombre del agente de compra"
+                  data-testid="input-agente-compra"
+                />
+              </div>
+            )}
+            
+            {formData.tipo === 'Venta' && (
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label className="form-label">Agente de Venta</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={formData.agente_venta}
+                  onChange={(e) => setFormData({...formData, agente_venta: e.target.value})}
+                  placeholder="Nombre del agente de venta"
+                  data-testid="input-agente-venta"
+                />
+              </div>
+            )}
             
             <div className="grid-2">
               <div className="form-group">
