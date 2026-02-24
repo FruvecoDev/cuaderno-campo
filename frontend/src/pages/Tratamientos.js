@@ -807,7 +807,9 @@ const Tratamientos = () => {
     fecha_tratamiento: new Date().toISOString().split('T')[0], // Fecha actual por defecto
     fecha_aplicacion: '',
     aplicador_nombre: '',
+    tecnico_aplicador_id: '',
     maquina_id: '',
+    maquina_nombre: '',
     // Producto fitosanitario desde calculadora
     producto_fitosanitario_id: '',
     producto_fitosanitario_nombre: '',
