@@ -772,7 +772,16 @@ const Contratos = () => {
                 </tr>
               </thead>
               <tbody>
-                {contratos.map((contrato) => (
+                {contratos
+                  .filter(contrato => {
+                    // Filtrar contratos según permiso de operación del usuario
+                    const tipoContrato = contrato.tipo || 'Compra';
+                    if (puedeCompra && puedeVenta) return true; // Ambos
+                    if (puedeCompra && tipoContrato === 'Compra') return true;
+                    if (puedeVenta && tipoContrato === 'Venta') return true;
+                    return false;
+                  })
+                  .map((contrato) => (
                   <tr key={contrato._id}>
                     <td className="font-semibold">{contrato.serie}-{contrato.año}-{String(contrato.numero).padStart(3, '0')}</td>
                     <td>
