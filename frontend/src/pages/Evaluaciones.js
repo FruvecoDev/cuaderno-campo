@@ -608,6 +608,14 @@ const Evaluaciones = () => {
     }
   };
   
+  // Duplicar pregunta existente (abre el modal con datos pre-rellenados)
+  const handleDuplicateQuestion = (pregunta, seccion) => {
+    setNewQuestionSection(seccion);
+    setNewQuestionType(pregunta.tipo || 'texto');
+    setNewQuestionText(pregunta.pregunta + ' (copia)');
+    setShowAddQuestion(true);
+  };
+  
   const getEstadoBadge = (estado) => {
     switch (estado) {
       case 'completada': return { class: 'badge-success', icon: <CheckCircle size={12} /> };
