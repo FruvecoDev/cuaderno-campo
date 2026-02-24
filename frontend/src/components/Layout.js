@@ -108,26 +108,76 @@ const Layout = ({ children }) => {
           </div>
         </div>
         <nav className="sidebar-nav">
-          {filteredNavItems.map((section, idx) => (
-            <div key={idx} className="nav-section">
-              <div className="nav-section-title">{section.section}</div>
-              {section.items.map((item) => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.path;
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={`nav-link ${isActive ? 'active' : ''}`}
-                    data-testid={`nav-${item.label.toLowerCase()}`}
-                  >
-                    <Icon size={18} />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
-          ))}
+          {filteredNavItems.map((section, idx) => {
+            const isCollapsed = collapsedSections[section.section];
+            const hasActiveItem = section.items.some(item => location.pathname === item.path);
+            
+            return (
+              <div key={idx} className="nav-section">
+                <div 
+                  className="nav-section-title"
+                  onClick={() => toggleSection(section.section)}
+                  style={{ 
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    userSelect: 'none',
+                    padding: '0.5rem 0.75rem',
+                    marginBottom: isCollapsed ? '0' : '0.25rem',
+                    borderRadius: '0.375rem',
+                    transition: 'all 0.2s ease',
+                    backgroundColor: hasActiveItem && isCollapsed ? 'hsl(var(--primary) / 0.1)' : 'transparent'
+                  }}
+                  title={isCollapsed ? 'Expandir sección' : 'Colapsar sección'}
+                >
+                  <span style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.5rem',
+                    fontWeight: hasActiveItem ? '600' : '500'
+                  }}>
+                    {section.section}
+                    {hasActiveItem && isCollapsed && (
+                      <span style={{
+                        width: '6px',
+                        height: '6px',
+                        borderRadius: '50%',
+                        backgroundColor: 'hsl(var(--primary))'
+                      }} />
+                    )}
+                  </span>
+                  {isCollapsed ? (
+                    <ChevronRight size={16} style={{ opacity: 0.7 }} />
+                  ) : (
+                    <ChevronDown size={16} style={{ opacity: 0.7 }} />
+                  )}
+                </div>
+                <div style={{
+                  maxHeight: isCollapsed ? '0' : '500px',
+                  overflow: 'hidden',
+                  transition: 'max-height 0.3s ease-in-out',
+                  opacity: isCollapsed ? 0 : 1
+                }}>
+                  {section.items.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = location.pathname === item.path;
+                    return (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        className={`nav-link ${isActive ? 'active' : ''}`}
+                        data-testid={`nav-${item.label.toLowerCase()}`}
+                      >
+                        <Icon size={18} />
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </nav>
         
         <div style={{
