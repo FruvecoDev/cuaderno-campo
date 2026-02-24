@@ -177,63 +177,6 @@ const Albaranes = () => {
     }
   };
   
-  const fetchClientes = async () => {
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/clientes/activos`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const text = await response.text();
-      try {
-        const data = JSON.parse(text);
-        if (response.ok) {
-          setClientes(data.clientes || []);
-        }
-      } catch (e) {
-        console.error('Error parsing clientes JSON:', e, 'Response:', text);
-      }
-    } catch (error) {
-      console.error('Error fetching clientes:', error);
-    }
-  };
-  
-  const fetchArticulosCatalogo = async () => {
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/articulos/activos`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const text = await response.text();
-      try {
-        const data = JSON.parse(text);
-        if (response.ok) {
-          setArticulosCatalogo(data.articulos || []);
-        }
-      } catch (e) {
-        console.error('Error parsing articulos JSON:', e, 'Response:', text);
-      }
-    } catch (error) {
-      console.error('Error fetching artículos catálogo:', error);
-    }
-  };
-  
-  const fetchProveedores = async () => {
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/proveedores?limit=500`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const text = await response.text();
-      try {
-        const data = JSON.parse(text);
-        if (response.ok) {
-          setProveedores(data.proveedores || []);
-        }
-      } catch (e) {
-        console.error('Error parsing proveedores JSON:', e, 'Response:', text);
-      }
-    } catch (error) {
-      console.error('Error fetching proveedores:', error);
-    }
-  };
-  
   useEffect(() => {
     // Extraer opciones de filtro de albaranes existentes
     const proveedores = [...new Set(albaranes.map(a => a.proveedor).filter(Boolean))];
@@ -253,51 +196,6 @@ const Albaranes = () => {
   useEffect(() => {
     localStorage.setItem('albaranes_fields_config_v2', JSON.stringify(fieldsConfig));
   }, [fieldsConfig]);
-  
-  const fetchContratos = async () => {
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/contratos`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const text = await response.text();
-      try {
-        const data = JSON.parse(text);
-        if (response.ok) {
-          setContratos(data.contratos || []);
-        }
-      } catch (e) {
-        console.error('Error parsing contratos JSON:', e, 'Response:', text);
-      }
-    } catch (error) {
-      console.error('Error fetching contratos:', error);
-    }
-  };
-  
-  const fetchAlbaranes = async () => {
-    try {
-      setError(null);
-      const response = await fetch(`${BACKEND_URL}/api/albaranes`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      const text = await response.text();
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch (e) {
-        console.error('Error parsing albaranes JSON:', e);
-        throw new Error('Error al procesar respuesta');
-      }
-      
-      if (!response.ok) {
-        throw { status: response.status, message: data.detail || 'Error al cargar albaranes' };
-      }
-      
-      setAlbaranes(data.albaranes || []);
-    } catch (error) {
-      console.error('Error fetching albaranes:', error);
-      const errorMsg = handlePermissionError(error, 'ver los albaranes');
-      setError(errorMsg);
     } finally {
       setLoading(false);
     }
