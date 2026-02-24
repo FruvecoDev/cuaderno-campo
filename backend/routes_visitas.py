@@ -116,27 +116,40 @@ async def get_visitas_planificadas(
     current_user: dict = Depends(get_current_user),
     _access: dict = Depends(RequireVisitasAccess)
 ):
-    """Obtener visitas planificadas (con fecha_planificada futura o reciente)"""
-    # Buscar visitas con fecha_planificada en los próximos 30 días o los últimos 7 días
+    """Obtener visitas planificadas (con fecha_visita o fecha_planificada futura o reciente)"""
+    # Buscar visitas con fecha en los próximos 30 días o los últimos 7 días
     hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     hace_7_dias = hoy - timedelta(days=7)
     en_30_dias = hoy + timedelta(days=30)
     
+    hace_7_dias_str = hace_7_dias.strftime("%Y-%m-%d")
+    en_30_dias_str = en_30_dias.strftime("%Y-%m-%d")
+    
     query = {
         "$or": [
-            {"fecha_planificada": {"$gte": hace_7_dias.isoformat(), "$lte": en_30_dias.isoformat()}},
+            # Visitas con fecha_planificada en el rango
+            {"fecha_planificada": {"$gte": hace_7_dias_str, "$lte": en_30_dias_str}},
+            # Visitas con fecha_visita en el rango (próximas visitas)
+            {"fecha_visita": {"$gte": hace_7_dias_str, "$lte": en_30_dias_str}},
+            # Visitas marcadas como planificadas no realizadas
             {"planificado": True, "realizado": False}
         ]
     }
     
-    visitas = await visitas_collection.find(query).sort("fecha_planificada", 1).to_list(50)
+    visitas = await visitas_collection.find(query).sort("fecha_visita", 1).to_list(50)
     
-    # Filtrar las que tienen fecha_planificada válida
+    # Procesar visitas y usar fecha_visita si no hay fecha_planificada
     visitas_filtradas = []
     for v in visitas:
-        if v.get("fecha_planificada"):
+        # Usar fecha_visita como fecha principal si no hay fecha_planificada
+        fecha = v.get("fecha_planificada") or v.get("fecha_visita")
+        if fecha:
+            v["fecha_planificada"] = fecha  # Para compatibilidad con el frontend
             v["parcela"] = v.get("codigo_plantacion", "")
             visitas_filtradas.append(v)
+    
+    # Ordenar por fecha
+    visitas_filtradas.sort(key=lambda x: x.get("fecha_planificada", ""))
     
     return {"visitas": serialize_docs(visitas_filtradas)}
 
