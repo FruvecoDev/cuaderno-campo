@@ -29,7 +29,7 @@ const Contratos = () => {
   const [cultivos, setCultivos] = useState([]);
   
   const [formData, setFormData] = useState({
-    tipo: 'Compra',  // Compra o Venta
+    tipo: puedeCompra ? 'Compra' : 'Venta',  // Compra o Venta según permiso
     campana: '2025/26',
     procedencia: 'Campo',
     fecha_contrato: new Date().toISOString().split('T')[0],
