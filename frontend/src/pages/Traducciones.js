@@ -117,7 +117,11 @@ const Traducciones = () => {
       if (filters.search) params.append('search', filters.search);
       if (filters.approvedOnly) params.append('approved_only', 'true');
       
-      const response = await fetch(`${BACKEND_URL}/api/translations?${params}`);
+      const queryString = params.toString();
+      const url = queryString 
+        ? `${BACKEND_URL}/api/translations/?${queryString}`
+        : `${BACKEND_URL}/api/translations/`;
+      const response = await fetch(url);
       const data = await response.json();
       setTranslations(data.translations || []);
     } catch (err) {
