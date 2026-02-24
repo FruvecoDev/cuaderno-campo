@@ -627,3 +627,13 @@ Módulos actualizados para seguir patrón consistente:
   - `DELETE /api/clientes/{id}` - Eliminar (verifica contratos asociados)
 - **Navegación**: Catálogos > Clientes
 - **Estado**: ✅ COMPLETADO Y TESTEADO
+
+## Resumen de Ventas por Cliente (24/02/2026) - COMPLETADO
+- **Backend**: `GET /api/clientes/{id}/resumen-ventas`
+- **Frontend**: Modal en página Clientes con botón de gráfico (TrendingUp)
+- **Funcionalidades**:
+  - KPIs: Total contratos, kg totales, importe contratos, nº albaranes
+  - Tabla "Ventas por Campaña" con desglose por campaña, cultivos, cantidad e importe
+  - Tabla "Detalle de Contratos" con información completa de cada contrato
+  - Diseño visual con colores distintivos para cada KPI
+- **Estado**: ✅ COMPLETADO Y TESTEADO
