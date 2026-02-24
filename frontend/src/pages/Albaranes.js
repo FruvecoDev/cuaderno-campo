@@ -843,7 +843,7 @@ const Albaranes = () => {
                     <tr>
                       <th style={{ minWidth: '200px' }}>Descripción</th>
                       <th style={{ width: '100px' }}>Cantidad</th>
-                      <th style={{ width: '80px' }}>Unidad</th>
+                      <th style={{ width: '100px' }}>Unidad</th>
                       <th style={{ width: '120px' }}>Precio Unit.</th>
                       <th style={{ width: '120px' }}>Total</th>
                       <th style={{ width: '50px' }}></th>
