@@ -64,7 +64,12 @@
     "forgotPassword": "¿Olvidaste tu contraseña?",
     "rememberMe": "Recordarme",
     "loginTitle": "Inicia sesión para continuar",
-    "defaultCredentials": "Credenciales por defecto"
+    "defaultCredentials": "Credenciales por defecto",
+    "fieldNotebook": "Cuaderno de Campo",
+    "firstTime": "¿Primera vez? Crea el usuario administrador",
+    "initAdmin": "Inicializar Admin",
+    "adminCreated": "Admin creado",
+    "useCredentials": "Usa estas credenciales para entrar"
   },
   "nav": {
     "general": "General",
