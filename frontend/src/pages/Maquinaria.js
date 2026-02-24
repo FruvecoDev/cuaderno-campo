@@ -102,13 +102,21 @@ const Maquinaria = () => {
   const [showFieldsConfig, setShowFieldsConfig] = useState(false);
   const [fieldsConfig, setFieldsConfig] = useState(() => {
     const saved = localStorage.getItem('maquinaria_fields_config');
-    return saved ? JSON.parse(saved) : DEFAULT_FIELDS_CONFIG;
+    if (saved) {
+      // Fusionar con defaults para incluir campos nuevos
+      return { ...DEFAULT_FIELDS_CONFIG, ...JSON.parse(saved) };
+    }
+    return DEFAULT_FIELDS_CONFIG;
   });
   
   // Configuración de columnas de tabla
   const [tableConfig, setTableConfig] = useState(() => {
     const saved = localStorage.getItem('maquinaria_table_config');
-    return saved ? JSON.parse(saved) : DEFAULT_TABLE_CONFIG;
+    if (saved) {
+      // Fusionar con defaults para incluir columnas nuevas
+      return { ...DEFAULT_TABLE_CONFIG, ...JSON.parse(saved) };
+    }
+    return DEFAULT_TABLE_CONFIG;
   });
   
   // Form data
