@@ -726,7 +726,7 @@ const Dashboard = () => {
                             alignItems: 'center',
                             gap: '0.25rem'
                           }}
-                          title="Ver visita"
+                          title={t('dashboard.visits.viewVisit')}
                           data-testid={`ver-visita-${visita._id}`}
                         >
                           <Eye size={14} />
@@ -745,7 +745,7 @@ const Dashboard = () => {
                             alignItems: 'center',
                             gap: '0.25rem'
                           }}
-                          title="Editar visita"
+                          title={t('dashboard.visits.editVisit')}
                           data-testid={`editar-visita-${visita._id}`}
                         >
                           <Edit2 size={14} />
