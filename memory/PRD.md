@@ -57,6 +57,10 @@ Visita/Tratamiento → realizados sobre → Parcela
    - Panel de configuración accesible con botón ⚙️
    - Checkboxes para mostrar/ocultar campos del formulario y columnas de tabla
    - Preferencias guardadas en localStorage (persisten entre sesiones)
+   - **Módulos con configuración implementada**:
+     - Parcelas, Visitas, Tratamientos, Irrigaciones, Recetas, Albaranes, Maquinaria
+     - Proveedores (24/02/2026): Nombre, CIF/NIF, Teléfono, Email, Población, Provincia, Dirección, C.P., Contacto, Observaciones, Estado
+     - Clientes (24/02/2026): Código, Nombre, NIF, Tipo, Población, Provincia, Teléfono, Email, Dirección, C.P., Contacto, Web, Observaciones, Estado
 
 5. **Buscador de Parcelas/Contratos en Formularios (Nuevo)**
    - En Visitas: buscar parcela por Proveedor, Cultivo, Campaña
