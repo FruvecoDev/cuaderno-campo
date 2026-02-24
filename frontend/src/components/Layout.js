@@ -15,7 +15,7 @@ import logo from '../assets/logo.png';
 const Layout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, canDoOperacion } = useAuth();
   const { t } = useTranslation();
   
   // Estado para secciones colapsadas
