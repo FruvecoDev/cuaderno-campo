@@ -63,7 +63,8 @@ const Layout = ({ children }) => {
       { path: '/albaranes', label: t('nav.deliveryNotes'), icon: FileBarChart, module: 'albaranes' },
       { path: '/cosechas', label: t('nav.harvests'), icon: Wheat, module: 'cosechas' },
       { path: '/documentos', label: t('nav.documents'), icon: FolderOpen, module: 'documentos' },
-      { path: '/informes-gastos', label: t('nav.expenseReports'), icon: BarChart3, module: 'albaranes' },
+      { path: '/informes-gastos', label: t('nav.expenseReports'), icon: BarChart3, module: 'albaranes', operacion: 'compra' },
+      { path: '/informes-ingresos', label: 'Informes Ingresos', icon: TrendingUp, module: 'albaranes', operacion: 'venta' },
     ]},
     { section: t('nav.catalogs'), items: [
       { path: '/proveedores', label: t('nav.providers'), icon: Package, operacion: 'compra' },
