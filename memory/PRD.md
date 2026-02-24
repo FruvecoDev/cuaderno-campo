@@ -587,3 +587,16 @@ Módulos actualizados para seguir patrón consistente:
   - Upload certificados Técnicos a /app/uploads/
   - Integración Artículos en Albaranes
   - Auto-completado precio/unidad desde catálogo
+
+## Comisiones de Agentes en Contratos (24/02/2026) - COMPLETADO
+- **Archivos modificados**:
+  - `/app/backend/models.py` - Añadidos campos `tipo`, `agente_compra`, `agente_venta`, `comision_tipo`, `comision_valor` a `ContratoCreate`
+  - `/app/frontend/src/pages/Contratos.js` - Formulario con sección de agente y comisión
+- **Funcionalidades**:
+  - Tipo de contrato: Compra o Venta
+  - Selector de agente según tipo (Agente de Compra / Agente de Venta)
+  - Tipo de comisión: Porcentaje (%) o Euros por Kilo (€/kg)
+  - Valor de comisión numérico
+  - UI dinámica que cambia según el tipo de contrato
+  - Sección visual destacada con fondo gris
+- **Estado**: ✅ COMPLETADO Y TESTEADO
