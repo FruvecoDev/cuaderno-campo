@@ -6,7 +6,7 @@ from bson import ObjectId
 import io
 
 from database import (
-    albaranes_collection, contratos_collection, clientes_collection,
+    albaranes_collection, contratos_collection,
     serialize_doc, serialize_docs, db
 )
 from rbac_guards import RequireAlbaranesAccess, get_current_user
