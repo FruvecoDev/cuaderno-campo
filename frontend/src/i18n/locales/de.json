@@ -421,6 +421,21 @@
     "de": "Deutsch",
     "it": "Italiano"
   },
+  "fieldNotebook": {
+    "title": "Feldbuch",
+    "generate": "Feldbuch Generieren",
+    "generating": "Generierung...",
+    "errorGenerating": "Fehler beim Generieren des Feldbuchs",
+    "downloadSuccess": "Feldbuch erfolgreich heruntergeladen",
+    "aiSummary": "KI-Zusammenfassung",
+    "statistics": "Statistiken",
+    "visits": "Besuche",
+    "treatments": "Behandlungen",
+    "irrigations": "Bewässerungen",
+    "harvests": "Ernten",
+    "totalProduction": "Gesamtproduktion",
+    "campaign": "Kampagne"
+  },
   "translations": {
     "title": "Landwirtschaftliches Wörterbuch",
     "subtitle": "Verwalten Sie benutzerdefinierte Übersetzungen für Ihre Region",

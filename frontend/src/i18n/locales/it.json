@@ -421,6 +421,21 @@
     "de": "Deutsch",
     "it": "Italiano"
   },
+  "fieldNotebook": {
+    "title": "Quaderno di Campo",
+    "generate": "Genera Quaderno di Campo",
+    "generating": "Generazione...",
+    "errorGenerating": "Errore nella generazione del quaderno",
+    "downloadSuccess": "Quaderno di campo scaricato con successo",
+    "aiSummary": "Riepilogo IA",
+    "statistics": "Statistiche",
+    "visits": "Visite",
+    "treatments": "Trattamenti",
+    "irrigations": "Irrigazioni",
+    "harvests": "Raccolti",
+    "totalProduction": "Produzione Totale",
+    "campaign": "Campagna"
+  },
   "translations": {
     "title": "Dizionario Termini Agricoli",
     "subtitle": "Gestisci traduzioni personalizzate per la tua regione",

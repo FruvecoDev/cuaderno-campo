@@ -421,6 +421,21 @@
     "de": "Deutsch",
     "it": "Italiano"
   },
+  "fieldNotebook": {
+    "title": "Field Notebook",
+    "generate": "Generate Field Notebook",
+    "generating": "Generating...",
+    "errorGenerating": "Error generating field notebook",
+    "downloadSuccess": "Field notebook downloaded successfully",
+    "aiSummary": "AI Summary",
+    "statistics": "Statistics",
+    "visits": "Visits",
+    "treatments": "Treatments",
+    "irrigations": "Irrigations",
+    "harvests": "Harvests",
+    "totalProduction": "Total Production",
+    "campaign": "Campaign"
+  },
   "translations": {
     "title": "Agricultural Terms Dictionary",
     "subtitle": "Manage custom translations for your region",

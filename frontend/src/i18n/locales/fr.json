@@ -421,6 +421,21 @@
     "de": "Deutsch",
     "it": "Italiano"
   },
+  "fieldNotebook": {
+    "title": "Carnet de Terrain",
+    "generate": "Générer Carnet de Terrain",
+    "generating": "Génération...",
+    "errorGenerating": "Erreur lors de la génération du carnet",
+    "downloadSuccess": "Carnet de terrain téléchargé avec succès",
+    "aiSummary": "Résumé IA",
+    "statistics": "Statistiques",
+    "visits": "Visites",
+    "treatments": "Traitements",
+    "irrigations": "Irrigations",
+    "harvests": "Récoltes",
+    "totalProduction": "Production Totale",
+    "campaign": "Campagne"
+  },
   "translations": {
     "title": "Dictionnaire des Termes Agricoles",
     "subtitle": "Gérez les traductions personnalisées pour votre région",
