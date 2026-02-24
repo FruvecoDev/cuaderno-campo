@@ -365,15 +365,24 @@ const Clientes = () => {
     <div data-testid="clientes-page">
       <div className="flex justify-between items-center mb-6">
         <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>Clientes</h1>
-        <PermissionButton
-          permission="create"
-          onClick={() => setShowForm(!showForm)}
-          className="btn btn-primary"
-          data-testid="btn-nuevo-cliente"
-        >
-          <Plus size={18} />
-          Nuevo Cliente
-        </PermissionButton>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button
+            className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setShowFieldsConfig(!showFieldsConfig)}
+            title="Configurar columnas"
+          >
+            <Settings size={18} />
+          </button>
+          <PermissionButton
+            permission="create"
+            onClick={() => setShowForm(!showForm)}
+            className="btn btn-primary"
+            data-testid="btn-nuevo-cliente"
+          >
+            <Plus size={18} />
+            Nuevo Cliente
+          </PermissionButton>
+        </div>
       </div>
       
       {error && (
