@@ -171,12 +171,9 @@ const Albaranes = () => {
   // Función para recargar albaranes (después de crear/editar/eliminar)
   const reloadAlbaranes = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/albaranes`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      if (response.ok) {
-        setAlbaranes(data.albaranes || []);
+      const result = await safeFetch(`${BACKEND_URL}/api/albaranes`);
+      if (result.ok) {
+        setAlbaranes(result.data?.albaranes || []);
       }
     } catch (error) {
       console.error('Error reloading albaranes:', error);
