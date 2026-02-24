@@ -74,6 +74,7 @@
   "nav": {
     "general": "General",
     "dashboard": "Dashboard",
+    "aiAssistant": "AI Assistant",
     "mainManagement": "Main Management",
     "contracts": "Contracts",
     "parcels": "Parcels",
