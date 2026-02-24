@@ -118,20 +118,36 @@ const TecnicosAplicadores = () => {
   };
 
   const uploadCertificado = async (tecnicoId) => {
-    if (!selectedFile) return;
+    if (!selectedFile) {
+      console.log('No file selected for upload');
+      return;
+    }
+    
+    console.log('Uploading certificate for tecnico:', tecnicoId);
     
     setUploading(true);
     try {
       const formDataFile = new FormData();
       formDataFile.append('file', selectedFile);
       
-      await fetch(`${BACKEND_URL}/api/tecnicos-aplicadores/${tecnicoId}/certificado`, {
+      const response = await fetch(`${BACKEND_URL}/api/tecnicos-aplicadores/${tecnicoId}/certificado`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formDataFile
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Upload error:', errorData);
+        setError('Error al subir el certificado');
+        setTimeout(() => setError(null), 5000);
+      } else {
+        console.log('Certificate uploaded successfully');
+      }
     } catch (err) {
       console.error('Error uploading certificado:', err);
+      setError('Error al subir el certificado');
+      setTimeout(() => setError(null), 5000);
     } finally {
       setUploading(false);
       setSelectedFile(null);
