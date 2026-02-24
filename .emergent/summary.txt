@@ -27,44 +27,46 @@ Cada sección puede ser configurable pudiendo habilitar o deshabilitar secciones
 **User's preferred language**: Español
 
 **what currently exists?**
-Una aplicación full-stack (FastAPI, React, MongoDB) para la gestión agrícola. Se ha implementado un nuevo módulo de Clientes y se ha modificado la lógica de Contratos y Albaranes para distinguir entre Compra (con Proveedores) y Venta (con Clientes). El formulario de Albaranes ha sido rediseñado para un flujo más intuitivo, preguntando primero el tipo (Compra/Venta) y mostrando los campos correspondientes. Sin embargo, la página de Albaranes sufre un error crítico de carga de datos que impide su uso.
+Una aplicación full-stack (FastAPI, React, MongoDB) para gestión agrícola. En esta sesión, se han implementado múltiples funcionalidades clave:
+1.  **Permisos de Operación por Usuario:** Se ha creado un sistema de permisos (, , ) que restringe el acceso a módulos (Proveedores, Clientes), opciones en formularios (Contratos, Albaranes) y KPIs del Dashboard.
+2.  **Nuevos Módulos y Mejoras:** Se creó un módulo de Informes de Ingresos, se internacionalizó el Dashboard, se corrigió el selector de idiomas y se implementó la configuración de columnas en las tablas de Clientes y Proveedores.
+3.  **PDF Mejorado:** La generación del PDF de Hojas de Evaluación ahora incluye fichas detalladas para el Técnico Aplicador y la Maquinaria, con espacio para sus imágenes correspondientes.
+4.  **Lógica de Negocio:** Se mejoró el filtrado de contratos en los albaranes para que coincida el tipo (compra/venta).
+
+El error crítico en la página de Albaranes de la sesión anterior fue confirmado como resuelto por el usuario al inicio de esta.
 
 **Last working item**:
--   **Last item agent was working**: Depurando un error persistente ( o variaciones) que ocurre al cargar la página de Albaranes (). El agente intentó múltiples soluciones (refactorización de , eliminación de , uso de ) sin éxito, ya que el usuario sigue reportando el error en el entorno de previsualización.
--   **Status**: BLOCKED
--   **Agent Testing Done**: N (Las pruebas del agente no reproducen el error reportado por el usuario, por lo que no son válidas.)
--   **Which testing method agent to use?**: troubleshoot_agent (Este es un bug recurrente y el agente principal está atascado).
--   **User Testing Done**: N (El usuario confirma que la página sigue rota).
+-   **Last item agent was working**: Depurando por qué no se guardan las imágenes subidas en las fichas de Técnicos Aplicadores y Maquinaria. El usuario reportó el bug. El agente identificó que el backend guardaba una ruta de archivo local en lugar de una URL accesible por web. Se aplicó una corrección en los endpoints de subida (, ) para guardar la URL correcta (ej. ), pero no se completó la verificación de la solución.
+-   **Status**: IN PROGRESS
+-   **Agent Testing Done**: N
+-   **Which testing method agent to use?**: both. Se debe probar el flujo completo: subir una imagen en el frontend, verificar que el backend la guarda en  y que la URL correcta se almacena en la base de datos, y finalmente, que la imagen se puede visualizar en la aplicación.
+-   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Error crítico al cargar la página de Albaranes (P0)**
+-   **Issue 1: Las imágenes no se guardan en Técnicos y Maquinaria (P0)**
 -   **Issue 2: Finalizar implementación de notificaciones por email (P1)**
 
 **Issues Detail**:
--   **Issue 1: Error crítico al cargar la página de Albaranes**
-    -   **Attempted fixes**:
-        -   Refactorización de todas las llamadas  en  y otros archivos (, , ) para asegurar que el cuerpo de la respuesta (, ) se lea una sola vez.
-        -   Reestructuración del  de carga inicial en  para usar  con un flag  y evitar ejecuciones múltiples.
-        -   Eliminación de  de  para descartar que el problema fuera el doble renderizado en desarrollo.
-        -   Reemplazo de  por  como último recurso.
-        -   El mensaje de error ha variado entre , , y , lo que indica que el problema subyacente persiste a pesar de los cambios.
+-   **Issue 1: Las imágenes no se guardan en Técnicos y Maquinaria**
+    -   **Attempted fixes**: El agente modificó los endpoints del backend ( y ) para que la ruta guardada en la base de datos sea una URL relativa (ej. ) en lugar de una ruta absoluta del sistema de archivos (). También se verificó que  ya sirve estáticamente el directorio .
     -   **Next debug checklist**:
-        1.  El agente no puede reproducir el error, pero el usuario sí. Esto es un bloqueo crítico. La primera acción debe ser invocar al  para obtener una nueva perspectiva sobre el problema.
-        2.  Re-habilitar . Su eliminación es una mala práctica y oculta el problema real, que probablemente es un efecto secundario en un  que no es idempotente.
-        3.  En , comentar temporalmente las llamadas a las funciones de carga de datos dentro del  una por una para aislar qué  específico está causando la corrupción de la respuesta.
-        4.  Utilizar las herramientas de desarrollador del navegador para inspeccionar la pestaña Network y ver el estado, la respuesta y las cabeceras de la petición que falla.
-    -   **Why fix this issue and what will be achieved with the fix?**: La página de Albaranes es inutilizable. Solucionarlo es crucial para la funcionalidad principal de la aplicación.
-    -   **Status**: BLOCKED
-    -   **Is recurring issue?**: Y
-    -   **Should Test frontend/backend/both after fix?**: frontend
+        1.  Realizar una prueba de extremo a extremo: usar el formulario en  para subir una imagen.
+        2.  Verificar que el archivo aparece físicamente en el directorio .
+        3.  Confirmar que el documento del técnico en MongoDB tiene el campo  con la ruta web correcta.
+        4.  Comprobar que al hacer clic en el icono de visualización en la tabla de técnicos se abre la imagen correctamente.
+        5.  Repetir los pasos 1-4 para el módulo de .
+    -   **Why fix this issue and what will be achieved with the fix?**: Es un requisito del usuario poder adjuntar y visualizar imágenes de certificados y placas. Además, estas imágenes son necesarias para la generación de los PDF de Hojas de Evaluación.
+    -   **Status**: IN PROGRESS
+    -   **Is recurring issue?**: N
+    -   **Should Test frontend/backend/both after fix?**: both
     -   **Blocked on other issue**: None
 -   **Issue 2: Finalizar implementación de notificaciones por email**
     -   **Attempted fixes**: La estructura básica existe (, ).
     -   **Next debug checklist**:
         1.  Solicitar la  al usuario.
         2.  Añadir la clave al fichero .
-        3.  Implementar un planificador en segundo plano (ej: ) para enviar notificaciones.
-    -   **Why fix this issue and what will be achieved with the fix?**: Permitirá enviar recordatorios proactivos por email.
+        3.  Implementar la lógica de envío en los eventos correspondientes.
+    -   **Why fix this issue and what will be achieved with the fix?**: Permitirá enviar recordatorios y alertas proactivas por email.
     -   **Status**: BLOCKED
     -   **Is recurring issue?**: N
     -   **Should Test frontend/backend/both after fix?**: both
@@ -80,16 +82,17 @@ Una aplicación full-stack (FastAPI, React, MongoDB) para la gestión agrícola.
     -   **P2**: Mejorar el mapa interactivo con funciones avanzadas de edición para las parcelas.
 
 **Completed work in this session**
--   **Feature**: Se completó la adición de campos de comisión (, ) al módulo de Contratos.
--   **Feature**: Se creó un nuevo módulo Clientes con CRUD completo y una página de gestión en el frontend.
--   **Feature**: Se implementó una vista de Resumen de Ventas por cliente, con KPIs y contratos asociados.
--   **Feature**: Se refactorizó la lógica de Contratos y Albaranes para manejar la dualidad Proveedor (Compras) vs. Cliente (Ventas).
--   **Feature**: Se rediseñó completamente el formulario de creación de Albaranes para un flujo más intuitivo, donde primero se elige el tipo (Compra/Venta) y el contrato es opcional.
--   **User Support**: Se proporcionaron instrucciones detalladas para ejecutar el proyecto localmente y se aclararon dudas sobre las APIs de OpenAI vs. suscripciones de ChatGPT.
--   **Bugfix (Attempted)**: Múltiples intentos fallidos para resolver el error  en la página de Albaranes.
+-   **Feature**: Se implementó un sistema de permisos por usuario (, , ) que restringe el acceso a módulos (Proveedores/Clientes), opciones en formularios (Contratos/Albaranes) y KPIs del Dashboard.
+-   **Feature**: Se creó el módulo completo de Informes de Ingresos, con backend y frontend.
+-   **Feature**: Se mejoró el PDF de Hojas de Evaluación para incluir fichas del técnico aplicador y de la maquinaria con sus respectivas imágenes.
+-   **Feature**: Se añadió la funcionalidad de configurar (mostrar/ocultar) las columnas de las tablas en las páginas de Clientes y Proveedores.
+-   **Feature**: El Dashboard ahora muestra KPIs de Contratos de Compra y Contratos de Venta por separado y respeta los permisos del usuario.
+-   **Bugfix**: Se corrigió un problema de visualización en el menú desplegable del selector de idiomas.
+-   **i18n**: Se completó la internacionalización de todos los textos del Dashboard.
+-   **UX**: Se añadió un botón de acceso directo para editar los permisos de operación de un usuario, mejorando su descubrimiento.
 
 **Earlier issues found/mentioned but not fixed**
--   None.
+-   None. El error  de la sesión anterior fue resuelto.
 
 **Known issue recurrence from previous fork**
 -   None.
@@ -99,59 +102,62 @@ Una aplicación full-stack (FastAPI, React, MongoDB) para la gestión agrícola.
 
 **Key Technical Concepts**
 -   **Stack**: FARM (FastAPI, React, MongoDB)
--   **UI**: shadcn/ui, 
--   **State Management**: React Hooks (, , )
--   **Bug**: La aplicación sufre un error persistente relacionado con la lectura del cuerpo de las respuestas  (), probablemente causado por un  no idempotente que  estaba detectando.
+-   **Role-Based Access Control (RBAC)**: Lógica de permisos personalizada implementada en el  de React para el frontend y en los endpoints de FastAPI para el backend.
+-   **File Uploads**: Uso de  en React y  en FastAPI. Se configuró el servicio de archivos estáticos para servir las imágenes subidas.
+-   **Internationalization (i18n)**: Uso de  para la traducción de la interfaz.
 
 **key DB schema**
--   **clientes**:  (New Collection)
--   **contratos**: 
--   **albaranes**: 
+-   **users**: Se añadió el campo  (Enum: Compra, Venta, Ambos).
+-   **tecnicos_aplicadores**: Se añadió .
+-   **maquinaria**: Se añadió .
 
 **changes in tech stack**
 -   None.
 
 **All files of reference**
--   : Archivo principal modificado y donde reside el bug actual.
--   : Nueva página para la gestión de clientes.
--   : Nuevo router para el CRUD de clientes.
--   : Modificado para la lógica de cliente/proveedor.
--   : Modificado para aceptar .
--   : Actualizado con los nuevos campos y colecciones.
--   : Se eliminó  como intento de solución.
+-   **/app/backend/routes/routes_tecnicos_aplicadores.py**: Modificado para corregir la URL de la imagen subida.
+-   **/app/backend/routes/routes_maquinaria.py**: Modificado para corregir la URL de la imagen subida.
+-   **/app/frontend/src/pages/TecnicosAplicadores.js**: Contiene la UI para la subida de imágenes de certificados.
+-   **/app/frontend/src/pages/Maquinaria.js**: Contiene la UI para la subida de imágenes de placas.
+-   **/app/frontend/src/pages/Usuarios.js**: UI principal para gestionar los permisos de operación.
+-   **/app/frontend/src/context/AuthContext.js**: Lógica central de permisos en el frontend.
+-   **/app/backend/models.py**: Actualizado el modelo  con el nuevo campo de permiso.
+-   **/app/backend/routes/routes_evaluaciones.py**: Modificado para incluir las nuevas fichas en el PDF.
 
 **Areas that need refactoring**:
--   ****: Este componente se ha vuelto excesivamente grande y complejo. Maneja la lógica y el estado de albaranes, proveedores, clientes y contratos. Debería descomponerse en componentes más pequeños y manejables.
--   ** de carga de datos**: El  en  es propenso a errores y ha sido la fuente de una depuración extensiva. Necesita ser refactorizado para ser robusto e idempotente, permitiendo que  se vuelva a habilitar.
+-   La lógica de permisos está distribuida en varios componentes (, , , ). Se podría considerar abstraerla a un Hook o HOC (Higher-Order Component) para evitar la repetición del  y la lógica .
 
 **key api endpoints**
--    (CRUD para Clientes)
--   
--    (ahora  es opcional y acepta )
+-   : (Nuevo) Actualiza el permiso de operación de un usuario.
+-   : (Modificado) Endpoint para subir imagen de certificado.
+-   : (Modificado) Endpoint para subir imagen de placa CE.
+-   : (Nuevo) Obtiene los datos para los informes de ingresos.
+-   : Ruta estática para servir los archivos subidos.
 
 **Critical Info for New Agent**
-1.  **P0 BLOCKER: FIX ALBARANES PAGE**: Tu prioridad absoluta es resolver el error  (o sus variantes) en la página de Albaranes. El agente anterior no pudo solucionarlo. **NO ASUMAS QUE ESTÁ RESUELTO**. Usa el  inmediatamente.
-2.  **REACT STRICT MODE**:  fue eliminado de  como un parche. Esto es una mala práctica. El objetivo es arreglar el  en  para que sea idempotente y luego **re-habilitar **.
-3.  **USER'S LOCAL ENVIRONMENT**: El usuario está configurando el proyecto localmente. Prepárate para más preguntas sobre dependencias (, ) y configuración de .
+1.  **P0 - FIX IMAGE UPLOADS**: Tu prioridad absoluta es finalizar la depuración de la subida de imágenes para Técnicos Aplicadores y Maquinaria. El agente anterior corrigió el backend para guardar URLs correctas, pero no completó la prueba de extremo a extremo. Debes verificar que la subida, el guardado y la visualización de imágenes funcionen perfectamente.
+2.  **USER PERMISSIONS ():** Se ha implementado un sistema de permisos de operación (, , ). Este permiso controla la visibilidad y el acceso en el Dashboard, el menú lateral, Contratos y Albaranes. Cualquier nueva funcionalidad relacionada con compras o ventas debe respetar este sistema.
+3.  **BLOCKED TASK - EMAIL NOTIFICATIONS:** La tarea para implementar notificaciones por email sigue bloqueada a la espera de que el usuario proporcione la . No trabajes en ello hasta recibir la clave.
 
 **documents and test reports created in this job**
--    (actualizado)
+-   None.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.   - **Request**: Filter contracts in Delivery Notes form. **Status: COMPLETED**.
-2.   - **Bug Report**: User reports the error persists. **Status: PENDING**.
-3.   - **Bug Report**: User reports error on page load. **Status: PENDING**.
-4.   - **Bug Report**: User reports error again after a fix attempt. **Status: PENDING**.
-5.   - **Bug Report**: User confirms error persists after multiple fixes. **Status: PENDING**.
-6.   - **Bug Report & Clarification**: User confirms error persists and clarifies business logic. **Status: PENDING**.
-7.   - **Bug Report**: User confirms error again. **Status: PENDING**.
-8.   - **Bug Report**: User reports a new variation of the same error. **Status: PENDING**.
-9.   - **Bug Report**: User reports another variation of the error. **Status: PENDING**.
-10.  - **Clarification**: User confirms the error is happening in the Emergent preview environment, not just locally. **Status: PENDING**.
+1.   - **Bug Report**: Images are not saving. **Status: IN PROGRESS** (Current 
+wtmp begins Tue Feb 24 20:26:57 2026).
+2.   - **Request**: Add applicator/machinery details to PDF. **Status: COMPLETED** (backend logic implemented, pending image fix).
+3.   - **Request**: Create income reports module. **Status: COMPLETED**.
+4.   - **Request**: Dashboard KPIs must respect operation permissions. **Status: COMPLETED**.
+5.   - **Confirmation**: User saw the new UI button for permissions. **Status: COMPLETED**.
+6.   - **UX Feedback**: Operation type modal is not intuitive. **Status: COMPLETED** (dedicated button added).
+7.   - **Request**: Implement operation-based permissions. **Status: COMPLETED**.
+8.   - **Request**: Split Total Contracts KPI on dashboard. **Status: COMPLETED**.
+9.   - **Bug Report**: Language selector dropdown is broken. **Status: COMPLETED**.
+10.  - **Request**: Internationalize the dashboard. **Status: COMPLETED**.
 
 **Project Health Check:**
--   **Broken**: La página de Albaranes () es inutilizable debido a un error crítico de carga de datos.
--   **Mocked**: Sistema de notificaciones por email.
+-   **Broken**: La funcionalidad de subir y mostrar imágenes para Técnicos y Maquinaria no funciona.
+-   **Mocked**: El sistema de notificaciones por email () está incompleto y bloqueado.
 
 **3rd Party Integrations**
 -   **OpenAI GPT-4o**: Uses Emergent LLM Key.
@@ -159,7 +165,7 @@ Una aplicación full-stack (FastAPI, React, MongoDB) para la gestión agrícola.
 -   **react-i18next / i18next**: Multi-language support.
 -   **WeasyPrint**: PDF generation.
 -   **openpyxl**: Excel file generation.
--   **Resend**: For email notifications (parcialmente integrado, bloqueado).
+-   **Resend**: For email notifications (partially integrated, blocked).
 -   **Leaflet.js / OpenStreetMap**: Maps.
 -   **react-dropzone**: For drag-and-drop file uploads.
 
@@ -167,12 +173,11 @@ Una aplicación full-stack (FastAPI, React, MongoDB) para la gestión agrícola.
 -   **Testing agent used after significant changes**: NO
 -   **Troubleshoot agent used after agent stuck in loop**: NO
 -   **Test files created**: No
--   **Known regressions**: La página de Albaranes funcionaba y ahora está rota.
+-   **Known regressions**: None in this session.
 
 **Credentials to test flow:**
 -   **Admin**:  / 
 -   **Manager**:  / 
 
 **What agent forgot to execute**
--   El agente no utilizó el  a pesar de estar claramente atascado en un bucle de depuración con el error .
--   El agente eliminó  como una solución, en lugar de abordar la causa raíz del problema que  estaba señalando (un efecto no idempotente).</analysis>
+-   El agente no completó el ciclo de prueba de extremo a extremo para la corrección de la subida de imágenes antes de que finalizara la sesión.</analysis>

@@ -1,6 +1,6 @@
 import { Page, expect } from '@playwright/test';
 
-const BACKEND_URL = process.env.BASE_URL || 'https://agri-field-app.preview.emergentagent.com';
+const BACKEND_URL = process.env.BASE_URL || 'https://field-tracker-66.preview.emergentagent.com';
 
 export async function waitForAppReady(page: Page) {
   await page.waitForLoadState('domcontentloaded');
