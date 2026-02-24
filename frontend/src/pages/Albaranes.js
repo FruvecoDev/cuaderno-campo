@@ -94,7 +94,7 @@ const Albaranes = () => {
   
   // Form data
   const [formData, setFormData] = useState({
-    tipo: 'Entrada',
+    tipo: 'Albarán de compra',
     fecha: new Date().toISOString().split('T')[0],
     contrato_id: '',
     // Datos heredados del contrato (referencia)
@@ -432,7 +432,7 @@ const Albaranes = () => {
     setSelectedContrato(null);
     setContratoSearch({ proveedor: '', cultivo: '', campana: '', parcela: '' });
     setFormData({
-      tipo: 'Entrada',
+      tipo: 'Albarán de compra',
       fecha: new Date().toISOString().split('T')[0],
       contrato_id: '',
       proveedor_contrato: '',
