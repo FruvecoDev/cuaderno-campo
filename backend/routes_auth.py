@@ -4,7 +4,7 @@ from typing import Optional
 from datetime import datetime, timedelta
 from bson import ObjectId
 
-from models_auth import UserCreate, UserLogin, UserInDB, Token, UserRole
+from models_auth import UserCreate, UserLogin, UserInDB, Token, UserRole, ALL_MENU_ITEMS, DEFAULT_MENU_PERMISSIONS
 from auth_utils import (
     verify_password, get_password_hash, create_access_token,
     decode_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
