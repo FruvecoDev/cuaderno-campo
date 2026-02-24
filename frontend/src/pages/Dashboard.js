@@ -713,7 +713,7 @@ const Dashboard = () => {
                       </div>
                       <div style={{ display: 'flex', gap: '0.25rem' }}>
                         <button
-                          onClick={() => navigate(`/visitas?ver=${visita._id}`)}
+                          onClick={() => setSelectedVisita(visita)}
                           className="btn btn-sm"
                           style={{ 
                             padding: '0.35rem 0.5rem',
@@ -732,7 +732,7 @@ const Dashboard = () => {
                           <Eye size={14} />
                         </button>
                         <button
-                          onClick={() => navigate(`/visitas?editar=${visita._id}`)}
+                          onClick={() => setSelectedVisita(visita)}
                           className="btn btn-sm"
                           style={{ 
                             padding: '0.35rem 0.5rem',
