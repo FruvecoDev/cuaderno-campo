@@ -654,11 +654,23 @@ const Visitas = () => {
                   type="date"
                   className="form-input"
                   value={formData.fecha_planificada}
-                  onChange={(e) => setFormData({...formData, fecha_planificada: e.target.value})}
+                  onChange={(e) => {
+                    const nuevaFechaPlanificada = e.target.value;
+                    // Si se establece una fecha planificada, actualizar también la fecha de visita
+                    if (nuevaFechaPlanificada) {
+                      setFormData({
+                        ...formData, 
+                        fecha_planificada: nuevaFechaPlanificada,
+                        fecha_visita: nuevaFechaPlanificada
+                      });
+                    } else {
+                      setFormData({...formData, fecha_planificada: nuevaFechaPlanificada});
+                    }
+                  }}
                   data-testid="input-fecha-planificada"
                 />
                 <small style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.75rem' }}>
-                  Si planificas una fecha, aparecerá en el calendario del Dashboard
+                  Al establecer fecha planificada, la fecha de visita se actualizará automáticamente
                 </small>
               </div>
             </div>
