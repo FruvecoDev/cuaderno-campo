@@ -205,12 +205,9 @@ async def gather_contrato_data(contrato_id: str) -> dict:
 
 
 async def generate_ai_summary(data: dict) -> str:
-    """Generate AI-powered summary of the field notebook using OpenAI directly"""
-    if not AI_API_KEY:
-        return "<p><em>Resumen IA no disponible - API key no configurada. Añade OPENAI_API_KEY en el archivo .env</em></p>"
-    
-    if not OPENAI_AVAILABLE:
-        return "<p><em>Resumen IA no disponible - Instala openai: pip install openai</em></p>"
+    """Generate AI-powered summary of the field notebook"""
+    if not EMERGENT_LLM_KEY:
+        return "<p><em>Resumen IA no disponible - API key no configurada</em></p>"
     
     try:
         # Prepare summary data
@@ -281,27 +278,17 @@ GENERA UN RESUMEN EN HTML (sin etiquetas html/body, solo el contenido) que inclu
 
 Usa etiquetas <h4>, <p>, <ul>, <li> para estructurar. Sé conciso y directo."""
 
-        # Use OpenAI directly
-        client = AsyncOpenAI(api_key=AI_API_KEY)
-        
-        response = await client.chat.completions.create(
-            model="gpt-4o-mini",  # Modelo económico y rápido
-            messages=[
-                {
-                    "role": "system",
-                    "content": "Eres un agrónomo experto especializado en análisis de campañas agrícolas y generación de informes."
-                },
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            max_tokens=1000,
-            temperature=0.7
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=f"cuaderno-summary-{datetime.now().strftime('%Y%m%d%H%M%S')}",
+            system_message="Eres un agrónomo experto especializado en análisis de campañas agrícolas y generación de informes."
         )
+        chat.with_model("openai", "gpt-4o-mini")
         
-        ai_response = response.choices[0].message.content
-        return ai_response if ai_response else "<p>Error generando resumen</p>"
+        user_message = UserMessage(text=prompt)
+        response = await chat.send_message(user_message)
+        
+        return response if response else "<p>Error generando resumen</p>"
         
     except Exception as e:
         return f"<p><em>Error generando resumen IA: {str(e)}</em></p>"
