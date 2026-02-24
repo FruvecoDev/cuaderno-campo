@@ -243,17 +243,22 @@ async def upload_certificado(
     # Guardar archivo
     file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
     file_id = str(uuid.uuid4())
-    file_path = f"{upload_dir}/{file_id}.{file_ext}"
+    filename = f"{file_id}.{file_ext}"
+    file_path = f"{upload_dir}/{filename}"
     
     with open(file_path, "wb") as f:
         content = await file.read()
         f.write(content)
     
+    # Guardar URL relativa para acceso web
+    web_url = f"/api/uploads/certificados/{filename}"
+    
     # Actualizar URL en la base de datos
     await tecnicos_aplicadores_collection.update_one(
         {"_id": ObjectId(tecnico_id)},
         {"$set": {
-            "imagen_certificado_url": file_path,
+            "imagen_certificado_url": web_url,
+            "imagen_certificado_path": file_path,
             "imagen_certificado_nombre": file.filename,
             "updated_at": datetime.now()
         }}
