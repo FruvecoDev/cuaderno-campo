@@ -28,6 +28,7 @@ import AsistenteIA from './pages/AsistenteIA';
 import TecnicosAplicadores from './pages/TecnicosAplicadores';
 import ArticulosExplotacion from './pages/ArticulosExplotacion';
 import Agentes from './pages/Agentes';
+import Clientes from './pages/Clientes';
 
 function App() {
   return (
