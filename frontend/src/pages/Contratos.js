@@ -757,7 +757,7 @@ const Contratos = () => {
                   <th>{t('contracts.contractNumber')}</th>
                   <th>Tipo</th>
                   <th>{t('contracts.campaign')}</th>
-                  <th>{t('contracts.provider')}</th>
+                  <th>Proveedor/Cliente</th>
                   <th>{t('contracts.crop')}</th>
                   <th>{t('common.quantity')} (kg)</th>
                   <th>{t('contracts.price')} (€/kg)</th>
@@ -783,7 +783,14 @@ const Contratos = () => {
                       </span>
                     </td>
                     <td>{contrato.campana}</td>
-                    <td>{contrato.proveedor}</td>
+                    <td>
+                      <div>
+                        <span style={{ fontSize: '0.7rem', color: '#666' }}>
+                          {contrato.tipo === 'Venta' ? 'Cliente: ' : 'Prov: '}
+                        </span>
+                        {contrato.tipo === 'Venta' ? (contrato.cliente || '-') : contrato.proveedor}
+                      </div>
+                    </td>
                     <td>{contrato.cultivo}</td>
                     <td>{contrato.cantidad?.toLocaleString()}</td>
                     <td>€{contrato.precio?.toFixed(2)}</td>
@@ -792,7 +799,7 @@ const Contratos = () => {
                     {(canEdit || canDelete) ? (
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
-                          {canEdit && (
+                          {canEdit ? (
                             <button
                               className="btn btn-sm btn-secondary"
                               onClick={() => handleEdit(contrato)}
@@ -801,7 +808,7 @@ const Contratos = () => {
                             >
                               <Edit2 size={14} />
                             </button>
-                          )}
+                          ) : null}
                           <button
                             className="btn btn-sm btn-primary"
                             onClick={() => handleGenerateCuaderno(contrato._id)}
