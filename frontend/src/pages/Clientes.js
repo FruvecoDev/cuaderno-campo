@@ -352,6 +352,14 @@ const Clientes = () => {
   const totalClientes = clientes.length;
   const clientesActivos = clientes.filter(c => c.activo).length;
   const clientesConEmail = clientes.filter(c => c.email).length;
+
+  useEffect(() => {
+    localStorage.setItem('clientes_fields_config', JSON.stringify(fieldsConfig));
+  }, [fieldsConfig]);
+
+  const toggleFieldConfig = (field) => {
+    setFieldsConfig(prev => ({ ...prev, [field]: !prev[field] }));
+  };
   
   return (
     <div data-testid="clientes-page">
