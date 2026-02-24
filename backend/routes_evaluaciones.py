@@ -429,8 +429,11 @@ async def generate_evaluacion_pdf(
     """Generar PDF de la hoja de evaluación con visitas y tratamientos"""
     from fastapi.responses import Response
     from weasyprint import HTML
-    from database import visitas_collection, tratamientos_collection
+    from database import visitas_collection, tratamientos_collection, maquinaria_collection
     import io
+    
+    # Collection de tecnicos aplicadores
+    tecnicos_aplicadores_collection = db['tecnicos_aplicadores']
     
     if not ObjectId.is_valid(evaluacion_id):
         raise HTTPException(status_code=400, detail="ID inválido")
@@ -451,6 +454,29 @@ async def generate_evaluacion_pdf(
     if parcela_id:
         tratamientos = await tratamientos_collection.find({"parcelas_ids": parcela_id}).sort("fecha_tratamiento", -1).to_list(100)
     
+    # Para cada tratamiento, obtener los datos completos del aplicador y la máquina
+    tratamientos_enriquecidos = []
+    for trat in tratamientos:
+        trat_data = dict(trat)
+        
+        # Obtener datos del aplicador
+        aplicador_id = trat.get("aplicador_id")
+        if aplicador_id and ObjectId.is_valid(aplicador_id):
+            aplicador = await tecnicos_aplicadores_collection.find_one({"_id": ObjectId(aplicador_id)})
+            if aplicador:
+                trat_data["aplicador_completo"] = serialize_doc(aplicador)
+        
+        # Obtener datos de la máquina
+        maquina_id = trat.get("maquina_id")
+        if maquina_id and ObjectId.is_valid(maquina_id):
+            maquina = await maquinaria_collection.find_one({"_id": ObjectId(maquina_id)})
+            if maquina:
+                trat_data["maquina_completa"] = serialize_doc(maquina)
+        
+        tratamientos_enriquecidos.append(trat_data)
+    
+    tratamientos = tratamientos_enriquecidos
+    
     # Obtener irrigaciones de la parcela
     irrigaciones = []
     if parcela_id:
@@ -463,8 +489,8 @@ async def generate_evaluacion_pdf(
         from database import cosechas_collection
         cosechas = await cosechas_collection.find({"parcelas_ids": parcela_id}).sort("created_at", -1).to_list(100)
     
-    # Calcular total de páginas
-    total_pages = 1 + len(visitas) + len(tratamientos) + len(irrigaciones) + len(cosechas)
+    # Calcular total de páginas (1 principal + visitas + tratamientos*3 (trat + aplicador + maquina) + irrigaciones + cosechas)
+    total_pages = 1 + len(visitas) + (len(tratamientos) * 3) + len(irrigaciones) + len(cosechas)
     
     # Función helper para formatear respuestas
     def format_respuesta(resp):
