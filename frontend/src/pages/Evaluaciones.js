@@ -694,6 +694,59 @@ const Evaluaciones = () => {
     setShowAddQuestion(true);
   };
   
+  // Manejar fin del drag & drop para reordenar preguntas custom
+  const handleDragEnd = async (event, seccionKey) => {
+    const { active, over } = event;
+    
+    if (!over || active.id === over.id) {
+      return;
+    }
+    
+    // Solo permitir reordenar preguntas custom
+    if (!active.id.startsWith('custom_') || !over.id.startsWith('custom_')) {
+      return;
+    }
+    
+    // Obtener las preguntas custom de esta sección
+    const customPreguntasSeccion = customPreguntas[seccionKey] || [];
+    
+    const oldIndex = customPreguntasSeccion.findIndex(p => p.id === active.id);
+    const newIndex = customPreguntasSeccion.findIndex(p => p.id === over.id);
+    
+    if (oldIndex === -1 || newIndex === -1) {
+      return;
+    }
+    
+    // Reordenar localmente
+    const newOrder = arrayMove(customPreguntasSeccion, oldIndex, newIndex);
+    
+    // Actualizar estado local inmediatamente
+    setCustomPreguntas(prev => ({
+      ...prev,
+      [seccionKey]: newOrder
+    }));
+    
+    // Guardar en el servidor
+    try {
+      const ordenIds = newOrder.map(p => p.id);
+      await fetch(
+        `${BACKEND_URL}/api/evaluaciones/config/preguntas/reorder?seccion=${seccionKey}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(ordenIds)
+        }
+      );
+    } catch (error) {
+      console.error('Error al guardar el orden:', error);
+      // Revertir si hay error
+      fetchPreguntasConfig();
+    }
+  };
+  
   const getEstadoBadge = (estado) => {
     switch (estado) {
       case 'completada': return { class: 'badge-success', icon: <CheckCircle size={12} /> };
