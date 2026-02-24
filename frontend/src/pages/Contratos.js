@@ -14,10 +14,14 @@ const Contratos = () => {
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState(null);
   const [generatingCuaderno, setGeneratingCuaderno] = useState(null);
-  const { token } = useAuth();
+  const { token, canDoOperacion } = useAuth();
   const { canCreate, canEdit, canDelete, canExport } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   const { t } = useTranslation();
+  
+  // Permisos de operación
+  const puedeCompra = canDoOperacion('compra');
+  const puedeVenta = canDoOperacion('venta');
   
   // Estados para catálogos
   const [proveedores, setProveedores] = useState([]);
