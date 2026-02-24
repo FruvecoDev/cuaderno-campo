@@ -863,10 +863,10 @@ const Albaranes = () => {
                   >
                     <option value="">{formData.tipo === 'Albarán de venta' ? 'Cliente' : 'Proveedor'}</option>
                     {formData.tipo === 'Albarán de venta' 
-                      ? clientes.map(c => (
-                          <option key={c._id} value={c.nombre}>{c.nombre}</option>
+                      ? (contratoOptions.clientesVenta || []).map(c => (
+                          <option key={c} value={c}>{c}</option>
                         ))
-                      : contratoOptions.proveedores.map(p => (
+                      : (contratoOptions.proveedores || []).map(p => (
                           <option key={p} value={p}>{p}</option>
                         ))
                     }
