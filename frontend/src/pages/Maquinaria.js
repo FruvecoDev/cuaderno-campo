@@ -766,12 +766,19 @@ const Maquinaria = () => {
                   <Image size={16} style={{ display: 'inline', marginRight: '0.5rem' }} />
                   Imagen Placa CE
                 </label>
-                <div style={{ 
-                  border: '2px dashed hsl(var(--border))', 
-                  borderRadius: '8px', 
-                  padding: '1rem',
-                  backgroundColor: 'hsl(var(--muted) / 0.3)'
-                }}>
+                <div 
+                  style={{ 
+                    border: isDragging ? '2px solid hsl(var(--primary))' : '2px dashed hsl(var(--border))', 
+                    borderRadius: '8px', 
+                    padding: '1rem',
+                    backgroundColor: isDragging ? 'hsl(var(--primary) / 0.1)' : 'hsl(var(--muted) / 0.3)',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                >
                   {imagePreview ? (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
                       <img 
