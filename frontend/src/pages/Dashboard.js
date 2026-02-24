@@ -966,39 +966,39 @@ const Dashboard = () => {
             
             <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.25rem' }}>
               <Eye size={22} />
-              Detalles de la Visita
+              {t('dashboard.visits.visitDetails')}
             </h2>
             
             <div style={{ display: 'grid', gap: '1rem' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
-                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.25rem' }}>Objetivo</label>
+                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.25rem' }}>{t('dashboard.visits.objective')}</label>
                   <p style={{ fontWeight: '500', margin: 0 }}>{selectedVisita.objetivo}</p>
                 </div>
                 <div>
-                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.25rem' }}>Fecha</label>
+                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.25rem' }}>{t('dashboard.visits.date')}</label>
                   <p style={{ fontWeight: '500', margin: 0 }}>{selectedVisita.fecha_visita}</p>
                 </div>
               </div>
               
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
-                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.25rem' }}>Proveedor</label>
+                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.25rem' }}>{t('dashboard.visits.provider')}</label>
                   <p style={{ margin: 0 }}>{selectedVisita.proveedor || 'N/A'}</p>
                 </div>
                 <div>
-                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.25rem' }}>Cultivo</label>
+                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.25rem' }}>{t('dashboard.visits.crop')}</label>
                   <p style={{ margin: 0 }}>{selectedVisita.cultivo || 'N/A'}</p>
                 </div>
               </div>
               
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
-                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.25rem' }}>Campaña</label>
+                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.25rem' }}>{t('dashboard.visits.campaign')}</label>
                   <p style={{ margin: 0 }}>{selectedVisita.campana || 'N/A'}</p>
                 </div>
                 <div>
-                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.25rem' }}>Estado</label>
+                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.25rem' }}>{t('dashboard.visits.status')}</label>
                   <span className={`badge ${selectedVisita.estado === 'Completada' ? 'badge-success' : selectedVisita.estado === 'Programada' ? 'badge-warning' : 'badge-secondary'}`}>
                     {selectedVisita.estado || 'Programada'}
                   </span>
@@ -1007,14 +1007,14 @@ const Dashboard = () => {
               
               {selectedVisita.observaciones && (
                 <div>
-                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.25rem' }}>Observaciones</label>
+                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.25rem' }}>{t('dashboard.visits.observations')}</label>
                   <p style={{ margin: 0, whiteSpace: 'pre-wrap', backgroundColor: 'hsl(var(--muted) / 0.5)', padding: '0.75rem', borderRadius: '6px' }}>{selectedVisita.observaciones}</p>
                 </div>
               )}
               
               {selectedVisita.cuestionario_plagas && Object.keys(selectedVisita.cuestionario_plagas).length > 0 && (
                 <div>
-                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.5rem' }}>Cuestionario de Plagas</label>
+                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.5rem' }}>{t('dashboard.visits.pestsQuestionnaire')}</label>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.5rem' }}>
                     {Object.entries(selectedVisita.cuestionario_plagas).map(([key, value]) => (
                       <div key={key} style={{ 
@@ -1041,13 +1041,13 @@ const Dashboard = () => {
                 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
               >
                 <Edit2 size={16} />
-                Editar
+                {t('dashboard.visits.edit')}
               </button>
               <button
                 className="btn btn-secondary"
                 onClick={() => setSelectedVisita(null)}
               >
-                Cerrar
+                {t('dashboard.visits.close')}
               </button>
             </div>
           </div>
