@@ -515,22 +515,44 @@ const Contratos = () => {
             </div>
             
             <div className="grid-2">
-              <div className="form-group">
-                <label className="form-label">{t('contracts.provider')} *</label>
-                <select
-                  className="form-select"
-                  value={formData.proveedor_id}
-                  onChange={(e) => setFormData({...formData, proveedor_id: e.target.value})}
-                  required
-                >
-                  <option value="">{t('common.selectOption')}...</option>
-                  {proveedores.map(p => (
-                    <option key={p._id} value={p._id}>
-                      {p.nombre} {p.cif_nif ? `(${p.cif_nif})` : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {/* Mostrar Proveedor para Compra o Cliente para Venta */}
+              {formData.tipo === 'Compra' ? (
+                <div className="form-group">
+                  <label className="form-label">{t('contracts.provider')} *</label>
+                  <select
+                    className="form-select"
+                    value={formData.proveedor_id}
+                    onChange={(e) => setFormData({...formData, proveedor_id: e.target.value, cliente_id: ''})}
+                    required
+                    data-testid="select-proveedor"
+                  >
+                    <option value="">{t('common.selectOption')}...</option>
+                    {proveedores.map(p => (
+                      <option key={p._id} value={p._id}>
+                        {p.nombre} {p.cif_nif ? `(${p.cif_nif})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <div className="form-group">
+                  <label className="form-label">Cliente *</label>
+                  <select
+                    className="form-select"
+                    value={formData.cliente_id}
+                    onChange={(e) => setFormData({...formData, cliente_id: e.target.value, proveedor_id: ''})}
+                    required
+                    data-testid="select-cliente"
+                  >
+                    <option value="">{t('common.selectOption')}...</option>
+                    {clientes.map(c => (
+                      <option key={c._id} value={c._id}>
+                        {c.nombre} {c.nif ? `(${c.nif})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               
               <div className="form-group">
                 <label className="form-label">{t('contracts.crop')} *</label>
