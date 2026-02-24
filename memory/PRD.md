@@ -335,10 +335,34 @@ Módulos actualizados para seguir patrón consistente:
   - Contratos.js, Parcelas.js, Fincas.js, Visitas.js, Tareas.js
   - Tratamientos.js, Irrigaciones.js, Cosechas.js, Recetas.js
   - Maquinaria.js, Cultivos.js, Proveedores.js, Albaranes.js
-  - Fitosanitarios.js, InformesGastos.js
-- **Claves agregadas**: auth.*, users.*, evaluations.*, suppliers.*, parcels.code, phytosanitary.*
+  - Fitosanitarios.js, InformesGastos.js, Traducciones.js
+- **Claves agregadas**: auth.*, users.*, evaluations.*, suppliers.*, parcels.code, phytosanitary.*, translations.*
 - **Dependencias**: i18next, react-i18next, i18next-browser-languagedetector
 - **Test Report**: `/app/test_reports/iteration_11.json` - 100% pass
+- **Estado**: ✅ COMPLETADO
+
+## Panel de Traducciones Personalizadas (24/02/2026) - COMPLETADO
+- **Backend**: `/app/backend/routes_translations.py`
+- **Frontend**: `/app/frontend/src/pages/Traducciones.js`
+- **Colección MongoDB**: `custom_translations`
+- **Funcionalidades**:
+  - Diccionario de términos agrícolas multilingüe
+  - Categorías: cultivos, plagas, enfermedades, tratamientos, maquinaria, medidas, suelo, riego, cosecha, general
+  - CRUD completo de traducciones personalizadas
+  - Sistema de aprobación (Admin)
+  - Carga de términos predeterminados (12 términos agrícolas comunes)
+  - Filtros por categoría, búsqueda y estado de aprobación
+  - Soporte para indicar región de uso del término
+- **API Endpoints**:
+  - GET `/api/translations/` - Lista traducciones con filtros
+  - GET `/api/translations/categories` - Lista categorías y idiomas
+  - GET `/api/translations/export/{language}` - Exporta traducciones aprobadas
+  - POST `/api/translations/` - Crea nueva traducción
+  - PUT `/api/translations/{id}` - Actualiza traducción
+  - DELETE `/api/translations/{id}` - Elimina traducción
+  - POST `/api/translations/{id}/approve` - Aprueba traducción
+  - POST `/api/translations/seed` - Carga términos predeterminados
+- **Menú**: Configuración > Traducciones
 - **Estado**: ✅ COMPLETADO
 
 ## Historial de Tratamientos por Parcela (23/02/2026)
