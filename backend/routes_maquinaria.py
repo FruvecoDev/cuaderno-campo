@@ -153,23 +153,28 @@ async def upload_imagen_placa_ce(
     os.makedirs(upload_dir, exist_ok=True)
     
     # Eliminar imagen anterior si existe
-    old_file_path = maquinaria.get("imagen_placa_ce_url")
+    old_file_path = maquinaria.get("imagen_placa_ce_path")
     if old_file_path and os.path.exists(old_file_path):
         os.remove(old_file_path)
     
     # Guardar archivo
     file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
     file_id = str(uuid.uuid4())
-    file_path = f"{upload_dir}/{file_id}.{file_ext}"
+    filename = f"{file_id}.{file_ext}"
+    file_path = f"{upload_dir}/{filename}"
     
     with open(file_path, "wb") as f:
         f.write(content)
+    
+    # Guardar URL relativa para acceso web
+    web_url = f"/api/uploads/maquinaria_placas/{filename}"
     
     # Actualizar URL en la base de datos
     await maquinaria_collection.update_one(
         {"_id": ObjectId(maquinaria_id)},
         {"$set": {
-            "imagen_placa_ce_url": file_path,
+            "imagen_placa_ce_url": web_url,
+            "imagen_placa_ce_path": file_path,
             "imagen_placa_ce_nombre": file.filename,
             "updated_at": datetime.now()
         }}
