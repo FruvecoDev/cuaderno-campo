@@ -1,0 +1,12 @@
+{
+  "name": "farm-hub-tests",
+  "version": "1.0.0",
+  "description": "E2E tests for Farm Hub application",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.42.0"
+  }
+}
