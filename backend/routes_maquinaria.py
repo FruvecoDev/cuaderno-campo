@@ -231,7 +231,7 @@ async def get_imagen_placa_ce(
     if not maquinaria:
         raise HTTPException(status_code=404, detail="Maquinaria no encontrada")
     
-    file_path = maquinaria.get("imagen_placa_ce_url")
+    file_path = maquinaria.get("imagen_placa_ce_path")
     if not file_path or not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="No hay imagen de placa CE")
     
