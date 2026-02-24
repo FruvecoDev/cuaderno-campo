@@ -206,14 +206,14 @@ const Tareas = () => {
   return (
     <div data-testid="tareas-page">
       <div className="flex justify-between items-center mb-6">
-        <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>Tareas</h1>
+        <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>{t('tasks.title')}</h1>
         <button 
           className="btn btn-primary" 
           onClick={() => { resetForm(); setShowForm(!showForm); }}
           data-testid="btn-nueva-tarea"
         >
           <Plus size={18} style={{ marginRight: '0.5rem' }} />
-          Nueva Tarea
+          {t('tasks.newTask')}
         </button>
       </div>
 
@@ -222,7 +222,7 @@ const Tareas = () => {
         <div className="card mb-6" data-testid="form-tarea">
           <div className="flex justify-between items-center mb-4">
             <h3 style={{ fontWeight: '600', margin: 0 }}>
-              {editingId ? 'Editar Tarea' : 'Nueva Tarea'}
+              {editingId ? t('common.edit') + ' ' + t('tasks.title') : t('tasks.newTask')}
             </h3>
             <button 
               className="btn btn-sm btn-secondary"
@@ -233,19 +233,19 @@ const Tareas = () => {
           </div>
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label className="form-label">Nombre de la Tarea *</label>
+              <label className="form-label">{t('tasks.taskName')} *</label>
               <input 
                 className="form-input" 
                 value={formData.nombre} 
                 onChange={(e) => setFormData({...formData, nombre: e.target.value})} 
                 required 
-                placeholder="Ej: Poda de invierno, Abonado, etc."
+                placeholder={t('tasks.taskName')}
                 data-testid="input-nombre"
               />
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
               <div className="form-group">
-                <label className="form-label">Superficie (ha)</label>
+                <label className="form-label">{t('parcels.surface')} ({t('units.hectares')})</label>
                 <input 
                   type="number" 
                   step="0.01" 
@@ -255,7 +255,7 @@ const Tareas = () => {
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Coste Total (€)</label>
+                <label className="form-label">{t('common.total')} (€)</label>
                 <input 
                   type="number" 
                   step="0.01" 
@@ -265,7 +265,7 @@ const Tareas = () => {
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Fecha Inicio</label>
+                <label className="form-label">{t('contracts.startDate')}</label>
                 <input 
                   type="date" 
                   className="form-input" 
@@ -274,7 +274,7 @@ const Tareas = () => {
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Fecha Fin</label>
+                <label className="form-label">{t('contracts.endDate')}</label>
                 <input 
                   type="date" 
                   className="form-input" 
@@ -284,7 +284,7 @@ const Tareas = () => {
               </div>
             </div>
             <div className="form-group">
-              <label className="form-label">Parcelas</label>
+              <label className="form-label">{t('parcels.title')}</label>
               <select
                 className="form-select"
                 multiple
@@ -304,7 +304,7 @@ const Tareas = () => {
               <small style={{ color: '#6c757d' }}>Ctrl+Click para seleccionar múltiples</small>
             </div>
             <div className="form-group">
-              <label className="form-label">Observaciones</label>
+              <label className="form-label">{t('common.observations')}</label>
               <textarea 
                 className="form-textarea" 
                 value={formData.observaciones} 
@@ -314,14 +314,14 @@ const Tareas = () => {
             </div>
             <div className="flex gap-2">
               <button type="submit" className="btn btn-primary">
-                {editingId ? 'Actualizar' : 'Guardar'}
+                {editingId ? t('common.edit') : t('common.save')}
               </button>
               <button 
                 type="button" 
                 className="btn btn-secondary" 
                 onClick={() => { setShowForm(false); resetForm(); }}
               >
-                Cancelar
+                {t('common.cancel')}
               </button>
             </div>
           </form>
@@ -331,20 +331,20 @@ const Tareas = () => {
       {/* Filtros */}
       <div className="card mb-4" data-testid="filtros-tareas">
         <div className="flex justify-between items-center mb-4">
-          <h3 style={{ fontWeight: '600', margin: 0 }}>Filtros</h3>
+          <h3 style={{ fontWeight: '600', margin: 0 }}>{t('common.filters')}</h3>
           {hasActiveFilters && (
             <button 
               className="btn btn-sm btn-secondary"
               onClick={clearFilters}
             >
               <X size={14} style={{ marginRight: '0.25rem' }} />
-              Limpiar filtros
+              {t('common.clear')}
             </button>
           )}
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Buscar</label>
+            <label className="form-label">{t('common.search')}</label>
             <div style={{ position: 'relative' }}>
               <Search size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#6c757d' }} />
               <input
@@ -357,15 +357,15 @@ const Tareas = () => {
             </div>
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Estado</label>
+            <label className="form-label">{t('common.status')}</label>
             <select
               className="form-select"
               value={filters.estado}
               onChange={(e) => setFilters({...filters, estado: e.target.value})}
             >
-              <option value="">Todos</option>
-              <option value="realizada">Realizadas</option>
-              <option value="pendiente">Pendientes</option>
+              <option value="">{t('common.all')}</option>
+              <option value="realizada">{t('tasks.completed')}</option>
+              <option value="pendiente">{t('tasks.pending')}</option>
             </select>
           </div>
         </div>
@@ -379,31 +379,31 @@ const Tareas = () => {
         marginBottom: '1rem' 
       }}>
         <div className="card" style={{ textAlign: 'center', padding: '1rem' }}>
-          <div style={{ fontSize: '0.85rem', color: '#6c757d' }}>Total Tareas</div>
+          <div style={{ fontSize: '0.85rem', color: '#6c757d' }}>{t('common.total')} {t('tasks.title')}</div>
           <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#2d5a27' }}>
             {totals.total}
           </div>
         </div>
         <div className="card" style={{ textAlign: 'center', padding: '1rem' }}>
-          <div style={{ fontSize: '0.85rem', color: '#6c757d' }}>Realizadas</div>
+          <div style={{ fontSize: '0.85rem', color: '#6c757d' }}>{t('tasks.completed')}</div>
           <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#155724' }}>
             {totals.realizadas}
           </div>
         </div>
         <div className="card" style={{ textAlign: 'center', padding: '1rem' }}>
-          <div style={{ fontSize: '0.85rem', color: '#6c757d' }}>Pendientes</div>
+          <div style={{ fontSize: '0.85rem', color: '#6c757d' }}>{t('tasks.pending')}</div>
           <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#856404' }}>
             {totals.pendientes}
           </div>
         </div>
         <div className="card" style={{ textAlign: 'center', padding: '1rem' }}>
-          <div style={{ fontSize: '0.85rem', color: '#6c757d' }}>Superficie</div>
+          <div style={{ fontSize: '0.85rem', color: '#6c757d' }}>{t('parcels.surface')}</div>
           <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#2d5a27' }}>
             {totals.superficieTotal.toLocaleString()} ha
           </div>
         </div>
         <div className="card" style={{ textAlign: 'center', padding: '1rem' }}>
-          <div style={{ fontSize: '0.85rem', color: '#6c757d' }}>Coste Total</div>
+          <div style={{ fontSize: '0.85rem', color: '#6c757d' }}>{t('common.total')} {t('common.price')}</div>
           <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#dc3545' }}>
             {totals.costeTotal.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
           </div>
@@ -413,24 +413,24 @@ const Tareas = () => {
       {/* Lista */}
       <div className="card">
         <h3 style={{ fontWeight: '600', marginBottom: '1rem' }}>
-          Lista de Tareas ({filteredTareas.length})
+          {t('tasks.title')} ({filteredTareas.length})
         </h3>
         
         {loading ? (
-          <p>Cargando...</p>
+          <p>{t('common.loading')}</p>
         ) : filteredTareas.length === 0 ? (
-          <p className="text-muted">No hay tareas registradas</p>
+          <p className="text-muted">{t('common.noData')}</p>
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #dee2e6' }}>
-                  <th style={{ padding: '12px', textAlign: 'left' }}>Tarea</th>
-                  <th style={{ padding: '12px', textAlign: 'center' }}>Fechas</th>
-                  <th style={{ padding: '12px', textAlign: 'right' }}>Superficie</th>
-                  <th style={{ padding: '12px', textAlign: 'right' }}>Coste</th>
-                  <th style={{ padding: '12px', textAlign: 'center' }}>Estado</th>
-                  <th style={{ padding: '12px', textAlign: 'center' }}>Acciones</th>
+                  <th style={{ padding: '12px', textAlign: 'left' }}>{t('tasks.taskName')}</th>
+                  <th style={{ padding: '12px', textAlign: 'center' }}>{t('common.date')}</th>
+                  <th style={{ padding: '12px', textAlign: 'right' }}>{t('parcels.surface')}</th>
+                  <th style={{ padding: '12px', textAlign: 'right' }}>{t('common.price')}</th>
+                  <th style={{ padding: '12px', textAlign: 'center' }}>{t('common.status')}</th>
+                  <th style={{ padding: '12px', textAlign: 'center' }}>{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody>

@@ -399,12 +399,12 @@ const Visitas = () => {
   return (
     <div data-testid="visitas-page">
       <div className="flex justify-between items-center mb-6">
-        <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>Visitas</h1>
+        <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>{t('visits.title')}</h1>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button 
             className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setShowFieldsConfig(!showFieldsConfig)}
-            title="Configurar campos visibles"
+            title={t('common.settings')}
             data-testid="btn-config-fields"
           >
             <Settings size={18} />
@@ -416,7 +416,7 @@ const Visitas = () => {
             data-testid="btn-nueva-visita"
           >
             <Plus size={18} />
-            Nueva Visita
+            {t('visits.newVisit')}
           </PermissionButton>
         </div>
       </div>
