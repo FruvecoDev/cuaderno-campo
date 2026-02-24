@@ -26,6 +26,7 @@ import InformesGastos from './pages/InformesGastos';
 import Traducciones from './pages/Traducciones';
 import AsistenteIA from './pages/AsistenteIA';
 import TecnicosAplicadores from './pages/TecnicosAplicadores';
+import ArticulosExplotacion from './pages/ArticulosExplotacion';
 
 function App() {
   return (
