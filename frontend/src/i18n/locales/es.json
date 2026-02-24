@@ -135,6 +135,7 @@
     "subtitle": "Gestión de parcelas y terrenos",
     "newParcel": "Nueva Parcela",
     "parcelCode": "Código de Parcela",
+    "code": "Código",
     "farm": "Finca",
     "crop": "Cultivo",
     "surface": "Superficie",
