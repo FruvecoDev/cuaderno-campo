@@ -543,6 +543,39 @@ const Evaluaciones = () => {
     }
   };
   
+  // Eliminar pregunta personalizada
+  const handleDeleteQuestion = async (preguntaId, seccion) => {
+    if (!window.confirm(t('evaluations.confirmDeleteQuestion'))) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/api/evaluaciones/config/preguntas/${preguntaId}?seccion=${seccion}`,
+        {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        }
+      );
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw { status: response.status, message: errorData.detail };
+      }
+      
+      // Recargar preguntas
+      fetchPreguntasConfig();
+      // Reinicializar respuestas si estamos en modo edición
+      if (formData.parcela_id) {
+        initializeRespuestas();
+      }
+    } catch (error) {
+      const errorMsg = handlePermissionError(error, 'eliminar la pregunta');
+      setError(errorMsg);
+      setTimeout(() => setError(null), 5000);
+    }
+  };
+  
   const getEstadoBadge = (estado) => {
     switch (estado) {
       case 'completada': return { class: 'badge-success', icon: <CheckCircle size={12} /> };
