@@ -120,8 +120,8 @@ const ArticulosExplotacion = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.codigo.trim() || !formData.nombre.trim()) {
-      setError('El código y nombre son obligatorios');
+    if (!formData.nombre.trim()) {
+      setError('El nombre es obligatorio');
       setTimeout(() => setError(null), 5000);
       return;
     }
@@ -134,6 +134,8 @@ const ArticulosExplotacion = () => {
       
       const payload = {
         ...formData,
+        // No enviar código vacío, el backend lo genera automáticamente
+        codigo: editingId ? formData.codigo : undefined,
         precio_unitario: parseFloat(formData.precio_unitario) || 0,
         iva: parseFloat(formData.iva) || 21,
         stock_actual: formData.stock_actual ? parseFloat(formData.stock_actual) : null,
