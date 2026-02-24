@@ -584,6 +584,7 @@ def generate_html_cuaderno(data: dict, ai_summary: str = "", maquinaria_images: 
     for t in tratamientos_data:
         # Recopilar maquinaria
         maquina_nombre = t.get('maquina_nombre')
+        maquina_id = t.get('maquina_id')
         if not maquina_nombre:
             maquinaria_data = t.get('maquinaria')
             if maquinaria_data and isinstance(maquinaria_data, dict):
@@ -593,6 +594,7 @@ def generate_html_cuaderno(data: dict, ai_summary: str = "", maquinaria_images: 
             if maquina_nombre not in maquinaria_usada:
                 maquinaria_usada[maquina_nombre] = {
                     'nombre': maquina_nombre,
+                    'id': maquina_id,
                     'usos': 0,
                     'fechas': []
                 }
@@ -603,6 +605,7 @@ def generate_html_cuaderno(data: dict, ai_summary: str = "", maquinaria_images: 
         
         # Recopilar técnicos aplicadores
         aplicador = t.get('aplicador_nombre') or t.get('tecnico')
+        aplicador_id = t.get('tecnico_aplicador_id')
         if isinstance(aplicador, dict):
             aplicador = f"{aplicador.get('nombre', '')} {aplicador.get('apellidos', '')}".strip()
         
@@ -610,6 +613,7 @@ def generate_html_cuaderno(data: dict, ai_summary: str = "", maquinaria_images: 
             if aplicador not in tecnicos_usados:
                 tecnicos_usados[aplicador] = {
                     'nombre': aplicador,
+                    'id': aplicador_id,
                     'aplicaciones': 0
                 }
             tecnicos_usados[aplicador]['aplicaciones'] += 1
@@ -630,6 +634,7 @@ def generate_html_cuaderno(data: dict, ai_summary: str = "", maquinaria_images: 
                         <th>Máquina</th>
                         <th>Nº de Usos</th>
                         <th>Última Utilización</th>
+                        <th style="width: 120px;">Placa CE</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -638,11 +643,21 @@ def generate_html_cuaderno(data: dict, ai_summary: str = "", maquinaria_images: 
                 ultima_fecha = max(maq['fechas']) if maq['fechas'] else 'N/A'
                 if ultima_fecha != 'N/A':
                     ultima_fecha = format_date(ultima_fecha)
+                
+                # Get image if available
+                maq_id = maq.get('id')
+                placa_ce_html = '<span style="color: #999;">Sin imagen</span>'
+                if maq_id and maq_id in maquinaria_images:
+                    img_data = maquinaria_images[maq_id]
+                    if img_data:
+                        placa_ce_html = f'<img src="{img_data}" style="max-width: 100px; max-height: 60px; border: 1px solid #ddd; border-radius: 4px;" alt="Placa CE" />'
+                
                 html += f"""
                     <tr>
                         <td><strong>{maq['nombre']}</strong></td>
                         <td style="text-align: center;">{maq['usos']}</td>
                         <td>{ultima_fecha}</td>
+                        <td style="text-align: center;">{placa_ce_html}</td>
                     </tr>
                 """
             html += """
@@ -658,15 +673,25 @@ def generate_html_cuaderno(data: dict, ai_summary: str = "", maquinaria_images: 
                     <tr>
                         <th>Técnico Aplicador</th>
                         <th>Nº de Aplicaciones</th>
+                        <th style="width: 120px;">Certificado</th>
                     </tr>
                 </thead>
                 <tbody>
             """
             for tec in sorted(tecnicos_usados.values(), key=lambda x: x['aplicaciones'], reverse=True):
+                # Get certificate image if available
+                tec_id = tec.get('id')
+                cert_html = '<span style="color: #999;">Sin imagen</span>'
+                if tec_id and tec_id in tecnicos_images:
+                    img_data = tecnicos_images[tec_id]
+                    if img_data:
+                        cert_html = f'<img src="{img_data}" style="max-width: 100px; max-height: 60px; border: 1px solid #ddd; border-radius: 4px;" alt="Certificado" />'
+                
                 html += f"""
                     <tr>
                         <td><strong>{tec['nombre']}</strong></td>
                         <td style="text-align: center;">{tec['aplicaciones']}</td>
+                        <td style="text-align: center;">{cert_html}</td>
                     </tr>
                 """
             html += """
