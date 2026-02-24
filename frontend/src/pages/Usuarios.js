@@ -471,13 +471,16 @@ const Usuarios = () => {
                   <th>{t('users.userName')}</th>
                   <th>{t('auth.email')}</th>
                   <th>{t('users.role')}</th>
+                  <th>Tipo Operación</th>
                   <th>{t('common.status')}</th>
                   <th>{t('users.createdAt')}</th>
                   <th>{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody>
-                {users.map(user => (
+                {users.map(user => {
+                  const tipoOp = getTipoOperacionBadge(user.tipo_operacion);
+                  return (
                   <tr key={user._id}>
                     <td>
                       <div style={{ fontWeight: '600' }}>{user.full_name}</div>
@@ -486,6 +489,23 @@ const Usuarios = () => {
                     <td>
                       <span className={`badge ${getRoleBadgeClass(user.role)}`}>
                         {user.role}
+                      </span>
+                    </td>
+                    <td>
+                      <span 
+                        onClick={() => user._id !== currentUser._id && openTipoOperacionModal(user)}
+                        style={{
+                          padding: '0.25rem 0.75rem',
+                          borderRadius: '9999px',
+                          fontSize: '0.75rem',
+                          fontWeight: '600',
+                          backgroundColor: tipoOp.bg,
+                          color: tipoOp.color,
+                          cursor: user._id !== currentUser._id ? 'pointer' : 'default'
+                        }}
+                        title={user._id !== currentUser._id ? 'Clic para cambiar' : ''}
+                      >
+                        {tipoOp.label}
                       </span>
                     </td>
                     <td>
@@ -544,7 +564,8 @@ const Usuarios = () => {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
