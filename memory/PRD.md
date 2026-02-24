@@ -137,10 +137,32 @@ Visita/Tratamiento → realizados sobre → Parcela
       - PUT /api/cosechas/{id}/completar - Marcar como completada
     - **Frontend**: Lista expandible con planificaciones, cargas y acciones
 
+12. **Asistente de Inteligencia Artificial (Nuevo - 24/02/2026)** ✅
+    - **Sugerencias de Tratamientos IA**:
+      - Seleccionar parcela y describir problema (plaga, enfermedad, deficiencia)
+      - GPT-4o analiza datos de parcela, tratamientos recientes y productos disponibles
+      - Genera recomendaciones priorizadas con dosis, momento de aplicación, precauciones
+      - Muestra severidad estimada del problema y medidas preventivas
+    - **Predicción de Cosecha IA**:
+      - Seleccionar contrato para análisis
+      - GPT-4o analiza datos históricos, tratamientos aplicados, estado actual
+      - Genera predicción de rendimiento con rango de confianza
+      - Muestra factores positivos, riesgos y recomendaciones para maximizar rendimiento
+      - Compara con datos históricos y cumplimiento del contrato
+    - **API Endpoints**:
+      - `GET /api/ai/parcelas-for-suggestions` - Lista parcelas para selector
+      - `GET /api/ai/contratos-for-predictions` - Lista contratos para selector
+      - `POST /api/ai/suggest-treatments/{parcela_id}` - Genera sugerencias de tratamiento
+      - `POST /api/ai/predict-yield/{contrato_id}` - Genera predicción de cosecha
+    - **Frontend**: Nueva página `/asistente-ia` con dos tabs interactivas
+    - **Backend**: `/app/backend/routes_ai_suggestions.py`
+    - **Test Report**: `/app/test_reports/iteration_12.json` - 100% pass
+
 ### Pending/In Progress
-1. **Frontend IA** (P0)
-   - Página para generar y ver reportes IA
-   - Formularios para seleccionar parámetros
+1. **Notificaciones por Email** (P1)
+   - Backend/frontend parcialmente implementado con Resend
+   - Requiere RESEND_API_KEY del usuario
+   - Falta mecanismo de envío automático (scheduler)
 
 2. **Mejoras UI/UX** (P2)
    - Consistencia en patrones de búsqueda/filtro
