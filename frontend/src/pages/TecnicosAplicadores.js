@@ -43,10 +43,72 @@ const TecnicosAplicadores = () => {
   // File upload
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [filePreview, setFilePreview] = useState(null);
 
   const headers = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${token}`
+  };
+  
+  // Validar y establecer archivo
+  const validateAndSetFile = (file) => {
+    if (!file) return false;
+    
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      setError('Tipo de archivo no permitido. Use JPEG, PNG, WEBP o PDF');
+      setTimeout(() => setError(null), 5000);
+      return false;
+    }
+    
+    if (file.size > 10 * 1024 * 1024) {
+      setError('El archivo excede el tamaño máximo de 10MB');
+      setTimeout(() => setError(null), 5000);
+      return false;
+    }
+    
+    setSelectedFile(file);
+    if (file.type.startsWith('image/')) {
+      setFilePreview(URL.createObjectURL(file));
+    } else {
+      setFilePreview(null);
+    }
+    return true;
+  };
+  
+  // Drag and drop handlers
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+  
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+  
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      validateAndSetFile(files[0]);
+    }
+  };
+  
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    validateAndSetFile(file);
   };
 
   useEffect(() => {
