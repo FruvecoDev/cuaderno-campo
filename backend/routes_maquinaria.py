@@ -231,7 +231,20 @@ async def get_imagen_placa_ce(
     if not maquinaria:
         raise HTTPException(status_code=404, detail="Maquinaria no encontrada")
     
+    # Intentar obtener el path directamente
     file_path = maquinaria.get("imagen_placa_ce_path")
+    
+    # Si no existe o el archivo no existe, intentar derivar desde la URL
+    if not file_path or not os.path.exists(file_path):
+        url = maquinaria.get("imagen_placa_ce_url")
+        if url:
+            # Si la URL es relativa a /api/uploads/, derivar el path
+            if url.startswith("/api/uploads/"):
+                file_path = "/app/uploads/" + url.replace("/api/uploads/", "")
+            # Si la URL es una ruta absoluta del sistema, usarla directamente
+            elif url.startswith("/app/uploads/"):
+                file_path = url
+    
     if not file_path or not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="No hay imagen de placa CE")
     
