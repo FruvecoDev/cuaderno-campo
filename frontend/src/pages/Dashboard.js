@@ -521,16 +521,16 @@ const Dashboard = () => {
       <div className="card mb-6" data-testid="mapa-parcelas">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <MapPin size={20} /> Mapa de Parcelas
+            <MapPin size={20} /> {t('dashboard.map.title')}
           </h2>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
-              {parcelas.filter(p => p.recintos?.[0]?.geometria).length} parcelas con geometría
+              {parcelas.filter(p => p.recintos?.[0]?.geometria).length} {t('dashboard.map.parcelsWithGeometry')}
             </span>
             <button
               onClick={() => setMapType(mapType === 'satellite' ? 'osm' : 'satellite')}
               className="btn btn-sm btn-secondary"
-              title={mapType === 'satellite' ? 'Cambiar a Mapa Base' : 'Cambiar a Satélite'}
+              title={mapType === 'satellite' ? t('dashboard.map.switchToBase') : t('dashboard.map.switchToSatellite')}
             >
               {mapType === 'satellite' ? <Layers size={14} /> : <Satellite size={14} />}
             </button>
