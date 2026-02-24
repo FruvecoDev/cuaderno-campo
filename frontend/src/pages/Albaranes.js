@@ -882,12 +882,17 @@ const Albaranes = () => {
             <div className="form-group">
               <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Package size={16} /> Líneas del Albarán
+                {articulosCatalogo.length > 0 && (
+                  <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', fontWeight: 'normal' }}>
+                    ({articulosCatalogo.length} artículos disponibles en catálogo)
+                  </span>
+                )}
               </label>
               <div style={{ overflowX: 'auto' }}>
                 <table className="table" style={{ marginBottom: '0.5rem' }}>
                   <thead>
                     <tr>
-                      <th style={{ minWidth: '200px' }}>Descripción</th>
+                      <th style={{ minWidth: '280px' }}>Artículo / Descripción</th>
                       <th style={{ width: '100px' }}>Cantidad</th>
                       <th style={{ width: '100px' }}>Unidad</th>
                       <th style={{ width: '120px' }}>Precio Unit.</th>
@@ -899,14 +904,31 @@ const Albaranes = () => {
                     {formData.items.map((item, index) => (
                       <tr key={index}>
                         <td>
-                          <input
-                            type="text"
-                            className="form-input"
-                            value={item.descripcion}
-                            onChange={(e) => updateItemTotal(index, 'descripcion', e.target.value)}
-                            placeholder="Descripción del producto"
-                            data-testid={`item-descripcion-${index}`}
-                          />
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                            <select
+                              className="form-select"
+                              value={item.articulo_id || ''}
+                              onChange={(e) => handleArticuloSelect(index, e.target.value)}
+                              style={{ fontSize: '0.875rem' }}
+                              data-testid={`item-articulo-${index}`}
+                            >
+                              <option value="">-- Seleccionar del catálogo o escribir --</option>
+                              {articulosCatalogo.map(art => (
+                                <option key={art._id} value={art._id}>
+                                  {art.codigo} - {art.nombre} ({art.precio_unitario?.toFixed(2) || '0.00'} €/{art.unidad_medida})
+                                </option>
+                              ))}
+                            </select>
+                            <input
+                              type="text"
+                              className="form-input"
+                              value={item.descripcion}
+                              onChange={(e) => updateItemTotal(index, 'descripcion', e.target.value)}
+                              placeholder="O escriba descripción libre..."
+                              style={{ fontSize: '0.875rem' }}
+                              data-testid={`item-descripcion-${index}`}
+                            />
+                          </div>
                         </td>
                         <td>
                           <input
