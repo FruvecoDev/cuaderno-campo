@@ -258,6 +258,40 @@ async def update_menu_permissions(
     return {"success": True, "user": user_response}
 
 
+@router.put("/users/{user_id}/tipo-operacion")
+async def update_tipo_operacion(
+    user_id: str, 
+    data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update operation type permission for a user (Admin only)
+    tipo_operacion: 'compra', 'venta', 'ambos'
+    """
+    if current_user.get("role") != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    if not ObjectId.is_valid(user_id):
+        raise HTTPException(status_code=400, detail="Invalid user ID")
+    
+    tipo_operacion = data.get("tipo_operacion", "ambos")
+    if tipo_operacion not in ["compra", "venta", "ambos"]:
+        raise HTTPException(status_code=400, detail="tipo_operacion debe ser: compra, venta o ambos")
+    
+    result = await users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"tipo_operacion": tipo_operacion, "updated_at": datetime.now()}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    updated_user = await users_collection.find_one({"_id": ObjectId(user_id)})
+    user_response = serialize_doc(updated_user)
+    user_response.pop("hashed_password", None)
+    
+    return {"success": True, "user": user_response}
+
+
 @router.post("/init-admin")
 async def initialize_admin():
     """Initialize first admin user - only works if no users exist"""
