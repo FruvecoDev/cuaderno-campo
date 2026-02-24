@@ -186,6 +186,32 @@ const Visitas = () => {
     localStorage.setItem('visitas_table_config', JSON.stringify(tableConfig));
   }, [tableConfig]);
   
+  // Manejar parámetros de URL (ver y editar desde Dashboard)
+  useEffect(() => {
+    const verParam = searchParams.get('ver');
+    const editarParam = searchParams.get('editar');
+    
+    if (verParam && visitas.length > 0) {
+      const visita = visitas.find(v => v._id === verParam);
+      if (visita) {
+        setViewingVisita(visita);
+        // Limpiar parámetro de URL
+        searchParams.delete('ver');
+        setSearchParams(searchParams);
+      }
+    }
+    
+    if (editarParam && visitas.length > 0) {
+      const visita = visitas.find(v => v._id === editarParam);
+      if (visita) {
+        handleEdit(visita);
+        // Limpiar parámetro de URL
+        searchParams.delete('editar');
+        setSearchParams(searchParams);
+      }
+    }
+  }, [searchParams, visitas]);
+  
   // Cuando se selecciona una parcela, mostrar info heredada
   useEffect(() => {
     if (formData.parcela_id) {
