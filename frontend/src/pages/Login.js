@@ -45,7 +45,7 @@ const Login = () => {
     const result = await initializeAdmin();
     
     if (result.success) {
-      alert(`Admin creado!\n\nEmail: ${result.credentials.email}\nPassword: ${result.credentials.password}\n\nUsa estas credenciales para entrar.`);
+      alert(`${t('auth.adminCreated')}!\n\nEmail: ${result.credentials.email}\nPassword: ${result.credentials.password}\n\n${t('auth.useCredentials')}`);
       setEmail(result.credentials.email);
       setPassword(result.credentials.password);
       setShowInitAdmin(false);
@@ -86,7 +86,7 @@ const Login = () => {
                 marginBottom: '0.5rem'
               }} 
             />
-            <p style={{ fontSize: '0.875rem', fontWeight: '500', color: 'hsl(var(--muted-foreground))', marginBottom: '0.5rem' }}>Cuaderno de Campo</p>
+            <p style={{ fontSize: '0.875rem', fontWeight: '500', color: 'hsl(var(--muted-foreground))', marginBottom: '0.5rem' }}>{t('auth.fieldNotebook')}</p>
             <p className="text-muted">{t('auth.loginTitle')}</p>
           </div>
           
@@ -167,7 +167,7 @@ const Login = () => {
           {showInitAdmin && (
             <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
               <p className="text-sm text-muted" style={{ marginBottom: '0.75rem' }}>
-                ¿Primera vez? Crea el usuario administrador
+                {t('auth.firstTime')}
               </p>
               <button
                 onClick={handleInitAdmin}
@@ -175,7 +175,7 @@ const Login = () => {
                 style={{ width: '100%' }}
                 disabled={loading}
               >
-                Inicializar Admin
+                {t('auth.initAdmin')}
               </button>
             </div>
           )}
