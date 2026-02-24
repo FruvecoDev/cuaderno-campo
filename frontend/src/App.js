@@ -164,6 +164,12 @@ function App() {
           </ProtectedRoute>
         } />
         
+        <Route path="/clientes" element={
+          <ProtectedRoute>
+            <Layout><Clientes /></Layout>
+          </ProtectedRoute>
+        } />
+        
         <Route path="/evaluaciones" element={
           <ProtectedRoute>
             <Layout><Evaluaciones /></Layout>
