@@ -286,6 +286,11 @@
     "email": "Email",
     "address": "Dirección"
   },
+  "suppliers": {
+    "title": "Proveedores",
+    "subtitle": "Catálogo de proveedores",
+    "newSupplier": "Nuevo Proveedor"
+  },
   "crops": {
     "title": "Cultivos",
     "subtitle": "Catálogo de cultivos",
