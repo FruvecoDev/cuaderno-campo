@@ -656,7 +656,13 @@ const TecnicosAplicadores = () => {
                           <button
                             className="btn btn-sm btn-secondary"
                             title="Ver certificado"
-                            onClick={() => window.open(tecnico.imagen_certificado_url, '_blank')}
+                            onClick={() => {
+                              // Construir URL completa: si ya es absoluta, usarla; si es relativa, añadir BACKEND_URL
+                              const url = tecnico.imagen_certificado_url.startsWith('http') 
+                                ? tecnico.imagen_certificado_url 
+                                : `${BACKEND_URL}${tecnico.imagen_certificado_url}`;
+                              window.open(url, '_blank');
+                            }}
                           >
                             <Eye size={14} />
                           </button>
