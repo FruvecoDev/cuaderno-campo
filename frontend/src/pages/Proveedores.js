@@ -197,19 +197,28 @@ const Proveedores = () => {
           <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>Proveedores</h1>
           <p className="text-muted">Gestiona el catálogo de proveedores</p>
         </div>
-        <PermissionButton
-          permission="create"
-          onClick={() => {
-            resetForm();
-            setEditingId(null);
-            setShowForm(!showForm);
-          }}
-          className="btn btn-primary"
-          data-testid="btn-nuevo-proveedor"
-        >
-          <Plus size={18} />
-          Nuevo Proveedor
-        </PermissionButton>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button
+            className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setShowFieldsConfig(!showFieldsConfig)}
+            title="Configurar columnas"
+          >
+            <Settings size={18} />
+          </button>
+          <PermissionButton
+            permission="create"
+            onClick={() => {
+              resetForm();
+              setEditingId(null);
+              setShowForm(!showForm);
+            }}
+            className="btn btn-primary"
+            data-testid="btn-nuevo-proveedor"
+          >
+            <Plus size={18} />
+            Nuevo Proveedor
+          </PermissionButton>
+        </div>
       </div>
 
       {error && (
