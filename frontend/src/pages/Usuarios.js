@@ -433,24 +433,9 @@ const Usuarios = () => {
                     </td>
                     <td>{user.email}</td>
                     <td>
-                      {editingUser === user._id ? (
-                        <select
-                          className="form-select"
-                          value={user.role}
-                          onChange={(e) => handleEditRole(user._id, e.target.value)}
-                          style={{ minWidth: '150px' }}
-                        >
-                          {ROLES.map(role => (
-                            <option key={role.value} value={role.value}>
-                              {role.label}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <span className={`badge ${getRoleBadgeClass(user.role)}`}>
-                          {user.role}
-                        </span>
-                      )}
+                      <span className={`badge ${getRoleBadgeClass(user.role)}`}>
+                        {user.role}
+                      </span>
                     </td>
                     <td>
                       <span className={`badge ${user.is_active ? 'badge-success' : 'badge-error'}`}>
