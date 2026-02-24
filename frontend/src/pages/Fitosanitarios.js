@@ -194,7 +194,7 @@ const Fitosanitarios = () => {
       }
     } catch (error) {
       console.error('Error downloading template:', error);
-      setError('Error al descargar la plantilla');
+      setError(t('phytosanitary.errorDownloadTemplate'));
     }
   };
 
@@ -227,12 +227,12 @@ const Fitosanitarios = () => {
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
         
-        setSuccessMsg(`Exportados ${data.total} productos`);
+        setSuccessMsg(`${t('phytosanitary.exported')} ${data.total} ${t('phytosanitary.products')}`);
         setTimeout(() => setSuccessMsg(null), 3000);
       }
     } catch (error) {
       console.error('Error exporting:', error);
-      setError('Error al exportar productos');
+      setError(t('phytosanitary.errorExport'));
     }
   };
 
