@@ -824,32 +824,38 @@ const Clientes = () => {
                         {cliente.activo ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
-                    {(canEdit || canDelete) ? (
-                      <td>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                          {canEdit ? (
-                            <button
-                              className="btn btn-sm btn-secondary"
-                              onClick={() => handleEdit(cliente)}
-                              title="Editar"
-                              data-testid={`edit-cliente-${cliente._id}`}
-                            >
-                              <Edit2 size={14} />
-                            </button>
-                          ) : null}
-                          {canDelete ? (
-                            <button
-                              className="btn btn-sm btn-error"
-                              onClick={() => handleDelete(cliente._id)}
-                              title="Eliminar"
-                              data-testid={`delete-cliente-${cliente._id}`}
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          ) : null}
-                        </div>
-                      </td>
-                    ) : null}
+                    <td>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button
+                          className="btn btn-sm btn-primary"
+                          onClick={() => handleVerResumenVentas(cliente)}
+                          title="Ver resumen de ventas"
+                          data-testid={`ventas-cliente-${cliente._id}`}
+                        >
+                          <TrendingUp size={14} />
+                        </button>
+                        {canEdit ? (
+                          <button
+                            className="btn btn-sm btn-secondary"
+                            onClick={() => handleEdit(cliente)}
+                            title="Editar"
+                            data-testid={`edit-cliente-${cliente._id}`}
+                          >
+                            <Edit2 size={14} />
+                          </button>
+                        ) : null}
+                        {canDelete ? (
+                          <button
+                            className="btn btn-sm btn-error"
+                            onClick={() => handleDelete(cliente._id)}
+                            title="Eliminar"
+                            data-testid={`delete-cliente-${cliente._id}`}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        ) : null}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -857,6 +863,228 @@ const Clientes = () => {
           </div>
         )}
       </div>
+      
+      {/* Modal Resumen de Ventas */}
+      {showResumenVentas && selectedCliente && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '2rem'
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            width: '100%',
+            maxWidth: '900px',
+            maxHeight: '90vh',
+            overflow: 'auto'
+          }}>
+            {/* Header */}
+            <div style={{
+              padding: '1.5rem',
+              borderBottom: '1px solid hsl(var(--border))',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              position: 'sticky',
+              top: 0,
+              backgroundColor: 'white',
+              zIndex: 1
+            }}>
+              <div>
+                <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <TrendingUp size={24} />
+                  Resumen de Ventas
+                </h2>
+                <p style={{ margin: '0.25rem 0 0 0', color: 'hsl(var(--muted-foreground))' }}>
+                  {selectedCliente.nombre} {selectedCliente.razon ? `(${selectedCliente.razon})` : ''}
+                </p>
+              </div>
+              <button
+                className="btn btn-secondary"
+                onClick={() => {
+                  setShowResumenVentas(false);
+                  setSelectedCliente(null);
+                  setResumenVentas(null);
+                }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+            
+            {/* Content */}
+            <div style={{ padding: '1.5rem' }}>
+              {loadingResumen ? (
+                <div style={{ textAlign: 'center', padding: '2rem' }}>
+                  <p>Cargando resumen...</p>
+                </div>
+              ) : resumenVentas ? (
+                <>
+                  {/* KPIs del cliente */}
+                  <div className="grid-4" style={{ marginBottom: '1.5rem', gridTemplateColumns: 'repeat(4, 1fr)' }}>
+                    <div style={{
+                      backgroundColor: '#dbeafe',
+                      padding: '1rem',
+                      borderRadius: '8px',
+                      textAlign: 'center'
+                    }}>
+                      <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#1e40af' }}>
+                        {resumenVentas.resumen?.total_contratos || 0}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#1e40af' }}>Contratos de Venta</div>
+                    </div>
+                    <div style={{
+                      backgroundColor: '#dcfce7',
+                      padding: '1rem',
+                      borderRadius: '8px',
+                      textAlign: 'center'
+                    }}>
+                      <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#166534' }}>
+                        {(resumenVentas.resumen?.total_cantidad_kg || 0).toLocaleString()}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#166534' }}>Kg Totales</div>
+                    </div>
+                    <div style={{
+                      backgroundColor: '#fef3c7',
+                      padding: '1rem',
+                      borderRadius: '8px',
+                      textAlign: 'center'
+                    }}>
+                      <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#92400e' }}>
+                        €{(resumenVentas.resumen?.total_importe || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#92400e' }}>Importe Contratos</div>
+                    </div>
+                    <div style={{
+                      backgroundColor: '#f3e8ff',
+                      padding: '1rem',
+                      borderRadius: '8px',
+                      textAlign: 'center'
+                    }}>
+                      <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#7c3aed' }}>
+                        {resumenVentas.resumen?.total_albaranes || 0}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#7c3aed' }}>Albaranes</div>
+                    </div>
+                  </div>
+                  
+                  {/* Ventas por Campaña */}
+                  {resumenVentas.ventas_por_campana?.length > 0 && (
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <FileText size={18} />
+                        Ventas por Campaña
+                      </h3>
+                      <div className="table-container">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Campaña</th>
+                              <th>Nº Contratos</th>
+                              <th>Cultivos</th>
+                              <th>Cantidad (kg)</th>
+                              <th>Importe (€)</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {resumenVentas.ventas_por_campana.map((venta, idx) => (
+                              <tr key={idx}>
+                                <td className="font-semibold">{venta.campana}</td>
+                                <td>{venta.num_contratos}</td>
+                                <td>
+                                  <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+                                    {venta.cultivos?.filter(c => c).map((cultivo, cidx) => (
+                                      <span
+                                        key={cidx}
+                                        style={{
+                                          padding: '0.125rem 0.5rem',
+                                          borderRadius: '4px',
+                                          fontSize: '0.7rem',
+                                          backgroundColor: '#e0f2fe',
+                                          color: '#0369a1'
+                                        }}
+                                      >
+                                        {cultivo}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </td>
+                                <td>{venta.cantidad_total?.toLocaleString()}</td>
+                                <td className="font-semibold">€{venta.importe_total?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Lista de Contratos */}
+                  {resumenVentas.contratos?.length > 0 && (
+                    <div>
+                      <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Package size={18} />
+                        Detalle de Contratos
+                      </h3>
+                      <div className="table-container">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Contrato</th>
+                              <th>Fecha</th>
+                              <th>Campaña</th>
+                              <th>Cultivo</th>
+                              <th>Cantidad (kg)</th>
+                              <th>Precio (€/kg)</th>
+                              <th>Total (€)</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {resumenVentas.contratos.map((contrato) => (
+                              <tr key={contrato._id}>
+                                <td className="font-semibold">
+                                  {contrato.serie || 'MP'}-{contrato.año}-{String(contrato.numero || 0).padStart(3, '0')}
+                                </td>
+                                <td>{contrato.fecha_contrato ? new Date(contrato.fecha_contrato).toLocaleDateString() : '-'}</td>
+                                <td>{contrato.campana}</td>
+                                <td>{contrato.cultivo}</td>
+                                <td>{contrato.cantidad?.toLocaleString()}</td>
+                                <td>€{contrato.precio?.toFixed(2)}</td>
+                                <td className="font-semibold">
+                                  €{((contrato.cantidad || 0) * (contrato.precio || 0)).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {resumenVentas.contratos?.length === 0 && (
+                    <div style={{ textAlign: 'center', padding: '2rem', color: 'hsl(var(--muted-foreground))' }}>
+                      <TrendingUp size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
+                      <p>Este cliente aún no tiene contratos de venta registrados.</p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '2rem' }}>
+                  <p>No se pudo cargar el resumen</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
