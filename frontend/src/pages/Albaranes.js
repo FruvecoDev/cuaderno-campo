@@ -89,6 +89,9 @@ const Albaranes = () => {
   // Lista de proveedores para selector alternativo
   const [proveedores, setProveedores] = useState([]);
   
+  // Catálogo de artículos de explotación
+  const [articulosCatalogo, setArticulosCatalogo] = useState([]);
+  
   // Form data
   const [formData, setFormData] = useState({
     tipo: 'Entrada',
