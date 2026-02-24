@@ -398,8 +398,22 @@ const Maquinaria = () => {
     }
   };
   
-  const viewImage = (maquinariaId) => {
-    setModalImageUrl(`${BACKEND_URL}/api/maquinaria/${maquinariaId}/imagen-placa-ce`);
+  const viewImage = (item) => {
+    // Usar la URL directa del campo imagen_placa_ce_url
+    let url = item.imagen_placa_ce_url;
+    if (url) {
+      // Si la URL es relativa, añadir el BACKEND_URL
+      if (url.startsWith('/api/uploads/')) {
+        url = `${BACKEND_URL}${url}`;
+      } else if (url.startsWith('/app/uploads/')) {
+        // Convertir rutas absolutas del sistema a URLs web
+        url = `${BACKEND_URL}/api/uploads${url.replace('/app/uploads', '')}`;
+      }
+    } else {
+      // Fallback al endpoint de API
+      url = `${BACKEND_URL}/api/maquinaria/${item._id}/imagen-placa-ce`;
+    }
+    setModalImageUrl(url);
     setShowImageModal(true);
   };
   
