@@ -831,7 +831,7 @@ const Dashboard = () => {
             <span style={{ fontSize: '0.875rem' }}>{notificationResult.message}</span>
             {notificationResult.sent !== undefined && (
               <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
-                ({notificationResult.sent} enviados)
+                ({notificationResult.sent} {t('dashboard.notifications.sent')})
               </span>
             )}
           </div>
@@ -845,7 +845,7 @@ const Dashboard = () => {
             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
           >
             <Send size={16} />
-            {sendingNotification ? 'Enviando...' : 'Enviar Recordatorios'}
+            {sendingNotification ? t('dashboard.notifications.sending') : t('dashboard.notifications.sendReminders')}
           </button>
           
           <button 
@@ -855,7 +855,7 @@ const Dashboard = () => {
             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
           >
             <Mail size={16} />
-            Enviar Email de Prueba
+            {t('dashboard.notifications.sendTestEmail')}
           </button>
         </div>
         
@@ -868,7 +868,7 @@ const Dashboard = () => {
             backgroundColor: '#fff8e1',
             borderRadius: '4px'
           }}>
-            Para activar las notificaciones, añade tu API key de Resend en el archivo .env del backend (RESEND_API_KEY)
+            {t('dashboard.notifications.configureApi')}
           </p>
         )}
       </div>
