@@ -1,7 +1,9 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from typing import Optional
 from bson import ObjectId
 from datetime import datetime
+import os
+import uuid
 
 from models_tratamientos import MaquinariaCreate, MaquinariaInDB
 from database import maquinaria_collection, serialize_doc, serialize_docs
