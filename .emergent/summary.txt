@@ -6,76 +6,73 @@ Un contrato siempre estará asignado a una parcela y un cultivo. Sobre una parce
 Cada sección puede ser configurable pudiendo habilitar o deshabilitar secciones por usuario. También los campos de cada sección son configurables.
 
 **PRODUCT REQUIREMENTS:**
--   **Modules:** Contracts, Parcels, Maps, Farms, Visits, Tasks, Harvests, Treatments, Irrigations, Recipes, Delivery Notes, Suppliers, Crops, Machinery, Evaluation Sheets.
+-   **Modules:** Contracts, Parcels, Maps, Farms, Visits, Tasks, Harvests, Treatments, Irrigations, Recipes, Delivery Notes, Suppliers, Crops, Machinery, Evaluation Sheets, Applicator Technicians.
 -   **Core Features:**
     -   Dashboard with KPIs.
     -   PDF and Excel report generation.
     -   User and permissions management panel (RBAC).
     -   User authentication (login).
     -   Advanced search filters and configurable columns/fields per module.
-    -   Dynamically generated questionnaires within modules.
+    -   Dynamically generated questionnaires within modules (with custom questions, duplication, and reordering).
     -   Multi-language support (Spanish, English, French, German, Italian).
     -   Custom translation dictionary for agricultural terms.
     -   Smart Field Notebook generation (PDF with AI summary).
--   **AI Integrations (Backend Implemented):**
+-   **AI Integrations:**
     -   AI-powered summary reports for contracts.
-    -   Suggestions for treatments.
-    -   Harvest yield predictions.
+    -   AI Assistant for treatment suggestions and harvest yield predictions.
     -   AI summary for the Smart Field Notebook.
 
 **User's preferred language**: Español
 
 **what currently exists?**
-A full-stack FARM (FastAPI, React, MongoDB) application for agricultural management. The app is now fully translated into five languages (ES, EN, FR, DE, IT), verified by the testing agent. It includes a custom translation management module (Diccionario de Términos Agrícolas) allowing users to define their own terms. The latest feature, Cuaderno de Campo Inteligente, generates a comprehensive PDF report for a contract or parcel, including an AI-powered summary using GPT-4o. The backend and frontend for this feature are complete.
+A comprehensive full-stack agricultural management application built with FastAPI, React, and MongoDB. The application is fully internationalized (5 languages) and features a stable, modular backend architecture.
+
+Key functionalities include:
+-   **AI Assistant**: A dedicated page providing AI-driven treatment suggestions and harvest predictions.
+-   **Dynamic Evaluation Sheets**: A highly configurable module for evaluation questionnaires, allowing users to add, delete, duplicate, and reorder custom questions via drag-and-drop.
+-   **Smart Field Notebook**: Generates a complete PDF report for a contract, including an AI-powered summary.
+-   **Core Modules**: Full CRUD functionality for managing Contracts, Parcels, Visits, Treatments, etc.
+-   **New Técnico Aplicador Module**: A recently added module to manage applicator technicians, fully integrated into the Treatments workflow.
 
 **Last working item**:
--   **Last item agent was working**: Implementing the Cuaderno de Campo Inteligente (Smart Field Notebook). The agent created the backend endpoint () which gathers all related data (visits, treatments, harvests, etc.), generates an AI summary, and compiles everything into a PDF using WeasyPrint. It also added UI buttons on the Contracts and Parcels pages to trigger this generation.
+-   **Last item agent was working**: Creation of the Técnico Aplicador (Applicator Technician) module. This involved building a new backend router and a complete frontend interface (list, create, edit, delete). The agent also integrated this new entity into the Tratamientos (Treatments) form, replacing a free-text input with a dropdown selector that pulls from the list of registered and certified technicians.
 -   **Status**: USER VERIFICATION PENDING
 -   **Agent Testing Done**: Y
--   **Which testing method agent to use?**: Manual user verification. The agent has already tested the endpoint with , verified the PDF content with , and confirmed the UI buttons are present via screenshot. The user should now test the end-to-end flow.
+-   **Which testing method agent to use?**: Manual user verification. The user should be prompted to test the new Técnicos Aplicadores page and confirm that the selector works correctly in the Tratamientos form.
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Finalizar implementación de notificaciones por email (P1)**: The backend/frontend scaffolding exists but is not functional. It requires an API key and an automated sending mechanism.
--   **Issue 2: Implementar Frontend para AI Features (P2)**: The backend AI endpoints for treatment suggestions and harvest prediction are ready, but the UI is missing to expose this functionality to the user.
+-   **Issue 1: Finalizar implementación de notificaciones por email (P1)**
 
 **Issues Detail**:
 -   **Issue 1: Finalizar implementación de notificaciones por email**
-    -   **Attempted fixes**: Previous agent integrated Resend, created backend routes (), an email service (), and a frontend configuration panel.
+    -   **Attempted fixes**: The scaffolding for Resend integration exists (, , frontend panel).
     -   **Next debug checklist**:
-        1.  Ask the user for the  and add it to the  file.
-        2.  Implement a background scheduling mechanism on the backend (e.g., using ) to automatically check for upcoming visits and send email reminders.
-    -   **Why fix this issue and what will be achieved with the fix?**: Completes the user-requested feature for proactive visit notifications.
-    -   **Status**: NOT STARTED
+        1.  Request the  from the user.
+        2.  Add the key to the  file.
+        3.  Implement a background scheduler (e.g., ) to check for upcoming events (like visits) and trigger email notifications.
+    -   **Why fix this issue and what will be achieved with the fix?**: This will enable proactive email reminders for important events, completing a core user requirement.
+    -   **Status**: BLOCKED
     -   **Is recurring issue?**: N
     -   **Should Test frontend/backend/both after fix?**: both
-    -   **Blocked on other issue**: Requires user input (API Key).
-
--   **Issue 2: Implementar Frontend para AI Features**
-    -   **Attempted fixes**: None.
-    -   **Next debug checklist**:
-        1.  Design and build UI elements (buttons, modals) in the relevant modules (e.g., , ) to trigger AI actions.
-        2.  Create components to display the AI-generated suggestions or predictions.
-        3.  Connect the new UI to the existing backend AI endpoints (, ).
-    -   **Why fix this issue and what will be achieved with the fix?**: This will expose the powerful backend AI functionality to the end-user, a key original requirement.
-    -   **Status**: NOT STARTED
-    -   **Is recurring issue?**: N
-    -   **Should Test frontend/backend/both after fix?**: both
-    -   **Blocked on other issue**: None
+    -   **Blocked on other issue**: User input is required for the .
 
 **In progress Task List**:
 -   None.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks**:
-    -   **P1**: Finish  refactoring by moving remaining module logic (e.g., Contratos, Fincas, etc.) into separate router files.
+    -   None.
 -   **Future Tasks**:
     -   **P2**: Enhance the interactive map with advanced editing features for existing parcels.
 
 **Completed work in this session**
--   **Full i18n Translation (DONE)**: Completed the translation of all frontend pages and components into five languages. The work was validated by the frontend testing agent with 100% success.
--   **Custom Translation Dictionary (DONE)**: Implemented a full-stack feature allowing administrators to manage a custom dictionary of agricultural terms. This includes a new backend router () and a frontend page ().
--   **Smart Field Notebook (Cuaderno de Campo Inteligente) (DONE)**: Developed the end-to-end feature for generating a comprehensive PDF report for a contract or parcel, including an AI-generated summary. This involved creating  on the backend and adding trigger buttons to  and  on the frontend.
+-   **New Module: Técnico Aplicador (DONE)**: Implemented the full-stack module for managing applicator technicians and integrated it with the Treatments form.
+-   **Evaluation Sheets Enhancement (DONE)**: Added functionality to add, delete, duplicate, and reorder custom questions in evaluation sheets. Fixed a bug where new questions did not render immediately.
+-   **Backend Refactoring (DONE)**: Refactored the backend by splitting  and  into smaller, single-responsibility router files (, , etc.), greatly improving maintainability.
+-   **AI Assistant Frontend (DONE)**: Created the frontend page () to interact with the backend AI endpoints for treatment suggestions and harvest predictions.
+-   **Bug Fix: Albaranes Unit Field (DONE)**: Corrected a CSS/layout issue where the selected unit was not visible in the delivery notes form.
+-   **Bug Fix: Add Question Functionality (DONE)**: Investigated and resolved a bug where adding a new question to an evaluation sheet was not working as expected. The fix involved making the modal a floating overlay and ensuring the component state was updated immediately.
 
 **Earlier issues found/mentioned but not fixed**
 -   None.
@@ -83,97 +80,97 @@ A full-stack FARM (FastAPI, React, MongoDB) application for agricultural managem
 **Known issue recurrence from previous fork**
 -   **Issue recurrence in previous fork**: Backend failure due to missing WeasyPrint dependency ().
 -   **Recurrence count**: 1
--   **Status**: RESOLVED. The fix is Hit:1 http://deb.debian.org/debian bookworm InRelease
-Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
-Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [48.0 kB]
+-   **Status**: RESOLVED. The fix is Hit:1 https://cloudfront.debian.net/debian bookworm InRelease
+Get:2 https://cloudfront.debian.net/debian bookworm-updates InRelease [55.4 kB]
+Hit:3 https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 InRelease
 Hit:4 https://deb.nodesource.com/node_20.x nodistro InRelease
-Get:5 https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 InRelease [3005 B]
-Get:6 http://deb.debian.org/debian-security bookworm-security/main arm64 Packages [293 kB]
-Get:7 https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0/multiverse arm64 Packages [104 kB]
-Get:8 https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0/multiverse amd64 Packages [105 kB]
-Fetched 609 kB in 1s (599 kB/s)
+Get:5 https://cloudfront.debian.net/debian-security bookworm-security InRelease [48.0 kB]
+Fetched 103 kB in 1s (104 kB/s)
 Reading package lists...
 Reading package lists...
 Building dependency tree...
 Reading state information...
 libpango-1.0-0 is already the newest version (1.50.12+ds-1).
-The following NEW packages will be installed:
-  libpangoft2-1.0-0
-0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
-Need to get 44.5 kB of archives.
-After this operation, 178 kB of additional disk space will be used.
-Get:1 http://deb.debian.org/debian bookworm/main arm64 libpangoft2-1.0-0 arm64 1.50.12+ds-1 [44.5 kB]
-Fetched 44.5 kB in 0s (875 kB/s)
-Selecting previously unselected package libpangoft2-1.0-0:arm64.
-(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 39989 files and directories currently installed.)
-Preparing to unpack .../libpangoft2-1.0-0_1.50.12+ds-1_arm64.deb ...
-Unpacking libpangoft2-1.0-0:arm64 (1.50.12+ds-1) ...
-Setting up libpangoft2-1.0-0:arm64 (1.50.12+ds-1) ...
-Processing triggers for libc-bin (2.36-9+deb12u13) .... This might be needed again on a pod reset.
+libpangoft2-1.0-0 is already the newest version (1.50.12+ds-1).
+libpangoft2-1.0-0 set to manually installed.
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.. This might be needed again on a pod reset.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
 -   **Stack**: FARM (FastAPI, React, MongoDB)
--   **Internationalization (i18n)**: , 
+-   **UI**: shadcn/ui, Recharts, react-router
+-   **Drag & Drop**: 
+-   **Internationalization (i18n)**: 
 -   **PDF Generation**: 
 -   **AI**: OpenAI GPT-4o via 
 -   **Authentication**: JWT & Role-Based Access Control (RBAC)
--   **UI**: shadcn/ui, react-router
 
 **key DB schema**
 -   **translations**: 
+-   **tecnicos_aplicadores**: 
+-   **evaluation_questions_config**: 
 
 **All files of reference**
--   : New backend router for generating the smart field notebook.
--   : New backend router for the custom translation dictionary.
--   : New frontend page for managing custom translations.
--   : Modified to include the Generate Notebook button.
--   : Modified to include the Generate Notebook button.
--   : Modified to add Traducciones to the navigation menu.
--   : Updated with the latest completed features.
+-   : New backend router for applicator technicians.
+-   : Modified to add question reordering endpoint.
+-   : Modified to include all new modular routers.
+-   : New frontend page for applicator technicians.
+-   : Modified to integrate the technician selector.
+-   : Heavily modified to implement add, duplicate, and reorder functionality for questions.
+-   : Modified to fix a display bug in the unit selector.
+-   : New frontend page for the AI Assistant.
+-   : Updated with all new features.
 
 **Areas that need refactoring**:
--   The refactoring of  is still pending. Core module logic should be extracted into dedicated router files to improve maintainability.
+-   None. The major backend refactoring has been completed.
 
 **key api endpoints**
--   : Loads default terms into the custom dictionary.
--   : Fetches all custom translations.
--   : Gets a JSON preview of the notebook data.
--   : Generates and returns the full notebook as a PDF.
+-   : Generates AI-based treatment suggestions.
+-   : Predicts crop yield based on provided data.
+-   : Updates the display order of custom evaluation questions.
+-   : CRUD operations for applicator technicians.
+-   : Update and delete operations for applicator technicians.
 
 **Critical Info for New Agent**
-1.  Your first action should be to present the newly completed Cuaderno de Campo Inteligente feature to the user for verification. Explain that they can now generate an AI-summarized PDF report from the Contratos and Parcelas pages.
-2.  After user confirmation, the next priorities are the pending issues: implementing email notifications (P1) and building the frontend for the other AI features (P2). You will need to ask the user for the  to proceed with email notifications.
-3.  The agent successfully completed a major i18n refactoring and a new feature for custom translations. The app is in a stable and significantly improved state.
+1.  Your first action should be to present the newly completed **Técnico Aplicador** module to the user for verification. Confirm that the new page works and that the dropdown is correctly integrated into the Tratamientos form.
+2.  After user confirmation, the highest priority is to address the last remaining pending issue: **Email Notifications**. This is blocked pending the user providing a . You must ask the user for this key to proceed.
+3.  The application is in a very stable state. Major work has been done on backend architecture (modular routers) and frontend UX (dynamic questionnaires), resolving multiple user requests and bugs in this session.
 
 **documents and test reports created in this job**
 -   
+-   
+-   
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User**:  - Confirmed this is the next feature to build. **(Status: COMPLETED)**
-2.  **User**:  - Selected specific implementation choices for the feature (generate from Contracts/Parcels, AI summary, PDF export). **(Status: COMPLETED)**
-3.  **User**:  - Agreed to the agent's suggestion to build a custom translation dictionary. **(Status: COMPLETED)**
+1.  **User**:  (Request to create the Applicator Technician module) - **Status: COMPLETED**
+2.  **User**:  (Bug report for the delivery notes unit field) - **Status: COMPLETED**
+3.  **User**:  (Confirmation to proceed with reordering questions feature) - **Status: COMPLETED**
+4.  **User**:  (Confirmation to proceed with duplicate question feature) - **Status: COMPLETED**
+5.  **User**:  (Bug report for adding a new question) - **Status: COMPLETED**
+6.  **User**:  (Request to add questions to evaluation sheets) - **Status: COMPLETED**
+7.  **User**:  (Approval of the backend refactoring task) - **Status: COMPLETED**
+8.  **User**:  (Choice to implement the AI frontend) - **Status: COMPLETED**
 
 **Project Health Check:**
--   **Broken**: None.
--   **Mocked**: Email notification system (requires an API key from the user and a background scheduler).
+-   **Broken**: None
+-   **Mocked**: Email notification system (requires API key and background scheduler).
 
 **3rd Party Integrations**
--   **OpenAI GPT-4o**: Uses Emergent LLM Key. Actively used for the Cuaderno de Campo Inteligente.
--   **Recharts**: For data visualization charts.
--   **react-i18next / i18next**: For multi-language support.
--   **WeasyPrint**: For PDF generation.
--   **openpyxl**: For Excel (.xlsx) file generation.
+-   **OpenAI GPT-4o**: Uses Emergent LLM Key.
+-   **Recharts**: Data visualization.
+-   **react-i18next / i18next**: Multi-language support.
+-   **WeasyPrint**: PDF generation.
+-   **openpyxl**: Excel file generation.
 -   **Resend**: For email notifications (partially integrated, blocked on API key).
--   **Leaflet.js / OpenStreetMap**: For maps.
--   **BeautifulSoup4 / httpx**: For web scraping.
+-   **Leaflet.js / OpenStreetMap**: Maps.
+-   **@dnd-kit/core**: For drag-and-drop functionality.
 
 **Testing status**
--   **Testing agent used after significant changes**: YES (for the i18n translation task).
+-   **Testing agent used after significant changes**: YES (for the AI Assistant feature).
 -   **Troubleshoot agent used after agent stuck in loop**: NO
--   **Test files created**: None.
+-   **Test files created**: []
 -   **Known regressions**: None.
 
 **Credentials to test flow:**
@@ -181,4 +178,4 @@ Processing triggers for libc-bin (2.36-9+deb12u13) .... This might be needed ag
 -   **Other Roles**: Users for Manager, Technician, and Viewer roles exist. Passwords are their role name in lowercase (e.g., role: Manager, password: manager).
 
 **What agent forgot to execute**
--   The agent correctly followed all user requests and did not forget to execute any planned tasks.</analysis>
+-   The agent successfully completed all user-requested tasks and planned work for this session. Nothing was forgotten.</analysis>
