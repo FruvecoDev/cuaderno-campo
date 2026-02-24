@@ -207,9 +207,14 @@ const Albaranes = () => {
       const response = await fetch(`${BACKEND_URL}/api/contratos`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const data = await response.json();
-      if (response.ok) {
-        setContratos(data.contratos || []);
+      const text = await response.text();
+      try {
+        const data = JSON.parse(text);
+        if (response.ok) {
+          setContratos(data.contratos || []);
+        }
+      } catch (e) {
+        console.error('Error parsing contratos JSON:', e, 'Response:', text);
       }
     } catch (error) {
       console.error('Error fetching contratos:', error);
