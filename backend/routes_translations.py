@@ -260,7 +260,7 @@ async def delete_translation(translation_id: str):
     """Delete a translation"""
     try:
         obj_id = ObjectId(translation_id)
-    except:
+    except Exception:
         raise HTTPException(status_code=400, detail="Invalid translation ID")
     
     result = await db.custom_translations.delete_one({"_id": obj_id})
@@ -276,7 +276,7 @@ async def approve_translation(translation_id: str):
     """Approve a translation (Admin only)"""
     try:
         obj_id = ObjectId(translation_id)
-    except:
+    except Exception:
         raise HTTPException(status_code=400, detail="Invalid translation ID")
     
     result = await db.custom_translations.update_one(
