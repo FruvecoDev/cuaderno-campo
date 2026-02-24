@@ -959,8 +959,40 @@ async def generar_cuaderno_campo(
         if request.include_ai_summary:
             ai_summary = await generate_ai_summary(data)
         
-        # Generate HTML
-        html_content = generate_html_cuaderno(data, ai_summary)
+        # Preload images for maquinaria and tecnicos from tratamientos
+        maquinaria_images = {}
+        tecnicos_images = {}
+        tratamientos = data.get("tratamientos", [])
+        
+        # Collect unique IDs
+        maquina_ids = set()
+        tecnico_ids = set()
+        for t in tratamientos:
+            if t.get('maquina_id'):
+                maquina_ids.add(t.get('maquina_id'))
+            if t.get('tecnico_aplicador_id'):
+                tecnico_ids.add(t.get('tecnico_aplicador_id'))
+        
+        # Load maquinaria images
+        for maq_id in maquina_ids:
+            if ObjectId.is_valid(maq_id):
+                maq = await maquinaria_collection.find_one({"_id": ObjectId(maq_id)})
+                if maq and maq.get('imagen_placa_ce_url'):
+                    img_data = get_image_as_base64(maq['imagen_placa_ce_url'])
+                    if img_data:
+                        maquinaria_images[maq_id] = img_data
+        
+        # Load tecnicos images
+        for tec_id in tecnico_ids:
+            if ObjectId.is_valid(tec_id):
+                tec = await tecnicos_aplicadores_collection.find_one({"_id": ObjectId(tec_id)})
+                if tec and tec.get('imagen_certificado_url'):
+                    img_data = get_image_as_base64(tec['imagen_certificado_url'])
+                    if img_data:
+                        tecnicos_images[tec_id] = img_data
+        
+        # Generate HTML with images
+        html_content = generate_html_cuaderno(data, ai_summary, maquinaria_images, tecnicos_images)
         
         # Generate PDF
         pdf_buffer = BytesIO()
