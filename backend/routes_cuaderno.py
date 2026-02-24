@@ -279,16 +279,16 @@ GENERA UN RESUMEN EN HTML (sin etiquetas html/body, solo el contenido) que inclu
 Usa etiquetas <h4>, <p>, <ul>, <li> para estructurar. Sé conciso y directo."""
 
         chat = LlmChat(
-            api_key=EMERGENT_LLM_KEY
+            api_key=EMERGENT_LLM_KEY,
+            session_id=f"cuaderno-summary-{datetime.now().strftime('%Y%m%d%H%M%S')}",
+            system_message="Eres un agrónomo experto especializado en análisis de campañas agrícolas y generación de informes."
         )
         chat.with_model("openai", "gpt-4o-mini")
         
-        response = await chat.send_async(
-            messages=[UserMessage(content=prompt)],
-            max_tokens=1000
-        )
+        user_message = UserMessage(text=prompt)
+        response = await chat.send_message(user_message)
         
-        return response.content if response else "<p>Error generando resumen</p>"
+        return response if response else "<p>Error generando resumen</p>"
         
     except Exception as e:
         return f"<p><em>Error generando resumen IA: {str(e)}</em></p>"
