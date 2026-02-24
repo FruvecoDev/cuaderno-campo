@@ -477,5 +477,33 @@
     "fr": "Français",
     "de": "Deutsch",
     "it": "Italiano"
+  },
+  "translations": {
+    "title": "Diccionario de Términos Agrícolas",
+    "subtitle": "Gestiona traducciones personalizadas para tu región",
+    "newTranslation": "Nueva Traducción",
+    "editTranslation": "Editar Traducción",
+    "key": "Clave",
+    "keyRequired": "La clave es obligatoria",
+    "keyHelp": "Use formato: categoria.termino (ej: crop.tomato)",
+    "category": "Categoría",
+    "description": "Descripción",
+    "descriptionPlaceholder": "Describe qué significa este término",
+    "region": "Región",
+    "regionPlaceholder": "Región donde se usa (ej: Murcia, Andalucía)",
+    "translations": "Traducciones",
+    "translationIn": "Traducción en",
+    "atLeastOneTranslation": "Debe proporcionar al menos una traducción",
+    "dictionary": "Diccionario",
+    "noTranslations": "No hay traducciones personalizadas. Carga los términos predeterminados o crea nuevos.",
+    "loadDefaults": "Cargar Términos Predeterminados",
+    "confirmSeed": "¿Cargar términos agrícolas predeterminados?",
+    "created": "Traducción creada correctamente",
+    "confirmDelete": "¿Estás seguro de eliminar esta traducción?",
+    "approved": "Aprobada",
+    "pending": "Pendiente",
+    "approve": "Aprobar",
+    "approvedOnly": "Solo aprobadas",
+    "searchPlaceholder": "Buscar por clave o descripción..."
   }
 }
