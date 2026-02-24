@@ -919,6 +919,140 @@ const Dashboard = () => {
           </div>
         </div>
       )}
+      
+      {/* Modal de Detalles de Visita */}
+      {selectedVisita && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}
+          onClick={() => setSelectedVisita(null)}
+        >
+          <div 
+            className="card"
+            style={{
+              maxWidth: '550px',
+              width: '90%',
+              maxHeight: '80vh',
+              overflow: 'auto',
+              position: 'relative',
+              padding: '1.5rem'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setSelectedVisita(null)}
+              style={{
+                position: 'absolute',
+                top: '1rem',
+                right: '1rem',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '0.25rem'
+              }}
+            >
+              <AlertCircle size={20} style={{ transform: 'rotate(45deg)' }} />
+            </button>
+            
+            <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.25rem' }}>
+              <Eye size={22} />
+              Detalles de la Visita
+            </h2>
+            
+            <div style={{ display: 'grid', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.25rem' }}>Objetivo</label>
+                  <p style={{ fontWeight: '500', margin: 0 }}>{selectedVisita.objetivo}</p>
+                </div>
+                <div>
+                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.25rem' }}>Fecha</label>
+                  <p style={{ fontWeight: '500', margin: 0 }}>{selectedVisita.fecha_visita}</p>
+                </div>
+              </div>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.25rem' }}>Proveedor</label>
+                  <p style={{ margin: 0 }}>{selectedVisita.proveedor || 'N/A'}</p>
+                </div>
+                <div>
+                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.25rem' }}>Cultivo</label>
+                  <p style={{ margin: 0 }}>{selectedVisita.cultivo || 'N/A'}</p>
+                </div>
+              </div>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.25rem' }}>Campaña</label>
+                  <p style={{ margin: 0 }}>{selectedVisita.campana || 'N/A'}</p>
+                </div>
+                <div>
+                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.25rem' }}>Estado</label>
+                  <span className={`badge ${selectedVisita.estado === 'Completada' ? 'badge-success' : selectedVisita.estado === 'Programada' ? 'badge-warning' : 'badge-secondary'}`}>
+                    {selectedVisita.estado || 'Programada'}
+                  </span>
+                </div>
+              </div>
+              
+              {selectedVisita.observaciones && (
+                <div>
+                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.25rem' }}>Observaciones</label>
+                  <p style={{ margin: 0, whiteSpace: 'pre-wrap', backgroundColor: 'hsl(var(--muted) / 0.5)', padding: '0.75rem', borderRadius: '6px' }}>{selectedVisita.observaciones}</p>
+                </div>
+              )}
+              
+              {selectedVisita.cuestionario_plagas && Object.keys(selectedVisita.cuestionario_plagas).length > 0 && (
+                <div>
+                  <label style={{ fontWeight: '600', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '0.5rem' }}>Cuestionario de Plagas</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.5rem' }}>
+                    {Object.entries(selectedVisita.cuestionario_plagas).map(([key, value]) => (
+                      <div key={key} style={{ 
+                        padding: '0.5rem', 
+                        backgroundColor: value === 0 ? 'hsl(142 76% 36% / 0.1)' : value === 1 ? 'hsl(48 96% 53% / 0.2)' : 'hsl(0 84% 60% / 0.1)',
+                        borderRadius: '4px',
+                        fontSize: '0.8rem'
+                      }}>
+                        <strong style={{ textTransform: 'capitalize' }}>{key.replace(/_/g, ' ')}:</strong> {value}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  navigate(`/visitas?editar=${selectedVisita._id}`);
+                  setSelectedVisita(null);
+                }}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              >
+                <Edit2 size={16} />
+                Editar
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => setSelectedVisita(null)}
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
