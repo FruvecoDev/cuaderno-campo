@@ -487,16 +487,28 @@ const Albaranes = () => {
   
   // Filtrar contratos para el selector según búsqueda Y tipo de albarán
   const filteredContratos = contratos.filter(c => {
-    // Filtrar por tipo de contrato según tipo de albarán
-    const tipoContratoEsperado = formData.tipo === 'Albarán de venta' ? 'Venta' : 'Compra';
-    if (c.tipo && c.tipo !== tipoContratoEsperado) return false;
+    // Determinar el tipo de contrato (por defecto 'Compra' si no está definido)
+    const tipoContrato = c.tipo || 'Compra';
+    
+    // Filtrar por tipo de contrato según tipo de albarán seleccionado
+    if (formData.tipo === 'Albarán de venta') {
+      // Solo mostrar contratos de Venta para albaranes de venta
+      if (tipoContrato !== 'Venta') return false;
+    } else {
+      // Solo mostrar contratos de Compra para albaranes de compra
+      if (tipoContrato !== 'Compra') return false;
+    }
     
     // Filtros de búsqueda
     if (contratoSearch.proveedor) {
-      // Buscar en proveedor o cliente según el tipo
-      const matchProveedor = c.proveedor && c.proveedor === contratoSearch.proveedor;
-      const matchCliente = c.cliente && c.cliente === contratoSearch.proveedor;
-      if (!matchProveedor && !matchCliente) return false;
+      // Buscar en proveedor o cliente según el tipo de contrato
+      if (tipoContrato === 'Venta') {
+        // Para contratos de venta, buscar por cliente
+        if (!c.cliente || c.cliente !== contratoSearch.proveedor) return false;
+      } else {
+        // Para contratos de compra, buscar por proveedor
+        if (!c.proveedor || c.proveedor !== contratoSearch.proveedor) return false;
+      }
     }
     if (contratoSearch.cultivo && c.cultivo !== contratoSearch.cultivo) return false;
     if (contratoSearch.campana && c.campana !== contratoSearch.campana) return false;
