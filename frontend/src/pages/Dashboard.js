@@ -565,11 +565,11 @@ const Dashboard = () => {
                       <div style={{ minWidth: '200px' }}>
                         <strong style={{ fontSize: '1rem' }}>{parcela.codigo_plantacion}</strong>
                         <div style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
-                          <div><strong>Cultivo:</strong> {parcela.cultivo}</div>
-                          <div><strong>Proveedor:</strong> {parcela.proveedor}</div>
-                          <div><strong>Finca:</strong> {parcela.finca}</div>
-                          <div><strong>Superficie:</strong> {parcela.superficie_total} ha</div>
-                          <div><strong>Campaña:</strong> {parcela.campana}</div>
+                          <div><strong>{t('dashboard.map.crop')}:</strong> {parcela.cultivo}</div>
+                          <div><strong>{t('dashboard.map.provider')}:</strong> {parcela.proveedor}</div>
+                          <div><strong>{t('dashboard.map.farm')}:</strong> {parcela.finca}</div>
+                          <div><strong>{t('dashboard.map.surface')}:</strong> {parcela.superficie_total} ha</div>
+                          <div><strong>{t('dashboard.map.campaign')}:</strong> {parcela.campana}</div>
                         </div>
                         <button 
                           onClick={() => navigate(`/parcelas`)}
@@ -584,7 +584,7 @@ const Dashboard = () => {
                             fontSize: '0.8rem'
                           }}
                         >
-                          Ver detalles
+                          {t('dashboard.map.viewDetails')}
                         </button>
                       </div>
                     </Popup>
