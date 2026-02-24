@@ -1577,7 +1577,7 @@ async def generate_evaluacion_pdf(
     # PÁGINAS DE COSECHAS - Una página por cada cosecha
     # ========================================================================
     for idx, cosecha in enumerate(cosechas, 1):
-        page_num = 1 + len(visitas) + len(tratamientos) + len(irrigaciones) + idx
+        page_num = 1 + len(visitas) + (len(tratamientos) * 3) + len(irrigaciones) + idx
         html_content += f"""
         <div class="page-break"></div>
         <div class="header">
