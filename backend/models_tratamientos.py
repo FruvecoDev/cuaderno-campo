@@ -95,6 +95,7 @@ class TratamientoBase(BaseModel):
     
     # Aplicador y maquinaria (versión simplificada)
     aplicador_nombre: Optional[str] = None  # Texto libre con nombre del aplicador
+    tecnico_aplicador_id: Optional[str] = None  # ObjectId ref a tecnicos_aplicadores
     maquina_id: Optional[str] = None  # ObjectId ref a maquinaria
     maquina_nombre: Optional[str] = None  # Nombre de la máquina (denormalizado para display)
     
