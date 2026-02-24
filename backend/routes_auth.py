@@ -75,6 +75,7 @@ async def register(user_data: UserCreate, current_user: dict = Depends(get_curre
         "role": user_data.role,
         "hashed_password": hashed_password,
         "is_active": True,
+        "tipo_operacion": "ambos",  # compra, venta, ambos
         **role_permissions,
         "created_at": datetime.now(),
         "updated_at": datetime.now()
