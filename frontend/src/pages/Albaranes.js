@@ -656,7 +656,7 @@ const Albaranes = () => {
           <h2 className="card-title">{editingId ? 'Editar Albarán' : 'Nuevo Albarán'}</h2>
           
           <form onSubmit={handleSubmit}>
-            {/* Paso 1: Seleccionar Contrato */}
+            {/* Paso 1: Tipo de Albarán */}
             <div style={{ 
               backgroundColor: 'hsl(var(--primary) / 0.1)', 
               padding: '1rem', 
@@ -664,9 +664,149 @@ const Albaranes = () => {
               marginBottom: '1.5rem',
               border: '1px solid hsl(var(--primary) / 0.3)'
             }}>
+              <h3 style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1rem 0' }}>
+                <FileText size={18} /> 1. Tipo de Albarán
+              </h3>
+              
+              <div className="grid-2" style={{ gap: '1rem' }}>
+                <label 
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.75rem',
+                    padding: '1rem',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    border: formData.tipo === 'Albarán de compra' ? '2px solid #3b82f6' : '2px solid #e5e7eb',
+                    backgroundColor: formData.tipo === 'Albarán de compra' ? '#dbeafe' : 'white',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="tipo_albaran"
+                    value="Albarán de compra"
+                    checked={formData.tipo === 'Albarán de compra'}
+                    onChange={(e) => setFormData({...formData, tipo: e.target.value, cliente: '', proveedor: ''})}
+                    style={{ width: '20px', height: '20px' }}
+                    data-testid="radio-albaran-compra"
+                  />
+                  <div>
+                    <div style={{ fontWeight: '600', color: formData.tipo === 'Albarán de compra' ? '#1e40af' : '#374151' }}>
+                      Albarán de Compra
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                      Registro de compras a proveedores
+                    </div>
+                  </div>
+                </label>
+                
+                <label 
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.75rem',
+                    padding: '1rem',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    border: formData.tipo === 'Albarán de venta' ? '2px solid #22c55e' : '2px solid #e5e7eb',
+                    backgroundColor: formData.tipo === 'Albarán de venta' ? '#dcfce7' : 'white',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="tipo_albaran"
+                    value="Albarán de venta"
+                    checked={formData.tipo === 'Albarán de venta'}
+                    onChange={(e) => setFormData({...formData, tipo: e.target.value, cliente: '', proveedor: ''})}
+                    style={{ width: '20px', height: '20px' }}
+                    data-testid="radio-albaran-venta"
+                  />
+                  <div>
+                    <div style={{ fontWeight: '600', color: formData.tipo === 'Albarán de venta' ? '#166534' : '#374151' }}>
+                      Albarán de Venta
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                      Registro de ventas a clientes
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+            
+            {/* Paso 2: Proveedor o Cliente según tipo */}
+            <div style={{ 
+              backgroundColor: formData.tipo === 'Albarán de venta' ? '#f0fdf4' : '#eff6ff', 
+              padding: '1rem', 
+              borderRadius: '8px', 
+              marginBottom: '1.5rem',
+              border: `1px solid ${formData.tipo === 'Albarán de venta' ? '#86efac' : '#93c5fd'}`
+            }}>
+              <h3 style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1rem 0' }}>
+                {formData.tipo === 'Albarán de venta' ? (
+                  <>
+                    <Users size={18} /> 2. Seleccionar Cliente
+                  </>
+                ) : (
+                  <>
+                    <Package size={18} /> 2. Seleccionar Proveedor
+                  </>
+                )}
+              </h3>
+              
+              {formData.tipo === 'Albarán de venta' ? (
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Cliente *</label>
+                  <select
+                    className="form-select"
+                    value={formData.cliente}
+                    onChange={(e) => setFormData({...formData, cliente: e.target.value})}
+                    required
+                    data-testid="select-cliente-albaran"
+                    style={{ backgroundColor: 'white' }}
+                  >
+                    <option value="">-- Seleccionar cliente --</option>
+                    {clientes.map(c => (
+                      <option key={c._id} value={c.nombre}>
+                        {c.nombre} {c.nif ? `(${c.nif})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Proveedor *</label>
+                  <select
+                    className="form-select"
+                    value={formData.proveedor}
+                    onChange={(e) => setFormData({...formData, proveedor: e.target.value})}
+                    required
+                    data-testid="select-proveedor-albaran"
+                    style={{ backgroundColor: 'white' }}
+                  >
+                    <option value="">-- Seleccionar proveedor --</option>
+                    {proveedores.map(p => (
+                      <option key={p._id} value={p.nombre || p.razon_social}>
+                        {p.nombre || p.razon_social} {p.cif_nif ? `(${p.cif_nif})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+            
+            {/* Paso 3: Vincular a Contrato (Opcional) */}
+            <div style={{ 
+              backgroundColor: 'hsl(var(--muted))', 
+              padding: '1rem', 
+              borderRadius: '8px', 
+              marginBottom: '1.5rem',
+              border: '1px solid hsl(var(--border))'
+            }}>
               <div className="flex justify-between items-center mb-3">
                 <h3 style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-                  <FileText size={18} /> 1. Seleccionar Contrato
+                  <FileText size={18} /> 3. Vincular a Contrato (Opcional)
                 </h3>
                 {hasContratoSearchActive && (
                   <button 
@@ -697,7 +837,7 @@ const Albaranes = () => {
                     onChange={(e) => setContratoSearch({...contratoSearch, proveedor: e.target.value})}
                     style={{ fontSize: '0.875rem' }}
                   >
-                    <option value="">Proveedor</option>
+                    <option value="">Proveedor/Cliente</option>
                     {contratoOptions.proveedores.map(p => (
                       <option key={p} value={p}>{p}</option>
                     ))}
@@ -741,7 +881,7 @@ const Albaranes = () => {
               {/* Selector de contrato filtrado */}
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">
-                  Contrato * 
+                  Contrato
                   <span style={{ fontWeight: 'normal', fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginLeft: '0.5rem' }}>
                     ({filteredContratos.length} {filteredContratos.length === 1 ? 'contrato' : 'contratos'} encontrados)
                   </span>
@@ -750,13 +890,12 @@ const Albaranes = () => {
                   className="form-select"
                   value={formData.contrato_id}
                   onChange={(e) => handleContratoSelect(e.target.value)}
-                  required
                   data-testid="select-contrato"
                 >
-                  <option value="">-- Seleccionar contrato --</option>
+                  <option value="">-- Sin contrato vinculado --</option>
                   {filteredContratos.map(c => (
                     <option key={c._id} value={c._id}>
-                      {c.numero_contrato || `CON-${c._id.slice(-6)}`} | {c.proveedor} | {c.cultivo} | {c.parcela || c.parcela_codigo} | {c.campana}
+                      {c.tipo === 'Venta' ? '🟢' : '🔵'} {c.numero_contrato || `CON-${c._id.slice(-6)}`} | {c.tipo === 'Venta' ? c.cliente : c.proveedor} | {c.cultivo} | {c.campana}
                     </option>
                   ))}
                 </select>
@@ -773,12 +912,16 @@ const Albaranes = () => {
                 border: '1px solid #86efac'
               }}>
                 <h4 style={{ fontWeight: '600', marginBottom: '0.75rem', color: '#166534' }}>
-                  Datos del Contrato (referencia)
+                  Datos del Contrato Vinculado
                 </h4>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
                   <div>
-                    <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Proveedor del Contrato</span>
-                    <p style={{ fontWeight: '500' }}>{formData.proveedor_contrato || '-'}</p>
+                    <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                      {selectedContrato.tipo === 'Venta' ? 'Cliente' : 'Proveedor'}
+                    </span>
+                    <p style={{ fontWeight: '500' }}>
+                      {selectedContrato.tipo === 'Venta' ? selectedContrato.cliente : selectedContrato.proveedor || '-'}
+                    </p>
                   </div>
                   <div>
                     <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Cultivo</span>
@@ -793,115 +936,6 @@ const Albaranes = () => {
                     <p style={{ fontWeight: '500' }}>{formData.campana || '-'}</p>
                   </div>
                 </div>
-              </div>
-            )}
-            
-            {/* Selección de Proveedor del Albarán */}
-            {selectedContrato && (
-              <div style={{ 
-                backgroundColor: formData.usar_otro_proveedor ? '#fef3c7' : '#f8fafc', 
-                padding: '1rem', 
-                borderRadius: '8px', 
-                marginBottom: '1.5rem',
-                border: `1px solid ${formData.usar_otro_proveedor ? '#fcd34d' : 'hsl(var(--border))'}`
-              }}>
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h4 style={{ fontWeight: '600', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      2. {formData.tipo === 'Albarán de venta' ? 'Cliente' : 'Proveedor'} del Albarán
-                    </h4>
-                    <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginTop: '0.25rem' }}>
-                      {formData.tipo === 'Albarán de venta' 
-                        ? 'El ingreso se registrará en el contrato seleccionado'
-                        : 'El gasto se imputará al contrato seleccionado'}
-                    </p>
-                  </div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.875rem' }}>
-                    <input
-                      type="checkbox"
-                      checked={formData.usar_otro_proveedor}
-                      onChange={(e) => handleUsarOtroProveedorChange(e.target.checked)}
-                      style={{ width: '18px', height: '18px' }}
-                      data-testid="checkbox-otro-proveedor"
-                    />
-                    <span style={{ color: formData.usar_otro_proveedor ? '#92400e' : 'inherit' }}>
-                      Usar otro {formData.tipo === 'Albarán de venta' ? 'cliente' : 'proveedor'}
-                    </span>
-                  </label>
-                </div>
-                
-                {formData.usar_otro_proveedor ? (
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">
-                      Seleccionar {formData.tipo === 'Albarán de venta' ? 'Cliente' : 'Proveedor'} *
-                    </label>
-                    {formData.tipo === 'Albarán de venta' ? (
-                      <select
-                        className="form-select"
-                        value={formData.cliente}
-                        onChange={(e) => setFormData({...formData, cliente: e.target.value})}
-                        required
-                        data-testid="select-cliente-alternativo"
-                        style={{ backgroundColor: '#fffbeb' }}
-                      >
-                        <option value="">-- Seleccionar cliente --</option>
-                        {clientes.map(c => (
-                          <option key={c._id} value={c.nombre}>
-                            {c.nombre} {c.nif ? `(${c.nif})` : ''}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <select
-                        className="form-select"
-                        value={formData.proveedor}
-                        onChange={(e) => setFormData({...formData, proveedor: e.target.value})}
-                        required
-                        data-testid="select-proveedor-alternativo"
-                        style={{ backgroundColor: '#fffbeb' }}
-                      >
-                        <option value="">-- Seleccionar proveedor --</option>
-                        {proveedores.map(p => (
-                          <option key={p._id} value={p.nombre || p.razon_social}>
-                            {p.nombre || p.razon_social} {p.nif ? `(${p.nif})` : ''}
-                          </option>
-                        ))}
-                        {contratoOptions.proveedores
-                          .filter(prov => !proveedores.some(p => (p.nombre || p.razon_social) === prov))
-                          .map(prov => (
-                            <option key={prov} value={prov}>{prov}</option>
-                          ))
-                        }
-                      </select>
-                    )}
-                    <p style={{ fontSize: '0.75rem', color: '#92400e', marginTop: '0.5rem' }}>
-                      Este {formData.tipo === 'Albarán de venta' ? 'cliente' : 'proveedor'} es diferente al del contrato. 
-                      El {formData.tipo === 'Albarán de venta' ? 'ingreso' : 'gasto'} aún se imputará al contrato "{selectedContrato?.numero_contrato || selectedContrato?._id?.slice(-6)}".
-                    </p>
-                  </div>
-                ) : (
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '0.5rem',
-                    padding: '0.75rem',
-                    backgroundColor: 'white',
-                    borderRadius: '6px',
-                    border: '1px solid hsl(var(--border))'
-                  }}>
-                    <span style={{ fontWeight: '500' }}>
-                      {formData.tipo === 'Albarán de venta' ? 'Cliente:' : 'Proveedor:'}
-                    </span>
-                    <span>
-                      {formData.tipo === 'Albarán de venta' 
-                        ? (formData.cliente || formData.cliente_contrato || '-')
-                        : (formData.proveedor || formData.proveedor_contrato || '-')}
-                    </span>
-                    <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginLeft: 'auto' }}>
-                      (mismo que el contrato)
-                    </span>
-                  </div>
-                )}
               </div>
             )}
             
