@@ -144,8 +144,8 @@ const Albaranes = () => {
       const response = await fetch(`${BACKEND_URL}/api/articulos/activos`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      const data = await response.json();
       if (response.ok) {
-        const data = await response.json();
         setArticulosCatalogo(data.articulos || []);
       }
     } catch (error) {
