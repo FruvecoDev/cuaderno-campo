@@ -69,6 +69,8 @@ async def get_dashboard_kpis():
     return {
         "totales": {
             "contratos": total_contratos,
+            "contratos_venta": contratos_venta,
+            "contratos_compra": contratos_compra,
             "parcelas": total_parcelas,
             "parcelas_activas": parcelas_activas,
             "fincas": total_fincas,
