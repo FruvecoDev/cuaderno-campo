@@ -189,6 +189,12 @@ function App() {
           </ProtectedRoute>
         } />
         
+        <Route path="/informes-ingresos" element={
+          <ProtectedRoute>
+            <Layout><InformesIngresos /></Layout>
+          </ProtectedRoute>
+        } />
+        
         <Route path="/traducciones" element={
           <ProtectedRoute>
             <Layout><Traducciones /></Layout>
