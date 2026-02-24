@@ -284,12 +284,20 @@ const Maquinaria = () => {
   };
   
   const uploadImage = async (maquinariaId) => {
-    if (!selectedImage) return;
+    if (!selectedImage) {
+      console.log('No image selected for upload');
+      return;
+    }
+    
+    console.log('Uploading image for maquinaria:', maquinariaId);
+    console.log('Selected image:', selectedImage.name, selectedImage.type, selectedImage.size);
     
     setUploadingImage(true);
     try {
       const formDataImage = new FormData();
       formDataImage.append('file', selectedImage);
+      
+      console.log('Sending upload request to:', `${BACKEND_URL}/api/maquinaria/${maquinariaId}/imagen-placa-ce`);
       
       const response = await fetch(`${BACKEND_URL}/api/maquinaria/${maquinariaId}/imagen-placa-ce`, {
         method: 'POST',
@@ -297,12 +305,17 @@ const Maquinaria = () => {
         body: formDataImage
       });
       
+      console.log('Upload response status:', response.status);
+      
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('Upload error:', errorData);
         throw { status: response.status, message: errorData.detail };
       }
       
-      return await response.json();
+      const result = await response.json();
+      console.log('Upload success:', result);
+      return result;
     } catch (error) {
       console.error('Error uploading image:', error);
       setError('Error al subir la imagen de la placa CE');
