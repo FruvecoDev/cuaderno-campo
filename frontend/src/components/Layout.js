@@ -67,6 +67,7 @@ const Layout = ({ children }) => {
     ]},
     { section: t('nav.catalogs'), items: [
       { path: '/proveedores', label: t('nav.providers'), icon: Package },
+      { path: '/clientes', label: 'Clientes', icon: Users },
       { path: '/cultivos', label: t('nav.crops'), icon: Leaf },
       { path: '/maquinaria', label: t('nav.machinery'), icon: Cog },
       { path: '/fitosanitarios', label: t('nav.phytosanitary'), icon: Beaker },
