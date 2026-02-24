@@ -466,8 +466,9 @@ const Usuarios = () => {
                           <>
                             <button
                               className="btn btn-sm btn-secondary"
-                              onClick={() => setEditingUser(editingUser === user._id ? null : user._id)}
-                              title={t('users.editRole')}
+                              onClick={() => openEditModal(user)}
+                              title="Editar usuario"
+                              data-testid={`btn-edit-${user._id}`}
                             >
                               <Edit2 size={14} />
                             </button>
