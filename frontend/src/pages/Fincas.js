@@ -149,14 +149,14 @@ const Fincas = () => {
   return (
     <div data-testid="fincas-page">
       <div className="flex justify-between items-center mb-6">
-        <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>Fincas</h1>
+        <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>{t('farms.title')}</h1>
         <button 
           className="btn btn-primary" 
           onClick={() => { resetForm(); setShowForm(!showForm); }}
           data-testid="btn-nueva-finca"
         >
           <Plus size={18} style={{ marginRight: '0.5rem' }} />
-          Nueva Finca
+          {t('farms.newFarm')}
         </button>
       </div>
 
@@ -165,7 +165,7 @@ const Fincas = () => {
         <div className="card mb-6" data-testid="form-finca">
           <div className="flex justify-between items-center mb-4">
             <h3 style={{ fontWeight: '600', margin: 0 }}>
-              {editingId ? 'Editar Finca' : 'Nueva Finca'}
+              {editingId ? t('common.edit') + ' ' + t('farms.title') : t('farms.newFarm')}
             </h3>
             <button 
               className="btn btn-sm btn-secondary"
@@ -177,7 +177,7 @@ const Fincas = () => {
           <form onSubmit={handleSubmit}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
               <div className="form-group">
-                <label className="form-label">Nombre *</label>
+                <label className="form-label">{t('farms.farmName')} *</label>
                 <input 
                   className="form-input" 
                   value={formData.nombre} 
@@ -187,7 +187,7 @@ const Fincas = () => {
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Campaña *</label>
+                <label className="form-label">{t('contracts.campaign')} *</label>
                 <input 
                   className="form-input" 
                   value={formData.campana} 
@@ -196,7 +196,7 @@ const Fincas = () => {
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Superficie (ha) *</label>
+                <label className="form-label">{t('parcels.surface')} ({t('units.hectares')}) *</label>
                 <input 
                   type="number" 
                   step="0.01" 
@@ -207,7 +207,7 @@ const Fincas = () => {
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Nº Plantas *</label>
+                <label className="form-label">{t('parcels.parcelsCount')} *</label>
                 <input 
                   type="number" 
                   className="form-input" 
@@ -244,14 +244,14 @@ const Fincas = () => {
             </div>
             <div className="flex gap-2">
               <button type="submit" className="btn btn-primary">
-                {editingId ? 'Actualizar' : 'Guardar'}
+                {editingId ? t('common.edit') : t('common.save')}
               </button>
               <button 
                 type="button" 
                 className="btn btn-secondary" 
                 onClick={() => { setShowForm(false); resetForm(); }}
               >
-                Cancelar
+                {t('common.cancel')}
               </button>
             </div>
           </form>
@@ -261,7 +261,7 @@ const Fincas = () => {
       {/* Filtros */}
       <div className="card mb-4" data-testid="filtros-fincas">
         <div className="flex justify-between items-center mb-4">
-          <h3 style={{ fontWeight: '600', margin: 0 }}>Filtros</h3>
+          <h3 style={{ fontWeight: '600', margin: 0 }}>{t('common.filters')}</h3>
           {hasActiveFilters && (
             <button 
               className="btn btn-sm btn-secondary"
@@ -269,13 +269,13 @@ const Fincas = () => {
               data-testid="btn-limpiar-filtros"
             >
               <X size={14} style={{ marginRight: '0.25rem' }} />
-              Limpiar filtros
+              {t('common.clear')}
             </button>
           )}
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Buscar</label>
+            <label className="form-label">{t('common.search')}</label>
             <div style={{ position: 'relative' }}>
               <Search size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#6c757d' }} />
               <input
@@ -288,13 +288,13 @@ const Fincas = () => {
             </div>
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Campaña</label>
+            <label className="form-label">{t('contracts.campaign')}</label>
             <select
               className="form-select"
               value={filters.campana}
               onChange={(e) => setFilters({...filters, campana: e.target.value})}
             >
-              <option value="">Todas</option>
+              <option value="">{t('common.all')}</option>
               {filterOptions.campanas.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
@@ -320,19 +320,19 @@ const Fincas = () => {
         marginBottom: '1rem' 
       }}>
         <div className="card" style={{ textAlign: 'center', padding: '1rem' }}>
-          <div style={{ fontSize: '0.85rem', color: '#6c757d' }}>Total Fincas</div>
+          <div style={{ fontSize: '0.85rem', color: '#6c757d' }}>{t('common.total')} {t('farms.title')}</div>
           <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#2d5a27' }}>
             {filteredFincas.length}
           </div>
         </div>
         <div className="card" style={{ textAlign: 'center', padding: '1rem' }}>
-          <div style={{ fontSize: '0.85rem', color: '#6c757d' }}>Superficie Total</div>
+          <div style={{ fontSize: '0.85rem', color: '#6c757d' }}>{t('farms.totalSurface')}</div>
           <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#2d5a27' }}>
-            {totals.superficie.toLocaleString()} ha
+            {totals.superficie.toLocaleString()} {t('units.hectares')}
           </div>
         </div>
         <div className="card" style={{ textAlign: 'center', padding: '1rem' }}>
-          <div style={{ fontSize: '0.85rem', color: '#6c757d' }}>Total Plantas</div>
+          <div style={{ fontSize: '0.85rem', color: '#6c757d' }}>{t('common.total')} {t('parcels.parcelsCount')}</div>
           <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#2d5a27' }}>
             {totals.plantas.toLocaleString()}
           </div>
@@ -342,24 +342,24 @@ const Fincas = () => {
       {/* Lista */}
       <div className="card">
         <h3 style={{ fontWeight: '600', marginBottom: '1rem' }}>
-          Lista de Fincas ({filteredFincas.length})
+          {t('farms.title')} ({filteredFincas.length})
         </h3>
         
         {loading ? (
-          <p>Cargando...</p>
+          <p>{t('common.loading')}</p>
         ) : filteredFincas.length === 0 ? (
-          <p className="text-muted">No hay fincas registradas</p>
+          <p className="text-muted">{t('common.noData')}</p>
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #dee2e6' }}>
-                  <th style={{ padding: '12px', textAlign: 'left' }}>Nombre</th>
-                  <th style={{ padding: '12px', textAlign: 'center' }}>Campaña</th>
-                  <th style={{ padding: '12px', textAlign: 'right' }}>Superficie</th>
-                  <th style={{ padding: '12px', textAlign: 'right' }}>Plantas</th>
-                  <th style={{ padding: '12px', textAlign: 'left' }}>Ubicación</th>
-                  <th style={{ padding: '12px', textAlign: 'center' }}>Acciones</th>
+                  <th style={{ padding: '12px', textAlign: 'left' }}>{t('farms.farmName')}</th>
+                  <th style={{ padding: '12px', textAlign: 'center' }}>{t('contracts.campaign')}</th>
+                  <th style={{ padding: '12px', textAlign: 'right' }}>{t('parcels.surface')}</th>
+                  <th style={{ padding: '12px', textAlign: 'right' }}>{t('parcels.parcelsCount')}</th>
+                  <th style={{ padding: '12px', textAlign: 'left' }}>{t('parcels.location')}</th>
+                  <th style={{ padding: '12px', textAlign: 'center' }}>{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody>

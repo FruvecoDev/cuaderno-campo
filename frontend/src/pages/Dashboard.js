@@ -420,27 +420,27 @@ const Dashboard = () => {
       {/* KPI Cards */}
       <div className="stats-grid" data-testid="dashboard-kpis">
         <div className="stat-card">
-          <div className="stat-label">Total Contratos</div>
+          <div className="stat-label">{t('dashboard.stats.totalContracts')}</div>
           <div className="stat-value">{kpis.totales.contratos}</div>
-          <div className="text-sm text-muted">Contratos activos</div>
+          <div className="text-sm text-muted">{t('common.active')}</div>
         </div>
         
         <div className="stat-card">
-          <div className="stat-label">Parcelas Activas</div>
+          <div className="stat-label">{t('dashboard.stats.activeParcels')}</div>
           <div className="stat-value">{kpis.totales.parcelas_activas}</div>
-          <div className="text-sm text-muted">de {kpis.totales.parcelas} totales</div>
+          <div className="text-sm text-muted">de {kpis.totales.parcelas} {t('common.total').toLowerCase()}</div>
         </div>
         
         <div className="stat-card">
-          <div className="stat-label">Superficie Total</div>
+          <div className="stat-label">{t('parcels.surface')} {t('common.total')}</div>
           <div className="stat-value">{kpis.superficie.total_ha.toFixed(2)}</div>
-          <div className="text-sm text-muted">hectáreas</div>
+          <div className="text-sm text-muted">{t('units.hectares')}</div>
         </div>
         
         <div className="stat-card">
-          <div className="stat-label">Tratamientos</div>
+          <div className="stat-label">{t('dashboard.stats.treatments')}</div>
           <div className="stat-value">{kpis.totales.tratamientos}</div>
-          <div className="text-sm text-muted">aplicaciones registradas</div>
+          <div className="text-sm text-muted">{t('common.total')}</div>
         </div>
         
         <div className="stat-card">
