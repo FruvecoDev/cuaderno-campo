@@ -345,13 +345,14 @@ const Albaranes = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.contrato_id) {
-      setError('Debe seleccionar un contrato');
+    // Validar que se haya seleccionado proveedor o cliente según el tipo
+    if (formData.tipo === 'Albarán de compra' && !formData.proveedor) {
+      setError('Debe seleccionar un proveedor');
       return;
     }
     
-    if (formData.usar_otro_proveedor && !formData.proveedor) {
-      setError('Debe seleccionar un proveedor para el albarán');
+    if (formData.tipo === 'Albarán de venta' && !formData.cliente) {
+      setError('Debe seleccionar un cliente');
       return;
     }
     
@@ -365,9 +366,6 @@ const Albaranes = () => {
       
       const payload = {
         ...formData,
-        // No enviar campos temporales del frontend
-        usar_otro_proveedor: undefined,
-        proveedor_contrato: undefined,
         items: formData.items.map(item => ({
           ...item,
           cantidad: parseFloat(item.cantidad) || 0,
@@ -377,9 +375,11 @@ const Albaranes = () => {
         total_albaran: calculateGrandTotal()
       };
       
-      // Limpiar campos undefined del payload
+      // Limpiar campos temporales del frontend
       delete payload.usar_otro_proveedor;
       delete payload.proveedor_contrato;
+      delete payload.cliente_contrato;
+      delete payload.tipo_contrato;
       
       const response = await fetch(url, {
         method,
@@ -390,9 +390,10 @@ const Albaranes = () => {
         body: JSON.stringify(payload)
       });
       
+      const data = await response.json();
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
+        throw { status: response.status, message: data.detail || 'Error al guardar' };
       }
       
       setShowForm(false);
