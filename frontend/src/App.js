@@ -23,6 +23,7 @@ import Maquinaria from './pages/Maquinaria';
 import Evaluaciones from './pages/Evaluaciones';
 import Fitosanitarios from './pages/Fitosanitarios';
 import InformesGastos from './pages/InformesGastos';
+import Traducciones from './pages/Traducciones';
 
 function App() {
   return (
