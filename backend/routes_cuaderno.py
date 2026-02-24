@@ -279,9 +279,9 @@ GENERA UN RESUMEN EN HTML (sin etiquetas html/body, solo el contenido) que inclu
 Usa etiquetas <h4>, <p>, <ul>, <li> para estructurar. Sé conciso y directo."""
 
         chat = LlmChat(
-            api_key=EMERGENT_LLM_KEY,
-            model="gpt-4o-mini"
+            api_key=EMERGENT_LLM_KEY
         )
+        chat.with_model("openai", "gpt-4o-mini")
         
         response = await chat.send_async(
             messages=[UserMessage(content=prompt)],
