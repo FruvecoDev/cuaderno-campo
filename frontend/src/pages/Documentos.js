@@ -41,15 +41,15 @@ const Documentos = () => {
   return (
     <div data-testid="documentos-page">
       <div className="flex justify-between items-center mb-6">
-        <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>Documentos</h1>
+        <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>{t('documents.title')}</h1>
         <label className="btn btn-primary" style={{ cursor: 'pointer' }}>
           <Upload size={18} />
-          {uploading ? 'Subiendo...' : 'Subir Documento'}
+          {uploading ? t('common.loading') : t('common.upload')}
           <input type="file" style={{ display: 'none' }} onChange={handleFileUpload} disabled={uploading} />
         </label>
       </div>
       <div className="card">
-        {loading ? <p>Cargando...</p> : documentos.length === 0 ? <p className="text-muted">No hay documentos</p> : (
+        {loading ? <p>{t('common.loading')}</p> : documentos.length === 0 ? <p className="text-muted">{t('common.noData')}</p> : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
             {documentos.map(doc => (
               <div key={doc._id} style={{ border: '1px solid hsl(var(--border))', borderRadius: '8px', padding: '1rem', textAlign: 'center' }}>
