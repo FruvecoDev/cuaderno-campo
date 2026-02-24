@@ -99,7 +99,8 @@ test.describe('Artículos de Explotación - CRUD', () => {
     
     // Wait for form to open with data
     await expect(page.getByTestId('input-codigo')).toBeVisible();
-    await expect(page.getByTestId('input-codigo')).toHaveValue(testCodigo);
+    // Note: codigo is automatically converted to uppercase
+    await expect(page.getByTestId('input-codigo')).toHaveValue(testCodigo.toUpperCase());
     
     // Update the name
     await page.getByTestId('input-nombre').fill(updatedNombre);
