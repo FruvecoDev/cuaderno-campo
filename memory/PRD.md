@@ -524,3 +524,66 @@ Módulos actualizados para seguir patrón consistente:
   - Los datos se guardan en el tratamiento: `producto_fitosanitario_id`, `producto_fitosanitario_nombre`, etc.
 - **Enlace en menú**: Catálogos > Fitosanitarios
 - **Estado**: ✅ COMPLETADO
+
+
+## Bug Fix: Subida de Imágenes (24/02/2026) - COMPLETADO
+- **Problema**: Las imágenes de Placa CE (Maquinaria) y Certificados (Técnicos Aplicadores) no se guardaban de forma persistente
+- **Causa raíz**: Las imágenes se guardaban en `/tmp/` que es un directorio temporal y se borra al reiniciar
+- **Solución implementada**:
+  - Cambiado directorio de uploads a `/app/uploads/` (persistente)
+  - `/app/uploads/maquinaria_placas/` para imágenes de placas CE
+  - `/app/uploads/certificados/` para certificados de técnicos
+  - Agregado montaje de archivos estáticos en server.py: `app.mount("/api/uploads", StaticFiles(...))`
+- **Archivos modificados**:
+  - `/app/backend/routes_maquinaria.py` - línea 152
+  - `/app/backend/routes_tecnicos_aplicadores.py` - línea 240
+  - `/app/backend/server.py` - añadido StaticFiles mount
+- **Estado**: ✅ COMPLETADO Y TESTEADO
+
+## Módulo Artículos de Explotación (24/02/2026) - COMPLETADO
+- **Nuevo Módulo**: Catálogo de artículos para usar en albaranes
+- **Backend Router**: `/app/backend/routes_articulos.py`
+- **Frontend**: `/app/frontend/src/pages/ArticulosExplotacion.js`
+- **Funcionalidades**:
+  - CRUD completo de artículos
+  - Campos: código, nombre, descripción, categoría, unidad de medida, precio unitario, IVA, stock actual/mínimo, proveedor habitual
+  - Categorías: Fertilizantes, Fitosanitarios, Semillas, Materiales, Maquinaria, Servicios, Combustibles, Envases, Otros
+  - Unidades: Kg, L, Unidad, Saco, Caja, Palet, m², m³, Hora, Servicio
+  - Filtros por categoría, búsqueda y estado activo
+  - Toggle de activación/desactivación
+  - Alerta visual de stock bajo
+- **API Endpoints**:
+  - `GET /api/articulos` - Lista con filtros y paginación
+  - `GET /api/articulos/activos` - Solo activos para selectores
+  - `GET /api/articulos/categorias` - Lista de categorías
+  - `POST /api/articulos` - Crear (valida código único)
+  - `PUT /api/articulos/{id}` - Actualizar
+  - `PATCH /api/articulos/{id}/toggle-activo` - Activar/desactivar
+  - `DELETE /api/articulos/{id}` - Eliminar
+- **Navegación**: Menú lateral > Artículos Explotación
+- **Estado**: ✅ COMPLETADO
+
+## Integración Artículos-Albaranes (24/02/2026) - COMPLETADO
+- **Archivo modificado**: `/app/frontend/src/pages/Albaranes.js`
+- **Funcionalidades**:
+  - Selector de artículos del catálogo en cada línea del albarán
+  - Dropdown con formato: "CODIGO - Nombre (precio €/unidad)"
+  - Auto-completado al seleccionar artículo:
+    - Descripción: "CODIGO - Nombre"
+    - Precio unitario: precio del catálogo
+    - Unidad: unidad del catálogo
+  - Campo de descripción libre como alternativa
+  - Indicador de cantidad de artículos disponibles
+- **Backend**: Endpoint `/api/articulos/activos` provee lista para selector
+- **Estado**: ✅ COMPLETADO Y TESTEADO
+
+## Test Report - Iteración 13 (24/02/2026)
+- **Archivo**: `/app/test_reports/iteration_13.json`
+- **Backend**: 100% (20/20 tests passed)
+- **Frontend**: 100% (todas las features verificadas)
+- **Features testeadas**:
+  - CRUD Artículos de Explotación
+  - Upload imágenes Maquinaria a /app/uploads/
+  - Upload certificados Técnicos a /app/uploads/
+  - Integración Artículos en Albaranes
+  - Auto-completado precio/unidad desde catálogo
