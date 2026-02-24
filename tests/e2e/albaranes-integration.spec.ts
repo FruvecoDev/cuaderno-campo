@@ -5,7 +5,13 @@ test.describe('Albaranes - Artículos Integration', () => {
   const baseUrl = 'https://farm-hub-15.preview.emergentagent.com';
   
   test.beforeEach(async ({ page }) => {
-    await login(page);
+    // Login manually with correct flow
+    await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('domcontentloaded');
+    await page.locator('input').first().fill('admin@fruveco.com');
+    await page.locator('input[type="password"]').first().fill('admin123');
+    await page.getByRole('button', { name: /Iniciar Sesión|Login/i }).click();
+    await page.waitForURL(/dashboard/, { timeout: 15000 });
     await removeEmergentBadge(page);
   });
 
