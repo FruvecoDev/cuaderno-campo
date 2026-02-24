@@ -1190,7 +1190,20 @@ const Albaranes = () => {
                         ) : '-'}
                       </td>
                     )}
-                    {fieldsConfig.proveedor && <td>{albaran.proveedor || '-'}</td>}
+                    {fieldsConfig.proveedor && (
+                      <td>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ fontSize: '0.65rem', color: '#6b7280' }}>
+                            {albaran.tipo === 'Albarán de venta' ? 'Cliente:' : 'Prov:'}
+                          </span>
+                          <span>
+                            {albaran.tipo === 'Albarán de venta' 
+                              ? (albaran.cliente || '-')
+                              : (albaran.proveedor || '-')}
+                          </span>
+                        </div>
+                      </td>
+                    )}
                     {fieldsConfig.cultivo && <td>{albaran.cultivo || '-'}</td>}
                     {fieldsConfig.parcela && <td>{albaran.parcela_codigo || '-'}</td>}
                     {fieldsConfig.items && <td>{albaran.items?.length || 0} líneas</td>}
