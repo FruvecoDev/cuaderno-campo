@@ -838,11 +838,11 @@ const Maquinaria = () => {
                       alignItems: 'center', 
                       gap: '0.5rem',
                       cursor: 'pointer',
-                      padding: '1rem'
+                      padding: '1.5rem'
                     }}>
-                      <Upload size={32} style={{ color: 'hsl(var(--muted-foreground))' }} />
-                      <span style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
-                        Haz clic para subir imagen de la placa CE
+                      <Upload size={36} style={{ color: isDragging ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }} />
+                      <span style={{ fontSize: '0.875rem', color: isDragging ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))', fontWeight: isDragging ? '600' : '400' }}>
+                        {isDragging ? 'Suelta la imagen aquí' : 'Arrastra una imagen o haz clic para seleccionar'}
                       </span>
                       <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
                         JPEG, PNG o WEBP (máx. 10MB)
