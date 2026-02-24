@@ -37,7 +37,7 @@ class ArticuloBase(BaseModel):
 
 
 class ArticuloCreate(BaseModel):
-    codigo: str
+    codigo: Optional[str] = None  # Auto-generated if not provided
     nombre: str
     descripcion: Optional[str] = None
     categoria: str = "General"
@@ -49,6 +49,44 @@ class ArticuloCreate(BaseModel):
     proveedor_habitual: Optional[str] = None
     observaciones: Optional[str] = None
     activo: bool = True
+
+
+# Prefijos de código por categoría
+CATEGORIA_PREFIXES = {
+    "Fertilizantes": "FERT",
+    "Fitosanitarios": "FITO",
+    "Semillas": "SEM",
+    "Materiales": "MAT",
+    "Maquinaria": "MAQ",
+    "Servicios": "SRV",
+    "Combustibles": "COMB",
+    "Envases": "ENV",
+    "Otros": "OTR",
+    "General": "ART"
+}
+
+
+async def generate_codigo(categoria: str) -> str:
+    """Genera un código único para el artículo basado en la categoría"""
+    prefix = CATEGORIA_PREFIXES.get(categoria, "ART")
+    
+    # Buscar el último código con este prefijo
+    last_articulo = await articulos_collection.find_one(
+        {"codigo": {"$regex": f"^{prefix}-"}},
+        sort=[("codigo", -1)]
+    )
+    
+    if last_articulo:
+        # Extraer el número del último código
+        try:
+            last_num = int(last_articulo["codigo"].split("-")[1])
+            next_num = last_num + 1
+        except (IndexError, ValueError):
+            next_num = 1
+    else:
+        next_num = 1
+    
+    return f"{prefix}-{next_num:04d}"
 
 
 # Endpoints
