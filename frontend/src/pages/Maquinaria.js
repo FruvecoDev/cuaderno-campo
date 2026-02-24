@@ -918,6 +918,23 @@ const Maquinaria = () => {
                         </span>
                       </td>
                     ) : null}
+                    {tableConfig.imagen_placa_ce ? (
+                      <td>
+                        {item.imagen_placa_ce_url ? (
+                          <button
+                            className="btn btn-sm btn-secondary"
+                            onClick={() => viewImage(item._id)}
+                            title="Ver imagen de placa CE"
+                            data-testid={`view-placa-${item._id}`}
+                          >
+                            <Eye size={14} style={{ marginRight: '0.25rem' }} />
+                            Ver
+                          </button>
+                        ) : (
+                          <span style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }}>—</span>
+                        )}
+                      </td>
+                    ) : null}
                     {(canEdit || canDelete) ? (
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
