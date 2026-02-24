@@ -68,10 +68,12 @@ const TABLE_LABELS = {
 
 const Visitas = () => {
   const { t } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [visitas, setVisitas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [viewingVisita, setViewingVisita] = useState(null);
   const [error, setError] = useState(null);
   const { token } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
