@@ -99,17 +99,23 @@ const Albaranes = () => {
     contrato_id: '',
     // Datos heredados del contrato (referencia)
     proveedor_contrato: '',  // Proveedor original del contrato (informativo)
+    cliente_contrato: '',    // Cliente original del contrato (para contratos de venta)
+    tipo_contrato: '',       // Tipo del contrato (Compra/Venta)
     cultivo: '',
     parcela_codigo: '',
     parcela_id: '',
     campana: '',
-    // Proveedor del albarán (puede ser diferente al del contrato)
+    // Proveedor/Cliente del albarán (puede ser diferente al del contrato)
     proveedor: '',  // Este es el proveedor real del albarán
-    usar_otro_proveedor: false,  // Flag para indicar si usa otro proveedor
+    cliente: '',    // Este es el cliente real del albarán
+    usar_otro_proveedor: false,  // Flag para indicar si usa otro proveedor/cliente
     // Líneas del albarán
     items: [{ descripcion: '', cantidad: '', unidad: 'kg', precio_unitario: '', total: 0 }],
     observaciones: ''
   });
+  
+  // Estado para clientes (para albaranes de venta)
+  const [clientes, setClientes] = useState([]);
   
   useEffect(() => {
     fetchAlbaranes();
