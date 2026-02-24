@@ -187,6 +187,58 @@ const Usuarios = () => {
     }
   };
 
+  // Edit user functions
+  const openEditModal = (user) => {
+    setSelectedUserForEdit(user);
+    setEditFormData({
+      full_name: user.full_name || '',
+      email: user.email || '',
+      role: user.role || 'Viewer'
+    });
+    setEditError('');
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = async () => {
+    setEditError('');
+    
+    if (!editFormData.full_name.trim()) {
+      setEditError('El nombre es obligatorio');
+      return;
+    }
+    
+    if (!editFormData.email.trim() || !editFormData.email.includes('@')) {
+      setEditError('Introduce un email válido');
+      return;
+    }
+    
+    setSavingEdit(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/auth/users/${selectedUserForEdit._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(editFormData)
+      });
+      
+      if (response.ok) {
+        setShowEditModal(false);
+        setSelectedUserForEdit(null);
+        fetchUsers();
+      } else {
+        const error = await response.json();
+        setEditError(error.detail || 'Error al actualizar usuario');
+      }
+    } catch (error) {
+      console.error('Error updating user:', error);
+      setEditError('Error al actualizar usuario');
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
