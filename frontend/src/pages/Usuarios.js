@@ -422,11 +422,15 @@ const Usuarios = () => {
                               <Settings size={14} />
                             </button>
                             <button
-                              className="btn btn-sm btn-warning"
+                              className="btn btn-sm"
                               onClick={() => openPasswordModal(user)}
                               title="Cambiar contraseña"
                               data-testid={`btn-password-${user._id}`}
-                              style={{ backgroundColor: 'hsl(var(--warning))', color: 'white' }}
+                              style={{ 
+                                backgroundColor: '#f59e0b', 
+                                color: 'white',
+                                border: 'none'
+                              }}
                             >
                               <Key size={14} />
                             </button>
