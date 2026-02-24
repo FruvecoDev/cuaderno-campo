@@ -168,6 +168,19 @@ Visita/Tratamiento → realizados sobre → Parcela
    - Consistencia en patrones de búsqueda/filtro
    - Corregir warnings de hydration de React (cosmético)
 
+### Completed Refactoring (24/02/2026)
+13. **Refactorización Modular del Backend** ✅
+    - Dividido `routes_main.py` en módulos separados:
+      - `routes_contratos.py` - CRUD Contratos (160 líneas)
+      - `routes_parcelas.py` - CRUD Parcelas (118 líneas)
+      - `routes_visitas.py` - CRUD Visitas (241 líneas)
+      - `routes_fincas.py` - CRUD Fincas (85 líneas)
+    - Extraído de `routes_extended.py`:
+      - `routes_tratamientos.py` - CRUD Tratamientos (286 líneas)
+      - `routes_cosechas.py` - CRUD Cosechas (328 líneas)
+    - `routes_extended.py` simplificado: solo Irrigaciones, Recetas, Albaranes, Tareas, Documentos (449 líneas)
+    - Total: 20 archivos de rutas, ~8000 líneas bien organizadas
+
 ## Technical Stack
 - **Backend**: FastAPI, Python 3.11
 - **Frontend**: React 18, shadcn/ui
@@ -177,19 +190,40 @@ Visita/Tratamiento → realizados sobre → Parcela
 - **Maps**: Leaflet.js / OpenStreetMap
 - **Reports**: WeasyPrint (PDF), openpyxl (Excel)
 
-## Key Files
-- `/app/backend/routes_main.py` - CRUD Contratos, Parcelas, Visitas, Fincas
-- `/app/backend/routes_extended.py` - CRUD Tratamientos, Irrigaciones, Recetas, Albaranes, Tareas, **Cosechas (rediseñado)**
-- `/app/backend/routes_maquinaria.py` - CRUD Maquinaria
-- `/app/backend/routes_evaluaciones.py` - CRUD Evaluaciones + PDF generation
-- `/app/backend/routes_ai.py` - Endpoints IA base (reportes, análisis de costes)
-- `/app/backend/routes_ai_suggestions.py` - **Nuevos endpoints IA (sugerencias tratamientos, predicción cosecha)**
-- `/app/frontend/src/pages/Maquinaria.js` - Gestión de maquinaria
-- `/app/frontend/src/pages/Evaluaciones.js` - Hojas de Evaluación con filtros completos
-- `/app/frontend/src/pages/AsistenteIA.js` - **Nueva página de Asistente IA**
-- `/app/frontend/src/pages/Visitas.js` - Formulario simplificado + Plagas/Enfermedades
-- `/app/frontend/src/pages/Tratamientos.js` - Formulario con Aplicador y Máquina
-- `/app/frontend/src/pages/Cosechas.js` - **Nuevo módulo de cosechas asociado a contratos**
+## Backend Architecture (Refactored)
+### Core Modules (Individual Routers)
+- `routes_contratos.py` - Contratos CRUD
+- `routes_parcelas.py` - Parcelas CRUD
+- `routes_visitas.py` - Visitas CRUD with inheritance
+- `routes_fincas.py` - Fincas CRUD
+- `routes_tratamientos.py` - Tratamientos CRUD + historial + resumen
+- `routes_cosechas.py` - Cosechas CRUD + cargas + pricing
+
+### Extended Modules (Grouped)
+- `routes_extended.py` - Irrigaciones, Recetas, Albaranes, Tareas, Documentos
+
+### Supporting Modules
+- `routes_auth.py` - Authentication + RBAC
+- `routes_catalogos.py` - Catalog management
+- `routes_ai.py` - Base AI endpoints
+- `routes_ai_suggestions.py` - AI treatment suggestions + yield prediction
+- `routes_dashboard.py` - Dashboard KPIs
+- `routes_reports.py` - PDF/Excel reports
+- `routes_evaluaciones.py` - Evaluation sheets
+- `routes_maquinaria.py` - Machinery management
+- `routes_fitosanitarios.py` - Phytosanitary products
+- `routes_gastos.py` - Expense management
+- `routes_notifications.py` - Email notifications
+- `routes_translations.py` - Custom dictionary
+- `routes_cuaderno.py` - Field notebook generation
+
+## Key Frontend Pages
+- `/app/frontend/src/pages/AsistenteIA.js` - AI Assistant page
+- `/app/frontend/src/pages/Visitas.js` - Simplified form + Pest questionnaire
+- `/app/frontend/src/pages/Tratamientos.js` - Applicator + Machine fields
+- `/app/frontend/src/pages/Cosechas.js` - Harvest module with contract integration
+- `/app/frontend/src/pages/Evaluaciones.js` - Evaluation sheets with filters
+- `/app/frontend/src/pages/Maquinaria.js` - Machinery management
 
 ## Test Credentials
 - **Admin**: `admin@fruveco.com` / `admin123`
