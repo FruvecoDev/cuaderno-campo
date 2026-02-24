@@ -286,6 +286,11 @@
     "email": "E-Mail",
     "address": "Adresse"
   },
+  "suppliers": {
+    "title": "Lieferanten",
+    "subtitle": "Lieferantenkatalog",
+    "newSupplier": "Neuer Lieferant"
+  },
   "crops": {
     "title": "Kulturen",
     "subtitle": "Kulturkatalog",
