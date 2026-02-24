@@ -341,14 +341,18 @@ const ArticulosExplotacion = () => {
           <form onSubmit={handleSubmit}>
             <div className="grid-3">
               <div className="form-group">
-                <label className="form-label">Código <span style={{ color: 'red' }}>*</span></label>
+                <label className="form-label">
+                  Código {editingId ? '' : <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', fontWeight: 'normal' }}>(Auto-generado)</span>}
+                </label>
                 <input
                   type="text"
                   className="form-input"
-                  value={formData.codigo}
-                  onChange={(e) => setFormData({...formData, codigo: e.target.value.toUpperCase()})}
-                  placeholder="Ej: FERT001"
-                  required
+                  value={editingId ? formData.codigo : 'Se generará automáticamente'}
+                  onChange={(e) => editingId && setFormData({...formData, codigo: e.target.value.toUpperCase()})}
+                  placeholder="Auto-generado"
+                  readOnly={!editingId}
+                  disabled={!editingId}
+                  style={!editingId ? { backgroundColor: 'hsl(var(--muted))', color: 'hsl(var(--muted-foreground))' } : {}}
                   data-testid="input-codigo"
                 />
               </div>
