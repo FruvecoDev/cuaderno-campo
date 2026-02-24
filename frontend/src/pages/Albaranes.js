@@ -271,12 +271,14 @@ const Albaranes = () => {
     }
   };
   
-  // Manejar cambio de checkbox para usar otro proveedor
+  // Manejar cambio de checkbox para usar otro proveedor/cliente
   const handleUsarOtroProveedorChange = (checked) => {
+    const esVenta = formData.tipo === 'Albarán de venta';
     setFormData(prev => ({
       ...prev,
       usar_otro_proveedor: checked,
-      proveedor: checked ? '' : prev.proveedor_contrato
+      proveedor: esVenta ? '' : (checked ? '' : prev.proveedor_contrato),
+      cliente: esVenta ? (checked ? '' : prev.cliente_contrato) : ''
     }));
   };
   
