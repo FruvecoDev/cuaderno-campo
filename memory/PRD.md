@@ -316,7 +316,7 @@ Módulos actualizados para seguir patrón consistente:
 - **Navegación**: Administración > Informes Gastos
 - **Estado**: ✅ COMPLETADO
 
-## Soporte Multi-idioma (24/02/2026)
+## Soporte Multi-idioma (24/02/2026) - COMPLETADO
 - **Configuración i18n**: `/app/frontend/src/i18n/index.js`
 - **Archivos de traducción**:
   - `/app/frontend/src/i18n/locales/es.json` - Español (predeterminado)
@@ -329,13 +329,17 @@ Módulos actualizados para seguir patrón consistente:
   - Selector de idioma con banderas en la página de login (esquina superior derecha)
   - Selector de idioma compacto en el sidebar (junto al perfil de usuario)
   - Persistencia del idioma seleccionado en localStorage
-  - Traducciones para:
-    - Menú de navegación completo
-    - Página de login
-    - Mensajes comunes (guardar, cancelar, eliminar, etc.)
-    - Nombres de módulos y campos
-- **Dependencias añadidas**: i18next, react-i18next, i18next-browser-languagedetector
-- **Estado**: ✅ COMPLETADO (estructura base, algunas páginas pendientes de traducir)
+  - Traducciones completas para todas las páginas principales
+- **Páginas traducidas (24/02/2026)**:
+  - Login.js, Dashboard.js, Usuarios.js, Evaluaciones.js, Documentos.js
+  - Contratos.js, Parcelas.js, Fincas.js, Visitas.js, Tareas.js
+  - Tratamientos.js, Irrigaciones.js, Cosechas.js, Recetas.js
+  - Maquinaria.js, Cultivos.js, Proveedores.js, Albaranes.js
+  - Fitosanitarios.js, InformesGastos.js
+- **Claves agregadas**: auth.*, users.*, evaluations.*, suppliers.*, parcels.code, phytosanitary.*
+- **Dependencias**: i18next, react-i18next, i18next-browser-languagedetector
+- **Test Report**: `/app/test_reports/iteration_11.json` - 100% pass
+- **Estado**: ✅ COMPLETADO
 
 ## Historial de Tratamientos por Parcela (23/02/2026)
 - **Ubicación**: Modal en `/app/frontend/src/pages/Parcelas.js`
