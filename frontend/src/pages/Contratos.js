@@ -605,6 +605,19 @@ const Contratos = () => {
                               <Edit2 size={14} />
                             </button>
                           )}
+                          <button
+                            className="btn btn-sm btn-primary"
+                            onClick={() => handleGenerateCuaderno(contrato._id)}
+                            title={t('fieldNotebook.generate')}
+                            disabled={generatingCuaderno === contrato._id}
+                            data-testid={`cuaderno-contrato-${contrato._id}`}
+                          >
+                            {generatingCuaderno === contrato._id ? (
+                              <Loader2 size={14} className="animate-spin" />
+                            ) : (
+                              <BookOpen size={14} />
+                            )}
+                          </button>
                           {canDelete && (
                             <button
                               className="btn btn-sm btn-error"
