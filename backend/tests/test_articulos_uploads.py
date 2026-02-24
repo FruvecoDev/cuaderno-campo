@@ -387,7 +387,12 @@ class TestMaquinariaImageUpload:
         assert image_url.startswith("/api/uploads/maquinaria_placas/"), f"Image saved to wrong path: {image_url}"
         assert "/tmp/" not in image_url, f"Image incorrectly saved to /tmp/: {image_url}"
         
-        # Verify we can retrieve the image
+        # Verify we can retrieve the image via the web URL
+        full_image_url = f"{BASE_URL}{image_url}"
+        get_static_resp = requests.get(full_image_url)
+        assert get_static_resp.status_code == 200, f"Cannot access image via static URL: {get_static_resp.status_code}"
+        
+        # Verify we can also retrieve the image via API endpoint
         get_image_resp = requests.get(
             f"{BASE_URL}/api/maquinaria/{maquinaria_id}/imagen-placa-ce",
             headers=headers_file_upload
