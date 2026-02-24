@@ -1322,12 +1322,205 @@ async def generate_evaluacion_pdf(
             </div>
         </div>
             """
+        
+        # ====================================================================
+        # PÁGINA DE FICHA DEL APLICADOR
+        # ====================================================================
+        aplicador = tratamiento.get("aplicador_completo")
+        page_num_aplicador = 1 + len(visitas) + (idx * 3) - 1
+        
+        html_content += f"""
+        <div class="page-break"></div>
+        <div class="header">
+            <h1>FRUVECO</h1>
+            <h2>FICHA DEL TÉCNICO APLICADOR</h2>
+            <h3>Tratamiento {idx} | Página {page_num_aplicador} de {total_pages}</h3>
+        </div>
+        
+        <div class="aplicador-header">
+            <h3>TÉCNICO APLICADOR - TRATAMIENTO #{idx}</h3>
+        </div>
+        """
+        
+        if aplicador:
+            nombre_completo = f"{aplicador.get('nombre', '')} {aplicador.get('apellidos', '')}"
+            img_certificado = aplicador.get('imagen_certificado_url', '')
+            
+            html_content += f"""
+        <div class="ficha-datos">
+            <div class="ficha-titulo ficha-titulo-aplicador">DATOS DEL TÉCNICO APLICADOR</div>
+            <div class="datos-grid-2">
+                <div class="dato-item">
+                    <div class="dato-label">Nombre Completo</div>
+                    <div class="dato-value" style="font-size: 14pt; font-weight: bold;">{nombre_completo}</div>
+                </div>
+                <div class="dato-item">
+                    <div class="dato-label">DNI/NIF</div>
+                    <div class="dato-value">{aplicador.get('dni', '—')}</div>
+                </div>
+                <div class="dato-item">
+                    <div class="dato-label">Nivel de Capacitación</div>
+                    <div class="dato-value" style="font-weight: bold; color: #7b2cbf;">{aplicador.get('nivel_capacitacion', '—')}</div>
+                </div>
+                <div class="dato-item">
+                    <div class="dato-label">Número de Carnet</div>
+                    <div class="dato-value">{aplicador.get('num_carnet', '—')}</div>
+                </div>
+                <div class="dato-item">
+                    <div class="dato-label">Fecha de Certificación</div>
+                    <div class="dato-value">{format_fecha(aplicador.get('fecha_certificacion'))}</div>
+                </div>
+                <div class="dato-item">
+                    <div class="dato-label">Fecha de Validez</div>
+                    <div class="dato-value">{format_fecha(aplicador.get('fecha_validez'))}</div>
+                </div>
+                <div class="dato-item">
+                    <div class="dato-label">Estado</div>
+                    <div class="dato-value">{'Activo' if aplicador.get('activo') else 'Inactivo'}</div>
+                </div>
+                <div class="dato-item">
+                    <div class="dato-label">Observaciones</div>
+                    <div class="dato-value">{aplicador.get('observaciones', '—') or '—'}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title section-title-purple">CERTIFICADO DE CAPACITACIÓN</div>
+            <div class="section-content" style="text-align: center;">
+            """
+            
+            if img_certificado:
+                html_content += f"""
+                <img src="{img_certificado}" class="certificate-image" alt="Certificado de {nombre_completo}" />
+                <p style="font-size: 9pt; color: #666; margin-top: 10px;">Imagen del certificado de capacitación</p>
+                """
+            else:
+                html_content += """
+                <div class="no-image-box">
+                    <p>No hay imagen del certificado disponible</p>
+                </div>
+                """
+            
+            html_content += """
+            </div>
+        </div>
+            """
+        else:
+            html_content += """
+        <div class="ficha-datos">
+            <div class="no-image-box">
+                <p style="font-size: 12pt;">No hay información del aplicador asociado a este tratamiento</p>
+                <p style="font-size: 10pt; margin-top: 10px;">Asigne un técnico aplicador al tratamiento para ver sus datos</p>
+            </div>
+        </div>
+            """
+        
+        # ====================================================================
+        # PÁGINA DE FICHA DE LA MÁQUINA
+        # ====================================================================
+        maquina = tratamiento.get("maquina_completa")
+        page_num_maquina = 1 + len(visitas) + (idx * 3)
+        
+        html_content += f"""
+        <div class="page-break"></div>
+        <div class="header">
+            <h1>FRUVECO</h1>
+            <h2>FICHA DE MAQUINARIA</h2>
+            <h3>Tratamiento {idx} | Página {page_num_maquina} de {total_pages}</h3>
+        </div>
+        
+        <div class="maquina-header">
+            <h3>MAQUINARIA UTILIZADA - TRATAMIENTO #{idx}</h3>
+        </div>
+        """
+        
+        if maquina:
+            img_placa_ce = maquina.get('imagen_placa_ce_url', '')
+            
+            html_content += f"""
+        <div class="ficha-datos">
+            <div class="ficha-titulo ficha-titulo-maquina">DATOS DE LA MAQUINARIA</div>
+            <div class="datos-grid-2">
+                <div class="dato-item">
+                    <div class="dato-label">Nombre</div>
+                    <div class="dato-value" style="font-size: 14pt; font-weight: bold;">{maquina.get('nombre', '—')}</div>
+                </div>
+                <div class="dato-item">
+                    <div class="dato-label">Tipo</div>
+                    <div class="dato-value" style="font-weight: bold; color: #495057;">{maquina.get('tipo', '—')}</div>
+                </div>
+                <div class="dato-item">
+                    <div class="dato-label">Marca</div>
+                    <div class="dato-value">{maquina.get('marca', '—') or '—'}</div>
+                </div>
+                <div class="dato-item">
+                    <div class="dato-label">Modelo</div>
+                    <div class="dato-value">{maquina.get('modelo', '—') or '—'}</div>
+                </div>
+                <div class="dato-item">
+                    <div class="dato-label">Matrícula</div>
+                    <div class="dato-value">{maquina.get('matricula', '—') or '—'}</div>
+                </div>
+                <div class="dato-item">
+                    <div class="dato-label">Número de Serie</div>
+                    <div class="dato-value">{maquina.get('num_serie', '—') or '—'}</div>
+                </div>
+                <div class="dato-item">
+                    <div class="dato-label">Año de Fabricación</div>
+                    <div class="dato-value">{maquina.get('año_fabricacion', '—') or '—'}</div>
+                </div>
+                <div class="dato-item">
+                    <div class="dato-label">Capacidad</div>
+                    <div class="dato-value">{maquina.get('capacidad', '—') or '—'}</div>
+                </div>
+                <div class="dato-item">
+                    <div class="dato-label">Estado</div>
+                    <div class="dato-value">{maquina.get('estado', '—')}</div>
+                </div>
+                <div class="dato-item">
+                    <div class="dato-label">Observaciones</div>
+                    <div class="dato-value">{maquina.get('observaciones', '—') or '—'}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title section-title-gray">PLACA CE (MARCADO CE)</div>
+            <div class="section-content" style="text-align: center;">
+            """
+            
+            if img_placa_ce:
+                html_content += f"""
+                <img src="{img_placa_ce}" class="placa-ce-image" alt="Placa CE de {maquina.get('nombre', 'Máquina')}" />
+                <p style="font-size: 9pt; color: #666; margin-top: 10px;">Imagen de la placa CE de conformidad europea</p>
+                """
+            else:
+                html_content += """
+                <div class="no-image-box">
+                    <p>No hay imagen de la placa CE disponible</p>
+                </div>
+                """
+            
+            html_content += """
+            </div>
+        </div>
+            """
+        else:
+            html_content += """
+        <div class="ficha-datos">
+            <div class="no-image-box">
+                <p style="font-size: 12pt;">No hay información de maquinaria asociada a este tratamiento</p>
+                <p style="font-size: 10pt; margin-top: 10px;">Asigne una máquina al tratamiento para ver sus datos</p>
+            </div>
+        </div>
+            """
     
     # ========================================================================
     # PÁGINAS DE IRRIGACIONES - Una página por cada irrigación
     # ========================================================================
     for idx, irrigacion in enumerate(irrigaciones, 1):
-        page_num = 1 + len(visitas) + len(tratamientos) + idx
+        page_num = 1 + len(visitas) + (len(tratamientos) * 3) + idx
         html_content += f"""
         <div class="page-break"></div>
         <div class="header">
