@@ -381,7 +381,7 @@ const Albaranes = () => {
     const usarOtroProveedor = albaran.proveedor && albaran.proveedor !== proveedorContrato;
     
     setFormData({
-      tipo: albaran.tipo || 'Entrada',
+      tipo: albaran.tipo || 'Albarán de compra',
       fecha: albaran.fecha || '',
       contrato_id: albaran.contrato_id || '',
       proveedor_contrato: proveedorContrato,
