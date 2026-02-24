@@ -135,7 +135,7 @@ const Fitosanitarios = () => {
   };
 
   const handleSeedData = async () => {
-    if (!window.confirm('¿Cargar productos fitosanitarios desde la base de datos oficial? Esto solo funciona si no hay productos cargados.')) {
+    if (!window.confirm(t('phytosanitary.confirmLoadData'))) {
       return;
     }
 
@@ -161,7 +161,7 @@ const Fitosanitarios = () => {
       }, 5000);
     } catch (error) {
       console.error('Error seeding data:', error);
-      setError('Error al cargar los datos iniciales');
+      setError(t('phytosanitary.errorLoadingData'));
     }
   };
 
