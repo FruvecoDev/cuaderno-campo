@@ -186,6 +186,37 @@ async def update_user(user_id: str, user_update: dict, current_user: dict = Depe
     return {"success": True, "user": user_response}
 
 
+@router.put("/users/{user_id}/password")
+async def change_user_password(
+    user_id: str, 
+    password_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Change user password (Admin only)"""
+    if current_user.get("role") != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    if not ObjectId.is_valid(user_id):
+        raise HTTPException(status_code=400, detail="Invalid user ID")
+    
+    new_password = password_data.get("new_password")
+    if not new_password or len(new_password) < 6:
+        raise HTTPException(status_code=400, detail="La contraseña debe tener al menos 6 caracteres")
+    
+    # Hash the new password
+    hashed_password = get_password_hash(new_password)
+    
+    result = await users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"hashed_password": hashed_password, "updated_at": datetime.now()}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"success": True, "message": "Contraseña actualizada correctamente"}
+
+
 @router.get("/menu-items")
 async def get_menu_items(current_user: dict = Depends(get_current_user)):
     """Get all available menu items for permission configuration"""
