@@ -227,6 +227,19 @@ const TecnicosAplicadores = () => {
       observaciones: tecnico.observaciones || ''
     });
     setEditingId(tecnico._id);
+    // Si tiene certificado, mostrar preview
+    if (tecnico.imagen_certificado_url) {
+      let url = tecnico.imagen_certificado_url;
+      if (url.startsWith('/api/uploads/')) {
+        url = `${BACKEND_URL}${url}`;
+      } else if (url.startsWith('/app/uploads/')) {
+        url = `${BACKEND_URL}/api/uploads${url.replace('/app/uploads', '')}`;
+      }
+      setFilePreview(url);
+    } else {
+      setFilePreview(null);
+    }
+    setSelectedFile(null);
     setShowForm(true);
   };
 
