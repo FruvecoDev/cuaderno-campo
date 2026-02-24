@@ -444,29 +444,29 @@ const Dashboard = () => {
         </div>
         
         <div className="stat-card">
-          <div className="stat-label">Producción Total</div>
+          <div className="stat-label">{t('dashboard.stats.totalProduction')}</div>
           <div className="stat-value">{(kpis.produccion.total_kg / 1000).toFixed(1)}</div>
-          <div className="text-sm text-muted">toneladas</div>
+          <div className="text-sm text-muted">{t('dashboard.stats.tons')}</div>
         </div>
         
         <div className="stat-card">
-          <div className="stat-label">Ingresos</div>
+          <div className="stat-label">{t('dashboard.stats.income')}</div>
           <div className="stat-value">€{kpis.produccion.total_ingresos.toLocaleString()}</div>
-          <div className="text-sm text-muted">total facturado</div>
+          <div className="text-sm text-muted">{t('dashboard.stats.totalBilled')}</div>
         </div>
         
         <div className="stat-card">
-          <div className="stat-label">Costes</div>
+          <div className="stat-label">{t('dashboard.stats.costs')}</div>
           <div className="stat-value">€{kpis.costes.total.toLocaleString()}</div>
-          <div className="text-sm text-muted">gastos totales</div>
+          <div className="text-sm text-muted">{t('dashboard.stats.totalExpenses')}</div>
         </div>
         
         <div className="stat-card">
-          <div className="stat-label">Margen Bruto</div>
+          <div className="stat-label">{t('dashboard.stats.grossMargin')}</div>
           <div className="stat-value">€{kpis.rentabilidad.margen_bruto.toLocaleString()}</div>
           <div className="stat-change positive">
             <TrendingUp size={14} style={{ display: 'inline' }} />
-            {((kpis.rentabilidad.margen_bruto / kpis.produccion.total_ingresos) * 100).toFixed(1)}% margen
+            {((kpis.rentabilidad.margen_bruto / kpis.produccion.total_ingresos) * 100).toFixed(1)}% {t('dashboard.stats.margin')}
           </div>
         </div>
       </div>
