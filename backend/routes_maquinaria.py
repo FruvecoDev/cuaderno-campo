@@ -140,7 +140,7 @@ async def upload_imagen_placa_ce(
     if file.content_type not in allowed_types:
         raise HTTPException(
             status_code=400, 
-            detail=f"Tipo de archivo no permitido. Permitidos: JPEG, PNG, WEBP"
+            detail="Tipo de archivo no permitido. Permitidos: JPEG, PNG, WEBP"
         )
     
     # Validar tamaño (max 10MB)
