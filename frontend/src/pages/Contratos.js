@@ -13,6 +13,7 @@ const Contratos = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState(null);
+  const [generatingCuaderno, setGeneratingCuaderno] = useState(null);
   const { token } = useAuth();
   const { canCreate, canEdit, canDelete, canExport } = usePermissions();
   const { handlePermissionError } = usePermissionError();
