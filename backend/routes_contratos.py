@@ -19,6 +19,7 @@ router = APIRouter(prefix="/api", tags=["contratos"])
 
 # Collections for lookups
 proveedores_collection = db['proveedores']
+clientes_collection = db['clientes']
 cultivos_collection = db['cultivos']
 
 
@@ -32,12 +33,20 @@ async def create_contrato(
     last_contrato = await contratos_collection.find_one(sort=[("numero", -1)])
     next_numero = (last_contrato.get("numero", 0) if last_contrato else 0) + 1
     
-    # Lookup proveedor name
+    # Lookup proveedor name (para contratos de Compra)
     proveedor_name = contrato.proveedor or ""
     if contrato.proveedor_id:
         prov = await proveedores_collection.find_one({"_id": ObjectId(contrato.proveedor_id)})
         if prov:
             proveedor_name = prov.get("nombre", "")
+    
+    # Lookup cliente name (para contratos de Venta)
+    cliente_name = ""
+    cliente_id_str = getattr(contrato, 'cliente_id', None) or ""
+    if cliente_id_str:
+        cli = await clientes_collection.find_one({"_id": ObjectId(cliente_id_str)})
+        if cli:
+            cliente_name = cli.get("nombre", "")
     
     # Lookup cultivo name
     cultivo_name = contrato.cultivo or ""
@@ -53,6 +62,8 @@ async def create_contrato(
         "año": datetime.now().year,
         "numero": next_numero,
         "proveedor": proveedor_name,
+        "cliente": cliente_name,
+        "cliente_id": cliente_id_str,
         "cultivo": cultivo_name,
         "cultivo_id": cultivo_id_str,
         "created_at": datetime.now(),
