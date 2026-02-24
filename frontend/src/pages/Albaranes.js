@@ -130,9 +130,14 @@ const Albaranes = () => {
       const response = await fetch(`${BACKEND_URL}/api/clientes/activos`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const data = await response.json();
-      if (response.ok) {
-        setClientes(data.clientes || []);
+      const text = await response.text();
+      try {
+        const data = JSON.parse(text);
+        if (response.ok) {
+          setClientes(data.clientes || []);
+        }
+      } catch (e) {
+        console.error('Error parsing clientes JSON:', e, 'Response:', text);
       }
     } catch (error) {
       console.error('Error fetching clientes:', error);
