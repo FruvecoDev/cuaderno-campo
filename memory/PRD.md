@@ -600,3 +600,30 @@ Módulos actualizados para seguir patrón consistente:
   - UI dinámica que cambia según el tipo de contrato
   - Sección visual destacada con fondo gris
 - **Estado**: ✅ COMPLETADO Y TESTEADO
+
+## Módulo Clientes y Lógica Proveedor/Cliente (24/02/2026) - COMPLETADO
+- **Nuevo módulo Clientes**: `/app/frontend/src/pages/Clientes.js`, `/app/backend/routes_clientes.py`
+- **Campos de Cliente** (según imagen de referencia):
+  - Identificación: Código (auto-generado), Nombre, Razón Social, NIF, Denominación, 2º Código, Tipo
+  - Dirección: Dirección, País, Código Postal, Población, Provincia, Coordenadas GPS
+  - Contacto: Teléfono/s, Móvil, FAX, Contacto, Email, Web
+  - Datos Adicionales: SII Tipo ID País, Clave Identificación, Consultor, Idioma, Nombre Verifactu, Protegido, Activo
+- **Contratos actualizados**:
+  - Contrato de **Compra** → muestra selector de **Proveedor**
+  - Contrato de **Venta** → muestra selector de **Cliente**
+  - Tabla de contratos muestra "Prov:" o "Cliente:" según el tipo
+- **Albaranes actualizados**:
+  - Al seleccionar contrato de Venta, el formulario muestra "Cliente del Albarán"
+  - Al seleccionar contrato de Compra, el formulario muestra "Proveedor del Albarán"
+  - Tipo de albarán se ajusta automáticamente según tipo de contrato
+- **API Endpoints**:
+  - `GET /api/clientes` - Listar con filtros (search, activo, tipo, provincia)
+  - `GET /api/clientes/activos` - Para selectores
+  - `GET /api/clientes/tipos` - Lista de tipos
+  - `POST /api/clientes` - Crear (código auto-generado)
+  - `PUT /api/clientes/{id}` - Actualizar
+  - `POST /api/clientes/{id}/foto` - Subir foto
+  - `PATCH /api/clientes/{id}/toggle-activo` - Activar/desactivar
+  - `DELETE /api/clientes/{id}` - Eliminar (verifica contratos asociados)
+- **Navegación**: Catálogos > Clientes
+- **Estado**: ✅ COMPLETADO Y TESTEADO
