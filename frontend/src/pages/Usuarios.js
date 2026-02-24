@@ -68,7 +68,7 @@ const Usuarios = () => {
       }
     } catch (error) {
       console.error('Error creating user:', error);
-      alert('Error al crear usuario');
+      alert(t('messages.errorSaving'));
     }
   };
 
@@ -125,8 +125,8 @@ const Usuarios = () => {
     return (
       <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
         <Shield size={48} style={{ margin: '0 auto 1rem', color: 'hsl(var(--muted-foreground))' }} />
-        <h2 style={{ marginBottom: '0.5rem' }}>Acceso Restringido</h2>
-        <p className="text-muted">Solo los administradores pueden gestionar usuarios.</p>
+        <h2 style={{ marginBottom: '0.5rem' }}>{t('users.restrictedAccess')}</h2>
+        <p className="text-muted">{t('users.adminOnly')}</p>
       </div>
     );
   }
@@ -135,8 +135,8 @@ const Usuarios = () => {
     <div data-testid="usuarios-page">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>Gestión de Usuarios</h1>
-          <p className="text-muted">Administra usuarios y sus permisos</p>
+          <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>{t('users.title')}</h1>
+          <p className="text-muted">{t('users.subtitle')}</p>
         </div>
         <button
           className="btn btn-primary"
@@ -144,17 +144,17 @@ const Usuarios = () => {
           data-testid="btn-nuevo-usuario"
         >
           <Plus size={18} />
-          Nuevo Usuario
+          {t('users.newUser')}
         </button>
       </div>
 
       {showForm && (
         <div className="card mb-6">
-          <h2 className="card-title">Crear Nuevo Usuario</h2>
+          <h2 className="card-title">{t('users.createUser')}</h2>
           <form onSubmit={handleSubmit}>
             <div className="grid-2">
               <div className="form-group">
-                <label className="form-label">Nombre Completo *</label>
+                <label className="form-label">{t('users.fullName')} *</label>
                 <input
                   type="text"
                   className="form-input"
@@ -164,7 +164,7 @@ const Usuarios = () => {
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Email *</label>
+                <label className="form-label">{t('auth.email')} *</label>
                 <input
                   type="email"
                   className="form-input"
@@ -177,7 +177,7 @@ const Usuarios = () => {
             
             <div className="grid-2">
               <div className="form-group">
-                <label className="form-label">Contraseña *</label>
+                <label className="form-label">{t('auth.password')} *</label>
                 <input
                   type="password"
                   className="form-input"
@@ -188,7 +188,7 @@ const Usuarios = () => {
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Rol *</label>
+                <label className="form-label">{t('users.role')} *</label>
                 <select
                   className="form-select"
                   value={formData.role}
@@ -204,9 +204,9 @@ const Usuarios = () => {
             </div>
 
             <div className="flex gap-2">
-              <button type="submit" className="btn btn-primary">Crear Usuario</button>
+              <button type="submit" className="btn btn-primary">{t('users.createUser')}</button>
               <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>
-                Cancelar
+                {t('common.cancel')}
               </button>
             </div>
           </form>
@@ -214,22 +214,22 @@ const Usuarios = () => {
       )}
 
       <div className="card">
-        <h2 className="card-title">Usuarios del Sistema</h2>
+        <h2 className="card-title">{t('users.systemUsers')}</h2>
         {loading ? (
-          <p>Cargando usuarios...</p>
+          <p>{t('common.loading')}</p>
         ) : users.length === 0 ? (
-          <p className="text-muted">No hay usuarios registrados</p>
+          <p className="text-muted">{t('users.noUsers')}</p>
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table>
               <thead>
                 <tr>
-                  <th>Usuario</th>
-                  <th>Email</th>
-                  <th>Rol</th>
-                  <th>Estado</th>
-                  <th>Fecha Creación</th>
-                  <th>Acciones</th>
+                  <th>{t('users.userName')}</th>
+                  <th>{t('auth.email')}</th>
+                  <th>{t('users.role')}</th>
+                  <th>{t('common.status')}</th>
+                  <th>{t('users.createdAt')}</th>
+                  <th>{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -261,11 +261,11 @@ const Usuarios = () => {
                     </td>
                     <td>
                       <span className={`badge ${user.is_active ? 'badge-success' : 'badge-error'}`}>
-                        {user.is_active ? 'Activo' : 'Inactivo'}
+                        {user.is_active ? t('common.active') : t('common.inactive')}
                       </span>
                     </td>
                     <td>
-                      {new Date(user.created_at).toLocaleDateString('es-ES')}
+                      {new Date(user.created_at).toLocaleDateString()}
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -274,21 +274,21 @@ const Usuarios = () => {
                             <button
                               className="btn btn-sm btn-secondary"
                               onClick={() => setEditingUser(editingUser === user._id ? null : user._id)}
-                              title="Editar rol"
+                              title={t('users.editRole')}
                             >
                               <Edit2 size={14} />
                             </button>
                             <button
                               className={`btn btn-sm ${user.is_active ? 'btn-error' : 'btn-success'}`}
                               onClick={() => handleToggleActive(user._id, user.is_active)}
-                              title={user.is_active ? 'Desactivar' : 'Activar'}
+                              title={user.is_active ? t('users.deactivate') : t('users.activate')}
                             >
                               {user.is_active ? <UserX size={14} /> : <UserCheck size={14} />}
                             </button>
                           </>
                         )}
                         {user._id === currentUser._id && (
-                          <span className="text-muted text-sm">(Tú)</span>
+                          <span className="text-muted text-sm">({t('users.you')})</span>
                         )}
                       </div>
                     </td>
@@ -301,7 +301,7 @@ const Usuarios = () => {
       </div>
 
       <div className="card" style={{ marginTop: '1.5rem' }}>
-        <h3 className="card-title">Descripción de Roles</h3>
+        <h3 className="card-title">{t('users.roleDescriptions')}</h3>
         <div className="grid-2" style={{ gap: '1rem' }}>
           {ROLES.map(role => (
             <div key={role.value} style={{ padding: '1rem', background: 'hsl(var(--muted))', borderRadius: '0.5rem' }}>
