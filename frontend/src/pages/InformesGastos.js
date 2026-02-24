@@ -268,7 +268,10 @@ const InformesGastos = () => {
     }));
   };
   
-  const hasActiveFilters = filters.fecha_desde || filters.fecha_hasta || filters.campana;
+  const hasActiveFiltersCount = [
+    filters.fecha_desde, filters.fecha_hasta, filters.campana,
+    filters.contrato_id, filters.cultivo, filters.proveedor, filters.parcela_codigo
+  ].filter(Boolean).length;
 
   const toggleSection = (section) => {
     setExpandedSection(expandedSection === section ? null : section);
