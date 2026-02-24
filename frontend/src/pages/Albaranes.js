@@ -41,10 +41,14 @@ const Albaranes = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState(null);
-  const { token } = useAuth();
+  const { token, canDoOperacion } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   const { t } = useTranslation();
+  
+  // Permisos de operación
+  const puedeCompra = canDoOperacion('compra');
+  const puedeVenta = canDoOperacion('venta');
   
   // Contrato seleccionado y datos heredados
   const [selectedContrato, setSelectedContrato] = useState(null);
