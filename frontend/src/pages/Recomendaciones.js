@@ -363,10 +363,14 @@ const Recomendaciones = () => {
       const response = await fetch(`${API_URL}/api/plantillas-recomendaciones`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      if (!response.ok) {
+        throw new Error('Error fetching plantillas');
+      }
       const data = await response.json();
       setPlantillas(data.plantillas || []);
     } catch (err) {
       console.error('Error fetching plantillas:', err);
+      setPlantillas([]);
     }
   };
   
