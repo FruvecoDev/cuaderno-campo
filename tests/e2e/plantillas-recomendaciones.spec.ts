@@ -82,33 +82,36 @@ test.describe('Plantillas - CRUD Operations', () => {
     
     await page.getByTestId('btn-nueva-plantilla').click();
     
-    // Fill form
-    await page.locator('input[placeholder*="nombre"], input').first().fill(plantillaName);
+    // Wait for form to appear
+    await expect(page.locator('label').filter({ hasText: /Nombre de la Plantilla/i })).toBeVisible();
+    
+    // Fill nombre field - find input near the label
+    const nombreInput = page.locator('input').first();
+    await nombreInput.fill(plantillaName);
     
     // Select tipo (form should have tipo select)
     const tipoSelect = page.locator('select').filter({ has: page.locator('option:has-text("Tratamiento Fitosanitario")') }).first();
     await tipoSelect.selectOption('Fertilización');
     
     // Fill dosis
-    const dosisInput = page.locator('input[placeholder*="0.00"], input[type="number"]').first();
+    const dosisInput = page.locator('input[type="number"]').first();
     await dosisInput.fill('5.0');
     
     // Submit
-    const saveBtn = page.locator('button').filter({ hasText: /Guardar|Crear/i }).first();
+    const saveBtn = page.locator('button').filter({ hasText: /Crear Plantilla/i }).first();
     await saveBtn.click();
     
     // Should show success message
     await expect(page.locator('text=Plantilla creada')).toBeVisible({ timeout: 5000 });
     
     // Plantilla should appear in list
-    await expect(page.locator(`text=${plantillaName}`).first()).toBeVisible();
+    await expect(page.locator(`text=${plantillaName}`).first()).toBeVisible({ timeout: 5000 });
     
-    // Cleanup: delete the created plantilla
-    const deleteBtn = page.locator('table tbody tr').filter({ hasText: plantillaName }).locator('button').last();
+    // Cleanup: delete the created plantilla - need to confirm in dialog
+    page.on('dialog', async dialog => await dialog.accept());
+    const plantillaRow = page.locator('table tbody tr').filter({ hasText: plantillaName }).first();
+    const deleteBtn = plantillaRow.locator('button').last();
     await deleteBtn.click();
-    await page.waitForTimeout(500);
-    // Confirm deletion if dialog appears
-    page.on('dialog', dialog => dialog.accept());
   });
 
   test('should toggle plantilla active status', async ({ page }) => {
