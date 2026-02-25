@@ -90,6 +90,7 @@ app.include_router(agentes_router)
 app.include_router(clientes_router)
 app.include_router(comisiones_router)
 app.include_router(config_router)
+app.include_router(recomendaciones_router)
 
 # Mount static files for uploaded images
 uploads_dir = "/app/uploads"
