@@ -30,6 +30,7 @@ import TecnicosAplicadores from './pages/TecnicosAplicadores';
 import ArticulosExplotacion from './pages/ArticulosExplotacion';
 import Agentes from './pages/Agentes';
 import Clientes from './pages/Clientes';
+import LiquidacionComisiones from './pages/LiquidacionComisiones';
 
 function App() {
   return (
