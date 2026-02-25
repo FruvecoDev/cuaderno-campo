@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Settings, Upload, Trash2, Image, Check, AlertCircle, RefreshCw, Palette, RotateCcw } from 'lucide-react';
+import { Settings, Upload, Trash2, Image, Check, AlertCircle, RefreshCw, Palette, RotateCcw, Clock, Bell, Mail, Play } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
