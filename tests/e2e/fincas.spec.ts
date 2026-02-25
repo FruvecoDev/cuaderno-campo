@@ -629,7 +629,7 @@ test.describe('Fincas Module - Polygon Drawing Feature', () => {
     await expect(page.getByTestId('btn-dibujar-parcela')).toContainText(/dibujar parcela/i);
     
     // Verify help text mentions drawing
-    await expect(page.locator('text=Dibujar Parcela')).toBeVisible();
+    await expect(page.locator('text=marcar manualmente los límites')).toBeVisible();
   });
 
   test('should open drawing map when clicking "Dibujar Parcela"', async ({ page }) => {
