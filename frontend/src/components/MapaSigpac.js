@@ -122,7 +122,10 @@ const MapaSigpac = ({
   onToggleExpand,
   enableDrawing = false,
   onGeometryChange,
-  initialDrawnCoords
+  initialDrawnCoords,
+  parcela, // New prop to display parcela geometry
+  height = null, // Custom height
+  showControls = false // Show/hide controls
 }) => {
   const [polygonCoords, setPolygonCoords] = useState(null);
   const [drawnPolygons, setDrawnPolygons] = useState([]);
@@ -131,7 +134,33 @@ const MapaSigpac = ({
   const [baseLayer, setBaseLayer] = useState('satellite');
   const [isDrawingMode, setIsDrawingMode] = useState(false);
   const [calculatedArea, setCalculatedArea] = useState(0);
+  const [localExpanded, setLocalExpanded] = useState(false);
   const featureGroupRef = useRef(null);
+  
+  // Handle parcela geometry
+  useEffect(() => {
+    if (parcela) {
+      // Check if parcela has recintos with geometry
+      if (parcela.recintos && parcela.recintos.length > 0) {
+        const recintosWithGeom = parcela.recintos.filter(r => r.geometria && r.geometria.length > 0);
+        if (recintosWithGeom.length > 0) {
+          // Get first recinto geometry
+          const firstGeom = recintosWithGeom[0].geometria;
+          // Convert to Leaflet format [lat, lng]
+          const coords = firstGeom.map(p => [p.lat, p.lng]);
+          setPolygonCoords(coords);
+          const center = calculateCentroid(coords);
+          if (center) {
+            setMapCenter(center);
+            setMapZoom(17);
+          }
+          return;
+        }
+      }
+      // Fallback: use default center for Spain
+      setPolygonCoords(null);
+    }
+  }, [parcela]);
   
   useEffect(() => {
     if (wkt) {
