@@ -569,6 +569,14 @@ const Parcelas = () => {
         <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>Parcelas</h1>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button 
+            className={`btn ${showGeneralMap ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setShowGeneralMap(!showGeneralMap)}
+            title="Ver mapa general de parcelas"
+            data-testid="btn-general-map"
+          >
+            <Eye size={18} /> {showGeneralMap ? 'Ocultar Mapa' : 'Ver Mapa'}
+          </button>
+          <button 
             className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setShowFieldsConfig(!showFieldsConfig)}
             title="Configurar campos visibles"
@@ -581,6 +589,34 @@ const Parcelas = () => {
           </button>
         </div>
       </div>
+      
+      {/* Mapa general de todas las parcelas */}
+      {showGeneralMap && (
+        <div className="card mb-6">
+          <h3 style={{ fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <MapIcon size={18} /> Mapa General de Parcelas
+          </h3>
+          <AdvancedParcelMap
+            parcelas={filteredParcelas}
+            showAllParcelas={true}
+            height="500px"
+            onParcelaSelect={(parcela) => {
+              // Scroll to the parcela in the table or open edit
+              const row = document.querySelector(`[data-parcela-id="${parcela._id}"]`);
+              if (row) {
+                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                row.style.backgroundColor = 'hsl(var(--primary) / 0.1)';
+                setTimeout(() => {
+                  row.style.backgroundColor = '';
+                }, 2000);
+              }
+            }}
+          />
+          <p style={{ marginTop: '0.75rem', fontSize: '0.8125rem', color: 'hsl(var(--muted-foreground))' }}>
+            Haz clic en una parcela del mapa para localizarla en la tabla. Colores según cultivo.
+          </p>
+        </div>
+      )}
       
       {/* Panel de configuración de campos */}
       {showFieldsConfig && (
