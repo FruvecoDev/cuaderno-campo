@@ -538,6 +538,98 @@ const Recomendaciones = () => {
     }));
   };
   
+  // Add current form as a pending recommendation
+  const handleAddToPending = () => {
+    if (!formData.parcela_id) {
+      setError('Debe seleccionar una parcela');
+      return;
+    }
+    if (!formData.producto_id && formData.tipo === 'Tratamiento Fitosanitario') {
+      setError('Debe seleccionar un producto');
+      return;
+    }
+    
+    const newRec = {
+      ...formData,
+      id: Date.now(), // Temporary ID
+      parcela_codigo: selectedParcela?.codigo_plantacion || '',
+      cantidad_total_producto: resultados.cantidadProducto,
+      volumen_total_agua: resultados.volumenTotalAgua,
+      tiene_alertas: Object.keys(alerts).length > 0,
+      alertas_bloqueantes: hasBlockingAlerts
+    };
+    
+    setRecomendacionesPendientes(prev => [...prev, newRec]);
+    
+    // Reset only product-specific fields, keep parcela/contrato
+    setFormData(prev => ({
+      ...prev,
+      tipo: 'Tratamiento Fitosanitario',
+      subtipo: '',
+      producto_id: '',
+      producto_nombre: '',
+      dosis: '',
+      fecha_programada: '',
+      prioridad: 'Media',
+      observaciones: '',
+      motivo: ''
+    }));
+    
+    setSuccess('Recomendación añadida a la lista');
+    setTimeout(() => setSuccess(null), 2000);
+  };
+  
+  // Remove from pending list
+  const handleRemoveFromPending = (id) => {
+    setRecomendacionesPendientes(prev => prev.filter(r => r.id !== id));
+  };
+  
+  // Save all pending recommendations
+  const handleSaveAllPending = async () => {
+    if (recomendacionesPendientes.length === 0) {
+      setError('No hay recomendaciones pendientes para guardar');
+      return;
+    }
+    
+    setError(null);
+    let savedCount = 0;
+    let errors = [];
+    
+    for (const rec of recomendacionesPendientes) {
+      try {
+        const response = await fetch(`${API_URL}/api/recomendaciones`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(rec)
+        });
+        
+        if (response.ok) {
+          savedCount++;
+        } else {
+          const data = await response.json();
+          errors.push(`${rec.producto_nombre}: ${data.detail}`);
+        }
+      } catch (err) {
+        errors.push(`${rec.producto_nombre}: ${err.message}`);
+      }
+    }
+    
+    if (savedCount > 0) {
+      setSuccess(`${savedCount} recomendación(es) guardada(s) correctamente`);
+      setTimeout(() => setSuccess(null), 3000);
+      setRecomendacionesPendientes([]);
+      fetchRecomendaciones();
+      fetchStats();
+    }
+    
+    if (errors.length > 0) {
+      setError(`Errores: ${errors.join(', ')}`);
+    }
+  };
+  
   const canManage = user?.role && ['Admin', 'Manager', 'Technician'].includes(user.role);
   
   if (loading) {
