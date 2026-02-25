@@ -79,6 +79,8 @@ const Recomendaciones = () => {
   const [formData, setFormData] = useState({
     parcela_id: '',
     contrato_id: '',
+    cultivo: '',
+    variedad: '',
     campana: new Date().getFullYear().toString(),
     tipo: 'Tratamiento Fitosanitario',
     subtipo: '',
@@ -94,6 +96,17 @@ const Recomendaciones = () => {
     volumen_agua: 200,
     superficie_tratada: ''
   });
+  
+  // Get selected contrato info
+  const selectedContrato = useMemo(() => {
+    return contratos.find(c => c._id === formData.contrato_id);
+  }, [contratos, formData.contrato_id]);
+  
+  // Filter parcelas by selected contrato
+  const parcelasFiltradas = useMemo(() => {
+    if (!formData.contrato_id) return parcelas;
+    return parcelas.filter(p => p.contrato_id === formData.contrato_id);
+  }, [parcelas, formData.contrato_id]);
   
   // Alerts for calculadora
   const [alerts, setAlerts] = useState({});
