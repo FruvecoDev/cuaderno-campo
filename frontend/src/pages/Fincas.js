@@ -1120,6 +1120,18 @@ const Fincas = () => {
                   
                   {/* Acciones */}
                   <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    {/* Botón Ver Mapa */}
+                    {finca.sigpac && finca.sigpac.provincia && finca.sigpac.poligono && (
+                      <button
+                        className="btn btn-sm"
+                        style={{ backgroundColor: '#e8f5e9', color: '#2e7d32', padding: '6px 10px' }}
+                        onClick={() => verMapaFinca(finca)}
+                        title="Ver ubicación en mapa"
+                        data-testid={`btn-map-${finca._id}`}
+                      >
+                        <Map size={14} />
+                      </button>
+                    )}
                     <button
                       className="btn btn-sm"
                       style={{ backgroundColor: '#e3f2fd', color: '#1976d2', padding: '6px 10px' }}
