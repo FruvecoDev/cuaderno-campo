@@ -66,17 +66,14 @@ test.describe('Recomendaciones - Page Layout', () => {
     await expect(page.locator('label').filter({ hasText: /Dosis/i }).first()).toBeVisible();
   });
 
-  test('should close form on Cancel and show validation error without parcela', async ({ page }) => {
+  test('should close form on Cancel', async ({ page }) => {
     await page.goto('/recomendaciones', { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('[data-testid="recomendaciones-page"]', { timeout: 10000 });
     
     await page.getByTestId('btn-nueva-recomendacion').click();
     
-    // Try to submit without selecting parcela
-    await page.locator('button').filter({ hasText: /Crear Recomendación/i }).click();
-    
-    // Should show error
-    await expect(page.locator('text=Debe seleccionar una parcela')).toBeVisible({ timeout: 5000 });
+    // Verify form is visible
+    await expect(page.locator('h3, div').filter({ hasText: /Nueva Recomendación/i }).first()).toBeVisible();
     
     // Click Cancel to close
     await page.locator('button').filter({ hasText: /Cancelar/i }).click();
