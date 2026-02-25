@@ -1761,8 +1761,520 @@ const Recomendaciones = () => {
           </div>
         )}
       </div>
-    </div>
-  );
-};
-
-export default Recomendaciones;
+      )}
+      
+      {/* ====================== PLANTILLAS TAB ====================== */}
+      {activeTab === 'plantillas' && (
+        <>
+          {/* Plantilla Form */}
+          {showPlantillaForm && (
+            <div className="card mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 style={{ fontWeight: '600' }}>
+                  {editingPlantillaId ? 'Editar Plantilla' : 'Nueva Plantilla'}
+                </h3>
+                <button className="btn btn-sm btn-secondary" onClick={resetPlantillaForm}>
+                  <X size={16} />
+                </button>
+              </div>
+              
+              <form onSubmit={handlePlantillaSubmit}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <label className="form-label">Nombre de la Plantilla *</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={plantillaForm.nombre}
+                      onChange={(e) => setPlantillaForm(prev => ({ ...prev, nombre: e.target.value }))}
+                      placeholder="Ej: Control preventivo de hongos"
+                      required
+                    />
+                  </div>
+                  
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <label className="form-label">Descripción</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={plantillaForm.descripcion}
+                      onChange={(e) => setPlantillaForm(prev => ({ ...prev, descripcion: e.target.value }))}
+                      placeholder="Breve descripción del uso de esta plantilla"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="form-label">Tipo</label>
+                    <select
+                      className="form-select"
+                      value={plantillaForm.tipo}
+                      onChange={(e) => setPlantillaForm(prev => ({ ...prev, tipo: e.target.value }))}
+                    >
+                      {tipos.map(t => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {plantillaForm.tipo === 'Tratamiento Fitosanitario' && (
+                    <div>
+                      <label className="form-label">Subtipo</label>
+                      <select
+                        className="form-select"
+                        value={plantillaForm.subtipo}
+                        onChange={(e) => setPlantillaForm(prev => ({ ...prev, subtipo: e.target.value }))}
+                      >
+                        <option value="">Seleccionar subtipo</option>
+                        {subtipos.map(s => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  
+                  {(plantillaForm.tipo === 'Tratamiento Fitosanitario' || plantillaForm.tipo === 'Fertilización') && (
+                    <div>
+                      <label className="form-label">Producto</label>
+                      <select
+                        className="form-select"
+                        value={plantillaForm.producto_id}
+                        onChange={(e) => {
+                          const producto = fitosanitarios.find(p => p._id === e.target.value);
+                          setPlantillaForm(prev => ({
+                            ...prev,
+                            producto_id: e.target.value,
+                            producto_nombre: producto?.nombre_comercial || '',
+                            dosis: producto?.dosis_max || prev.dosis,
+                            unidad_dosis: producto?.unidad_dosis || prev.unidad_dosis
+                          }));
+                        }}
+                      >
+                        <option value="">Seleccionar producto (opcional)</option>
+                        {fitosanitarios.map(f => (
+                          <option key={f._id} value={f._id}>{f.nombre_comercial}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <div style={{ flex: 1 }}>
+                      <label className="form-label">Dosis</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        className="form-input"
+                        value={plantillaForm.dosis}
+                        onChange={(e) => setPlantillaForm(prev => ({ ...prev, dosis: e.target.value }))}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div style={{ width: '100px' }}>
+                      <label className="form-label">Unidad</label>
+                      <select
+                        className="form-select"
+                        value={plantillaForm.unidad_dosis}
+                        onChange={(e) => setPlantillaForm(prev => ({ ...prev, unidad_dosis: e.target.value }))}
+                      >
+                        <option value="L/ha">L/ha</option>
+                        <option value="Kg/ha">Kg/ha</option>
+                        <option value="g/ha">g/ha</option>
+                        <option value="ml/ha">ml/ha</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="form-label">Volumen Agua (L/ha)</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={plantillaForm.volumen_agua}
+                      onChange={(e) => setPlantillaForm(prev => ({ ...prev, volumen_agua: e.target.value }))}
+                      placeholder="200"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="form-label">Prioridad</label>
+                    <select
+                      className="form-select"
+                      value={plantillaForm.prioridad}
+                      onChange={(e) => setPlantillaForm(prev => ({ ...prev, prioridad: e.target.value }))}
+                    >
+                      <option value="Alta">Alta</option>
+                      <option value="Media">Media</option>
+                      <option value="Baja">Baja</option>
+                    </select>
+                  </div>
+                  
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <label className="form-label">Motivo / Justificación</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={plantillaForm.motivo}
+                      onChange={(e) => setPlantillaForm(prev => ({ ...prev, motivo: e.target.value }))}
+                      placeholder="Ej: Prevención de enfermedades fúngicas"
+                    />
+                  </div>
+                  
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <label className="form-label">Observaciones</label>
+                    <textarea
+                      className="form-textarea"
+                      value={plantillaForm.observaciones}
+                      onChange={(e) => setPlantillaForm(prev => ({ ...prev, observaciones: e.target.value }))}
+                      rows={2}
+                      placeholder="Notas adicionales para quien use esta plantilla..."
+                    />
+                  </div>
+                </div>
+                
+                <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                  <button type="button" className="btn btn-secondary" onClick={resetPlantillaForm}>
+                    Cancelar
+                  </button>
+                  <button type="submit" className="btn btn-primary">
+                    {editingPlantillaId ? 'Actualizar Plantilla' : 'Crear Plantilla'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+          
+          {/* Plantillas List */}
+          <div className="card">
+            <h3 style={{ fontWeight: '600', marginBottom: '1rem' }}>
+              Plantillas de Recomendaciones ({plantillas.length})
+            </h3>
+            
+            {plantillas.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '3rem', color: 'hsl(var(--muted-foreground))' }}>
+                <Layers size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
+                <p>No hay plantillas creadas</p>
+                <p className="text-sm" style={{ marginTop: '0.5rem' }}>
+                  {canManagePlantillas ? 'Cree plantillas para agilizar la creación de recomendaciones' : 'Contacte a un administrador para crear plantillas'}
+                </p>
+              </div>
+            ) : (
+              <div className="table-responsive">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Tipo</th>
+                      <th>Producto</th>
+                      <th>Dosis</th>
+                      <th>Prioridad</th>
+                      <th>Usos</th>
+                      <th>Estado</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {plantillas.map((plantilla) => {
+                      const prioridadStyle = PRIORIDAD_COLORS[plantilla.prioridad] || PRIORIDAD_COLORS['Media'];
+                      
+                      return (
+                        <tr key={plantilla._id} style={{ opacity: plantilla.activo ? 1 : 0.6 }}>
+                          <td>
+                            <div style={{ fontWeight: '500' }}>{plantilla.nombre}</div>
+                            {plantilla.descripcion && (
+                              <div className="text-sm text-muted">{plantilla.descripcion}</div>
+                            )}
+                          </td>
+                          <td>
+                            <div>{plantilla.tipo}</div>
+                            {plantilla.subtipo && <div className="text-sm text-muted">{plantilla.subtipo}</div>}
+                          </td>
+                          <td>{plantilla.producto_nombre || '-'}</td>
+                          <td>{plantilla.dosis ? `${plantilla.dosis} ${plantilla.unidad_dosis}` : '-'}</td>
+                          <td>
+                            <span style={{
+                              padding: '0.25rem 0.75rem',
+                              borderRadius: '9999px',
+                              fontSize: '0.75rem',
+                              fontWeight: '600',
+                              backgroundColor: prioridadStyle.bg,
+                              color: prioridadStyle.text
+                            }}>
+                              {plantilla.prioridad}
+                            </span>
+                          </td>
+                          <td>
+                            <span style={{ 
+                              padding: '0.25rem 0.5rem', 
+                              backgroundColor: 'hsl(var(--muted))', 
+                              borderRadius: '0.25rem',
+                              fontSize: '0.75rem'
+                            }}>
+                              {plantilla.usos_count || 0}
+                            </span>
+                          </td>
+                          <td>
+                            <button
+                              onClick={() => handleTogglePlantillaActivo(plantilla)}
+                              style={{ 
+                                background: 'none', 
+                                border: 'none', 
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                                color: plantilla.activo ? '#16a34a' : '#9ca3af'
+                              }}
+                              title={plantilla.activo ? 'Desactivar' : 'Activar'}
+                            >
+                              {plantilla.activo ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
+                              <span className="text-sm">{plantilla.activo ? 'Activa' : 'Inactiva'}</span>
+                            </button>
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', gap: '0.25rem' }}>
+                              {canManage && (
+                                <button
+                                  className="btn btn-sm"
+                                  style={{ backgroundColor: '#dcfce7', color: '#166534' }}
+                                  onClick={() => {
+                                    setSelectedPlantilla(plantilla);
+                                    setShowAplicacionMasiva(true);
+                                  }}
+                                  title="Aplicar a múltiples parcelas"
+                                >
+                                  <Zap size={14} />
+                                </button>
+                              )}
+                              {canManagePlantillas && (
+                                <>
+                                  <button
+                                    className="btn btn-sm btn-secondary"
+                                    onClick={() => handleEditPlantilla(plantilla)}
+                                    title="Editar"
+                                  >
+                                    <Edit2 size={14} />
+                                  </button>
+                                  <button
+                                    className="btn btn-sm"
+                                    style={{ backgroundColor: 'hsl(var(--destructive))', color: 'white' }}
+                                    onClick={() => handleDeletePlantilla(plantilla._id)}
+                                    title="Eliminar"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+      
+      {/* ====================== MODALS ====================== */}
+      
+      {/* Modal: Selector de Plantillas */}
+      {showPlantillaSelector && (
+        <div className="modal-overlay" onClick={() => setShowPlantillaSelector(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '600px' }}>
+            <div className="modal-header">
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Layers size={20} /> Seleccionar Plantilla
+              </h3>
+              <button className="btn btn-sm btn-secondary" onClick={() => setShowPlantillaSelector(false)}>
+                <X size={16} />
+              </button>
+            </div>
+            <div className="modal-body" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              {plantillas.filter(p => p.activo).length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '2rem', color: 'hsl(var(--muted-foreground))' }}>
+                  <p>No hay plantillas activas disponibles</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {plantillas.filter(p => p.activo).map(plantilla => (
+                    <div 
+                      key={plantilla._id}
+                      style={{
+                        padding: '1rem',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '0.5rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onClick={() => handleUsePlantilla(plantilla)}
+                      onMouseEnter={e => e.currentTarget.style.backgroundColor = 'hsl(var(--muted))'}
+                      onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <div style={{ fontWeight: '600' }}>{plantilla.nombre}</div>
+                          <div className="text-sm text-muted">{plantilla.tipo} {plantilla.subtipo ? `- ${plantilla.subtipo}` : ''}</div>
+                          {plantilla.producto_nombre && (
+                            <div className="text-sm" style={{ color: '#166534' }}>
+                              Producto: {plantilla.producto_nombre} ({plantilla.dosis} {plantilla.unidad_dosis})
+                            </div>
+                          )}
+                        </div>
+                        <span style={{
+                          padding: '0.25rem 0.5rem',
+                          borderRadius: '9999px',
+                          fontSize: '0.7rem',
+                          backgroundColor: PRIORIDAD_COLORS[plantilla.prioridad]?.bg,
+                          color: PRIORIDAD_COLORS[plantilla.prioridad]?.text
+                        }}>
+                          {plantilla.prioridad}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Modal: Aplicación Masiva */}
+      {showAplicacionMasiva && (
+        <div className="modal-overlay" onClick={() => { setShowAplicacionMasiva(false); setSelectedPlantilla(null); setSelectedParcelas([]); }}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '800px' }}>
+            <div className="modal-header">
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Zap size={20} /> Aplicación Masiva
+              </h3>
+              <button className="btn btn-sm btn-secondary" onClick={() => { setShowAplicacionMasiva(false); setSelectedPlantilla(null); setSelectedParcelas([]); }}>
+                <X size={16} />
+              </button>
+            </div>
+            <div className="modal-body">
+              {/* Step 1: Select Template */}
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label className="form-label" style={{ fontWeight: '600' }}>1. Seleccionar Plantilla</label>
+                <select
+                  className="form-select"
+                  value={selectedPlantilla?._id || ''}
+                  onChange={(e) => {
+                    const plantilla = plantillas.find(p => p._id === e.target.value);
+                    setSelectedPlantilla(plantilla || null);
+                  }}
+                >
+                  <option value="">Seleccionar plantilla...</option>
+                  {plantillas.filter(p => p.activo).map(p => (
+                    <option key={p._id} value={p._id}>
+                      {p.nombre} - {p.tipo} {p.producto_nombre ? `(${p.producto_nombre})` : ''}
+                    </option>
+                  ))}
+                </select>
+                
+                {selectedPlantilla && (
+                  <div style={{ 
+                    marginTop: '0.75rem', 
+                    padding: '0.75rem', 
+                    backgroundColor: '#f0fdf4', 
+                    borderRadius: '0.5rem',
+                    fontSize: '0.875rem'
+                  }}>
+                    <strong>{selectedPlantilla.nombre}</strong>
+                    <div className="text-muted">
+                      {selectedPlantilla.tipo} {selectedPlantilla.subtipo ? `- ${selectedPlantilla.subtipo}` : ''}
+                      {selectedPlantilla.producto_nombre && ` | ${selectedPlantilla.producto_nombre}`}
+                      {selectedPlantilla.dosis && ` | ${selectedPlantilla.dosis} ${selectedPlantilla.unidad_dosis}`}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Step 2: Select Parcelas */}
+              <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                  <label className="form-label" style={{ fontWeight: '600', margin: 0 }}>
+                    2. Seleccionar Parcelas ({selectedParcelas.length} seleccionadas)
+                  </label>
+                  <button 
+                    className="btn btn-sm btn-secondary"
+                    onClick={handleSelectAllParcelas}
+                  >
+                    {selectedParcelas.length === parcelas.length ? 'Deseleccionar todas' : 'Seleccionar todas'}
+                  </button>
+                </div>
+                
+                <div style={{ 
+                  maxHeight: '250px', 
+                  overflowY: 'auto', 
+                  border: '1px solid hsl(var(--border))', 
+                  borderRadius: '0.5rem',
+                  padding: '0.5rem'
+                }}>
+                  {parcelas.map(parcela => (
+                    <label 
+                      key={parcela._id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        padding: '0.5rem',
+                        cursor: 'pointer',
+                        borderRadius: '0.25rem',
+                        backgroundColor: selectedParcelas.includes(parcela._id) ? '#dcfce7' : 'transparent'
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedParcelas.includes(parcela._id)}
+                        onChange={() => handleToggleParcelaSelection(parcela._id)}
+                        style={{ width: '18px', height: '18px' }}
+                      />
+                      <div>
+                        <div style={{ fontWeight: '500' }}>{parcela.codigo_plantacion}</div>
+                        <div className="text-sm text-muted">
+                          {parcela.cultivo} {parcela.variedad ? `(${parcela.variedad})` : ''} | {parcela.superficie_total} ha
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Optional: Date */}
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label className="form-label">Fecha Programada (opcional)</label>
+                <input
+                  type="date"
+                  className="form-input"
+                  value={formData.fecha_programada}
+                  onChange={(e) => setFormData(prev => ({ ...prev, fecha_programada: e.target.value }))}
+                  style={{ maxWidth: '200px' }}
+                />
+              </div>
+            </div>
+            
+            <div className="modal-footer">
+              <button 
+                className="btn btn-secondary" 
+                onClick={() => { setShowAplicacionMasiva(false); setSelectedPlantilla(null); setSelectedParcelas([]); }}
+              >
+                Cancelar
+              </button>
+              <button 
+                className="btn btn-primary"
+                onClick={handleAplicacionMasiva}
+                disabled={!selectedPlantilla || selectedParcelas.length === 0 || aplicacionMasivaLoading}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              >
+                {aplicacionMasivaLoading ? (
+                  <><Loader2 size={16} className="animate-spin" /> Creando...</>
+                ) : (
+                  <><Zap size={16} /> Crear {selectedParcelas.length} Recomendación(es)</>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
