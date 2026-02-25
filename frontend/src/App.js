@@ -222,6 +222,12 @@ function App() {
             <Layout><Configuracion /></Layout>
           </ProtectedRoute>
         } />
+        
+        <Route path="/alertas-clima" element={
+          <ProtectedRoute>
+            <Layout><AlertasClima /></Layout>
+          </ProtectedRoute>
+        } />
       </Routes>
     </AuthProvider>
   );
