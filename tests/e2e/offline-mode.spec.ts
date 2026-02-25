@@ -64,7 +64,8 @@ test.describe('Offline Mode - Connection Indicator', () => {
     
     // Wait for caching to complete - notification should appear
     // The notification shows "Datos cacheados: X parcelas, Y cultivos, Z contratos"
-    await expect(page.locator('text=/Datos cacheados|parcelas/i')).toBeVisible({ timeout: 10000 });
+    // Use more specific locator for the success notification (fixed position toast)
+    await expect(page.locator('text=Datos cacheados').first()).toBeVisible({ timeout: 10000 });
   });
   
   test('should display last cache date after caching data', async ({ page }) => {
