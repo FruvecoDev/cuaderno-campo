@@ -12,7 +12,7 @@
 import { test, expect } from '@playwright/test';
 import { login, removeEmergentBadge, waitForAppReady, dismissToasts } from '../fixtures/helpers';
 
-const PAGE_URL = 'https://harvest-track-14.preview.emergentagent.com';
+const PAGE_URL = 'https://harvest-log-1.preview.emergentagent.com';
 
 test.describe('Parcelas Page - General Map View', () => {
   test.beforeEach(async ({ page }) => {
