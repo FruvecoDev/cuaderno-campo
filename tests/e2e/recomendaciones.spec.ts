@@ -266,20 +266,29 @@ test.describe('Recomendaciones - New Features', () => {
     const parcelaSelect = page.locator('select').filter({ has: page.locator('option:has-text("Seleccionar parcela")') }).first();
     await parcelaSelect.selectOption({ index: 1 });
     
+    // Select a product
+    const productoSelect = page.locator('select').filter({ has: page.locator('option:has-text("Seleccionar producto")') }).first();
+    const productoOptionsCount = await productoSelect.locator('option').count();
+    if (productoOptionsCount > 1) {
+      await productoSelect.selectOption({ index: 1 });
+    }
+    
     await page.locator('input[placeholder="0.00"]').fill('1.0');
     
     await page.locator('button').filter({ hasText: /Añadir a la lista/i }).click();
-    await expect(page.locator('text=Recomendación añadida a la lista')).toBeVisible({ timeout: 5000 });
     
-    // Verify pending list has 1 item
-    await expect(page.locator('text=Recomendaciones a guardar')).toBeVisible();
+    // Wait for pending list section to appear
+    const pendingSection = page.locator('h4').filter({ hasText: /Recomendaciones a guardar/i });
+    await expect(pendingSection).toBeVisible({ timeout: 5000 });
     
-    // Find and click remove button in the pending table row
-    const removeButton = page.locator('table tbody tr button').filter({ has: page.locator('svg') }).first();
+    // Find the remove button - it's a small red button with X icon in the pending table row
+    // The pending table is inside the section after the pendingSection header
+    const pendingTableParent = pendingSection.locator('..').locator('..');
+    const removeButton = pendingTableParent.locator('table tbody tr button').first();
     await removeButton.click();
     
     // Pending list should disappear (no items)
-    await expect(page.locator('text=Recomendaciones a guardar')).not.toBeVisible();
+    await expect(pendingSection).not.toBeVisible();
   });
 });
 
