@@ -817,6 +817,56 @@ const Fincas = () => {
                 </div>
               )}
               
+              {/* Mapa para dibujar parcelas manualmente */}
+              {showDrawingMap && (
+                <div style={{ marginBottom: '1rem' }}>
+                  <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Cargando mapa...</div>}>
+                    <MapaSigpac
+                      enableDrawing={true}
+                      onGeometryChange={handleGeometryChange}
+                      initialDrawnCoords={formData.geometria_manual?.coords}
+                      onClose={() => setShowDrawingMap(false)}
+                      isExpanded={drawingMapExpanded}
+                      onToggleExpand={() => setDrawingMapExpanded(!drawingMapExpanded)}
+                    />
+                  </Suspense>
+                </div>
+              )}
+              
+              {/* Indicador de parcela dibujada */}
+              {drawnGeometry && !showDrawingMap && (
+                <div style={{ 
+                  backgroundColor: '#e8f5e9', 
+                  padding: '0.75rem', 
+                  borderRadius: '6px', 
+                  marginBottom: '1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  border: '1px solid #a5d6a7'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <CheckCircle size={20} style={{ color: '#2e7d32' }} />
+                    <div>
+                      <strong style={{ color: '#2e7d32' }}>Parcela dibujada manualmente</strong>
+                      <div style={{ fontSize: '0.85rem', color: '#555' }}>
+                        Área calculada: <strong>{drawnGeometry.area_ha?.toFixed(4)} ha</strong>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-sm"
+                    style={{ backgroundColor: '#2e7d32', color: 'white' }}
+                    onClick={() => setShowDrawingMap(true)}
+                    data-testid="btn-editar-dibujo"
+                  >
+                    <Edit2 size={14} style={{ marginRight: '4px' }} />
+                    Editar
+                  </button>
+                </div>
+              )}
+              
               {/* Error de búsqueda SIGPAC */}
               {sigpacError && (
                 <div style={{ 
