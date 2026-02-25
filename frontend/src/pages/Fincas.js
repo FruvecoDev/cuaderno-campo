@@ -1230,6 +1230,23 @@ const Fincas = () => {
                       }}>
                         {finca.finca_propia ? 'Propia' : 'Alquilada'}
                       </span>
+                      {/* Indicador de parcela con geometría */}
+                      {finca.geometria_manual?.coords && (
+                        <span style={{
+                          backgroundColor: '#e8f5e9',
+                          color: '#2e7d32',
+                          padding: '2px 8px',
+                          borderRadius: '12px',
+                          fontSize: '0.75rem',
+                          fontWeight: '500',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}>
+                          <Pencil size={10} />
+                          Dibujada
+                        </span>
+                      )}
                     </div>
                     
                     {/* Info resumida */}
