@@ -200,6 +200,7 @@ const Parcelas = () => {
   const [editingId, setEditingId] = useState(null);
   const [polygon, setPolygon] = useState([]);
   const [mapType, setMapType] = useState('satellite'); // Tipo de mapa: osm, satellite, hybrid, topo
+  const [showGeneralMap, setShowGeneralMap] = useState(false); // Mostrar mapa general de todas las parcelas
   const { token } = useAuth();
   const navigate = useNavigate();
   
