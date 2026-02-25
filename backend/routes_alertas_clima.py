@@ -134,10 +134,23 @@ class AlertaUpdate(BaseModel):
 
 def serialize_doc(doc: dict) -> dict:
     """Convert ObjectId to string for JSON serialization"""
-    if doc:
-        if "_id" in doc:
-            doc["_id"] = str(doc["_id"])
-        for key in ["parcela_id", "plantilla_id", "created_by_id"]:
+    if not doc:
+        return doc
+    
+    result = {}
+    for key, value in doc.items():
+        if key == "_id":
+            result["_id"] = str(value)
+        elif isinstance(value, ObjectId):
+            result[key] = str(value)
+        elif isinstance(value, dict):
+            result[key] = serialize_doc(value)
+        elif isinstance(value, datetime):
+            result[key] = value.isoformat()
+        else:
+            result[key] = value
+    
+    return result
             if key in doc and doc[key]:
                 doc[key] = str(doc[key])
     return doc
