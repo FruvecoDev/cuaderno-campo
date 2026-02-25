@@ -822,10 +822,10 @@ Módulos actualizados para seguir patrón consistente:
 - **Frontend**:
   - **Página**: `/app/frontend/src/pages/Recomendaciones.js`
   - **Campos del formulario**:
-    - Parcela (obligatorio)
+    - Parcela (obligatorio) - auto-rellena superficie
     - Campaña
     - Tipo: Tratamiento Fitosanitario, Fertilización, Riego, Poda, Otro
-    - Subtipo: Herbicida, Insecticida, Fungicida, etc. (solo para tratamientos)
+    - Subtipo: Herbicida, Insecticida, Fungicida, etc.
     - Producto (de lista de fitosanitarios)
     - Dosis y Unidad
     - Fecha Programada
@@ -834,8 +834,23 @@ Módulos actualizados para seguir patrón consistente:
     - Observaciones
   - **KPIs**: Total, Pendientes, Programadas, Aplicadas
   - **Estados**: Pendiente, Programada, Aplicada, Cancelada
+- **Calculadora de Dosis Integrada**:
+  - Superficie a tratar (auto-rellena desde parcela)
+  - Volumen de agua por hectárea
+  - Cálculos automáticos:
+    - Producto total necesario
+    - Agua total necesaria
+    - Producto por litro de agua
+    - Concentración de la mezcla
+  - **Sistema de Alertas**:
+    - Alerta de dosis baja/excesiva por tipo de producto
+    - Alerta de dosis fuera de límites del producto específico
+    - Alerta de volumen de agua inadecuado
+    - Alerta de concentración peligrosa
+    - **Alertas bloqueantes** impiden generar tratamiento
 - **Flujo de trabajo**:
-  - Técnico crea recomendación → Estado "Pendiente"
+  - Técnico crea recomendación con calculadora → Estado "Pendiente"
+  - Si hay alertas bloqueantes → Botón "Generar Tratamiento" deshabilitado
   - Botón "Generar Tratamiento" → Crea tratamiento vinculado y cambia estado a "Aplicada"
   - Una vez generado el tratamiento, la recomendación no se puede editar
 - **Test Report**: `/app/test_reports/iteration_21.json` - 100% (24/24 tests)
