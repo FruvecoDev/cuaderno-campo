@@ -62,6 +62,9 @@ const Recomendaciones = () => {
   const [generatingTratamiento, setGeneratingTratamiento] = useState(null);
   const [showCalculadora, setShowCalculadora] = useState(false);
   
+  // Multiple recommendations
+  const [recomendacionesPendientes, setRecomendacionesPendientes] = useState([]);
+  
   // Filter states
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
