@@ -1,0 +1,62 @@
+{
+  "summary": "Testing iteration for Plantillas de Recomendaciones feature. Backend API tests (20/20 passed) cover all CRUD, mass application, and statistics endpoints. Frontend E2E tests (16/17 passed) cover tab navigation, mass application modal, template selector, and data display. One critical frontend issue found: Create Plantilla form submission fails with 'body stream already read' JavaScript error.",
+  "mode": "generate",
+  "baseline_commit": "04e6c1723bc19f6576515133de0a56a3bdde3eca",
+  "head_commit": "5dfb0b4a4aa99f22ff162db3936d5acc9a2dd79e",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Create Plantilla Form",
+        "issue": "Form submission fails with 'Failed to execute json on Response: body stream already read' error. The form fields are correctly filled (nombre, tipo, dosis) but API call fails silently.",
+        "selector": "button:has-text('Crear Plantilla')",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [
+      {
+        "flow": "Create Plantilla -> handlePlantillaSubmit",
+        "issue": "JavaScript 'body stream already read' error during fetch response processing. Likely caused by double-reading the response body in error handling or a conflicting interceptor.",
+        "affected_selectors": ["input[placeholder='Ej: Control preventivo de hongos']", "button:has-text('Crear Plantilla')"]
+      }
+    ],
+    "design_issues": []
+  },
+  "regression_results": {
+    "total_specs": 2,
+    "passed": 36,
+    "failed": 1,
+    "skipped": 0
+  },
+  "specs_created": [
+    "/app/backend/tests/test_plantillas_recomendaciones.py",
+    "/app/tests/e2e/plantillas-recomendaciones.spec.ts"
+  ],
+  "specs_updated": [],
+  "quarantined_tests": [],
+  "test_report_links": [
+    "/app/backend/tests/test_plantillas_recomendaciones.py",
+    "/app/test_reports/pytest/test_plantillas_recomendaciones.xml",
+    "/app/tests/e2e/plantillas-recomendaciones.spec.ts"
+  ],
+  "action_items": [
+    "CRITICAL: Fix 'body stream already read' error in handlePlantillaSubmit function in /app/frontend/src/pages/Recomendaciones.js. The response.json() may be called multiple times, causing the error. Check lines 397-401 for duplicate response body reads.",
+    "Verify if there's any fetch interceptor or middleware that might be pre-reading the response body before it reaches the component."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_plantillas_recomendaciones.py",
+    "/app/tests/e2e/plantillas-recomendaciones.spec.ts"
+  ],
+  "success_rate": {
+    "backend": "100%",
+    "frontend": "94%"
+  },
+  "seed_data_creation": "Used existing seeded plantillas (8 default templates). No new seed data created.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "The Plantillas de Recomendaciones backend API is fully functional - all endpoints work correctly. The frontend has one bug: creating a new plantilla fails with a JavaScript error. The error message 'Failed to execute json on Response: body stream already read' appears in the UI when clicking 'Crear Plantilla' button. All other frontend flows work correctly: viewing plantillas, toggling active status, applying plantillas to multiple parcelas via the 'Aplicación Masiva' modal, and using the 'Usar Plantilla' button in the recommendation form.",
+  "rca_of_issue": "Root cause: The handlePlantillaSubmit function in Recomendaciones.js reads response.json() and then checks response.ok. If there's a network issue or the response is being intercepted/read elsewhere first, the 'body stream already read' error occurs because the response body can only be consumed once in JavaScript Fetch API. Potential fix: Clone the response before reading, or restructure error handling to avoid double-reading."
+}
