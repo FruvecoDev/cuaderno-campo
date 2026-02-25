@@ -323,16 +323,8 @@ test.describe('Fincas Module - SIGPAC Integration', () => {
   });
 
   test('should show error message for non-existent parcel', async ({ page }) => {
-    // Fill with non-existent parcel data
-    await page.getByTestId('input-sigpac-provincia').selectOption('99'); // Invalid
-    
-    // Check if 99 exists, if not skip
-    const hasOption = await page.locator('option[value="99"]').count() > 0;
-    if (!hasOption) {
-      // Select a valid province but invalid other data
-      await page.getByTestId('input-sigpac-provincia').selectOption('41');
-    }
-    
+    // Fill with valid province but non-existent parcel data
+    await page.getByTestId('input-sigpac-provincia').selectOption('41'); // Sevilla (valid)
     await page.getByTestId('input-sigpac-municipio').fill('999');
     await page.getByTestId('input-sigpac-poligono').fill('9999');
     await page.getByTestId('input-sigpac-parcela').fill('99999');
@@ -342,7 +334,7 @@ test.describe('Fincas Module - SIGPAC Integration', () => {
     
     // Wait for error response
     try {
-      await expect(page.locator('[style*="ffcdd2"], [style*="AlertCircle"]').first()).toBeVisible({ timeout: 20000 });
+      await expect(page.locator('[style*="ffcdd2"]').first()).toBeVisible({ timeout: 20000 });
     } catch {
       // May get different error - check for any error-related text
       await expect(page.locator('text=/no encontrad|Error|Verifique/i').first()).toBeVisible({ timeout: 5000 });
