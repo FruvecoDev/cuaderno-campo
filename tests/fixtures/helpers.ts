@@ -31,11 +31,12 @@ export async function login(page: Page, email: string = 'admin@fruveco.com', pas
   await page.locator('input[type="email"], input[placeholder*="email"], input[placeholder*="usuario"]').first().fill(email);
   await page.locator('input[type="password"]').first().fill(password);
   
-  // Click login button
-  await page.locator('button[type="submit"]').first().click();
+  // Click login button (could be type="submit" or just a button with "Iniciar" text)
+  const loginBtn = page.locator('button:has-text("Iniciar"), button[type="submit"]').first();
+  await loginBtn.click();
   
-  // Wait for redirect to dashboard or authenticated area
-  await expect(page).not.toHaveURL(/login/i, { timeout: 10000 });
+  // Wait for redirect to dashboard or authenticated area with longer timeout
+  await page.waitForURL(/dashboard/, { timeout: 15000 });
 }
 
 export async function navigateToPage(page: Page, pageName: string) {
