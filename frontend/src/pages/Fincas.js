@@ -355,7 +355,14 @@ const Fincas = () => {
         precio_corte: parseFloat(formData.precio_corte) || 0,
         precio_transporte: parseFloat(formData.precio_transporte) || 0,
         recoleccion_semana: formData.recoleccion_semana ? parseInt(formData.recoleccion_semana) : null,
-        recoleccion_ano: formData.recoleccion_ano ? parseInt(formData.recoleccion_ano) : null
+        recoleccion_ano: formData.recoleccion_ano ? parseInt(formData.recoleccion_ano) : null,
+        // Incluir geometría dibujada si existe
+        geometria_manual: drawnGeometry ? {
+          wkt: drawnGeometry.wkt,
+          coords: drawnGeometry.coords,
+          centroide: drawnGeometry.centroid,
+          area_ha: drawnGeometry.area_ha
+        } : formData.geometria_manual
       };
       
       const res = await fetch(url, {
