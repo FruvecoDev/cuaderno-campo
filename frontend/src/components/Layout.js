@@ -186,7 +186,7 @@ const Layout = ({ children }) => {
         <div className="sidebar-header">
           <div className="sidebar-title" style={{ justifyContent: 'center' }}>
             <img 
-              src={logo} 
+              src={dashboardLogo || defaultLogo} 
               alt="Logo" 
               style={{ 
                 maxWidth: '160px', 
