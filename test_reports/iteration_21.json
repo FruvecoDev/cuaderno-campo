@@ -1,0 +1,122 @@
+{
+  "summary": "Testing iteration 21: Verified Recomendaciones (Recommendations) module - full CRUD API operations, treatment generation, stats/config endpoints, and frontend E2E tests for page layout, navigation, form fields, and creation flow.",
+  "mode": "generate",
+  "baseline_commit": "3bb9250fd9539b0e170100dcfc4bff1e3de75970",
+  "head_commit": "90fe9db4f8cbd996b1856f29f514b419169044a7",
+
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "GET /api/recomendaciones/{id}",
+        "issue": "Returns HTTP 500 instead of 404 for not found resources. Response body contains '404: Recomendación no encontrada' but status code is 500.",
+        "priority": "LOW"
+      }
+    ]
+  },
+
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+
+  "passed_tests": {
+    "backend_pytest": [
+      "test_get_tipos_config",
+      "test_get_stats_resumen",
+      "test_list_recomendaciones",
+      "test_create_recomendacion",
+      "test_create_requires_parcela",
+      "test_get_recomendacion_by_id",
+      "test_update_recomendacion",
+      "test_delete_recomendacion",
+      "test_recomendacion_not_found",
+      "test_invalid_recomendacion_id",
+      "test_filter_by_tipo",
+      "test_filter_by_prioridad",
+      "test_filter_by_estado",
+      "test_generar_tratamiento",
+      "test_cannot_generate_twice",
+      "test_cannot_edit_after_tratamiento",
+      "test_list_requires_auth",
+      "test_create_requires_auth",
+      "test_config_tipos_no_auth_required"
+    ],
+    "frontend_playwright": [
+      "should display Recomendaciones link in sidebar and navigate",
+      "should load page with header, KPIs and Nueva Recomendación button",
+      "should open form with all required fields",
+      "should close form on Cancel",
+      "should create a new recommendation successfully"
+    ]
+  },
+
+  "regression_results": {
+    "total_specs": 2,
+    "passed": 24,
+    "failed": 0,
+    "skipped": 0
+  },
+
+  "specs_created": [
+    "/app/backend/tests/test_recomendaciones.py",
+    "/app/tests/e2e/recomendaciones.spec.ts"
+  ],
+
+  "specs_updated": [],
+
+  "test_report_links": [
+    "/app/backend/tests/test_recomendaciones.py",
+    "/app/tests/e2e/recomendaciones.spec.ts",
+    "/app/test_reports/pytest/test_recomendaciones.xml"
+  ],
+
+  "action_items": [
+    "MINOR: Fix HTTP status code in GET /api/recomendaciones/{id} endpoint - currently returns 500 instead of 404 for not found resources (low priority)"
+  ],
+
+  "updated_files": [
+    "/app/backend/tests/test_recomendaciones.py",
+    "/app/tests/e2e/recomendaciones.spec.ts"
+  ],
+
+  "success_rate": {
+    "backend": "100% (19/19 passed)",
+    "frontend": "100% (5/5 passed)"
+  },
+
+  "seed_data_creation": "Test recommendations created and cleaned up during testing. No persistent test data.",
+
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+
+  "context_for_next_testing_agent": "Recomendaciones module fully tested. Key features verified: (1) CRUD API - GET list with filters, POST create, PUT update, DELETE, GET by ID, (2) POST /generar-tratamiento creates linked treatment and updates recommendation state to 'Aplicada', (3) Stats endpoint returns totals by estado and prioridad, (4) Config endpoint returns tipos/subtipos/prioridades/estados without auth, (5) Frontend page loads with KPIs (Total, Pendientes, Programadas, Aplicadas), Nueva Recomendación button, sidebar link under Visitas, (6) Form shows all fields: Parcela, Campaña, Tipo, Subtipo, Producto, Dosis, Unidad, Fecha Programada, Prioridad, Motivo, Observaciones, (7) Form validation works, Cancel closes form, creation shows success message.",
+
+  "features_verified": {
+    "backend_api": {
+      "list_recomendaciones": "✓ GET /api/recomendaciones returns list with filters (parcela_id, tipo, prioridad, estado, campana)",
+      "create_recomendacion": "✓ POST /api/recomendaciones creates recommendation with estado='Pendiente'",
+      "get_recomendacion": "✓ GET /api/recomendaciones/{id} returns single recommendation",
+      "update_recomendacion": "✓ PUT /api/recomendaciones/{id} updates fields (blocked if tratamiento_generado)",
+      "delete_recomendacion": "✓ DELETE /api/recomendaciones/{id} removes recommendation",
+      "generar_tratamiento": "✓ POST /api/recomendaciones/{id}/generar-tratamiento creates linked treatment",
+      "stats_resumen": "✓ GET /api/recomendaciones/stats/resumen returns statistics",
+      "config_tipos": "✓ GET /api/recomendaciones/config/tipos returns types/subtipos/priorities/states",
+      "auth_required": "✓ CRUD endpoints require auth, config/tipos does not"
+    },
+    "frontend_ui": {
+      "sidebar_link": "✓ Recomendaciones link visible under Visitas in ACTIVIDADES section",
+      "page_layout": "✓ Header, description, KPI cards (Total, Pendientes, Programadas, Aplicadas)",
+      "nueva_recomendacion_button": "✓ Button visible with correct text",
+      "form_fields": "✓ All fields present: Parcela, Campaña, Tipo, Subtipo, Producto, Dosis, Unidad, Fecha, Prioridad, Motivo, Observaciones",
+      "form_cancel": "✓ Cancel button closes form",
+      "form_submit": "✓ Form submission creates recommendation with success message"
+    }
+  },
+
+  "test_credentials": {
+    "admin_email": "admin@fruveco.com",
+    "admin_password": "admin123"
+  }
+}
