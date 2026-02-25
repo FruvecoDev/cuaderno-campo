@@ -550,5 +550,55 @@ class TestGeometriaManual:
         api_session.delete(f"{BASE_URL}/api/fincas/{finca_id}")
 
 
+class TestFincasParcelasAssociation:
+    """Test fincas-parcelas association endpoints (refactored functionality)"""
+    
+    def test_get_parcelas_disponibles(self, api_session):
+        """Test GET /api/fincas/parcelas-disponibles - Get available parcelas"""
+        response = api_session.get(f"{BASE_URL}/api/fincas/parcelas-disponibles")
+        
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+        
+        data = response.json()
+        assert "parcelas" in data, "Response should contain 'parcelas' key"
+        assert isinstance(data["parcelas"], list), "parcelas should be a list"
+    
+    def test_get_parcelas_disponibles_with_search(self, api_session):
+        """Test GET /api/fincas/parcelas-disponibles with search filter"""
+        response = api_session.get(f"{BASE_URL}/api/fincas/parcelas-disponibles", params={"search": "guisante"})
+        
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}"
+        
+        data = response.json()
+        assert "parcelas" in data
+    
+    def test_finca_with_parcelas_returns_parcelas_info(self, api_session, created_finca):
+        """Test that GET /api/fincas returns parcelas_info for fincas with associated parcelas"""
+        response = api_session.get(f"{BASE_URL}/api/fincas")
+        
+        assert response.status_code == 200
+        
+        data = response.json()
+        fincas = data.get("fincas", [])
+        
+        # All fincas should have num_parcelas field
+        for finca in fincas:
+            assert "num_parcelas" in finca, f"Finca {finca.get('denominacion')} should have num_parcelas"
+            assert isinstance(finca["num_parcelas"], int)
+    
+    def test_get_single_finca_returns_parcelas_detalle(self, api_session, created_finca):
+        """Test that GET /api/fincas/{id} returns parcelas_detalle array"""
+        finca_id = created_finca["_id"]
+        
+        response = api_session.get(f"{BASE_URL}/api/fincas/{finca_id}")
+        
+        assert response.status_code == 200
+        
+        finca = response.json()
+        assert "parcelas_detalle" in finca, "Response should include parcelas_detalle"
+        assert isinstance(finca["parcelas_detalle"], list)
+
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])
