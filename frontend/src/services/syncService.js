@@ -300,6 +300,24 @@ class SyncService {
       remaining: remainingCount
     });
 
+    // Show push notification with sync results
+    if (synced > 0 || failed > 0) {
+      const title = synced > 0 ? '✅ Sincronización completada' : '⚠️ Sincronización con errores';
+      let body = '';
+      
+      if (synced > 0) {
+        const items = synced === 1 ? 'registro' : 'registros';
+        body = `${synced} ${items} sincronizado${synced > 1 ? 's' : ''} correctamente`;
+      }
+      
+      if (failed > 0) {
+        const failedItems = failed === 1 ? 'registro' : 'registros';
+        body += body ? `. ${failed} ${failedItems} fallido${failed > 1 ? 's' : ''}` : `${failed} ${failedItems} fallido${failed > 1 ? 's' : ''}`;
+      }
+      
+      this.showNotification(title, { body });
+    }
+
     console.log(`Sync complete: ${synced} synced, ${failed} failed, ${remainingCount} remaining`);
     return { synced, failed, remaining: remainingCount };
   }
