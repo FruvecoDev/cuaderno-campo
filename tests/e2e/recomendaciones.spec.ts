@@ -203,16 +203,23 @@ test.describe('Recomendaciones - New Features', () => {
     await page.locator('input[placeholder="0.00"]').fill('1.5');
     await page.locator('button').filter({ hasText: /Añadir a la lista/i }).click();
     
-    // Wait for success message
-    await expect(page.locator('text=Recomendación añadida a la lista')).toBeVisible({ timeout: 5000 });
+    // Wait for pending section to appear
+    const pendingSection = page.locator('h4').filter({ hasText: /Recomendaciones a guardar/i });
+    await expect(pendingSection).toBeVisible({ timeout: 5000 });
     
-    // Verify table structure - headers
-    await expect(page.locator('th').filter({ hasText: 'Parcela' })).toBeVisible();
-    await expect(page.locator('th').filter({ hasText: 'Cultivo' })).toBeVisible();
-    await expect(page.locator('th').filter({ hasText: 'Tipo' })).toBeVisible();
-    await expect(page.locator('th').filter({ hasText: 'Producto' })).toBeVisible();
-    await expect(page.locator('th').filter({ hasText: 'Dosis' })).toBeVisible();
-    await expect(page.locator('th').filter({ hasText: 'Prioridad' })).toBeVisible();
+    // Verify table structure - the pending table has specific headers (without "/ Cultivo" combination)
+    // The pending table header says "Parcela" alone, while main table says "Parcela / Cultivo"
+    const pendingTableParent = pendingSection.locator('..').locator('..');
+    const pendingTable = pendingTableParent.locator('table').first();
+    await expect(pendingTable).toBeVisible();
+    
+    // Check headers exist in pending table area
+    await expect(pendingTable.locator('th').filter({ hasText: 'Parcela' }).first()).toBeVisible();
+    await expect(pendingTable.locator('th').filter({ hasText: 'Cultivo' })).toBeVisible();
+    await expect(pendingTable.locator('th').filter({ hasText: 'Tipo' })).toBeVisible();
+    await expect(pendingTable.locator('th').filter({ hasText: 'Producto' })).toBeVisible();
+    await expect(pendingTable.locator('th').filter({ hasText: 'Dosis' })).toBeVisible();
+    await expect(pendingTable.locator('th').filter({ hasText: 'Prioridad' })).toBeVisible();
     
     // Should have "Guardar Todas" button
     await expect(page.locator('button').filter({ hasText: /Guardar Todas/i })).toBeVisible();
