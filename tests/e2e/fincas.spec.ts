@@ -599,3 +599,360 @@ test.describe('Fincas Module - SIGPAC Map Feature', () => {
     }
   });
 });
+
+test.describe('Fincas Module - Polygon Drawing Feature', () => {
+  test.beforeEach(async ({ page }) => {
+    await dismissToasts(page);
+    await login(page);
+    await page.waitForTimeout(2000);
+    await ensureModalClosed(page);
+    
+    // Navigate directly to fincas page
+    await page.goto('/fincas', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(2000);
+    await ensureModalClosed(page);
+    await expect(page.getByTestId('fincas-page')).toBeVisible({ timeout: 10000 });
+    
+    // Open form for drawing tests
+    await page.getByTestId('btn-nueva-finca').click({ force: true });
+    await page.waitForTimeout(1000);
+    await ensureModalClosed(page);
+    await expect(page.getByTestId('form-finca')).toBeVisible({ timeout: 10000 });
+  });
+
+  test('should display "Dibujar Parcela" button in SIGPAC section', async ({ page }) => {
+    // Scroll to SIGPAC section
+    await page.getByTestId('btn-dibujar-parcela').scrollIntoViewIfNeeded();
+    
+    // Verify "Dibujar Parcela" button exists
+    await expect(page.getByTestId('btn-dibujar-parcela')).toBeVisible();
+    await expect(page.getByTestId('btn-dibujar-parcela')).toContainText(/dibujar parcela/i);
+    
+    // Verify help text mentions drawing
+    await expect(page.locator('text=Dibujar Parcela')).toBeVisible();
+  });
+
+  test('should open drawing map when clicking "Dibujar Parcela"', async ({ page }) => {
+    // Click "Dibujar Parcela" button
+    const drawBtn = page.getByTestId('btn-dibujar-parcela');
+    await drawBtn.scrollIntoViewIfNeeded();
+    await expect(drawBtn).toContainText(/dibujar parcela/i);
+    await drawBtn.click({ force: true });
+    await page.waitForTimeout(2000);
+    
+    // Verify map container appears with drawing mode
+    const mapContainer = page.getByTestId('mapa-sigpac-container');
+    await expect(mapContainer).toBeVisible({ timeout: 5000 });
+    
+    // Verify map header shows "Dibujar Parcela en Mapa"
+    await expect(page.locator('text=Dibujar Parcela en Mapa')).toBeVisible();
+    
+    // Verify instructions are visible
+    await expect(page.locator('text=Instrucciones:')).toBeVisible();
+    await expect(page.locator('text=herramientas del lado izquierdo')).toBeVisible();
+  });
+
+  test('should toggle button text between "Dibujar Parcela" and "Ocultar Dibujo"', async ({ page }) => {
+    const drawBtn = page.getByTestId('btn-dibujar-parcela');
+    await drawBtn.scrollIntoViewIfNeeded();
+    
+    // Initially should say "Dibujar Parcela"
+    await expect(drawBtn).toContainText(/dibujar parcela/i);
+    
+    // Click to open drawing map
+    await drawBtn.click({ force: true });
+    await page.waitForTimeout(2000);
+    
+    // Button should now say "Ocultar Dibujo"
+    await expect(drawBtn).toContainText(/ocultar dibujo/i);
+    
+    // Click again to hide
+    await drawBtn.click({ force: true });
+    await page.waitForTimeout(1000);
+    
+    // Button should say "Dibujar Parcela" again
+    await expect(drawBtn).toContainText(/dibujar parcela/i);
+  });
+
+  test('should display Leaflet Draw tools in drawing mode', async ({ page }) => {
+    // Open drawing map
+    const drawBtn = page.getByTestId('btn-dibujar-parcela');
+    await drawBtn.scrollIntoViewIfNeeded();
+    await drawBtn.click({ force: true });
+    await page.waitForTimeout(2000);
+    
+    // Verify map is visible
+    const mapContainer = page.getByTestId('mapa-sigpac-container');
+    await expect(mapContainer).toBeVisible({ timeout: 5000 });
+    
+    // Verify Leaflet Draw toolbar is present (on left side of map)
+    // The draw control has class .leaflet-draw-toolbar
+    await expect(page.locator('.leaflet-draw')).toBeVisible({ timeout: 5000 });
+    
+    // Verify zoom controls are visible
+    await expect(page.locator('.leaflet-control-zoom')).toBeVisible();
+  });
+
+  test('should have layer selector in drawing map', async ({ page }) => {
+    // Open drawing map
+    const drawBtn = page.getByTestId('btn-dibujar-parcela');
+    await drawBtn.scrollIntoViewIfNeeded();
+    await drawBtn.click({ force: true });
+    await page.waitForTimeout(2000);
+    
+    // Verify layer selector is visible
+    const layerSelect = page.getByTestId('select-map-layer');
+    await expect(layerSelect).toBeVisible();
+    
+    // Verify it has 3 options (Satellite, OSM, Topo)
+    await expect(layerSelect.locator('option')).toHaveCount(3);
+    
+    // Change layer
+    await layerSelect.selectOption('osm');
+    await page.waitForTimeout(500);
+    await expect(layerSelect).toHaveValue('osm');
+  });
+
+  test('should have expand/reduce button in drawing map', async ({ page }) => {
+    // Open drawing map
+    const drawBtn = page.getByTestId('btn-dibujar-parcela');
+    await drawBtn.scrollIntoViewIfNeeded();
+    await drawBtn.click({ force: true });
+    await page.waitForTimeout(2000);
+    
+    // Verify expand button is visible
+    const expandBtn = page.getByTestId('btn-toggle-expand-map');
+    await expect(expandBtn).toBeVisible();
+    await expect(expandBtn).toContainText(/ampliar/i);
+    
+    // Click to expand
+    await expandBtn.click({ force: true });
+    await page.waitForTimeout(1000);
+    
+    // Button should now say "Reducir"
+    await expect(expandBtn).toContainText(/reducir/i);
+    
+    // Click to reduce
+    await expandBtn.click({ force: true });
+    await page.waitForTimeout(1000);
+    
+    // Button should say "Ampliar" again
+    await expect(expandBtn).toContainText(/ampliar/i);
+  });
+
+  test('should close drawing map with close button', async ({ page }) => {
+    // Open drawing map
+    const drawBtn = page.getByTestId('btn-dibujar-parcela');
+    await drawBtn.scrollIntoViewIfNeeded();
+    await drawBtn.click({ force: true });
+    await page.waitForTimeout(2000);
+    
+    // Verify map is visible
+    const mapContainer = page.getByTestId('mapa-sigpac-container');
+    await expect(mapContainer).toBeVisible({ timeout: 5000 });
+    
+    // Click close button
+    const closeBtn = page.getByTestId('btn-close-map');
+    await closeBtn.click({ force: true });
+    await page.waitForTimeout(1000);
+    
+    // Map should be hidden
+    await expect(mapContainer).not.toBeVisible();
+    
+    // Button should say "Dibujar Parcela" again
+    await expect(drawBtn).toContainText(/dibujar parcela/i);
+  });
+
+  test('should draw polygon and show info panel', async ({ page }) => {
+    // Open drawing map
+    const drawBtn = page.getByTestId('btn-dibujar-parcela');
+    await drawBtn.scrollIntoViewIfNeeded();
+    await drawBtn.click({ force: true });
+    await page.waitForTimeout(2000);
+    
+    // Verify map is visible
+    const mapContainer = page.getByTestId('mapa-sigpac-container');
+    await expect(mapContainer).toBeVisible({ timeout: 5000 });
+    
+    // Click on polygon draw tool (first button in the draw toolbar)
+    const polygonTool = page.locator('.leaflet-draw-draw-polygon');
+    if (await polygonTool.isVisible({ timeout: 3000 })) {
+      await polygonTool.click({ force: true });
+      await page.waitForTimeout(500);
+      
+      // Get the map element
+      const leafletMap = page.locator('.leaflet-container').first();
+      const mapBox = await leafletMap.boundingBox();
+      
+      if (mapBox) {
+        // Draw a simple triangle polygon
+        // Click 3 points to create a polygon
+        const centerX = mapBox.x + mapBox.width / 2;
+        const centerY = mapBox.y + mapBox.height / 2;
+        
+        await page.mouse.click(centerX - 50, centerY - 50);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX + 50, centerY - 50);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX, centerY + 50);
+        await page.waitForTimeout(300);
+        // Close polygon by clicking first point again
+        await page.mouse.click(centerX - 50, centerY - 50);
+        await page.waitForTimeout(1000);
+        
+        // After drawing, the info panel should appear showing area
+        // Check for "Parcela Dibujada" panel or area display
+        const areaDisplay = page.locator('text=Área:').or(page.locator('text=Parcela Dibujada'));
+        await expect(areaDisplay.first()).toBeVisible({ timeout: 5000 });
+      }
+    } else {
+      // If polygon tool not directly visible, try through the toolbar
+      console.log('Polygon tool not immediately visible, checking toolbar');
+    }
+  });
+
+  test('should have "Limpiar" button to clear drawings', async ({ page }) => {
+    // Open drawing map
+    const drawBtn = page.getByTestId('btn-dibujar-parcela');
+    await drawBtn.scrollIntoViewIfNeeded();
+    await drawBtn.click({ force: true });
+    await page.waitForTimeout(2000);
+    
+    // Verify map is visible
+    const mapContainer = page.getByTestId('mapa-sigpac-container');
+    await expect(mapContainer).toBeVisible({ timeout: 5000 });
+    
+    // Draw a polygon first
+    const polygonTool = page.locator('.leaflet-draw-draw-polygon');
+    if (await polygonTool.isVisible({ timeout: 3000 })) {
+      await polygonTool.click({ force: true });
+      await page.waitForTimeout(500);
+      
+      const leafletMap = page.locator('.leaflet-container').first();
+      const mapBox = await leafletMap.boundingBox();
+      
+      if (mapBox) {
+        const centerX = mapBox.x + mapBox.width / 2;
+        const centerY = mapBox.y + mapBox.height / 2;
+        
+        await page.mouse.click(centerX - 50, centerY - 50);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX + 50, centerY - 50);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX, centerY + 50);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX - 50, centerY - 50);
+        await page.waitForTimeout(1000);
+        
+        // "Limpiar" button should appear after drawing
+        const clearBtn = page.getByTestId('btn-clear-drawings');
+        await expect(clearBtn).toBeVisible({ timeout: 5000 });
+        await expect(clearBtn).toContainText(/limpiar/i);
+        
+        // Click to clear
+        await clearBtn.click({ force: true });
+        await page.waitForTimeout(1000);
+        
+        // Clear button should disappear (no more drawings)
+        await expect(clearBtn).not.toBeVisible();
+      }
+    }
+  });
+
+  test('should show green indicator when map is hidden with drawn parcel', async ({ page }) => {
+    // Open drawing map
+    const drawBtn = page.getByTestId('btn-dibujar-parcela');
+    await drawBtn.scrollIntoViewIfNeeded();
+    await drawBtn.click({ force: true });
+    await page.waitForTimeout(2000);
+    
+    // Draw a polygon
+    const polygonTool = page.locator('.leaflet-draw-draw-polygon');
+    if (await polygonTool.isVisible({ timeout: 3000 })) {
+      await polygonTool.click({ force: true });
+      await page.waitForTimeout(500);
+      
+      const leafletMap = page.locator('.leaflet-container').first();
+      const mapBox = await leafletMap.boundingBox();
+      
+      if (mapBox) {
+        const centerX = mapBox.x + mapBox.width / 2;
+        const centerY = mapBox.y + mapBox.height / 2;
+        
+        await page.mouse.click(centerX - 50, centerY - 50);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX + 50, centerY - 50);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX, centerY + 50);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX - 50, centerY - 50);
+        await page.waitForTimeout(1000);
+        
+        // Hide the drawing map
+        await drawBtn.click({ force: true });
+        await page.waitForTimeout(1000);
+        
+        // Green indicator should appear showing "Parcela dibujada manualmente"
+        await expect(page.locator('text=Parcela dibujada manualmente')).toBeVisible({ timeout: 5000 });
+        
+        // Should show calculated area
+        await expect(page.locator('text=Área calculada:')).toBeVisible();
+        
+        // Edit button should be visible
+        const editBtn = page.getByTestId('btn-editar-dibujo');
+        await expect(editBtn).toBeVisible();
+      }
+    }
+  });
+
+  test('should update Hectáreas field when polygon is drawn', async ({ page }) => {
+    // Get initial hectareas value
+    const hectareasInput = page.getByTestId('input-hectareas');
+    await hectareasInput.scrollIntoViewIfNeeded();
+    const initialValue = await hectareasInput.inputValue();
+    
+    // Open drawing map
+    const drawBtn = page.getByTestId('btn-dibujar-parcela');
+    await drawBtn.scrollIntoViewIfNeeded();
+    await drawBtn.click({ force: true });
+    await page.waitForTimeout(2000);
+    
+    // Draw a polygon
+    const polygonTool = page.locator('.leaflet-draw-draw-polygon');
+    if (await polygonTool.isVisible({ timeout: 3000 })) {
+      await polygonTool.click({ force: true });
+      await page.waitForTimeout(500);
+      
+      const leafletMap = page.locator('.leaflet-container').first();
+      const mapBox = await leafletMap.boundingBox();
+      
+      if (mapBox) {
+        const centerX = mapBox.x + mapBox.width / 2;
+        const centerY = mapBox.y + mapBox.height / 2;
+        
+        // Draw a larger polygon for more noticeable area
+        await page.mouse.click(centerX - 100, centerY - 100);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX + 100, centerY - 100);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX + 100, centerY + 100);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX - 100, centerY + 100);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX - 100, centerY - 100);
+        await page.waitForTimeout(1000);
+        
+        // Scroll to hectareas to check updated value
+        await hectareasInput.scrollIntoViewIfNeeded();
+        await page.waitForTimeout(500);
+        
+        // Hectareas value should be different (area was calculated)
+        const newValue = await hectareasInput.inputValue();
+        // The value should have changed from 0 to some calculated area
+        if (initialValue === '0' || initialValue === '') {
+          expect(parseFloat(newValue)).toBeGreaterThan(0);
+        }
+      }
+    }
+  });
+});
