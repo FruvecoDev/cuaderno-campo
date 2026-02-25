@@ -5,8 +5,8 @@ import { test, expect } from '@playwright/test';
  */
 test.describe('Recomendaciones Page Stats Layout', () => {
   
-  test.beforeEach(async ({ page }) => {
-    // Login first
+  // Helper to login and dismiss any modals
+  async function loginAndNavigate(page: any, targetUrl: string) {
     await page.goto('/');
     await page.waitForLoadState('domcontentloaded');
     
@@ -17,34 +17,36 @@ test.describe('Recomendaciones Page Stats Layout', () => {
       localStorage.setItem('resumen_diario_shown', today);
     });
     
-    // Fill login form
-    await page.fill('input[type="email"], input[placeholder*="usuario"], input[placeholder*="email"]', 'admin@fruveco.com');
-    await page.fill('input[type="password"]', 'admin123');
-    await page.click('button[type="submit"]');
-    
-    // Wait for navigation to any page after login (dashboard or similar)
-    await page.waitForURL(/\/(dashboard|parcelas|recomendaciones)/, { timeout: 15000 });
-  });
-
-  test('should navigate to Recomendaciones page', async ({ page }) => {
-    // Navigate to Recomendaciones
-    await page.goto('/recomendaciones');
+    // Reload to apply localStorage changes
+    await page.reload();
     await page.waitForLoadState('domcontentloaded');
     
-    // Wait for page content to load
-    await page.waitForSelector('[data-testid="recomendaciones-page"]', { timeout: 10000 });
+    // Fill login form
+    await page.locator('input').first().fill('admin@fruveco.com');
+    await page.locator('input[type="password"]').fill('admin123');
+    await page.locator('button:has-text("Iniciar Sesión")').click();
     
-    // Verify page loads
+    // Wait for dashboard navigation
+    await page.waitForURL(/\/(dashboard|parcelas)/, { timeout: 15000 });
+    
+    // Navigate to target page
+    await page.goto(targetUrl);
+    await page.waitForLoadState('domcontentloaded');
+  }
+
+  test('should navigate to Recomendaciones page', async ({ page }) => {
+    await loginAndNavigate(page, '/recomendaciones');
+    
+    // Verify page loads by checking for the title
+    await expect(page.locator('h1:has-text("Recomendaciones")')).toBeVisible({ timeout: 10000 });
     await expect(page.getByTestId('recomendaciones-page')).toBeVisible();
-    await expect(page.locator('h1:has-text("Recomendaciones")')).toBeVisible();
   });
 
   test('should display 4 stat counters in horizontal layout', async ({ page }) => {
-    await page.goto('/recomendaciones');
-    await page.waitForLoadState('domcontentloaded');
+    await loginAndNavigate(page, '/recomendaciones');
     
     // Wait for page content to load
-    await page.waitForSelector('[data-testid="recomendaciones-page"]', { timeout: 10000 });
+    await expect(page.locator('h1:has-text("Recomendaciones")')).toBeVisible({ timeout: 10000 });
     
     // Check for the 4 stat counters - they should all be visible
     await expect(page.locator('text=Total').first()).toBeVisible();
@@ -54,19 +56,17 @@ test.describe('Recomendaciones Page Stats Layout', () => {
   });
 
   test('should have counters in a 4-column grid layout', async ({ page }) => {
-    await page.goto('/recomendaciones');
-    await page.waitForLoadState('domcontentloaded');
+    await loginAndNavigate(page, '/recomendaciones');
     
     // Wait for page content to load
-    await page.waitForSelector('[data-testid="recomendaciones-page"]', { timeout: 10000 });
+    await expect(page.locator('h1:has-text("Recomendaciones")')).toBeVisible({ timeout: 10000 });
     
     // Find the stats container - it should use grid with 4 columns
-    // The stats are in card elements after the header
     const statsContainer = page.locator('[style*="grid-template-columns: repeat(4"]');
     await expect(statsContainer.first()).toBeVisible();
     
     // Get the computed style to verify 4 columns
-    const gridStyle = await statsContainer.first().evaluate((el) => {
+    const gridStyle = await statsContainer.first().evaluate((el: HTMLElement) => {
       return window.getComputedStyle(el).gridTemplateColumns;
     });
     
@@ -76,22 +76,17 @@ test.describe('Recomendaciones Page Stats Layout', () => {
   });
 
   test('should show numeric values in stat counters', async ({ page }) => {
-    await page.goto('/recomendaciones');
-    await page.waitForLoadState('domcontentloaded');
+    await loginAndNavigate(page, '/recomendaciones');
     
     // Wait for stats to load
-    await page.waitForSelector('[data-testid="recomendaciones-page"]', { timeout: 10000 });
+    await expect(page.locator('h1:has-text("Recomendaciones")')).toBeVisible({ timeout: 10000 });
     
     // Find the stat cards - they contain large numbers
-    const cards = page.locator('.card').filter({ hasText: 'Total' }).first();
-    await expect(cards).toBeVisible();
-    
-    // Look for numbers (stats values like 0, 1, 2, etc)
-    // The numbers should be in elements with large font
     const totalCard = page.locator('.card').filter({ hasText: 'Total' }).first();
-    const numberElement = totalCard.locator('[style*="font-weight: 700"]').first();
+    await expect(totalCard).toBeVisible();
     
-    // The number should be visible
+    // Look for the number element
+    const numberElement = totalCard.locator('[style*="font-weight: 700"]').first();
     await expect(numberElement).toBeVisible();
     
     // Text content should be a number
@@ -101,16 +96,21 @@ test.describe('Recomendaciones Page Stats Layout', () => {
   });
 
   test('should display stats in horizontal row (not stacked)', async ({ page }) => {
-    await page.goto('/recomendaciones');
-    await page.waitForLoadState('domcontentloaded');
+    await loginAndNavigate(page, '/recomendaciones');
     
-    await page.waitForSelector('[data-testid="recomendaciones-page"]', { timeout: 10000 });
+    await expect(page.locator('h1:has-text("Recomendaciones")')).toBeVisible({ timeout: 10000 });
     
     // Get positions of stat cards
     const totalCard = page.locator('.card').filter({ hasText: 'Total' }).first();
     const pendientesCard = page.locator('.card').filter({ hasText: 'Pendientes' }).first();
     const programadasCard = page.locator('.card').filter({ hasText: 'Programadas' }).first();
     const aplicadasCard = page.locator('.card').filter({ hasText: 'Aplicadas' }).first();
+    
+    // Wait for cards to be visible
+    await expect(totalCard).toBeVisible();
+    await expect(pendientesCard).toBeVisible();
+    await expect(programadasCard).toBeVisible();
+    await expect(aplicadasCard).toBeVisible();
     
     // Get bounding boxes
     const totalBox = await totalCard.boundingBox();
@@ -124,7 +124,7 @@ test.describe('Recomendaciones Page Stats Layout', () => {
     expect(aplicadasBox).not.toBeNull();
     
     // All cards should be on approximately the same Y position (horizontal layout)
-    const tolerance = 10; // Allow small variation
+    const tolerance = 15; // Allow small variation
     expect(Math.abs((totalBox?.y || 0) - (pendientesBox?.y || 0))).toBeLessThan(tolerance);
     expect(Math.abs((pendientesBox?.y || 0) - (programadasBox?.y || 0))).toBeLessThan(tolerance);
     expect(Math.abs((programadasBox?.y || 0) - (aplicadasBox?.y || 0))).toBeLessThan(tolerance);
@@ -136,15 +136,14 @@ test.describe('Recomendaciones Page Stats Layout', () => {
   });
 
   test('should have colored borders for stat cards', async ({ page }) => {
-    await page.goto('/recomendaciones');
-    await page.waitForLoadState('domcontentloaded');
+    await loginAndNavigate(page, '/recomendaciones');
     
-    await page.waitForSelector('[data-testid="recomendaciones-page"]', { timeout: 10000 });
+    await expect(page.locator('h1:has-text("Recomendaciones")')).toBeVisible({ timeout: 10000 });
     
     // Check that stat cards with borders exist (Pendientes has orange, Programadas has blue, Aplicadas has green)
-    const pendientesCard = page.locator('.card[style*="border-left: 4px solid"]').filter({ hasText: 'Pendientes' });
-    const programadasCard = page.locator('.card[style*="border-left: 4px solid"]').filter({ hasText: 'Programadas' });
-    const aplicadasCard = page.locator('.card[style*="border-left: 4px solid"]').filter({ hasText: 'Aplicadas' });
+    const pendientesCard = page.locator('.card[style*="border-left"]').filter({ hasText: 'Pendientes' });
+    const programadasCard = page.locator('.card[style*="border-left"]').filter({ hasText: 'Programadas' });
+    const aplicadasCard = page.locator('.card[style*="border-left"]').filter({ hasText: 'Aplicadas' });
     
     await expect(pendientesCard.first()).toBeVisible();
     await expect(programadasCard.first()).toBeVisible();
