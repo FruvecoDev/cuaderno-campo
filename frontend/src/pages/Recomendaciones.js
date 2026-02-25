@@ -482,6 +482,8 @@ const Recomendaciones = () => {
     setFormData({
       parcela_id: '',
       contrato_id: '',
+      cultivo: '',
+      variedad: '',
       campana: new Date().getFullYear().toString(),
       tipo: 'Tratamiento Fitosanitario',
       subtipo: '',
@@ -500,6 +502,7 @@ const Recomendaciones = () => {
     setShowForm(false);
     setShowCalculadora(false);
     setAlerts({});
+    setRecomendacionesPendientes([]);
   };
   
   const handleContratoChange = (contratoId) => {
