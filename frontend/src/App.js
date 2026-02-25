@@ -172,6 +172,12 @@ function App() {
           </ProtectedRoute>
         } />
         
+        <Route path="/liquidacion-comisiones" element={
+          <ProtectedRoute>
+            <Layout><LiquidacionComisiones /></Layout>
+          </ProtectedRoute>
+        } />
+        
         <Route path="/evaluaciones" element={
           <ProtectedRoute>
             <Layout><Evaluaciones /></Layout>
