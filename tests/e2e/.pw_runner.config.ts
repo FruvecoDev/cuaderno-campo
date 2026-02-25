@@ -11,7 +11,7 @@ export default defineConfig({
     ['json', { outputFile: '/root/.emergent/automation_output/20260225_160803/results.json' }],
   ],
   use: {
-    baseURL: 'https://harvest-log-1.preview.emergentagent.com',
+    baseURL: 'https://finca-suite.preview.emergentagent.com',
     screenshot: 'only-on-failure',
     trace: 'off',
     headless: true,
