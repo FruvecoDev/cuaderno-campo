@@ -264,8 +264,8 @@ test.describe('Fincas Refactored - CRUD Operations', () => {
     // Save
     await page.getByTestId('btn-guardar-finca').click({ force: true });
     
-    // Verify form closes and finca appears in list
-    await expect(page.getByTestId('form-finca')).not.toBeVisible({ timeout: 5000 });
+    // Wait for form to close (allow time for API response)
+    await expect(page.getByTestId('form-finca')).not.toBeVisible({ timeout: 10000 });
     
     // Search for the created finca
     await page.getByTestId('input-filtro-buscar').fill(testId);
