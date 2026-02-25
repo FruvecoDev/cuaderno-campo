@@ -263,8 +263,11 @@ const Contratos = () => {
       observaciones: contrato.observaciones || '',
       agente_compra: contrato.agente_compra || '',
       agente_venta: contrato.agente_venta || '',
-      comision_tipo: contrato.comision_tipo || 'porcentaje',
-      comision_valor: contrato.comision_valor || ''
+      // Comisiones separadas
+      comision_compra_tipo: contrato.comision_compra_tipo || contrato.comision_tipo || 'porcentaje',
+      comision_compra_valor: contrato.comision_compra_valor || contrato.comision_valor || '',
+      comision_venta_tipo: contrato.comision_venta_tipo || 'porcentaje',
+      comision_venta_valor: contrato.comision_venta_valor || ''
     });
     setShowForm(true);
   };
