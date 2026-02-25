@@ -1,0 +1,118 @@
+{
+  "summary": "Testing iteration 22: Updated and verified new Recomendaciones features - Contrato selector filtering Parcelas, auto-fill Cultivo/Variedad on Parcela selection, multi-recommendation pending list with 'Añadir a la lista' and 'Guardar Todas' buttons, and backend cultivo/variedad field persistence.",
+  "mode": "update",
+  "baseline_commit": "90fe9db4f8cbd996b1856f29f514b419169044a7",
+  "head_commit": "04e6c1723bc19f6576515133de0a56a3bdde3eca",
+
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+
+  "passed_tests": {
+    "backend_pytest": [
+      "test_get_tipos_config",
+      "test_get_stats_resumen",
+      "test_list_recomendaciones",
+      "test_create_recomendacion",
+      "test_create_requires_parcela",
+      "test_get_recomendacion_by_id",
+      "test_update_recomendacion",
+      "test_delete_recomendacion",
+      "test_recomendacion_not_found",
+      "test_invalid_recomendacion_id",
+      "test_filter_by_tipo",
+      "test_filter_by_prioridad",
+      "test_filter_by_estado",
+      "test_generar_tratamiento",
+      "test_cannot_generate_twice",
+      "test_cannot_edit_after_tratamiento",
+      "test_list_requires_auth",
+      "test_create_requires_auth",
+      "test_config_tipos_no_auth_required",
+      "test_create_with_cultivo_variedad",
+      "test_update_cultivo_variedad"
+    ],
+    "frontend_playwright": [
+      "should display Recomendaciones link in sidebar and navigate",
+      "should load page with header, KPIs and Nueva Recomendación button",
+      "should open form with all required fields including Contrato and Cultivo/Variedad",
+      "should close form on Cancel",
+      "should filter parcelas when contrato is selected",
+      "should auto-fill cultivo and variedad when parcela is selected",
+      "should add recommendation to pending list with 'Añadir a la lista' button",
+      "should display pending recommendations table correctly",
+      "should save all pending recommendations with 'Guardar Todas' button",
+      "should remove item from pending list",
+      "should create a new recommendation successfully"
+    ]
+  },
+
+  "regression_results": {
+    "total_specs": 2,
+    "passed": 32,
+    "failed": 0,
+    "skipped": 0
+  },
+
+  "specs_created": [],
+
+  "specs_updated": [
+    "/app/backend/tests/test_recomendaciones.py",
+    "/app/tests/e2e/recomendaciones.spec.ts"
+  ],
+
+  "test_report_links": [
+    "/app/backend/tests/test_recomendaciones.py",
+    "/app/tests/e2e/recomendaciones.spec.ts",
+    "/app/test_reports/pytest/test_recomendaciones.xml"
+  ],
+
+  "action_items": [],
+
+  "updated_files": [
+    "/app/backend/tests/test_recomendaciones.py",
+    "/app/tests/e2e/recomendaciones.spec.ts"
+  ],
+
+  "success_rate": {
+    "backend": "100% (21/21 passed)",
+    "frontend": "100% (11/11 passed)"
+  },
+
+  "seed_data_creation": "Test recommendations created and cleaned up during testing. No persistent test data.",
+
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+
+  "context_for_next_testing_agent": "Recomendaciones module fully tested including new features from iteration 22: (1) Contrato selector filters available Parcelas - when a contrato is selected, parcelas dropdown shows only parcelas associated with that contrato, (2) Parcela selection auto-fills Cultivo and Variedad fields from parcela data with visual green background indicator, (3) 'Añadir a la lista' button adds current form to pending recommendations list without saving to backend, (4) Pending recommendations table shows items with columns: Parcela, Cultivo, Tipo, Producto, Dosis, Prioridad, Alertas, and remove button, (5) 'Guardar Todas' button batch-saves all pending recommendations, (6) Backend persists cultivo and variedad fields correctly on create/update.",
+
+  "features_verified": {
+    "new_features": {
+      "contrato_filters_parcelas": "✓ Selecting a contrato filters the parcelas dropdown to show only associated parcelas",
+      "auto_fill_cultivo_variedad": "✓ Selecting a parcela auto-fills cultivo and variedad from parcela data",
+      "add_to_pending_list": "✓ 'Añadir a la lista' button adds recommendation to pending list",
+      "pending_table_display": "✓ Pending recommendations table displays items with all columns",
+      "save_all_button": "✓ 'Guardar Todas' button saves all pending recommendations",
+      "remove_from_pending": "✓ Remove button in pending list removes item",
+      "cultivo_variedad_persistence": "✓ Backend correctly saves and retrieves cultivo/variedad fields"
+    },
+    "existing_features": {
+      "crud_operations": "✓ All CRUD operations still working",
+      "treatment_generation": "✓ Treatment generation from recommendation working",
+      "auth_requirements": "✓ Auth requirements enforced correctly",
+      "filters": "✓ Filtering by tipo/prioridad/estado working"
+    }
+  },
+
+  "test_credentials": {
+    "admin_email": "admin@fruveco.com",
+    "admin_password": "admin123"
+  }
+}
