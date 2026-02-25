@@ -1101,13 +1101,23 @@ const Recomendaciones = () => {
       )}
       
       {/* Form */}
-      {showForm && (
+      {activeTab === 'recomendaciones' && showForm && (
         <div className="card mb-6">
           <div className="flex justify-between items-center mb-4">
             <h3 style={{ fontWeight: '600' }}>
               {editingId ? 'Editar Recomendación' : 'Nueva Recomendación'}
             </h3>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
+              {/* Use Template Button */}
+              {!editingId && (
+                <button 
+                  className="btn btn-sm btn-secondary"
+                  onClick={() => setShowPlantillaSelector(true)}
+                  title="Usar una plantilla"
+                >
+                  <Layers size={16} /> Usar Plantilla
+                </button>
+              )}
               <button 
                 className={`btn btn-sm ${showCalculadora ? 'btn-primary' : 'btn-secondary'}`}
                 onClick={() => setShowCalculadora(!showCalculadora)}
