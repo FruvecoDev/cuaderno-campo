@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, X, MapPin, Search, Home, ChevronDown, ChevronUp, Layers, Loader2, ExternalLink, CheckCircle, AlertCircle, Link2, Unlink } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, MapPin, Search, Home, ChevronDown, ChevronUp, Layers, Loader2, ExternalLink, CheckCircle, AlertCircle, Link2, Unlink, Map, Eye } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import MapaSigpac from '../components/MapaSigpac';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
@@ -47,6 +48,10 @@ const Fincas = () => {
   const [parcelasDisponibles, setParcelasDisponibles] = useState([]);
   const [showAsignarParcela, setShowAsignarParcela] = useState(false);
   const [selectedFincaForParcelas, setSelectedFincaForParcelas] = useState(null);
+  
+  // Estado para mapa de parcela
+  const [showParcelaMap, setShowParcelaMap] = useState(false);
+  const [selectedParcelaForMap, setSelectedParcelaForMap] = useState(null);
   
   // Filtros
   const [filters, setFilters] = useState({
@@ -364,6 +369,7 @@ const Fincas = () => {
       if (res.ok) {
         fetchFincas();
         fetchParcelasDisponibles();
+        fetchParcelas();
       } else {
         const error = await res.json();
         alert(error.detail || 'Error al asignar parcela');
@@ -385,6 +391,7 @@ const Fincas = () => {
       if (res.ok) {
         fetchFincas();
         fetchParcelasDisponibles();
+        fetchParcelas();
       }
     } catch (err) {
       console.error('Error desasignando parcela:', err);
@@ -395,6 +402,26 @@ const Fincas = () => {
   const getParcelasDeFinca = (finca) => {
     if (!finca.parcelas_ids || finca.parcelas_ids.length === 0) return [];
     return parcelas.filter(p => finca.parcelas_ids.includes(p._id));
+  };
+
+  // Ver mapa de una parcela
+  const handleVerMapaParcela = (parcela) => {
+    setSelectedParcelaForMap(parcela);
+    setShowParcelaMap(true);
+  };
+
+  // Verificar si la parcela tiene geometría para mostrar mapa
+  const parcelaTieneMapa = (parcela) => {
+    // Tiene geometría en recintos
+    if (parcela.recintos && parcela.recintos.length > 0) {
+      const tieneGeometria = parcela.recintos.some(r => r.geometria && r.geometria.length > 0);
+      if (tieneGeometria) return true;
+    }
+    // Tiene datos SIGPAC que podrían tener geometría
+    if (parcela.sigpac_data || (parcela.recintos && parcela.recintos[0]?.provincia_sigpac)) {
+      return true;
+    }
+    return false;
   };
 
   const clearFilters = () => {
@@ -644,7 +671,7 @@ const Fincas = () => {
               </div>
             </div>
 
-            {/* Sección 3: Datos SIGPAC */}
+            {/* Sección 3: Datos SIGPAC (solo para referencia, sin mapa) */}
             <div style={{ 
               backgroundColor: '#e3f2fd', 
               padding: '1rem', 
@@ -655,7 +682,7 @@ const Fincas = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                 <h4 style={{ color: '#1565c0', fontWeight: '600', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
                   <MapPin size={18} />
-                  Datos SIGPAC
+                  Datos SIGPAC (Referencia)
                 </h4>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button
@@ -701,7 +728,7 @@ const Fincas = () => {
               </div>
               
               <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.75rem', fontStyle: 'italic' }}>
-                Introduzca los códigos SIGPAC y pulse "Buscar en SIGPAC" para obtener automáticamente la superficie y el uso del terreno.
+                Introduzca los códigos SIGPAC para obtener automáticamente la superficie y el uso del terreno. Estos datos son de referencia para la finca.
               </p>
               
               {/* Resultado de búsqueda SIGPAC */}
@@ -1187,41 +1214,96 @@ const Fincas = () => {
                         </div>
                       </div>
                       
-                      {/* Parcelas asignadas */}
+                      {/* Parcelas asociadas - Cards con botón de mapa */}
                       {parcelasDeFinca.length > 0 && (
-                        <div style={{ marginTop: '1rem' }}>
-                          <h5 style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#7b1fa2', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div style={{ marginTop: '1.5rem' }}>
+                          <h5 style={{ fontWeight: '600', marginBottom: '1rem', color: '#7b1fa2', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <Layers size={16} />
                             Parcelas de esta Finca ({parcelasDeFinca.length})
                           </h5>
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.75rem' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
                             {parcelasDeFinca.map(p => (
                               <div key={p._id} style={{
-                                backgroundColor: '#f3e5f5',
-                                padding: '0.75rem',
-                                borderRadius: '6px',
+                                backgroundColor: '#fff',
+                                padding: '1rem',
+                                borderRadius: '8px',
                                 border: '1px solid #ce93d8',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center'
-                              }}>
-                                <div>
-                                  <div style={{ fontWeight: '600', color: '#7b1fa2' }}>{p.codigo_plantacion || 'Sin código'}</div>
-                                  <div style={{ fontSize: '0.85rem', color: '#555' }}>
-                                    <strong>Cultivo:</strong> {p.cultivo || '-'} | <strong>Variedad:</strong> {p.variedad || '-'}
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                              }} data-testid={`parcela-card-${p._id}`}>
+                                {/* Header de la card */}
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                                  <div>
+                                    <h6 style={{ margin: 0, fontWeight: '600', color: '#7b1fa2', fontSize: '1rem' }}>
+                                      {p.codigo_plantacion || 'Sin código'}
+                                    </h6>
+                                    <span style={{
+                                      backgroundColor: '#f3e5f5',
+                                      color: '#7b1fa2',
+                                      padding: '2px 6px',
+                                      borderRadius: '4px',
+                                      fontSize: '0.7rem',
+                                      marginTop: '4px',
+                                      display: 'inline-block'
+                                    }}>
+                                      {p.campana || 'Sin campaña'}
+                                    </span>
                                   </div>
-                                  <div style={{ fontSize: '0.8rem', color: '#777' }}>
-                                    {p.superficie_total} ha | {p.num_plantas} plantas
+                                  <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                    {/* Botón Ver Mapa */}
+                                    <button
+                                      className="btn btn-sm"
+                                      style={{ 
+                                        backgroundColor: '#e8f5e9', 
+                                        color: '#2e7d32', 
+                                        padding: '4px 8px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px'
+                                      }}
+                                      onClick={() => handleVerMapaParcela(p)}
+                                      title="Ver mapa de la parcela"
+                                      data-testid={`btn-ver-mapa-${p._id}`}
+                                    >
+                                      <Map size={14} />
+                                      <span style={{ fontSize: '0.75rem' }}>Mapa</span>
+                                    </button>
+                                    {/* Botón Quitar */}
+                                    <button
+                                      className="btn btn-sm"
+                                      style={{ backgroundColor: '#ffcdd2', color: '#c62828', padding: '4px 8px' }}
+                                      onClick={() => desasignarParcela(finca._id, p._id)}
+                                      title="Quitar parcela de la finca"
+                                      data-testid={`btn-quitar-parcela-${p._id}`}
+                                    >
+                                      <Unlink size={12} />
+                                    </button>
                                   </div>
                                 </div>
-                                <button
-                                  className="btn btn-sm"
-                                  style={{ backgroundColor: '#ffcdd2', color: '#c62828', padding: '4px 8px' }}
-                                  onClick={() => desasignarParcela(finca._id, p._id)}
-                                  title="Quitar parcela de la finca"
-                                >
-                                  <Unlink size={12} />
-                                </button>
+                                
+                                {/* Contenido de la card */}
+                                <div style={{ fontSize: '0.85rem', color: '#555' }}>
+                                  <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem' }}>
+                                    <div>
+                                      <strong>Cultivo:</strong> {p.cultivo || '-'}
+                                    </div>
+                                    <div>
+                                      <strong>Variedad:</strong> {p.variedad || '-'}
+                                    </div>
+                                  </div>
+                                  <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem' }}>
+                                    <div>
+                                      <strong>Superficie:</strong> {p.superficie_total?.toLocaleString() || '0'} ha
+                                    </div>
+                                    <div>
+                                      <strong>Plantas:</strong> {p.num_plantas?.toLocaleString() || '0'}
+                                    </div>
+                                  </div>
+                                  {p.proveedor && (
+                                    <div style={{ color: '#888', fontSize: '0.8rem' }}>
+                                      <strong>Proveedor:</strong> {p.proveedor}
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             ))}
                           </div>
@@ -1273,7 +1355,7 @@ const Fincas = () => {
             overflow: 'auto',
             zIndex: 9999,
             boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
-          }}>
+          }} data-testid="modal-asignar-parcelas">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Link2 size={24} style={{ color: '#2d5a27' }} />
@@ -1370,6 +1452,81 @@ const Fincas = () => {
                   ))}
                 </div>
               )}
+            </div>
+          </div>
+        </>
+      )}
+      
+      {/* Modal Mapa de Parcela */}
+      {showParcelaMap && selectedParcelaForMap && (
+        <>
+          <div 
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.6)',
+              zIndex: 9998
+            }}
+            onClick={() => {
+              setShowParcelaMap(false);
+              setSelectedParcelaForMap(null);
+            }}
+          />
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '1rem',
+            width: '90%',
+            maxWidth: '900px',
+            height: '80vh',
+            zIndex: 9999,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+            display: 'flex',
+            flexDirection: 'column'
+          }} data-testid="modal-mapa-parcela">
+            {/* Header del modal */}
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              marginBottom: '0.75rem',
+              paddingBottom: '0.75rem',
+              borderBottom: '1px solid #e0e0e0'
+            }}>
+              <div>
+                <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#2d5a27' }}>
+                  <Map size={24} />
+                  Mapa - {selectedParcelaForMap.codigo_plantacion || 'Parcela'}
+                </h3>
+                <div style={{ fontSize: '0.85rem', color: '#666', marginTop: '4px' }}>
+                  {selectedParcelaForMap.cultivo} | {selectedParcelaForMap.variedad} | {selectedParcelaForMap.superficie_total} ha
+                </div>
+              </div>
+              <button 
+                className="btn btn-sm btn-secondary"
+                onClick={() => {
+                  setShowParcelaMap(false);
+                  setSelectedParcelaForMap(null);
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+            
+            {/* Mapa */}
+            <div style={{ flex: 1, minHeight: 0 }}>
+              <MapaSigpac 
+                parcela={selectedParcelaForMap}
+                height="100%"
+                showControls={true}
+              />
             </div>
           </div>
         </>
