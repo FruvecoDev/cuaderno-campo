@@ -902,6 +902,7 @@ const Recomendaciones = () => {
   };
   
   const canManage = user?.role && ['Admin', 'Manager', 'Technician'].includes(user.role);
+  const canManagePlantillas = user?.role && ['Admin', 'Manager'].includes(user.role);
   
   if (loading) {
     return (
@@ -922,23 +923,76 @@ const Recomendaciones = () => {
           </h1>
           <p className="text-muted">Gestiona las recomendaciones técnicas para parcelas y cultivos</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button
-            className={`btn ${showFilters ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            <Filter size={18} />
-          </button>
-          {canManage && (
-            <button
-              className="btn btn-primary"
-              onClick={() => { resetForm(); setShowForm(true); }}
-              data-testid="btn-nueva-recomendacion"
-            >
-              <Plus size={18} /> Nueva Recomendación
-            </button>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          {activeTab === 'recomendaciones' && (
+            <>
+              <button
+                className={`btn ${showFilters ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <Filter size={18} />
+              </button>
+              {canManage && (
+                <>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setShowAplicacionMasiva(true)}
+                    title="Aplicación Masiva desde Plantilla"
+                    data-testid="btn-aplicacion-masiva"
+                  >
+                    <Zap size={18} /> Aplicación Masiva
+                  </button>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => { resetForm(); setShowForm(true); }}
+                    data-testid="btn-nueva-recomendacion"
+                  >
+                    <Plus size={18} /> Nueva Recomendación
+                  </button>
+                </>
+              )}
+            </>
+          )}
+          {activeTab === 'plantillas' && canManagePlantillas && (
+            <>
+              {plantillas.length === 0 && (
+                <button
+                  className="btn btn-secondary"
+                  onClick={handleSeedPlantillas}
+                  title="Cargar plantillas predeterminadas"
+                >
+                  <Copy size={18} /> Cargar Predeterminadas
+                </button>
+              )}
+              <button
+                className="btn btn-primary"
+                onClick={() => { resetPlantillaForm(); setShowPlantillaForm(true); }}
+                data-testid="btn-nueva-plantilla"
+              >
+                <Plus size={18} /> Nueva Plantilla
+              </button>
+            </>
           )}
         </div>
+      </div>
+      
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '2px solid hsl(var(--border))', paddingBottom: '0.5rem' }}>
+        <button
+          className={`btn ${activeTab === 'recomendaciones' ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={() => setActiveTab('recomendaciones')}
+          style={{ borderRadius: '0.5rem 0.5rem 0 0' }}
+        >
+          <FileText size={16} /> Recomendaciones ({recomendaciones.length})
+        </button>
+        <button
+          className={`btn ${activeTab === 'plantillas' ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={() => setActiveTab('plantillas')}
+          style={{ borderRadius: '0.5rem 0.5rem 0 0' }}
+          data-testid="tab-plantillas"
+        >
+          <Layers size={16} /> Plantillas ({plantillas.length})
+        </button>
       </div>
       
       {/* Messages */}
