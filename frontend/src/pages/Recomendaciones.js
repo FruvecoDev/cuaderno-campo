@@ -2278,3 +2278,8 @@ const Recomendaciones = () => {
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+export default Recomendaciones;
