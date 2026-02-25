@@ -2100,7 +2100,13 @@ const Recomendaciones = () => {
             borderRadius: '0.5rem',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
           }}>
-            <div className="modal-header">
+            <div className="modal-header" style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              padding: '1rem 1.5rem',
+              borderBottom: '1px solid hsl(var(--border))'
+            }}>
               <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Layers size={20} /> Seleccionar Plantilla
               </h3>
@@ -2162,7 +2168,13 @@ const Recomendaciones = () => {
       {showAplicacionMasiva && (
         <div className="modal-overlay" onClick={() => { setShowAplicacionMasiva(false); setSelectedPlantilla(null); setSelectedParcelas([]); }}>
           <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '800px' }}>
-            <div className="modal-header">
+            <div className="modal-header" style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              padding: '1rem 1.5rem',
+              borderBottom: '1px solid hsl(var(--border))'
+            }}>
               <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Zap size={20} /> Aplicación Masiva
               </h3>
