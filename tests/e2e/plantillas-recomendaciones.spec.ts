@@ -83,18 +83,21 @@ test.describe('Plantillas - CRUD Operations', () => {
     await page.getByTestId('btn-nueva-plantilla').click();
     
     // Wait for form to appear
-    await expect(page.locator('label').filter({ hasText: /Nombre de la Plantilla/i })).toBeVisible();
+    await expect(page.locator('h3').filter({ hasText: /Nueva Plantilla/i })).toBeVisible();
     
-    // Fill nombre field - find input near the label
-    const nombreInput = page.locator('input').first();
+    // Scroll to top to see the form
+    await page.evaluate(() => window.scrollTo(0, 0));
+    
+    // Fill nombre field - use placeholder text to find the correct input
+    const nombreInput = page.locator('input[placeholder*="Control preventivo"]');
     await nombreInput.fill(plantillaName);
     
-    // Select tipo (form should have tipo select)
+    // Select tipo (form should have tipo select with "Tratamiento Fitosanitario")
     const tipoSelect = page.locator('select').filter({ has: page.locator('option:has-text("Tratamiento Fitosanitario")') }).first();
     await tipoSelect.selectOption('Fertilización');
     
     // Fill dosis
-    const dosisInput = page.locator('input[type="number"]').first();
+    const dosisInput = page.locator('input[placeholder*="0.00"]').first();
     await dosisInput.fill('5.0');
     
     // Submit
