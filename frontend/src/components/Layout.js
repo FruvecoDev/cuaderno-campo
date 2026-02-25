@@ -377,6 +377,11 @@ const Layout = ({ children }) => {
           {children}
         </div>
       </div>
+      
+      {/* Resumen Diario Modal */}
+      {showResumenDiario && (
+        <ResumenDiario onClose={() => setShowResumenDiario(false)} />
+      )}
     </div>
   );
 };
