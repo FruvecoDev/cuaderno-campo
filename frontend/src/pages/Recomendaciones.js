@@ -394,25 +394,27 @@ const Recomendaciones = () => {
         body: JSON.stringify(plantillaForm)
       });
       
-      // Read the response text first, then parse as JSON
-      const text = await response.text();
-      let data;
-      try {
-        data = text ? JSON.parse(text) : {};
-      } catch (e) {
-        data = { detail: text || 'Error procesando respuesta' };
+      if (!response.ok) {
+        let errorMsg = 'Error al guardar plantilla';
+        try {
+          const errorData = await response.json();
+          errorMsg = errorData.detail || errorMsg;
+        } catch (e) {
+          // Ignore JSON parse errors for error response
+        }
+        throw new Error(errorMsg);
       }
       
-      if (!response.ok) {
-        throw new Error(data.detail || 'Error al guardar plantilla');
-      }
+      // Success case - parse response
+      const data = await response.json();
       
       setSuccess(editingPlantillaId ? 'Plantilla actualizada' : 'Plantilla creada');
       setTimeout(() => setSuccess(null), 3000);
       resetPlantillaForm();
       fetchPlantillas();
     } catch (err) {
-      setError(err.message);
+      console.error('Error en handlePlantillaSubmit:', err);
+      setError(err.message || 'Error desconocido');
     }
   };
   
