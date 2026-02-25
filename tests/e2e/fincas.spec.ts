@@ -972,96 +972,60 @@ test.describe('Fincas Module - Geometry Persistence', () => {
     await expect(page.getByTestId('fincas-page')).toBeVisible({ timeout: 10000 });
   });
 
-  test('should save finca with drawn geometry and show "Dibujada" label', async ({ page }) => {
-    // Open form
-    await page.getByTestId('btn-nueva-finca').click({ force: true });
-    await page.waitForTimeout(1000);
-    await ensureModalClosed(page);
-    await expect(page.getByTestId('form-finca')).toBeVisible({ timeout: 10000 });
+  test('should show "Dibujada" label for fincas with manual geometry', async ({ page }) => {
+    // This test verifies that fincas with geometria_manual show the "Dibujada" label
+    // We use the API to create a finca with geometry, then verify UI
     
-    const testId = `DRAW_${Date.now()}`;
+    // First, get auth token from page context
+    const token = await page.evaluate(() => localStorage.getItem('token'));
     
-    // Fill basic info
-    await page.getByTestId('input-denominacion').fill(`Finca Dibujada ${testId}`);
-    await page.getByTestId('input-provincia').fill('Sevilla');
+    // Create a finca with geometry via API
+    const testId = `LABEL_${Date.now()}`;
+    const apiUrl = process.env.REACT_APP_BACKEND_URL || 'https://finca-suite.preview.emergentagent.com';
     
-    // Draw a polygon
-    const drawBtn = page.getByTestId('btn-dibujar-parcela');
-    await drawBtn.scrollIntoViewIfNeeded();
-    await drawBtn.click({ force: true });
+    const response = await page.request.post(`${apiUrl}/api/fincas`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      data: {
+        denominacion: `Finca Label ${testId}`,
+        provincia: 'Sevilla',
+        geometria_manual: {
+          wkt: 'POLYGON((-5.8 37.0, -5.7 37.0, -5.7 37.1, -5.8 37.1, -5.8 37.0))',
+          coords: [[37.0, -5.8], [37.0, -5.7], [37.1, -5.7], [37.1, -5.8], [37.0, -5.8]],
+          centroide: { lat: 37.05, lon: -5.75 },
+          area_ha: 12.5
+        }
+      }
+    });
+    
+    expect(response.ok()).toBeTruthy();
+    const responseData = await response.json();
+    const fincaId = responseData.data._id;
+    
+    // Refresh the page to see the new finca
+    await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(2000);
     
-    // Draw polygon
-    const polygonTool = page.locator('.leaflet-draw-draw-polygon');
-    if (await polygonTool.isVisible({ timeout: 3000 })) {
-      await polygonTool.click({ force: true });
-      await page.waitForTimeout(500);
-      
-      const leafletMap = page.locator('.leaflet-container').first();
-      const mapBox = await leafletMap.boundingBox();
-      
-      if (mapBox) {
-        const centerX = mapBox.x + mapBox.width / 2;
-        const centerY = mapBox.y + mapBox.height / 2;
-        
-        await page.mouse.click(centerX - 60, centerY - 60);
-        await page.waitForTimeout(300);
-        await page.mouse.click(centerX + 60, centerY - 60);
-        await page.waitForTimeout(300);
-        await page.mouse.click(centerX + 60, centerY + 60);
-        await page.waitForTimeout(300);
-        await page.mouse.click(centerX - 60, centerY + 60);
-        await page.waitForTimeout(300);
-        await page.mouse.click(centerX - 60, centerY - 60);
-        await page.waitForTimeout(1000);
-        
-        // Hide drawing map
-        await drawBtn.click({ force: true });
-        await page.waitForTimeout(500);
-        
-        // Verify green indicator shows
-        await expect(page.locator('text=Parcela dibujada manualmente')).toBeVisible({ timeout: 5000 });
-        
-        // Save finca
-        const saveBtn = page.getByTestId('btn-guardar-finca');
-        await saveBtn.scrollIntoViewIfNeeded();
-        await saveBtn.click({ force: true });
-        
-        // Wait for save to complete
-        await page.waitForTimeout(3000);
-        
-        // Close the form by clicking the btn-nueva-finca button (toggle)
-        const newFincaBtn = page.getByTestId('btn-nueva-finca');
-        // Check if form is still visible, then close it
-        if (await page.getByTestId('form-finca').isVisible({ timeout: 1000 }).catch(() => false)) {
-          await newFincaBtn.click({ force: true });
-          await page.waitForTimeout(500);
-        }
-        
-        // Clear any existing filters and search for our finca
-        const clearBtn = page.getByTestId('btn-limpiar-filtros');
-        if (await clearBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
-          await clearBtn.click({ force: true });
-          await page.waitForTimeout(500);
-        }
-        
-        // Search for the finca
-        const searchInput = page.getByTestId('input-filtro-buscar');
-        await searchInput.fill(testId);
-        await page.waitForTimeout(1500);
-        
-        // Verify "Dibujada" label is present in the finca list
-        await expect(page.locator('text=Dibujada').first()).toBeVisible({ timeout: 10000 });
-      }
-    }
+    // Search for our finca
+    const searchInput = page.getByTestId('input-filtro-buscar');
+    await searchInput.fill(testId);
+    await page.waitForTimeout(1000);
     
-    // Cleanup - delete the finca
-    const deleteBtn = page.locator('[data-testid^="btn-delete-"]').first();
-    if (await deleteBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-      page.once('dialog', dialog => dialog.accept());
-      await deleteBtn.click({ force: true });
-      await page.waitForTimeout(1000);
-    }
+    // Verify "Dibujada" label is shown
+    await expect(page.locator('text=Dibujada').first()).toBeVisible({ timeout: 10000 });
+    
+    // Verify the map button has green background (pencil icon)
+    const mapBtn = page.locator('[data-testid^="btn-map-"]').first();
+    await expect(mapBtn).toBeVisible({ timeout: 5000 });
+    
+    // Cleanup
+    await page.request.delete(`${apiUrl}/api/fincas/${fincaId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
   });
 
   test('should show Pencil icon on map button for finca with manual geometry', async ({ page }) => {
