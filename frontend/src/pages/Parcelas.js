@@ -616,6 +616,8 @@ const Parcelas = () => {
     setPolygon([]);
     setSearchContrato('');
     setContratoSearch({ proveedor: '', cultivo: '', campana: '' });
+    setSigpacResult(null);
+    setSigpacError(null);
     setFormData({
       contrato_id: '',
       proveedor: '', 
@@ -625,7 +627,17 @@ const Parcelas = () => {
       superficie_total: '', 
       codigo_plantacion: '', 
       num_plantas: '', 
-      finca: ''
+      finca: '',
+      sigpac: {
+        provincia: '',
+        municipio: '',
+        cod_agregado: '',
+        zona: '',
+        poligono: '',
+        parcela: '',
+        recinto: '',
+        cod_uso: ''
+      }
     });
   };
   
