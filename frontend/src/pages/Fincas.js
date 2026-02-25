@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, X, MapPin, Search, Home, ChevronDown, ChevronUp, Map, Layers, Loader2, ExternalLink, CheckCircle, AlertCircle, Eye } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, MapPin, Search, Home, ChevronDown, ChevronUp, Map, Layers, Loader2, ExternalLink, CheckCircle, AlertCircle, Eye, Pencil } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 // Lazy load map component
