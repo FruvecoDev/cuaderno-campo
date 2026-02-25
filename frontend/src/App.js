@@ -33,6 +33,7 @@ import Clientes from './pages/Clientes';
 import LiquidacionComisiones from './pages/LiquidacionComisiones';
 import Configuracion from './pages/Configuracion';
 import Recomendaciones from './pages/Recomendaciones';
+import AlertasClima from './pages/AlertasClima';
 
 function App() {
   return (
