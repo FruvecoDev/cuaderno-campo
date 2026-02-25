@@ -5,7 +5,7 @@ import {
   LayoutDashboard, FileText, MapPin, Home, Calendar, ListTodo,
   Sprout, Droplets, BookOpen, FileBarChart, Wheat, FolderOpen,
   LogOut, User, Users, Package, Leaf, Cog, ClipboardCheck, Beaker, BarChart3, Globe, Brain, UserCheck,
-  ChevronDown, ChevronRight, TrendingUp
+  ChevronDown, ChevronRight, TrendingUp, Menu, X
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import LanguageSelector from './LanguageSelector';
@@ -18,11 +18,42 @@ const Layout = ({ children }) => {
   const { user, logout, canDoOperacion } = useAuth();
   const { t } = useTranslation();
   
+  // Estado para sidebar móvil
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
   // Estado para secciones colapsadas
   const [collapsedSections, setCollapsedSections] = useState(() => {
     const saved = localStorage.getItem('menu_collapsed_sections');
     return saved ? JSON.parse(saved) : {};
   });
+  
+  // Cerrar menú móvil al cambiar de ruta
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+  
+  // Cerrar menú móvil al redimensionar a desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Prevenir scroll cuando el menú móvil está abierto
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMobileMenuOpen]);
   
   // Guardar estado en localStorage
   useEffect(() => {
