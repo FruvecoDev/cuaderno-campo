@@ -712,3 +712,32 @@ Módulos actualizados para seguir patrón consistente:
 - **Test Report**: `/app/test_reports/iteration_17.json` - 100% (15/15 tests)
 - **Estado**: ✅ COMPLETADO Y TESTEADO
 
+
+
+## Configuración de Logos Personalizados (25/02/2026) - COMPLETADO
+- **Alcance**: Permite a administradores cambiar los logos de la aplicación
+- **Logos configurables**:
+  - **Logo de Login**: Aparece en la pantalla de inicio de sesión
+  - **Logo de Dashboard**: Aparece en el menú lateral del dashboard
+- **Backend**:
+  - **Archivo**: `/app/backend/routes_config.py`
+  - **Endpoints**:
+    - `GET /api/config/logos` - Obtiene URLs de ambos logos (público)
+    - `POST /api/config/logo/{type}` - Sube logo (login/dashboard, solo admin)
+    - `DELETE /api/config/logo/{type}` - Elimina logo específico (solo admin)
+  - **Almacenamiento**: `/app/uploads/logos/`
+  - **MongoDB**: Colección `app_settings` con key "logos"
+- **Frontend**:
+  - **Página**: `/app/frontend/src/pages/Configuracion.js`
+  - **Funcionalidades**:
+    - Interfaz drag-and-drop para subir imágenes (react-dropzone)
+    - Preview del logo actual
+    - Botón para eliminar y restaurar logo por defecto
+    - Validación de formato (PNG, JPG, WebP, SVG) y tamaño (máx. 5MB)
+  - **Integración**:
+    - `Login.js`: Carga logo personalizado dinámicamente
+    - `Layout.js`: Carga logo del sidebar dinámicamente
+- **Acceso**: Solo usuarios con rol "Admin" (ruta `/configuracion`)
+- **Navegación**: Configuración > Configuración App
+- **Test Report**: `/app/test_reports/iteration_18.json` - 100% (24/24 tests)
+- **Estado**: ✅ COMPLETADO Y TESTEADO
