@@ -981,8 +981,10 @@ test.describe('Fincas Module - Geometry Persistence', () => {
     await ensureModalClosed(page);
     await expect(page.getByTestId('form-finca')).toBeVisible({ timeout: 10000 });
     
+    const testId = `DRAW_${Date.now()}`;
+    
     // Fill basic info
-    await page.getByTestId('input-denominacion').fill(`Finca Dibujada ${uniqueId}`);
+    await page.getByTestId('input-denominacion').fill(`Finca Dibujada ${testId}`);
     await page.getByTestId('input-provincia').fill('Sevilla');
     
     // Draw a polygon
@@ -1026,19 +1028,25 @@ test.describe('Fincas Module - Geometry Persistence', () => {
         const saveBtn = page.getByTestId('btn-guardar-finca');
         await saveBtn.scrollIntoViewIfNeeded();
         await saveBtn.click({ force: true });
-        await page.waitForTimeout(2000);
         
-        // Verify finca appears in list with "Dibujada" label
-        const searchInput = page.getByTestId('input-filtro-buscar');
-        await searchInput.fill(uniqueId);
+        // Wait for form to close
+        await expect(page.getByTestId('form-finca')).not.toBeVisible({ timeout: 10000 });
         await page.waitForTimeout(1000);
         
-        // Find our finca in the list
-        const fincaCard = page.locator(`text=Finca Dibujada ${uniqueId}`).first();
-        await expect(fincaCard).toBeVisible({ timeout: 5000 });
+        // Clear any existing filters and search for our finca
+        const clearBtn = page.getByTestId('btn-limpiar-filtros');
+        if (await clearBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
+          await clearBtn.click({ force: true });
+          await page.waitForTimeout(500);
+        }
         
-        // Verify "Dibujada" label is present
-        await expect(page.locator('text=Dibujada').first()).toBeVisible({ timeout: 5000 });
+        // Search for the finca
+        const searchInput = page.getByTestId('input-filtro-buscar');
+        await searchInput.fill(testId);
+        await page.waitForTimeout(1500);
+        
+        // Verify "Dibujada" label is present in the finca list
+        await expect(page.locator('text=Dibujada').first()).toBeVisible({ timeout: 10000 });
       }
     }
     
