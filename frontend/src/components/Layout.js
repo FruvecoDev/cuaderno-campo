@@ -335,7 +335,7 @@ const Layout = ({ children }) => {
       </aside>
       
       <div className="main-content">
-        {/* Header con indicador offline */}
+        {/* Header con indicador offline y notificaciones */}
         <div style={{
           position: 'sticky',
           top: 0,
@@ -346,8 +346,9 @@ const Layout = ({ children }) => {
           display: 'flex',
           justifyContent: 'flex-end',
           alignItems: 'center',
-          gap: '0.5rem'
+          gap: '0.75rem'
         }}>
+          <NotificacionesDropdown />
           <OfflineIndicator />
         </div>
         <div className="content">
