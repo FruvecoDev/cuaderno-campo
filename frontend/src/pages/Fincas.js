@@ -1231,6 +1231,51 @@ const Fincas = () => {
           </div>
         )}
       </div>
+      
+      {/* Mapa flotante para ver fincas desde el listado */}
+      {showMap && mapData && !showForm && (
+        <div style={{
+          position: 'fixed',
+          top: mapExpanded ? 0 : '50%',
+          left: mapExpanded ? 0 : '50%',
+          transform: mapExpanded ? 'none' : 'translate(-50%, -50%)',
+          width: mapExpanded ? '100%' : '80%',
+          maxWidth: mapExpanded ? '100%' : '900px',
+          height: mapExpanded ? '100%' : '500px',
+          zIndex: 9999,
+          boxShadow: mapExpanded ? 'none' : '0 4px 20px rgba(0,0,0,0.3)',
+          borderRadius: mapExpanded ? 0 : '8px',
+          overflow: 'hidden'
+        }}>
+          <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center', backgroundColor: 'white' }}>Cargando mapa...</div>}>
+            <MapaSigpac
+              sigpacData={mapData.sigpac}
+              wkt={mapData.wkt}
+              centroide={mapData.centroide}
+              denominacion={mapData.denominacion}
+              onClose={() => { setShowMap(false); setMapData(null); }}
+              isExpanded={mapExpanded}
+              onToggleExpand={() => setMapExpanded(!mapExpanded)}
+            />
+          </Suspense>
+        </div>
+      )}
+      
+      {/* Overlay para el mapa flotante */}
+      {showMap && mapData && !showForm && !mapExpanded && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            zIndex: 9998
+          }}
+          onClick={() => { setShowMap(false); setMapData(null); }}
+        />
+      )}
     </div>
   );
 };
