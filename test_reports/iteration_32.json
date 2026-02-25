@@ -1,0 +1,58 @@
+{
+  "summary": "Geometry Persistence Feature - All tests passing. Added 5 new backend tests for geometria_manual field and 4 new frontend tests for geometry persistence UI. Backend: 23/23 tests pass including the new TestGeometriaManual class. Frontend: All 36 fincas.spec.ts tests pass including the 4 new Geometry Persistence tests.",
+  "mode": "update",
+  "baseline_commit": "05260e3d35194a63491fb1d6725a06d9346f079a",
+  "head_commit": "cde7635b9b4d282c60381a0c30db21eb848f5165",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "regression_results": {
+    "total_specs": 1,
+    "passed": 36,
+    "failed": 0,
+    "skipped": 0
+  },
+  "specs_created": [],
+  "specs_updated": [
+    "/app/tests/e2e/fincas.spec.ts"
+  ],
+  "quarantined_tests": [],
+  "test_report_links": [
+    "/app/tests/e2e/fincas.spec.ts",
+    "/app/backend/tests/test_fincas.py"
+  ],
+  "action_items": [],
+  "updated_files": [
+    "/app/tests/e2e/fincas.spec.ts",
+    "/app/backend/tests/test_fincas.py"
+  ],
+  "success_rate": {
+    "backend": "100% (23/23 fincas tests)",
+    "frontend": "100% (36/36 fincas tests)"
+  },
+  "seed_data_creation": "No new seed data created. Tests use API to create/cleanup test data.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Geometry Persistence Feature fully tested. New tests added:\n\nBackend (test_fincas.py - TestGeometriaManual class):\n1. test_create_finca_with_geometria_manual - POST creates finca with geometry data\n2. test_get_finca_with_geometria_manual - GET returns geometry correctly\n3. test_update_finca_geometria_manual - PUT updates geometry\n4. test_update_finca_replace_geometria_manual - PUT replaces geometry\n5. test_fincas_list_includes_geometria_manual - GET list includes geometry\n\nFrontend (fincas.spec.ts - Geometry Persistence section):\n1. should show 'Dibujada' label for fincas with manual geometry\n2. should show Pencil icon on map button for finca with manual geometry\n3. should load existing geometry when editing a finca with manual geometry\n4. should show calculated area in indicator for saved geometry\n\nKey testids for geometry features:\n- btn-dibujar-parcela (toggle drawing map)\n- btn-editar-dibujo (edit existing drawing)\n- btn-clear-drawings (clear all drawings)\n- mapa-sigpac-container (map container)\n\nGeometriaManual model fields: wkt, coords, centroide, area_ha",
+  "tested_features": {
+    "backend_endpoints": [
+      "POST /api/fincas with geometria_manual - Creates finca with drawn geometry",
+      "GET /api/fincas/{id} - Returns geometria_manual correctly",
+      "PUT /api/fincas/{id} with geometria_manual - Updates/replaces geometry",
+      "GET /api/fincas - List includes geometria_manual for each finca"
+    ],
+    "frontend_features": [
+      "'Dibujada' label on fincas with manual geometry in list",
+      "Pencil icon (green) on map button for fincas with manual geometry",
+      "Load existing geometry when editing finca",
+      "Show 'Parcela dibujada manualmente' indicator with area",
+      "'Editar' button to modify existing geometry"
+    ]
+  }
+}
