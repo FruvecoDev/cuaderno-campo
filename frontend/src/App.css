@@ -542,11 +542,11 @@ tr:hover {
     gap: 1rem;
   }
   
-  .grid-4 {
+  .grid-4, .grid-responsive-4 {
     grid-template-columns: repeat(2, 1fr);
   }
   
-  .grid-3 {
+  .grid-3, .grid-responsive-3 {
     grid-template-columns: repeat(2, 1fr);
   }
   
@@ -560,6 +560,10 @@ tr:hover {
   
   .page-title {
     font-size: 1.5rem;
+  }
+  
+  .page-header {
+    flex-wrap: wrap;
   }
 }
 
