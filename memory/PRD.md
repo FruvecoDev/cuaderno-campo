@@ -705,6 +705,7 @@ Módulos actualizados para seguir patrón consistente:
   - Guardar visitas/tratamientos en cola cuando offline
   - Sincronización automática al reconectar
   - Carga de parcelas desde cache cuando offline
+  - **Notificaciones push** cuando se sincronicen datos (Web Notifications API)
 - **Páginas modificadas**:
   - **Visitas.js**: Soporte offline para crear visitas
   - **Tratamientos.js**: Soporte offline para crear tratamientos
