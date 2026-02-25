@@ -1081,3 +1081,41 @@ Módulos actualizados para seguir patrón consistente:
 - Issue menor: Modal "Resumen Diario" puede interferir ocasionalmente (LOW priority)
 
 ### Estado: ✅ COMPLETADO Y TESTEADO
+
+
+## Mapa de Parcelas SIGPAC (25/02/2026) - COMPLETADO
+- **Alcance**: Visualización de parcelas en mapa interactivo con búsqueda por códigos SIGPAC
+- **Componente**: `/app/frontend/src/components/MapaSigpac.js`
+- **Tecnología**: react-leaflet + Leaflet.js
+
+### Funcionalidad:
+1. **Mapa integrado en formulario de Fincas**:
+   - Se muestra automáticamente tras búsqueda SIGPAC exitosa
+   - Dibuja el polígono de la parcela (naranja) usando geometría WKT
+   - Auto-centrado en la ubicación de la parcela
+
+2. **Acceso desde listado de Fincas**:
+   - Botón de mapa (icono verde) en cada finca con datos SIGPAC
+   - Abre mapa flotante modal sobre el listado
+   - Muestra título "Mapa SIGPAC - [Nombre Finca]"
+
+3. **Capas de mapa disponibles**:
+   - **Satélite**: ESRI World Imagery (por defecto)
+   - **Callejero**: OpenStreetMap
+   - **Topográfico**: OpenTopoMap
+
+4. **Controles del mapa**:
+   - Selector de capa (dropdown)
+   - Botón "Ampliar/Reducir" para pantalla completa
+   - Botón cerrar (X)
+   - Panel de datos SIGPAC con info de la parcela
+
+5. **Panel de información** (esquina inferior izquierda):
+   - Provincia, Municipio, Polígono, Parcela, Recinto, Uso
+
+### Test Report: `/app/test_reports/iteration_30.json`
+- Backend: 100% (9/9 tests)
+- Frontend: 100% (21/21 tests)
+- Total: 30/30 tests passed
+
+### Estado: ✅ COMPLETADO Y TESTEADO
