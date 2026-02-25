@@ -17,13 +17,15 @@ test.describe('Recomendaciones Page Stats Layout', () => {
       localStorage.setItem('resumen_diario_shown', today);
     });
     
-    // Reload to apply localStorage changes
-    await page.reload();
-    await page.waitForLoadState('domcontentloaded');
+    // Fill login form - clear and fill properly
+    const emailInput = page.locator('input').first();
+    await emailInput.clear();
+    await emailInput.fill('admin@fruveco.com');
     
-    // Fill login form
-    await page.locator('input').first().fill('admin@fruveco.com');
-    await page.locator('input[type="password"]').fill('admin123');
+    const passwordInput = page.locator('input[type="password"]');
+    await passwordInput.clear();
+    await passwordInput.fill('admin123');
+    
     await page.locator('button:has-text("Iniciar Sesión")').click();
     
     // Wait for dashboard navigation
