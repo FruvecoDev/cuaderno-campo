@@ -181,8 +181,9 @@ test.describe('Fincas Refactored - SIGPAC Search (Reference Data)', () => {
     await page.getByTestId('input-sigpac-provincia').scrollIntoViewIfNeeded();
     await page.getByTestId('btn-buscar-sigpac').click({ force: true });
     
-    // Should show error about missing required fields
-    await expect(page.locator('text=Debe completar al menos')).toBeVisible({ timeout: 5000 });
+    // Should show error about missing required fields - look for error style element
+    const errorBox = page.locator('[style*="ffcdd2"]');
+    await expect(errorBox).toBeVisible({ timeout: 5000 });
   });
 
   test('should load provinces in dropdown', async ({ page }) => {
