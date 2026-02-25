@@ -1,0 +1,508 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - img "Logo" [ref=e7]
+      - navigation [ref=e8]:
+        - generic [ref=e9]:
+          - generic [ref=e10]:
+            - generic "Colapsar sección" [ref=e11] [cursor=pointer]:
+              - generic [ref=e12]: General
+              - img [ref=e14]
+            - generic [ref=e17]:
+              - link "Dashboard" [ref=e18] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=e19]
+                - text: Dashboard
+              - link "Asistente IA" [ref=e24] [cursor=pointer]:
+                - /url: /asistente-ia
+                - img [ref=e25]
+                - text: Asistente IA
+          - generic [ref=e33]:
+            - generic "Colapsar sección" [ref=e34] [cursor=pointer]:
+              - generic [ref=e35]: Gestión Principal
+              - img [ref=e37]
+            - generic [ref=e40]:
+              - link "Contratos" [ref=e41] [cursor=pointer]:
+                - /url: /contratos
+                - img [ref=e42]
+                - text: Contratos
+              - link "Parcelas" [ref=e45] [cursor=pointer]:
+                - /url: /parcelas
+                - img [ref=e46]
+                - text: Parcelas
+              - link "Fincas" [ref=e49] [cursor=pointer]:
+                - /url: /fincas
+                - img [ref=e50]
+                - text: Fincas
+          - generic [ref=e53]:
+            - generic "Colapsar sección" [ref=e54] [cursor=pointer]:
+              - generic [ref=e55]: Actividades
+              - img [ref=e57]
+            - generic [ref=e60]:
+              - link "Visitas" [ref=e61] [cursor=pointer]:
+                - /url: /visitas
+                - img [ref=e62]
+                - text: Visitas
+              - link "Recomendaciones" [ref=e64] [cursor=pointer]:
+                - /url: /recomendaciones
+                - img [ref=e65]
+                - text: Recomendaciones
+              - link "Tareas" [ref=e68] [cursor=pointer]:
+                - /url: /tareas
+                - img [ref=e69]
+                - text: Tareas
+              - link "Tratamientos" [ref=e72] [cursor=pointer]:
+                - /url: /tratamientos
+                - img [ref=e73]
+                - text: Tratamientos
+              - link "Irrigaciones" [ref=e76] [cursor=pointer]:
+                - /url: /irrigaciones
+                - img [ref=e77]
+                - text: Irrigaciones
+              - link "Evaluaciones" [ref=e80] [cursor=pointer]:
+                - /url: /evaluaciones
+                - img [ref=e81]
+                - text: Evaluaciones
+          - generic [ref=e85]:
+            - generic "Colapsar sección" [ref=e86] [cursor=pointer]:
+              - generic [ref=e87]: Administración
+              - img [ref=e89]
+            - generic [ref=e92]:
+              - link "Recetas" [ref=e93] [cursor=pointer]:
+                - /url: /recetas
+                - img [ref=e94]
+                - text: Recetas
+              - link "Albaranes" [ref=e96] [cursor=pointer]:
+                - /url: /albaranes
+                - img [ref=e97]
+                - text: Albaranes
+              - link "Cosechas" [ref=e100] [cursor=pointer]:
+                - /url: /cosechas
+                - img [ref=e101]
+                - text: Cosechas
+              - link "Documentos" [ref=e110] [cursor=pointer]:
+                - /url: /documentos
+                - img [ref=e111]
+                - text: Documentos
+              - link "Informes Gastos" [ref=e113] [cursor=pointer]:
+                - /url: /informes-gastos
+                - img [ref=e114]
+                - text: Informes Gastos
+              - link "Informes Ingresos" [ref=e116] [cursor=pointer]:
+                - /url: /informes-ingresos
+                - img [ref=e117]
+                - text: Informes Ingresos
+              - link "Liquidación Comisiones" [ref=e120] [cursor=pointer]:
+                - /url: /liquidacion-comisiones
+                - img [ref=e121]
+                - text: Liquidación Comisiones
+          - generic [ref=e124]:
+            - generic "Colapsar sección" [ref=e125] [cursor=pointer]:
+              - generic [ref=e126]: Catálogos
+              - img [ref=e128]
+            - generic [ref=e131]:
+              - link "Proveedores" [ref=e132] [cursor=pointer]:
+                - /url: /proveedores
+                - img [ref=e133]
+                - text: Proveedores
+              - link "Clientes" [ref=e137] [cursor=pointer]:
+                - /url: /clientes
+                - img [ref=e138]
+                - text: Clientes
+              - link "Cultivos" [ref=e143] [cursor=pointer]:
+                - /url: /cultivos
+                - img [ref=e144]
+                - text: Cultivos
+              - link "Maquinaria" [ref=e147] [cursor=pointer]:
+                - /url: /maquinaria
+                - img [ref=e148]
+                - text: Maquinaria
+              - link "Fitosanitarios" [ref=e159] [cursor=pointer]:
+                - /url: /fitosanitarios
+                - img [ref=e160]
+                - text: Fitosanitarios
+              - link "Técnicos Aplicadores" [ref=e162] [cursor=pointer]:
+                - /url: /tecnicos-aplicadores
+                - img [ref=e163]
+                - text: Técnicos Aplicadores
+              - link "Artículos Explotación" [ref=e167] [cursor=pointer]:
+                - /url: /articulos-explotacion
+                - img [ref=e168]
+                - text: Artículos Explotación
+              - link "Agentes" [ref=e172] [cursor=pointer]:
+                - /url: /agentes
+                - img [ref=e173]
+                - text: Agentes
+          - generic [ref=e178]:
+            - generic "Colapsar sección" [ref=e179] [cursor=pointer]:
+              - generic [ref=e180]: Configuración
+              - img [ref=e182]
+            - generic [ref=e185]:
+              - link "Usuarios" [ref=e186] [cursor=pointer]:
+                - /url: /usuarios
+                - img [ref=e187]
+                - text: Usuarios
+              - link "Traducciones" [ref=e192] [cursor=pointer]:
+                - /url: /traducciones
+                - img [ref=e193]
+                - text: Traducciones
+              - link "Configuración App" [ref=e196] [cursor=pointer]:
+                - /url: /configuracion
+                - img [ref=e197]
+                - text: Configuración App
+      - generic [ref=e200]:
+        - generic [ref=e201]:
+          - img [ref=e203]
+          - generic [ref=e206]:
+            - generic [ref=e207]: Administrador FRUVECO
+            - generic [ref=e208]: Admin
+          - button "ES" [ref=e210] [cursor=pointer]:
+            - img [ref=e211]
+            - generic [ref=e214]: ES
+        - button "Cerrar Sesión" [ref=e215] [cursor=pointer]:
+          - img [ref=e216]
+          - text: Cerrar Sesión
+    - generic [ref=e219]:
+      - button "Conectado" [ref=e222] [cursor=pointer]:
+        - img [ref=e224]
+        - generic [ref=e228]: Conectado
+      - generic [ref=e231]:
+        - generic [ref=e232]:
+          - generic [ref=e233]:
+            - heading "Recomendaciones" [level=1] [ref=e234]:
+              - img [ref=e235]
+              - text: Recomendaciones
+            - paragraph [ref=e238]: Gestiona las recomendaciones técnicas para parcelas y cultivos
+          - button "Nueva Plantilla" [ref=e241] [cursor=pointer]:
+            - img [ref=e242]
+            - text: Nueva Plantilla
+        - generic [ref=e243]:
+          - button "Recomendaciones ( 11 )" [ref=e244] [cursor=pointer]:
+            - img [ref=e245]
+            - text: Recomendaciones ( 11 )
+          - button "Plantillas ( 8 )" [ref=e248] [cursor=pointer]:
+            - img [ref=e249]
+            - text: Plantillas ( 8 )
+        - generic [ref=e254]:
+          - img [ref=e255]
+          - text: "Failed to execute 'json' on 'Response': body stream already read"
+          - button [ref=e257]:
+            - img [ref=e258]
+        - generic [ref=e261]:
+          - generic [ref=e262]:
+            - generic [ref=e263]:
+              - heading "Nueva Plantilla" [level=3] [ref=e264]
+              - button [ref=e265] [cursor=pointer]:
+                - img [ref=e266]
+            - generic [ref=e269]:
+              - generic [ref=e270]:
+                - generic [ref=e271]:
+                  - generic [ref=e272]: Nombre de la Plantilla *
+                  - 'textbox "Ej: Control preventivo de hongos" [ref=e273]': Test TEST_1772030305134_yjf4mi
+                - generic [ref=e274]:
+                  - generic [ref=e275]: Descripción
+                  - textbox "Breve descripción del uso de esta plantilla" [ref=e276]
+                - generic [ref=e277]:
+                  - generic [ref=e278]: Tipo
+                  - combobox [ref=e279]:
+                    - generic:
+                      - option
+                      - option [selected]
+                      - option
+                      - option
+                      - option
+                - generic [ref=e281]:
+                  - generic [ref=e282]: Producto
+                  - combobox [ref=e283]:
+                    - option "Seleccionar producto (opcional)" [selected]
+                    - generic:
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                      - option
+                - generic [ref=e284]:
+                  - generic [ref=e285]:
+                    - generic [ref=e286]: Dosis
+                    - spinbutton [ref=e287]: "5.0"
+                  - generic [ref=e288]:
+                    - generic [ref=e289]: Unidad
+                    - combobox [ref=e290]:
+                      - option "L/ha" [selected]
+                      - option "Kg/ha"
+                      - option "g/ha"
+                      - option "ml/ha"
+                - generic [ref=e291]:
+                  - generic [ref=e292]: Volumen Agua (L/ha)
+                  - spinbutton [ref=e293]
+                - generic [ref=e294]:
+                  - generic [ref=e295]: Prioridad
+                  - combobox [ref=e296]:
+                    - option "Alta"
+                    - option "Media" [selected]
+                    - option "Baja"
+                - generic [ref=e297]:
+                  - generic [ref=e298]: Motivo / Justificación
+                  - 'textbox "Ej: Prevención de enfermedades fúngicas" [ref=e299]'
+                - generic [ref=e300]:
+                  - generic [ref=e301]: Observaciones
+                  - textbox "Notas adicionales para quien use esta plantilla..." [ref=e302]
+              - generic [ref=e303]:
+                - button "Cancelar" [ref=e304] [cursor=pointer]
+                - button "Crear Plantilla" [active] [ref=e305] [cursor=pointer]
+          - generic [ref=e306]:
+            - heading "Plantillas de Recomendaciones ( 8 )" [level=3] [ref=e307]
+            - table [ref=e310]:
+              - rowgroup [ref=e311]:
+                - row "Nombre Tipo Producto Dosis Prioridad Usos Estado Acciones" [ref=e312]:
+                  - columnheader "Nombre" [ref=e313]
+                  - columnheader "Tipo" [ref=e314]
+                  - columnheader "Producto" [ref=e315]
+                  - columnheader "Dosis" [ref=e316]
+                  - columnheader "Prioridad" [ref=e317]
+                  - columnheader "Usos" [ref=e318]
+                  - columnheader "Estado" [ref=e319]
+                  - columnheader "Acciones" [ref=e320]
+              - rowgroup [ref=e321]:
+                - generic [ref=e322]:
+                  - row "Control de caracoles y babosas Molusquicida para control de caracoles Tratamiento Fitosanitario Molusquicida - 5 Kg/ha Media 12 Activa" [ref=e323]:
+                    - cell "Control de caracoles y babosas Molusquicida para control de caracoles" [ref=e324]:
+                      - generic [ref=e325]: Control de caracoles y babosas
+                      - generic [ref=e327]: Molusquicida para control de caracoles
+                    - cell "Tratamiento Fitosanitario Molusquicida" [ref=e328]:
+                      - generic [ref=e329]: Tratamiento Fitosanitario
+                      - generic [ref=e331]: Molusquicida
+                    - cell "-" [ref=e332]
+                    - cell "5 Kg/ha" [ref=e333]
+                    - cell "Media" [ref=e334]:
+                      - generic [ref=e335]: Media
+                    - cell "12" [ref=e336]:
+                      - generic [ref=e337]: "12"
+                    - cell "Activa" [ref=e338]:
+                      - button "Activa" [ref=e339] [cursor=pointer]:
+                        - img [ref=e341]
+                        - generic [ref=e344]: Activa
+                    - cell [ref=e345]:
+                      - generic [ref=e346]:
+                        - button "Aplicar a múltiples parcelas" [ref=e348] [cursor=pointer]:
+                          - img [ref=e349]
+                        - generic [ref=e351]:
+                          - button "Editar" [ref=e352] [cursor=pointer]:
+                            - img [ref=e353]
+                          - button "Eliminar" [ref=e355] [cursor=pointer]:
+                            - img [ref=e356]
+                  - row "Control de malas hierbas preemergencia Herbicida preemergente para control de adventicias Tratamiento Fitosanitario Herbicida - 3 L/ha Media 0 Activa" [ref=e359]:
+                    - cell "Control de malas hierbas preemergencia Herbicida preemergente para control de adventicias" [ref=e360]:
+                      - generic [ref=e361]: Control de malas hierbas preemergencia
+                      - generic [ref=e363]: Herbicida preemergente para control de adventicias
+                    - cell "Tratamiento Fitosanitario Herbicida" [ref=e364]:
+                      - generic [ref=e365]: Tratamiento Fitosanitario
+                      - generic [ref=e367]: Herbicida
+                    - cell "-" [ref=e368]
+                    - cell "3 L/ha" [ref=e369]
+                    - cell "Media" [ref=e370]:
+                      - generic [ref=e371]: Media
+                    - cell "0" [ref=e372]:
+                      - generic [ref=e373]: "0"
+                    - cell "Activa" [ref=e374]:
+                      - button "Activa" [ref=e375] [cursor=pointer]:
+                        - img [ref=e377]
+                        - generic [ref=e380]: Activa
+                    - cell [ref=e381]:
+                      - generic [ref=e382]:
+                        - button "Aplicar a múltiples parcelas" [ref=e384] [cursor=pointer]:
+                          - img [ref=e385]
+                        - generic [ref=e387]:
+                          - button "Editar" [ref=e388] [cursor=pointer]:
+                            - img [ref=e389]
+                          - button "Eliminar" [ref=e391] [cursor=pointer]:
+                            - img [ref=e392]
+                  - row "Control de pulgón Tratamiento curativo para infestación de pulgón Tratamiento Fitosanitario Insecticida - 0.5 L/ha Alta 0 Activa" [ref=e395]:
+                    - cell "Control de pulgón Tratamiento curativo para infestación de pulgón" [ref=e396]:
+                      - generic [ref=e397]: Control de pulgón
+                      - generic [ref=e399]: Tratamiento curativo para infestación de pulgón
+                    - cell "Tratamiento Fitosanitario Insecticida" [ref=e400]:
+                      - generic [ref=e401]: Tratamiento Fitosanitario
+                      - generic [ref=e403]: Insecticida
+                    - cell "-" [ref=e404]
+                    - cell "0.5 L/ha" [ref=e405]
+                    - cell "Alta" [ref=e406]:
+                      - generic [ref=e407]: Alta
+                    - cell "0" [ref=e408]:
+                      - generic [ref=e409]: "0"
+                    - cell "Activa" [ref=e410]:
+                      - button "Activa" [ref=e411] [cursor=pointer]:
+                        - img [ref=e413]
+                        - generic [ref=e416]: Activa
+                    - cell [ref=e417]:
+                      - generic [ref=e418]:
+                        - button "Aplicar a múltiples parcelas" [ref=e420] [cursor=pointer]:
+                          - img [ref=e421]
+                        - generic [ref=e423]:
+                          - button "Editar" [ref=e424] [cursor=pointer]:
+                            - img [ref=e425]
+                          - button "Eliminar" [ref=e427] [cursor=pointer]:
+                            - img [ref=e428]
+                  - row "Control preventivo de hongos Tratamiento preventivo para control de enfermedades fúngicas Tratamiento Fitosanitario Fungicida - 2 L/ha Media 0 Activa" [ref=e431]:
+                    - cell "Control preventivo de hongos Tratamiento preventivo para control de enfermedades fúngicas" [ref=e432]:
+                      - generic [ref=e433]: Control preventivo de hongos
+                      - generic [ref=e435]: Tratamiento preventivo para control de enfermedades fúngicas
+                    - cell "Tratamiento Fitosanitario Fungicida" [ref=e436]:
+                      - generic [ref=e437]: Tratamiento Fitosanitario
+                      - generic [ref=e439]: Fungicida
+                    - cell "-" [ref=e440]
+                    - cell "2 L/ha" [ref=e441]
+                    - cell "Media" [ref=e442]:
+                      - generic [ref=e443]: Media
+                    - cell "0" [ref=e444]:
+                      - generic [ref=e445]: "0"
+                    - cell "Activa" [ref=e446]:
+                      - button "Activa" [ref=e447] [cursor=pointer]:
+                        - img [ref=e449]
+                        - generic [ref=e452]: Activa
+                    - cell [ref=e453]:
+                      - generic [ref=e454]:
+                        - button "Aplicar a múltiples parcelas" [ref=e456] [cursor=pointer]:
+                          - img [ref=e457]
+                        - generic [ref=e459]:
+                          - button "Editar" [ref=e460] [cursor=pointer]:
+                            - img [ref=e461]
+                          - button "Eliminar" [ref=e463] [cursor=pointer]:
+                            - img [ref=e464]
+                  - row "Fertilización nitrogenada Aporte de nitrógeno para desarrollo vegetativo Fertilización Fertilizante - 150 Kg/ha Media 0 Activa" [ref=e467]:
+                    - cell "Fertilización nitrogenada Aporte de nitrógeno para desarrollo vegetativo" [ref=e468]:
+                      - generic [ref=e469]: Fertilización nitrogenada
+                      - generic [ref=e471]: Aporte de nitrógeno para desarrollo vegetativo
+                    - cell "Fertilización Fertilizante" [ref=e472]:
+                      - generic [ref=e473]: Fertilización
+                      - generic [ref=e475]: Fertilizante
+                    - cell "-" [ref=e476]
+                    - cell "150 Kg/ha" [ref=e477]
+                    - cell "Media" [ref=e478]:
+                      - generic [ref=e479]: Media
+                    - cell "0" [ref=e480]:
+                      - generic [ref=e481]: "0"
+                    - cell "Activa" [ref=e482]:
+                      - button "Activa" [ref=e483] [cursor=pointer]:
+                        - img [ref=e485]
+                        - generic [ref=e488]: Activa
+                    - cell [ref=e489]:
+                      - generic [ref=e490]:
+                        - button "Aplicar a múltiples parcelas" [ref=e492] [cursor=pointer]:
+                          - img [ref=e493]
+                        - generic [ref=e495]:
+                          - button "Editar" [ref=e496] [cursor=pointer]:
+                            - img [ref=e497]
+                          - button "Eliminar" [ref=e499] [cursor=pointer]:
+                            - img [ref=e500]
+                  - row "Poda de formación Poda para formación de estructura del cultivo Poda - - Media 0 Activa" [ref=e503]:
+                    - cell "Poda de formación Poda para formación de estructura del cultivo" [ref=e504]:
+                      - generic [ref=e505]: Poda de formación
+                      - generic [ref=e507]: Poda para formación de estructura del cultivo
+                    - cell "Poda" [ref=e508]:
+                      - generic [ref=e509]: Poda
+                    - cell "-" [ref=e510]
+                    - cell "-" [ref=e511]
+                    - cell "Media" [ref=e512]:
+                      - generic [ref=e513]: Media
+                    - cell "0" [ref=e514]:
+                      - generic [ref=e515]: "0"
+                    - cell "Activa" [ref=e516]:
+                      - button "Activa" [ref=e517] [cursor=pointer]:
+                        - img [ref=e519]
+                        - generic [ref=e522]: Activa
+                    - cell [ref=e523]:
+                      - generic [ref=e524]:
+                        - button "Aplicar a múltiples parcelas" [ref=e526] [cursor=pointer]:
+                          - img [ref=e527]
+                        - generic [ref=e529]:
+                          - button "Editar" [ref=e530] [cursor=pointer]:
+                            - img [ref=e531]
+                          - button "Eliminar" [ref=e533] [cursor=pointer]:
+                            - img [ref=e534]
+                  - row "Riego de mantenimiento Programación de riego estándar Riego - - Baja 0 Activa" [ref=e537]:
+                    - cell "Riego de mantenimiento Programación de riego estándar" [ref=e538]:
+                      - generic [ref=e539]: Riego de mantenimiento
+                      - generic [ref=e541]: Programación de riego estándar
+                    - cell "Riego" [ref=e542]:
+                      - generic [ref=e543]: Riego
+                    - cell "-" [ref=e544]
+                    - cell "-" [ref=e545]
+                    - cell "Baja" [ref=e546]:
+                      - generic [ref=e547]: Baja
+                    - cell "0" [ref=e548]:
+                      - generic [ref=e549]: "0"
+                    - cell "Activa" [ref=e550]:
+                      - button "Activa" [ref=e551] [cursor=pointer]:
+                        - img [ref=e553]
+                        - generic [ref=e556]: Activa
+                    - cell [ref=e557]:
+                      - generic [ref=e558]:
+                        - button "Aplicar a múltiples parcelas" [ref=e560] [cursor=pointer]:
+                          - img [ref=e561]
+                        - generic [ref=e563]:
+                          - button "Editar" [ref=e564] [cursor=pointer]:
+                            - img [ref=e565]
+                          - button "Eliminar" [ref=e567] [cursor=pointer]:
+                            - img [ref=e568]
+                  - row "Tratamiento araña roja Acaricida para control de araña roja Tratamiento Fitosanitario Acaricida - 0.8 L/ha Alta 0 Activa" [ref=e571]:
+                    - cell "Tratamiento araña roja Acaricida para control de araña roja" [ref=e572]:
+                      - generic [ref=e573]: Tratamiento araña roja
+                      - generic [ref=e575]: Acaricida para control de araña roja
+                    - cell "Tratamiento Fitosanitario Acaricida" [ref=e576]:
+                      - generic [ref=e577]: Tratamiento Fitosanitario
+                      - generic [ref=e579]: Acaricida
+                    - cell "-" [ref=e580]
+                    - cell "0.8 L/ha" [ref=e581]
+                    - cell "Alta" [ref=e582]:
+                      - generic [ref=e583]: Alta
+                    - cell "0" [ref=e584]:
+                      - generic [ref=e585]: "0"
+                    - cell "Activa" [ref=e586]:
+                      - button "Activa" [ref=e587] [cursor=pointer]:
+                        - img [ref=e589]
+                        - generic [ref=e592]: Activa
+                    - cell [ref=e593]:
+                      - generic [ref=e594]:
+                        - button "Aplicar a múltiples parcelas" [ref=e596] [cursor=pointer]:
+                          - img [ref=e597]
+                        - generic [ref=e599]:
+                          - button "Editar" [ref=e600] [cursor=pointer]:
+                            - img [ref=e601]
+                          - button "Eliminar" [ref=e603] [cursor=pointer]:
+                            - img [ref=e604]
+  - link "Made with Emergent" [ref=e607] [cursor=pointer]:
+    - /url: https://app.emergent.sh/?utm_source=emergent-badge
+    - img [ref=e608]
+    - paragraph [ref=e611]: Made with Emergent
+```
