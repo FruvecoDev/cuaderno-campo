@@ -63,25 +63,25 @@ const Login = () => {
       alignItems: 'center',
       justifyContent: 'center',
       background: 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%)',
-      position: 'relative'
+      position: 'relative',
+      padding: '1rem'
     }}>
       {/* Language selector in top right */}
-      <div style={{ position: 'absolute', top: '1rem', right: '1rem' }}>
+      <div style={{ position: 'absolute', top: '1rem', right: '1rem', zIndex: 10 }}>
         <LanguageSelector />
       </div>
       
       <div style={{
         width: '100%',
-        maxWidth: '400px',
-        padding: '2rem'
+        maxWidth: '400px'
       }}>
-        <div className="card" style={{ padding: '2.5rem' }}>
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <div className="card" style={{ padding: 'clamp(1.5rem, 5vw, 2.5rem)' }}>
+          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
             <img 
               src={logo} 
               alt="FRUVECO Logo" 
               style={{ 
-                maxWidth: '180px', 
+                maxWidth: 'min(180px, 70%)', 
                 height: 'auto',
                 marginBottom: '0.5rem'
               }} 
