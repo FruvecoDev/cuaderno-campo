@@ -354,8 +354,8 @@ test.describe('Fincas Refactored - Province Grouping (New)', () => {
       const firstGroup = provinceGroups.first();
       await expect(firstGroup).toBeVisible();
       
-      // Verify province badge shows count (e.g., "2 fincas")
-      const badge = firstGroup.locator('span').filter({ hasText: /\\d+ finca/ });
+      // Verify province has finca count badge - look for text pattern directly in group's immediate children
+      const badge = page.locator('[data-testid^="provincia-group-"]').first().locator('> div').first().locator('span').filter({ hasText: /\d+ finca/ });
       await expect(badge.first()).toBeVisible({ timeout: 3000 });
     }
   });
@@ -367,12 +367,13 @@ test.describe('Fincas Refactored - Province Grouping (New)', () => {
     const provinceGroup = page.locator('[data-testid^="provincia-group-"]').first();
     
     if (await provinceGroup.isVisible({ timeout: 3000 }).catch(() => false)) {
-      // Province name should be visible as h4
-      const provinceName = provinceGroup.locator('h4');
+      // Province name should be visible as h4 in the header div (first child div)
+      const headerDiv = provinceGroup.locator('> div').first();
+      const provinceName = headerDiv.locator('h4').first();
       await expect(provinceName).toBeVisible();
       
       // Count badge should be visible
-      await expect(provinceGroup.locator('text=/\\d+ finca/')).toBeVisible({ timeout: 2000 });
+      await expect(headerDiv.locator('span').filter({ hasText: /\d+ finca/ })).toBeVisible({ timeout: 2000 });
     }
   });
 });
