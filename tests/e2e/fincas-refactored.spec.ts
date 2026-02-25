@@ -3,20 +3,38 @@ import { login, dismissToasts, removeEmergentBadge } from '../fixtures/helpers';
 
 // Helper to close the daily summary modal if it appears
 async function closeDailySummaryModal(page: any) {
+  // Wait a moment for modal to appear
   try {
-    const closeBtn = page.locator('.modal-overlay button:has(svg), button:has-text("Entendido")').first();
-    if (await closeBtn.isVisible({ timeout: 2000 })) {
-      await closeBtn.click({ force: true });
+    await page.waitForTimeout(500);
+    
+    // Try clicking "Entendido" button first
+    const entendidoBtn = page.locator('button:has-text("Entendido")').first();
+    if (await entendidoBtn.isVisible({ timeout: 1500 })) {
+      await entendidoBtn.click({ force: true });
+      await page.waitForTimeout(300);
       return;
     }
   } catch {}
+  
   try {
+    // Try clicking the X close button
+    const closeBtn = page.locator('.modal-overlay button:has(svg)').first();
+    if (await closeBtn.isVisible({ timeout: 1000 })) {
+      await closeBtn.click({ force: true });
+      await page.waitForTimeout(300);
+      return;
+    }
+  } catch {}
+  
+  try {
+    // Try pressing Escape
     await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
   } catch {}
 }
 
 async function ensureModalClosed(page: any) {
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 5; i++) {
     const modal = page.locator('.modal-overlay');
     if (await modal.isVisible({ timeout: 1000 }).catch(() => false)) {
       await closeDailySummaryModal(page);
@@ -238,7 +256,10 @@ test.describe('Fincas Refactored - CRUD Operations', () => {
     await page.getByTestId('input-provincia').fill('Sevilla');
     await page.getByTestId('input-poblacion').fill('Lebrija');
     await page.getByTestId('input-hectareas').fill('25.5');
-    await page.getByTestId('input-finca-propia').check({ force: true });
+    
+    // Click checkbox using click instead of check (force: true)
+    const checkbox = page.getByTestId('input-finca-propia');
+    await checkbox.click({ force: true });
     
     // Save
     await page.getByTestId('btn-guardar-finca').click({ force: true });
