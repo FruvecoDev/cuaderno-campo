@@ -1192,3 +1192,38 @@ class GeometriaManual(BaseModel):
 - Total: 59 tests passed
 
 ### Estado: ✅ COMPLETADO Y TESTEADO
+
+
+## Integración SIGPAC en Parcelas (25/02/2026) - COMPLETADO
+- **Alcance**: Añadir funcionalidad de localización por SIGPAC al módulo de Parcelas
+- **Archivo modificado**: `/app/frontend/src/pages/Parcelas.js`
+
+### Funcionalidad:
+1. **Sección "Localizar por SIGPAC"** en el formulario de nueva/editar parcela
+2. **Campos de búsqueda**:
+   - Obligatorios: Provincia (dropdown), Municipio, Polígono, Parcela
+   - Opcionales: Agregado, Zona, Recinto, Cod. Uso
+3. **Botón "Buscar"**: Consulta la API SIGPAC
+4. **Resultado de búsqueda**:
+   - Mensaje de éxito con superficie y uso del terreno
+   - Auto-relleno del campo "Superficie (ha)" con datos de SIGPAC
+   - Dibujo automático del polígono en el mapa
+5. **Enlace "Visor"**: Abre el visor oficial de SIGPAC
+6. **Reset**: Los campos se limpian al cancelar el formulario
+
+### Flujo de uso:
+1. Usuario abre formulario de nueva parcela
+2. Introduce códigos SIGPAC (Provincia, Municipio, Polígono, Parcela)
+3. Pulsa "Buscar"
+4. El sistema consulta SIGPAC y:
+   - Muestra mensaje "Parcela encontrada: X.XXXX ha - Uso: XX"
+   - Rellena automáticamente el campo Superficie
+   - Dibuja el polígono en el mapa existente
+5. Usuario completa el resto del formulario y guarda
+
+### Test Report: `/app/test_reports/iteration_33.json`
+- Backend: 100% (25/25 tests - 16 parcelas + 9 SIGPAC)
+- Frontend: 100% (12/12 tests nuevos en parcelas-sigpac.spec.ts)
+- Nuevo archivo de tests: `/app/tests/e2e/parcelas-sigpac.spec.ts`
+
+### Estado: ✅ COMPLETADO Y TESTEADO
