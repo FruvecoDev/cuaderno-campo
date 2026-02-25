@@ -1360,6 +1360,19 @@ const Fitosanitarios = () => {
                     )}
                     <td>
                       <div style={{ display: 'flex', gap: '0.25rem' }}>
+                        <button
+                          onClick={() => handleVerifyProduct(producto._id)}
+                          className="btn btn-sm"
+                          style={{ backgroundColor: '#dbeafe', color: '#1e40af' }}
+                          title="Verificar en MAPA"
+                          disabled={verifyingProduct === producto._id}
+                        >
+                          {verifyingProduct === producto._id ? (
+                            <Loader2 size={14} className="animate-spin" />
+                          ) : (
+                            <Shield size={14} />
+                          )}
+                        </button>
                         <PermissionButton
                           permission="edit"
                           onClick={() => handleEdit(producto)}
