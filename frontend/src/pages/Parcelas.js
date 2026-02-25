@@ -259,8 +259,25 @@ const Parcelas = () => {
     superficie_total: '',
     codigo_plantacion: '',
     num_plantas: '',
-    finca: ''
+    finca: '',
+    // Datos SIGPAC
+    sigpac: {
+      provincia: '',
+      municipio: '',
+      cod_agregado: '',
+      zona: '',
+      poligono: '',
+      parcela: '',
+      recinto: '',
+      cod_uso: ''
+    }
   });
+  
+  // Estado para búsqueda SIGPAC
+  const [sigpacLoading, setSigpacLoading] = useState(false);
+  const [sigpacResult, setSigpacResult] = useState(null);
+  const [sigpacError, setSigpacError] = useState(null);
+  const [provincias, setProvincias] = useState([]);
   
   useEffect(() => {
     fetchParcelas();
