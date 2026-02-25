@@ -241,8 +241,8 @@ test.describe('Offline Mode - Data Caching Integration', () => {
     const downloadButton = page.locator('button:has-text("Descargar datos offline")');
     await downloadButton.click();
     
-    // Wait for caching
-    await expect(page.locator('text=/Datos cacheados|parcelas/i')).toBeVisible({ timeout: 10000 });
+    // Wait for caching - use more specific locator
+    await expect(page.locator('text=Datos cacheados').first()).toBeVisible({ timeout: 10000 });
     
     // Navigate to Visitas to verify parcelas are available
     await page.goto('/visitas', { waitUntil: 'domcontentloaded' });
