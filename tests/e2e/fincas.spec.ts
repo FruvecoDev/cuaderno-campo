@@ -163,8 +163,8 @@ test.describe('Fincas Module - CRUD', () => {
     await page.getByTestId('input-hectareas').fill('30.5');
     await page.getByTestId('input-finca-propia').check();
     
-    // Fill SIGPAC
-    await page.getByTestId('input-sigpac-provincia').fill('14');
+    // Fill SIGPAC (provincia is a dropdown now)
+    await page.getByTestId('input-sigpac-provincia').selectOption('14');
     await page.getByTestId('input-sigpac-municipio').fill('045');
     
     // Save
