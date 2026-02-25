@@ -566,6 +566,16 @@ const Fitosanitarios = () => {
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <button
+            className={`btn ${showMapaPanel ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => { setShowMapaPanel(!showMapaPanel); if (!mapaInfo) fetchMapaInfo(); }}
+            title="Sincronización con MAPA"
+            data-testid="btn-mapa-sync"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <Shield size={18} />
+            MAPA
+          </button>
+          <button
             className={`btn ${showConfig ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setShowConfig(!showConfig)}
             title="Configurar columnas"
