@@ -1043,6 +1043,31 @@ Módulos actualizados para seguir patrón consistente:
 
 ### Estado: ✅ COMPLETADO Y TESTEADO
 
+## UI Mejoras - Fincas Agrupadas y Lista de Parcelas (25/02/2026) - COMPLETADO
+- **Alcance**: Mejoras de UI solicitadas por el usuario
+
+### Cambios Implementados:
+1. **Agrupación por Provincia**:
+   - Las fincas ahora se muestran agrupadas por provincia
+   - Cabecera distintiva con nombre de provincia y badge con número de fincas
+   - Provincias ordenadas alfabéticamente, "Sin provincia" al final
+   - data-testid='provincia-group-{provincia}'
+
+2. **Lista de Parcelas (en lugar de Cards)**:
+   - Las parcelas asociadas ahora se muestran en formato tabla/lista
+   - Columnas: Código, Cultivo, Variedad, Superficie, Plantas, Acciones
+   - Botones "Mapa" y "Quitar" en cada fila
+   - data-testid cambió de 'parcela-card-{id}' a 'parcela-row-{id}'
+   - Diseño más limpio y compacto
+
+### Test Report: `/app/test_reports/iteration_36.json`
+- Backend: 100% (27/27 tests)
+- Frontend: 100% (30/30 tests)
+- Total: 30/30 specs passed
+
+### Estado: ✅ COMPLETADO Y TESTEADO
+
+
 ## Refactorización de Fincas - Contenedor de Parcelas (25/02/2026) - COMPLETADO
 - **Alcance**: Refactorizar el módulo de Fincas para que actúe como contenedor de parcelas existentes
 - **Objetivo del usuario**: Las fincas ahora pueden tener múltiples parcelas asociadas en lugar de tener su propia geometría/mapa
