@@ -141,4 +141,69 @@ test.describe('Theme Configuration Feature', () => {
     const data = await response.json();
     expect(data.theme_id).toBe('verde');
   });
+
+  test('theme persists after page reload', async ({ page, request }) => {
+    // Set morado theme via API
+    await request.post(`${BASE_URL}/api/config/theme?theme_id=morado`, {
+      headers: { 'Authorization': `Bearer ${adminToken}` }
+    });
+    
+    // Login
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+    await page.getByTestId('login-email').fill(ADMIN_EMAIL);
+    await page.getByTestId('login-password').fill(ADMIN_PASSWORD);
+    await page.getByTestId('login-submit').click();
+    await expect(page).toHaveURL(/dashboard/, { timeout: 15000 });
+    
+    // Reload page
+    await page.reload();
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Theme should still be morado (check CSS variable)
+    const primary = await page.evaluate(() => {
+      return getComputedStyle(document.documentElement).getPropertyValue('--primary');
+    });
+    
+    // Morado primary is "270 50% 40%"
+    expect(primary.trim()).toBe('270 50% 40%');
+  });
+
+  test('theme is applied on app initial load', async ({ page, request }) => {
+    // Set teal theme
+    await request.post(`${BASE_URL}/api/config/theme?theme_id=teal`, {
+      headers: { 'Authorization': `Bearer ${adminToken}` }
+    });
+    
+    // Open login page (not logged in yet)
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Theme should be loaded - teal primary is "175 60% 30%"
+    const primary = await page.evaluate(() => {
+      return getComputedStyle(document.documentElement).getPropertyValue('--primary');
+    });
+    
+    expect(primary.trim()).toBe('175 60% 30%');
+  });
+
+  test('selecting theme updates CSS variables dynamically', async ({ page, request }) => {
+    // Reset to verde
+    await request.delete(`${BASE_URL}/api/config/theme`, {
+      headers: { 'Authorization': `Bearer ${adminToken}` }
+    });
+    
+    await loginAndNavigateToConfig(page);
+    
+    // Click azul theme
+    await page.getByTestId('theme-azul').click();
+    await expect(page.getByText(/aplicado correctamente/i)).toBeVisible({ timeout: 5000 });
+    
+    // Get updated CSS variable - azul primary is "210 70% 35%"
+    const updatedPrimary = await page.evaluate(() => {
+      return getComputedStyle(document.documentElement).getPropertyValue('--primary');
+    });
+    
+    expect(updatedPrimary.trim()).toBe('210 70% 35%');
+  });
 });
