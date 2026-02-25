@@ -881,7 +881,204 @@ const Parcelas = () => {
               }}>
                 {editingId 
                   ? 'Dibuja un nuevo polígono para actualizar la geometría (opcional)' 
-                  : 'Usa las herramientas del mapa para dibujar la parcela. Puedes importar archivos GeoJSON, KML o GPX.'}
+                  : 'Usa las herramientas del mapa para dibujar la parcela. Puedes importar archivos GeoJSON, KML o GPX, o buscar por códigos SIGPAC.'}
+              </div>
+              
+              {/* Sección SIGPAC */}
+              <div style={{ 
+                marginTop: '1rem',
+                backgroundColor: '#e3f2fd', 
+                padding: '1rem', 
+                borderRadius: '8px',
+                border: '1px solid #90caf9'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <h4 style={{ color: '#1565c0', fontWeight: '600', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+                    <MapIcon size={16} />
+                    Localizar por SIGPAC
+                  </h4>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                      type="button"
+                      className="btn btn-sm"
+                      style={{ 
+                        backgroundColor: '#1565c0', 
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
+                        fontSize: '0.8rem',
+                        padding: '4px 10px'
+                      }}
+                      onClick={buscarEnSigpac}
+                      disabled={sigpacLoading}
+                      data-testid="btn-buscar-sigpac-parcela"
+                    >
+                      {sigpacLoading ? (
+                        <Loader2 size={12} className="animate-spin" />
+                      ) : (
+                        <Search size={12} />
+                      )}
+                      Buscar
+                    </button>
+                    <a
+                      href="https://sigpac.mapa.es/fega/visor/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-sm"
+                      style={{ 
+                        backgroundColor: '#fff', 
+                        color: '#1565c0',
+                        border: '1px solid #1565c0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
+                        textDecoration: 'none',
+                        fontSize: '0.8rem',
+                        padding: '4px 10px'
+                      }}
+                    >
+                      <ExternalLink size={12} />
+                      Visor
+                    </a>
+                  </div>
+                </div>
+                
+                <p style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.75rem', fontStyle: 'italic' }}>
+                  Introduce los códigos SIGPAC y pulsa "Buscar" para localizar y dibujar automáticamente la parcela en el mapa.
+                </p>
+                
+                {/* Resultado de búsqueda SIGPAC */}
+                {sigpacResult && (
+                  <div style={{ 
+                    backgroundColor: '#c8e6c9', 
+                    padding: '0.5rem 0.75rem', 
+                    borderRadius: '6px', 
+                    marginBottom: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    fontSize: '0.85rem'
+                  }}>
+                    <CheckCircle size={16} style={{ color: '#2e7d32' }} />
+                    <span style={{ color: '#2e7d32' }}>
+                      <strong>Parcela encontrada:</strong> {sigpacResult.superficie_ha?.toFixed(4)} ha - Uso: {sigpacResult.uso_sigpac}
+                    </span>
+                  </div>
+                )}
+                
+                {/* Error de búsqueda SIGPAC */}
+                {sigpacError && (
+                  <div style={{ 
+                    backgroundColor: '#ffcdd2', 
+                    padding: '0.5rem 0.75rem', 
+                    borderRadius: '6px', 
+                    marginBottom: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    fontSize: '0.85rem'
+                  }}>
+                    <AlertCircle size={16} style={{ color: '#c62828' }} />
+                    <span style={{ color: '#c62828' }}>{sigpacError}</span>
+                  </div>
+                )}
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontSize: '0.7rem', fontWeight: '500' }}>Provincia *</label>
+                    <select
+                      className="form-select"
+                      style={{ fontSize: '0.8rem', padding: '4px 8px' }}
+                      value={formData.sigpac.provincia}
+                      onChange={(e) => updateSigpac('provincia', e.target.value)}
+                      data-testid="sigpac-provincia"
+                    >
+                      <option value="">Seleccionar...</option>
+                      {provincias.map(p => (
+                        <option key={p.codigo} value={p.codigo}>{p.codigo} - {p.nombre}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontSize: '0.7rem', fontWeight: '500' }}>Municipio *</label>
+                    <input 
+                      className="form-input" 
+                      style={{ fontSize: '0.8rem', padding: '4px 8px' }}
+                      value={formData.sigpac.municipio} 
+                      onChange={(e) => updateSigpac('municipio', e.target.value)}
+                      placeholder="Ej: 053"
+                      data-testid="sigpac-municipio"
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontSize: '0.7rem', fontWeight: '500' }}>Polígono *</label>
+                    <input 
+                      className="form-input" 
+                      style={{ fontSize: '0.8rem', padding: '4px 8px' }}
+                      value={formData.sigpac.poligono} 
+                      onChange={(e) => updateSigpac('poligono', e.target.value)}
+                      placeholder="Ej: 5"
+                      data-testid="sigpac-poligono"
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontSize: '0.7rem', fontWeight: '500' }}>Parcela *</label>
+                    <input 
+                      className="form-input" 
+                      style={{ fontSize: '0.8rem', padding: '4px 8px' }}
+                      value={formData.sigpac.parcela} 
+                      onChange={(e) => updateSigpac('parcela', e.target.value)}
+                      placeholder="Ej: 12"
+                      data-testid="sigpac-parcela"
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontSize: '0.7rem', fontWeight: '500' }}>Agregado</label>
+                    <input 
+                      className="form-input" 
+                      style={{ fontSize: '0.8rem', padding: '4px 8px' }}
+                      value={formData.sigpac.cod_agregado} 
+                      onChange={(e) => updateSigpac('cod_agregado', e.target.value)}
+                      placeholder="0"
+                      data-testid="sigpac-agregado"
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontSize: '0.7rem', fontWeight: '500' }}>Zona</label>
+                    <input 
+                      className="form-input" 
+                      style={{ fontSize: '0.8rem', padding: '4px 8px' }}
+                      value={formData.sigpac.zona} 
+                      onChange={(e) => updateSigpac('zona', e.target.value)}
+                      placeholder="0"
+                      data-testid="sigpac-zona"
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontSize: '0.7rem', fontWeight: '500' }}>Recinto</label>
+                    <input 
+                      className="form-input" 
+                      style={{ fontSize: '0.8rem', padding: '4px 8px' }}
+                      value={formData.sigpac.recinto} 
+                      onChange={(e) => updateSigpac('recinto', e.target.value)}
+                      placeholder="1"
+                      data-testid="sigpac-recinto"
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontSize: '0.7rem', fontWeight: '500' }}>Cod. Uso</label>
+                    <input 
+                      className="form-input" 
+                      style={{ fontSize: '0.8rem', padding: '4px 8px' }}
+                      value={formData.sigpac.cod_uso} 
+                      onChange={(e) => updateSigpac('cod_uso', e.target.value)}
+                      placeholder="TA"
+                      data-testid="sigpac-uso"
+                      readOnly={!!sigpacResult}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
             
