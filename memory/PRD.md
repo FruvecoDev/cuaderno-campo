@@ -770,3 +770,35 @@ Módulos actualizados para seguir patrón consistente:
 - **Test Report**: `/app/test_reports/iteration_19.json` - 100% (24/24 tests)
 - **Estado**: ✅ COMPLETADO Y TESTEADO
 
+
+
+
+## Mapa Interactivo Avanzado de Parcelas (25/02/2026) - COMPLETADO
+- **Alcance**: Mejoras avanzadas al mapa de parcelas con herramientas profesionales de GIS
+- **Componente**: `/app/frontend/src/components/AdvancedParcelMap.js`
+- **Funcionalidades implementadas**:
+  - **A. Herramientas de medición**:
+    - Medir distancias entre puntos (líneas)
+    - Cálculo automático de perímetro del polígono
+    - Mostrar coordenadas GPS al hacer clic (con botón de copiar)
+  - **B. Gestión de múltiples parcelas en mapa**:
+    - Ver todas las parcelas en un mapa general (botón "Ver Mapa")
+    - Colores automáticos por cultivo con leyenda
+    - Clic en parcela para localizarla en la tabla
+    - Popups con información detallada de cada parcela
+  - **C. Importar/Exportar geometrías**:
+    - Importar polígonos desde GeoJSON, KML, GPX
+    - Exportar polígono actual a GeoJSON o KML
+    - Copiar coordenadas al portapapeles
+  - **D. Herramientas de dibujo avanzadas**:
+    - Dibujar polígonos irregulares
+    - Dibujar rectángulos
+    - Dibujar círculos (convertidos a polígonos de 32 puntos)
+  - **E. Geolocalización**:
+    - Centrar mapa en ubicación actual del usuario
+    - Buscar dirección/localidad usando API de Nominatim (OpenStreetMap)
+- **Capas de mapa**: Mapa Base (OSM), Satélite (ESRI), Topográfico
+- **Información en tiempo real**: Puntos del polígono, área en hectáreas, perímetro en metros
+- **Integración**: Usado en formulario de nueva/editar parcela y mapa general
+- **Test Report**: `/app/test_reports/iteration_20.json` - 100% (37/37 tests)
+- **Estado**: ✅ COMPLETADO Y TESTEADO
