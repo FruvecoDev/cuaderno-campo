@@ -1157,3 +1157,38 @@ Módulos actualizados para seguir patrón consistente:
 - Total: 41 tests passed
 
 ### Estado: ✅ COMPLETADO Y TESTEADO
+
+
+## Persistencia de Geometría Dibujada (25/02/2026) - COMPLETADO
+- **Alcance**: Guardar el polígono dibujado en la base de datos y cargarlo al editar
+- **Backend**: Modelo `GeometriaManual` añadido a `/app/backend/models.py`
+- **Campos del modelo**: `wkt`, `coords`, `centroide`, `area_ha`
+
+### Funcionalidad:
+1. **Guardar geometría**: Al crear/actualizar una finca, la geometría dibujada se guarda en MongoDB
+2. **Cargar geometría**: Al editar una finca con geometría guardada:
+   - Se muestra el indicador verde "Parcela dibujada manualmente" con el área
+   - El botón "Editar" permite modificar el dibujo
+   - El campo "Hectáreas" mantiene el valor del área calculada
+3. **Indicadores visuales en el listado**:
+   - Etiqueta **"Dibujada"** (verde) junto a fincas con geometría manual
+   - Botón de mapa con **icono de lápiz** (en lugar de mapa) para estas fincas
+4. **Visualizar geometría guardada**: Al hacer clic en el botón de mapa de una finca con geometría:
+   - Se muestra el polígono naranja sobre el mapa satelital
+   - El mapa se centra automáticamente en la ubicación
+
+### Modelo de datos (GeometriaManual):
+```python
+class GeometriaManual(BaseModel):
+    wkt: Optional[str] = None  # POLYGON((lon lat, ...))
+    coords: Optional[List[List[float]]] = None  # [[lat, lon], ...]
+    centroide: Optional[Dict[str, float]] = None  # {"lat": x, "lon": y}
+    area_ha: Optional[float] = None  # Área en hectáreas
+```
+
+### Test Report: `/app/test_reports/iteration_32.json`
+- Backend: 100% (23/23 tests) - incluyendo 5 nuevos tests para geometria_manual
+- Frontend: 100% (36/36 tests) - incluyendo 4 nuevos tests para persistencia
+- Total: 59 tests passed
+
+### Estado: ✅ COMPLETADO Y TESTEADO
