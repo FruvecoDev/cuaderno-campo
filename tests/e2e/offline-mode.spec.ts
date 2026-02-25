@@ -78,8 +78,8 @@ test.describe('Offline Mode - Connection Indicator', () => {
     const downloadButton = page.locator('button:has-text("Descargar datos offline")');
     await downloadButton.click();
     
-    // Wait for caching notification
-    await expect(page.locator('text=/Datos cacheados|parcelas/i')).toBeVisible({ timeout: 10000 });
+    // Wait for caching notification - use more specific locator
+    await expect(page.locator('text=Datos cacheados').first()).toBeVisible({ timeout: 10000 });
     
     // Verify "Última cache" shows a date/time
     // The format is like "25/2, 08:44"
