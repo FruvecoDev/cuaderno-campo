@@ -548,14 +548,26 @@ async def consultar_sigpac(
                     "message": "El servicio SIGPAC no está disponible en este momento"
                 }
             
-            data = response.json()
+            raw_data = response.json()
+            
+            # La API puede devolver una lista o un objeto
+            if isinstance(raw_data, list):
+                if len(raw_data) == 0:
+                    return {
+                        "success": False,
+                        "error": "Parcela no encontrada",
+                        "message": "No se encontraron datos para los códigos introducidos"
+                    }
+                data = raw_data[0]  # Tomar el primer elemento
+            else:
+                data = raw_data
             
             # Parsear la respuesta
             result = {
                 "success": True,
                 "sigpac": {
                     "provincia": str(data.get("provincia", pr)),
-                    "municipio": str(data.get("municipio", mu)),
+                    "municipio": str(data.get("municipio", mu)).zfill(3),
                     "cod_agregado": str(data.get("agregado", ag)),
                     "zona": str(data.get("zona", zo)),
                     "poligono": str(data.get("poligono", po)),
@@ -565,8 +577,10 @@ async def consultar_sigpac(
                 },
                 "superficie_ha": data.get("superficie", data.get("dn_surface", 0)),
                 "uso_sigpac": data.get("uso_sigpac", data.get("uso", "")),
-                "pendiente": data.get("pendiente", None),
+                "pendiente": data.get("pendiente_media", data.get("pendiente", None)),
                 "coef_regadio": data.get("coef_regadio", None),
+                "region": data.get("region", None),
+                "altitud": data.get("altitud", None),
             }
             
             # Si hay geometría WKT, extraer centroide para localización
