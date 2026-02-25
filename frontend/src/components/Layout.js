@@ -142,7 +142,23 @@ const Layout = ({ children }) => {
   
   return (
     <div className="layout">
-      <aside className="sidebar">
+      {/* Mobile overlay */}
+      <div 
+        className={`sidebar-overlay ${isMobileMenuOpen ? 'active' : ''}`}
+        onClick={() => setIsMobileMenuOpen(false)}
+      />
+      
+      {/* Mobile menu toggle button */}
+      <button 
+        className="mobile-menu-toggle"
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        aria-label={isMobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+        data-testid="mobile-menu-toggle"
+      >
+        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+      
+      <aside className={`sidebar ${isMobileMenuOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-title" style={{ justifyContent: 'center' }}>
             <img 
