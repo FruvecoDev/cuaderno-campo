@@ -5,7 +5,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { Lock, User, AlertCircle } from 'lucide-react';
 import LanguageSelector from '../components/LanguageSelector';
 import '../App.css';
-import logo from '../assets/logo.png';
+import defaultLogo from '../assets/logo.png';
+
+const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const Login = () => {
   const [email, setEmail] = useState('');
