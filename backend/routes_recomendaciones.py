@@ -173,6 +173,8 @@ async def get_recomendacion(
         if not rec:
             raise HTTPException(status_code=404, detail="Recomendación no encontrada")
         return serialize_recomendacion(rec)
+    except HTTPException:
+        raise
     except Exception as e:
         if "ObjectId" in str(e):
             raise HTTPException(status_code=400, detail="ID inválido")
