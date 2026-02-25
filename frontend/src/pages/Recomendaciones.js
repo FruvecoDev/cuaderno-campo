@@ -2182,7 +2182,7 @@ const Recomendaciones = () => {
                 <X size={16} />
               </button>
             </div>
-            <div className="modal-body">
+            <div className="modal-body" style={{ padding: '1.5rem' }}>
               {/* Step 1: Select Template */}
               <div style={{ marginBottom: '1.5rem' }}>
                 <label className="form-label" style={{ fontWeight: '600' }}>1. Seleccionar Plantilla</label>
