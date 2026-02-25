@@ -1,10 +1,7 @@
-import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, X, MapPin, Search, Home, ChevronDown, ChevronUp, Map, Layers, Loader2, ExternalLink, CheckCircle, AlertCircle, Eye, Pencil } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, MapPin, Search, Home, ChevronDown, ChevronUp, Layers, Loader2, ExternalLink, CheckCircle, AlertCircle, Link2, Unlink } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-
-// Lazy load map component
-const MapaSigpac = lazy(() => import('../components/MapaSigpac'));
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
@@ -45,15 +42,11 @@ const Fincas = () => {
   const [sigpacError, setSigpacError] = useState(null);
   const [provincias, setProvincias] = useState([]);
   
-  // Estado para el mapa
-  const [showMap, setShowMap] = useState(false);
-  const [mapExpanded, setMapExpanded] = useState(false);
-  const [mapData, setMapData] = useState(null);
-  
-  // Estado para dibujo de parcelas
-  const [showDrawingMap, setShowDrawingMap] = useState(false);
-  const [drawingMapExpanded, setDrawingMapExpanded] = useState(false);
-  const [drawnGeometry, setDrawnGeometry] = useState(null);
+  // Estado para parcelas
+  const [parcelas, setParcelas] = useState([]);
+  const [parcelasDisponibles, setParcelasDisponibles] = useState([]);
+  const [showAsignarParcela, setShowAsignarParcela] = useState(false);
+  const [selectedFincaForParcelas, setSelectedFincaForParcelas] = useState(null);
   
   // Filtros
   const [filters, setFilters] = useState({
@@ -62,27 +55,20 @@ const Fincas = () => {
     finca_propia: ''
   });
   
-  // Form data completo basado en la imagen
+  // Form data
   const emptyFormData = {
-    // Datos principales
     denominacion: '',
     provincia: '',
     poblacion: '',
     poligono: '',
     parcela: '',
     subparcela: '',
-    
-    // Superficie y producción
     hectareas: 0,
     areas: 0,
     toneladas: 0,
     produccion_esperada: 0,
     produccion_disponible: 0,
-    
-    // Propiedad
     finca_propia: false,
-    
-    // Datos SIGPAC
     sigpac: {
       provincia: '',
       municipio: '',
@@ -93,24 +79,13 @@ const Fincas = () => {
       recinto: '',
       cod_uso: ''
     },
-    
-    // Recolección
     recoleccion_semana: '',
     recoleccion_ano: new Date().getFullYear(),
-    
-    // Precios
     precio_corte: 0,
     precio_transporte: 0,
     proveedor_corte: '',
-    
-    // Observaciones
     observaciones: '',
-    
-    // Parcelas asociadas
-    parcelas_ids: [],
-    
-    // Geometría dibujada manualmente
-    geometria_manual: null
+    parcelas_ids: []
   };
   
   const [formData, setFormData] = useState(emptyFormData);
@@ -119,32 +94,12 @@ const Fincas = () => {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${token}`
   };
-  
-  // Manejar cambios de geometría dibujada
-  const handleGeometryChange = (geometryData) => {
-    setDrawnGeometry(geometryData);
-    if (geometryData) {
-      setFormData(prev => ({
-        ...prev,
-        hectareas: geometryData.area_ha || prev.hectareas,
-        geometria_manual: {
-          wkt: geometryData.wkt,
-          coords: geometryData.coords,
-          centroide: geometryData.centroid
-        }
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        geometria_manual: null
-      }));
-    }
-  };
 
   useEffect(() => {
     fetchFincas();
     fetchStats();
     fetchProvincias();
+    fetchParcelas();
   }, []);
 
   const fetchFincas = async () => {
@@ -183,6 +138,35 @@ const Fincas = () => {
       }
     } catch (err) {
       console.error('Error fetching provincias:', err);
+    }
+  };
+
+  const fetchParcelas = async () => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/parcelas`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setParcelas(data.parcelas || data || []);
+      }
+    } catch (err) {
+      console.error('Error fetching parcelas:', err);
+    }
+  };
+
+  // Obtener parcelas disponibles (sin asignar a ninguna finca)
+  const fetchParcelasDisponibles = async () => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/fincas/parcelas-disponibles`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setParcelasDisponibles(data.parcelas || []);
+      }
+    } catch (err) {
+      console.error('Error fetching parcelas disponibles:', err);
+      // Fallback: filtrar manualmente
+      const asignadas = fincas.flatMap(f => f.parcelas_ids || []);
+      const disponibles = parcelas.filter(p => !asignadas.includes(p._id));
+      setParcelasDisponibles(disponibles);
     }
   };
 
@@ -227,93 +211,18 @@ const Fincas = () => {
               ...prev.sigpac,
               ...data.sigpac
             },
-            // Si hay superficie, actualizar hectáreas
             hectareas: data.superficie_ha || prev.hectareas
           }));
         }
-        
-        // Guardar datos para el mapa
-        setMapData({
-          sigpac: data.sigpac,
-          wkt: data.geometria_wkt,
-          centroide: data.centroide,
-          superficie_ha: data.superficie_ha,
-          uso_sigpac: data.uso_sigpac
-        });
-        
-        // Mostrar el mapa automáticamente si hay geometría
-        if (data.geometria_wkt || data.centroide) {
-          setShowMap(true);
-        }
       } else {
         setSigpacError(data.message || data.error || 'Error al consultar SIGPAC');
-        setMapData(null);
       }
     } catch (err) {
       console.error('Error consultando SIGPAC:', err);
       setSigpacError('Error de conexión al servicio SIGPAC');
-      setMapData(null);
     }
     
     setSigpacLoading(false);
-  };
-  
-  // Función para ver mapa de una finca existente
-  const verMapaFinca = async (finca) => {
-    // Primero verificar si tiene geometría manual dibujada
-    if (finca.geometria_manual && finca.geometria_manual.coords) {
-      setMapData({
-        sigpac: finca.sigpac,
-        wkt: finca.geometria_manual.wkt,
-        centroide: finca.geometria_manual.centroide,
-        superficie_ha: finca.geometria_manual.area_ha,
-        denominacion: finca.denominacion || finca.nombre,
-        isManual: true
-      });
-      setShowMap(true);
-      return;
-    }
-    
-    // Si tiene datos SIGPAC, buscar la geometría
-    if (finca.sigpac && finca.sigpac.provincia && finca.sigpac.municipio && finca.sigpac.poligono && finca.sigpac.parcela) {
-      // Buscar datos en SIGPAC para obtener geometría
-      try {
-        const params = new URLSearchParams({
-          provincia: finca.sigpac.provincia,
-          municipio: finca.sigpac.municipio,
-          poligono: finca.sigpac.poligono,
-          parcela: finca.sigpac.parcela,
-          agregado: finca.sigpac.cod_agregado || '0',
-          zona: finca.sigpac.zona || '0'
-        });
-        
-        if (finca.sigpac.recinto) {
-          params.append('recinto', finca.sigpac.recinto);
-        }
-        
-        const res = await fetch(`${BACKEND_URL}/api/sigpac/consulta?${params}`, { headers });
-        const data = await res.json();
-        
-        if (data.success) {
-          setMapData({
-            sigpac: finca.sigpac,
-            wkt: data.geometria_wkt,
-            centroide: data.centroide,
-            superficie_ha: data.superficie_ha,
-            uso_sigpac: data.uso_sigpac,
-            denominacion: finca.denominacion || finca.nombre
-          });
-          setShowMap(true);
-        } else {
-          alert('No se encontró la parcela en SIGPAC');
-        }
-      } catch (err) {
-        console.error('Error consultando SIGPAC para mapa:', err);
-        alert('Error al cargar datos del mapa');
-      }
-    } else {
-      alert('Esta finca no tiene datos de ubicación (ni SIGPAC ni dibujo manual)');
-    }
   };
 
   // Filtrar fincas
@@ -345,10 +254,6 @@ const Fincas = () => {
     setEditingId(null);
     setSigpacResult(null);
     setSigpacError(null);
-    setDrawnGeometry(null);
-    setShowDrawingMap(false);
-    setShowMap(false);
-    setMapData(null);
   };
 
   const handleSubmit = async (e) => {
@@ -370,14 +275,7 @@ const Fincas = () => {
         precio_corte: parseFloat(formData.precio_corte) || 0,
         precio_transporte: parseFloat(formData.precio_transporte) || 0,
         recoleccion_semana: formData.recoleccion_semana ? parseInt(formData.recoleccion_semana) : null,
-        recoleccion_ano: formData.recoleccion_ano ? parseInt(formData.recoleccion_ano) : null,
-        // Incluir geometría dibujada si existe
-        geometria_manual: drawnGeometry ? {
-          wkt: drawnGeometry.wkt,
-          coords: drawnGeometry.coords,
-          centroide: drawnGeometry.centroid,
-          area_ha: drawnGeometry.area_ha
-        } : formData.geometria_manual
+        recoleccion_ano: formData.recoleccion_ano ? parseInt(formData.recoleccion_ano) : null
       };
       
       const res = await fetch(url, {
@@ -431,25 +329,12 @@ const Fincas = () => {
       precio_transporte: finca.precio_transporte || 0,
       proveedor_corte: finca.proveedor_corte || '',
       observaciones: finca.observaciones || '',
-      parcelas_ids: finca.parcelas_ids || [],
-      geometria_manual: finca.geometria_manual || null
+      parcelas_ids: finca.parcelas_ids || []
     });
     setEditingId(finca._id);
     setShowForm(true);
     setSigpacResult(null);
     setSigpacError(null);
-    
-    // Cargar geometría dibujada si existe
-    if (finca.geometria_manual && finca.geometria_manual.coords) {
-      setDrawnGeometry({
-        coords: finca.geometria_manual.coords,
-        wkt: finca.geometria_manual.wkt,
-        area_ha: finca.geometria_manual.area_ha,
-        centroid: finca.geometria_manual.centroide
-      });
-    } else {
-      setDrawnGeometry(null);
-    }
   };
 
   const handleDelete = async (id) => {
@@ -469,6 +354,49 @@ const Fincas = () => {
     }
   };
 
+  // Asignar parcela a finca
+  const asignarParcela = async (fincaId, parcelaId) => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/fincas/${fincaId}/parcelas/${parcelaId}`, {
+        method: 'POST',
+        headers
+      });
+      if (res.ok) {
+        fetchFincas();
+        fetchParcelasDisponibles();
+      } else {
+        const error = await res.json();
+        alert(error.detail || 'Error al asignar parcela');
+      }
+    } catch (err) {
+      console.error('Error asignando parcela:', err);
+    }
+  };
+
+  // Desasignar parcela de finca
+  const desasignarParcela = async (fincaId, parcelaId) => {
+    if (!window.confirm('¿Desea quitar esta parcela de la finca?')) return;
+    
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/fincas/${fincaId}/parcelas/${parcelaId}`, {
+        method: 'DELETE',
+        headers
+      });
+      if (res.ok) {
+        fetchFincas();
+        fetchParcelasDisponibles();
+      }
+    } catch (err) {
+      console.error('Error desasignando parcela:', err);
+    }
+  };
+
+  // Obtener parcelas de una finca
+  const getParcelasDeFinca = (finca) => {
+    if (!finca.parcelas_ids || finca.parcelas_ids.length === 0) return [];
+    return parcelas.filter(p => finca.parcelas_ids.includes(p._id));
+  };
+
   const clearFilters = () => {
     setFilters({ search: '', provincia: '', finca_propia: '' });
   };
@@ -483,15 +411,20 @@ const Fincas = () => {
         [field]: value
       }
     }));
-    // Limpiar resultados previos al cambiar datos
     if (sigpacResult) {
       setSigpacResult(null);
     }
   };
 
-  // Obtener descripción del uso SIGPAC
   const getUsoDescripcion = (codigo) => {
     return USOS_SIGPAC[codigo] || codigo || '-';
+  };
+
+  // Abrir modal de asignar parcelas
+  const openAsignarParcelas = (finca) => {
+    setSelectedFincaForParcelas(finca);
+    fetchParcelasDisponibles();
+    setShowAsignarParcela(true);
   };
 
   return (
@@ -542,7 +475,7 @@ const Fincas = () => {
         </div>
       )}
 
-      {/* Formulario completo */}
+      {/* Formulario */}
       {showForm && (
         <div className="card mb-6" data-testid="form-finca">
           <div className="flex justify-between items-center mb-4">
@@ -711,7 +644,7 @@ const Fincas = () => {
               </div>
             </div>
 
-            {/* Sección 3: Datos SIGPAC con integración */}
+            {/* Sección 3: Datos SIGPAC */}
             <div style={{ 
               backgroundColor: '#e3f2fd', 
               padding: '1rem', 
@@ -719,9 +652,9 @@ const Fincas = () => {
               marginBottom: '1rem',
               border: '1px solid #90caf9'
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                 <h4 style={{ color: '#1565c0', fontWeight: '600', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-                  <Map size={18} />
+                  <MapPin size={18} />
                   Datos SIGPAC
                 </h4>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -746,22 +679,6 @@ const Fincas = () => {
                     )}
                     Buscar en SIGPAC
                   </button>
-                  <button
-                    type="button"
-                    className="btn btn-sm"
-                    style={{ 
-                      backgroundColor: '#2e7d32', 
-                      color: 'white',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem'
-                    }}
-                    onClick={() => setShowDrawingMap(!showDrawingMap)}
-                    data-testid="btn-dibujar-parcela"
-                  >
-                    <Pencil size={14} />
-                    {showDrawingMap ? 'Ocultar Dibujo' : 'Dibujar Parcela'}
-                  </button>
                   <a
                     href="https://sigpac.mapa.es/fega/visor/"
                     target="_blank"
@@ -783,9 +700,8 @@ const Fincas = () => {
                 </div>
               </div>
               
-              {/* Mensaje de ayuda */}
-              <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', fontStyle: 'italic' }}>
-                Introduzca los códigos SIGPAC y pulse "Buscar en SIGPAC", o use "Dibujar Parcela" para marcar manualmente los límites en el mapa.
+              <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.75rem', fontStyle: 'italic' }}>
+                Introduzca los códigos SIGPAC y pulse "Buscar en SIGPAC" para obtener automáticamente la superficie y el uso del terreno.
               </p>
               
               {/* Resultado de búsqueda SIGPAC */}
@@ -794,35 +710,15 @@ const Fincas = () => {
                   backgroundColor: '#c8e6c9', 
                   padding: '0.75rem', 
                   borderRadius: '6px', 
-                  marginBottom: '1rem',
+                  marginBottom: '0.75rem',
                   display: 'flex',
-                  alignItems: 'flex-start',
+                  alignItems: 'center',
                   gap: '0.75rem'
                 }}>
-                  <CheckCircle size={20} style={{ color: '#2e7d32', flexShrink: 0, marginTop: '2px' }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <strong style={{ color: '#2e7d32' }}>Parcela encontrada en SIGPAC</strong>
-                      {mapData && (
-                        <button
-                          type="button"
-                          className="btn btn-sm"
-                          style={{ 
-                            backgroundColor: '#1565c0', 
-                            color: 'white',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px'
-                          }}
-                          onClick={() => setShowMap(!showMap)}
-                          data-testid="btn-toggle-map"
-                        >
-                          <Eye size={14} />
-                          {showMap ? 'Ocultar Mapa' : 'Ver en Mapa'}
-                        </button>
-                      )}
-                    </div>
-                    <div style={{ fontSize: '0.85rem', marginTop: '0.25rem' }}>
+                  <CheckCircle size={20} style={{ color: '#2e7d32' }} />
+                  <div>
+                    <strong style={{ color: '#2e7d32' }}>Datos obtenidos de SIGPAC</strong>
+                    <div style={{ fontSize: '0.85rem' }}>
                       <span style={{ marginRight: '1rem' }}>
                         <strong>Superficie:</strong> {sigpacResult.superficie_ha?.toFixed(4)} ha
                       </span>
@@ -839,80 +735,13 @@ const Fincas = () => {
                 </div>
               )}
               
-              {/* Mapa SIGPAC */}
-              {showMap && mapData && (
-                <div style={{ marginBottom: '1rem' }}>
-                  <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Cargando mapa...</div>}>
-                    <MapaSigpac
-                      sigpacData={mapData.sigpac}
-                      wkt={mapData.wkt}
-                      centroide={mapData.centroide}
-                      denominacion={formData.denominacion || mapData.denominacion}
-                      onClose={() => setShowMap(false)}
-                      isExpanded={mapExpanded}
-                      onToggleExpand={() => setMapExpanded(!mapExpanded)}
-                    />
-                  </Suspense>
-                </div>
-              )}
-              
-              {/* Mapa para dibujar parcelas manualmente */}
-              {showDrawingMap && (
-                <div style={{ marginBottom: '1rem' }}>
-                  <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Cargando mapa...</div>}>
-                    <MapaSigpac
-                      enableDrawing={true}
-                      onGeometryChange={handleGeometryChange}
-                      initialDrawnCoords={formData.geometria_manual?.coords}
-                      onClose={() => setShowDrawingMap(false)}
-                      isExpanded={drawingMapExpanded}
-                      onToggleExpand={() => setDrawingMapExpanded(!drawingMapExpanded)}
-                    />
-                  </Suspense>
-                </div>
-              )}
-              
-              {/* Indicador de parcela dibujada */}
-              {drawnGeometry && !showDrawingMap && (
-                <div style={{ 
-                  backgroundColor: '#e8f5e9', 
-                  padding: '0.75rem', 
-                  borderRadius: '6px', 
-                  marginBottom: '1rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  border: '1px solid #a5d6a7'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <CheckCircle size={20} style={{ color: '#2e7d32' }} />
-                    <div>
-                      <strong style={{ color: '#2e7d32' }}>Parcela dibujada manualmente</strong>
-                      <div style={{ fontSize: '0.85rem', color: '#555' }}>
-                        Área calculada: <strong>{drawnGeometry.area_ha?.toFixed(4)} ha</strong>
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    className="btn btn-sm"
-                    style={{ backgroundColor: '#2e7d32', color: 'white' }}
-                    onClick={() => setShowDrawingMap(true)}
-                    data-testid="btn-editar-dibujo"
-                  >
-                    <Edit2 size={14} style={{ marginRight: '4px' }} />
-                    Editar
-                  </button>
-                </div>
-              )}
-              
               {/* Error de búsqueda SIGPAC */}
               {sigpacError && (
                 <div style={{ 
                   backgroundColor: '#ffcdd2', 
                   padding: '0.75rem', 
                   borderRadius: '6px', 
-                  marginBottom: '1rem',
+                  marginBottom: '0.75rem',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.75rem'
@@ -922,9 +751,9 @@ const Fincas = () => {
                 </div>
               )}
               
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1rem' }}>
-                <div className="form-group">
-                  <label className="form-label">Provincia *</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.75rem' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Provincia</label>
                   <select
                     className="form-select"
                     value={formData.sigpac.provincia}
@@ -937,8 +766,8 @@ const Fincas = () => {
                     ))}
                   </select>
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Municipio *</label>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Municipio</label>
                   <input 
                     className="form-input" 
                     value={formData.sigpac.municipio} 
@@ -947,8 +776,8 @@ const Fincas = () => {
                     data-testid="input-sigpac-municipio"
                   />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Agregado</label>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Agregado</label>
                   <input 
                     className="form-input" 
                     value={formData.sigpac.cod_agregado} 
@@ -957,8 +786,8 @@ const Fincas = () => {
                     data-testid="input-sigpac-cod-agregado"
                   />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Zona</label>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Zona</label>
                   <input 
                     className="form-input" 
                     value={formData.sigpac.zona} 
@@ -967,8 +796,8 @@ const Fincas = () => {
                     data-testid="input-sigpac-zona"
                   />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Polígono *</label>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Polígono</label>
                   <input 
                     className="form-input" 
                     value={formData.sigpac.poligono} 
@@ -977,8 +806,8 @@ const Fincas = () => {
                     data-testid="input-sigpac-poligono"
                   />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Parcela *</label>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Parcela</label>
                   <input 
                     className="form-input" 
                     value={formData.sigpac.parcela} 
@@ -987,8 +816,8 @@ const Fincas = () => {
                     data-testid="input-sigpac-parcela"
                   />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Recinto</label>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Recinto</label>
                   <input 
                     className="form-input" 
                     value={formData.sigpac.recinto} 
@@ -997,8 +826,8 @@ const Fincas = () => {
                     data-testid="input-sigpac-recinto"
                   />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Cod. Uso</label>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Cod. Uso</label>
                   <input 
                     className="form-input" 
                     value={formData.sigpac.cod_uso} 
@@ -1017,7 +846,6 @@ const Fincas = () => {
               gap: '1rem',
               marginBottom: '1rem'
             }}>
-              {/* Recolección */}
               <div style={{ 
                 backgroundColor: '#fff3e0', 
                 padding: '1rem', 
@@ -1053,7 +881,6 @@ const Fincas = () => {
                 </div>
               </div>
 
-              {/* Precios */}
               <div style={{ 
                 backgroundColor: '#fce4ec', 
                 padding: '1rem', 
@@ -1200,237 +1027,352 @@ const Fincas = () => {
           <p className="text-muted">No hay fincas registradas</p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {filteredFincas.map((finca) => (
-              <div 
-                key={finca._id}
-                className="card"
-                style={{ 
-                  padding: '1rem',
-                  border: '1px solid #e0e0e0',
-                  borderLeft: `4px solid ${finca.finca_propia ? '#2d5a27' : '#f57c00'}`,
-                  marginBottom: 0
-                }}
-                data-testid={`finca-card-${finca._id}`}
-              >
-                {/* Cabecera */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                      <Home size={20} style={{ color: '#2d5a27' }} />
-                      <h4 style={{ margin: 0, fontWeight: '600', fontSize: '1.1rem' }}>
-                        {finca.denominacion || finca.nombre}
-                      </h4>
-                      <span style={{
-                        backgroundColor: finca.finca_propia ? '#e8f5e9' : '#fff3e0',
-                        color: finca.finca_propia ? '#2d5a27' : '#e65100',
-                        padding: '2px 8px',
-                        borderRadius: '12px',
-                        fontSize: '0.75rem',
-                        fontWeight: '500'
-                      }}>
-                        {finca.finca_propia ? 'Propia' : 'Alquilada'}
-                      </span>
-                      {/* Indicador de parcela con geometría */}
-                      {finca.geometria_manual?.coords && (
+            {filteredFincas.map((finca) => {
+              const parcelasDeFinca = getParcelasDeFinca(finca);
+              
+              return (
+                <div 
+                  key={finca._id}
+                  className="card"
+                  style={{ 
+                    padding: '1rem',
+                    border: '1px solid #e0e0e0',
+                    borderLeft: `4px solid ${finca.finca_propia ? '#2d5a27' : '#f57c00'}`,
+                    marginBottom: 0
+                  }}
+                  data-testid={`finca-card-${finca._id}`}
+                >
+                  {/* Cabecera */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                        <Home size={20} style={{ color: '#2d5a27' }} />
+                        <h4 style={{ margin: 0, fontWeight: '600', fontSize: '1.1rem' }}>
+                          {finca.denominacion || finca.nombre}
+                        </h4>
                         <span style={{
-                          backgroundColor: '#e8f5e9',
-                          color: '#2e7d32',
+                          backgroundColor: finca.finca_propia ? '#e8f5e9' : '#fff3e0',
+                          color: finca.finca_propia ? '#2d5a27' : '#e65100',
                           padding: '2px 8px',
                           borderRadius: '12px',
                           fontSize: '0.75rem',
-                          fontWeight: '500',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px'
+                          fontWeight: '500'
                         }}>
-                          <Pencil size={10} />
-                          Dibujada
+                          {finca.finca_propia ? 'Propia' : 'Alquilada'}
                         </span>
-                      )}
+                        {parcelasDeFinca.length > 0 && (
+                          <span style={{
+                            backgroundColor: '#e3f2fd',
+                            color: '#1565c0',
+                            padding: '2px 8px',
+                            borderRadius: '12px',
+                            fontSize: '0.75rem',
+                            fontWeight: '500'
+                          }}>
+                            {parcelasDeFinca.length} parcela{parcelasDeFinca.length > 1 ? 's' : ''}
+                          </span>
+                        )}
+                      </div>
+                      
+                      {/* Info resumida */}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', fontSize: '0.9rem', color: '#555' }}>
+                        {(finca.provincia || finca.poblacion) && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                            <MapPin size={14} />
+                            {finca.provincia}{finca.poblacion ? `, ${finca.poblacion}` : ''}
+                          </div>
+                        )}
+                        {finca.hectareas > 0 && (
+                          <div><strong>{finca.hectareas.toLocaleString()}</strong> ha</div>
+                        )}
+                        {finca.produccion_esperada > 0 && (
+                          <div>Prod. esperada: <strong>{finca.produccion_esperada.toLocaleString()}</strong> t</div>
+                        )}
+                      </div>
                     </div>
                     
-                    {/* Info resumida */}
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', fontSize: '0.9rem', color: '#555' }}>
-                      {(finca.provincia || finca.poblacion) && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                          <MapPin size={14} />
-                          {finca.provincia}{finca.poblacion ? `, ${finca.poblacion}` : ''}
-                        </div>
-                      )}
-                      {finca.hectareas > 0 && (
-                        <div><strong>{finca.hectareas.toLocaleString()}</strong> ha</div>
-                      )}
-                      {finca.produccion_esperada > 0 && (
-                        <div>Prod. esperada: <strong>{finca.produccion_esperada.toLocaleString()}</strong> t</div>
-                      )}
-                      {finca.num_parcelas > 0 && (
-                        <div><strong>{finca.num_parcelas}</strong> parcelas</div>
-                      )}
+                    {/* Acciones */}
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <button
+                        className="btn btn-sm"
+                        style={{ backgroundColor: '#e8f5e9', color: '#2e7d32', padding: '6px 10px' }}
+                        onClick={() => openAsignarParcelas(finca)}
+                        title="Gestionar parcelas"
+                        data-testid={`btn-parcelas-${finca._id}`}
+                      >
+                        <Link2 size={14} />
+                      </button>
+                      <button
+                        className="btn btn-sm"
+                        style={{ backgroundColor: '#e3f2fd', color: '#1976d2', padding: '6px 10px' }}
+                        onClick={() => setExpandedFinca(expandedFinca === finca._id ? null : finca._id)}
+                        data-testid={`btn-expand-${finca._id}`}
+                      >
+                        {expandedFinca === finca._id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                      </button>
+                      <button
+                        className="btn btn-sm"
+                        style={{ backgroundColor: '#e3f2fd', color: '#1976d2', padding: '6px 10px' }}
+                        onClick={() => handleEdit(finca)}
+                        data-testid={`btn-edit-${finca._id}`}
+                      >
+                        <Edit2 size={14} />
+                      </button>
+                      <button
+                        className="btn btn-sm"
+                        style={{ backgroundColor: '#fee2e2', color: '#dc2626', padding: '6px 10px' }}
+                        onClick={() => handleDelete(finca._id)}
+                        data-testid={`btn-delete-${finca._id}`}
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
                   </div>
                   
-                  {/* Acciones */}
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    {/* Botón Ver Mapa - mostrar si tiene SIGPAC o geometría manual */}
-                    {((finca.sigpac && finca.sigpac.provincia && finca.sigpac.poligono) || 
-                      (finca.geometria_manual && finca.geometria_manual.coords)) && (
-                      <button
-                        className="btn btn-sm"
-                        style={{ 
-                          backgroundColor: finca.geometria_manual?.coords ? '#e8f5e9' : '#e3f2fd', 
-                          color: finca.geometria_manual?.coords ? '#2e7d32' : '#1976d2', 
-                          padding: '6px 10px' 
-                        }}
-                        onClick={() => verMapaFinca(finca)}
-                        title={finca.geometria_manual?.coords ? "Ver parcela dibujada" : "Ver ubicación SIGPAC"}
-                        data-testid={`btn-map-${finca._id}`}
-                      >
-                        {finca.geometria_manual?.coords ? <Pencil size={14} /> : <Map size={14} />}
-                      </button>
-                    )}
-                    <button
-                      className="btn btn-sm"
-                      style={{ backgroundColor: '#e3f2fd', color: '#1976d2', padding: '6px 10px' }}
-                      onClick={() => setExpandedFinca(expandedFinca === finca._id ? null : finca._id)}
-                      data-testid={`btn-expand-${finca._id}`}
-                    >
-                      {expandedFinca === finca._id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                    </button>
-                    <button
-                      className="btn btn-sm"
-                      style={{ backgroundColor: '#e3f2fd', color: '#1976d2', padding: '6px 10px' }}
-                      onClick={() => handleEdit(finca)}
-                      data-testid={`btn-edit-${finca._id}`}
-                    >
-                      <Edit2 size={14} />
-                    </button>
-                    <button
-                      className="btn btn-sm"
-                      style={{ backgroundColor: '#fee2e2', color: '#dc2626', padding: '6px 10px' }}
-                      onClick={() => handleDelete(finca._id)}
-                      data-testid={`btn-delete-${finca._id}`}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                </div>
-                
-                {/* Detalle expandido */}
-                {expandedFinca === finca._id && (
-                  <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #e0e0e0' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
-                      {/* Ubicación */}
-                      <div>
-                        <h5 style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#2d5a27' }}>Ubicación</h5>
-                        <div style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
-                          <div><strong>Provincia:</strong> {finca.provincia || '-'}</div>
-                          <div><strong>Población:</strong> {finca.poblacion || '-'}</div>
-                          <div><strong>Polígono:</strong> {finca.poligono || '-'}</div>
-                          <div><strong>Parcela:</strong> {finca.parcela || '-'}</div>
-                          <div><strong>Subparcela:</strong> {finca.subparcela || '-'}</div>
-                        </div>
-                      </div>
-                      
-                      {/* Superficie y Producción */}
-                      <div>
-                        <h5 style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#388e3c' }}>Superficie y Producción</h5>
-                        <div style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
-                          <div><strong>Hectáreas:</strong> {finca.hectareas?.toLocaleString() || '0'}</div>
-                          <div><strong>Áreas:</strong> {finca.areas?.toLocaleString() || '0'}</div>
-                          <div><strong>Toneladas:</strong> {finca.toneladas?.toLocaleString() || '0'}</div>
-                          <div><strong>Prod. Esperada:</strong> {finca.produccion_esperada?.toLocaleString() || '0'}</div>
-                          <div><strong>Prod. Disponible:</strong> {finca.produccion_disponible?.toLocaleString() || '0'}</div>
-                        </div>
-                      </div>
-                      
-                      {/* SIGPAC */}
-                      {finca.sigpac && (
+                  {/* Detalle expandido */}
+                  {expandedFinca === finca._id && (
+                    <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #e0e0e0' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
+                        {/* Ubicación */}
                         <div>
-                          <h5 style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#1565c0' }}>Datos SIGPAC</h5>
+                          <h5 style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#2d5a27' }}>Ubicación</h5>
                           <div style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
-                            <div><strong>Provincia:</strong> {finca.sigpac.provincia || '-'}</div>
-                            <div><strong>Municipio:</strong> {finca.sigpac.municipio || '-'}</div>
-                            <div><strong>Cod. Agregado:</strong> {finca.sigpac.cod_agregado || '-'}</div>
-                            <div><strong>Zona:</strong> {finca.sigpac.zona || '-'}</div>
-                            <div><strong>Polígono:</strong> {finca.sigpac.poligono || '-'}</div>
-                            <div><strong>Parcela:</strong> {finca.sigpac.parcela || '-'}</div>
-                            <div><strong>Recinto:</strong> {finca.sigpac.recinto || '-'}</div>
-                            <div><strong>Cod. Uso:</strong> {finca.sigpac.cod_uso ? `${finca.sigpac.cod_uso} (${getUsoDescripcion(finca.sigpac.cod_uso)})` : '-'}</div>
+                            <div><strong>Provincia:</strong> {finca.provincia || '-'}</div>
+                            <div><strong>Población:</strong> {finca.poblacion || '-'}</div>
+                            <div><strong>Polígono:</strong> {finca.poligono || '-'}</div>
+                            <div><strong>Parcela:</strong> {finca.parcela || '-'}</div>
+                            <div><strong>Subparcela:</strong> {finca.subparcela || '-'}</div>
+                          </div>
+                        </div>
+                        
+                        {/* Superficie y Producción */}
+                        <div>
+                          <h5 style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#388e3c' }}>Superficie y Producción</h5>
+                          <div style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
+                            <div><strong>Hectáreas:</strong> {finca.hectareas?.toLocaleString() || '0'}</div>
+                            <div><strong>Áreas:</strong> {finca.areas?.toLocaleString() || '0'}</div>
+                            <div><strong>Toneladas:</strong> {finca.toneladas?.toLocaleString() || '0'}</div>
+                            <div><strong>Prod. Esperada:</strong> {finca.produccion_esperada?.toLocaleString() || '0'}</div>
+                            <div><strong>Prod. Disponible:</strong> {finca.produccion_disponible?.toLocaleString() || '0'}</div>
+                          </div>
+                        </div>
+                        
+                        {/* SIGPAC */}
+                        {finca.sigpac && (
+                          <div>
+                            <h5 style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#1565c0' }}>Datos SIGPAC</h5>
+                            <div style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
+                              <div><strong>Provincia:</strong> {finca.sigpac.provincia || '-'}</div>
+                              <div><strong>Municipio:</strong> {finca.sigpac.municipio || '-'}</div>
+                              <div><strong>Cod. Agregado:</strong> {finca.sigpac.cod_agregado || '-'}</div>
+                              <div><strong>Zona:</strong> {finca.sigpac.zona || '-'}</div>
+                              <div><strong>Polígono:</strong> {finca.sigpac.poligono || '-'}</div>
+                              <div><strong>Parcela:</strong> {finca.sigpac.parcela || '-'}</div>
+                              <div><strong>Recinto:</strong> {finca.sigpac.recinto || '-'}</div>
+                              <div><strong>Cod. Uso:</strong> {finca.sigpac.cod_uso ? `${finca.sigpac.cod_uso} (${getUsoDescripcion(finca.sigpac.cod_uso)})` : '-'}</div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Recolección y Precios */}
+                        <div>
+                          <h5 style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#e65100' }}>Recolección y Precios</h5>
+                          <div style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
+                            <div><strong>Semana Recolección:</strong> {finca.recoleccion_semana || '-'}</div>
+                            <div><strong>Año:</strong> {finca.recoleccion_ano || '-'}</div>
+                            <div><strong>Precio Corte:</strong> {finca.precio_corte?.toLocaleString() || '0'} €</div>
+                            <div><strong>Precio Transporte:</strong> {finca.precio_transporte?.toLocaleString() || '0'} €</div>
+                            <div><strong>Prov. Corte:</strong> {finca.proveedor_corte || '-'}</div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Parcelas asignadas */}
+                      {parcelasDeFinca.length > 0 && (
+                        <div style={{ marginTop: '1rem' }}>
+                          <h5 style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#7b1fa2', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Layers size={16} />
+                            Parcelas de esta Finca ({parcelasDeFinca.length})
+                          </h5>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.75rem' }}>
+                            {parcelasDeFinca.map(p => (
+                              <div key={p._id} style={{
+                                backgroundColor: '#f3e5f5',
+                                padding: '0.75rem',
+                                borderRadius: '6px',
+                                border: '1px solid #ce93d8',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                              }}>
+                                <div>
+                                  <div style={{ fontWeight: '600', color: '#7b1fa2' }}>{p.codigo_plantacion || 'Sin código'}</div>
+                                  <div style={{ fontSize: '0.85rem', color: '#555' }}>
+                                    <strong>Cultivo:</strong> {p.cultivo || '-'} | <strong>Variedad:</strong> {p.variedad || '-'}
+                                  </div>
+                                  <div style={{ fontSize: '0.8rem', color: '#777' }}>
+                                    {p.superficie_total} ha | {p.num_plantas} plantas
+                                  </div>
+                                </div>
+                                <button
+                                  className="btn btn-sm"
+                                  style={{ backgroundColor: '#ffcdd2', color: '#c62828', padding: '4px 8px' }}
+                                  onClick={() => desasignarParcela(finca._id, p._id)}
+                                  title="Quitar parcela de la finca"
+                                >
+                                  <Unlink size={12} />
+                                </button>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       )}
                       
-                      {/* Recolección y Precios */}
-                      <div>
-                        <h5 style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#e65100' }}>Recolección y Precios</h5>
-                        <div style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
-                          <div><strong>Semana Recolección:</strong> {finca.recoleccion_semana || '-'}</div>
-                          <div><strong>Año:</strong> {finca.recoleccion_ano || '-'}</div>
-                          <div><strong>Precio Corte:</strong> {finca.precio_corte?.toLocaleString() || '0'} €</div>
-                          <div><strong>Precio Transporte:</strong> {finca.precio_transporte?.toLocaleString() || '0'} €</div>
-                          <div><strong>Prov. Corte:</strong> {finca.proveedor_corte || '-'}</div>
+                      {/* Observaciones */}
+                      {finca.observaciones && (
+                        <div style={{ marginTop: '1rem' }}>
+                          <h5 style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#555' }}>Observaciones</h5>
+                          <p style={{ fontSize: '0.9rem', color: '#666', margin: 0 }}>{finca.observaciones}</p>
                         </div>
-                      </div>
+                      )}
                     </div>
-                    
-                    {/* Observaciones */}
-                    {finca.observaciones && (
-                      <div style={{ marginTop: '1rem' }}>
-                        <h5 style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#555' }}>Observaciones</h5>
-                        <p style={{ fontSize: '0.9rem', color: '#666', margin: 0 }}>{finca.observaciones}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
       
-      {/* Mapa flotante para ver fincas desde el listado */}
-      {showMap && mapData && !showForm && (
-        <div style={{
-          position: 'fixed',
-          top: mapExpanded ? 0 : '50%',
-          left: mapExpanded ? 0 : '50%',
-          transform: mapExpanded ? 'none' : 'translate(-50%, -50%)',
-          width: mapExpanded ? '100%' : '80%',
-          maxWidth: mapExpanded ? '100%' : '900px',
-          height: mapExpanded ? '100%' : '500px',
-          zIndex: 9999,
-          boxShadow: mapExpanded ? 'none' : '0 4px 20px rgba(0,0,0,0.3)',
-          borderRadius: mapExpanded ? 0 : '8px',
-          overflow: 'hidden'
-        }}>
-          <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center', backgroundColor: 'white' }}>Cargando mapa...</div>}>
-            <MapaSigpac
-              sigpacData={mapData.sigpac}
-              wkt={mapData.wkt}
-              centroide={mapData.centroide}
-              denominacion={mapData.denominacion}
-              onClose={() => { setShowMap(false); setMapData(null); }}
-              isExpanded={mapExpanded}
-              onToggleExpand={() => setMapExpanded(!mapExpanded)}
-            />
-          </Suspense>
-        </div>
-      )}
-      
-      {/* Overlay para el mapa flotante */}
-      {showMap && mapData && !showForm && !mapExpanded && (
-        <div 
-          style={{
+      {/* Modal Asignar Parcelas */}
+      {showAsignarParcela && selectedFincaForParcelas && (
+        <>
+          <div 
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              zIndex: 9998
+            }}
+            onClick={() => setShowAsignarParcela(false)}
+          />
+          <div style={{
             position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            zIndex: 9998
-          }}
-          onClick={() => { setShowMap(false); setMapData(null); }}
-        />
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '1.5rem',
+            width: '90%',
+            maxWidth: '700px',
+            maxHeight: '80vh',
+            overflow: 'auto',
+            zIndex: 9999,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Link2 size={24} style={{ color: '#2d5a27' }} />
+                Gestionar Parcelas - {selectedFincaForParcelas.denominacion}
+              </h3>
+              <button 
+                className="btn btn-sm btn-secondary"
+                onClick={() => setShowAsignarParcela(false)}
+              >
+                <X size={16} />
+              </button>
+            </div>
+            
+            {/* Parcelas ya asignadas */}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h4 style={{ fontSize: '0.95rem', fontWeight: '600', marginBottom: '0.75rem', color: '#2d5a27' }}>
+                Parcelas Asignadas ({getParcelasDeFinca(selectedFincaForParcelas).length})
+              </h4>
+              {getParcelasDeFinca(selectedFincaForParcelas).length === 0 ? (
+                <p style={{ color: '#888', fontSize: '0.9rem', fontStyle: 'italic' }}>
+                  Esta finca no tiene parcelas asignadas
+                </p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {getParcelasDeFinca(selectedFincaForParcelas).map(p => (
+                    <div key={p._id} style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0.75rem',
+                      backgroundColor: '#e8f5e9',
+                      borderRadius: '6px',
+                      border: '1px solid #a5d6a7'
+                    }}>
+                      <div>
+                        <div style={{ fontWeight: '600' }}>{p.codigo_plantacion || 'Sin código'}</div>
+                        <div style={{ fontSize: '0.85rem', color: '#555' }}>
+                          {p.cultivo} - {p.variedad} | {p.superficie_total} ha
+                        </div>
+                      </div>
+                      <button
+                        className="btn btn-sm"
+                        style={{ backgroundColor: '#ffcdd2', color: '#c62828' }}
+                        onClick={() => desasignarParcela(selectedFincaForParcelas._id, p._id)}
+                      >
+                        <Unlink size={14} style={{ marginRight: '4px' }} />
+                        Quitar
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            {/* Parcelas disponibles para asignar */}
+            <div>
+              <h4 style={{ fontSize: '0.95rem', fontWeight: '600', marginBottom: '0.75rem', color: '#1565c0' }}>
+                Parcelas Disponibles ({parcelasDisponibles.length})
+              </h4>
+              {parcelasDisponibles.length === 0 ? (
+                <p style={{ color: '#888', fontSize: '0.9rem', fontStyle: 'italic' }}>
+                  No hay parcelas disponibles para asignar
+                </p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {parcelasDisponibles.map(p => (
+                    <div key={p._id} style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0.75rem',
+                      backgroundColor: '#f5f5f5',
+                      borderRadius: '6px',
+                      border: '1px solid #e0e0e0'
+                    }}>
+                      <div>
+                        <div style={{ fontWeight: '600' }}>{p.codigo_plantacion || 'Sin código'}</div>
+                        <div style={{ fontSize: '0.85rem', color: '#555' }}>
+                          {p.cultivo} - {p.variedad} | {p.superficie_total} ha
+                        </div>
+                        <div style={{ fontSize: '0.8rem', color: '#888' }}>
+                          Proveedor: {p.proveedor}
+                        </div>
+                      </div>
+                      <button
+                        className="btn btn-sm"
+                        style={{ backgroundColor: '#e8f5e9', color: '#2e7d32' }}
+                        onClick={() => asignarParcela(selectedFincaForParcelas._id, p._id)}
+                      >
+                        <Link2 size={14} style={{ marginRight: '4px' }} />
+                        Asignar
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
