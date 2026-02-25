@@ -305,6 +305,159 @@ test.describe('Parcelas Module - SIGPAC Integration', () => {
   });
 });
 
+test.describe('Parcelas Edit Bug Fix - SIGPAC Initialization', () => {
+  test.beforeEach(async ({ page }) => {
+    await dismissToasts(page);
+    await login(page);
+    await page.waitForTimeout(2000);
+    await ensureModalClosed(page);
+    
+    // Navigate to Parcelas
+    await page.getByTestId('nav-parcelas').click({ force: true });
+    await page.waitForLoadState('domcontentloaded');
+    await waitForDataLoad(page);
+    await removeEmergentBadge(page);
+    await ensureModalClosed(page);
+  });
+
+  test('should open edit form without JavaScript errors', async ({ page }) => {
+    // Check if there are parcelas to edit
+    const parcelasTable = page.getByTestId('parcelas-table');
+    await expect(parcelasTable).toBeVisible({ timeout: 10000 });
+    
+    // Find an edit button
+    const editButtons = page.locator('[data-testid^="edit-parcela-"]');
+    const editCount = await editButtons.count();
+    
+    if (editCount === 0) {
+      console.log('No parcelas to edit - skipping test');
+      return;
+    }
+    
+    // Add console error listener to catch JavaScript errors
+    const consoleErrors: string[] = [];
+    page.on('console', msg => {
+      if (msg.type() === 'error') {
+        consoleErrors.push(msg.text());
+      }
+    });
+    
+    // Click the first edit button
+    await editButtons.first().click({ force: true });
+    await page.waitForTimeout(2000);
+    
+    // Verify the form opened (look for "Editar Parcela" title)
+    await expect(page.locator('text=Editar Parcela')).toBeVisible({ timeout: 5000 });
+    
+    // Check for JavaScript errors related to sigpac
+    const sigpacErrors = consoleErrors.filter(e => 
+      e.includes('sigpac') || 
+      e.includes('provincia') || 
+      e.includes('Cannot read properties of undefined')
+    );
+    
+    expect(sigpacErrors.length).toBe(0);
+  });
+
+  test('should display SIGPAC fields correctly when editing a parcela', async ({ page }) => {
+    const editButtons = page.locator('[data-testid^="edit-parcela-"]');
+    const editCount = await editButtons.count();
+    
+    if (editCount === 0) {
+      console.log('No parcelas to edit - skipping test');
+      return;
+    }
+    
+    // Click the first edit button
+    await editButtons.first().click({ force: true });
+    await page.waitForTimeout(2000);
+    
+    // Verify form is in edit mode
+    await expect(page.locator('text=Editar Parcela')).toBeVisible({ timeout: 5000 });
+    
+    // Scroll to SIGPAC section
+    const sigpacProvinciaField = page.getByTestId('sigpac-provincia');
+    await sigpacProvinciaField.scrollIntoViewIfNeeded();
+    
+    // Verify all SIGPAC fields exist and are accessible without errors
+    await expect(page.getByTestId('sigpac-provincia')).toBeVisible();
+    await expect(page.getByTestId('sigpac-municipio')).toBeVisible();
+    await expect(page.getByTestId('sigpac-poligono')).toBeVisible();
+    await expect(page.getByTestId('sigpac-parcela')).toBeVisible();
+    await expect(page.getByTestId('sigpac-agregado')).toBeVisible();
+    await expect(page.getByTestId('sigpac-zona')).toBeVisible();
+    await expect(page.getByTestId('sigpac-recinto')).toBeVisible();
+    await expect(page.getByTestId('sigpac-uso')).toBeVisible();
+    
+    // Verify the search button is visible
+    await expect(page.getByTestId('btn-buscar-sigpac-parcela')).toBeVisible();
+  });
+
+  test('should show map when editing parcela', async ({ page }) => {
+    const editButtons = page.locator('[data-testid^="edit-parcela-"]');
+    const editCount = await editButtons.count();
+    
+    if (editCount === 0) {
+      console.log('No parcelas to edit - skipping test');
+      return;
+    }
+    
+    // Click the first edit button
+    await editButtons.first().click({ force: true });
+    await page.waitForTimeout(2000);
+    
+    // Verify form is in edit mode
+    await expect(page.locator('text=Editar Parcela')).toBeVisible({ timeout: 5000 });
+    
+    // Verify the map is visible
+    const mapContainer = page.locator('.leaflet-container');
+    await expect(mapContainer.first()).toBeVisible({ timeout: 5000 });
+  });
+
+  test('should be able to cancel edit without errors', async ({ page }) => {
+    const editButtons = page.locator('[data-testid^="edit-parcela-"]');
+    const editCount = await editButtons.count();
+    
+    if (editCount === 0) {
+      console.log('No parcelas to edit - skipping test');
+      return;
+    }
+    
+    // Add console error listener
+    const consoleErrors: string[] = [];
+    page.on('console', msg => {
+      if (msg.type() === 'error') {
+        consoleErrors.push(msg.text());
+      }
+    });
+    
+    // Click the first edit button
+    await editButtons.first().click({ force: true });
+    await page.waitForTimeout(2000);
+    
+    // Verify form opened
+    await expect(page.locator('text=Editar Parcela')).toBeVisible({ timeout: 5000 });
+    
+    // Click Cancel button
+    const cancelBtn = page.locator('button:has-text("Cancelar")').first();
+    await cancelBtn.click({ force: true });
+    await page.waitForTimeout(1000);
+    
+    // Verify form is closed (should see "Nueva Parcela" button but not "Editar Parcela")
+    await expect(page.locator('text=Editar Parcela')).not.toBeVisible({ timeout: 3000 });
+    await expect(page.getByTestId('btn-nueva-parcela')).toBeVisible();
+    
+    // Check no sigpac-related errors occurred
+    const sigpacErrors = consoleErrors.filter(e => 
+      e.includes('sigpac') || 
+      e.includes('provincia') || 
+      e.includes('Cannot read properties of undefined')
+    );
+    
+    expect(sigpacErrors.length).toBe(0);
+  });
+});
+
 test.describe('Parcelas Module - Page Load', () => {
   test.beforeEach(async ({ page }) => {
     await dismissToasts(page);
