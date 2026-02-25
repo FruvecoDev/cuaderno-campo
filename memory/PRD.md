@@ -876,3 +876,30 @@ Módulos actualizados para seguir patrón consistente:
 - **Test Report**: `/app/test_reports/iteration_22.json` - 100% (32/32 tests: 21 backend + 11 frontend)
 - **Estado**: ✅ COMPLETADO Y TESTEADO
 
+## Plantillas de Recomendaciones (25/02/2026) - COMPLETADO
+- **Alcance**: Sistema de plantillas predefinidas para crear recomendaciones rápidamente
+- **Funcionalidades implementadas**:
+  - **CRUD de Plantillas**: Crear, editar, eliminar y listar plantillas (solo Admin/Manager)
+  - **Campos de plantilla**: Nombre, descripción, tipo, subtipo, producto, dosis, unidad, volumen agua, prioridad, motivo, observaciones
+  - **Plantillas predeterminadas**: 8 plantillas de uso común (Control de hongos, pulgón, malas hierbas, araña roja, caracoles, fertilización, riego, poda)
+  - **Toggle activar/desactivar**: Las plantillas inactivas no aparecen en selectores
+  - **Contador de usos**: Cada plantilla registra cuántas veces ha sido usada
+  - **Botón "Usar Plantilla"**: En el formulario de nueva recomendación, auto-rellena los campos desde la plantilla seleccionada
+  - **Aplicación Masiva**: Modal que permite:
+    - Seleccionar una plantilla
+    - Seleccionar múltiples parcelas (checkboxes)
+    - Crear N recomendaciones idénticas de una vez
+    - Los campos cultivo/variedad se toman automáticamente de cada parcela
+- **Backend**: `/app/backend/routes_plantillas_recomendaciones.py`
+  - Endpoints: GET, POST, PUT, DELETE `/api/plantillas-recomendaciones`
+  - POST `/api/plantillas-recomendaciones/seed` - Cargar predeterminadas
+  - POST `/api/plantillas-recomendaciones/aplicar-masivo` - Aplicación masiva
+  - PATCH `/api/plantillas-recomendaciones/{id}/toggle-activo`
+  - GET `/api/plantillas-recomendaciones/stats/uso`
+- **Frontend**: Pestañas en `/app/frontend/src/pages/Recomendaciones.js`
+  - Tab "Recomendaciones" - Lista de recomendaciones existentes
+  - Tab "Plantillas" - Gestión de plantillas
+  - Modal "Aplicación Masiva" - Crear múltiples recomendaciones
+  - Modal "Selector de Plantillas" - Usar plantilla en formulario
+- **Test Report**: `/app/test_reports/iteration_24.json` - 100% (37/37 tests: 20 backend + 17 frontend)
+- **Estado**: ✅ COMPLETADO Y TESTEADO
