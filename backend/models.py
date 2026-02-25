@@ -124,9 +124,17 @@ class ContratoCreate(BaseModel):
     agente_compra: Optional[str] = None  # Solo si tipo = "Compra"
     agente_venta: Optional[str] = None   # Solo si tipo = "Venta"
     
-    # Comisión del agente
-    comision_tipo: Optional[str] = None  # "porcentaje" o "euro_kilo"
-    comision_valor: Optional[float] = None  # Valor de la comisión
+    # Comisión del agente de COMPRA
+    comision_compra_tipo: Optional[str] = None  # "porcentaje" o "euro_kilo"
+    comision_compra_valor: Optional[float] = None  # Valor de la comisión
+    
+    # Comisión del agente de VENTA
+    comision_venta_tipo: Optional[str] = None  # "porcentaje" o "euro_kilo"
+    comision_venta_valor: Optional[float] = None  # Valor de la comisión
+    
+    # Campos legacy de comisión (para compatibilidad)
+    comision_tipo: Optional[str] = None
+    comision_valor: Optional[float] = None
     
     # Tabla de precios por calidad/tenderometría (para guisante)
     precios_calidad: List[ContratoPrecios] = []
