@@ -11,7 +11,7 @@ export default defineConfig({
     ['json', { outputFile: '/root/.emergent/automation_output/20260225_084633/results.json' }],
   ],
   use: {
-    baseURL: 'https://field-tracker-66.preview.emergentagent.com',
+    baseURL: 'https://harvest-track-14.preview.emergentagent.com',
     screenshot: 'only-on-failure',
     trace: 'off',
     headless: true,

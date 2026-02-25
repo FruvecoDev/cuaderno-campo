@@ -27,72 +27,64 @@ Cada sección puede ser configurable pudiendo habilitar o deshabilitar secciones
 **User's preferred language**: Español
 
 **what currently exists?**
-Una aplicación full-stack (FastAPI, React, MongoDB) para gestión agrícola. En esta sesión, se han implementado múltiples funcionalidades clave:
-1.  **Permisos de Operación por Usuario:** Se ha creado un sistema de permisos (, , ) que restringe el acceso a módulos (Proveedores, Clientes), opciones en formularios (Contratos, Albaranes) y KPIs del Dashboard.
-2.  **Nuevos Módulos y Mejoras:** Se creó un módulo de Informes de Ingresos, se internacionalizó el Dashboard, se corrigió el selector de idiomas y se implementó la configuración de columnas en las tablas de Clientes y Proveedores.
-3.  **PDF Mejorado:** La generación del PDF de Hojas de Evaluación ahora incluye fichas detalladas para el Técnico Aplicador y la Maquinaria, con espacio para sus imágenes correspondientes.
-4.  **Lógica de Negocio:** Se mejoró el filtrado de contratos en los albaranes para que coincida el tipo (compra/venta).
-
-El error crítico en la página de Albaranes de la sesión anterior fue confirmado como resuelto por el usuario al inicio de esta.
+Una aplicación full-stack para gestión agrícola (FastAPI, React, MongoDB). En esta sesión se han realizado avances significativos:
+1.  **Corrección de Errores Críticos:** Se solucionó por completo el bug que impedía guardar y visualizar imágenes en los módulos de Técnicos Aplicadores y Maquinaria.
+2.  **Diseño Adaptable (Responsive):** Toda la aplicación ha sido adaptada para funcionar correctamente en dispositivos móviles y tablets, incluyendo un menú de hamburguesa, tablas con desplazamiento horizontal y rejillas adaptables.
+3.  **Sistema de Comisiones:** Se implementó un módulo completo de Liquidación de Comisiones que calcula las ganancias de los agentes basándose en los albaranes generados, no en el valor total del contrato. Incluye KPIs, filtros y generación de PDFs.
+4.  **Modo Offline:** Los módulos de Visitas y Tratamientos ahora funcionan sin conexión. Los usuarios pueden descargar datos de referencia y guardar nuevos registros, que se sincronizan automáticamente al recuperar la conexión.
+5.  **Notificaciones Push:** Se añadió una mejora para notificar al usuario mediante una notificación push cuando los datos guardados offline se han sincronizado correctamente.
 
 **Last working item**:
--   **Last item agent was working**: Depurando por qué no se guardan las imágenes subidas en las fichas de Técnicos Aplicadores y Maquinaria. El usuario reportó el bug. El agente identificó que el backend guardaba una ruta de archivo local en lugar de una URL accesible por web. Se aplicó una corrección en los endpoints de subida (, ) para guardar la URL correcta (ej. ), pero no se completó la verificación de la solución.
+-   **Last item agent was working**: Implementando una nueva funcionalidad solicitada por el usuario: permitir a un administrador cambiar los logos de la aplicación (para la pantalla de login y el dashboard principal). El agente comenzó creando el endpoint de backend necesario para la subida del archivo.
 -   **Status**: IN PROGRESS
 -   **Agent Testing Done**: N
--   **Which testing method agent to use?**: both. Se debe probar el flujo completo: subir una imagen en el frontend, verificar que el backend la guarda en  y que la URL correcta se almacena en la base de datos, y finalmente, que la imagen se puede visualizar en la aplicación.
+-   **Which testing method agent to use?**: both. Se debe probar el flujo completo: que un usuario administrador pueda subir una imagen desde el frontend, que el backend la guarde correctamente, y que los nuevos logos se muestren en el login y en el layout principal.
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Las imágenes no se guardan en Técnicos y Maquinaria (P0)**
--   **Issue 2: Finalizar implementación de notificaciones por email (P1)**
+-   **Issue 1: Completar la implementación del cambio de logo (P0)**
 
 **Issues Detail**:
--   **Issue 1: Las imágenes no se guardan en Técnicos y Maquinaria**
-    -   **Attempted fixes**: El agente modificó los endpoints del backend ( y ) para que la ruta guardada en la base de datos sea una URL relativa (ej. ) en lugar de una ruta absoluta del sistema de archivos (). También se verificó que  ya sirve estáticamente el directorio .
+-   **Issue 1: Completar la implementación del cambio de logo**
+    -   **Attempted fixes**: Se creó el archivo  con un endpoint  para manejar la subida del archivo.
     -   **Next debug checklist**:
-        1.  Realizar una prueba de extremo a extremo: usar el formulario en  para subir una imagen.
-        2.  Verificar que el archivo aparece físicamente en el directorio .
-        3.  Confirmar que el documento del técnico en MongoDB tiene el campo  con la ruta web correcta.
-        4.  Comprobar que al hacer clic en el icono de visualización en la tabla de técnicos se abre la imagen correctamente.
-        5.  Repetir los pasos 1-4 para el módulo de .
-    -   **Why fix this issue and what will be achieved with the fix?**: Es un requisito del usuario poder adjuntar y visualizar imágenes de certificados y placas. Además, estas imágenes son necesarias para la generación de los PDF de Hojas de Evaluación.
+        1.  Registrar el nuevo router () en .
+        2.  Crear la interfaz de frontend, probablemente en una nueva página de Configuración accesible solo para administradores.
+        3.  Implementar la lógica de subida de archivos en el frontend.
+        4.  Modificar los componentes  y  para que carguen las URLs de los logos de forma dinámica desde una nueva colección de MongoDB (ej. ).
+        5.  Asegurar que el endpoint guarde el archivo en una ruta persistente (ej. ) y almacene la URL en la base de datos.
+        6.  Verificar que solo los usuarios con el rol de admin puedan acceder a esta funcionalidad.
+    -   **Why fix this issue and what will be achieved with the fix?**: Es una solicitud directa del usuario para permitir la personalización visual (white-labeling) de la aplicación.
     -   **Status**: IN PROGRESS
     -   **Is recurring issue?**: N
     -   **Should Test frontend/backend/both after fix?**: both
     -   **Blocked on other issue**: None
--   **Issue 2: Finalizar implementación de notificaciones por email**
-    -   **Attempted fixes**: La estructura básica existe (, ).
-    -   **Next debug checklist**:
-        1.  Solicitar la  al usuario.
-        2.  Añadir la clave al fichero .
-        3.  Implementar la lógica de envío en los eventos correspondientes.
-    -   **Why fix this issue and what will be achieved with the fix?**: Permitirá enviar recordatorios y alertas proactivas por email.
-    -   **Status**: BLOCKED
-    -   **Is recurring issue?**: N
-    -   **Should Test frontend/backend/both after fix?**: both
-    -   **Blocked on other issue**: Necesita la  del usuario.
 
 **In progress Task List**:
--   None.
+-   **Task 1: Implementar la funcionalidad de cambio de logo (P0)**
+    -   **Where to resume**: El archivo  ya está creado. El siguiente paso es registrarlo en  y luego construir la interfaz de usuario en el frontend para que el administrador pueda subir los logos.
+    -   **What will be achieved with this?**: Los administradores podrán personalizar la aplicación subiendo sus propios logos para la pantalla de inicio de sesión y el panel principal.
+    -   **Status**: IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?**: both
+    -   **Blocked on something**: No
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks**:
-    -   **P1**: Implementar el sistema de aplicación de comisiones a un contrato, cultivo o parcela.
+    -   **P1**: Finalizar implementación de notificaciones por email (BLOCKED: esperando la  del usuario).
 -   **Future Tasks**:
     -   **P2**: Mejorar el mapa interactivo con funciones avanzadas de edición para las parcelas.
 
 **Completed work in this session**
--   **Feature**: Se implementó un sistema de permisos por usuario (, , ) que restringe el acceso a módulos (Proveedores/Clientes), opciones en formularios (Contratos/Albaranes) y KPIs del Dashboard.
--   **Feature**: Se creó el módulo completo de Informes de Ingresos, con backend y frontend.
--   **Feature**: Se mejoró el PDF de Hojas de Evaluación para incluir fichas del técnico aplicador y de la maquinaria con sus respectivas imágenes.
--   **Feature**: Se añadió la funcionalidad de configurar (mostrar/ocultar) las columnas de las tablas en las páginas de Clientes y Proveedores.
--   **Feature**: El Dashboard ahora muestra KPIs de Contratos de Compra y Contratos de Venta por separado y respeta los permisos del usuario.
--   **Bugfix**: Se corrigió un problema de visualización en el menú desplegable del selector de idiomas.
--   **i18n**: Se completó la internacionalización de todos los textos del Dashboard.
--   **UX**: Se añadió un botón de acceso directo para editar los permisos de operación de un usuario, mejorando su descubrimiento.
+-   **Bugfix**: Corregida la subida y visualización de imágenes para Técnicos Aplicadores y Maquinaria. (DONE, Verified by testing agent)
+-   **Feature**: Adaptación completa de la aplicación a vistas de tablet y móvil (Diseño Responsive). (DONE, Verified by testing agent)
+-   **Feature**: Implementado el sistema de liquidación de comisiones basado en albaranes, con un nuevo módulo, KPIs y exportación a PDF. (DONE, Verified by testing agent)
+-   **Feature**: Implementado el modo offline para los módulos de Visitas y Tratamientos usando IndexedDB y Service Workers. (DONE, Verified by testing agent)
+-   **Enhancement**: Añadido un sistema de notificaciones push para confirmar la sincronización de datos offline. (DONE)
+-   **Refactor**: Modificada la lógica de comisiones para que se calcule a partir de los albaranes en lugar de los contratos, según la petición del usuario. (DONE)
+-   **Enhancement**: Añadido un campo de búsqueda por nombre al filtro de agentes en el módulo de comisiones. (DONE)
 
 **Earlier issues found/mentioned but not fixed**
--   None. El error  de la sesión anterior fue resuelto.
+-   None.
 
 **Known issue recurrence from previous fork**
 -   None.
@@ -101,83 +93,90 @@ El error crítico en la página de Albaranes de la sesión anterior fue confirma
 
 
 **Key Technical Concepts**
--   **Stack**: FARM (FastAPI, React, MongoDB)
--   **Role-Based Access Control (RBAC)**: Lógica de permisos personalizada implementada en el  de React para el frontend y en los endpoints de FastAPI para el backend.
--   **File Uploads**: Uso de  en React y  en FastAPI. Se configuró el servicio de archivos estáticos para servir las imágenes subidas.
--   **Internationalization (i18n)**: Uso de  para la traducción de la interfaz.
+-   **Offline First**: Uso de Service Workers e IndexedDB (a través de ) para cachear datos y permitir la creación de registros sin conexión.
+-   **Background Sync**: Sincronización automática de datos locales con el backend al recuperar la conexión a internet.
+-   **Push Notifications API**: Para notificaciones del navegador sobre eventos de la aplicación.
+-   **Responsive Design**: CSS Media Queries para adaptar la interfaz a diferentes tamaños de pantalla (móvil, tablet, escritorio).
+-   **FARM Stack**: FastAPI, React, MongoDB.
 
 **key DB schema**
--   **users**: Se añadió el campo  (Enum: Compra, Venta, Ambos).
--   **tecnicos_aplicadores**: Se añadió .
--   **maquinaria**: Se añadió .
+-   **contratos**: Modificado para incluir campos de comisión separados para agente de compra y de venta.
+-   **configuracion**: Se necesitará probablemente una nueva colección para almacenar las URLs de los logos, ej: .
 
 **changes in tech stack**
--   None.
+-   **dexie**: Nueva dependencia en el frontend para facilitar el uso de IndexedDB.
 
 **All files of reference**
--   **/app/backend/routes/routes_tecnicos_aplicadores.py**: Modificado para corregir la URL de la imagen subida.
--   **/app/backend/routes/routes_maquinaria.py**: Modificado para corregir la URL de la imagen subida.
--   **/app/frontend/src/pages/TecnicosAplicadores.js**: Contiene la UI para la subida de imágenes de certificados.
--   **/app/frontend/src/pages/Maquinaria.js**: Contiene la UI para la subida de imágenes de placas.
--   **/app/frontend/src/pages/Usuarios.js**: UI principal para gestionar los permisos de operación.
--   **/app/frontend/src/context/AuthContext.js**: Lógica central de permisos en el frontend.
--   **/app/backend/models.py**: Actualizado el modelo  con el nuevo campo de permiso.
--   **/app/backend/routes/routes_evaluaciones.py**: Modificado para incluir las nuevas fichas en el PDF.
+-   **/app/backend/routes/routes_configuracion.py**: (Nuevo) Creado para la funcionalidad de subida de logos.
+-   **/app/frontend/src/pages/Login.js**: Necesitará ser modificado para mostrar el logo personalizado.
+-   **/app/frontend/src/components/Layout.js**: Necesitará ser modificado para mostrar el logo personalizado en el dashboard.
+-   **/app/frontend/src/services/syncService.js**: Contiene la lógica principal del modo offline.
+-   **/app/frontend/src/pages/LiquidacionComisiones.js**: Nuevo módulo para la gestión de comisiones.
+-   **/app/backend/routes/routes_comisiones.py**: Lógica de backend para el cálculo de comisiones.
 
 **Areas that need refactoring**:
--   La lógica de permisos está distribuida en varios componentes (, , , ). Se podría considerar abstraerla a un Hook o HOC (Higher-Order Component) para evitar la repetición del  y la lógica .
+-   La lógica de control de acceso por roles (RBAC) está dispersa. Se podría centralizar en un Hook o HOC para mejorar la mantenibilidad, aunque no es una prioridad actual.
 
 **key api endpoints**
--   : (Nuevo) Actualiza el permiso de operación de un usuario.
--   : (Modificado) Endpoint para subir imagen de certificado.
--   : (Modificado) Endpoint para subir imagen de placa CE.
--   : (Nuevo) Obtiene los datos para los informes de ingresos.
--   : Ruta estática para servir los archivos subidos.
+-   : (Nuevo, En progreso) Endpoint para subir un nuevo logo de la aplicación.
+-   : (Nuevo) Obtiene los datos de las comisiones calculadas a partir de los albaranes.
+-   : (Nuevo) Genera un informe PDF con la liquidación de un agente.
 
 **Critical Info for New Agent**
-1.  **P0 - FIX IMAGE UPLOADS**: Tu prioridad absoluta es finalizar la depuración de la subida de imágenes para Técnicos Aplicadores y Maquinaria. El agente anterior corrigió el backend para guardar URLs correctas, pero no completó la prueba de extremo a extremo. Debes verificar que la subida, el guardado y la visualización de imágenes funcionen perfectamente.
-2.  **USER PERMISSIONS ():** Se ha implementado un sistema de permisos de operación (, , ). Este permiso controla la visibilidad y el acceso en el Dashboard, el menú lateral, Contratos y Albaranes. Cualquier nueva funcionalidad relacionada con compras o ventas debe respetar este sistema.
-3.  **BLOCKED TASK - EMAIL NOTIFICATIONS:** La tarea para implementar notificaciones por email sigue bloqueada a la espera de que el usuario proporcione la . No trabajes en ello hasta recibir la clave.
+1.  **P0 - FINALIZAR CAMBIO DE LOGO**: Tu prioridad inmediata es completar la funcionalidad que permite a un administrador cambiar los logos. El archivo de ruta del backend ya está creado. Debes registrarlo, construir la interfaz de usuario en el frontend para el admin, y modificar los componentes  y  para que muestren los logos de forma dinámica.
+2.  **LÓGICA DE COMISIONES**: El sistema de comisiones fue refactorizado y ahora se calcula sobre los **albaranes**, no sobre el valor total del contrato. El tipo y valor de la comisión se siguen definiendo en el contrato asociado.
+3.  **MODO OFFLINE**: La aplicación cuenta con un modo offline para Visitas y Tratamientos. Cualquier cambio en estos módulos debe tener en cuenta la lógica existente en  y el almacenamiento en IndexedDB.
+4.  **TAREA BLOQUEADA**: La implementación de notificaciones por email sigue bloqueada a la espera de que el usuario proporcione la . No trabajes en ello.
 
 **documents and test reports created in this job**
--   None.
+-    (Verificación del arreglo de subida de imágenes)
+-    (Verificación del diseño responsive)
+-    (Verificación del sistema de comisiones)
+-    (Verificación del modo offline)
+-    (Actualizado con las tareas completadas)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.   - **Bug Report**: Images are not saving. **Status: IN PROGRESS** (Current 
-wtmp begins Tue Feb 24 20:26:57 2026).
-2.   - **Request**: Add applicator/machinery details to PDF. **Status: COMPLETED** (backend logic implemented, pending image fix).
-3.   - **Request**: Create income reports module. **Status: COMPLETED**.
-4.   - **Request**: Dashboard KPIs must respect operation permissions. **Status: COMPLETED**.
-5.   - **Confirmation**: User saw the new UI button for permissions. **Status: COMPLETED**.
-6.   - **UX Feedback**: Operation type modal is not intuitive. **Status: COMPLETED** (dedicated button added).
-7.   - **Request**: Implement operation-based permissions. **Status: COMPLETED**.
-8.   - **Request**: Split Total Contracts KPI on dashboard. **Status: COMPLETED**.
-9.   - **Bug Report**: Language selector dropdown is broken. **Status: COMPLETED**.
-10.  - **Request**: Internationalize the dashboard. **Status: COMPLETED**.
+1.  : (Nueva Petición) Opción para que el admin cambie los logos. **Estado: IN PROGRESS**.
+2.  : (Mejora) Añadir búsqueda por nombre al filtro de agentes. **Estado: COMPLETED**.
+3.  : (Clarificación) Confirmación de la lógica de comisiones. **Estado: COMPLETED**.
+4.  : (Petición de Cambio) Las comisiones deben basarse en los albaranes. **Estado: COMPLETED**.
+5.  : (Confirmación) Aprobación para implementar las notificaciones push. **Estado: COMPLETED**.
+6.  : (Confirmación) Aprobación de los requisitos para la sincronización offline. **Estado: COMPLETED**.
+7.  : (Confirmación) Aprobación del plan para implementar el sistema de comisiones. **Estado: COMPLETED**.
+8.  : (Priorización) Usuario pide implementar comisiones (P1) y luego la mejora del modo offline. **Estado: COMPLETED**.
+9.  : (Confirmación) Usuario quiere que toda la aplicación sea responsive. **Estado: COMPLETED**.
+10. : (Nueva Petición) Hacer la aplicación responsive. **Estado: COMPLETED**.
 
 **Project Health Check:**
--   **Broken**: La funcionalidad de subir y mostrar imágenes para Técnicos y Maquinaria no funciona.
--   **Mocked**: El sistema de notificaciones por email () está incompleto y bloqueado.
+-   **Broken**: Ninguna funcionalidad crítica está rota.
+-   **Mocked**: El sistema de notificaciones por email () está implementado parcialmente y bloqueado.
 
 **3rd Party Integrations**
--   **OpenAI GPT-4o**: Uses Emergent LLM Key.
--   **Recharts**: Data visualization.
--   **react-i18next / i18next**: Multi-language support.
--   **WeasyPrint**: PDF generation.
--   **openpyxl**: Excel file generation.
--   **Resend**: For email notifications (partially integrated, blocked).
--   **Leaflet.js / OpenStreetMap**: Maps.
--   **react-dropzone**: For drag-and-drop file uploads.
+-   **OpenAI GPT-4o**: Usa Emergent LLM Key.
+-   **Resend**: Para notificaciones por email (bloqueado).
+-   **dexie.js**: Nueva dependencia para la gestión de IndexedDB.
+-   **Recharts**: Para visualización de datos.
+-   **react-i18next / i18next**: Para soporte multi-idioma.
+-   **WeasyPrint**: Para generación de PDF.
+-   **openpyxl**: Para generación de archivos Excel.
+-   **Leaflet.js / OpenStreetMap**: Para mapas.
+-   **react-dropzone**: Para subida de archivos drag-and-drop.
 
 **Testing status**
--   **Testing agent used after significant changes**: NO
+-   **Testing agent used after significant changes**: YES
 -   **Troubleshoot agent used after agent stuck in loop**: NO
--   **Test files created**: No
--   **Known regressions**: None in this session.
+-   **Test files created**:
+    -   
+    -   
+    -   
+    -   
+    -   
+    -   
+-   **Known regressions**: None.
 
 **Credentials to test flow:**
 -   **Admin**:  / 
 -   **Manager**:  / 
 
 **What agent forgot to execute**
--   El agente no completó el ciclo de prueba de extremo a extremo para la corrección de la subida de imágenes antes de que finalizara la sesión.</analysis>
+-   El agente creó el archivo de rutas para la nueva funcionalidad de cambio de logo pero no lo registró en  ni comenzó ninguna implementación en el frontend antes de finalizar la sesión.</analysis>

@@ -6,7 +6,7 @@ import * as fs from 'fs';
  * Tests the bug fix for image storage (now using /api/uploads/ instead of /tmp/)
  */
 
-const BASE_URL = 'https://field-tracker-66.preview.emergentagent.com';
+const BASE_URL = 'https://harvest-track-14.preview.emergentagent.com';
 
 // Helper to create a test PNG image
 function createTestPNG(): Buffer {
