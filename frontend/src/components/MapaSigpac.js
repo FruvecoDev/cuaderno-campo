@@ -561,11 +561,11 @@ const MapaSigpac = ({
       </div>
       
       {/* Info panel */}
-      {sigpacData && !enableDrawing && (
+      {(sigpacData || parcela) && !enableDrawing && (
         <div style={{
           position: 'absolute',
-          bottom: isExpanded ? '20px' : '10px',
-          left: isExpanded ? '20px' : '10px',
+          bottom: effectiveExpanded ? '20px' : '10px',
+          left: effectiveExpanded ? '20px' : '10px',
           backgroundColor: 'rgba(255,255,255,0.95)',
           padding: '0.75rem',
           borderRadius: '8px',
@@ -575,20 +575,29 @@ const MapaSigpac = ({
           zIndex: 1000
         }}>
           <div style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#1565c0' }}>
-            Datos SIGPAC
+            {parcela ? 'Datos Parcela' : 'Datos SIGPAC'}
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.25rem' }}>
-            <span>Provincia:</span><strong>{sigpacData.provincia}</strong>
-            <span>Municipio:</span><strong>{sigpacData.municipio}</strong>
-            <span>Polígono:</span><strong>{sigpacData.poligono}</strong>
-            <span>Parcela:</span><strong>{sigpacData.parcela}</strong>
-            {sigpacData.recinto && (
-              <><span>Recinto:</span><strong>{sigpacData.recinto}</strong></>
-            )}
-            {sigpacData.cod_uso && (
-              <><span>Uso:</span><strong>{sigpacData.cod_uso}</strong></>
-            )}
-          </div>
+          {parcela ? (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.25rem' }}>
+              <span>Código:</span><strong>{parcela.codigo_plantacion || '-'}</strong>
+              <span>Cultivo:</span><strong>{parcela.cultivo || '-'}</strong>
+              <span>Variedad:</span><strong>{parcela.variedad || '-'}</strong>
+              <span>Superficie:</span><strong>{parcela.superficie_total?.toFixed(2) || '0'} ha</strong>
+            </div>
+          ) : sigpacData ? (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.25rem' }}>
+              <span>Provincia:</span><strong>{sigpacData.provincia}</strong>
+              <span>Municipio:</span><strong>{sigpacData.municipio}</strong>
+              <span>Polígono:</span><strong>{sigpacData.poligono}</strong>
+              <span>Parcela:</span><strong>{sigpacData.parcela}</strong>
+              {sigpacData.recinto && (
+                <><span>Recinto:</span><strong>{sigpacData.recinto}</strong></>
+              )}
+              {sigpacData.cod_uso && (
+                <><span>Uso:</span><strong>{sigpacData.cod_uso}</strong></>
+              )}
+            </div>
+          ) : null}
         </div>
       )}
       
