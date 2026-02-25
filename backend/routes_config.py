@@ -245,3 +245,180 @@ async def get_app_settings(
                 }
     
     return {"success": True, "settings": result}
+
+
+
+# Predefined color themes
+PREDEFINED_THEMES = {
+    "verde": {
+        "name": "Verde (Por defecto)",
+        "primary": "122 37% 27%",
+        "accent": "74 85% 40%"
+    },
+    "azul": {
+        "name": "Azul Corporativo",
+        "primary": "210 70% 35%",
+        "accent": "199 89% 48%"
+    },
+    "rojo": {
+        "name": "Rojo Tierra",
+        "primary": "6 65% 35%",
+        "accent": "27 87% 55%"
+    },
+    "naranja": {
+        "name": "Naranja Citrus",
+        "primary": "27 87% 45%",
+        "accent": "45 93% 47%"
+    },
+    "morado": {
+        "name": "Morado Uva",
+        "primary": "270 50% 40%",
+        "accent": "290 60% 55%"
+    },
+    "teal": {
+        "name": "Teal Agua",
+        "primary": "175 60% 30%",
+        "accent": "160 60% 45%"
+    },
+    "marron": {
+        "name": "Marrón Tierra",
+        "primary": "30 40% 30%",
+        "accent": "45 70% 45%"
+    },
+    "gris": {
+        "name": "Gris Profesional",
+        "primary": "215 16% 35%",
+        "accent": "215 20% 50%"
+    }
+}
+
+
+@router.get("/config/theme")
+async def get_theme():
+    """
+    Get the current color theme (public endpoint)
+    """
+    settings = await settings_collection.find_one({"key": "theme"})
+    
+    if settings:
+        return {
+            "success": True,
+            "theme_id": settings.get("theme_id", "verde"),
+            "primary": settings.get("primary"),
+            "accent": settings.get("accent"),
+            "is_custom": settings.get("is_custom", False),
+            "updated_at": settings.get("updated_at")
+        }
+    
+    # Return default theme
+    return {
+        "success": True,
+        "theme_id": "verde",
+        "primary": PREDEFINED_THEMES["verde"]["primary"],
+        "accent": PREDEFINED_THEMES["verde"]["accent"],
+        "is_custom": False,
+        "updated_at": None
+    }
+
+
+@router.get("/config/themes")
+async def get_predefined_themes():
+    """
+    Get list of predefined themes
+    """
+    themes = []
+    for theme_id, theme_data in PREDEFINED_THEMES.items():
+        themes.append({
+            "id": theme_id,
+            "name": theme_data["name"],
+            "primary": theme_data["primary"],
+            "accent": theme_data["accent"]
+        })
+    return {"success": True, "themes": themes}
+
+
+@router.post("/config/theme")
+async def set_theme(
+    theme_id: str = None,
+    primary: str = None,
+    accent: str = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Set the color theme (Admin only)
+    Can use a predefined theme_id or custom primary/accent colors
+    """
+    # Check admin permission
+    if not is_admin(current_user):
+        raise HTTPException(status_code=403, detail="Solo el administrador puede cambiar el tema")
+    
+    is_custom = False
+    
+    # If using predefined theme
+    if theme_id and theme_id in PREDEFINED_THEMES:
+        theme = PREDEFINED_THEMES[theme_id]
+        primary_color = theme["primary"]
+        accent_color = theme["accent"]
+    elif primary and accent:
+        # Custom colors
+        is_custom = True
+        theme_id = "custom"
+        primary_color = primary
+        accent_color = accent
+    else:
+        raise HTTPException(
+            status_code=400, 
+            detail="Debe proporcionar un theme_id válido o colores primary y accent personalizados"
+        )
+    
+    try:
+        await settings_collection.update_one(
+            {"key": "theme"},
+            {
+                "$set": {
+                    "key": "theme",
+                    "theme_id": theme_id,
+                    "primary": primary_color,
+                    "accent": accent_color,
+                    "is_custom": is_custom,
+                    "updated_at": datetime.utcnow().isoformat(),
+                    "updated_by": current_user.get("username", "admin")
+                }
+            },
+            upsert=True
+        )
+        
+        theme_name = PREDEFINED_THEMES.get(theme_id, {}).get("name", "Personalizado")
+        return {
+            "success": True,
+            "message": f"Tema '{theme_name}' aplicado correctamente",
+            "theme_id": theme_id,
+            "primary": primary_color,
+            "accent": accent_color,
+            "is_custom": is_custom
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al guardar el tema: {str(e)}")
+
+
+@router.delete("/config/theme")
+async def reset_theme(
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Reset to default theme (Admin only)
+    """
+    if not is_admin(current_user):
+        raise HTTPException(status_code=403, detail="Solo el administrador puede cambiar el tema")
+    
+    try:
+        await settings_collection.delete_one({"key": "theme"})
+        
+        return {
+            "success": True,
+            "message": "Tema restaurado al predeterminado (Verde)"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al restaurar el tema: {str(e)}")
