@@ -97,7 +97,7 @@ const Login = () => {
         <div className="card" style={{ padding: 'clamp(1.5rem, 5vw, 2.5rem)' }}>
           <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
             <img 
-              src={logo} 
+              src={loginLogo || defaultLogo} 
               alt="FRUVECO Logo" 
               style={{ 
                 maxWidth: 'min(180px, 70%)', 
