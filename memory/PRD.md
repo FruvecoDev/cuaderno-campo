@@ -692,3 +692,23 @@ Módulos actualizados para seguir patrón consistente:
 - **Test Report**: `/app/test_reports/iteration_16.json` - 100% (30/30 tests)
 - **Estado**: ✅ COMPLETADO Y TESTEADO
 
+## Modo Offline para Técnicos (25/02/2026) - COMPLETADO
+- **Alcance**: Registro de visitas y tratamientos sin conexión a internet
+- **Componentes implementados**:
+  - **offlineDB.js**: IndexedDB para cache local (parcelas, cultivos, contratos, proveedores)
+  - **syncService.js**: Gestión de cola de sincronización y eventos online/offline
+  - **OfflineIndicator.js**: Indicador visual de estado en header
+- **Funcionalidades**:
+  - Indicador de conexión (WiFi verde=online, rojo=offline)
+  - Panel desplegable con: pendientes, fallidos, última cache
+  - Botón "Descargar datos offline" para cachear datos de referencia
+  - Guardar visitas/tratamientos en cola cuando offline
+  - Sincronización automática al reconectar
+  - Carga de parcelas desde cache cuando offline
+- **Páginas modificadas**:
+  - **Visitas.js**: Soporte offline para crear visitas
+  - **Tratamientos.js**: Soporte offline para crear tratamientos
+  - **Layout.js**: OfflineIndicator en header
+- **Test Report**: `/app/test_reports/iteration_17.json` - 100% (15/15 tests)
+- **Estado**: ✅ COMPLETADO Y TESTEADO
+
