@@ -469,3 +469,265 @@ async def remove_parcela_from_finca(
         "success": True,
         "message": "Parcela eliminada de la finca"
     }
+
+
+
+# ==================== SIGPAC INTEGRATION ====================
+
+import httpx
+
+# SIGPAC HubCloud API base URL
+SIGPAC_API_BASE = "https://sigpac-hubcloud.es/servicioconsultassigpac/query"
+
+
+@router.get("/sigpac/consulta")
+async def consultar_sigpac(
+    provincia: str,
+    municipio: str,
+    poligono: str,
+    parcela: str,
+    agregado: str = "0",
+    zona: str = "0",
+    recinto: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Consultar datos de una parcela en SIGPAC usando la API REST de HubCloud.
+    
+    Parámetros:
+    - provincia: Código de provincia (2 dígitos, ej: "41" para Sevilla)
+    - municipio: Código de municipio (3 dígitos, ej: "053")
+    - poligono: Número de polígono
+    - parcela: Número de parcela
+    - agregado: Código agregado (por defecto "0")
+    - zona: Código zona (por defecto "0")
+    - recinto: Número de recinto (opcional, si se omite devuelve info de parcela)
+    
+    Retorna información de la parcela/recinto incluyendo:
+    - Superficie en hectáreas
+    - Uso SIGPAC
+    - Geometría en formato WKT
+    - Coordenadas del centroide
+    """
+    try:
+        # Limpiar códigos (eliminar ceros a la izquierda para algunos, añadir para otros)
+        pr = provincia.zfill(2)
+        mu = municipio.zfill(3)
+        ag = agregado or "0"
+        zo = zona or "0"
+        po = poligono
+        pa = parcela
+        
+        # Construir URL de consulta
+        if recinto:
+            # Consulta de recinto específico
+            url = f"{SIGPAC_API_BASE}/recinfo/{pr}/{mu}/{ag}/{zo}/{po}/{pa}/{recinto}.json"
+        else:
+            # Consulta de parcela (primer recinto)
+            url = f"{SIGPAC_API_BASE}/recinfo/{pr}/{mu}/{ag}/{zo}/{po}/{pa}/1.json"
+        
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            response = await client.get(url)
+            
+            if response.status_code == 404:
+                # Intentar sin recinto
+                url_parcela = f"{SIGPAC_API_BASE}/parinfo/{pr}/{mu}/{ag}/{zo}/{po}/{pa}.json"
+                response = await client.get(url_parcela)
+                
+                if response.status_code == 404:
+                    return {
+                        "success": False,
+                        "error": "Parcela no encontrada en SIGPAC",
+                        "message": "Verifique los códigos introducidos. Formato: Provincia (2 dígitos), Municipio (3 dígitos), Polígono, Parcela"
+                    }
+            
+            if response.status_code != 200:
+                return {
+                    "success": False,
+                    "error": f"Error al consultar SIGPAC: {response.status_code}",
+                    "message": "El servicio SIGPAC no está disponible en este momento"
+                }
+            
+            data = response.json()
+            
+            # Parsear la respuesta
+            result = {
+                "success": True,
+                "sigpac": {
+                    "provincia": str(data.get("provincia", pr)),
+                    "municipio": str(data.get("municipio", mu)),
+                    "cod_agregado": str(data.get("agregado", ag)),
+                    "zona": str(data.get("zona", zo)),
+                    "poligono": str(data.get("poligono", po)),
+                    "parcela": str(data.get("parcela", pa)),
+                    "recinto": str(data.get("recinto", "1")),
+                    "cod_uso": data.get("uso_sigpac", data.get("uso", "")),
+                },
+                "superficie_ha": data.get("superficie", data.get("dn_surface", 0)),
+                "uso_sigpac": data.get("uso_sigpac", data.get("uso", "")),
+                "pendiente": data.get("pendiente", None),
+                "coef_regadio": data.get("coef_regadio", None),
+            }
+            
+            # Si hay geometría WKT, extraer centroide para localización
+            if "wkt" in data:
+                result["geometria_wkt"] = data["wkt"]
+                # Intentar extraer centroide del polígono
+                try:
+                    wkt = data["wkt"]
+                    if "POLYGON" in wkt:
+                        # Extraer primer punto como aproximación del centroide
+                        coords_str = wkt.replace("POLYGON((", "").replace("))", "").split(",")[0]
+                        lon, lat = coords_str.strip().split(" ")
+                        result["centroide"] = {
+                            "lat": float(lat),
+                            "lon": float(lon)
+                        }
+                except:
+                    pass
+            
+            # Información adicional si está disponible
+            if "dn_oid" in data:
+                result["oid"] = data["dn_oid"]
+            if "srid" in data:
+                result["srid"] = data["srid"]
+                
+            return result
+            
+    except httpx.TimeoutException:
+        return {
+            "success": False,
+            "error": "Timeout",
+            "message": "El servicio SIGPAC tardó demasiado en responder. Inténtelo de nuevo."
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Error al consultar el servicio SIGPAC"
+        }
+
+
+@router.get("/sigpac/municipios/{provincia}")
+async def get_municipios_sigpac(
+    provincia: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Obtener lista de municipios de una provincia desde SIGPAC.
+    Útil para autocompletado de formularios.
+    """
+    try:
+        pr = provincia.zfill(2)
+        url = f"{SIGPAC_API_BASE}/municipios/{pr}.json"
+        
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(url)
+            
+            if response.status_code != 200:
+                return {
+                    "success": False,
+                    "municipios": [],
+                    "message": "No se pudieron obtener los municipios"
+                }
+            
+            data = response.json()
+            return {
+                "success": True,
+                "provincia": pr,
+                "municipios": data if isinstance(data, list) else []
+            }
+            
+    except Exception as e:
+        return {
+            "success": False,
+            "municipios": [],
+            "error": str(e)
+        }
+
+
+# Diccionario de códigos de provincia
+PROVINCIAS_SIGPAC = {
+    "01": "Álava", "02": "Albacete", "03": "Alicante", "04": "Almería",
+    "05": "Ávila", "06": "Badajoz", "07": "Baleares", "08": "Barcelona",
+    "09": "Burgos", "10": "Cáceres", "11": "Cádiz", "12": "Castellón",
+    "13": "Ciudad Real", "14": "Córdoba", "15": "La Coruña", "16": "Cuenca",
+    "17": "Gerona", "18": "Granada", "19": "Guadalajara", "20": "Guipúzcoa",
+    "21": "Huelva", "22": "Huesca", "23": "Jaén", "24": "León",
+    "25": "Lérida", "26": "La Rioja", "27": "Lugo", "28": "Madrid",
+    "29": "Málaga", "30": "Murcia", "31": "Navarra", "32": "Orense",
+    "33": "Asturias", "34": "Palencia", "35": "Las Palmas", "36": "Pontevedra",
+    "37": "Salamanca", "38": "Santa Cruz de Tenerife", "39": "Cantabria",
+    "40": "Segovia", "41": "Sevilla", "42": "Soria", "43": "Tarragona",
+    "44": "Teruel", "45": "Toledo", "46": "Valencia", "47": "Valladolid",
+    "48": "Vizcaya", "49": "Zamora", "50": "Zaragoza", "51": "Ceuta", "52": "Melilla"
+}
+
+
+@router.get("/sigpac/provincias")
+async def get_provincias_sigpac(
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Obtener lista de provincias españolas con sus códigos SIGPAC.
+    """
+    return {
+        "success": True,
+        "provincias": [
+            {"codigo": k, "nombre": v} 
+            for k, v in sorted(PROVINCIAS_SIGPAC.items(), key=lambda x: x[1])
+        ]
+    }
+
+
+# Diccionario de usos SIGPAC
+USOS_SIGPAC = {
+    "AG": "Corrientes y superficies de agua",
+    "CA": "Viales",
+    "CF": "Cítricos - Frutal",
+    "CI": "Cítricos",
+    "CS": "Cítricos - Frutal de cáscara",
+    "ED": "Edificaciones",
+    "EP": "Elemento del paisaje",
+    "FF": "Forestal - Frutal",
+    "FL": "Flores y plantas ornamentales",
+    "FO": "Forestal",
+    "FS": "Forestal - Frutal de cáscara",
+    "FV": "Frutal - Viñedo",
+    "FY": "Frutal",
+    "HN": "Huertos de nogales",
+    "HR": "Huerta",
+    "IM": "Improductivos",
+    "IV": "Invernadero",
+    "NR": "No indicado",
+    "OC": "Olivar - Cítricos",
+    "OF": "Olivar - Frutal",
+    "OV": "Olivar",
+    "PA": "Pasto con arbolado",
+    "PR": "Pasto arbustivo",
+    "PS": "Pastizal",
+    "TA": "Tierra arable",
+    "TH": "Huerta que no riega",
+    "VF": "Viñedo - Frutal",
+    "VI": "Viñedo",
+    "VO": "Viñedo - Olivar",
+    "ZC": "Zona concentrada no incluida en la ortofoto",
+    "ZU": "Zona urbana",
+    "ZV": "Zona censurada"
+}
+
+
+@router.get("/sigpac/usos")
+async def get_usos_sigpac(
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Obtener diccionario de códigos de uso SIGPAC.
+    """
+    return {
+        "success": True,
+        "usos": [
+            {"codigo": k, "descripcion": v}
+            for k, v in sorted(USOS_SIGPAC.items())
+        ]
+    }
