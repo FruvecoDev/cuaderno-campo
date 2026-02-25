@@ -230,11 +230,20 @@ class ParcelaInDB(ParcelaBase):
 # FINCAS
 # ============================================================================
 
+class DatosSIGPAC(BaseModel):
+    """Datos SIGPAC para localización de parcelas"""
+    provincia: Optional[str] = None
+    municipio: Optional[str] = None
+    cod_agregado: Optional[str] = None
+    zona: Optional[str] = None
+    poligono: Optional[str] = None
+    parcela: Optional[str] = None
+    recinto: Optional[str] = None
+    cod_uso: Optional[str] = None
+
+
 class FincaBase(BaseModel):
-    campana: str
-    nombre: str
-    superficie_total: float
-    num_plantas: int
+    denominacion: str  # Nombre de la finca
     
     # Ubicación
     provincia: Optional[str] = None
@@ -243,27 +252,97 @@ class FincaBase(BaseModel):
     parcela: Optional[str] = None
     subparcela: Optional[str] = None
     
-    # Producción
-    hectareas: Optional[float] = None
-    areas: Optional[float] = None
-    toneladas: Optional[float] = None
+    # Superficie y Producción
+    hectareas: float = 0.0
+    areas: float = 0.0
+    toneladas: float = 0.0
+    produccion_esperada: float = 0.0
+    produccion_disponible: float = 0.0
+    
+    # Propiedad
+    finca_propia: bool = False
+    observaciones: Optional[str] = None
+    
+    # Datos SIGPAC
+    sigpac: Optional[DatosSIGPAC] = None
+    
+    # Recolección
+    recoleccion_semana: Optional[int] = None
+    recoleccion_ano: Optional[int] = None
+    
+    # Precios
+    precio_corte: float = 0.0
+    precio_transporte: float = 0.0
+    proveedor_corte: Optional[str] = None
+    
+    # Parcelas asociadas
+    parcelas_ids: List[str] = []
+    
+    # Estado
+    activo: bool = True
+    
+    # Legacy fields for compatibility
+    campana: Optional[str] = None
+    nombre: Optional[str] = None  # Alias for denominacion
+    superficie_total: Optional[float] = None
+    num_plantas: Optional[int] = None
     cantidad_producto_esperado: Optional[float] = None
     cantidad_producto_recolectado: Optional[float] = None
-    
-    # Datos SIGPAC (similar a parcela)
     geometria: Optional[List[Dict[str, float]]] = None
-    sigpac: Optional[str] = None
     
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
 
 class FincaCreate(BaseModel):
-    campana: str
-    nombre: str
-    superficie_total: float
-    num_plantas: int
+    denominacion: str
     provincia: Optional[str] = None
     poblacion: Optional[str] = None
+    poligono: Optional[str] = None
+    parcela: Optional[str] = None
+    subparcela: Optional[str] = None
+    hectareas: float = 0.0
+    areas: float = 0.0
+    toneladas: float = 0.0
+    produccion_esperada: float = 0.0
+    produccion_disponible: float = 0.0
+    finca_propia: bool = False
+    observaciones: Optional[str] = None
+    sigpac: Optional[DatosSIGPAC] = None
+    recoleccion_semana: Optional[int] = None
+    recoleccion_ano: Optional[int] = None
+    precio_corte: float = 0.0
+    precio_transporte: float = 0.0
+    proveedor_corte: Optional[str] = None
+    parcelas_ids: List[str] = []
+    activo: bool = True
+    # Legacy
+    campana: Optional[str] = None
+    nombre: Optional[str] = None
+    superficie_total: Optional[float] = None
+    num_plantas: Optional[int] = None
+
+class FincaUpdate(BaseModel):
+    denominacion: Optional[str] = None
+    provincia: Optional[str] = None
+    poblacion: Optional[str] = None
+    poligono: Optional[str] = None
+    parcela: Optional[str] = None
+    subparcela: Optional[str] = None
+    hectareas: Optional[float] = None
+    areas: Optional[float] = None
+    toneladas: Optional[float] = None
+    produccion_esperada: Optional[float] = None
+    produccion_disponible: Optional[float] = None
+    finca_propia: Optional[bool] = None
+    observaciones: Optional[str] = None
+    sigpac: Optional[DatosSIGPAC] = None
+    recoleccion_semana: Optional[int] = None
+    recoleccion_ano: Optional[int] = None
+    precio_corte: Optional[float] = None
+    precio_transporte: Optional[float] = None
+    proveedor_corte: Optional[str] = None
+    parcelas_ids: Optional[List[str]] = None
+    activo: Optional[bool] = None
 
 class FincaInDB(FincaBase):
     id: str = Field(alias="_id")
