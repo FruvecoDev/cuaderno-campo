@@ -330,6 +330,10 @@ const Fincas = () => {
     setEditingId(null);
     setSigpacResult(null);
     setSigpacError(null);
+    setDrawnGeometry(null);
+    setShowDrawingMap(false);
+    setShowMap(false);
+    setMapData(null);
   };
 
   const handleSubmit = async (e) => {
