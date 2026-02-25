@@ -389,13 +389,30 @@ const Recomendaciones = () => {
         ? `${API_URL}/api/plantillas-recomendaciones/${editingPlantillaId}`
         : `${API_URL}/api/plantillas-recomendaciones`;
       
+      // Prepare data - convert types and clean empty values
+      const dataToSend = {
+        nombre: plantillaForm.nombre,
+        descripcion: plantillaForm.descripcion || null,
+        tipo: plantillaForm.tipo,
+        subtipo: plantillaForm.subtipo || null,
+        producto_id: plantillaForm.producto_id || null,
+        producto_nombre: plantillaForm.producto_nombre || null,
+        dosis: plantillaForm.dosis ? parseFloat(plantillaForm.dosis) : null,
+        unidad_dosis: plantillaForm.unidad_dosis || 'L/ha',
+        volumen_agua: plantillaForm.volumen_agua ? parseFloat(plantillaForm.volumen_agua) : null,
+        prioridad: plantillaForm.prioridad || 'Media',
+        motivo: plantillaForm.motivo || null,
+        observaciones: plantillaForm.observaciones || null,
+        activo: plantillaForm.activo
+      };
+      
       const response = await fetch(url, {
         method: editingPlantillaId ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(plantillaForm)
+        body: JSON.stringify(dataToSend)
       });
       
       if (!response.ok) {
