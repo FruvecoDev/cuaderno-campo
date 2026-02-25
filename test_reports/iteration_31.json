@@ -1,0 +1,63 @@
+{
+  "summary": "Polygon Drawing Feature testing completed successfully. All 32 Fincas tests pass including 11 new polygon drawing tests. Backend SIGPAC tests: 9/9 pass. The new feature allows users to draw polygons manually on the map to define parcels visually, with automatic area calculation in hectares.",
+  "mode": "update",
+  "baseline_commit": "a27e958856d22a524793f35743a61430e2dc2691",
+  "head_commit": "05260e3d35194a63491fb1d6725a06d9346f079a",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "regression_results": {
+    "total_specs": 1,
+    "passed": 32,
+    "failed": 0,
+    "skipped": 0
+  },
+  "specs_created": [],
+  "specs_updated": [
+    "/app/tests/e2e/fincas.spec.ts"
+  ],
+  "quarantined_tests": [],
+  "test_report_links": [
+    "/app/tests/e2e/fincas.spec.ts",
+    "/app/backend/tests/test_sigpac_integration.py",
+    "/app/test_reports/pytest/pytest_results_iteration31.xml"
+  ],
+  "action_items": [],
+  "updated_files": [
+    "/app/tests/e2e/fincas.spec.ts"
+  ],
+  "success_rate": {
+    "backend": "100% (9/9 SIGPAC tests)",
+    "frontend": "100% (32/32 Fincas tests)"
+  },
+  "seed_data_creation": "No new seed data created. Tests use existing fincas data.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Polygon Drawing Feature is fully tested and working. New tests added to fincas.spec.ts cover:\n\n1. 'Dibujar Parcela' button visibility and functionality\n2. Drawing map opens with green header 'Dibujar Parcela en Mapa'\n3. Button text toggles between 'Dibujar Parcela' and 'Ocultar Dibujo'\n4. Leaflet Draw tools visible (.leaflet-draw selector)\n5. Layer selector works in drawing mode\n6. Expand/Reduce button works (Ampliar/Reducir)\n7. Close button hides the drawing map\n8. Drawing polygon shows 'Parcela Dibujada' info panel with:\n   - Polígonos count\n   - Área Total in hectares\n   - Vértices count\n9. 'Limpiar' button (btn-clear-drawings testid) clears all drawings\n10. Green indicator shows 'Parcela dibujada manualmente' when map hidden with drawn parcel\n11. Hectáreas field updates automatically when polygon is drawn\n\nKey testids used:\n- btn-dibujar-parcela (toggle drawing map)\n- btn-clear-drawings (clear all drawings)\n- btn-editar-dibujo (edit existing drawing)\n- mapa-sigpac-container (map container)\n- select-map-layer (layer dropdown)\n- btn-toggle-expand-map (fullscreen toggle)\n- btn-close-map (close drawing map)",
+  "tested_features": {
+    "backend_endpoints": [
+      "GET /api/sigpac/provincias - List Spanish provinces with SIGPAC codes",
+      "GET /api/sigpac/usos - Dictionary of SIGPAC land use codes",
+      "GET /api/sigpac/consulta - Query external SIGPAC API for parcel data"
+    ],
+    "frontend_features": [
+      "Dibujar Parcela button opens drawing map",
+      "Leaflet Draw polygon drawing tools",
+      "Draw polygon on satellite/street/topo map",
+      "Automatic area calculation in hectares",
+      "Parcela Dibujada info panel (polígonos, área, vértices)",
+      "Hectáreas form field auto-updates with calculated area",
+      "Limpiar button clears all drawings",
+      "Toggle Ocultar Dibujo / Dibujar Parcela",
+      "Green indicator when map hidden with drawn parcel",
+      "Layer selector (Satellite/OSM/Topo)",
+      "Ampliar/Reducir fullscreen toggle"
+    ]
+  }
+}
