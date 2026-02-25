@@ -211,7 +211,7 @@
               - generic [ref=e278]:
                 - generic [ref=e279]:
                   - generic [ref=e280]: Denominación *
-                  - textbox "Nombre de la finca" [ref=e281]: Finca Dibujada TEST_GEOM_1772048629312
+                  - textbox "Nombre de la finca" [ref=e281]: Finca Dibujada DRAW_1772048780615
                 - generic [ref=e282]:
                   - generic [ref=e283]: Provincia
                   - 'textbox "Ej: Sevilla" [ref=e284]': Sevilla
@@ -381,42 +381,258 @@
               - generic [ref=e401]: Observaciones
               - textbox "Notas adicionales sobre la finca..." [ref=e402]
             - generic [ref=e403]:
-              - button "Guardar Finca" [ref=e404] [cursor=pointer]
+              - button "Guardar Finca" [active] [ref=e404] [cursor=pointer]
               - button "Cancelar" [ref=e405] [cursor=pointer]
         - generic [ref=e406]:
-          - generic [ref=e407]:
-            - heading "Filtros" [level=3] [ref=e408]
-            - button "Limpiar" [ref=e410] [cursor=pointer]:
-              - img [ref=e411]
-              - text: Limpiar
-          - generic [ref=e414]:
-            - generic [ref=e415]:
-              - generic [ref=e416]: Buscar
-              - generic [ref=e417]:
-                - img [ref=e418]
-                - textbox "Nombre, provincia, población..." [active] [ref=e421]: TEST_GEOM_1772048629312
-            - generic [ref=e422]:
-              - generic [ref=e423]: Provincia
-              - combobox [ref=e424]:
+          - heading "Filtros" [level=3] [ref=e408]
+          - generic [ref=e409]:
+            - generic [ref=e410]:
+              - generic [ref=e411]: Buscar
+              - generic [ref=e412]:
+                - img [ref=e413]
+                - textbox "Nombre, provincia, población..." [ref=e416]
+            - generic [ref=e417]:
+              - generic [ref=e418]: Provincia
+              - combobox [ref=e419]:
                 - option "Todas" [selected]
                 - generic:
                   - option
                   - option
                   - option
                   - option
-            - generic [ref=e425]:
-              - generic [ref=e426]: Tipo
-              - combobox [ref=e427]:
+            - generic [ref=e420]:
+              - generic [ref=e421]: Tipo
+              - combobox [ref=e422]:
                 - option "Todas" [selected]
                 - option "Propias"
                 - option "Alquiladas"
-        - generic [ref=e428]:
-          - heading "Listado de Fincas ( 0 )" [level=3] [ref=e429]:
-            - img [ref=e430]
-            - text: Listado de Fincas ( 0 )
-          - paragraph [ref=e435]: No hay fincas registradas
-  - link "Made with Emergent" [ref=e436] [cursor=pointer]:
+        - generic [ref=e423]:
+          - heading "Listado de Fincas ( 11 )" [level=3] [ref=e424]:
+            - img [ref=e425]
+            - text: Listado de Fincas ( 11 )
+          - generic [ref=e431]:
+            - generic [ref=e433]:
+              - generic [ref=e434]:
+                - generic [ref=e435]:
+                  - img [ref=e436]
+                  - heading "Test Finca" [level=4] [ref=e439]
+                  - generic [ref=e440]: Alquilada
+                - generic [ref=e443]:
+                  - img [ref=e444]
+                  - text: Test Province , Test Population
+              - generic [ref=e447]:
+                - button [ref=e448] [cursor=pointer]:
+                  - img [ref=e450]
+                - button [ref=e452] [cursor=pointer]:
+                  - img [ref=e453]
+                - button [ref=e455] [cursor=pointer]:
+                  - img [ref=e456]
+            - generic [ref=e460]:
+              - generic [ref=e461]:
+                - generic [ref=e462]:
+                  - img [ref=e463]
+                  - heading "Test Finca" [level=4] [ref=e466]
+                  - generic [ref=e467]: Alquilada
+                - generic [ref=e470]:
+                  - img [ref=e471]
+                  - text: Test Province , Test Population
+              - generic [ref=e474]:
+                - button [ref=e475] [cursor=pointer]:
+                  - img [ref=e477]
+                - button [ref=e479] [cursor=pointer]:
+                  - img [ref=e480]
+                - button [ref=e482] [cursor=pointer]:
+                  - img [ref=e483]
+            - generic [ref=e487]:
+              - generic [ref=e488]:
+                - generic [ref=e489]:
+                  - img [ref=e490]
+                  - heading "Test Finca" [level=4] [ref=e493]
+                  - generic [ref=e494]: Alquilada
+                - generic [ref=e497]:
+                  - img [ref=e498]
+                  - text: Test Province , Test Population
+              - generic [ref=e501]:
+                - button [ref=e502] [cursor=pointer]:
+                  - img [ref=e504]
+                - button [ref=e506] [cursor=pointer]:
+                  - img [ref=e507]
+                - button [ref=e509] [cursor=pointer]:
+                  - img [ref=e510]
+            - generic [ref=e514]:
+              - generic [ref=e515]:
+                - generic [ref=e516]:
+                  - img [ref=e517]
+                  - heading "Test Finca" [level=4] [ref=e520]
+                  - generic [ref=e521]: Alquilada
+                - generic [ref=e524]:
+                  - img [ref=e525]
+                  - text: Test Province , Test Population
+              - generic [ref=e528]:
+                - button [ref=e529] [cursor=pointer]:
+                  - img [ref=e531]
+                - button [ref=e533] [cursor=pointer]:
+                  - img [ref=e534]
+                - button [ref=e536] [cursor=pointer]:
+                  - img [ref=e537]
+            - generic [ref=e541]:
+              - generic [ref=e542]:
+                - generic [ref=e543]:
+                  - img [ref=e544]
+                  - heading "Test Finca" [level=4] [ref=e547]
+                  - generic [ref=e548]: Alquilada
+                - generic [ref=e551]:
+                  - img [ref=e552]
+                  - text: Test Province , Test Population
+              - generic [ref=e555]:
+                - button [ref=e556] [cursor=pointer]:
+                  - img [ref=e558]
+                - button [ref=e560] [cursor=pointer]:
+                  - img [ref=e561]
+                - button [ref=e563] [cursor=pointer]:
+                  - img [ref=e564]
+            - generic [ref=e568]:
+              - generic [ref=e569]:
+                - generic [ref=e570]:
+                  - img [ref=e571]
+                  - heading "Clear Geom Test 20260225193144" [level=4] [ref=e574]
+                  - generic [ref=e575]: Propia
+                  - generic [ref=e577]:
+                    - img [ref=e578]
+                    - text: Dibujada
+                - generic [ref=e581]:
+                  - generic [ref=e583]:
+                    - img [ref=e584]
+                    - text: Sevilla , Lebrija
+                  - generic [ref=e588]:
+                    - strong [ref=e589]: "25.5"
+                    - text: ha
+                  - generic [ref=e591]:
+                    - text: "Prod. esperada:"
+                    - strong [ref=e592]: "200"
+                    - text: t
+              - generic [ref=e593]:
+                - button "Ver parcela dibujada" [ref=e595] [cursor=pointer]:
+                  - img [ref=e597]
+                - button [ref=e600] [cursor=pointer]:
+                  - img [ref=e602]
+                - button [ref=e604] [cursor=pointer]:
+                  - img [ref=e605]
+                - button [ref=e607] [cursor=pointer]:
+                  - img [ref=e608]
+            - generic [ref=e612]:
+              - generic [ref=e613]:
+                - generic [ref=e614]:
+                  - img [ref=e615]
+                  - heading "Finca Edit TEST_1772037408698_z6dfbr" [level=4] [ref=e618]
+                  - generic [ref=e619]: Alquilada
+                - generic [ref=e620]:
+                  - generic [ref=e622]:
+                    - img [ref=e623]
+                    - text: Jaén
+                  - generic [ref=e627]:
+                    - strong [ref=e628]: "15"
+                    - text: ha
+              - generic [ref=e629]:
+                - button [ref=e630] [cursor=pointer]:
+                  - img [ref=e632]
+                - button [ref=e634] [cursor=pointer]:
+                  - img [ref=e635]
+                - button [ref=e637] [cursor=pointer]:
+                  - img [ref=e638]
+            - generic [ref=e642]:
+              - generic [ref=e643]:
+                - generic [ref=e644]:
+                  - img [ref=e645]
+                  - heading "Finca La Esperanza" [level=4] [ref=e648]
+                  - generic [ref=e649]: Propia
+                - generic [ref=e650]:
+                  - generic [ref=e652]:
+                    - img [ref=e653]
+                    - text: Sevilla , Lebrija
+                  - generic [ref=e657]:
+                    - strong [ref=e658]: "25.5"
+                    - text: ha
+                  - generic [ref=e660]:
+                    - text: "Prod. esperada:"
+                    - strong [ref=e661]: "200"
+                    - text: t
+              - generic [ref=e662]:
+                - button "Ver ubicación SIGPAC" [ref=e664] [cursor=pointer]:
+                  - img [ref=e666]
+                - button [ref=e668] [cursor=pointer]:
+                  - img [ref=e670]
+                - button [ref=e672] [cursor=pointer]:
+                  - img [ref=e673]
+                - button [ref=e675] [cursor=pointer]:
+                  - img [ref=e676]
+            - generic [ref=e680]:
+              - generic [ref=e681]:
+                - generic [ref=e682]:
+                  - img [ref=e683]
+                  - heading "Finca TEST_1772037765336_tnwfrg" [level=4] [ref=e686]
+                  - generic [ref=e687]: Propia
+                - generic [ref=e688]:
+                  - generic [ref=e690]:
+                    - img [ref=e691]
+                    - text: Córdoba
+                  - generic [ref=e695]:
+                    - strong [ref=e696]: "30.5"
+                    - text: ha
+              - generic [ref=e697]:
+                - button [ref=e698] [cursor=pointer]:
+                  - img [ref=e700]
+                - button [ref=e702] [cursor=pointer]:
+                  - img [ref=e703]
+                - button [ref=e705] [cursor=pointer]:
+                  - img [ref=e706]
+            - generic [ref=e710]:
+              - generic [ref=e711]:
+                - generic [ref=e712]:
+                  - img [ref=e713]
+                  - heading "Finca TEST_1772038957339_j5ymvr" [level=4] [ref=e716]
+                  - generic [ref=e717]: Propia
+                - generic [ref=e718]:
+                  - generic [ref=e720]:
+                    - img [ref=e721]
+                    - text: Córdoba
+                  - generic [ref=e725]:
+                    - strong [ref=e726]: "30.5"
+                    - text: ha
+              - generic [ref=e727]:
+                - button [ref=e728] [cursor=pointer]:
+                  - img [ref=e730]
+                - button [ref=e732] [cursor=pointer]:
+                  - img [ref=e733]
+                - button [ref=e735] [cursor=pointer]:
+                  - img [ref=e736]
+            - generic [ref=e740]:
+              - generic [ref=e741]:
+                - generic [ref=e742]:
+                  - img [ref=e743]
+                  - heading "Finca Test Geometría" [level=4] [ref=e746]
+                  - generic [ref=e747]: Propia
+                  - generic [ref=e749]:
+                    - img [ref=e750]
+                    - text: Dibujada
+                - generic [ref=e753]:
+                  - generic [ref=e755]:
+                    - img [ref=e756]
+                    - text: Sevilla , Carmona
+                  - generic [ref=e760]:
+                    - strong [ref=e761]: "15.5"
+                    - text: ha
+              - generic [ref=e762]:
+                - button "Ver parcela dibujada" [ref=e764] [cursor=pointer]:
+                  - img [ref=e766]
+                - button [ref=e769] [cursor=pointer]:
+                  - img [ref=e771]
+                - button [ref=e773] [cursor=pointer]:
+                  - img [ref=e774]
+                - button [ref=e776] [cursor=pointer]:
+                  - img [ref=e777]
+  - link "Made with Emergent" [ref=e780] [cursor=pointer]:
     - /url: https://app.emergent.sh/?utm_source=emergent-badge
-    - img [ref=e437]
-    - paragraph [ref=e440]: Made with Emergent
+    - img [ref=e781]
+    - paragraph [ref=e784]: Made with Emergent
 ```
