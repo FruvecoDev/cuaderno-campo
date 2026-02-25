@@ -1043,6 +1043,43 @@ Módulos actualizados para seguir patrón consistente:
 
 ### Estado: ✅ COMPLETADO Y TESTEADO
 
+## Refactorización de Fincas - Contenedor de Parcelas (25/02/2026) - COMPLETADO
+- **Alcance**: Refactorizar el módulo de Fincas para que actúe como contenedor de parcelas existentes
+- **Objetivo del usuario**: Las fincas ahora pueden tener múltiples parcelas asociadas en lugar de tener su propia geometría/mapa
+- **Cambios realizados**:
+
+### Cambios en Frontend (`/app/frontend/src/pages/Fincas.js`):
+1. **Eliminado**: Funcionalidad de mapas (visualización y dibujo) del formulario de Fincas
+2. **Mantenido**: Sección SIGPAC como datos de referencia (no mapa)
+3. **Añadido**: Parcelas asociadas mostradas en formato **cards** en la vista expandida
+4. **Añadido**: Botón "Mapa" en cada card para visualizar el mapa de la parcela individual
+
+### Parcelas en Cards:
+- Código de la parcela
+- Badge de campaña
+- Botón "Mapa" (verde) para ver geometría
+- Botón "Quitar" (rojo) para desasignar
+- Información: Cultivo, Variedad, Superficie, Plantas, Proveedor
+
+### Modal de Mapa de Parcela:
+- Título con código de parcela
+- Subtítulo con cultivo, variedad y superficie
+- Mapa interactivo con geometría de recintos
+- Selector de capas (Satélite, OpenStreetMap, etc.)
+- Panel de información
+
+### Actualización de MapaSigpac (`/app/frontend/src/components/MapaSigpac.js`):
+- Nueva prop `parcela` para mostrar geometría de parcela
+- Nueva prop `height` para altura personalizada
+- Soporte para mostrar datos de parcela en panel de información
+
+### Test Report: `/app/test_reports/iteration_35.json`
+- Backend: 100% (27/27 tests)
+- Frontend: 100% (28/28 tests)
+- Total: 28/28 specs passed
+
+### Estado: ✅ COMPLETADO Y TESTEADO
+
 
 ## Integración SIGPAC (25/02/2026) - COMPLETADO
 - **Alcance**: Localización automática de parcelas mediante códigos SIGPAC (Sistema de Información Geográfica de Parcelas Agrícolas de España)
