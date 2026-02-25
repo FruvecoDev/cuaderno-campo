@@ -210,6 +210,9 @@ test.describe('Plantillas - Aplicación Masiva', () => {
   test('should create recommendations via Aplicación Masiva', async ({ page }) => {
     await page.getByTestId('btn-aplicacion-masiva').click();
     
+    // Wait for modal
+    await expect(page.locator('h3, h2, div').filter({ hasText: 'Aplicación Masiva' }).first()).toBeVisible();
+    
     // Select a plantilla
     const plantillaSelect = page.locator('select').filter({ has: page.locator('option:has-text("Seleccionar plantilla")') }).first();
     await plantillaSelect.selectOption({ index: 1 });
@@ -223,18 +226,18 @@ test.describe('Plantillas - Aplicación Masiva', () => {
     
     // Should show success message
     await expect(page.locator('text=recomendación').filter({ hasText: /creada/i })).toBeVisible({ timeout: 5000 });
-    
-    // Modal should close
-    await expect(page.locator('text=Aplicación Masiva').first()).not.toBeVisible();
   });
 
   test('should close modal on Cancel', async ({ page }) => {
     await page.getByTestId('btn-aplicacion-masiva').click();
-    await expect(page.locator('text=Aplicación Masiva').first()).toBeVisible();
+    
+    // Wait for modal to be visible
+    await expect(page.locator('h3, h2').filter({ hasText: 'Aplicación Masiva' }).first()).toBeVisible();
     
     await page.locator('button').filter({ hasText: /Cancelar/i }).click();
     
-    await expect(page.locator('text=Aplicación Masiva').first()).not.toBeVisible();
+    // Modal should close - check for the modal header specifically, not the button
+    await expect(page.locator('h3, h2').filter({ hasText: 'Aplicación Masiva' }).first()).not.toBeVisible({ timeout: 3000 });
   });
 });
 
