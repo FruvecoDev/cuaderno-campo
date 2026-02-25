@@ -27,7 +27,7 @@ test.describe('Parcelas Page - General Map View', () => {
 
   test('should load parcelas page with basic elements', async ({ page }) => {
     // Check main elements are visible
-    await expect(page.getByRole('heading', { name: /parcelas/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Parcelas', exact: true })).toBeVisible();
     await expect(page.getByTestId('btn-general-map')).toBeVisible();
     await expect(page.getByTestId('btn-config-fields')).toBeVisible();
     await expect(page.getByTestId('btn-nueva-parcela')).toBeVisible();
