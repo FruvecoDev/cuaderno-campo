@@ -31,6 +31,7 @@ import ArticulosExplotacion from './pages/ArticulosExplotacion';
 import Agentes from './pages/Agentes';
 import Clientes from './pages/Clientes';
 import LiquidacionComisiones from './pages/LiquidacionComisiones';
+import Configuracion from './pages/Configuracion';
 
 function App() {
   return (
@@ -205,6 +206,12 @@ function App() {
         <Route path="/traducciones" element={
           <ProtectedRoute>
             <Layout><Traducciones /></Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/configuracion" element={
+          <ProtectedRoute>
+            <Layout><Configuracion /></Layout>
           </ProtectedRoute>
         } />
       </Routes>
