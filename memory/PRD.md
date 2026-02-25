@@ -933,3 +933,32 @@ Módulos actualizados para seguir patrón consistente:
   - Menú lateral: Actividades → Alertas Climáticas
 - **Test Report**: `/app/test_reports/iteration_25.json` - 100% (49/49 tests: 31 backend + 18 frontend)
 - **Estado**: ✅ COMPLETADO Y TESTEADO
+
+## Notificaciones y Programación Automática (25/02/2026) - COMPLETADO
+- **Alcance**: Sistema de notificaciones en app y verificaciones climáticas programadas
+- **Funcionalidades implementadas**:
+  - **Notificaciones In-App**:
+    - Icono de campana con badge contador en el header
+    - Dropdown con lista de notificaciones
+    - Marcar como leída individual o todas
+    - Tipos: info, warning, success, error, alert
+    - Poll automático cada 60 segundos
+  - **Programación de Verificaciones**:
+    - Scheduler con APScheduler para tareas periódicas
+    - Configuración de hora (HH:MM) y frecuencia (diaria, cada 12h, cada 6h)
+    - Botón "Ejecutar Ahora" para verificación manual
+    - Genera notificaciones cuando detecta nuevas alertas
+    - Selección de roles a notificar (Admin, Manager, Technician)
+  - **Preparación para Email**:
+    - Estructura lista para integrar Resend
+    - Badge "Pendiente API Key" cuando no está configurado
+    - Checkbox deshabilitado hasta tener RESEND_API_KEY
+- **Backend**: 
+  - `/app/backend/routes_notificaciones.py` - CRUD notificaciones + config scheduler
+  - `/app/backend/scheduler_service.py` - Servicio APScheduler
+  - Colecciones: `notificaciones`, `config_scheduler`
+- **Frontend**:
+  - `/app/frontend/src/components/NotificacionesDropdown.js` - Dropdown de notificaciones
+  - Panel de configuración en `/app/frontend/src/pages/Configuracion.js`
+- **Test Report**: `/app/test_reports/iteration_26.json` - 100% (33/33 tests: 21 backend + 12 frontend)
+- **Estado**: ✅ COMPLETADO Y TESTEADO
