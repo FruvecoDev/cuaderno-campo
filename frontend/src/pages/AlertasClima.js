@@ -510,7 +510,7 @@ const AlertasClima = () => {
           <button
             key={estado}
             className={`btn btn-sm ${filtroEstado === estado ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => { setFiltroEstado(estado); setTimeout(fetchAlertas, 100); }}
+            onClick={() => setFiltroEstado(estado)}
           >
             {estado === 'pendiente' && <Clock size={14} />}
             {estado === 'revisada' && <Eye size={14} />}
