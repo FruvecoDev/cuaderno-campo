@@ -394,7 +394,19 @@ const Recomendaciones = () => {
         body: JSON.stringify(plantillaForm)
       });
       
-      const data = await response.json();
+      // Clone response to handle potential double-read issues
+      const responseClone = response.clone();
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        // If JSON parsing fails, try with clone
+        try {
+          data = await responseClone.json();
+        } catch (e) {
+          data = { detail: 'Error procesando respuesta del servidor' };
+        }
+      }
       
       if (!response.ok) {
         throw new Error(data.detail || 'Error al guardar plantilla');
