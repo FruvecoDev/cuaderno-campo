@@ -319,7 +319,10 @@ const MapaSigpac = ({
     }
   };
   
-  const containerStyle = isExpanded ? {
+  const effectiveExpanded = isExpanded !== undefined ? isExpanded : localExpanded;
+  const handleToggleExpand = onToggleExpand || (() => setLocalExpanded(!localExpanded));
+  
+  const containerStyle = effectiveExpanded ? {
     position: 'fixed',
     top: 0,
     left: 0,
@@ -328,10 +331,11 @@ const MapaSigpac = ({
     zIndex: 9999,
     backgroundColor: 'white'
   } : {
-    height: enableDrawing ? '500px' : '400px',
+    height: height || (enableDrawing ? '500px' : '400px'),
     borderRadius: '8px',
     overflow: 'hidden',
-    border: '2px solid #1565c0'
+    border: '2px solid #1565c0',
+    position: 'relative'
   };
   
   return (
