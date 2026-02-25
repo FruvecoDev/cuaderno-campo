@@ -1040,7 +1040,12 @@ const Recomendaciones = () => {
       
       {/* Stats */}
       {activeTab === 'recomendaciones' && stats && (
-        <div className="grid grid-cols-4 gap-4 mb-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(4, 1fr)', 
+          gap: '1rem', 
+          marginBottom: '1.5rem' 
+        }}>
           <div className="card" style={{ padding: '1rem', textAlign: 'center' }}>
             <div style={{ fontSize: '2rem', fontWeight: '700', color: 'hsl(var(--primary))' }}>{stats.total}</div>
             <div className="text-muted text-sm">Total</div>
