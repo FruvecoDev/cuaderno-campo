@@ -230,12 +230,15 @@ test.describe('Fincas Refactored - CRUD Operations', () => {
     await page.getByTestId('btn-nueva-finca').click({ force: true });
     await expect(page.getByTestId('form-finca')).toBeVisible({ timeout: 5000 });
     
+    // Close any modal that may appear
+    await ensureModalClosed(page);
+    
     // Fill form
     await page.getByTestId('input-denominacion').fill(`Finca ${testId}`);
     await page.getByTestId('input-provincia').fill('Sevilla');
     await page.getByTestId('input-poblacion').fill('Lebrija');
     await page.getByTestId('input-hectareas').fill('25.5');
-    await page.getByTestId('input-finca-propia').check();
+    await page.getByTestId('input-finca-propia').check({ force: true });
     
     // Save
     await page.getByTestId('btn-guardar-finca').click({ force: true });
@@ -446,8 +449,8 @@ test.describe('Fincas Refactored - Gestionar Parcelas Modal', () => {
       await expect(page.locator('text=Gestionar Parcelas')).toBeVisible();
       
       // Verify sections exist
-      await expect(page.locator('text=Parcelas Asignadas')).toBeVisible();
-      await expect(page.locator('text=Parcelas Disponibles')).toBeVisible();
+      await expect(page.locator('text=/Parcelas Asignadas \\(\\d+\\)/').first()).toBeVisible();
+      await expect(page.locator('text=/Parcelas Disponibles \\(\\d+\\)/').first()).toBeVisible();
     }
   });
 
