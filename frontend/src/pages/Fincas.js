@@ -50,6 +50,11 @@ const Fincas = () => {
   const [mapExpanded, setMapExpanded] = useState(false);
   const [mapData, setMapData] = useState(null);
   
+  // Estado para dibujo de parcelas
+  const [showDrawingMap, setShowDrawingMap] = useState(false);
+  const [drawingMapExpanded, setDrawingMapExpanded] = useState(false);
+  const [drawnGeometry, setDrawnGeometry] = useState(null);
+  
   // Filtros
   const [filters, setFilters] = useState({
     search: '',
