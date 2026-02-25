@@ -42,16 +42,8 @@ class SyncService {
   }
 
   getToken() {
-    const authData = localStorage.getItem('auth');
-    if (authData) {
-      try {
-        const { token } = JSON.parse(authData);
-        return token;
-      } catch (e) {
-        return null;
-      }
-    }
-    return null;
+    // El token se guarda directamente como 'token' en localStorage
+    return localStorage.getItem('token');
   }
 
   // Cache reference data from server
