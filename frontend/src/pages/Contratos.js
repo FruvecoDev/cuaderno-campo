@@ -45,9 +45,12 @@ const Contratos = () => {
     precios_calidad: [],
     agente_compra: '',
     agente_venta: '',
-    // Comisión del agente
-    comision_tipo: 'porcentaje', // 'porcentaje' o 'euro_kilo'
-    comision_valor: ''
+    // Comisión del agente de COMPRA
+    comision_compra_tipo: 'porcentaje',
+    comision_compra_valor: '',
+    // Comisión del agente de VENTA
+    comision_venta_tipo: 'porcentaje',
+    comision_venta_valor: ''
   });
   
   // Estado para agentes
