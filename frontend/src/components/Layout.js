@@ -5,13 +5,15 @@ import {
   LayoutDashboard, FileText, MapPin, Home, Calendar, ListTodo,
   Sprout, Droplets, BookOpen, FileBarChart, Wheat, FolderOpen,
   LogOut, User, Users, Package, Leaf, Cog, ClipboardCheck, Beaker, BarChart3, Globe, Brain, UserCheck,
-  ChevronDown, ChevronRight, TrendingUp, Menu, X
+  ChevronDown, ChevronRight, TrendingUp, Menu, X, Settings
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import LanguageSelector from './LanguageSelector';
 import OfflineIndicator from './OfflineIndicator';
 import '../App.css';
-import logo from '../assets/logo.png';
+import defaultLogo from '../assets/logo.png';
+
+const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const Layout = ({ children }) => {
   const location = useLocation();
