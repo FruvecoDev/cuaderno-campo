@@ -451,3 +451,84 @@ class TestRecomendacionesAuth:
         response = fresh_client.get(f"{BASE_URL}/api/recomendaciones/config/tipos")
         # Should return 200 even without auth
         assert response.status_code == 200
+
+
+class TestCultivoVariedad:
+    """Test cultivo and variedad field persistence"""
+    
+    def test_create_with_cultivo_variedad(self, authenticated_client, test_parcela):
+        """POST /api/recomendaciones persists cultivo and variedad fields"""
+        unique_id = f"TEST_CULTIVO_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        
+        rec_data = {
+            "parcela_id": test_parcela['_id'],
+            "campana": "2024",
+            "tipo": "Tratamiento Fitosanitario",
+            "cultivo": "Brócoli",
+            "variedad": "Calabrese",
+            "prioridad": "Alta",
+            "motivo": f"TEST cultivo variedad - {unique_id}"
+        }
+        
+        response = authenticated_client.post(
+            f"{BASE_URL}/api/recomendaciones",
+            json=rec_data
+        )
+        assert response.status_code == 200
+        data = response.json()
+        
+        assert data['success'] == True
+        rec = data['recomendacion']
+        
+        # Verify cultivo and variedad were saved
+        assert rec['cultivo'] == 'Brócoli'
+        assert rec['variedad'] == 'Calabrese'
+        
+        # Verify via GET
+        get_response = authenticated_client.get(f"{BASE_URL}/api/recomendaciones/{rec['_id']}")
+        get_data = get_response.json()
+        assert get_data['cultivo'] == 'Brócoli'
+        assert get_data['variedad'] == 'Calabrese'
+        
+        # Cleanup
+        authenticated_client.delete(f"{BASE_URL}/api/recomendaciones/{rec['_id']}")
+    
+    def test_update_cultivo_variedad(self, authenticated_client, test_parcela):
+        """PUT /api/recomendaciones/{id} can update cultivo and variedad"""
+        unique_id = f"TEST_UPDATE_CV_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        
+        # Create recomendacion without cultivo/variedad
+        rec_data = {
+            "parcela_id": test_parcela['_id'],
+            "campana": "2024",
+            "tipo": "Fertilización",
+            "prioridad": "Media",
+            "motivo": f"TEST update cultivo - {unique_id}"
+        }
+        
+        create_response = authenticated_client.post(
+            f"{BASE_URL}/api/recomendaciones",
+            json=rec_data
+        )
+        rec_id = create_response.json()['recomendacion']['_id']
+        
+        # Update with cultivo and variedad
+        update_data = {
+            "cultivo": "Coliflor",
+            "variedad": "Snowball"
+        }
+        
+        response = authenticated_client.put(
+            f"{BASE_URL}/api/recomendaciones/{rec_id}",
+            json=update_data
+        )
+        assert response.status_code == 200
+        
+        # Verify via GET
+        get_response = authenticated_client.get(f"{BASE_URL}/api/recomendaciones/{rec_id}")
+        get_data = get_response.json()
+        assert get_data['cultivo'] == 'Coliflor'
+        assert get_data['variedad'] == 'Snowball'
+        
+        # Cleanup
+        authenticated_client.delete(f"{BASE_URL}/api/recomendaciones/{rec_id}")
