@@ -391,7 +391,7 @@ const Contratos = () => {
         <div className="card mb-6" data-testid="contrato-form">
           <h2 className="card-title">{editingId ? t('common.edit') + ' ' + t('contracts.title') : t('common.new') + ' ' + t('contracts.title')}</h2>
           <form onSubmit={handleSubmit}>
-            <div className="grid-4" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+            <div className="grid-responsive-4">
               <div className="form-group">
                 <label className="form-label">Tipo Contrato *</label>
                 <select
