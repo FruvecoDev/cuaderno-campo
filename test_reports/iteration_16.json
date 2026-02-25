@@ -1,0 +1,126 @@
+{
+  "summary": "Testing iteration 16: Verified commission system implementation for purchase and sale agents. All features working correctly - separate commission fields in contract form (shown only when agent selected), commission calculation by percentage and €/kilo, commission liquidation page with KPIs and filters, and PDF generation for settlement reports.",
+  "mode": "generate",
+  "baseline_commit": "716e48c485e4e52b010944d6ed2c20766c8aa907",
+  "head_commit": "992e805bc0c168b95183dedc3b1c1dece6725d54",
+  
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  
+  "passed_tests": {
+    "backend_pytest": [
+      "test_get_resumen_returns_success",
+      "test_resumen_totales_structure",
+      "test_resumen_filter_by_campana",
+      "test_resumen_filter_by_tipo_agente",
+      "test_resumen_comision_calculation",
+      "test_get_agentes_returns_success",
+      "test_agentes_have_required_fields",
+      "test_agentes_filter_by_campana",
+      "test_get_campanas_returns_success",
+      "test_campanas_is_list",
+      "test_pdf_requires_agente_id",
+      "test_pdf_requires_tipo_agente",
+      "test_pdf_invalid_agente_returns_404",
+      "test_pdf_generation_valid_agent",
+      "test_create_contract_with_percentage_commission",
+      "test_create_contract_with_euro_kilo_commission"
+    ],
+    "frontend_playwright": [
+      "should load Liquidación Comisiones page with KPIs",
+      "should display filters section",
+      "should filter by campaign",
+      "should filter by agent type",
+      "should show agent details with contracts table",
+      "should have PDF download button for each agent",
+      "should show contract form when clicking new contract button",
+      "should show agent field based on contract type",
+      "should show commission fields when purchase agent is selected",
+      "should have percentage and euro/kilo options in commission type",
+      "should show sale agent fields for Venta type contract",
+      "should hide commission fields when agent is cleared",
+      "should display contracts table with type column",
+      "should show Compra/Venta badges in contracts list"
+    ]
+  },
+  
+  "regression_results": {
+    "total_specs": 1,
+    "passed": 14,
+    "failed": 0,
+    "skipped": 0,
+    "backend_tests": {
+      "total": 16,
+      "passed": 16,
+      "failed": 0
+    }
+  },
+  
+  "specs_created": [
+    "/app/tests/e2e/comisiones.spec.ts",
+    "/app/backend/tests/test_comisiones.py"
+  ],
+  
+  "specs_updated": [],
+  
+  "test_report_links": [
+    "/app/tests/e2e/comisiones.spec.ts",
+    "/app/backend/tests/test_comisiones.py",
+    "/app/test_reports/pytest/test_comisiones_results.xml"
+  ],
+  
+  "action_items": [],
+  
+  "updated_files": [
+    "/app/tests/e2e/comisiones.spec.ts",
+    "/app/backend/tests/test_comisiones.py"
+  ],
+  
+  "success_rate": {
+    "backend": "100% (16/16 tests passed)",
+    "frontend": "100% (14/14 tests passed)"
+  },
+  
+  "seed_data_creation": "No new test data created - used existing admin@fruveco.com credentials and test contracts with commission",
+  
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  
+  "context_for_next_testing_agent": "Commission system is fully verified. Key features tested: (1) API endpoints /api/comisiones/resumen, /api/comisiones/agentes, /api/comisiones/campanas, /api/comisiones/liquidacion/pdf all working correctly, (2) Commission calculation formulas verified - percentage: cantidad*precio*valor/100, euro_kilo: cantidad*valor, (3) Contract form shows separate commission fields for purchase/sale agents only when an agent is selected, (4) Liquidación Comisiones page shows KPIs, filters by campaign/agent type/agent, and generates PDF settlement reports.",
+  
+  "features_verified": {
+    "commission_apis": {
+      "resumen": "✓ Returns summary grouped by agent with correct totals",
+      "agentes": "✓ Lists agents with commissions (id, nombre, tipo)",
+      "campanas": "✓ Lists campaigns with commission contracts",
+      "pdf": "✓ Generates PDF liquidation report"
+    },
+    "commission_calculation": {
+      "percentage": "✓ cantidad_kg * precio_kg * (valor / 100)",
+      "euro_kilo": "✓ cantidad_kg * valor"
+    },
+    "contract_form": {
+      "type_switch": "✓ Compra shows agente_compra, Venta shows agente_venta",
+      "conditional_fields": "✓ Commission fields shown only when agent selected",
+      "commission_types": "✓ Porcentaje (%) and € por Kilo options available"
+    },
+    "liquidacion_page": {
+      "kpis": "✓ Comisiones Compra, Venta, Total General, Agentes count",
+      "filters": "✓ Campaign, agent type, agent filters working",
+      "agent_cards": "✓ Shows contracts table per agent with PDF download"
+    }
+  },
+  
+  "test_credentials": {
+    "email": "admin@fruveco.com",
+    "password": "admin123"
+  }
+}
