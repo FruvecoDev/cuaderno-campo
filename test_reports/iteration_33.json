@@ -1,0 +1,61 @@
+{
+  "summary": "SIGPAC Integration in Parcelas Module - All tests passing. Added new spec file parcelas-sigpac.spec.ts with 12 tests for the new SIGPAC search functionality in the Parcelas form. Backend SIGPAC tests also pass (9/9). Parcelas CRUD tests pass (16/16).",
+  "mode": "update",
+  "baseline_commit": "8d5277e274631e2f4ea78dcca6328ad6e198acd4",
+  "head_commit": "4a5602d76fc0f38223cbddba17079a8133810924",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "regression_results": {
+    "total_specs": 1,
+    "passed": 12,
+    "failed": 0,
+    "skipped": 0
+  },
+  "specs_created": [
+    "/app/tests/e2e/parcelas-sigpac.spec.ts"
+  ],
+  "specs_updated": [],
+  "quarantined_tests": [],
+  "test_report_links": [
+    "/app/tests/e2e/parcelas-sigpac.spec.ts",
+    "/app/backend/tests/test_parcelas.py",
+    "/app/backend/tests/test_sigpac_integration.py"
+  ],
+  "action_items": [],
+  "updated_files": [
+    "/app/tests/e2e/parcelas-sigpac.spec.ts"
+  ],
+  "success_rate": {
+    "backend": "100% (16/16 parcelas tests + 9/9 SIGPAC tests)",
+    "frontend": "100% (12/12 parcelas-sigpac tests)"
+  },
+  "seed_data_creation": "No new seed data created. Tests use existing data and API responses.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "SIGPAC Integration in Parcelas Module fully tested. New spec file created:\n\nFrontend Tests (parcelas-sigpac.spec.ts):\n1. should display SIGPAC section with Localizar por SIGPAC header\n2. should display all SIGPAC form fields\n3. should load provinces in dropdown\n4. should show validation error when SIGPAC search with missing fields\n5. should search SIGPAC and display success message on valid parcel\n6. should auto-fill superficie field after SIGPAC search\n7. should draw polygon on map after successful SIGPAC search\n8. should reset SIGPAC fields on form cancel\n9. should have Visor link opening SIGPAC official viewer\n10-12. Page load and form open/close tests\n\nKey data-testids for SIGPAC in Parcelas:\n- btn-buscar-sigpac-parcela (search button)\n- sigpac-provincia (province dropdown)\n- sigpac-municipio, sigpac-poligono, sigpac-parcela (required fields)\n- sigpac-agregado, sigpac-zona, sigpac-recinto, sigpac-uso (optional fields)\n\nFeatures verified:\n- Province dropdown loads from /api/sigpac/provincias\n- Search calls /api/sigpac/consulta with required params\n- Success message shows 'Parcela encontrada: X.XXXX ha - Uso: XX'\n- Auto-fills superficie_total field with SIGPAC data\n- Auto-draws polygon on map from WKT geometry\n- Visor link points to https://sigpac.mapa.es/fega/visor/\n- Fields reset on form cancel",
+  "tested_features": {
+    "backend_endpoints": [
+      "GET /api/sigpac/provincias - Returns list of Spanish provinces",
+      "GET /api/sigpac/consulta - SIGPAC parcel query with geometry"
+    ],
+    "frontend_features": [
+      "'Localizar por SIGPAC' section in Parcelas form",
+      "Province dropdown populated from API",
+      "Required fields: Provincia, Municipio, Poligono, Parcela",
+      "Optional fields: Agregado, Zona, Recinto, Cod.Uso",
+      "Buscar button triggers SIGPAC API query",
+      "Success message with superficie and uso",
+      "Auto-fill of superficie_total field",
+      "Auto-draw polygon on map from WKT geometry",
+      "Visor link to official SIGPAC viewer",
+      "Form reset clears SIGPAC fields"
+    ]
+  }
+}
