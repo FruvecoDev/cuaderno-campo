@@ -55,6 +55,13 @@ const AlertasClima = () => {
     }
   }, [token]);
 
+  // Refetch alertas when filter changes
+  useEffect(() => {
+    if (token && !loading) {
+      fetchAlertas();
+    }
+  }, [filtroEstado]);
+
   const fetchAll = async () => {
     setLoading(true);
     await Promise.all([
