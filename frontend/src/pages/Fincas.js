@@ -107,7 +107,10 @@ const Fincas = () => {
     observaciones: '',
     
     // Parcelas asociadas
-    parcelas_ids: []
+    parcelas_ids: [],
+    
+    // Geometría dibujada manualmente
+    geometria_manual: null
   };
   
   const [formData, setFormData] = useState(emptyFormData);
@@ -115,6 +118,27 @@ const Fincas = () => {
   const headers = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${token}`
+  };
+  
+  // Manejar cambios de geometría dibujada
+  const handleGeometryChange = (geometryData) => {
+    setDrawnGeometry(geometryData);
+    if (geometryData) {
+      setFormData(prev => ({
+        ...prev,
+        hectareas: geometryData.area_ha || prev.hectareas,
+        geometria_manual: {
+          wkt: geometryData.wkt,
+          coords: geometryData.coords,
+          centroide: geometryData.centroid
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        geometria_manual: null
+      }));
+    }
   };
 
   useEffect(() => {
