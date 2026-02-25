@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
  * Tests bell icon, dropdown, marking as read, and scheduler configuration
  */
 
-const BASE_URL = process.env.REACT_APP_BACKEND_URL || 'https://finca-suite.preview.emergentagent.com';
+const BASE_URL = process.env.REACT_APP_BACKEND_URL || 'https://campo-fincas.preview.emergentagent.com';
 const ADMIN_EMAIL = 'admin@fruveco.com';
 const ADMIN_PASSWORD = 'admin123';
 

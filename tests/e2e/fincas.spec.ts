@@ -981,7 +981,7 @@ test.describe('Fincas Module - Geometry Persistence', () => {
     
     // Create a finca with geometry via API
     const testId = `LABEL_${Date.now()}`;
-    const apiUrl = process.env.REACT_APP_BACKEND_URL || 'https://finca-suite.preview.emergentagent.com';
+    const apiUrl = process.env.REACT_APP_BACKEND_URL || 'https://campo-fincas.preview.emergentagent.com';
     
     const response = await page.request.post(`${apiUrl}/api/fincas`, {
       headers: {

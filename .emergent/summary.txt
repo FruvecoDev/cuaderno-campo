@@ -5,7 +5,7 @@ Un contrato siempre estará asignado a una parcela y un cultivo. Sobre una parce
 
 Cada sección puede ser configurable pudiendo habilitar o deshabilitar secciones por usuario. También los campos de cada sección son configurables.
 
-El usuario ha solicitado recientemente la creación de un módulo Fincas con un formulario específico (basado en una imagen) y la capacidad de localizar parcelas mediante datos SIGPAC.
+El usuario ha solicitado recientemente la creación de un módulo Fincas con un formulario específico, la capacidad de localizar parcelas mediante datos SIGPAC, visualizarlas en un mapa y también dibujarlas manualmente. Posteriormente, ha redefinido el requisito para que las Fincas sean contenedores de Parcelas existentes, eliminando la funcionalidad de mapa del módulo de Fincas.
 
 **PRODUCT REQUIREMENTS:**
 -   **Modules:** Contracts, Parcels, Maps, Farms, Visits, Tasks, Harvests, Treatments, Irrigations, Recipes, Delivery Notes, Suppliers, Crops, Machinery, Evaluation Sheets, Applicator Technicians, Farm Articles, Purchase/Sale Agents, Clients.
@@ -27,68 +27,68 @@ El usuario ha solicitado recientemente la creación de un módulo Fincas con un 
 **User's preferred language**: Español
 
 **what currently exists?**
-Una aplicación full-stack de gestión agrícola (FastAPI, React, MongoDB). La sesión actual ha añadido funcionalidades significativas, todas probadas y verificadas por el agente de testing:
-1.  **Módulo de Recomendaciones Mejorado**: Completada la funcionalidad para añadir múltiples recomendaciones asociadas a un contrato. Se añadió un sistema de **Plantillas de Recomendación** que permite guardar, cargar y aplicar tratamientos de forma masiva a múltiples parcelas.
-2.  **Módulo de Alertas Climáticas**: Se creó un nuevo módulo que genera alertas (ej. Alta Humedad) basadas en datos meteorológicos introducidos manualmente. Estas alertas sugieren acciones preventivas (ej. Control de hongos). Se ha preparado el backend para integrar la API de OpenWeatherMap en el futuro.
-3.  **Scheduler y Notificaciones**: Se implementó un planificador de tareas en el backend () para ejecutar comprobaciones periódicas (como el clima) y un sistema de notificaciones en la UI para alertar al usuario de eventos relevantes.
-4.  **Dashboard de Resumen Diario**: Al iniciar sesión, ahora se muestra un modal con un resumen del estado de la finca: alertas climáticas, tratamientos programados y contratos por vencer.
-5.  **Correcciones UI**: Se ajustó el layout de los contadores en la página de Recomendaciones para que se muestren en una fila horizontal.
-6.  **Inicio del Módulo Fincas**: Se ha comenzado la implementación del módulo de Fincas. El modelo de datos del backend ha sido actualizado con los campos solicitados por el usuario y se han empezado a crear los endpoints CRUD correspondientes.
+Una aplicación full-stack (FastAPI, React, MongoDB) para gestión agrícola. En la sesión actual se han desarrollado las siguientes funcionalidades, todas probadas y verificadas:
+1.  **Módulo Fincas (Versión 1):** Se implementó un CRUD completo para Fincas con un formulario detallado basado en la imagen del usuario.
+2.  **Integración SIGPAC:** Se añadió funcionalidad en los módulos Fincas y Parcelas para buscar una parcela por sus datos SIGPAC a través de una API REST externa, autocompletando el formulario y mostrando la geometría en un mapa.
+3.  **Visualización y Dibujo en Mapa:** Se integró Leaflet.js para visualizar las geometrías de las parcelas (obtenidas de SIGPAC o dibujadas) y se añadió la capacidad de dibujar polígonos manualmente usando . La geometría dibujada se guarda en la base de datos.
+4.  **Corrección de Bug:** Se solucionó un error en el módulo de Parcelas que impedía cargar el mapa para editar una parcela que tenía un polígono dibujado pero no datos SIGPAC.
+
+La última petición del usuario es refactorizar el módulo de Fincas para que actúe como un contenedor de parcelas existentes, eliminando la funcionalidad de mapa y dibujo de dicho módulo.
 
 **Last working item**:
--   **Last item agent was working**: Implementando el módulo de Fincas. Específicamente, actualizando el modelo de datos  en  y creando los endpoints CRUD en el fichero de rutas  basándose en una imagen proporcionada por el usuario.
--   **Status**: IN PROGRESS
+-   **Last item agent was working**: Atendiendo a la última solicitud del usuario: refactorizar el módulo Fincas. El objetivo es eliminar toda la funcionalidad de mapas (búsqueda SIGPAC, visualización, dibujo) y, en su lugar, implementar un sistema para asociar múltiples parcelas existentes a una finca.
+-   **Status**: NOT STARTED
 -   **Agent Testing Done**: N
--   **Which testing method agent to use?**: both. Se necesitará  para crear pruebas de backend (nuevos endpoints CRUD para fincas) y de frontend (creación de la nueva página, formulario y listado de fincas).
+-   **Which testing method agent to use?**: both. Se requerirán pruebas de backend para el nuevo modelo de datos de Fincas (asociación con parcelas) y pruebas de frontend para verificar la nueva interfaz sin mapas y con el selector de parcelas.
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Finalizar la implementación del módulo Fincas (P0)**
+-   **Issue 1: Refactorizar el módulo Fincas para gestionar parcelas asociadas (P0)**
 
 **Issues Detail**:
--   **Issue 1: Finalizar la implementación del módulo Fincas**
-    -   **Attempted fixes**: El agente ha actualizado el modelo  en  para que incluya todos los campos del formulario que el usuario adjuntó en la imagen. También ha empezado a reescribir  para manejar el CRUD completo para este nuevo modelo.
+-   **Issue 1: Refactorizar el módulo Fincas para gestionar parcelas asociadas**
+    -   **Attempted fixes**: Ninguno. El agente acaba de recibir la petición y estaba a punto de empezar a reescribir el componente .
     -   **Next debug checklist**:
-        1.  Terminar de implementar todos los endpoints CRUD en .
-        2.  Registrar el router de fincas en .
-        3.  Crear un nuevo componente de página en el frontend: .
-        4.  Implementar el formulario de creación/edición en  con todos los campos de la imagen proporcionada.
-        5.  Implementar una tabla o lista para mostrar las fincas existentes.
-        6.  Añadir la nueva página al menú de navegación en  y a las rutas en .
-        7.  Implementar la funcionalidad de búsqueda de parcelas por SIGPAC.
-    -   **Why fix this issue and what will be achieved with the fix?**: Cumplirá con un requisito explícito del usuario para gestionar fincas, que es una entidad central en la aplicación agrícola.
-    -   **Status**: IN PROGRESS
+        1.  **Backend:**
+            -   Modificar el modelo  en  para que almacene una lista de referencias a  (ej. ).
+            -   Actualizar los endpoints CRUD en  para gestionar esta lista de IDs de parcelas.
+            -   Asegurar que el endpoint  devuelva la información de las parcelas asociadas (ya sea los IDs o los objetos completos mediante un populate).
+        2.  **Frontend ():**
+            -   Eliminar toda la lógica y componentes relacionados con mapas: , , estados , , , etc.
+            -   En el formulario de Fincas, añadir una sección para Parcelas Asociadas que permita seleccionar múltiples parcelas de una lista (usando un componente de selección múltiple o una tabla con checkboxes).
+            -   En la vista de detalle de una Finca, mostrar la lista de sus parcelas asociadas.
+    -   **Why fix this issue and what will be achieved with the fix?**: Para alinear la aplicación con el flujo de trabajo refinado del usuario, donde las Fincas son agrupaciones lógicas de Parcelas en lugar de entidades geográficas independientes.
+    -   **Status**: NOT STARTED
     -   **Is recurring issue?**: N
     -   **Should Test frontend/backend/both after fix?**: both
     -   **Blocked on other issue**: None
 
 **In progress Task List**:
--   **Task 1: Completar el Módulo Fincas (P0)**
-    -   **Where to resume**: Continuar con la modificación del fichero . Una vez finalizado el backend, se debe proceder a crear toda la interfaz de usuario en el frontend.
-    -   **What will be achieved with this?**: Se dispondrá de un módulo completo para el alta, edición, consulta y borrado de Fincas, incluyendo sus datos detallados y la gestión de sus parcelas asociadas.
-    -   **Status**: IN PROGRESS
+-   **Task 1: Completar la refactorización del Módulo Fincas (P0)**
+    -   **Where to resume**: Empezar la modificación del fichero  para eliminar la funcionalidad de mapas. El agente estaba a punto de usar el comando .
+    -   **What will be achieved with this?**: El módulo de Fincas permitirá a los usuarios crear una finca y asignarle un conjunto de parcelas ya existentes en el sistema.
+    -   **Status**: NOT STARTED
     -   **Should Test frontend/backend/both after fix?**: both
     -   **Blocked on something**: No
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks**:
-    -   **P1**: **Integración SIGPAC**: Implementar la funcionalidad para localizar parcelas en el módulo de Fincas introduciendo datos SIGPAC.
-    -   **P2**: **Finalizar notificaciones por email**: La integración con Resend sigue bloqueada a la espera de la  del usuario.
+    -   **P1**: **Finalizar notificaciones por email**: La integración con Resend sigue bloqueada a la espera de la  del usuario.
 -   **Future Tasks**:
-    -   No hay nuevas tareas futuras definidas.
+    -   Implementar los módulos restantes del PRD: Contratos, Visitas, Tareas, Cosechas, Tratamientos, etc.
+    -   Desarrollar la generación de informes en PDF y Excel.
+    -   Construir el Dashboard principal con KPIs.
+    -   Implementar las integraciones de IA (resúmenes de contratos, predicciones).
 
 **Completed work in this session**
--   **Feature**: Dashboard de Resumen Diario al iniciar sesión (DONE, Verified by testing agent).
--   **Feature**: Sistema de notificaciones en la app y configuración del scheduler (DONE, Verified by testing agent).
--   **Feature**: Módulo de Alertas Climáticas con entrada manual de datos (DONE, Verified by testing agent).
--   **Feature**: Sistema de Plantillas de Recomendación con aplicación masiva (DONE, Verified by testing agent).
--   **Enhancement**: Verificación final del formulario de múltiples recomendaciones (DONE, Verified by testing agent).
--   **UI Fix**: Corregido el diseño de los contadores en la página de Recomendaciones para que se muestren en horizontal (DONE, Verified with screenshot).
+-   **Feature**: Módulo de Fincas implementado con formulario detallado, búsqueda SIGPAC, visualización de mapas y dibujo manual de polígonos. (DONE, Verified by testing agent).
+-   **Feature**: Funcionalidad SIGPAC (búsqueda y mapa) añadida al módulo de Parcelas. (DONE, Verified by testing agent).
+-   **Bug Fix**: Corregido un error de Javascript que impedía editar parcelas con polígonos dibujados si no tenían datos SIGPAC. (DONE, Verified by testing agent).
 
 **Earlier issues found/mentioned but not fixed**
 -   **Issue 1: Error body stream already read en el frontend**
-    -   **Debug checklist**: Durante la sesión, se encontró repetidamente este error en las llamadas  del frontend, especialmente al manejar respuestas de error. Se solucionó en varios componentes (, ) cambiando el patrón para verificar  antes de intentar leer el cuerpo de la respuesta con  o .
-    -   **Why to solve this issue and what will be achieved with this?**: Aunque se ha parcheado, la recurrencia del error sugiere que podría haber un problema más profundo (como un interceptor de fetch global o un efecto secundario de React StrictMode). Una solución centralizada (ej. un wrapper de fetch) podría hacer el código más robusto y evitar futuros bugs.
+    -   **Debug checklist**: La causa raíz parece ser la falta de un manejador de peticiones API centralizado en el frontend. La solución temporal ha sido verificar  antes de procesar el cuerpo de la respuesta.
+    -   **Why to solve this issue and what will be achieved with this?**: Crear un wrapper para la función  haría el código más robusto, simplificaría el manejo de errores en toda la aplicación y evitaría la reaparición de este bug.
     -   **Should Test frontend/backend/both after fix**: frontend
     -   **Is recurring issue?**: Y
 
@@ -99,97 +99,88 @@ Una aplicación full-stack de gestión agrícola (FastAPI, React, MongoDB). La s
 
 
 **Key Technical Concepts**
--   **Background Scheduler (APScheduler)**: Se ha integrado  en el backend para ejecutar tareas periódicas en segundo plano, como la verificación de datos climáticos.
--   **In-App Notifications**: Un componente en el header de React sondea al backend en busca de nuevas notificaciones y las muestra al usuario en un dropdown.
--   **Modal State Management**: Uso de  y estado de React para mostrar un modal de Resumen Diario una vez por día después de que el usuario inicie sesión.
--   **Robust Fetch Pattern**: Se ha adoptado un patrón consistente en el frontend para manejar las respuestas de fetch, verificando  antes de leer el cuerpo para prevenir errores de body stream already read.
--   **Complex Form & State (React)**: El componente  ha sido expandido para manejar un estado complejo que incluye pestañas, modales para plantillas, aplicación masiva y una lista de recomendaciones.
+-   **API Externa**: Integración con la API REST de SIGPAC para obtener datos geoespaciales.
+-   **Mapas Interactivos**: Uso de , ,  y  para visualización y dibujo de polígonos (GeoJSON).
+-   **Gestión de Estado Complejo en React**: Manejo de formularios con lógica condicional, modales, mapas y datos asíncronos en los componentes  y .
 
 **key DB schema**
--   **fincas**: Modelo actualizado con numerosos campos nuevos, ej: , , , , .
--   **plantillas_recomendaciones**: Nueva colección. Ej: .
--   **alertas_clima**: Nueva colección. Ej: .
--   **notificaciones**: Nueva colección. Ej: .
+-   **fincas**: , , , . **Nota:** Este modelo será modificado para reemplazar  y  por una lista de referencias a .
+-   **parcelas**: Contiene , donde cada uno puede tener una  (polígono).
+-   **provincias**: Almacena la lista de provincias de España para los dropdowns.
 
 **changes in tech stack**
--   : Añadida al backend para tareas programadas.
--   : Añadida al backend para realizar llamadas HTTP asíncronas a APIs externas (preparado para OpenWeatherMap).
+-   : Añadido al frontend para la funcionalidad de dibujo en el mapa.
+-   : Añadido al frontend como dependencia.
 
 **All files of reference**
--   **/app/backend/models.py**: Contiene la definición del modelo  que se está implementando.
--   **/app/backend/routes/routes_fincas.py**: Archivo de rutas para la tarea en curso.
--   **/app/frontend/src/pages/Recomendaciones.js**: Modificado extensamente para las plantillas.
--   **/app/frontend/src/pages/AlertasClima.js**: Nuevo módulo de alertas.
--   **/app/frontend/src/components/Layout.js**: Contiene la navegación y el nuevo componente de notificaciones.
--   **/app/frontend/src/App.js**: Contiene la lógica del modal de resumen diario.
+-   **/app/frontend/src/pages/Fincas.js**: Componente principal a refactorizar.
+-   **/app/frontend/src/pages/Parcelas.js**: Componente donde se replicó la funcionalidad SIGPAC y se corrigió un bug.
+-   **/app/frontend/src/components/MapaSigpac.js**: Componente de mapa que probablemente será eliminado o modificado.
+-   **/app/backend/models.py**: Contiene los modelos  y  que necesitan ser ajustados.
+-   **/app/backend/routes/routes_fincas.py**: Rutas del backend que necesitarán ser actualizadas.
+-   **/app/memory/PRD.md**: Documento de requisitos del producto.
 
 **Areas that need refactoring**:
--   La gestión de errores en las llamadas  del frontend. Se ha parcheado el error body stream already read en múltiples lugares. Sería beneficioso crear una función wrapper o un interceptor centralizado para manejar las llamadas a la API y los errores de forma consistente.
+-   ****: Este componente está a punto de sufrir una refactorización importante según la última petición del usuario.
+-   **Manejo de API en Frontend**: Se recomienda crear un servicio o wrapper centralizado para las llamadas  para manejar errores de forma consistente y evitar el bug body stream already read.
 
 **key api endpoints**
--   **Plantillas**:  | 
--   **Alertas Climáticas**:  | 
--   **Scheduler**:  | 
--   **Notificaciones**:  | 
--   **Dashboard**: 
--   **Fincas (en desarrollo)**: 
+-   : Endpoints CRUD para Fincas.
+-   : Endpoint para consultar la API externa de SIGPAC.
+-   : Endpoints CRUD para Parcelas.
 
 **Critical Info for New Agent**
-1.  **P0 - Finalizar Módulo Fincas**: Tu tarea prioritaria es completar el módulo de Fincas. El backend está a medio hacer (). Debes finalizarlo y luego construir toda la interfaz de usuario desde cero (), basándote en la imagen que el usuario proporcionó.
-2.  **Integración SIGPAC**: Como parte del módulo de Fincas, el usuario solicitó explícitamente la capacidad de Localizar cada parcela introduciendo datos sigpac. Debes investigar e implementar cómo realizar esta consulta, probablemente a través de una API externa o un servicio web.
-3.  **Error body stream already read**: Ten en cuenta este error recurrente en el frontend. La solución actual es verificar  antes de leer el cuerpo de la respuesta. Si encuentras este error, aplica el mismo patrón. Considera proponer una refactorización para centralizar este manejo de errores si el problema persiste.
-4.  **Tarea Bloqueada**: No trabajes en las notificaciones por email. Sigue bloqueada esperando la  del usuario.
+1.  **Prioridad 0: Refactorizar el Módulo de Fincas**. Tu tarea principal e inmediata es modificar el módulo Fincas. El usuario ya no quiere mapas ni dibujo en esta sección. En su lugar, una finca debe poder asociarse con múltiples parcelas existentes.
+2.  **Cambios en Backend y Frontend**: Esto requerirá modificar tanto el modelo  en el backend para almacenar una lista de IDs de parcelas, como la UI en el frontend () para eliminar los mapas y añadir un selector de parcelas.
+3.  **No implementes nuevas features**: Concéntrate exclusivamente en esta refactorización solicitada por el usuario antes de proponer cualquier otra mejora o funcionalidad.
 
 **documents and test reports created in this job**
--   
--   
--   
--   
--   
--   
 -    (actualizado en cada )
+-   
+-   
+-   
+-   
+-   
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  : Confirmación para empezar a implementar el módulo de Fincas. (Estado: IN PROGRESS)
-2.  : Nueva petición de feature para el módulo Fincas. (Estado: IN PROGRESS)
-3.  : Confirmación para proceder con el Resumen Diario. (Estado: COMPLETED)
-4.  : Petición de un fix de UI y confirmación para la siguiente feature. (Estado: COMPLETED)
-5.  : Elección de la opción C (Notificaciones en App y preparación para email) de la propuesta del agente. (Estado: COMPLETED)
-6.  : Confirmación para proceder con la propuesta de notificaciones/scheduler. (Estado: COMPLETED)
-7.  : Elección de la opción B (Sistema de Alertas Climáticas) de la propuesta del agente. (Estado: COMPLETED)
-8.  : Petición para incluir tanto la API automática como la entrada manual en las alertas climáticas. (Estado: COMPLETED)
-9.  : Confirmación para proceder con la propuesta de alertas climáticas. (Estado: COMPLETED)
-10. : Elección de la opción 4 (Sistema completo de plantillas + aplicación masiva) de la propuesta del agente. (Estado: COMPLETED)
+1.  : Petición del usuario para refactorizar el módulo de Fincas. (Estado: NOT STARTED)
+2.  : El usuario aclara que el bug de no guarda se refiere al módulo de Parcelas. (Estado: RESOLVED)
+3.  : El usuario reporta un bug sobre el dibujo de polígonos. (Estado: IN PROGRESS, llevó a la corrección del bug)
+4.  : Acepta la sugerencia de persistir la geometría dibujada en Fincas. (Estado: COMPLETED)
+5.  : Acepta la sugerencia de añadir dibujo manual de parcelas en Fincas. (Estado: COMPLETED)
+6.  : Petición de añadir mapas a la funcionalidad SIGPAC en Fincas. (Estado: COMPLETED)
+7.  : Acepta la sugerencia de integrar SIGPAC en Fincas. (Estado: COMPLETED)
+8.  : Confirmación para empezar a implementar el módulo de Fincas. (Estado: COMPLETED)
+9.  : El agente confirma la recepción de la imagen para el formulario de Fincas. (Estado: COMPLETED)
+10. : El usuario proporciona los requisitos iniciales para el módulo Fincas. (Estado: COMPLETED)
 
 **Project Health Check:**
--   **Broken**: Ninguna funcionalidad crítica está rota.
+-   **Broken**: Ninguna funcionalidad está rota. La última acción fue corregir un bug.
 -   **Mocked**:
-    -   La integración con  para notificaciones por email está implementada parcialmente y bloqueada a la espera de una clave API.
-    -   La integración con  para las alertas climáticas está preparada en el backend pero no se utiliza activamente, ya que requiere una clave API. El sistema funciona con entrada manual.
+    -   La integración con  para notificaciones por email sigue bloqueada a la espera de una clave API del usuario.
+    -   La integración con  para alertas climáticas automáticas está preparada en el backend pero inactiva, a la espera de una clave API.
 
 **3rd Party Integrations**
--   **OpenAI GPT-4o**: Usa Emergent LLM Key.
--   **Resend**: Para notificaciones por email (bloqueado, requiere clave de usuario).
--   **OpenWeatherMap**: Preparado para alertas climáticas automáticas (requiere clave de usuario).
--   **APScheduler**: Integrado en el backend para tareas programadas.
--   **dexie.js**: Para gestión de IndexedDB (modo offline).
--   **Recharts**: Para visualización de datos.
--   **react-i18next / i18next**: Para soporte multi-idioma.
--   **WeasyPrint**: Para generación de PDF.
--   **openpyxl**: Para generación/lectura de archivos Excel.
--   **Leaflet.js / OpenStreetMap / react-leaflet / leaflet-draw**: Para mapas interactivos.
--   **BeautifulSoup4 / requests**: Para web scraping del registro MAPA.
--   **react-color**: Para el selector de color personalizado.
+-   **OpenAI GPT-4o**: Usa Emergent LLM Key (para futuras implementaciones de IA).
+-   **Resend**: Preparado para notificaciones por email (Bloqueado, requiere clave de usuario).
+-   **OpenWeatherMap**: Preparado para alertas climáticas (Bloqueado, requiere clave de usuario).
+-   **APScheduler**: Integrado en backend.
+-   **Leaflet.js / react-leaflet**: Para mapas interactivos.
+-   **leaflet-draw / react-leaflet-draw**: Para dibujar geometrías en el mapa.
+-   **SIGPAC HubCloud API**: Integración REST para consulta de datos de parcelas.
 
 **Testing status**
--   **Testing agent used after significant changes**: YES
+-   **Testing agent used after significant changes**: YES. Se usó el agente de testing después de cada feature principal y para verificar la corrección de bugs, con resultados 100% exitosos en las últimas ejecuciones.
 -   **Troubleshoot agent used after agent stuck in loop**: NO
--   **Test files created**: Sí, se crearon y actualizaron tests de backend (pytest) y frontend (Playwright) para cada una de las funcionalidades completadas en esta sesión.
--   **Known regressions**: El agente de testing reportó 1 test de frontend flaky (inestable) relacionado con el timing del login al probar el modal de Resumen Diario. La funcionalidad fue verificada manualmente y funciona, pero el test podría fallar ocasionalmente.
+-   **Test files created**:
+    -   
+    -   
+    -   Tests de backend actualizados para Fincas y Parcelas.
+-   **Known regressions**: None.
 
 **Credentials to test flow:**
 -   **Admin**:  / 
 -   **Manager**:  / 
 
 **What agent forgot to execute**
--   El agente no olvidó nada; fue interrumpido mientras estaba en mitad de la implementación de las rutas del backend para el módulo de Fincas. La tarea está incompleta y es la siguiente acción a retomar.</analysis>
+Nada. El agente estaba a punto de comenzar a trabajar en la última solicitud del usuario para refactorizar el módulo Fincas justo cuando la sesión terminó.</analysis>
