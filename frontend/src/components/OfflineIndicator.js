@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wifi, WifiOff, Cloud, CloudOff, RefreshCw, Check, AlertCircle, Download } from 'lucide-react';
+import { Wifi, WifiOff, Cloud, CloudOff, RefreshCw, Check, AlertCircle, Download, Bell, BellOff } from 'lucide-react';
 import syncService from '../services/syncService';
 
 const OfflineIndicator = () => {
@@ -9,8 +9,12 @@ const OfflineIndicator = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [syncStatus, setSyncStatus] = useState(null);
   const [notification, setNotification] = useState(null);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(syncService.notificationsEnabled);
 
   useEffect(() => {
+    // Check initial notification permission
+    setNotificationsEnabled(Notification.permission === 'granted');
+    
     // Subscribe to sync events
     const unsubscribe = syncService.subscribe((event) => {
       switch (event.type) {
