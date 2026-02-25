@@ -2,13 +2,13 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: '/app/tests/e2e',
-  outputDir: '/root/.emergent/automation_output/20260225_143522/test-results',
+  outputDir: '/root/.emergent/automation_output/20260225_143646/test-results',
   timeout: 60000,
   retries: 0,
   workers: 1,
   reporter: [
     ['line'],
-    ['json', { outputFile: '/root/.emergent/automation_output/20260225_143522/results.json' }],
+    ['json', { outputFile: '/root/.emergent/automation_output/20260225_143646/results.json' }],
   ],
   use: {
     baseURL: 'https://harvest-log-1.preview.emergentagent.com',
