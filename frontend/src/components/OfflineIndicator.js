@@ -92,6 +92,20 @@ const OfflineIndicator = () => {
     await syncService.retryFailedItems();
   };
 
+  const handleEnableNotifications = async () => {
+    const enabled = await syncService.requestNotificationPermission();
+    setNotificationsEnabled(enabled);
+    if (enabled) {
+      showNotification('Notificaciones activadas', 'success');
+      // Show a test notification
+      syncService.showNotification('Notificaciones activadas', {
+        body: 'Recibirás alertas cuando se sincronicen tus datos offline'
+      });
+    } else {
+      showNotification('Notificaciones denegadas por el navegador', 'warning');
+    }
+  };
+
   const getStatusColor = () => {
     if (!isOnline) return '#ef4444'; // red
     if (pendingCount > 0) return '#f59e0b'; // amber
