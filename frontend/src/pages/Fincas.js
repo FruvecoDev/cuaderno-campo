@@ -45,6 +45,11 @@ const Fincas = () => {
   const [sigpacError, setSigpacError] = useState(null);
   const [provincias, setProvincias] = useState([]);
   
+  // Estado para el mapa
+  const [showMap, setShowMap] = useState(false);
+  const [mapExpanded, setMapExpanded] = useState(false);
+  const [mapData, setMapData] = useState(null);
+  
   // Filtros
   const [filters, setFilters] = useState({
     search: '',
