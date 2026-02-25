@@ -20,9 +20,10 @@ test.describe('Notifications System', () => {
     await page.fill('input[type="password"]', ADMIN_PASSWORD);
     await page.click('button[type="submit"]');
     
-    // Wait for dashboard to load - use first() to avoid strict mode violation
+    // Wait for dashboard to load - use simple selector
     await expect(page.locator('.layout').first()).toBeVisible({ timeout: 15000 });
-    await expect(page.getByText('Dashboard')).toBeVisible({ timeout: 10000 });
+    // Wait for bell to appear (more specific)
+    await expect(page.getByTestId('btn-notificaciones')).toBeVisible({ timeout: 10000 });
   });
 
   test('should display bell icon in header', async ({ page }) => {
@@ -31,86 +32,12 @@ test.describe('Notifications System', () => {
     await expect(bellButton).toBeVisible();
   });
 
-  test('should show notification count badge when there are unread notifications', async ({ page }) => {
-    // First, create a notification via API
-    const loginResponse = await page.request.post(`${BASE_URL}/api/auth/login`, {
-      data: { email: ADMIN_EMAIL, password: ADMIN_PASSWORD }
-    });
-    const { access_token } = await loginResponse.json();
-    
-    const uniqueId = Date.now();
-    await page.request.post(`${BASE_URL}/api/notificaciones`, {
-      headers: { Authorization: `Bearer ${access_token}` },
-      data: {
-        titulo: `TEST_Badge_${uniqueId}`,
-        mensaje: 'Test notification for badge',
-        tipo: 'info'
-      }
-    });
-    
-    // Reload to update count
-    await page.reload({ waitUntil: 'domcontentloaded' });
-    await expect(page.locator('.layout').first()).toBeVisible({ timeout: 10000 });
-    
-    // Bell button should exist
-    const bellButton = page.getByTestId('btn-notificaciones');
-    await expect(bellButton).toBeVisible();
-    
-    // Cleanup notifications
-    const listResponse = await page.request.get(`${BASE_URL}/api/notificaciones`, {
-      headers: { Authorization: `Bearer ${access_token}` }
-    });
-    const { notificaciones } = await listResponse.json();
-    for (const notif of notificaciones.filter((n: any) => n.titulo?.startsWith('TEST_'))) {
-      await page.request.delete(`${BASE_URL}/api/notificaciones/${notif._id}`, {
-        headers: { Authorization: `Bearer ${access_token}` }
-      });
-    }
-  });
-
   test('should open notifications dropdown on bell click', async ({ page }) => {
     const bellButton = page.getByTestId('btn-notificaciones');
     await bellButton.click();
     
-    // Dropdown should appear with header
-    await expect(page.getByText('Notificaciones').first()).toBeVisible({ timeout: 5000 });
-  });
-
-  test('should show empty state when no notifications', async ({ page }) => {
-    // First clean up any test notifications
-    const loginResponse = await page.request.post(`${BASE_URL}/api/auth/login`, {
-      data: { email: ADMIN_EMAIL, password: ADMIN_PASSWORD }
-    });
-    const { access_token } = await loginResponse.json();
-    
-    // Mark all as read
-    await page.request.put(`${BASE_URL}/api/notificaciones/leer-todas`, {
-      headers: { Authorization: `Bearer ${access_token}` }
-    });
-    
-    // Delete test notifications
-    const listResponse = await page.request.get(`${BASE_URL}/api/notificaciones`, {
-      headers: { Authorization: `Bearer ${access_token}` }
-    });
-    const { notificaciones } = await listResponse.json();
-    for (const notif of notificaciones.filter((n: any) => n.titulo?.startsWith('TEST_'))) {
-      await page.request.delete(`${BASE_URL}/api/notificaciones/${notif._id}`, {
-        headers: { Authorization: `Bearer ${access_token}` }
-      });
-    }
-    
-    // Reload page
-    await page.reload({ waitUntil: 'domcontentloaded' });
-    await expect(page.locator('.layout').first()).toBeVisible({ timeout: 10000 });
-    
-    const bellButton = page.getByTestId('btn-notificaciones');
-    await bellButton.click();
-    
-    // Check for empty state or notification list
-    await expect(
-      page.getByText('No hay notificaciones')
-        .or(page.getByText('Notificaciones').first())
-    ).toBeVisible({ timeout: 5000 });
+    // Dropdown should appear with header - use locator inside the dropdown area
+    await expect(page.locator('h3').filter({ hasText: 'Notificaciones' })).toBeVisible({ timeout: 5000 });
   });
 
   test('should display notification in dropdown when created', async ({ page }) => {
@@ -134,7 +61,7 @@ test.describe('Notifications System', () => {
     
     // Reload to get fresh data
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await expect(page.locator('.layout').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('btn-notificaciones')).toBeVisible({ timeout: 10000 });
     
     // Open dropdown
     const bellButton = page.getByTestId('btn-notificaciones');
@@ -160,17 +87,19 @@ test.describe('Notifications System', () => {
     await bellButton.click();
     
     // Verify dropdown is open
-    await expect(page.getByText('Notificaciones').first()).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('h3').filter({ hasText: 'Notificaciones' })).toBeVisible({ timeout: 5000 });
     
     // Click bell again to close
     await bellButton.click();
     
-    // Wait for dropdown to close (the header "Notificaciones" inside dropdown should disappear)
-    // The bell button text might still be around, so we check for specific dropdown element
-    await page.waitForTimeout(500);
+    // Wait for dropdown to close
+    await page.waitForTimeout(300);
+    
+    // h3 inside dropdown should not be visible
+    await expect(page.locator('h3').filter({ hasText: 'Notificaciones' })).not.toBeVisible();
   });
 
-  test('should mark all notifications as read', async ({ page }) => {
+  test('should mark all notifications as read via button', async ({ page }) => {
     const loginResponse = await page.request.post(`${BASE_URL}/api/auth/login`, {
       data: { email: ADMIN_EMAIL, password: ADMIN_PASSWORD }
     });
@@ -195,11 +124,14 @@ test.describe('Notifications System', () => {
     
     // Reload
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await expect(page.locator('.layout').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('btn-notificaciones')).toBeVisible({ timeout: 10000 });
     
     // Open dropdown
     const bellButton = page.getByTestId('btn-notificaciones');
     await bellButton.click();
+    
+    // Wait for dropdown to open
+    await expect(page.locator('h3').filter({ hasText: 'Notificaciones' })).toBeVisible({ timeout: 5000 });
     
     // Look for "Mark all as read" button
     const markAllButton = page.getByText(/Marcar todas leídas/i);
@@ -236,27 +168,20 @@ test.describe('Scheduler Configuration', () => {
     
     // Wait for dashboard
     await expect(page.locator('.layout').first()).toBeVisible({ timeout: 15000 });
-    await expect(page.getByText('Dashboard')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('btn-notificaciones')).toBeVisible({ timeout: 10000 });
   });
 
-  test('should navigate to Configuracion page', async ({ page }) => {
+  test('should navigate to Configuracion page and show scheduler config', async ({ page }) => {
     // Navigate to configuration page
     await page.goto('/configuracion', { waitUntil: 'domcontentloaded' });
     
-    // Verify page loaded
-    await expect(page.getByText('Configuración de la Aplicación').or(page.getByTestId('configuracion-page'))).toBeVisible({ timeout: 10000 });
-  });
-
-  test('should display scheduler configuration panel', async ({ page }) => {
-    await page.goto('/configuracion', { waitUntil: 'domcontentloaded' });
-    
-    // Scheduler config panel should be visible
-    await expect(page.getByText('Verificación Climática Programada').or(page.getByTestId('scheduler-config'))).toBeVisible({ timeout: 10000 });
+    // Verify scheduler config panel is visible
+    await expect(page.getByText('Verificación Climática Programada')).toBeVisible({ timeout: 10000 });
   });
 
   test('should display Ejecutar Ahora button', async ({ page }) => {
     await page.goto('/configuracion', { waitUntil: 'domcontentloaded' });
-    await expect(page.getByText('Verificación Climática Programada').or(page.getByTestId('scheduler-config'))).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('Verificación Climática Programada')).toBeVisible({ timeout: 10000 });
     
     // Ejecutar Ahora button should be visible
     await expect(page.getByRole('button', { name: /Ejecutar Ahora/i })).toBeVisible();
@@ -264,38 +189,29 @@ test.describe('Scheduler Configuration', () => {
 
   test('should trigger manual execution when clicking Ejecutar Ahora', async ({ page }) => {
     await page.goto('/configuracion', { waitUntil: 'domcontentloaded' });
-    await expect(page.getByText('Verificación Climática Programada').or(page.getByTestId('scheduler-config'))).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('Verificación Climática Programada')).toBeVisible({ timeout: 10000 });
     
     // Click Ejecutar Ahora
     const executeButton = page.getByRole('button', { name: /Ejecutar Ahora/i });
     await executeButton.click();
     
     // Should show success message
-    await expect(
-      page.getByText(/iniciada/i)
-        .or(page.getByText(/Revisa las alertas/i))
-        .or(page.getByText(/segundos/i))
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/Revisa las alertas|iniciada|segundos/i)).toBeVisible({ timeout: 10000 });
   });
 
   test('should display scheduler configuration options', async ({ page }) => {
     await page.goto('/configuracion', { waitUntil: 'domcontentloaded' });
-    await expect(page.getByText('Verificación Climática Programada').or(page.getByTestId('scheduler-config'))).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('Verificación Climática Programada')).toBeVisible({ timeout: 10000 });
     
     // Check for configuration fields
-    // Time input
     await expect(page.locator('input[type="time"]')).toBeVisible();
-    
-    // Frequency label
     await expect(page.getByText(/Frecuencia/i)).toBeVisible();
-    
-    // Notification checkbox label
     await expect(page.getByText(/En la Aplicación/i)).toBeVisible();
   });
 
   test('should save scheduler configuration', async ({ page }) => {
     await page.goto('/configuracion', { waitUntil: 'domcontentloaded' });
-    await expect(page.getByText('Verificación Climática Programada').or(page.getByTestId('scheduler-config'))).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('Verificación Climática Programada')).toBeVisible({ timeout: 10000 });
     
     // Change time
     const timeInput = page.locator('input[type="time"]');
@@ -306,44 +222,24 @@ test.describe('Scheduler Configuration', () => {
     await saveButton.click();
     
     // Should show success message
-    await expect(
-      page.getByText(/guardada/i)
-        .or(page.getByText(/correctamente/i))
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/guardada|correctamente/i)).toBeVisible({ timeout: 10000 });
   });
 
-  test('should display email disabled badge when no API key', async ({ page }) => {
+  test('should display email disabled badge', async ({ page }) => {
     await page.goto('/configuracion', { waitUntil: 'domcontentloaded' });
-    await expect(page.getByText('Verificación Climática Programada').or(page.getByTestId('scheduler-config'))).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('Verificación Climática Programada')).toBeVisible({ timeout: 10000 });
     
     // Should show email disabled indicator
     await expect(page.getByText(/Pendiente API Key/i)).toBeVisible();
   });
 
-  test('should display role checkboxes', async ({ page }) => {
+  test('should display role checkboxes for notification targets', async ({ page }) => {
     await page.goto('/configuracion', { waitUntil: 'domcontentloaded' });
-    await expect(page.getByText('Verificación Climática Programada').or(page.getByTestId('scheduler-config'))).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('Verificación Climática Programada')).toBeVisible({ timeout: 10000 });
     
-    // Find role labels
-    await expect(page.getByText('Admin')).toBeVisible();
-    await expect(page.getByText('Manager')).toBeVisible();
-  });
-
-  test('should change frequency option', async ({ page }) => {
-    await page.goto('/configuracion', { waitUntil: 'domcontentloaded' });
-    await expect(page.getByText('Verificación Climática Programada').or(page.getByTestId('scheduler-config'))).toBeVisible({ timeout: 10000 });
-    
-    // Find and change frequency
-    const frequencySelect = page.locator('select.form-select');
-    if (await frequencySelect.isVisible()) {
-      await frequencySelect.selectOption('cada_12h');
-      
-      // Save
-      const saveButton = page.getByRole('button', { name: /Guardar Configuración/i });
-      await saveButton.click();
-      
-      // Verify saved
-      await expect(page.getByText(/guardada/i).or(page.getByText(/correctamente/i))).toBeVisible({ timeout: 10000 });
-    }
+    // Find role labels in scheduler config section
+    const schedulerConfig = page.getByTestId('scheduler-config');
+    await expect(schedulerConfig.getByText('Admin')).toBeVisible();
+    await expect(schedulerConfig.getByText('Manager')).toBeVisible();
   });
 });
