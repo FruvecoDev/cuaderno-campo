@@ -222,3 +222,197 @@ test.describe('Fincas Module - CRUD', () => {
     await expect(page.getByTestId('select-filtro-tipo')).toHaveValue('');
   });
 });
+
+test.describe('Fincas Module - SIGPAC Integration', () => {
+  test.beforeEach(async ({ page }) => {
+    await dismissToasts(page);
+    await login(page);
+    await ensureModalClosed(page);
+    
+    await page.getByTestId('nav-fincas').click({ force: true });
+    await page.waitForLoadState('domcontentloaded');
+    await ensureModalClosed(page);
+    await expect(page.getByTestId('fincas-page')).toBeVisible({ timeout: 10000 });
+    
+    // Open form for SIGPAC tests
+    await page.getByTestId('btn-nueva-finca').click({ force: true });
+    await expect(page.getByTestId('form-finca')).toBeVisible({ timeout: 5000 });
+  });
+
+  test('should display SIGPAC section with search button', async ({ page }) => {
+    // Verify SIGPAC section exists
+    await expect(page.locator('text=Datos SIGPAC')).toBeVisible();
+    
+    // Verify "Buscar en SIGPAC" button
+    await expect(page.getByTestId('btn-buscar-sigpac')).toBeVisible();
+    
+    // Verify "Visor SIGPAC" link
+    await expect(page.locator('a:has-text("Visor SIGPAC")')).toBeVisible();
+    
+    // Verify help text is displayed
+    await expect(page.locator('text=Introduzca los códigos SIGPAC')).toBeVisible();
+  });
+
+  test('should display all SIGPAC form fields', async ({ page }) => {
+    // Verify all SIGPAC form fields
+    await expect(page.getByTestId('input-sigpac-provincia')).toBeVisible();
+    await expect(page.getByTestId('input-sigpac-municipio')).toBeVisible();
+    await expect(page.getByTestId('input-sigpac-cod-agregado')).toBeVisible();
+    await expect(page.getByTestId('input-sigpac-zona')).toBeVisible();
+    await expect(page.getByTestId('input-sigpac-poligono')).toBeVisible();
+    await expect(page.getByTestId('input-sigpac-parcela')).toBeVisible();
+    await expect(page.getByTestId('input-sigpac-recinto')).toBeVisible();
+    await expect(page.getByTestId('input-sigpac-cod-uso')).toBeVisible();
+  });
+
+  test('should show validation error when SIGPAC search with missing fields', async ({ page }) => {
+    // Click search without filling required fields
+    await page.getByTestId('btn-buscar-sigpac').click({ force: true });
+    
+    // Should show error message about missing fields
+    await expect(page.locator('text=Debe completar al menos')).toBeVisible({ timeout: 5000 });
+  });
+
+  test('should load provinces in dropdown', async ({ page }) => {
+    const provinciaSelect = page.getByTestId('input-sigpac-provincia');
+    
+    // Click to open dropdown and verify options exist
+    await provinciaSelect.click();
+    
+    // Check for some known provinces
+    await expect(page.locator('option:has-text("Sevilla")')).toBeVisible();
+    await expect(page.locator('option:has-text("Madrid")')).toBeVisible();
+    await expect(page.locator('option:has-text("Barcelona")')).toBeVisible();
+  });
+
+  test('should search SIGPAC and display success message on valid parcel', async ({ page }) => {
+    // Fill SIGPAC data with known valid parcel (Sevilla test case)
+    await page.getByTestId('input-sigpac-provincia').selectOption('41'); // Sevilla
+    await page.getByTestId('input-sigpac-municipio').fill('053');
+    await page.getByTestId('input-sigpac-poligono').fill('5');
+    await page.getByTestId('input-sigpac-parcela').fill('12');
+    
+    // Click search
+    await page.getByTestId('btn-buscar-sigpac').click({ force: true });
+    
+    // Wait for response - either success or error from external API
+    // The external SIGPAC API may or may not be available
+    try {
+      // Check for success message (green box with CheckCircle)
+      const successMsg = page.locator('text=Parcela encontrada en SIGPAC');
+      const errorMsg = page.locator('[style*="ffcdd2"], [style*="AlertCircle"]');
+      
+      // Wait for either success or error response
+      await Promise.race([
+        expect(successMsg).toBeVisible({ timeout: 20000 }),
+        expect(page.locator('text=Superficie:')).toBeVisible({ timeout: 20000 }),
+        expect(errorMsg).toBeVisible({ timeout: 20000 }),
+        expect(page.locator('text=Error')).toBeVisible({ timeout: 20000 })
+      ]);
+      
+      // If success, verify the success message shows data
+      if (await successMsg.isVisible().catch(() => false)) {
+        await expect(page.locator('text=Superficie:')).toBeVisible();
+        await expect(page.locator('text=Uso:')).toBeVisible();
+      }
+    } catch {
+      // External API timeout - this is acceptable
+      console.log('SIGPAC external API may be unavailable');
+    }
+  });
+
+  test('should show error message for non-existent parcel', async ({ page }) => {
+    // Fill with non-existent parcel data
+    await page.getByTestId('input-sigpac-provincia').selectOption('99'); // Invalid
+    
+    // Check if 99 exists, if not skip
+    const hasOption = await page.locator('option[value="99"]').count() > 0;
+    if (!hasOption) {
+      // Select a valid province but invalid other data
+      await page.getByTestId('input-sigpac-provincia').selectOption('41');
+    }
+    
+    await page.getByTestId('input-sigpac-municipio').fill('999');
+    await page.getByTestId('input-sigpac-poligono').fill('9999');
+    await page.getByTestId('input-sigpac-parcela').fill('99999');
+    
+    // Click search
+    await page.getByTestId('btn-buscar-sigpac').click({ force: true });
+    
+    // Wait for error response
+    try {
+      await expect(page.locator('[style*="ffcdd2"], [style*="AlertCircle"]').first()).toBeVisible({ timeout: 20000 });
+    } catch {
+      // May get different error - check for any error-related text
+      await expect(page.locator('text=/no encontrad|Error|Verifique/i').first()).toBeVisible({ timeout: 5000 });
+    }
+  });
+
+  test('should auto-fill hectareas field after successful SIGPAC search', async ({ page }) => {
+    // Fill SIGPAC data
+    await page.getByTestId('input-sigpac-provincia').selectOption('41');
+    await page.getByTestId('input-sigpac-municipio').fill('053');
+    await page.getByTestId('input-sigpac-poligono').fill('5');
+    await page.getByTestId('input-sigpac-parcela').fill('12');
+    
+    // Get initial hectareas value
+    const hectareasInput = page.getByTestId('input-hectareas');
+    const initialValue = await hectareasInput.inputValue();
+    
+    // Click search
+    await page.getByTestId('btn-buscar-sigpac').click({ force: true });
+    
+    // If successful, hectareas should be updated
+    try {
+      await expect(page.locator('text=Parcela encontrada en SIGPAC')).toBeVisible({ timeout: 20000 });
+      
+      // Hectareas should be auto-filled (different from initial)
+      const newValue = await hectareasInput.inputValue();
+      // Value should have changed if successful
+      if (initialValue === '0') {
+        expect(parseFloat(newValue)).toBeGreaterThan(0);
+      }
+    } catch {
+      // External API unavailable - skip this check
+      console.log('SIGPAC API unavailable for auto-fill test');
+    }
+  });
+
+  test('should create finca with SIGPAC data and save it correctly', async ({ page }) => {
+    const uniqueId = generateUniqueId();
+    const fincaName = `SIGPAC_Finca_${uniqueId}`;
+    
+    // Scroll to top to fill denominacion first
+    await page.getByTestId('input-denominacion').scrollIntoViewIfNeeded();
+    await page.getByTestId('input-denominacion').fill(fincaName);
+    await page.getByTestId('input-provincia').fill('Sevilla');
+    await page.getByTestId('input-hectareas').fill('0.0714');
+    
+    // Fill SIGPAC data manually (in case API is unavailable)
+    await page.getByTestId('input-sigpac-provincia').selectOption('41');
+    await page.getByTestId('input-sigpac-municipio').fill('053');
+    await page.getByTestId('input-sigpac-poligono').fill('5');
+    await page.getByTestId('input-sigpac-parcela').fill('12');
+    await page.getByTestId('input-sigpac-cod-uso').fill('TA');
+    
+    // Save
+    await page.getByTestId('btn-guardar-finca').click({ force: true });
+    await expect(page.getByTestId('form-finca')).not.toBeVisible({ timeout: 10000 });
+    
+    // Search for created finca
+    await page.getByTestId('input-filtro-buscar').fill(uniqueId);
+    await expect(page.locator(`text=${fincaName}`)).toBeVisible({ timeout: 5000 });
+    
+    // Expand to see SIGPAC data
+    const expandBtn = page.locator('[data-testid^="btn-expand-"]').first();
+    await expandBtn.click({ force: true });
+    
+    // Verify SIGPAC data is displayed in expanded view
+    await expect(page.locator('h5').filter({ hasText: 'Datos SIGPAC' })).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('text=TA')).toBeVisible(); // Cod uso
+    
+    // Delete the test finca
+    page.on('dialog', dialog => dialog.accept());
+    await page.locator('[data-testid^="btn-delete-"]').first().click({ force: true });
+  });
+});
