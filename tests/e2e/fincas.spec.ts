@@ -956,3 +956,332 @@ test.describe('Fincas Module - Polygon Drawing Feature', () => {
     }
   });
 });
+
+test.describe('Fincas Module - Geometry Persistence', () => {
+  const uniqueId = `TEST_GEOM_${Date.now()}`;
+  let createdFincaId: string | null = null;
+
+  test.beforeEach(async ({ page }) => {
+    await dismissToasts(page);
+    await login(page);
+    await page.waitForTimeout(2000);
+    await ensureModalClosed(page);
+    
+    // Navigate directly to fincas page
+    await page.goto('/fincas', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(2000);
+    await ensureModalClosed(page);
+    await expect(page.getByTestId('fincas-page')).toBeVisible({ timeout: 10000 });
+  });
+
+  test('should save finca with drawn geometry and show "Dibujada" label', async ({ page }) => {
+    // Open form
+    await page.getByTestId('btn-nueva-finca').click({ force: true });
+    await page.waitForTimeout(1000);
+    await ensureModalClosed(page);
+    await expect(page.getByTestId('form-finca')).toBeVisible({ timeout: 10000 });
+    
+    // Fill basic info
+    await page.getByTestId('input-denominacion').fill(`Finca Dibujada ${uniqueId}`);
+    await page.getByTestId('input-provincia').fill('Sevilla');
+    
+    // Draw a polygon
+    const drawBtn = page.getByTestId('btn-dibujar-parcela');
+    await drawBtn.scrollIntoViewIfNeeded();
+    await drawBtn.click({ force: true });
+    await page.waitForTimeout(2000);
+    
+    // Draw polygon
+    const polygonTool = page.locator('.leaflet-draw-draw-polygon');
+    if (await polygonTool.isVisible({ timeout: 3000 })) {
+      await polygonTool.click({ force: true });
+      await page.waitForTimeout(500);
+      
+      const leafletMap = page.locator('.leaflet-container').first();
+      const mapBox = await leafletMap.boundingBox();
+      
+      if (mapBox) {
+        const centerX = mapBox.x + mapBox.width / 2;
+        const centerY = mapBox.y + mapBox.height / 2;
+        
+        await page.mouse.click(centerX - 60, centerY - 60);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX + 60, centerY - 60);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX + 60, centerY + 60);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX - 60, centerY + 60);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX - 60, centerY - 60);
+        await page.waitForTimeout(1000);
+        
+        // Hide drawing map
+        await drawBtn.click({ force: true });
+        await page.waitForTimeout(500);
+        
+        // Verify green indicator shows
+        await expect(page.locator('text=Parcela dibujada manualmente')).toBeVisible({ timeout: 5000 });
+        
+        // Save finca
+        const saveBtn = page.getByTestId('btn-guardar-finca');
+        await saveBtn.scrollIntoViewIfNeeded();
+        await saveBtn.click({ force: true });
+        await page.waitForTimeout(2000);
+        
+        // Verify finca appears in list with "Dibujada" label
+        const searchInput = page.getByTestId('input-filtro-buscar');
+        await searchInput.fill(uniqueId);
+        await page.waitForTimeout(1000);
+        
+        // Find our finca in the list
+        const fincaCard = page.locator(`text=Finca Dibujada ${uniqueId}`).first();
+        await expect(fincaCard).toBeVisible({ timeout: 5000 });
+        
+        // Verify "Dibujada" label is present
+        await expect(page.locator('text=Dibujada').first()).toBeVisible({ timeout: 5000 });
+      }
+    }
+    
+    // Cleanup - delete the finca
+    const deleteBtn = page.locator('[data-testid^="btn-delete-"]').first();
+    if (await deleteBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+      page.once('dialog', dialog => dialog.accept());
+      await deleteBtn.click({ force: true });
+      await page.waitForTimeout(1000);
+    }
+  });
+
+  test('should show Pencil icon on map button for finca with manual geometry', async ({ page }) => {
+    // First create a finca with geometry
+    await page.getByTestId('btn-nueva-finca').click({ force: true });
+    await page.waitForTimeout(1000);
+    await ensureModalClosed(page);
+    
+    const testId = `PENCIL_${Date.now()}`;
+    await page.getByTestId('input-denominacion').fill(`Finca Pencil ${testId}`);
+    await page.getByTestId('input-provincia').fill('Córdoba');
+    
+    // Draw polygon
+    const drawBtn = page.getByTestId('btn-dibujar-parcela');
+    await drawBtn.scrollIntoViewIfNeeded();
+    await drawBtn.click({ force: true });
+    await page.waitForTimeout(2000);
+    
+    const polygonTool = page.locator('.leaflet-draw-draw-polygon');
+    if (await polygonTool.isVisible({ timeout: 3000 })) {
+      await polygonTool.click({ force: true });
+      await page.waitForTimeout(500);
+      
+      const leafletMap = page.locator('.leaflet-container').first();
+      const mapBox = await leafletMap.boundingBox();
+      
+      if (mapBox) {
+        const centerX = mapBox.x + mapBox.width / 2;
+        const centerY = mapBox.y + mapBox.height / 2;
+        
+        await page.mouse.click(centerX - 40, centerY - 40);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX + 40, centerY - 40);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX, centerY + 40);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX - 40, centerY - 40);
+        await page.waitForTimeout(1000);
+        
+        // Hide and save
+        await drawBtn.click({ force: true });
+        await page.waitForTimeout(500);
+        
+        const saveBtn = page.getByTestId('btn-guardar-finca');
+        await saveBtn.scrollIntoViewIfNeeded();
+        await saveBtn.click({ force: true });
+        await page.waitForTimeout(2000);
+        
+        // Search for the finca
+        const searchInput = page.getByTestId('input-filtro-buscar');
+        await searchInput.fill(testId);
+        await page.waitForTimeout(1000);
+        
+        // The map button should have Pencil icon (green background)
+        const mapBtn = page.locator('[data-testid^="btn-map-"]').first();
+        if (await mapBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+          // Button should have green background (indicating manual geometry)
+          const btnStyle = await mapBtn.getAttribute('style');
+          expect(btnStyle).toContain('#e8f5e9');
+          
+          // Click the map button to verify it opens the map
+          await mapBtn.click({ force: true });
+          await page.waitForTimeout(1000);
+          
+          // Map modal should show and include manual geometry indicator
+          await expect(page.locator('.leaflet-container').first()).toBeVisible({ timeout: 5000 });
+        }
+        
+        // Cleanup
+        const deleteBtn = page.locator('[data-testid^="btn-delete-"]').first();
+        if (await deleteBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+          page.once('dialog', dialog => dialog.accept());
+          await deleteBtn.click({ force: true });
+          await page.waitForTimeout(1000);
+        }
+      }
+    }
+  });
+
+  test('should load existing geometry when editing a finca with manual geometry', async ({ page }) => {
+    // First create a finca with geometry
+    await page.getByTestId('btn-nueva-finca').click({ force: true });
+    await page.waitForTimeout(1000);
+    await ensureModalClosed(page);
+    
+    const testId = `EDIT_GEOM_${Date.now()}`;
+    await page.getByTestId('input-denominacion').fill(`Finca Edit Geom ${testId}`);
+    await page.getByTestId('input-provincia').fill('Granada');
+    
+    // Draw polygon
+    const drawBtn = page.getByTestId('btn-dibujar-parcela');
+    await drawBtn.scrollIntoViewIfNeeded();
+    await drawBtn.click({ force: true });
+    await page.waitForTimeout(2000);
+    
+    const polygonTool = page.locator('.leaflet-draw-draw-polygon');
+    if (await polygonTool.isVisible({ timeout: 3000 })) {
+      await polygonTool.click({ force: true });
+      await page.waitForTimeout(500);
+      
+      const leafletMap = page.locator('.leaflet-container').first();
+      const mapBox = await leafletMap.boundingBox();
+      
+      if (mapBox) {
+        const centerX = mapBox.x + mapBox.width / 2;
+        const centerY = mapBox.y + mapBox.height / 2;
+        
+        await page.mouse.click(centerX - 50, centerY - 50);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX + 50, centerY - 50);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX, centerY + 50);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX - 50, centerY - 50);
+        await page.waitForTimeout(1000);
+        
+        // Hide and save
+        await drawBtn.click({ force: true });
+        await page.waitForTimeout(500);
+        
+        // Verify indicator shows
+        await expect(page.locator('text=Parcela dibujada manualmente')).toBeVisible({ timeout: 5000 });
+        
+        const saveBtn = page.getByTestId('btn-guardar-finca');
+        await saveBtn.scrollIntoViewIfNeeded();
+        await saveBtn.click({ force: true });
+        await page.waitForTimeout(2000);
+        
+        // Search for the finca
+        const searchInput = page.getByTestId('input-filtro-buscar');
+        await searchInput.fill(testId);
+        await page.waitForTimeout(1000);
+        
+        // Click edit button
+        const editBtn = page.locator('[data-testid^="btn-edit-"]').first();
+        if (await editBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+          await editBtn.click({ force: true });
+          await page.waitForTimeout(1000);
+          
+          // Form should open
+          await expect(page.getByTestId('form-finca')).toBeVisible({ timeout: 5000 });
+          
+          // The green indicator should show (geometry loaded from saved finca)
+          await expect(page.locator('text=Parcela dibujada manualmente')).toBeVisible({ timeout: 5000 });
+          
+          // The "Editar" button should be visible next to the indicator
+          await expect(page.getByTestId('btn-editar-dibujo')).toBeVisible({ timeout: 5000 });
+        }
+        
+        // Cleanup
+        await page.getByTestId('btn-nueva-finca').click({ force: true });
+        await page.waitForTimeout(500);
+        
+        const deleteBtn = page.locator('[data-testid^="btn-delete-"]').first();
+        if (await deleteBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+          page.once('dialog', dialog => dialog.accept());
+          await deleteBtn.click({ force: true });
+          await page.waitForTimeout(1000);
+        }
+      }
+    }
+  });
+
+  test('should show calculated area in indicator for saved geometry', async ({ page }) => {
+    // First create a finca with geometry
+    await page.getByTestId('btn-nueva-finca').click({ force: true });
+    await page.waitForTimeout(1000);
+    await ensureModalClosed(page);
+    
+    const testId = `AREA_${Date.now()}`;
+    await page.getByTestId('input-denominacion').fill(`Finca Area ${testId}`);
+    await page.getByTestId('input-provincia').fill('Málaga');
+    
+    // Draw polygon
+    const drawBtn = page.getByTestId('btn-dibujar-parcela');
+    await drawBtn.scrollIntoViewIfNeeded();
+    await drawBtn.click({ force: true });
+    await page.waitForTimeout(2000);
+    
+    const polygonTool = page.locator('.leaflet-draw-draw-polygon');
+    if (await polygonTool.isVisible({ timeout: 3000 })) {
+      await polygonTool.click({ force: true });
+      await page.waitForTimeout(500);
+      
+      const leafletMap = page.locator('.leaflet-container').first();
+      const mapBox = await leafletMap.boundingBox();
+      
+      if (mapBox) {
+        const centerX = mapBox.x + mapBox.width / 2;
+        const centerY = mapBox.y + mapBox.height / 2;
+        
+        // Draw a larger polygon
+        await page.mouse.click(centerX - 80, centerY - 80);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX + 80, centerY - 80);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX + 80, centerY + 80);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX - 80, centerY + 80);
+        await page.waitForTimeout(300);
+        await page.mouse.click(centerX - 80, centerY - 80);
+        await page.waitForTimeout(1000);
+        
+        // Hide
+        await drawBtn.click({ force: true });
+        await page.waitForTimeout(500);
+        
+        // Verify area is shown in indicator
+        await expect(page.locator('text=Parcela dibujada manualmente')).toBeVisible({ timeout: 5000 });
+        await expect(page.locator('text=Área calculada:')).toBeVisible({ timeout: 5000 });
+        
+        // Should show hectares value
+        const areaText = page.locator('text=/\\d+\\.?\\d*\\s*ha/');
+        await expect(areaText.first()).toBeVisible({ timeout: 5000 });
+        
+        // Save
+        const saveBtn = page.getByTestId('btn-guardar-finca');
+        await saveBtn.scrollIntoViewIfNeeded();
+        await saveBtn.click({ force: true });
+        await page.waitForTimeout(2000);
+        
+        // Cleanup
+        const searchInput = page.getByTestId('input-filtro-buscar');
+        await searchInput.fill(testId);
+        await page.waitForTimeout(1000);
+        
+        const deleteBtn = page.locator('[data-testid^="btn-delete-"]').first();
+        if (await deleteBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+          page.once('dialog', dialog => dialog.accept());
+          await deleteBtn.click({ force: true });
+          await page.waitForTimeout(1000);
+        }
+      }
+    }
+  });
+});
