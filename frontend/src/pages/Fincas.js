@@ -707,6 +707,22 @@ const Fincas = () => {
                     )}
                     Buscar en SIGPAC
                   </button>
+                  <button
+                    type="button"
+                    className="btn btn-sm"
+                    style={{ 
+                      backgroundColor: '#2e7d32', 
+                      color: 'white',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
+                    }}
+                    onClick={() => setShowDrawingMap(!showDrawingMap)}
+                    data-testid="btn-dibujar-parcela"
+                  >
+                    <Pencil size={14} />
+                    {showDrawingMap ? 'Ocultar Dibujo' : 'Dibujar Parcela'}
+                  </button>
                   <a
                     href="https://sigpac.mapa.es/fega/visor/"
                     target="_blank"
@@ -730,7 +746,7 @@ const Fincas = () => {
               
               {/* Mensaje de ayuda */}
               <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', fontStyle: 'italic' }}>
-                Introduzca los códigos SIGPAC y pulse "Buscar en SIGPAC" para obtener automáticamente la superficie y el uso del terreno.
+                Introduzca los códigos SIGPAC y pulse "Buscar en SIGPAC", o use "Dibujar Parcela" para marcar manualmente los límites en el mapa.
               </p>
               
               {/* Resultado de búsqueda SIGPAC */}
