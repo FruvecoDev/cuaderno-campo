@@ -358,6 +358,244 @@ const Recomendaciones = () => {
     }
   };
   
+  const fetchPlantillas = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/plantillas-recomendaciones`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setPlantillas(data.plantillas || []);
+    } catch (err) {
+      console.error('Error fetching plantillas:', err);
+    }
+  };
+  
+  // Plantilla functions
+  const handlePlantillaSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+    
+    if (!plantillaForm.nombre.trim()) {
+      setError('El nombre de la plantilla es obligatorio');
+      return;
+    }
+    
+    try {
+      const url = editingPlantillaId 
+        ? `${API_URL}/api/plantillas-recomendaciones/${editingPlantillaId}`
+        : `${API_URL}/api/plantillas-recomendaciones`;
+      
+      const response = await fetch(url, {
+        method: editingPlantillaId ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(plantillaForm)
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.detail || 'Error al guardar plantilla');
+      }
+      
+      setSuccess(editingPlantillaId ? 'Plantilla actualizada' : 'Plantilla creada');
+      setTimeout(() => setSuccess(null), 3000);
+      resetPlantillaForm();
+      fetchPlantillas();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+  
+  const handleEditPlantilla = (plantilla) => {
+    setPlantillaForm({
+      nombre: plantilla.nombre || '',
+      descripcion: plantilla.descripcion || '',
+      tipo: plantilla.tipo || 'Tratamiento Fitosanitario',
+      subtipo: plantilla.subtipo || '',
+      producto_id: plantilla.producto_id || '',
+      producto_nombre: plantilla.producto_nombre || '',
+      dosis: plantilla.dosis || '',
+      unidad_dosis: plantilla.unidad_dosis || 'L/ha',
+      volumen_agua: plantilla.volumen_agua || '',
+      prioridad: plantilla.prioridad || 'Media',
+      motivo: plantilla.motivo || '',
+      observaciones: plantilla.observaciones || '',
+      activo: plantilla.activo !== false
+    });
+    setEditingPlantillaId(plantilla._id);
+    setShowPlantillaForm(true);
+  };
+  
+  const handleDeletePlantilla = async (id) => {
+    if (!window.confirm('¿Está seguro de eliminar esta plantilla?')) return;
+    
+    try {
+      const response = await fetch(`${API_URL}/api/plantillas-recomendaciones/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.detail || 'Error al eliminar');
+      }
+      
+      setSuccess('Plantilla eliminada');
+      setTimeout(() => setSuccess(null), 3000);
+      fetchPlantillas();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+  
+  const handleTogglePlantillaActivo = async (plantilla) => {
+    try {
+      const response = await fetch(`${API_URL}/api/plantillas-recomendaciones/${plantilla._id}/toggle-activo`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.detail || 'Error al cambiar estado');
+      }
+      
+      fetchPlantillas();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+  
+  const resetPlantillaForm = () => {
+    setPlantillaForm({
+      nombre: '',
+      descripcion: '',
+      tipo: 'Tratamiento Fitosanitario',
+      subtipo: '',
+      producto_id: '',
+      producto_nombre: '',
+      dosis: '',
+      unidad_dosis: 'L/ha',
+      volumen_agua: '',
+      prioridad: 'Media',
+      motivo: '',
+      observaciones: '',
+      activo: true
+    });
+    setEditingPlantillaId(null);
+    setShowPlantillaForm(false);
+  };
+  
+  // Use template to fill form
+  const handleUsePlantilla = (plantilla) => {
+    setFormData(prev => ({
+      ...prev,
+      tipo: plantilla.tipo || 'Tratamiento Fitosanitario',
+      subtipo: plantilla.subtipo || '',
+      producto_id: plantilla.producto_id || '',
+      producto_nombre: plantilla.producto_nombre || '',
+      dosis: plantilla.dosis || '',
+      unidad_dosis: plantilla.unidad_dosis || 'L/ha',
+      volumen_agua: plantilla.volumen_agua || 200,
+      prioridad: plantilla.prioridad || 'Media',
+      motivo: plantilla.motivo || '',
+      observaciones: plantilla.observaciones || ''
+    }));
+    setShowPlantillaSelector(false);
+    setSuccess(`Plantilla "${plantilla.nombre}" aplicada`);
+    setTimeout(() => setSuccess(null), 2000);
+  };
+  
+  // Aplicación masiva
+  const handleAplicacionMasiva = async () => {
+    if (!selectedPlantilla) {
+      setError('Debe seleccionar una plantilla');
+      return;
+    }
+    if (selectedParcelas.length === 0) {
+      setError('Debe seleccionar al menos una parcela');
+      return;
+    }
+    
+    setAplicacionMasivaLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(`${API_URL}/api/plantillas-recomendaciones/aplicar-masivo`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          plantilla_id: selectedPlantilla._id,
+          parcela_ids: selectedParcelas,
+          campana: new Date().getFullYear().toString(),
+          fecha_programada: formData.fecha_programada || null
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.detail || 'Error al aplicar plantilla');
+      }
+      
+      setSuccess(`${data.created_count} recomendación(es) creada(s) desde plantilla "${data.plantilla_usada}"`);
+      setTimeout(() => setSuccess(null), 4000);
+      
+      setShowAplicacionMasiva(false);
+      setSelectedPlantilla(null);
+      setSelectedParcelas([]);
+      fetchRecomendaciones();
+      fetchStats();
+      fetchPlantillas();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setAplicacionMasivaLoading(false);
+    }
+  };
+  
+  const handleToggleParcelaSelection = (parcelaId) => {
+    setSelectedParcelas(prev => 
+      prev.includes(parcelaId) 
+        ? prev.filter(id => id !== parcelaId)
+        : [...prev, parcelaId]
+    );
+  };
+  
+  const handleSelectAllParcelas = () => {
+    if (selectedParcelas.length === parcelas.length) {
+      setSelectedParcelas([]);
+    } else {
+      setSelectedParcelas(parcelas.map(p => p._id));
+    }
+  };
+  
+  const handleSeedPlantillas = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/plantillas-recomendaciones/seed`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.detail || 'Error al cargar plantillas');
+      }
+      
+      setSuccess(data.message);
+      setTimeout(() => setSuccess(null), 3000);
+      fetchPlantillas();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
