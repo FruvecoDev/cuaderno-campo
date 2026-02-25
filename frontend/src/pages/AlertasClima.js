@@ -115,11 +115,17 @@ const AlertasClima = () => {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.detail || 'Error al verificar');
+        let errorMsg = 'Error al verificar';
+        try {
+          const errorData = await response.json();
+          errorMsg = errorData.detail || errorMsg;
+        } catch (e) {}
+        throw new Error(errorMsg);
       }
+      
+      const data = await response.json();
       
       setSuccess(data.message);
       setTimeout(() => setSuccess(null), 4000);
