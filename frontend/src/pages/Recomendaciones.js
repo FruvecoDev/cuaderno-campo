@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
   Plus, Edit2, Trash2, Search, Filter, X, 
   AlertTriangle, CheckCircle, Clock, Calendar,
   FileText, Beaker, ArrowRight, Loader2, AlertCircle,
-  ChevronDown, ChevronUp
+  Calculator, Droplets, Info
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
@@ -23,6 +23,22 @@ const ESTADO_COLORS = {
   'Aplicada': { bg: '#dcfce7', text: '#166534', icon: CheckCircle },
   'Cancelada': { bg: '#f3f4f6', text: '#6b7280', icon: X }
 };
+
+// Límites recomendados por tipo de producto (L o kg por ha)
+const LIMITES_DOSIS = {
+  'Herbicida': { min: 0.5, max: 5, unidad: 'L/ha' },
+  'Insecticida': { min: 0.1, max: 3, unidad: 'L/ha' },
+  'Fungicida': { min: 0.2, max: 4, unidad: 'L/ha' },
+  'Acaricida': { min: 0.1, max: 2, unidad: 'L/ha' },
+  'Nematicida': { min: 1, max: 10, unidad: 'L/ha' },
+  'Molusquicida': { min: 0.5, max: 5, unidad: 'kg/ha' },
+  'Fertilizante': { min: 1, max: 50, unidad: 'kg/ha' },
+  'Regulador': { min: 0.1, max: 2, unidad: 'L/ha' },
+  'Otro': { min: 0.1, max: 10, unidad: 'L/ha' }
+};
+
+// Límites de volumen de agua por ha
+const LIMITES_AGUA = { min: 100, max: 1000 };
 
 const Recomendaciones = () => {
   const { t } = useTranslation();
@@ -44,6 +60,7 @@ const Recomendaciones = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [generatingTratamiento, setGeneratingTratamiento] = useState(null);
+  const [showCalculadora, setShowCalculadora] = useState(false);
   
   // Filter states
   const [showFilters, setShowFilters] = useState(false);
@@ -69,8 +86,135 @@ const Recomendaciones = () => {
     fecha_programada: '',
     prioridad: 'Media',
     observaciones: '',
-    motivo: ''
+    motivo: '',
+    // Calculadora fields
+    volumen_agua: 200,
+    superficie_tratada: ''
   });
+  
+  // Alerts for calculadora
+  const [alerts, setAlerts] = useState({});
+  
+  // Get selected parcela info
+  const selectedParcela = useMemo(() => {
+    return parcelas.find(p => p._id === formData.parcela_id);
+  }, [parcelas, formData.parcela_id]);
+  
+  // Get selected producto info
+  const selectedProducto = useMemo(() => {
+    return fitosanitarios.find(f => f._id === formData.producto_id);
+  }, [fitosanitarios, formData.producto_id]);
+  
+  // Calculate results
+  const resultados = useMemo(() => {
+    const superficie = parseFloat(formData.superficie_tratada) || (selectedParcela?.superficie_total || 0);
+    const dosis = parseFloat(formData.dosis) || 0;
+    const volAgua = parseFloat(formData.volumen_agua) || 0;
+    
+    // Cantidad total de producto necesario
+    const cantidadProducto = dosis * superficie;
+    
+    // Volumen total de agua
+    const volumenTotalAgua = volAgua * superficie;
+    
+    // Cantidad de producto por litro de agua (para mezcla)
+    const productoPorLitro = volumenTotalAgua > 0 ? (cantidadProducto / volumenTotalAgua) * 1000 : 0;
+    
+    // Concentración en la mezcla final
+    const concentracionMezcla = volumenTotalAgua > 0 ? (cantidadProducto / volumenTotalAgua) * 100 : 0;
+    
+    return {
+      superficieHa: superficie,
+      cantidadProducto: cantidadProducto,
+      volumenTotalAgua: volumenTotalAgua,
+      productoPorLitro: productoPorLitro,
+      concentracionMezcla: concentracionMezcla,
+      dosisReal: dosis
+    };
+  }, [formData, selectedParcela]);
+  
+  // Check alerts
+  useEffect(() => {
+    const newAlerts = {};
+    const tipoProducto = formData.subtipo || 'Otro';
+    const limites = LIMITES_DOSIS[tipoProducto] || LIMITES_DOSIS['Otro'];
+    const dosis = parseFloat(formData.dosis) || 0;
+    const volAgua = parseFloat(formData.volumen_agua) || 0;
+    
+    // Check dosis limits
+    if (dosis > 0 && limites) {
+      if (dosis < limites.min) {
+        newAlerts.dosis = { 
+          type: 'warning', 
+          message: `Dosis baja. Mínimo recomendado: ${limites.min} ${limites.unidad}`,
+          blocking: false
+        };
+      } else if (dosis > limites.max) {
+        newAlerts.dosis = { 
+          type: 'danger', 
+          message: `¡Dosis excesiva! Máximo permitido: ${limites.max} ${limites.unidad}`,
+          blocking: true
+        };
+      }
+    }
+    
+    // Check producto-specific limits
+    if (selectedProducto && dosis > 0) {
+      if (selectedProducto.dosis_max && dosis > selectedProducto.dosis_max) {
+        newAlerts.dosis_producto = {
+          type: 'danger',
+          message: `¡Dosis superior al máximo del producto! Máximo: ${selectedProducto.dosis_max} ${selectedProducto.unidad_dosis || 'L/ha'}`,
+          blocking: true
+        };
+      }
+      if (selectedProducto.dosis_min && dosis < selectedProducto.dosis_min) {
+        newAlerts.dosis_producto = {
+          type: 'warning',
+          message: `Dosis inferior al mínimo del producto. Mínimo: ${selectedProducto.dosis_min} ${selectedProducto.unidad_dosis || 'L/ha'}`,
+          blocking: false
+        };
+      }
+    }
+    
+    // Check water volume
+    if (volAgua > 0) {
+      if (volAgua < LIMITES_AGUA.min) {
+        newAlerts.agua = { 
+          type: 'warning', 
+          message: `Volumen de agua bajo. Mínimo: ${LIMITES_AGUA.min} L/ha`,
+          blocking: false
+        };
+      } else if (volAgua > LIMITES_AGUA.max) {
+        newAlerts.agua = { 
+          type: 'danger', 
+          message: `Volumen excesivo. Máximo: ${LIMITES_AGUA.max} L/ha`,
+          blocking: true
+        };
+      }
+    }
+    
+    // Check concentration
+    if (resultados.concentracionMezcla > 5) {
+      newAlerts.concentracion = { 
+        type: 'danger', 
+        message: '¡Concentración muy alta! Riesgo de fitotoxicidad',
+        blocking: true
+      };
+    } else if (resultados.concentracionMezcla > 2) {
+      newAlerts.concentracion = { 
+        type: 'warning', 
+        message: 'Concentración elevada. Verificar tolerancia del cultivo',
+        blocking: false
+      };
+    }
+    
+    setAlerts(newAlerts);
+  }, [formData, resultados, selectedProducto]);
+  
+  // Check if has blocking alerts
+  const hasBlockingAlerts = useMemo(() => {
+    return Object.values(alerts).some(alert => alert.blocking);
+  }, [alerts]);
   
   // Fetch data on mount
   useEffect(() => {
@@ -177,6 +321,16 @@ const Recomendaciones = () => {
       return;
     }
     
+    // Include calculated values
+    const submitData = {
+      ...formData,
+      cantidad_total_producto: resultados.cantidadProducto,
+      volumen_total_agua: resultados.volumenTotalAgua,
+      superficie_tratada: resultados.superficieHa,
+      tiene_alertas: Object.keys(alerts).length > 0,
+      alertas_bloqueantes: hasBlockingAlerts
+    };
+    
     try {
       const url = editingId 
         ? `${API_URL}/api/recomendaciones/${editingId}`
@@ -188,7 +342,7 @@ const Recomendaciones = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(submitData)
       });
       
       const data = await response.json();
@@ -222,7 +376,9 @@ const Recomendaciones = () => {
       fecha_programada: rec.fecha_programada || '',
       prioridad: rec.prioridad || 'Media',
       observaciones: rec.observaciones || '',
-      motivo: rec.motivo || ''
+      motivo: rec.motivo || '',
+      volumen_agua: rec.volumen_agua || 200,
+      superficie_tratada: rec.superficie_tratada || ''
     });
     setEditingId(rec._id);
     setShowForm(true);
@@ -252,7 +408,16 @@ const Recomendaciones = () => {
   };
   
   const handleGenerarTratamiento = async (rec) => {
-    if (!window.confirm(`¿Generar tratamiento a partir de esta recomendación?\n\nProducto: ${rec.producto_nombre}\nParcela: ${rec.parcela_codigo}`)) {
+    // Check alerts on this recommendation
+    const recAlerts = checkRecommendationAlerts(rec);
+    const hasBlocking = Object.values(recAlerts).some(a => a.blocking);
+    
+    if (hasBlocking) {
+      setError('No se puede generar el tratamiento. Hay alertas de seguridad pendientes. Por favor, revise y corrija la recomendación.');
+      return;
+    }
+    
+    if (!window.confirm(`¿Generar tratamiento a partir de esta recomendación?\n\nProducto: ${rec.producto_nombre}\nParcela: ${rec.parcela_codigo}\nDosis: ${rec.dosis} ${rec.unidad_dosis}`)) {
       return;
     }
     
@@ -281,6 +446,22 @@ const Recomendaciones = () => {
     }
   };
   
+  // Check alerts for a recommendation
+  const checkRecommendationAlerts = (rec) => {
+    const recAlerts = {};
+    const tipoProducto = rec.subtipo || 'Otro';
+    const limites = LIMITES_DOSIS[tipoProducto] || LIMITES_DOSIS['Otro'];
+    const dosis = parseFloat(rec.dosis) || 0;
+    
+    if (dosis > 0 && limites) {
+      if (dosis > limites.max) {
+        recAlerts.dosis = { type: 'danger', blocking: true };
+      }
+    }
+    
+    return recAlerts;
+  };
+  
   const resetForm = () => {
     setFormData({
       parcela_id: '',
@@ -295,17 +476,25 @@ const Recomendaciones = () => {
       fecha_programada: '',
       prioridad: 'Media',
       observaciones: '',
-      motivo: ''
+      motivo: '',
+      volumen_agua: 200,
+      superficie_tratada: ''
     });
     setEditingId(null);
     setShowForm(false);
+    setShowCalculadora(false);
+    setAlerts({});
   };
   
   const handleParcelaChange = (parcelaId) => {
-    setFormData(prev => ({ ...prev, parcela_id: parcelaId }));
+    const parcela = parcelas.find(p => p._id === parcelaId);
+    setFormData(prev => ({ 
+      ...prev, 
+      parcela_id: parcelaId,
+      superficie_tratada: parcela?.superficie_total || ''
+    }));
     
     // Auto-fill contrato if parcela has one
-    const parcela = parcelas.find(p => p._id === parcelaId);
     if (parcela?.contrato_id) {
       setFormData(prev => ({ ...prev, contrato_id: parcela.contrato_id }));
     }
@@ -316,14 +505,14 @@ const Recomendaciones = () => {
     setFormData(prev => ({
       ...prev,
       producto_id: productoId,
-      producto_nombre: producto?.nombre_comercial || ''
+      producto_nombre: producto?.nombre_comercial || '',
+      dosis: producto?.dosis_max ? producto.dosis_max.toString() : prev.dosis,
+      unidad_dosis: producto?.unidad_dosis || prev.unidad_dosis,
+      subtipo: producto?.tipo || prev.subtipo
     }));
   };
   
   const canManage = user?.role && ['Admin', 'Manager', 'Technician'].includes(user.role);
-  
-  // Filter recomendaciones
-  const filteredRecomendaciones = recomendaciones;
   
   if (loading) {
     return (
@@ -475,172 +664,328 @@ const Recomendaciones = () => {
             <h3 style={{ fontWeight: '600' }}>
               {editingId ? 'Editar Recomendación' : 'Nueva Recomendación'}
             </h3>
-            <button className="btn btn-sm btn-secondary" onClick={resetForm}>
-              <X size={16} />
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button 
+                className={`btn btn-sm ${showCalculadora ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setShowCalculadora(!showCalculadora)}
+              >
+                <Calculator size={16} /> Calculadora
+              </button>
+              <button className="btn btn-sm btn-secondary" onClick={resetForm}>
+                <X size={16} />
+              </button>
+            </div>
           </div>
           
+          {/* Alerts Panel */}
+          {Object.keys(alerts).length > 0 && (
+            <div style={{ 
+              marginBottom: '1rem', 
+              padding: '1rem', 
+              borderRadius: '0.5rem',
+              backgroundColor: hasBlockingAlerts ? '#fef2f2' : '#fffbeb',
+              border: `1px solid ${hasBlockingAlerts ? '#fecaca' : '#fde68a'}`
+            }}>
+              <h4 style={{ 
+                fontWeight: '600', 
+                marginBottom: '0.5rem', 
+                color: hasBlockingAlerts ? '#dc2626' : '#d97706',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <AlertTriangle size={18} />
+                {hasBlockingAlerts ? 'Alertas de Seguridad (bloquean generación de tratamiento)' : 'Advertencias'}
+              </h4>
+              <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
+                {Object.entries(alerts).map(([key, alert]) => (
+                  <li key={key} style={{ 
+                    color: alert.type === 'danger' ? '#dc2626' : '#d97706',
+                    marginBottom: '0.25rem'
+                  }}>
+                    {alert.message}
+                    {alert.blocking && <strong> (BLOQUEANTE)</strong>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
-              {/* Parcela */}
-              <div>
-                <label className="form-label">Parcela *</label>
-                <select
-                  className="form-select"
-                  value={formData.parcela_id}
-                  onChange={(e) => handleParcelaChange(e.target.value)}
-                  required
-                >
-                  <option value="">Seleccionar parcela</option>
-                  {parcelas.map(p => (
-                    <option key={p._id} value={p._id}>
-                      {p.codigo_plantacion} - {p.cultivo} ({p.proveedor})
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              {/* Campaña */}
-              <div>
-                <label className="form-label">Campaña</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.campana}
-                  onChange={(e) => setFormData(prev => ({ ...prev, campana: e.target.value }))}
-                  placeholder="2024"
-                />
-              </div>
-              
-              {/* Tipo */}
-              <div>
-                <label className="form-label">Tipo de Recomendación</label>
-                <select
-                  className="form-select"
-                  value={formData.tipo}
-                  onChange={(e) => setFormData(prev => ({ ...prev, tipo: e.target.value }))}
-                >
-                  {tipos.map(t => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
-              </div>
-              
-              {/* Subtipo (solo para tratamientos) */}
-              {formData.tipo === 'Tratamiento Fitosanitario' && (
+            <div style={{ display: 'grid', gridTemplateColumns: showCalculadora ? '1fr 1fr' : '1fr', gap: '1.5rem' }}>
+              {/* Main Form Fields */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                {/* Parcela */}
                 <div>
-                  <label className="form-label">Subtipo</label>
+                  <label className="form-label">Parcela *</label>
                   <select
                     className="form-select"
-                    value={formData.subtipo}
-                    onChange={(e) => setFormData(prev => ({ ...prev, subtipo: e.target.value }))}
+                    value={formData.parcela_id}
+                    onChange={(e) => handleParcelaChange(e.target.value)}
+                    required
                   >
-                    <option value="">Seleccionar subtipo</option>
-                    {subtipos.map(s => (
-                      <option key={s} value={s}>{s}</option>
+                    <option value="">Seleccionar parcela</option>
+                    {parcelas.map(p => (
+                      <option key={p._id} value={p._id}>
+                        {p.codigo_plantacion} - {p.cultivo} ({p.superficie_total} ha)
+                      </option>
                     ))}
                   </select>
                 </div>
-              )}
-              
-              {/* Producto */}
-              {(formData.tipo === 'Tratamiento Fitosanitario' || formData.tipo === 'Fertilización') && (
+                
+                {/* Campaña */}
                 <div>
-                  <label className="form-label">Producto</label>
-                  <select
-                    className="form-select"
-                    value={formData.producto_id}
-                    onChange={(e) => handleProductoChange(e.target.value)}
-                  >
-                    <option value="">Seleccionar producto</option>
-                    {fitosanitarios
-                      .filter(f => !formData.subtipo || f.tipo === formData.subtipo)
-                      .map(f => (
-                        <option key={f._id} value={f._id}>
-                          {f.nombre_comercial} ({f.materia_activa})
-                        </option>
-                      ))}
-                  </select>
-                </div>
-              )}
-              
-              {/* Dosis */}
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <div style={{ flex: 1 }}>
-                  <label className="form-label">Dosis</label>
+                  <label className="form-label">Campaña</label>
                   <input
-                    type="number"
-                    step="0.01"
+                    type="text"
                     className="form-input"
-                    value={formData.dosis}
-                    onChange={(e) => setFormData(prev => ({ ...prev, dosis: e.target.value }))}
-                    placeholder="0.00"
+                    value={formData.campana}
+                    onChange={(e) => setFormData(prev => ({ ...prev, campana: e.target.value }))}
+                    placeholder="2024"
                   />
                 </div>
-                <div style={{ width: '100px' }}>
-                  <label className="form-label">Unidad</label>
+                
+                {/* Tipo */}
+                <div>
+                  <label className="form-label">Tipo de Recomendación</label>
                   <select
                     className="form-select"
-                    value={formData.unidad_dosis}
-                    onChange={(e) => setFormData(prev => ({ ...prev, unidad_dosis: e.target.value }))}
+                    value={formData.tipo}
+                    onChange={(e) => setFormData(prev => ({ ...prev, tipo: e.target.value }))}
                   >
-                    <option value="L/ha">L/ha</option>
-                    <option value="Kg/ha">Kg/ha</option>
-                    <option value="g/ha">g/ha</option>
-                    <option value="ml/ha">ml/ha</option>
-                    <option value="cc/hl">cc/hl</option>
+                    {tipos.map(t => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
                   </select>
+                </div>
+                
+                {/* Subtipo */}
+                {formData.tipo === 'Tratamiento Fitosanitario' && (
+                  <div>
+                    <label className="form-label">Subtipo</label>
+                    <select
+                      className="form-select"
+                      value={formData.subtipo}
+                      onChange={(e) => setFormData(prev => ({ ...prev, subtipo: e.target.value }))}
+                    >
+                      <option value="">Seleccionar subtipo</option>
+                      {subtipos.map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                
+                {/* Producto */}
+                {(formData.tipo === 'Tratamiento Fitosanitario' || formData.tipo === 'Fertilización') && (
+                  <div>
+                    <label className="form-label">Producto</label>
+                    <select
+                      className="form-select"
+                      value={formData.producto_id}
+                      onChange={(e) => handleProductoChange(e.target.value)}
+                    >
+                      <option value="">Seleccionar producto</option>
+                      {fitosanitarios
+                        .filter(f => !formData.subtipo || f.tipo === formData.subtipo)
+                        .map(f => (
+                          <option key={f._id} value={f._id}>
+                            {f.nombre_comercial} {f.dosis_max ? `(máx ${f.dosis_max} ${f.unidad_dosis || 'L/ha'})` : ''}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                )}
+                
+                {/* Dosis */}
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <div style={{ flex: 1 }}>
+                    <label className="form-label">Dosis por ha</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      className="form-input"
+                      value={formData.dosis}
+                      onChange={(e) => setFormData(prev => ({ ...prev, dosis: e.target.value }))}
+                      placeholder="0.00"
+                      style={{ borderColor: alerts.dosis?.type === 'danger' ? '#dc2626' : undefined }}
+                    />
+                  </div>
+                  <div style={{ width: '100px' }}>
+                    <label className="form-label">Unidad</label>
+                    <select
+                      className="form-select"
+                      value={formData.unidad_dosis}
+                      onChange={(e) => setFormData(prev => ({ ...prev, unidad_dosis: e.target.value }))}
+                    >
+                      <option value="L/ha">L/ha</option>
+                      <option value="Kg/ha">Kg/ha</option>
+                      <option value="g/ha">g/ha</option>
+                      <option value="ml/ha">ml/ha</option>
+                      <option value="cc/hl">cc/hl</option>
+                    </select>
+                  </div>
+                </div>
+                
+                {/* Fecha programada */}
+                <div>
+                  <label className="form-label">Fecha Programada</label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    value={formData.fecha_programada}
+                    onChange={(e) => setFormData(prev => ({ ...prev, fecha_programada: e.target.value }))}
+                  />
+                </div>
+                
+                {/* Prioridad */}
+                <div>
+                  <label className="form-label">Prioridad</label>
+                  <select
+                    className="form-select"
+                    value={formData.prioridad}
+                    onChange={(e) => setFormData(prev => ({ ...prev, prioridad: e.target.value }))}
+                  >
+                    <option value="Alta">Alta</option>
+                    <option value="Media">Media</option>
+                    <option value="Baja">Baja</option>
+                  </select>
+                </div>
+                
+                {/* Motivo */}
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label className="form-label">Motivo / Justificación</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={formData.motivo}
+                    onChange={(e) => setFormData(prev => ({ ...prev, motivo: e.target.value }))}
+                    placeholder="Ej: Presencia de pulgón, deficiencia de nitrógeno..."
+                  />
+                </div>
+                
+                {/* Observaciones */}
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label className="form-label">Observaciones</label>
+                  <textarea
+                    className="form-textarea"
+                    value={formData.observaciones}
+                    onChange={(e) => setFormData(prev => ({ ...prev, observaciones: e.target.value }))}
+                    rows={2}
+                    placeholder="Notas adicionales..."
+                  />
                 </div>
               </div>
               
-              {/* Fecha programada */}
-              <div>
-                <label className="form-label">Fecha Programada</label>
-                <input
-                  type="date"
-                  className="form-input"
-                  value={formData.fecha_programada}
-                  onChange={(e) => setFormData(prev => ({ ...prev, fecha_programada: e.target.value }))}
-                />
-              </div>
-              
-              {/* Prioridad */}
-              <div>
-                <label className="form-label">Prioridad</label>
-                <select
-                  className="form-select"
-                  value={formData.prioridad}
-                  onChange={(e) => setFormData(prev => ({ ...prev, prioridad: e.target.value }))}
-                >
-                  <option value="Alta">Alta</option>
-                  <option value="Media">Media</option>
-                  <option value="Baja">Baja</option>
-                </select>
-              </div>
-              
-              {/* Motivo */}
-              <div style={{ gridColumn: 'span 2' }}>
-                <label className="form-label">Motivo / Justificación</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.motivo}
-                  onChange={(e) => setFormData(prev => ({ ...prev, motivo: e.target.value }))}
-                  placeholder="Ej: Presencia de pulgón, deficiencia de nitrógeno..."
-                />
-              </div>
-              
-              {/* Observaciones */}
-              <div style={{ gridColumn: 'span 2' }}>
-                <label className="form-label">Observaciones</label>
-                <textarea
-                  className="form-textarea"
-                  value={formData.observaciones}
-                  onChange={(e) => setFormData(prev => ({ ...prev, observaciones: e.target.value }))}
-                  rows={3}
-                  placeholder="Notas adicionales..."
-                />
-              </div>
+              {/* Calculadora Panel */}
+              {showCalculadora && (
+                <div style={{ 
+                  padding: '1rem', 
+                  backgroundColor: 'hsl(var(--muted))', 
+                  borderRadius: '0.5rem',
+                  border: '1px solid hsl(var(--border))'
+                }}>
+                  <h4 style={{ fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Calculator size={18} /> Calculadora de Dosis
+                  </h4>
+                  
+                  {/* Inputs */}
+                  <div style={{ display: 'grid', gap: '1rem', marginBottom: '1rem' }}>
+                    <div>
+                      <label className="form-label">Superficie a tratar (ha)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        className="form-input"
+                        value={formData.superficie_tratada}
+                        onChange={(e) => setFormData(prev => ({ ...prev, superficie_tratada: e.target.value }))}
+                        placeholder={selectedParcela?.superficie_total || 'Superficie'}
+                      />
+                      {selectedParcela && (
+                        <small className="text-muted">
+                          Parcela: {selectedParcela.superficie_total} ha
+                        </small>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <label className="form-label">Volumen de agua (L/ha)</label>
+                      <input
+                        type="number"
+                        className="form-input"
+                        value={formData.volumen_agua}
+                        onChange={(e) => setFormData(prev => ({ ...prev, volumen_agua: e.target.value }))}
+                        style={{ borderColor: alerts.agua?.type === 'danger' ? '#dc2626' : undefined }}
+                      />
+                      <small className="text-muted">
+                        Recomendado: {LIMITES_AGUA.min}-{LIMITES_AGUA.max} L/ha
+                      </small>
+                    </div>
+                  </div>
+                  
+                  {/* Results */}
+                  <div style={{ 
+                    padding: '1rem', 
+                    backgroundColor: 'white', 
+                    borderRadius: '0.5rem',
+                    border: '1px solid hsl(var(--border))'
+                  }}>
+                    <h5 style={{ fontWeight: '600', marginBottom: '0.75rem', color: 'hsl(var(--primary))' }}>
+                      Resultados del Cálculo
+                    </h5>
+                    
+                    <div style={{ display: 'grid', gap: '0.5rem', fontSize: '0.875rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', backgroundColor: 'hsl(var(--muted))', borderRadius: '0.25rem' }}>
+                        <span>Superficie:</span>
+                        <strong>{resultados.superficieHa.toFixed(2)} ha</strong>
+                      </div>
+                      
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', backgroundColor: '#dcfce7', borderRadius: '0.25rem' }}>
+                        <span>Producto Total:</span>
+                        <strong style={{ color: '#166534' }}>{resultados.cantidadProducto.toFixed(2)} {formData.unidad_dosis.replace('/ha', '')}</strong>
+                      </div>
+                      
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', backgroundColor: '#dbeafe', borderRadius: '0.25rem' }}>
+                        <span>Agua Total:</span>
+                        <strong style={{ color: '#1e40af' }}>{resultados.volumenTotalAgua.toFixed(0)} L</strong>
+                      </div>
+                      
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', backgroundColor: 'hsl(var(--muted))', borderRadius: '0.25rem' }}>
+                        <span>Producto/L agua:</span>
+                        <strong>{resultados.productoPorLitro.toFixed(2)} ml</strong>
+                      </div>
+                      
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', borderRadius: '0.25rem',
+                        backgroundColor: resultados.concentracionMezcla > 2 ? '#fef3c7' : 'hsl(var(--muted))'
+                      }}>
+                        <span>Concentración:</span>
+                        <strong>{resultados.concentracionMezcla.toFixed(3)}%</strong>
+                      </div>
+                    </div>
+                    
+                    {/* Product Info */}
+                    {selectedProducto && (
+                      <div style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: '#f0fdf4', borderRadius: '0.25rem', fontSize: '0.8125rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                          <Info size={14} />
+                          <strong>Info del Producto</strong>
+                        </div>
+                        <div>{selectedProducto.nombre_comercial}</div>
+                        {selectedProducto.dosis_min && selectedProducto.dosis_max && (
+                          <div className="text-muted">
+                            Dosis: {selectedProducto.dosis_min} - {selectedProducto.dosis_max} {selectedProducto.unidad_dosis || 'L/ha'}
+                          </div>
+                        )}
+                        {selectedProducto.plazo_seguridad && (
+                          <div className="text-muted">
+                            Plazo seguridad: {selectedProducto.plazo_seguridad} días
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
             
             <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
@@ -658,10 +1003,10 @@ const Recomendaciones = () => {
       {/* List */}
       <div className="card">
         <h3 style={{ fontWeight: '600', marginBottom: '1rem' }}>
-          Recomendaciones ({filteredRecomendaciones.length})
+          Recomendaciones ({recomendaciones.length})
         </h3>
         
-        {filteredRecomendaciones.length === 0 ? (
+        {recomendaciones.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '3rem', color: 'hsl(var(--muted-foreground))' }}>
             <FileText size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
             <p>No hay recomendaciones registradas</p>
@@ -682,13 +1027,15 @@ const Recomendaciones = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredRecomendaciones.map((rec) => {
+                {recomendaciones.map((rec) => {
                   const prioridadStyle = PRIORIDAD_COLORS[rec.prioridad] || PRIORIDAD_COLORS['Media'];
                   const estadoConfig = ESTADO_COLORS[rec.estado] || ESTADO_COLORS['Pendiente'];
                   const EstadoIcon = estadoConfig.icon;
+                  const recAlerts = checkRecommendationAlerts(rec);
+                  const hasBlockingRec = Object.values(recAlerts).some(a => a.blocking);
                   
                   return (
-                    <tr key={rec._id}>
+                    <tr key={rec._id} style={{ backgroundColor: hasBlockingRec ? '#fef2f2' : undefined }}>
                       <td>
                         <div style={{ fontWeight: '500' }}>{rec.parcela_codigo}</div>
                         <div className="text-sm text-muted">{rec.parcela_cultivo}</div>
@@ -701,7 +1048,12 @@ const Recomendaciones = () => {
                         {rec.producto_nombre || '-'}
                       </td>
                       <td>
-                        {rec.dosis ? `${rec.dosis} ${rec.unidad_dosis}` : '-'}
+                        {rec.dosis ? (
+                          <span style={{ color: hasBlockingRec ? '#dc2626' : undefined }}>
+                            {rec.dosis} {rec.unidad_dosis}
+                            {hasBlockingRec && <AlertTriangle size={12} style={{ marginLeft: '4px', color: '#dc2626' }} />}
+                          </span>
+                        ) : '-'}
                       </td>
                       <td>
                         {rec.fecha_programada ? new Date(rec.fecha_programada).toLocaleDateString('es-ES') : '-'}
@@ -740,11 +1092,18 @@ const Recomendaciones = () => {
                           {/* Generate Treatment Button */}
                           {!rec.tratamiento_generado && canManage && (
                             <button
-                              className="btn btn-sm btn-primary"
+                              className="btn btn-sm"
                               onClick={() => handleGenerarTratamiento(rec)}
-                              disabled={generatingTratamiento === rec._id}
-                              title="Generar Tratamiento"
-                              style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                              disabled={generatingTratamiento === rec._id || hasBlockingRec}
+                              title={hasBlockingRec ? 'No se puede generar: hay alertas de seguridad' : 'Generar Tratamiento'}
+                              style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: '0.25rem',
+                                backgroundColor: hasBlockingRec ? '#f3f4f6' : '#dcfce7',
+                                color: hasBlockingRec ? '#9ca3af' : '#166534',
+                                cursor: hasBlockingRec ? 'not-allowed' : 'pointer'
+                              }}
                             >
                               {generatingTratamiento === rec._id ? (
                                 <Loader2 size={14} className="animate-spin" />
