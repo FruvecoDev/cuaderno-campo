@@ -1,0 +1,78 @@
+{
+  "summary": "Testing refactored Fincas module: Map drawing removed from finca form (now SIGPAC reference only). Parcelas are displayed as cards in expanded finca view with individual 'Mapa' button for each. Modal for managing parcelas (assign/unassign) working correctly.",
+  "mode": "generate",
+  "baseline_commit": "43a185aea79318e35e33f07a154339185a7446ab",
+  "head_commit": "edbce5483b4cad605848f1772b03ae0f378b81c9",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "regression_results": {
+    "total_specs": 28,
+    "passed": 28,
+    "failed": 0,
+    "skipped": 0
+  },
+  "specs_created": [
+    "/app/tests/e2e/fincas-refactored.spec.ts"
+  ],
+  "specs_updated": [],
+  "quarantined_tests": [],
+  "test_report_links": [
+    "/app/tests/e2e/fincas-refactored.spec.ts",
+    "/app/backend/tests/test_fincas.py",
+    "/app/test_reports/pytest/pytest_fincas_results.xml"
+  ],
+  "action_items": [],
+  "updated_files": [
+    "/app/tests/e2e/fincas-refactored.spec.ts",
+    "/app/backend/tests/test_fincas.py"
+  ],
+  "success_rate": {
+    "backend": "100% (27/27 tests)",
+    "frontend": "100% (28/28 tests)"
+  },
+  "seed_data_creation": "No new seed data created",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Fincas module has been refactored:\n\n1. FORM CHANGES:\n   - Map drawing functionality removed from finca form\n   - SIGPAC section now marked as 'Datos SIGPAC (Referencia)' - data only, no map\n   - 'btn-dibujar-parcela' testid no longer exists\n   - 'Buscar en SIGPAC' button auto-fills SIGPAC fields only\n\n2. PARCELAS IN FINCAS:\n   - Fincas can have multiple parcelas associated via parcelas_ids array\n   - Expanded finca view shows parcelas as cards (data-testid='parcela-card-{id}')\n   - Each parcela card has 'Mapa' button (data-testid='btn-ver-mapa-{id}') to show map modal\n   - data-testid='btn-quitar-parcela-{id}' removes parcela from finca\n\n3. GESTIONAR PARCELAS MODAL:\n   - Opened via data-testid='btn-parcelas-{id}' button on finca card\n   - Modal testid='modal-asignar-parcelas'\n   - Shows 'Parcelas Asignadas' and 'Parcelas Disponibles' sections\n   - 'Asignar' and 'Quitar' buttons for managing associations\n\n4. MAP MODAL FOR PARCELA:\n   - Modal testid='modal-mapa-parcela'\n   - Shows parcela geometry from recintos array\n   - Contains MapaSigpac component with layer selector\n\n5. BACKEND TESTS:\n   - Added TestFincasParcelasAssociation class with tests for:\n     - GET /api/fincas/parcelas-disponibles endpoint\n     - parcelas_info in fincas list response\n     - parcelas_detalle in single finca response",
+  "tested_features": {
+    "fincas_crud": [
+      "Create finca with SIGPAC reference data",
+      "Edit finca",
+      "Delete finca",
+      "List fincas with filters",
+      "Expand finca to see details",
+      "Statistics display"
+    ],
+    "sigpac_integration": [
+      "SIGPAC section marked as reference only",
+      "Province dropdown loads correctly",
+      "SIGPAC search auto-fills fields",
+      "External SIGPAC API integration (may timeout)"
+    ],
+    "parcelas_in_fincas": [
+      "Parcelas count badge on finca card",
+      "Parcelas displayed as cards in expanded view",
+      "Mapa button opens map modal for each parcela",
+      "Parcela details shown in card (cultivo, variedad, superficie)"
+    ],
+    "gestionar_parcelas_modal": [
+      "Modal opens from finca card button",
+      "Shows assigned parcelas section",
+      "Shows available parcelas section",
+      "Assign button for available parcelas",
+      "Remove button for assigned parcelas"
+    ],
+    "map_in_parcela_cards": [
+      "Map modal opens with parcela geometry",
+      "Layer selector in map modal",
+      "Parcela info in map modal header"
+    ]
+  }
+}
