@@ -2081,8 +2081,25 @@ const Recomendaciones = () => {
       
       {/* Modal: Selector de Plantillas */}
       {showPlantillaSelector && (
-        <div className="modal-overlay" onClick={() => setShowPlantillaSelector(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '600px' }}>
+        <div className="modal-overlay" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }} onClick={() => setShowPlantillaSelector(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ 
+            maxWidth: '600px',
+            width: '90%',
+            backgroundColor: 'white',
+            borderRadius: '0.5rem',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+          }}>
             <div className="modal-header">
               <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Layers size={20} /> Seleccionar Plantilla
