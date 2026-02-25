@@ -836,6 +836,23 @@ const Recomendaciones = () => {
             <div style={{ display: 'grid', gridTemplateColumns: showCalculadora ? '1fr 1fr' : '1fr', gap: '1.5rem' }}>
               {/* Main Form Fields */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                {/* Contrato */}
+                <div>
+                  <label className="form-label">Contrato</label>
+                  <select
+                    className="form-select"
+                    value={formData.contrato_id}
+                    onChange={(e) => handleContratoChange(e.target.value)}
+                  >
+                    <option value="">Seleccionar contrato (opcional)</option>
+                    {contratos.map(c => (
+                      <option key={c._id} value={c._id}>
+                        {c.codigo || c._id.slice(-6)} - {c.cultivo} ({c.proveedor})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
                 {/* Parcela */}
                 <div>
                   <label className="form-label">Parcela *</label>
@@ -843,15 +860,44 @@ const Recomendaciones = () => {
                     className="form-select"
                     value={formData.parcela_id}
                     onChange={(e) => handleParcelaChange(e.target.value)}
-                    required
+                    required={!editingId && recomendacionesPendientes.length === 0}
                   >
                     <option value="">Seleccionar parcela</option>
-                    {parcelas.map(p => (
+                    {parcelasFiltradas.map(p => (
                       <option key={p._id} value={p._id}>
                         {p.codigo_plantacion} - {p.cultivo} ({p.superficie_total} ha)
                       </option>
                     ))}
                   </select>
+                  {formData.contrato_id && parcelasFiltradas.length === 0 && (
+                    <small className="text-muted">No hay parcelas para este contrato</small>
+                  )}
+                </div>
+                
+                {/* Cultivo (auto-filled) */}
+                <div>
+                  <label className="form-label">Cultivo</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={formData.cultivo}
+                    onChange={(e) => setFormData(prev => ({ ...prev, cultivo: e.target.value }))}
+                    placeholder="Auto-rellenado desde parcela"
+                    style={{ backgroundColor: formData.cultivo ? '#f0fdf4' : undefined }}
+                  />
+                </div>
+                
+                {/* Variedad (auto-filled) */}
+                <div>
+                  <label className="form-label">Variedad</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={formData.variedad}
+                    onChange={(e) => setFormData(prev => ({ ...prev, variedad: e.target.value }))}
+                    placeholder="Auto-rellenado desde parcela"
+                    style={{ backgroundColor: formData.variedad ? '#f0fdf4' : undefined }}
+                  />
                 </div>
                 
                 {/* Campaña */}
