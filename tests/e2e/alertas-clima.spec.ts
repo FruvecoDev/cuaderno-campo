@@ -185,8 +185,14 @@ test.describe('Alertas Climáticas - Climate Alerts', () => {
     await page.waitForLoadState('domcontentloaded');
     await expect(page.locator('[data-testid="alertas-clima-page"]')).toBeVisible();
     
+    // Remove webpack dev server overlay if present
+    await page.evaluate(() => {
+      const overlay = document.getElementById('webpack-dev-server-client-overlay');
+      if (overlay) overlay.remove();
+    });
+    
     // Open configuration
-    await page.locator('button').filter({ hasText: /Configurar/ }).first().click();
+    await page.locator('button').filter({ hasText: /Configurar/ }).first().click({ force: true });
     await expect(page.getByText('Configuración de Reglas de Alerta')).toBeVisible();
     
     // Check for expected rules in the table
