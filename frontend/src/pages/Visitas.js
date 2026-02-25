@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Info, Filter, Settings, X, Eye } from 'lucide-react';
+import { Plus, Edit2, Trash2, Info, Filter, Settings, X, Eye, WifiOff } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
+import syncService from '../services/syncService';
+import offlineDB from '../services/offlineDB';
 import '../App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
