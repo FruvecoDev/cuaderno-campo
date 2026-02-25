@@ -591,6 +591,11 @@ const Parcelas = () => {
   
   const handleEdit = (parcela) => {
     setEditingId(parcela._id);
+    
+    // Extraer datos SIGPAC del primer recinto si existe
+    const primerRecinto = parcela.recintos && parcela.recintos.length > 0 ? parcela.recintos[0] : null;
+    const sigpacData = primerRecinto?.sigpac || {};
+    
     setFormData({
       contrato_id: parcela.contrato_id || '',
       proveedor: parcela.proveedor || '',
@@ -600,8 +605,22 @@ const Parcelas = () => {
       superficie_total: parcela.superficie_total || '',
       codigo_plantacion: parcela.codigo_plantacion || '',
       num_plantas: parcela.num_plantas || '',
-      finca: parcela.finca || ''
+      finca: parcela.finca || '',
+      sigpac: {
+        provincia: sigpacData.provincia || primerRecinto?.provincia_sigpac || '',
+        municipio: sigpacData.municipio || primerRecinto?.municipio_sigpac || '',
+        cod_agregado: sigpacData.cod_agregado || primerRecinto?.agregado_sigpac || '',
+        zona: sigpacData.zona || primerRecinto?.zona_sigpac || '',
+        poligono: sigpacData.poligono || primerRecinto?.poligono_sigpac || '',
+        parcela: sigpacData.parcela || primerRecinto?.parcela_sigpac || '',
+        recinto: sigpacData.recinto || primerRecinto?.recinto_sigpac || '',
+        cod_uso: sigpacData.cod_uso || primerRecinto?.uso_sigpac || ''
+      }
     });
+    
+    // Limpiar estados de SIGPAC
+    setSigpacResult(null);
+    setSigpacError(null);
     
     if (parcela.recintos && parcela.recintos.length > 0 && parcela.recintos[0].geometria) {
       setPolygon(parcela.recintos[0].geometria);
