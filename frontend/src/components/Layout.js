@@ -10,6 +10,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import LanguageSelector from './LanguageSelector';
 import OfflineIndicator from './OfflineIndicator';
+import NotificacionesDropdown from './NotificacionesDropdown';
 import '../App.css';
 import defaultLogo from '../assets/logo.png';
 
