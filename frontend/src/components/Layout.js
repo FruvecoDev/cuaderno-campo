@@ -24,11 +24,30 @@ const Layout = ({ children }) => {
   // Estado para sidebar móvil
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
+  // Estado para el logo personalizado
+  const [dashboardLogo, setDashboardLogo] = useState(null);
+  
   // Estado para secciones colapsadas
   const [collapsedSections, setCollapsedSections] = useState(() => {
     const saved = localStorage.getItem('menu_collapsed_sections');
     return saved ? JSON.parse(saved) : {};
   });
+  
+  // Cargar logo personalizado
+  useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/config/logos`);
+        const data = await response.json();
+        if (data.success && data.dashboard_logo) {
+          setDashboardLogo(`${API_URL}${data.dashboard_logo}`);
+        }
+      } catch (err) {
+        console.error('Error fetching logo:', err);
+      }
+    };
+    fetchLogo();
+  }, []);
   
   // Cerrar menú móvil al cambiar de ruta
   useEffect(() => {
