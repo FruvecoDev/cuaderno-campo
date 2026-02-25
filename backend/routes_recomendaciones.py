@@ -52,6 +52,8 @@ class RecomendacionBase(BaseModel):
     parcela_id: str
     contrato_id: Optional[str] = None
     campana: str
+    cultivo: Optional[str] = None
+    variedad: Optional[str] = None
     tipo: str  # Tratamiento Fitosanitario, Fertilización, Riego, Poda, Otro
     subtipo: Optional[str] = None  # For Tratamiento: Herbicida, Insecticida, etc.
     producto_id: Optional[str] = None  # Reference to fitosanitarios
@@ -62,6 +64,13 @@ class RecomendacionBase(BaseModel):
     prioridad: str = "Media"
     observaciones: Optional[str] = None
     motivo: Optional[str] = None  # Reason for the recommendation
+    # Calculator fields
+    volumen_agua: Optional[float] = None
+    superficie_tratada: Optional[float] = None
+    cantidad_total_producto: Optional[float] = None
+    volumen_total_agua: Optional[float] = None
+    tiene_alertas: Optional[bool] = False
+    alertas_bloqueantes: Optional[bool] = False
 
 
 class RecomendacionCreate(RecomendacionBase):
@@ -71,6 +80,8 @@ class RecomendacionCreate(RecomendacionBase):
 class RecomendacionUpdate(BaseModel):
     tipo: Optional[str] = None
     subtipo: Optional[str] = None
+    cultivo: Optional[str] = None
+    variedad: Optional[str] = None
     producto_id: Optional[str] = None
     producto_nombre: Optional[str] = None
     dosis: Optional[float] = None
