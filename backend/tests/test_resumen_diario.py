@@ -25,7 +25,7 @@ def auth_token(api_client):
         "password": "admin123"
     })
     if response.status_code == 200:
-        return response.json().get("token")
+        return response.json().get("access_token")
     pytest.skip("Authentication failed - skipping tests")
 
 
