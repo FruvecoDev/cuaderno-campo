@@ -672,3 +672,23 @@ Módulos actualizados para seguir patrón consistente:
 - **Test Report**: `/app/test_reports/iteration_15.json` - 100% (18/18 tests)
 - **Estado**: ✅ COMPLETADO Y TESTEADO
 
+## Sistema de Comisiones (25/02/2026) - COMPLETADO
+- **Alcance**: Comisiones para agentes de compra y venta
+- **Tipos de cálculo**:
+  - Porcentaje sobre importe: `cantidad × precio × (valor / 100)`
+  - Euro por kilo: `cantidad × valor`
+- **Backend nuevos endpoints**:
+  - `GET /api/comisiones/resumen` - Resumen agrupado por agente
+  - `GET /api/comisiones/agentes` - Lista agentes con comisiones
+  - `GET /api/comisiones/campanas` - Lista campañas con comisiones
+  - `GET /api/comisiones/liquidacion/pdf` - PDF de liquidación por agente
+- **Frontend modificaciones**:
+  - **Contratos.js**: Campos separados `comision_compra_tipo/valor` y `comision_venta_tipo/valor`
+  - **LiquidacionComisiones.js**: Nueva página con KPIs, filtros y detalle por agente
+  - **Layout.js**: Enlace en menú "Administración"
+- **Archivos nuevos**:
+  - `/app/backend/routes_comisiones.py`
+  - `/app/frontend/src/pages/LiquidacionComisiones.js`
+- **Test Report**: `/app/test_reports/iteration_16.json` - 100% (30/30 tests)
+- **Estado**: ✅ COMPLETADO Y TESTEADO
+
