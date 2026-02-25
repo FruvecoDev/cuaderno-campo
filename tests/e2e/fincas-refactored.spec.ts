@@ -621,7 +621,7 @@ test.describe('Fincas Refactored - Gestionar Parcelas Modal', () => {
   });
 });
 
-test.describe('Fincas Refactored - Map in Parcela Cards', () => {
+test.describe('Fincas Refactored - Map in Parcela Rows', () => {
   test.beforeEach(async ({ page }) => {
     await dismissToasts(page);
     await login(page);
@@ -635,10 +635,11 @@ test.describe('Fincas Refactored - Map in Parcela Cards', () => {
 
   test('should display map with layer selector in modal', async ({ page }) => {
     // Find and open a parcela map
+    await page.waitForSelector('[data-testid^="btn-expand-"]', { timeout: 10000 }).catch(() => {});
     const expandBtns = page.locator('[data-testid^="btn-expand-"]');
     const count = await expandBtns.count();
     
-    for (let i = 0; i < Math.min(count, 3); i++) {
+    for (let i = 0; i < Math.min(count, 5); i++) {
       const btn = expandBtns.nth(i);
       await btn.click({ force: true });
       
@@ -665,10 +666,11 @@ test.describe('Fincas Refactored - Map in Parcela Cards', () => {
   });
 
   test('should show parcela info in map modal header', async ({ page }) => {
+    await page.waitForSelector('[data-testid^="btn-expand-"]', { timeout: 10000 }).catch(() => {});
     const expandBtns = page.locator('[data-testid^="btn-expand-"]');
     const count = await expandBtns.count();
     
-    for (let i = 0; i < Math.min(count, 3); i++) {
+    for (let i = 0; i < Math.min(count, 5); i++) {
       const btn = expandBtns.nth(i);
       await btn.click({ force: true });
       
@@ -696,7 +698,7 @@ test.describe('Fincas Refactored - Map in Parcela Cards', () => {
   });
 });
 
-test.describe('Fincas Refactored - Unassign Parcela from Expanded Card', () => {
+test.describe('Fincas Refactored - Unassign Parcela from Expanded Row', () => {
   test.beforeEach(async ({ page }) => {
     await dismissToasts(page);
     await login(page);
@@ -708,19 +710,22 @@ test.describe('Fincas Refactored - Unassign Parcela from Expanded Card', () => {
     await expect(page.getByTestId('fincas-page')).toBeVisible({ timeout: 10000 });
   });
 
-  test('should have unlink button on parcela card in expanded view', async ({ page }) => {
+  test('should have unlink button on parcela row in expanded view', async ({ page }) => {
+    await page.waitForSelector('[data-testid^="btn-expand-"]', { timeout: 10000 }).catch(() => {});
     const expandBtns = page.locator('[data-testid^="btn-expand-"]');
     const count = await expandBtns.count();
     
-    for (let i = 0; i < Math.min(count, 3); i++) {
+    for (let i = 0; i < Math.min(count, 5); i++) {
       const btn = expandBtns.nth(i);
       await btn.click({ force: true });
       
+      // NEW: Look for Quitar button in parcela row
       const quitarBtn = page.locator('[data-testid^="btn-quitar-parcela-"]').first();
       
       if (await quitarBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-        // Verify unlink button exists
+        // Verify unlink button exists and has text "Quitar"
         await expect(quitarBtn).toBeVisible();
+        await expect(quitarBtn).toContainText('Quitar');
         break;
       }
       
