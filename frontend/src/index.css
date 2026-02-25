@@ -73,3 +73,49 @@ code {
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--foreground));
 }
+
+
+/* Leaflet Draw Controls - Fix overlapping icons */
+.leaflet-draw.leaflet-control {
+  margin-top: 10px !important;
+}
+
+.leaflet-draw-toolbar {
+  margin-top: 0 !important;
+}
+
+.leaflet-draw-toolbar a {
+  width: 30px !important;
+  height: 30px !important;
+  line-height: 30px !important;
+  margin-bottom: 2px !important;
+}
+
+.leaflet-draw-actions {
+  left: 32px !important;
+}
+
+/* Ensure edit toolbar doesn't overlap with draw toolbar */
+.leaflet-draw-section {
+  clear: both;
+  margin-bottom: 5px;
+}
+
+/* Fix vertical spacing between control groups */
+.leaflet-control-container .leaflet-top.leaflet-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.leaflet-control-container .leaflet-top.leaflet-right .leaflet-control {
+  margin-right: 10px !important;
+  margin-top: 0 !important;
+  clear: both;
+}
+
+/* First control at top */
+.leaflet-control-container .leaflet-top.leaflet-right .leaflet-control:first-child {
+  margin-top: 10px !important;
+}
