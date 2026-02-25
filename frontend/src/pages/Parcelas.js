@@ -282,7 +282,122 @@ const Parcelas = () => {
   useEffect(() => {
     fetchParcelas();
     fetchContratos();
+    fetchProvincias();
   }, []);
+  
+  // Fetch provincias SIGPAC
+  const fetchProvincias = async () => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/sigpac/provincias`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setProvincias(data.provincias);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching provincias:', err);
+    }
+  };
+  
+  // Búsqueda en SIGPAC
+  const buscarEnSigpac = async () => {
+    const { provincia, municipio, poligono, parcela, cod_agregado, zona, recinto } = formData.sigpac;
+    
+    if (!provincia || !municipio || !poligono || !parcela) {
+      setSigpacError('Debe completar al menos: Provincia, Municipio, Polígono y Parcela');
+      return;
+    }
+    
+    setSigpacLoading(true);
+    setSigpacError(null);
+    setSigpacResult(null);
+    
+    try {
+      const params = new URLSearchParams({
+        provincia,
+        municipio,
+        poligono,
+        parcela,
+        agregado: cod_agregado || '0',
+        zona: zona || '0'
+      });
+      
+      if (recinto) {
+        params.append('recinto', recinto);
+      }
+      
+      const res = await fetch(`${BACKEND_URL}/api/sigpac/consulta?${params}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        setSigpacResult(data);
+        
+        // Auto-rellenar campos
+        if (data.sigpac) {
+          setFormData(prev => ({
+            ...prev,
+            sigpac: {
+              ...prev.sigpac,
+              ...data.sigpac
+            },
+            superficie_total: data.superficie_ha || prev.superficie_total
+          }));
+        }
+        
+        // Si hay geometría, convertirla a polígono para el mapa
+        if (data.geometria_wkt) {
+          const coords = parseWKTToPolygon(data.geometria_wkt);
+          if (coords && coords.length > 0) {
+            setPolygon(coords);
+          }
+        }
+      } else {
+        setSigpacError(data.message || data.error || 'Error al consultar SIGPAC');
+      }
+    } catch (err) {
+      console.error('Error consultando SIGPAC:', err);
+      setSigpacError('Error de conexión al servicio SIGPAC');
+    }
+    
+    setSigpacLoading(false);
+  };
+  
+  // Parsear WKT a formato de polígono Leaflet
+  const parseWKTToPolygon = (wkt) => {
+    if (!wkt || !wkt.includes('POLYGON')) return null;
+    try {
+      const coordsMatch = wkt.match(/POLYGON\(\(([^)]+)\)\)/);
+      if (!coordsMatch) return null;
+      const coordsString = coordsMatch[1];
+      const coords = coordsString.split(',').map(pair => {
+        const [lon, lat] = pair.trim().split(' ').map(Number);
+        return { lat, lng: lon };
+      });
+      return coords;
+    } catch (e) {
+      console.error('Error parsing WKT:', e);
+      return null;
+    }
+  };
+  
+  // Actualizar campo SIGPAC
+  const updateSigpac = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      sigpac: {
+        ...prev.sigpac,
+        [field]: value
+      }
+    }));
+    if (sigpacResult) {
+      setSigpacResult(null);
+    }
+  };
   
   // Extraer opciones únicas cuando cambian las parcelas
   useEffect(() => {
