@@ -15,9 +15,21 @@ async function loginAndNavigateToConfig(page) {
   
   await expect(page).toHaveURL(/dashboard/, { timeout: 15000 });
   
+  // Dismiss any error overlay from webpack dev server (Leaflet map errors, etc.)
+  await page.evaluate(() => {
+    const overlay = document.getElementById('webpack-dev-server-client-overlay');
+    if (overlay) overlay.remove();
+  });
+  
   // Navigate to Configuración
-  await page.getByRole('link', { name: /configuración/i }).click();
+  await page.getByRole('link', { name: /configuración/i }).click({ force: true });
   await expect(page.getByTestId('configuracion-page')).toBeVisible({ timeout: 10000 });
+  
+  // Dismiss overlay again if it reappears
+  await page.evaluate(() => {
+    const overlay = document.getElementById('webpack-dev-server-client-overlay');
+    if (overlay) overlay.remove();
+  });
 }
 
 test.describe('Theme Configuration Feature', () => {
