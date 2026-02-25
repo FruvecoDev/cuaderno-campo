@@ -1031,7 +1031,7 @@ const Recomendaciones = () => {
       )}
       
       {/* Filters */}
-      {showFilters && (
+      {activeTab === 'recomendaciones' && showFilters && (
         <div className="card mb-6">
           <h3 style={{ fontWeight: '600', marginBottom: '1rem' }}>Filtros</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
