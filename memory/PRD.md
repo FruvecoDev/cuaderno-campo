@@ -1042,3 +1042,42 @@ Módulos actualizados para seguir patrón consistente:
 - Total: 27/27 tests passed
 
 ### Estado: ✅ COMPLETADO Y TESTEADO
+
+
+## Integración SIGPAC (25/02/2026) - COMPLETADO
+- **Alcance**: Localización automática de parcelas mediante códigos SIGPAC (Sistema de Información Geográfica de Parcelas Agrícolas de España)
+- **Backend**: `/app/backend/routes_fincas.py` - Endpoints de integración SIGPAC
+- **API Externa**: SIGPAC HubCloud (https://sigpac-hubcloud.es)
+
+### Funcionalidad:
+1. **Búsqueda de Parcelas**: Introduciendo los códigos SIGPAC (Provincia, Municipio, Polígono, Parcela, etc.) se obtienen automáticamente:
+   - Superficie en hectáreas
+   - Código y descripción de uso del terreno (TA=Tierra arable, OV=Olivar, VI=Viñedo, etc.)
+   - Pendiente media del terreno
+   - Coeficiente de regadío
+   - Geometría WKT para representación en mapas
+   - Coordenadas del centroide
+
+2. **Auto-relleno de Campos**: Los datos obtenidos de SIGPAC se rellenan automáticamente en el formulario:
+   - Campo "Hectáreas" se actualiza con la superficie real
+   - Campos SIGPAC se completan con los datos devueltos
+
+3. **UI Mejorada**:
+   - Botón "Buscar en SIGPAC" con indicador de carga
+   - Selector de provincia con las 52 provincias españolas
+   - Mensaje de éxito (verde) mostrando superficie, uso y pendiente
+   - Mensaje de error (rojo) si la parcela no existe
+   - Enlace externo al "Visor SIGPAC" oficial
+
+### Nuevos API Endpoints:
+- `GET /api/sigpac/consulta` - Consulta parcela en SIGPAC (params: provincia, municipio, poligono, parcela, agregado, zona, recinto)
+- `GET /api/sigpac/provincias` - Lista de 52 provincias españolas con códigos
+- `GET /api/sigpac/municipios/{provincia}` - Municipios de una provincia
+- `GET /api/sigpac/usos` - Diccionario de códigos de uso (TA, OV, VI, etc.)
+
+### Test Report: `/app/test_reports/iteration_29.json`
+- Backend: 100% (27/27 tests)
+- Frontend: 94% (16/17 tests)
+- Issue menor: Modal "Resumen Diario" puede interferir ocasionalmente (LOW priority)
+
+### Estado: ✅ COMPLETADO Y TESTEADO
