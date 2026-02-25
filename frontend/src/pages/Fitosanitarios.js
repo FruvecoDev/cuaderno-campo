@@ -750,6 +750,185 @@ const Fitosanitarios = () => {
         </div>
       )}
 
+      {/* MAPA Sync Panel */}
+      {showMapaPanel && (
+        <div className="card mb-6" style={{ border: '2px solid #1e40af', background: 'linear-gradient(to right, #eff6ff, #f0f9ff)' }}>
+          <div className="flex justify-between items-center mb-4">
+            <h3 style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#1e40af' }}>
+              <Shield size={20} /> Registro Oficial de Productos Fitosanitarios (MAPA)
+            </h3>
+            <button className="btn btn-sm btn-secondary" onClick={() => setShowMapaPanel(false)}>
+              <X size={16} />
+            </button>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem' }}>
+            {/* Info Column */}
+            <div>
+              <h4 style={{ fontWeight: '600', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Info size={16} /> Información
+              </h4>
+              <p style={{ fontSize: '0.875rem', marginBottom: '1rem', color: 'hsl(var(--muted-foreground))' }}>
+                El MAPA (Ministerio de Agricultura, Pesca y Alimentación) mantiene el registro oficial de productos fitosanitarios autorizados en España.
+              </p>
+              <button
+                className="btn btn-primary"
+                onClick={openMapaRegistry}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', justifyContent: 'center' }}
+              >
+                <ExternalLink size={16} /> Acceder al Registro Oficial
+              </button>
+              {mapaInfo?.ultima_sincronizacion && (
+                <p style={{ fontSize: '0.75rem', marginTop: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                  Última importación: {new Date(mapaInfo.ultima_sincronizacion).toLocaleDateString('es-ES')}
+                </p>
+              )}
+            </div>
+            
+            {/* Import from MAPA Column */}
+            <div>
+              <h4 style={{ fontWeight: '600', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Upload size={16} /> Importar desde Excel MAPA
+              </h4>
+              <p style={{ fontSize: '0.8125rem', marginBottom: '1rem', color: 'hsl(var(--muted-foreground))' }}>
+                Descarga el listado de productos del MAPA en Excel y súbelo aquí para actualizar tu base de datos.
+              </p>
+              <div
+                style={{
+                  border: '2px dashed #93c5fd',
+                  borderRadius: '8px',
+                  padding: '1.5rem',
+                  textAlign: 'center',
+                  backgroundColor: 'white',
+                  cursor: 'pointer'
+                }}
+                onClick={() => mapaFileInputRef.current?.click()}
+              >
+                {importLoading ? (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                    <Loader2 size={20} className="animate-spin" />
+                    <span>Procesando...</span>
+                  </div>
+                ) : (
+                  <>
+                    <FileSpreadsheet size={32} style={{ color: '#3b82f6', marginBottom: '0.5rem' }} />
+                    <p style={{ fontWeight: '500', fontSize: '0.875rem' }}>Subir Excel del MAPA</p>
+                    <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>.xlsx o .xls</p>
+                  </>
+                )}
+                <input
+                  ref={mapaFileInputRef}
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={handleMapaFileSelect}
+                  style={{ display: 'none' }}
+                  data-testid="mapa-file-input"
+                />
+              </div>
+            </div>
+            
+            {/* Verification Column */}
+            <div>
+              <h4 style={{ fontWeight: '600', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <CheckCircle size={16} /> Verificación
+              </h4>
+              <p style={{ fontSize: '0.8125rem', marginBottom: '1rem', color: 'hsl(var(--muted-foreground))' }}>
+                Comprueba si los productos siguen vigentes en el registro oficial.
+              </p>
+              <button
+                className="btn btn-secondary"
+                onClick={handleBulkVerify}
+                disabled={bulkVerifying}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', justifyContent: 'center', marginBottom: '0.75rem' }}
+              >
+                {bulkVerifying ? (
+                  <><Loader2 size={16} className="animate-spin" /> Verificando...</>
+                ) : (
+                  <><RefreshCw size={16} /> Verificar Todos</>
+                )}
+              </button>
+              
+              {bulkVerifyResult && (
+                <div style={{ 
+                  padding: '0.75rem', 
+                  borderRadius: '6px', 
+                  backgroundColor: 'white',
+                  fontSize: '0.8125rem',
+                  border: '1px solid hsl(var(--border))'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                    <span style={{ color: '#166534' }}>Encontrados:</span>
+                    <strong style={{ color: '#166534' }}>{bulkVerifyResult.encontrados}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                    <span style={{ color: '#b45309' }}>No encontrados:</span>
+                    <strong style={{ color: '#b45309' }}>{bulkVerifyResult.no_encontrados}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: '#6b7280' }}>Errores:</span>
+                    <strong style={{ color: '#6b7280' }}>{bulkVerifyResult.errores}</strong>
+                  </div>
+                </div>
+              )}
+              
+              <p style={{ fontSize: '0.7rem', marginTop: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                También puedes verificar productos individuales usando el botón <Shield size={12} style={{ display: 'inline' }} /> en la tabla.
+              </p>
+            </div>
+          </div>
+          
+          {/* Verification Modal */}
+          {verificationResult && (
+            <div style={{ 
+              marginTop: '1.5rem', 
+              padding: '1rem', 
+              borderRadius: '8px',
+              backgroundColor: 'white',
+              border: '1px solid hsl(var(--border))'
+            }}>
+              <div className="flex justify-between items-center mb-3">
+                <h4 style={{ fontWeight: '600' }}>Resultado de Verificación</h4>
+                <button className="btn btn-sm btn-secondary" onClick={() => setVerificationResult(null)}>
+                  <X size={14} />
+                </button>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.875rem' }}>
+                <div>
+                  <strong>Producto:</strong> {verificationResult.nombre_comercial}
+                </div>
+                <div>
+                  <strong>Nº Registro:</strong> {verificationResult.numero_registro}
+                </div>
+                <div>
+                  <strong>Estado:</strong>{' '}
+                  <span style={{ 
+                    padding: '0.25rem 0.5rem', 
+                    borderRadius: '4px',
+                    backgroundColor: verificationResult.verificacion_automatica === 'ENCONTRADO' ? '#dcfce7' : '#fef3c7',
+                    color: verificationResult.verificacion_automatica === 'ENCONTRADO' ? '#166534' : '#92400e'
+                  }}>
+                    {verificationResult.verificacion_automatica === 'ENCONTRADO' ? 'Encontrado en MAPA' : 'No encontrado'}
+                  </span>
+                </div>
+                <div>
+                  <strong>Estado probable:</strong> {verificationResult.estado_probable || 'Desconocido'}
+                </div>
+              </div>
+              <p style={{ marginTop: '0.75rem', fontSize: '0.8125rem', color: 'hsl(var(--muted-foreground))' }}>
+                {verificationResult.mensaje}
+              </p>
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => window.open(verificationResult.verificacion_url, '_blank')}
+                style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              >
+                <ExternalLink size={14} /> Verificar en MAPA
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* KPIs by type */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
         {TIPOS_PRODUCTO.map(tipo => (
