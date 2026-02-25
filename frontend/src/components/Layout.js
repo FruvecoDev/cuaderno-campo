@@ -133,6 +133,7 @@ const Layout = ({ children }) => {
     { section: t('nav.configuration'), items: [
       { path: '/usuarios', label: t('nav.users'), icon: Users, requireAdmin: true },
       { path: '/traducciones', label: t('nav.translations'), icon: Globe },
+      { path: '/configuracion', label: 'Configuración App', icon: Settings, requireAdmin: true },
     ]}
   ];
   
