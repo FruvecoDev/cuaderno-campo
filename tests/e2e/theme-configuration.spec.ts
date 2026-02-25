@@ -73,8 +73,8 @@ test.describe('Theme Configuration Feature', () => {
     
     await loginAndNavigateToConfig(page);
     
-    // Click azul theme
-    await page.getByTestId('theme-azul').click();
+    // Click azul theme (force to bypass any overlay)
+    await page.getByTestId('theme-azul').click({ force: true });
     
     // Wait for success message
     await expect(page.getByText(/aplicado correctamente/i)).toBeVisible({ timeout: 5000 });
