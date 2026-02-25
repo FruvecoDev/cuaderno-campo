@@ -159,10 +159,16 @@ const AlertasClima = () => {
         body: JSON.stringify(dataToSend)
       });
       
-      const data = await response.json();
-      
       if (!response.ok) {
-        throw new Error(data.detail || 'Error al registrar datos');
+        let errorMsg = 'Error al registrar datos';
+        try {
+          const errorData = await response.json();
+          errorMsg = errorData.detail || errorMsg;
+        } catch (e) {}
+        throw new Error(errorMsg);
+      }
+      
+      const data = await response.json();
       }
       
       setSuccess(data.message);
