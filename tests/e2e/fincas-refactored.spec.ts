@@ -328,7 +328,56 @@ test.describe('Fincas Refactored - CRUD Operations', () => {
   });
 });
 
-test.describe('Fincas Refactored - Parcelas as Cards', () => {
+test.describe('Fincas Refactored - Province Grouping (New)', () => {
+  test.beforeEach(async ({ page }) => {
+    await dismissToasts(page);
+    await login(page);
+    await ensureModalClosed(page);
+    await page.getByTestId('nav-fincas').click({ force: true });
+    await page.waitForLoadState('domcontentloaded');
+    await waitForDataLoad(page);
+    await ensureModalClosed(page);
+    await expect(page.getByTestId('fincas-page')).toBeVisible({ timeout: 10000 });
+  });
+
+  test('should display fincas grouped by province', async ({ page }) => {
+    // Wait for fincas to load
+    await page.waitForSelector('[data-testid^="finca-card-"]', { timeout: 10000 }).catch(() => {});
+    
+    // Check for province groups
+    const provinceGroups = page.locator('[data-testid^="provincia-group-"]');
+    const groupCount = await provinceGroups.count();
+    
+    // Should have at least one province group
+    if (groupCount > 0) {
+      // Verify first group has province header visible
+      const firstGroup = provinceGroups.first();
+      await expect(firstGroup).toBeVisible();
+      
+      // Verify province badge shows count (e.g., "2 fincas")
+      const badge = firstGroup.locator('span').filter({ hasText: /\\d+ finca/ });
+      await expect(badge.first()).toBeVisible({ timeout: 3000 });
+    }
+  });
+
+  test('should show province header with count', async ({ page }) => {
+    await page.waitForSelector('[data-testid^="provincia-group-"]', { timeout: 10000 }).catch(() => {});
+    
+    // Find any visible province group
+    const provinceGroup = page.locator('[data-testid^="provincia-group-"]').first();
+    
+    if (await provinceGroup.isVisible({ timeout: 3000 }).catch(() => false)) {
+      // Province name should be visible as h4
+      const provinceName = provinceGroup.locator('h4');
+      await expect(provinceName).toBeVisible();
+      
+      // Count badge should be visible
+      await expect(provinceGroup.locator('text=/\\d+ finca/')).toBeVisible({ timeout: 2000 });
+    }
+  });
+});
+
+test.describe('Fincas Refactored - Parcelas as List/Table', () => {
   test.beforeEach(async ({ page }) => {
     await dismissToasts(page);
     await login(page);
@@ -342,6 +391,7 @@ test.describe('Fincas Refactored - Parcelas as Cards', () => {
 
   test('should show parcelas count badge on finca card', async ({ page }) => {
     // Look for a finca card that has parcelas badge
+    await page.waitForSelector('[data-testid^="finca-card-"]', { timeout: 10000 }).catch(() => {});
     const fincaCard = page.locator('[data-testid^="finca-card-"]').first();
     
     if (await fincaCard.isVisible({ timeout: 3000 }).catch(() => false)) {
@@ -355,12 +405,13 @@ test.describe('Fincas Refactored - Parcelas as Cards', () => {
     }
   });
 
-  test('should display parcelas as cards in expanded finca', async ({ page }) => {
+  test('should display parcelas as rows/table in expanded finca', async ({ page }) => {
     // Find a finca card with parcelas
+    await page.waitForSelector('[data-testid^="btn-expand-"]', { timeout: 10000 }).catch(() => {});
     const expandBtns = page.locator('[data-testid^="btn-expand-"]');
     const count = await expandBtns.count();
     
-    for (let i = 0; i < Math.min(count, 3); i++) {
+    for (let i = 0; i < Math.min(count, 5); i++) {
       const btn = expandBtns.nth(i);
       await btn.click({ force: true });
       
@@ -368,14 +419,27 @@ test.describe('Fincas Refactored - Parcelas as Cards', () => {
       const parcelasSection = page.locator('h5').filter({ hasText: 'Parcelas de esta Finca' });
       
       if (await parcelasSection.isVisible({ timeout: 2000 }).catch(() => false)) {
-        // Verify parcela cards are displayed
-        const parcelaCard = page.locator('[data-testid^="parcela-card-"]').first();
-        await expect(parcelaCard).toBeVisible({ timeout: 3000 });
+        // Verify parcela rows are displayed (NEW: parcela-row instead of parcela-card)
+        const parcelaRow = page.locator('[data-testid^="parcela-row-"]').first();
+        await expect(parcelaRow).toBeVisible({ timeout: 3000 });
         
-        // Verify parcela card has "Mapa" button
+        // Verify table header columns exist
+        await expect(page.locator('text=Código')).toBeVisible();
+        await expect(page.locator('text=Cultivo')).toBeVisible();
+        await expect(page.locator('text=Variedad')).toBeVisible();
+        await expect(page.locator('text=Superficie')).toBeVisible();
+        await expect(page.locator('text=Plantas')).toBeVisible();
+        await expect(page.locator('text=Acciones')).toBeVisible();
+        
+        // Verify parcela row has "Mapa" button
         const mapaBtn = page.locator('[data-testid^="btn-ver-mapa-"]').first();
         await expect(mapaBtn).toBeVisible();
         await expect(mapaBtn).toContainText('Mapa');
+        
+        // Verify parcela row has "Quitar" button
+        const quitarBtn = page.locator('[data-testid^="btn-quitar-parcela-"]').first();
+        await expect(quitarBtn).toBeVisible();
+        await expect(quitarBtn).toContainText('Quitar');
         
         break;
       }
@@ -385,12 +449,13 @@ test.describe('Fincas Refactored - Parcelas as Cards', () => {
     }
   });
 
-  test('should open map modal when clicking Mapa button on parcela card', async ({ page }) => {
+  test('should open map modal when clicking Mapa button on parcela row', async ({ page }) => {
     // Find and expand a finca with parcelas
+    await page.waitForSelector('[data-testid^="btn-expand-"]', { timeout: 10000 }).catch(() => {});
     const expandBtns = page.locator('[data-testid^="btn-expand-"]');
     const count = await expandBtns.count();
     
-    for (let i = 0; i < Math.min(count, 3); i++) {
+    for (let i = 0; i < Math.min(count, 5); i++) {
       const btn = expandBtns.nth(i);
       await btn.click({ force: true });
       
@@ -421,21 +486,26 @@ test.describe('Fincas Refactored - Parcelas as Cards', () => {
     }
   });
 
-  test('should show parcela details in card', async ({ page }) => {
+  test('should show parcela details in table row', async ({ page }) => {
+    await page.waitForSelector('[data-testid^="btn-expand-"]', { timeout: 10000 }).catch(() => {});
     const expandBtns = page.locator('[data-testid^="btn-expand-"]');
     const count = await expandBtns.count();
     
-    for (let i = 0; i < Math.min(count, 3); i++) {
+    for (let i = 0; i < Math.min(count, 5); i++) {
       const btn = expandBtns.nth(i);
       await btn.click({ force: true });
       
-      const parcelaCard = page.locator('[data-testid^="parcela-card-"]').first();
+      // NEW: Look for parcela-row instead of parcela-card
+      const parcelaRow = page.locator('[data-testid^="parcela-row-"]').first();
       
-      if (await parcelaCard.isVisible({ timeout: 2000 }).catch(() => false)) {
-        // Verify card shows essential info
-        await expect(parcelaCard.locator('text=/Cultivo:/')).toBeVisible();
-        await expect(parcelaCard.locator('text=/Variedad:/')).toBeVisible();
-        await expect(parcelaCard.locator('text=/Superficie:/')).toBeVisible();
+      if (await parcelaRow.isVisible({ timeout: 2000 }).catch(() => false)) {
+        // Verify row shows essential info (cultivo, variedad, superficie as columns)
+        // Each row has columns so we check the row contains the data
+        const rowText = await parcelaRow.textContent();
+        expect(rowText).toBeTruthy();
+        
+        // Verify row has "ha" for superficie column
+        await expect(parcelaRow.locator('text=/\\d+.*ha/')).toBeVisible();
         
         break;
       }
@@ -497,12 +567,12 @@ test.describe('Fincas Refactored - Gestionar Parcelas Modal', () => {
       await parcelasBtn.click({ force: true });
       await expect(page.getByTestId('modal-asignar-parcelas')).toBeVisible({ timeout: 5000 });
       
-      // Check for assigned parcelas section
-      const assignedSection = page.locator('text=Parcelas Asignadas');
+      // Check for assigned parcelas section - use h4 heading specifically to avoid strict mode violation
+      const assignedSection = page.locator('h4').filter({ hasText: 'Parcelas Asignadas' });
       await expect(assignedSection).toBeVisible();
       
-      // Count should be shown
-      await expect(page.locator('text=/Parcelas Asignadas \\(\\d+\\)/')).toBeVisible();
+      // Count should be shown in h4 heading
+      await expect(page.locator('h4').filter({ hasText: /Parcelas Asignadas \(\d+\)/ })).toBeVisible();
     }
   });
 
