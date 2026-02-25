@@ -903,3 +903,33 @@ Módulos actualizados para seguir patrón consistente:
   - Modal "Selector de Plantillas" - Usar plantilla en formulario
 - **Test Report**: `/app/test_reports/iteration_24.json` - 100% (37/37 tests: 20 backend + 17 frontend)
 - **Estado**: ✅ COMPLETADO Y TESTEADO
+
+## Alertas Climáticas (25/02/2026) - COMPLETADO
+- **Alcance**: Sistema de alertas automáticas basadas en condiciones meteorológicas
+- **Integración**: OpenWeatherMap API (gratuita) + entrada manual de datos como fallback
+- **Reglas de alerta implementadas**:
+  - 🍄 **Alta Humedad** (>80%) → Sugerir "Control preventivo de hongos" (Prioridad Alta)
+  - 🔥 **Altas Temperaturas** (>30°C) → Sugerir "Tratamiento araña roja" (Prioridad Alta)
+  - 🐌 **Lluvias Recientes** (>5mm) → Sugerir "Control de caracoles y babosas" (Prioridad Media)
+  - 💧 **Sequía/Baja Humedad** (<40%) → Sugerir "Riego de mantenimiento" (Prioridad Media)
+  - 🐛 **Temperaturas Templadas** (15-25°C) → Sugerir "Control de pulgón" (Prioridad Media)
+  - ❄️ **Riesgo de Heladas** (<5°C) → Alerta sin plantilla (Prioridad Alta)
+- **Funcionalidades**:
+  - Panel de estadísticas (pendientes, revisadas, resueltas, última semana)
+  - Filtros por estado (Pendientes/Revisadas/Resueltas/Todas)
+  - Formulario de datos manuales (temperatura, humedad, lluvia, viento)
+  - Botón "Verificar Parcelas" para evaluación masiva
+  - Panel de configuración de reglas (activar/desactivar)
+  - Cards de alertas expandibles con detalles del clima
+  - Botones de acción: Marcar Revisada, Marcar Resuelta, Crear Recomendación, Ignorar
+- **Backend**: `/app/backend/routes_alertas_clima.py`
+  - GET `/api/alertas-clima` - Lista con filtros
+  - POST `/api/alertas-clima/clima/manual` - Datos manuales
+  - POST `/api/alertas-clima/verificar-todas` - Verificación masiva
+  - PUT `/api/alertas-clima/{id}` - Actualizar estado
+  - GET/PUT `/api/alertas-clima/reglas/config` - Configuración de reglas
+  - GET `/api/alertas-clima/stats` - Estadísticas
+- **Frontend**: `/app/frontend/src/pages/AlertasClima.js`
+  - Menú lateral: Actividades → Alertas Climáticas
+- **Test Report**: `/app/test_reports/iteration_25.json` - 100% (49/49 tests: 31 backend + 18 frontend)
+- **Estado**: ✅ COMPLETADO Y TESTEADO
