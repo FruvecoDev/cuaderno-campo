@@ -1,0 +1,72 @@
+{
+  "summary": "Alertas Climáticas (Climate Alerts) module fully tested. All backend API endpoints and frontend features working correctly. Backend: 31/31 tests passed. Frontend: 18/18 E2E tests passed. The module allows automatic alert generation based on weather conditions (high humidity, high temperature, rain, mild temperature) with manual data entry fallback and rule configuration.",
+  "mode": "generate",
+  "baseline_commit": "d0d70e8867f185aaf190b1c31204de9bb2c6eb23",
+  "head_commit": "52b7e14062daa36f1700489c15ffa370fe3ab221",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "regression_results": {
+    "total_specs": 2,
+    "passed": 49,
+    "failed": 0,
+    "skipped": 0
+  },
+  "specs_created": [
+    "/app/tests/e2e/alertas-clima.spec.ts",
+    "/app/backend/tests/test_alertas_clima.py"
+  ],
+  "specs_updated": [],
+  "quarantined_tests": [],
+  "test_report_links": [
+    "/app/backend/tests/test_alertas_clima.py",
+    "/app/test_reports/pytest/test_alertas_clima.xml",
+    "/app/tests/e2e/alertas-clima.spec.ts"
+  ],
+  "action_items": [],
+  "updated_files": [
+    "/app/tests/e2e/alertas-clima.spec.ts",
+    "/app/backend/tests/test_alertas_clima.py"
+  ],
+  "success_rate": {
+    "backend": "100% (31/31)",
+    "frontend": "100% (18/18)"
+  },
+  "seed_data_creation": "No seed data created. Tests used existing alerts in the database (21+ alerts already present).",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Alertas Climáticas module fully tested. Backend endpoints: GET /api/alertas-clima (list with filters), POST /api/alertas-clima/clima/manual (register manual data), POST /api/alertas-clima/verificar-todas (verify all parcelas), PUT /api/alertas-clima/{id} (update status), GET /api/alertas-clima/reglas/config (get rules), PUT /api/alertas-clima/reglas/{id} (toggle rules), GET /api/alertas-clima/stats (statistics). Frontend tested: navigation, stats display, filter buttons (pendiente/revisada/resuelta/todas), manual data form submission, config panel with rules, alert card expansion, status updates.",
+  "tested_features": {
+    "backend_endpoints": [
+      "GET /api/alertas-clima - List alerts with filters (estado, prioridad)",
+      "POST /api/alertas-clima/clima/manual - Register manual climate data",
+      "POST /api/alertas-clima/verificar-todas - Verify climate in all parcelas",
+      "PUT /api/alertas-clima/{id} - Update alert status",
+      "GET /api/alertas-clima/reglas/config - Get rules configuration",
+      "PUT /api/alertas-clima/reglas/{id} - Enable/disable rules",
+      "GET /api/alertas-clima/stats - Alert statistics"
+    ],
+    "frontend_features": [
+      "Page displays statistics cards",
+      "Filter buttons work (Pendientes/Revisadas/Resueltas/Todas)",
+      "Manual data form opens and submits correctly",
+      "Configuration panel shows rules and allows toggling",
+      "Alert cards expand to show details",
+      "Verificar Parcelas button works"
+    ],
+    "alert_rules_tested": [
+      "high_humidity (>80%) → fungus alert",
+      "high_temperature (>30°C) → spider mite alert",
+      "recent_rain (>5mm) → snail alert",
+      "mild_temperature (15-25°C) → aphid alert",
+      "drought (<40% humidity) → irrigation alert",
+      "frost_risk (<5°C) → frost alert"
+    ]
+  }
+}
