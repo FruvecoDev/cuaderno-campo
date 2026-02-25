@@ -741,3 +741,32 @@ Módulos actualizados para seguir patrón consistente:
 - **Navegación**: Configuración > Configuración App
 - **Test Report**: `/app/test_reports/iteration_18.json` - 100% (24/24 tests)
 - **Estado**: ✅ COMPLETADO Y TESTEADO
+
+## Temas de Color Personalizables (25/02/2026) - COMPLETADO
+- **Alcance**: Permite a administradores cambiar los colores de la aplicación
+- **Opciones de personalización**:
+  - **Temas Predefinidos** (8 opciones): Verde, Azul Corporativo, Rojo Tierra, Naranja Citrus, Morado Uva, Teal Agua, Marrón Tierra, Gris Profesional
+  - **Colores Personalizados**: Color picker para elegir cualquier color (primario y acento)
+- **Backend**:
+  - **Archivo**: `/app/backend/routes_config.py` (extendido)
+  - **Endpoints**:
+    - `GET /api/config/themes` - Lista de temas predefinidos (público)
+    - `GET /api/config/theme` - Obtiene tema actual (público)
+    - `POST /api/config/theme?theme_id={id}` - Aplica tema predefinido (solo admin)
+    - `POST /api/config/theme?primary={hsl}&accent={hsl}` - Aplica colores personalizados (solo admin)
+    - `DELETE /api/config/theme` - Restaura tema predeterminado (solo admin)
+  - **MongoDB**: Colección `app_settings` con key "theme"
+- **Frontend**:
+  - **Página**: `/app/frontend/src/pages/Configuracion.js` (extendida)
+  - **Servicio**: `/app/frontend/src/services/themeService.js`
+  - **Funcionalidades**:
+    - Grid de temas predefinidos con vista previa de colores
+    - Selector de color HTML5 para personalización avanzada
+    - Vista previa en tiempo real de los colores seleccionados
+    - Botón de restaurar tema predeterminado
+    - Los colores se aplican dinámicamente via CSS variables (--primary, --accent)
+    - El tema persiste y se carga automáticamente al iniciar la aplicación
+- **Acceso**: Solo usuarios con rol "Admin"
+- **Test Report**: `/app/test_reports/iteration_19.json` - 100% (24/24 tests)
+- **Estado**: ✅ COMPLETADO Y TESTEADO
+
