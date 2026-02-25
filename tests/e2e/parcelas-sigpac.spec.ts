@@ -237,20 +237,22 @@ test.describe('Parcelas Module - SIGPAC Integration', () => {
     // Click search
     await page.getByTestId('btn-buscar-sigpac-parcela').click({ force: true });
     
-    try {
-      // Wait for success
-      await expect(page.locator('text=Parcela encontrada')).toBeVisible({ timeout: 20000 });
-      
-      // Check that the map shows the polygon (look for Leaflet polygon path)
-      const mapContainer = page.locator('.leaflet-container');
-      await expect(mapContainer).toBeVisible();
-      
-      // Verify polygon is drawn (SVG path element)
-      const polygonPath = page.locator('.leaflet-interactive, .leaflet-overlay-pane path');
-      await expect(polygonPath.first()).toBeVisible({ timeout: 5000 });
-    } catch {
+    // Wait for success message
+    const successMsg = page.locator('text=Parcela encontrada');
+    const isSuccess = await successMsg.isVisible({ timeout: 20000 }).catch(() => false);
+    
+    if (!isSuccess) {
       console.log('SIGPAC API may be unavailable - skipping polygon test');
+      return; // Skip test if API unavailable
     }
+    
+    // Check that the map shows the polygon (look for Leaflet polygon path)
+    const mapContainer = page.locator('.leaflet-container');
+    await expect(mapContainer).toBeVisible();
+    
+    // Verify polygon is drawn (SVG path element)
+    const polygonPath = page.locator('.leaflet-interactive, .leaflet-overlay-pane path');
+    await expect(polygonPath.first()).toBeVisible({ timeout: 5000 });
   });
 
   test('should reset SIGPAC fields on form cancel', async ({ page }) => {
