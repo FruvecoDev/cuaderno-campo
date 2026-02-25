@@ -9,10 +9,76 @@ class SyncService {
     this.isSyncing = false;
     this.listeners = new Set();
     this.syncInterval = null;
+    this.notificationsEnabled = false;
     
     // Listen to online/offline events
     window.addEventListener('online', () => this.handleOnline());
     window.addEventListener('offline', () => this.handleOffline());
+    
+    // Check notification permission on init
+    this.checkNotificationPermission();
+  }
+
+  // Check and request notification permission
+  async checkNotificationPermission() {
+    if (!('Notification' in window)) {
+      console.log('Este navegador no soporta notificaciones');
+      return false;
+    }
+    
+    if (Notification.permission === 'granted') {
+      this.notificationsEnabled = true;
+      return true;
+    }
+    
+    return false;
+  }
+
+  // Request notification permission from user
+  async requestNotificationPermission() {
+    if (!('Notification' in window)) {
+      return false;
+    }
+    
+    try {
+      const permission = await Notification.requestPermission();
+      this.notificationsEnabled = permission === 'granted';
+      return this.notificationsEnabled;
+    } catch (error) {
+      console.error('Error requesting notification permission:', error);
+      return false;
+    }
+  }
+
+  // Show a push notification
+  showNotification(title, options = {}) {
+    if (!this.notificationsEnabled || Notification.permission !== 'granted') {
+      console.log('Notificaciones no permitidas');
+      return;
+    }
+    
+    try {
+      const notification = new Notification(title, {
+        icon: '/logo192.png',
+        badge: '/logo192.png',
+        tag: 'fruveco-sync',
+        renotify: true,
+        ...options
+      });
+      
+      // Auto-close after 5 seconds
+      setTimeout(() => notification.close(), 5000);
+      
+      // Focus app on click
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+      };
+      
+      return notification;
+    } catch (error) {
+      console.error('Error showing notification:', error);
+    }
   }
 
   // Subscribe to sync events
@@ -30,6 +96,12 @@ class SyncService {
     console.log('🟢 Connection restored');
     this.isOnline = true;
     this.notifyListeners({ type: 'online' });
+    
+    // Show notification when back online
+    this.showNotification('Conexión restaurada', {
+      body: 'Sincronizando datos pendientes...',
+      icon: '/logo192.png'
+    });
     
     // Auto-sync when coming back online
     this.syncPendingItems();
