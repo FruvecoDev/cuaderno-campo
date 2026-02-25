@@ -1254,16 +1254,21 @@ const Fincas = () => {
                   
                   {/* Acciones */}
                   <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    {/* Botón Ver Mapa */}
-                    {finca.sigpac && finca.sigpac.provincia && finca.sigpac.poligono && (
+                    {/* Botón Ver Mapa - mostrar si tiene SIGPAC o geometría manual */}
+                    {((finca.sigpac && finca.sigpac.provincia && finca.sigpac.poligono) || 
+                      (finca.geometria_manual && finca.geometria_manual.coords)) && (
                       <button
                         className="btn btn-sm"
-                        style={{ backgroundColor: '#e8f5e9', color: '#2e7d32', padding: '6px 10px' }}
+                        style={{ 
+                          backgroundColor: finca.geometria_manual?.coords ? '#e8f5e9' : '#e3f2fd', 
+                          color: finca.geometria_manual?.coords ? '#2e7d32' : '#1976d2', 
+                          padding: '6px 10px' 
+                        }}
                         onClick={() => verMapaFinca(finca)}
-                        title="Ver ubicación en mapa"
+                        title={finca.geometria_manual?.coords ? "Ver parcela dibujada" : "Ver ubicación SIGPAC"}
                         data-testid={`btn-map-${finca._id}`}
                       >
-                        <Map size={14} />
+                        {finca.geometria_manual?.coords ? <Pencil size={14} /> : <Map size={14} />}
                       </button>
                     )}
                     <button
