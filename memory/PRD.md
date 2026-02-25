@@ -673,23 +673,22 @@ Módulos actualizados para seguir patrón consistente:
 - **Estado**: ✅ COMPLETADO Y TESTEADO
 
 ## Sistema de Comisiones (25/02/2026) - COMPLETADO
-- **Alcance**: Comisiones para agentes de compra y venta
+- **Alcance**: Comisiones para agentes de compra y venta **calculadas a partir de ALBARANES**
 - **Tipos de cálculo**:
   - Porcentaje sobre importe: `cantidad × precio × (valor / 100)`
   - Euro por kilo: `cantidad × valor`
-- **Backend nuevos endpoints**:
-  - `GET /api/comisiones/resumen` - Resumen agrupado por agente
+- **Lógica de negocio**:
+  - La comisión se configura en el CONTRATO (agente + tipo + valor)
+  - La comisión se CALCULA cuando se registra un ALBARÁN asociado al contrato
+  - El importe de comisión = datos del albarán × configuración del contrato
+- **Backend endpoints**:
+  - `GET /api/comisiones/resumen` - Resumen agrupado por agente (desde albaranes)
   - `GET /api/comisiones/agentes` - Lista agentes con comisiones
-  - `GET /api/comisiones/campanas` - Lista campañas con comisiones
+  - `GET /api/comisiones/campanas` - Lista campañas con albaranes y comisiones
   - `GET /api/comisiones/liquidacion/pdf` - PDF de liquidación por agente
-- **Frontend modificaciones**:
-  - **Contratos.js**: Campos separados `comision_compra_tipo/valor` y `comision_venta_tipo/valor`
-  - **LiquidacionComisiones.js**: Nueva página con KPIs, filtros y detalle por agente
-  - **Layout.js**: Enlace en menú "Administración"
-- **Archivos nuevos**:
-  - `/app/backend/routes_comisiones.py`
-  - `/app/frontend/src/pages/LiquidacionComisiones.js`
-- **Test Report**: `/app/test_reports/iteration_16.json` - 100% (30/30 tests)
+- **Frontend**:
+  - **Contratos.js**: Campos `comision_compra_tipo/valor` y `comision_venta_tipo/valor`
+  - **LiquidacionComisiones.js**: Muestra detalle por albarán (no por contrato)
 - **Estado**: ✅ COMPLETADO Y TESTEADO
 
 ## Modo Offline para Técnicos (25/02/2026) - COMPLETADO
