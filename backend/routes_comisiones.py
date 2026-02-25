@@ -15,7 +15,7 @@ router = APIRouter(prefix="/api", tags=["comisiones"])
 
 # Collections
 contratos_collection = db['contratos']
-agentes_collection = db['agentes_compra_venta']
+agentes_collection = db['agentes']
 albaranes_collection = db['albaranes']
 
 
