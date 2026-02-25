@@ -449,6 +449,298 @@ const ThemeSelector = ({ currentTheme, themes, onSelectTheme, onCustomColor, onR
   );
 };
 
+// Scheduler Configuration Component
+const SchedulerConfig = ({ token }) => {
+  const [config, setConfig] = useState(null);
+  const [status, setStatus] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [executing, setExecuting] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
+
+  useEffect(() => {
+    fetchConfig();
+    fetchStatus();
+  }, []);
+
+  const fetchConfig = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/notificaciones/scheduler/config`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setConfig(data.config || {
+        activa: true,
+        hora_verificacion: '07:00',
+        frecuencia: 'diaria',
+        notificar_app: true,
+        notificar_email: false,
+        roles_notificar: ['Admin', 'Manager', 'Technician']
+      });
+    } catch (err) {
+      console.error('Error fetching scheduler config:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchStatus = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/notificaciones/scheduler/status`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setStatus(data);
+    } catch (err) {
+      console.error('Error fetching scheduler status:', err);
+    }
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const response = await fetch(`${API_URL}/api/notificaciones/scheduler/config`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          verificacion_clima_activa: config.activa,
+          hora_verificacion: config.hora_verificacion,
+          frecuencia: config.frecuencia,
+          notificar_app: config.notificar_app,
+          notificar_email: config.notificar_email,
+          roles_notificar: config.roles_notificar
+        })
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.detail || 'Error al guardar');
+      }
+
+      setMessage({ type: 'success', text: 'Configuración guardada correctamente' });
+      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+      fetchStatus();
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleExecuteNow = async () => {
+    setExecuting(true);
+    try {
+      const response = await fetch(`${API_URL}/api/notificaciones/scheduler/ejecutar`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.detail || 'Error al ejecutar');
+      }
+
+      setMessage({ type: 'success', text: 'Verificación climática iniciada. Revisa las alertas en unos segundos.' });
+      setTimeout(() => setMessage({ type: '', text: '' }), 5000);
+      
+      // Refresh status after a delay
+      setTimeout(fetchStatus, 3000);
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setExecuting(false);
+    }
+  };
+
+  const handleToggleRole = (role) => {
+    setConfig(prev => ({
+      ...prev,
+      roles_notificar: prev.roles_notificar?.includes(role)
+        ? prev.roles_notificar.filter(r => r !== role)
+        : [...(prev.roles_notificar || []), role]
+    }));
+  };
+
+  if (loading) {
+    return <div className="card" style={{ padding: '2rem', textAlign: 'center' }}>Cargando...</div>;
+  }
+
+  return (
+    <div className="card" data-testid="scheduler-config">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <div>
+          <h3 style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Clock size={20} /> Verificación Climática Programada
+          </h3>
+          <p className="text-muted text-sm">Configura cuándo verificar automáticamente las condiciones climáticas</p>
+        </div>
+        <button
+          onClick={handleExecuteNow}
+          disabled={executing}
+          className="btn btn-primary"
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+        >
+          {executing ? <RefreshCw size={16} className="animate-spin" /> : <Play size={16} />}
+          Ejecutar Ahora
+        </button>
+      </div>
+
+      {message.text && (
+        <div style={{
+          padding: '0.75rem',
+          borderRadius: '0.5rem',
+          marginBottom: '1rem',
+          backgroundColor: message.type === 'success' ? '#dcfce7' : '#fee2e2',
+          color: message.type === 'success' ? '#166534' : '#dc2626',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem'
+        }}>
+          {message.type === 'success' ? <Check size={16} /> : <AlertCircle size={16} />}
+          {message.text}
+        </div>
+      )}
+
+      {/* Status */}
+      {status && (
+        <div style={{ 
+          backgroundColor: 'hsl(var(--muted))', 
+          padding: '0.75rem', 
+          borderRadius: '0.5rem', 
+          marginBottom: '1rem',
+          fontSize: '0.875rem'
+        }}>
+          <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+            <div>
+              <span className="text-muted">Estado: </span>
+              <span style={{ fontWeight: '600', color: status.activo ? '#16a34a' : '#9ca3af' }}>
+                {status.activo ? 'Activo' : 'Inactivo'}
+              </span>
+            </div>
+            {status.ultima_ejecucion && (
+              <div>
+                <span className="text-muted">Última ejecución: </span>
+                <span>{new Date(status.ultima_ejecucion).toLocaleString('es-ES')}</span>
+              </div>
+            )}
+            {status.ultimo_resultado && (
+              <div>
+                <span className="text-muted">Alertas generadas: </span>
+                <span style={{ fontWeight: '600' }}>{status.ultimo_resultado.total_alertas}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+        {/* Activar/Desactivar */}
+        <div>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={config?.activa || false}
+              onChange={(e) => setConfig(prev => ({ ...prev, activa: e.target.checked }))}
+              style={{ width: '18px', height: '18px' }}
+            />
+            <span style={{ fontWeight: '500' }}>Verificación Automática Activa</span>
+          </label>
+        </div>
+
+        {/* Hora */}
+        <div>
+          <label className="form-label">Hora de Verificación</label>
+          <input
+            type="time"
+            className="form-input"
+            value={config?.hora_verificacion || '07:00'}
+            onChange={(e) => setConfig(prev => ({ ...prev, hora_verificacion: e.target.value }))}
+          />
+        </div>
+
+        {/* Frecuencia */}
+        <div>
+          <label className="form-label">Frecuencia</label>
+          <select
+            className="form-select"
+            value={config?.frecuencia || 'diaria'}
+            onChange={(e) => setConfig(prev => ({ ...prev, frecuencia: e.target.value }))}
+          >
+            <option value="diaria">Diaria</option>
+            <option value="cada_12h">Cada 12 horas</option>
+            <option value="cada_6h">Cada 6 horas</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Notifications */}
+      <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid hsl(var(--border))' }}>
+        <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.75rem' }}>Notificaciones</h4>
+        
+        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={config?.notificar_app || false}
+              onChange={(e) => setConfig(prev => ({ ...prev, notificar_app: e.target.checked }))}
+              style={{ width: '16px', height: '16px' }}
+            />
+            <Bell size={16} /> En la Aplicación
+          </label>
+          
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', opacity: 0.5 }}>
+            <input
+              type="checkbox"
+              checked={config?.notificar_email || false}
+              onChange={(e) => setConfig(prev => ({ ...prev, notificar_email: e.target.checked }))}
+              disabled={true}
+              style={{ width: '16px', height: '16px' }}
+            />
+            <Mail size={16} /> Por Email
+            <span style={{ fontSize: '0.7rem', backgroundColor: '#fef3c7', color: '#92400e', padding: '0.125rem 0.375rem', borderRadius: '0.25rem' }}>
+              Pendiente API Key
+            </span>
+          </label>
+        </div>
+
+        {/* Roles to notify */}
+        <div>
+          <label className="form-label">Notificar a:</label>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            {['Admin', 'Manager', 'Technician'].map(role => (
+              <label key={role} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={config?.roles_notificar?.includes(role) || false}
+                  onChange={() => handleToggleRole(role)}
+                  style={{ width: '14px', height: '14px' }}
+                />
+                {role}
+              </label>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Save Button */}
+      <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="btn btn-primary"
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+        >
+          {saving ? <RefreshCw size={16} className="animate-spin" /> : <Check size={16} />}
+          Guardar Configuración
+        </button>
+      </div>
+    </div>
+  );
+};
+
 // Main Configuration Page
 const Configuracion = () => {
   const { t } = useTranslation();
