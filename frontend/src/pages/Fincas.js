@@ -1,9 +1,30 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, X, MapPin, Search, Home, ChevronDown, ChevronUp, Map, Layers } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, MapPin, Search, Home, ChevronDown, ChevronUp, Map, Layers, Loader2, ExternalLink, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+
+// Diccionario de usos SIGPAC
+const USOS_SIGPAC = {
+  "AG": "Corrientes y superficies de agua",
+  "CA": "Viales",
+  "CF": "Cítricos - Frutal",
+  "CI": "Cítricos",
+  "ED": "Edificaciones",
+  "FO": "Forestal",
+  "FY": "Frutal",
+  "HR": "Huerta",
+  "IM": "Improductivos",
+  "IV": "Invernadero",
+  "OV": "Olivar",
+  "PA": "Pasto con arbolado",
+  "PR": "Pasto arbustivo",
+  "PS": "Pastizal",
+  "TA": "Tierra arable",
+  "VI": "Viñedo",
+  "ZU": "Zona urbana"
+};
 
 const Fincas = () => {
   const { token } = useAuth();
@@ -14,6 +35,12 @@ const Fincas = () => {
   const [editingId, setEditingId] = useState(null);
   const [stats, setStats] = useState(null);
   const [expandedFinca, setExpandedFinca] = useState(null);
+  
+  // Estado para búsqueda SIGPAC
+  const [sigpacLoading, setSigpacLoading] = useState(false);
+  const [sigpacResult, setSigpacResult] = useState(null);
+  const [sigpacError, setSigpacError] = useState(null);
+  const [provincias, setProvincias] = useState([]);
   
   // Filtros
   const [filters, setFilters] = useState({
@@ -80,6 +107,7 @@ const Fincas = () => {
   useEffect(() => {
     fetchFincas();
     fetchStats();
+    fetchProvincias();
   }, []);
 
   const fetchFincas = async () => {
@@ -105,6 +133,76 @@ const Fincas = () => {
     } catch (err) {
       console.error('Error fetching stats:', err);
     }
+  };
+
+  const fetchProvincias = async () => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/sigpac/provincias`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setProvincias(data.provincias);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching provincias:', err);
+    }
+  };
+
+  // Búsqueda en SIGPAC
+  const buscarEnSigpac = async () => {
+    const { provincia, municipio, poligono, parcela, cod_agregado, zona, recinto } = formData.sigpac;
+    
+    if (!provincia || !municipio || !poligono || !parcela) {
+      setSigpacError('Debe completar al menos: Provincia, Municipio, Polígono y Parcela');
+      return;
+    }
+    
+    setSigpacLoading(true);
+    setSigpacError(null);
+    setSigpacResult(null);
+    
+    try {
+      const params = new URLSearchParams({
+        provincia,
+        municipio,
+        poligono,
+        parcela,
+        agregado: cod_agregado || '0',
+        zona: zona || '0'
+      });
+      
+      if (recinto) {
+        params.append('recinto', recinto);
+      }
+      
+      const res = await fetch(`${BACKEND_URL}/api/sigpac/consulta?${params}`, { headers });
+      const data = await res.json();
+      
+      if (data.success) {
+        setSigpacResult(data);
+        
+        // Auto-rellenar campos con los datos de SIGPAC
+        if (data.sigpac) {
+          setFormData(prev => ({
+            ...prev,
+            sigpac: {
+              ...prev.sigpac,
+              ...data.sigpac
+            },
+            // Si hay superficie, actualizar hectáreas
+            hectareas: data.superficie_ha || prev.hectareas
+          }));
+        }
+      } else {
+        setSigpacError(data.message || data.error || 'Error al consultar SIGPAC');
+      }
+    } catch (err) {
+      console.error('Error consultando SIGPAC:', err);
+      setSigpacError('Error de conexión al servicio SIGPAC');
+    }
+    
+    setSigpacLoading(false);
   };
 
   // Filtrar fincas
@@ -134,6 +232,8 @@ const Fincas = () => {
   const resetForm = () => {
     setFormData(emptyFormData);
     setEditingId(null);
+    setSigpacResult(null);
+    setSigpacError(null);
   };
 
   const handleSubmit = async (e) => {
@@ -213,6 +313,8 @@ const Fincas = () => {
     });
     setEditingId(finca._id);
     setShowForm(true);
+    setSigpacResult(null);
+    setSigpacError(null);
   };
 
   const handleDelete = async (id) => {
@@ -246,6 +348,15 @@ const Fincas = () => {
         [field]: value
       }
     }));
+    // Limpiar resultados previos al cambiar datos
+    if (sigpacResult) {
+      setSigpacResult(null);
+    }
+  };
+
+  // Obtener descripción del uso SIGPAC
+  const getUsoDescripcion = (codigo) => {
+    return USOS_SIGPAC[codigo] || codigo || '-';
   };
 
   return (
@@ -465,7 +576,7 @@ const Fincas = () => {
               </div>
             </div>
 
-            {/* Sección 3: Datos SIGPAC */}
+            {/* Sección 3: Datos SIGPAC con integración */}
             <div style={{ 
               backgroundColor: '#e3f2fd', 
               padding: '1rem', 
@@ -473,35 +584,138 @@ const Fincas = () => {
               marginBottom: '1rem',
               border: '1px solid #90caf9'
             }}>
-              <h4 style={{ marginBottom: '1rem', color: '#1565c0', fontWeight: '600', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Map size={18} />
-                Datos SIGPAC
-              </h4>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h4 style={{ color: '#1565c0', fontWeight: '600', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+                  <Map size={18} />
+                  Datos SIGPAC
+                </h4>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    type="button"
+                    className="btn btn-sm"
+                    style={{ 
+                      backgroundColor: '#1565c0', 
+                      color: 'white',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
+                    }}
+                    onClick={buscarEnSigpac}
+                    disabled={sigpacLoading}
+                    data-testid="btn-buscar-sigpac"
+                  >
+                    {sigpacLoading ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <Search size={14} />
+                    )}
+                    Buscar en SIGPAC
+                  </button>
+                  <a
+                    href="https://sigpac.mapa.es/fega/visor/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-sm"
+                    style={{ 
+                      backgroundColor: '#fff', 
+                      color: '#1565c0',
+                      border: '1px solid #1565c0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    <ExternalLink size={14} />
+                    Visor SIGPAC
+                  </a>
+                </div>
+              </div>
+              
+              {/* Mensaje de ayuda */}
+              <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1rem', fontStyle: 'italic' }}>
+                Introduzca los códigos SIGPAC y pulse "Buscar en SIGPAC" para obtener automáticamente la superficie y el uso del terreno.
+              </p>
+              
+              {/* Resultado de búsqueda SIGPAC */}
+              {sigpacResult && (
+                <div style={{ 
+                  backgroundColor: '#c8e6c9', 
+                  padding: '0.75rem', 
+                  borderRadius: '6px', 
+                  marginBottom: '1rem',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '0.75rem'
+                }}>
+                  <CheckCircle size={20} style={{ color: '#2e7d32', flexShrink: 0, marginTop: '2px' }} />
+                  <div style={{ flex: 1 }}>
+                    <strong style={{ color: '#2e7d32' }}>Parcela encontrada en SIGPAC</strong>
+                    <div style={{ fontSize: '0.85rem', marginTop: '0.25rem' }}>
+                      <span style={{ marginRight: '1rem' }}>
+                        <strong>Superficie:</strong> {sigpacResult.superficie_ha?.toFixed(4)} ha
+                      </span>
+                      <span style={{ marginRight: '1rem' }}>
+                        <strong>Uso:</strong> {sigpacResult.uso_sigpac} ({getUsoDescripcion(sigpacResult.uso_sigpac)})
+                      </span>
+                      {sigpacResult.pendiente && (
+                        <span>
+                          <strong>Pendiente:</strong> {sigpacResult.pendiente}%
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Error de búsqueda SIGPAC */}
+              {sigpacError && (
+                <div style={{ 
+                  backgroundColor: '#ffcdd2', 
+                  padding: '0.75rem', 
+                  borderRadius: '6px', 
+                  marginBottom: '1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem'
+                }}>
+                  <AlertCircle size={20} style={{ color: '#c62828' }} />
+                  <span style={{ color: '#c62828' }}>{sigpacError}</span>
+                </div>
+              )}
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1rem' }}>
                 <div className="form-group">
-                  <label className="form-label">Provincia</label>
-                  <input 
-                    className="form-input" 
-                    value={formData.sigpac.provincia} 
+                  <label className="form-label">Provincia *</label>
+                  <select
+                    className="form-select"
+                    value={formData.sigpac.provincia}
                     onChange={(e) => updateSigpac('provincia', e.target.value)}
                     data-testid="input-sigpac-provincia"
-                  />
+                  >
+                    <option value="">Seleccionar...</option>
+                    {provincias.map(p => (
+                      <option key={p.codigo} value={p.codigo}>{p.codigo} - {p.nombre}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Municipio</label>
+                  <label className="form-label">Municipio *</label>
                   <input 
                     className="form-input" 
                     value={formData.sigpac.municipio} 
                     onChange={(e) => updateSigpac('municipio', e.target.value)}
+                    placeholder="Ej: 053"
                     data-testid="input-sigpac-municipio"
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Cod. Agregado</label>
+                  <label className="form-label">Agregado</label>
                   <input 
                     className="form-input" 
                     value={formData.sigpac.cod_agregado} 
                     onChange={(e) => updateSigpac('cod_agregado', e.target.value)}
+                    placeholder="0"
                     data-testid="input-sigpac-cod-agregado"
                   />
                 </div>
@@ -511,24 +725,27 @@ const Fincas = () => {
                     className="form-input" 
                     value={formData.sigpac.zona} 
                     onChange={(e) => updateSigpac('zona', e.target.value)}
+                    placeholder="0"
                     data-testid="input-sigpac-zona"
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Polígono</label>
+                  <label className="form-label">Polígono *</label>
                   <input 
                     className="form-input" 
                     value={formData.sigpac.poligono} 
                     onChange={(e) => updateSigpac('poligono', e.target.value)}
+                    placeholder="Ej: 5"
                     data-testid="input-sigpac-poligono"
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Parcela</label>
+                  <label className="form-label">Parcela *</label>
                   <input 
                     className="form-input" 
                     value={formData.sigpac.parcela} 
                     onChange={(e) => updateSigpac('parcela', e.target.value)}
+                    placeholder="Ej: 12"
                     data-testid="input-sigpac-parcela"
                   />
                 </div>
@@ -538,6 +755,7 @@ const Fincas = () => {
                     className="form-input" 
                     value={formData.sigpac.recinto} 
                     onChange={(e) => updateSigpac('recinto', e.target.value)}
+                    placeholder="1"
                     data-testid="input-sigpac-recinto"
                   />
                 </div>
@@ -547,6 +765,7 @@ const Fincas = () => {
                     className="form-input" 
                     value={formData.sigpac.cod_uso} 
                     onChange={(e) => updateSigpac('cod_uso', e.target.value)}
+                    placeholder="TA"
                     data-testid="input-sigpac-cod-uso"
                   />
                 </div>
@@ -864,7 +1083,7 @@ const Fincas = () => {
                             <div><strong>Polígono:</strong> {finca.sigpac.poligono || '-'}</div>
                             <div><strong>Parcela:</strong> {finca.sigpac.parcela || '-'}</div>
                             <div><strong>Recinto:</strong> {finca.sigpac.recinto || '-'}</div>
-                            <div><strong>Cod. Uso:</strong> {finca.sigpac.cod_uso || '-'}</div>
+                            <div><strong>Cod. Uso:</strong> {finca.sigpac.cod_uso ? `${finca.sigpac.cod_uso} (${getUsoDescripcion(finca.sigpac.cod_uso)})` : '-'}</div>
                           </div>
                         </div>
                       )}
@@ -875,8 +1094,8 @@ const Fincas = () => {
                         <div style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
                           <div><strong>Semana Recolección:</strong> {finca.recoleccion_semana || '-'}</div>
                           <div><strong>Año:</strong> {finca.recoleccion_ano || '-'}</div>
-                          <div><strong>Precio Corte:</strong> {finca.precio_corte?.toLocaleString() || '0'}</div>
-                          <div><strong>Precio Transporte:</strong> {finca.precio_transporte?.toLocaleString() || '0'}</div>
+                          <div><strong>Precio Corte:</strong> {finca.precio_corte?.toLocaleString() || '0'} €</div>
+                          <div><strong>Precio Transporte:</strong> {finca.precio_transporte?.toLocaleString() || '0'} €</div>
                           <div><strong>Prov. Corte:</strong> {finca.proveedor_corte || '-'}</div>
                         </div>
                       </div>
