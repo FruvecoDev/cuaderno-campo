@@ -301,6 +301,57 @@ const Visitas = () => {
       return;
     }
     
+    // Payload simplificado - el backend hereda el resto
+    const payload = {
+      objetivo: formData.objetivo,
+      parcela_id: formData.parcela_id,
+      fecha_visita: formData.fecha_visita,
+      fecha_planificada: formData.fecha_planificada,
+      observaciones: formData.observaciones
+    };
+    
+    // Si el objetivo es "Plagas y Enfermedades", incluir el cuestionario
+    if (formData.objetivo === 'Plagas y Enfermedades') {
+      payload.cuestionario_plagas = cuestionarioPlagas;
+    }
+    
+    // Si estamos offline y es una creación nueva, guardar localmente
+    if (!navigator.onLine && !editingId) {
+      try {
+        // Añadir info de la parcela para mostrar en la cola
+        const parcelaInfo = parcelas.find(p => p._id === formData.parcela_id);
+        payload._offlineInfo = {
+          parcelaNombre: parcelaInfo?.codigo_plantacion || 'Parcela',
+          proveedor: parcelaInfo?.proveedor || '',
+          cultivo: parcelaInfo?.cultivo || ''
+        };
+        
+        const result = await syncService.saveVisitaOffline(payload);
+        if (result.success) {
+          setError(null);
+          // Reset form
+          setFormData({
+            objetivo: 'Control Rutinario',
+            fecha_visita: new Date().toISOString().split('T')[0],
+            fecha_planificada: '',
+            parcela_id: '',
+            observaciones: ''
+          });
+          setShowForm(false);
+          // Mostrar mensaje de éxito offline
+          alert('Visita guardada localmente. Se sincronizará automáticamente cuando vuelva la conexión.');
+        } else {
+          setError('Error al guardar offline: ' + result.error);
+        }
+        return;
+      } catch (error) {
+        console.error('Error saving offline:', error);
+        setError('Error al guardar offline');
+        return;
+      }
+    }
+    
+    // Si hay conexión, enviar al servidor normalmente
     try {
       setError(null);
       const url = editingId 
@@ -308,20 +359,6 @@ const Visitas = () => {
         : `${BACKEND_URL}/api/visitas`;
       
       const method = editingId ? 'PUT' : 'POST';
-      
-      // Payload simplificado - el backend hereda el resto
-      const payload = {
-        objetivo: formData.objetivo,
-        parcela_id: formData.parcela_id,
-        fecha_visita: formData.fecha_visita, // OBLIGATORIO
-        fecha_planificada: formData.fecha_planificada,
-        observaciones: formData.observaciones
-      };
-      
-      // Si el objetivo es "Plagas y Enfermedades", incluir el cuestionario
-      if (formData.objetivo === 'Plagas y Enfermedades') {
-        payload.cuestionario_plagas = cuestionarioPlagas;
-      }
       
       const response = await fetch(url, {
         method: method,
