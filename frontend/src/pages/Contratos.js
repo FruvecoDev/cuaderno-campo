@@ -292,8 +292,10 @@ const Contratos = () => {
       precios_calidad: [],
       agente_compra: '',
       agente_venta: '',
-      comision_tipo: 'porcentaje',
-      comision_valor: ''
+      comision_compra_tipo: 'porcentaje',
+      comision_compra_valor: '',
+      comision_venta_tipo: 'porcentaje',
+      comision_venta_valor: ''
     });
   };
   
