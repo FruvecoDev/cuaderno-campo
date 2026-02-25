@@ -151,9 +151,6 @@ def serialize_doc(doc: dict) -> dict:
             result[key] = value
     
     return result
-            if key in doc and doc[key]:
-                doc[key] = str(doc[key])
-    return doc
 
 
 def evaluar_condicion(regla: dict, datos_clima: dict) -> bool:
