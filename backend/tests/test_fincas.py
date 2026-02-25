@@ -381,5 +381,164 @@ class TestFincasStatsAggregation:
         assert isinstance(data["por_provincia"], list)
 
 
+class TestGeometriaManual:
+    """Test geometria_manual field for manually drawn polygons"""
+    
+    def test_create_finca_with_geometria_manual(self, api_session, test_finca_data):
+        """Test POST /api/fincas with geometria_manual data"""
+        # Add geometria_manual to test data
+        test_data = test_finca_data.copy()
+        test_data["geometria_manual"] = {
+            "wkt": "POLYGON((-5.8 37.0, -5.7 37.0, -5.7 37.1, -5.8 37.1, -5.8 37.0))",
+            "coords": [[37.0, -5.8], [37.0, -5.7], [37.1, -5.7], [37.1, -5.8], [37.0, -5.8]],
+            "centroide": {"lat": 37.05, "lon": -5.75},
+            "area_ha": 12.5
+        }
+        
+        response = api_session.post(f"{BASE_URL}/api/fincas", json=test_data)
+        
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+        
+        data = response.json()
+        assert data.get("success") is True, "Response should indicate success"
+        
+        finca = data["data"]
+        assert "geometria_manual" in finca, "Response should contain geometria_manual"
+        
+        geom = finca.get("geometria_manual", {})
+        assert geom.get("wkt") is not None, "geometria_manual should have wkt"
+        assert geom.get("coords") is not None, "geometria_manual should have coords"
+        assert geom.get("centroide") is not None, "geometria_manual should have centroide"
+        assert geom.get("area_ha") == 12.5, "geometria_manual should have correct area_ha"
+        
+        # Cleanup
+        finca_id = finca.get("_id")
+        if finca_id:
+            api_session.delete(f"{BASE_URL}/api/fincas/{finca_id}")
+    
+    def test_get_finca_with_geometria_manual(self, api_session, test_finca_data):
+        """Test GET /api/fincas/{id} returns geometria_manual correctly"""
+        # Create finca with geometria_manual
+        test_data = test_finca_data.copy()
+        test_data["denominacion"] = f"Geom Test {datetime.now().strftime('%Y%m%d%H%M%S')}"
+        test_data["geometria_manual"] = {
+            "wkt": "POLYGON((-5.9 37.2, -5.8 37.2, -5.8 37.3, -5.9 37.3, -5.9 37.2))",
+            "coords": [[37.2, -5.9], [37.2, -5.8], [37.3, -5.8], [37.3, -5.9], [37.2, -5.9]],
+            "centroide": {"lat": 37.25, "lon": -5.85},
+            "area_ha": 8.75
+        }
+        
+        create_response = api_session.post(f"{BASE_URL}/api/fincas", json=test_data)
+        assert create_response.status_code == 200
+        
+        finca_id = create_response.json().get("data", {}).get("_id")
+        
+        # GET the finca and verify geometria_manual is returned
+        get_response = api_session.get(f"{BASE_URL}/api/fincas/{finca_id}")
+        assert get_response.status_code == 200
+        
+        finca = get_response.json()
+        geom = finca.get("geometria_manual", {})
+        
+        assert geom.get("wkt") is not None, "GET should return geometria_manual with wkt"
+        assert geom.get("area_ha") == 8.75, "GET should return correct area_ha"
+        assert len(geom.get("coords", [])) == 5, "GET should return correct coords count"
+        
+        # Cleanup
+        api_session.delete(f"{BASE_URL}/api/fincas/{finca_id}")
+    
+    def test_update_finca_geometria_manual(self, api_session, created_finca):
+        """Test PUT /api/fincas/{id} to add/update geometria_manual"""
+        finca_id = created_finca["_id"]
+        
+        # Update with geometria_manual
+        update_data = {
+            "geometria_manual": {
+                "wkt": "POLYGON((-6.0 38.0, -5.9 38.0, -5.9 38.1, -6.0 38.1, -6.0 38.0))",
+                "coords": [[38.0, -6.0], [38.0, -5.9], [38.1, -5.9], [38.1, -6.0], [38.0, -6.0]],
+                "centroide": {"lat": 38.05, "lon": -5.95},
+                "area_ha": 15.25
+            }
+        }
+        
+        response = api_session.put(f"{BASE_URL}/api/fincas/{finca_id}", json=update_data)
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+        
+        # Verify with GET
+        get_response = api_session.get(f"{BASE_URL}/api/fincas/{finca_id}")
+        assert get_response.status_code == 200
+        
+        finca = get_response.json()
+        geom = finca.get("geometria_manual", {})
+        
+        assert geom.get("area_ha") == 15.25, "Updated geometria_manual should have new area_ha"
+        assert geom.get("centroide", {}).get("lat") == 38.05, "Updated geometria_manual should have new centroide"
+    
+    def test_update_finca_clear_geometria_manual(self, api_session, test_finca_data):
+        """Test clearing geometria_manual by setting to None"""
+        # Create finca with geometria_manual
+        test_data = test_finca_data.copy()
+        test_data["denominacion"] = f"Clear Geom Test {datetime.now().strftime('%Y%m%d%H%M%S')}"
+        test_data["geometria_manual"] = {
+            "wkt": "POLYGON((-5.5 36.5, -5.4 36.5, -5.4 36.6, -5.5 36.6, -5.5 36.5))",
+            "coords": [[36.5, -5.5], [36.5, -5.4], [36.6, -5.4], [36.6, -5.5], [36.5, -5.5]],
+            "centroide": {"lat": 36.55, "lon": -5.45},
+            "area_ha": 5.0
+        }
+        
+        create_response = api_session.post(f"{BASE_URL}/api/fincas", json=test_data)
+        assert create_response.status_code == 200
+        
+        finca_id = create_response.json().get("data", {}).get("_id")
+        
+        # Clear geometria_manual
+        update_response = api_session.put(f"{BASE_URL}/api/fincas/{finca_id}", json={
+            "geometria_manual": None
+        })
+        assert update_response.status_code == 200
+        
+        # Verify it's cleared
+        get_response = api_session.get(f"{BASE_URL}/api/fincas/{finca_id}")
+        assert get_response.status_code == 200
+        
+        finca = get_response.json()
+        # geometria_manual should be None or not present
+        assert finca.get("geometria_manual") is None or finca.get("geometria_manual") == {}
+        
+        # Cleanup
+        api_session.delete(f"{BASE_URL}/api/fincas/{finca_id}")
+    
+    def test_fincas_list_includes_geometria_manual(self, api_session, test_finca_data):
+        """Test GET /api/fincas returns geometria_manual in list"""
+        # Create finca with geometria_manual
+        test_data = test_finca_data.copy()
+        test_data["denominacion"] = f"List Geom Test {datetime.now().strftime('%Y%m%d%H%M%S')}"
+        test_data["geometria_manual"] = {
+            "wkt": "POLYGON((-5.6 37.5, -5.5 37.5, -5.5 37.6, -5.6 37.6, -5.6 37.5))",
+            "coords": [[37.5, -5.6], [37.5, -5.5], [37.6, -5.5], [37.6, -5.6], [37.5, -5.6]],
+            "centroide": {"lat": 37.55, "lon": -5.55},
+            "area_ha": 10.0
+        }
+        
+        create_response = api_session.post(f"{BASE_URL}/api/fincas", json=test_data)
+        assert create_response.status_code == 200
+        
+        finca_id = create_response.json().get("data", {}).get("_id")
+        
+        # Get fincas list and find our finca
+        list_response = api_session.get(f"{BASE_URL}/api/fincas")
+        assert list_response.status_code == 200
+        
+        fincas = list_response.json().get("fincas", [])
+        our_finca = next((f for f in fincas if f.get("_id") == finca_id), None)
+        
+        assert our_finca is not None, "Our finca should be in the list"
+        assert "geometria_manual" in our_finca, "Finca in list should have geometria_manual"
+        assert our_finca.get("geometria_manual", {}).get("area_ha") == 10.0
+        
+        # Cleanup
+        api_session.delete(f"{BASE_URL}/api/fincas/{finca_id}")
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])
