@@ -332,13 +332,8 @@ test.describe('Fincas Module - SIGPAC Integration', () => {
     // Click search
     await page.getByTestId('btn-buscar-sigpac').click({ force: true });
     
-    // Wait for error response
-    try {
-      await expect(page.locator('[style*="ffcdd2"]').first()).toBeVisible({ timeout: 20000 });
-    } catch {
-      // May get different error - check for any error-related text
-      await expect(page.locator('text=/no encontrad|Error|Verifique/i').first()).toBeVisible({ timeout: 5000 });
-    }
+    // Wait for error response - look for the error message
+    await expect(page.locator('text=/no se encontraron|no encontrad|Error|Verifique/i').first()).toBeVisible({ timeout: 25000 });
   });
 
   test('should auto-fill hectareas field after successful SIGPAC search', async ({ page }) => {
