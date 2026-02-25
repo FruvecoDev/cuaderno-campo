@@ -183,11 +183,12 @@ test.describe('Theme Configuration Feature', () => {
     await page.waitForLoadState('domcontentloaded');
     
     // Theme should be loaded - teal primary is "175 60% 30%"
-    const primary = await page.evaluate(() => {
-      return getComputedStyle(document.documentElement).getPropertyValue('--primary');
-    });
-    
-    expect(primary.trim()).toBe('175 60% 30%');
+    // Wait for async theme loading
+    await expect.poll(async () => {
+      return page.evaluate(() => {
+        return getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
+      });
+    }, { timeout: 10000, intervals: [500] }).toBe('175 60% 30%');
   });
 
   test('selecting theme updates CSS variables dynamically', async ({ page, request }) => {
