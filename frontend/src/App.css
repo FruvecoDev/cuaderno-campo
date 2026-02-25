@@ -537,7 +537,7 @@ tr:hover {
 /* ============================================
    MOBILE BREAKPOINT (< 768px)
    ============================================ */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   /* Sidebar transforms to overlay */
   .sidebar {
     transform: translateX(-100%);
