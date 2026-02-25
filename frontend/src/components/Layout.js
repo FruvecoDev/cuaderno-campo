@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import LanguageSelector from './LanguageSelector';
+import OfflineIndicator from './OfflineIndicator';
 import '../App.css';
 import logo from '../assets/logo.png';
 
