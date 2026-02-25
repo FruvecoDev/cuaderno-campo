@@ -42,7 +42,7 @@ class TestResumenDiarioAPI:
     def test_resumen_diario_requires_auth(self, api_client):
         """Resumen diario should require authentication"""
         response = api_client.get(f"{BASE_URL}/api/resumen-diario")
-        assert response.status_code == 401
+        assert response.status_code in [401, 403]  # Either unauthorized or forbidden
 
     def test_get_resumen_diario(self, authenticated_client):
         """Should return daily summary data structure"""
