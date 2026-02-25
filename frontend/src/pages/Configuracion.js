@@ -983,6 +983,9 @@ const Configuracion = () => {
           onDelete={handleLogoDelete}
           loading={loading}
         />
+
+        {/* Scheduler Config */}
+        <SchedulerConfig token={token} />
       </div>
 
       <div className="card" style={{ padding: '1.5rem', marginTop: '1.5rem', background: 'hsl(var(--muted))' }}>
