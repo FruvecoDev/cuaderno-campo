@@ -1,0 +1,74 @@
+{
+  "summary": "SIGPAC Integration testing completed. Backend: 27/27 tests pass (original fincas + new SIGPAC endpoints). Frontend: 16/17 tests pass (1 failing due to modal overlay blocking CRUD test).",
+  "mode": "update",
+  "baseline_commit": "16a038bb611ac21b2cc1bcad87f5ce842daf33d4",
+  "head_commit": "eb783c4b3890fa562a0df79652b63b1a367b53a5",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Fincas form + Daily Summary Modal",
+        "issue": "Daily summary modal 'Buenos días, admin' can appear after form operations, blocking user interaction. The modal overlay appears and prevents the form from closing until user clicks 'Entendido'.",
+        "selector": ".modal-overlay, button:has-text('Entendido')",
+        "priority": "LOW"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "regression_results": {
+    "total_specs": 2,
+    "passed": 43,
+    "failed": 1,
+    "skipped": 0
+  },
+  "specs_created": [
+    "/app/backend/tests/test_sigpac_integration.py"
+  ],
+  "specs_updated": [
+    "/app/tests/e2e/fincas.spec.ts"
+  ],
+  "quarantined_tests": [],
+  "test_report_links": [
+    "/app/backend/tests/test_fincas.py",
+    "/app/backend/tests/test_sigpac_integration.py",
+    "/app/test_reports/pytest/sigpac_final.xml",
+    "/app/tests/e2e/fincas.spec.ts"
+  ],
+  "action_items": [
+    "OPTIONAL: Consider adding logic to prevent daily summary modal from appearing during/after form operations - currently it can block CRUD workflows"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_sigpac_integration.py",
+    "/app/tests/e2e/fincas.spec.ts"
+  ],
+  "success_rate": {
+    "backend": "100% (27/27)",
+    "frontend": "94% (16/17)"
+  },
+  "seed_data_creation": "Test fincas created and deleted during tests. No persistent seed data added.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "SIGPAC Integration is fully tested and working. The integration includes:\n- GET /api/sigpac/provincias - returns list of 52 Spanish provinces with codes\n- GET /api/sigpac/usos - returns dictionary of SIGPAC land use codes\n- GET /api/sigpac/consulta - queries external HubCloud SIGPAC API for parcel data\n\nFrontend features tested:\n- SIGPAC section in Fincas form with 'Buscar en SIGPAC' button\n- Province dropdown loads all provinces from backend\n- Validation error when required fields missing (provincia, municipio, poligono, parcela)\n- Success message displays superficie, uso, pendiente when parcel found\n- Error message when parcel not found\n- Auto-fill of hectareas field after successful SIGPAC lookup\n- SIGPAC data saved correctly with finca\n\nNote: External SIGPAC HubCloud API may be unavailable at times - tests handle this gracefully.",
+  "tested_features": {
+    "backend_endpoints": [
+      "GET /api/sigpac/provincias - List Spanish provinces with SIGPAC codes",
+      "GET /api/sigpac/usos - Dictionary of SIGPAC land use codes",
+      "GET /api/sigpac/consulta - Query external SIGPAC API for parcel data",
+      "GET /api/sigpac/municipios/{provincia} - Get municipalities for a province"
+    ],
+    "frontend_features": [
+      "SIGPAC section in Fincas form with help text",
+      "'Buscar en SIGPAC' button triggers API lookup",
+      "Province dropdown populated from /api/sigpac/provincias",
+      "Validation error for missing required SIGPAC fields",
+      "Success message showing Superficie, Uso, Pendiente",
+      "Error message for non-existent parcels",
+      "Auto-fill hectareas field from SIGPAC response",
+      "'Visor SIGPAC' external link to official SIGPAC viewer"
+    ]
+  }
+}
