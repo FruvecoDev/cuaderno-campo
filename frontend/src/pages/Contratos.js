@@ -493,34 +493,72 @@ const Contratos = () => {
                   </div>
                 )}
                 
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">Tipo Comisión</label>
-                  <select
-                    className="form-select"
-                    value={formData.comision_tipo}
-                    onChange={(e) => setFormData({...formData, comision_tipo: e.target.value})}
-                    data-testid="select-comision-tipo"
-                  >
-                    <option value="porcentaje">Porcentaje (%)</option>
-                    <option value="euro_kilo">€ por Kilo</option>
-                  </select>
-                </div>
+                {/* Comisión según tipo de contrato */}
+                {formData.tipo === 'Compra' && formData.agente_compra && (
+                  <>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label">Tipo Comisión Compra</label>
+                      <select
+                        className="form-select"
+                        value={formData.comision_compra_tipo}
+                        onChange={(e) => setFormData({...formData, comision_compra_tipo: e.target.value})}
+                        data-testid="select-comision-compra-tipo"
+                      >
+                        <option value="porcentaje">Porcentaje (%)</option>
+                        <option value="euro_kilo">€ por Kilo</option>
+                      </select>
+                    </div>
+                    
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label">
+                        Comisión {formData.comision_compra_tipo === 'porcentaje' ? '(%)' : '(€/kg)'}
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        className="form-input"
+                        value={formData.comision_compra_valor}
+                        onChange={(e) => setFormData({...formData, comision_compra_valor: e.target.value})}
+                        placeholder={formData.comision_compra_tipo === 'porcentaje' ? 'Ej: 2.5' : 'Ej: 0.05'}
+                        data-testid="input-comision-compra-valor"
+                      />
+                    </div>
+                  </>
+                )}
                 
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">
-                    Comisión {formData.comision_tipo === 'porcentaje' ? '(%)' : '(€/kg)'}
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    className="form-input"
-                    value={formData.comision_valor}
-                    onChange={(e) => setFormData({...formData, comision_valor: e.target.value})}
-                    placeholder={formData.comision_tipo === 'porcentaje' ? 'Ej: 2.5' : 'Ej: 0.05'}
-                    data-testid="input-comision-valor"
-                  />
-                </div>
+                {formData.tipo === 'Venta' && formData.agente_venta && (
+                  <>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label">Tipo Comisión Venta</label>
+                      <select
+                        className="form-select"
+                        value={formData.comision_venta_tipo}
+                        onChange={(e) => setFormData({...formData, comision_venta_tipo: e.target.value})}
+                        data-testid="select-comision-venta-tipo"
+                      >
+                        <option value="porcentaje">Porcentaje (%)</option>
+                        <option value="euro_kilo">€ por Kilo</option>
+                      </select>
+                    </div>
+                    
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label">
+                        Comisión {formData.comision_venta_tipo === 'porcentaje' ? '(%)' : '(€/kg)'}
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        className="form-input"
+                        value={formData.comision_venta_valor}
+                        onChange={(e) => setFormData({...formData, comision_venta_valor: e.target.value})}
+                        placeholder={formData.comision_venta_tipo === 'porcentaje' ? 'Ej: 2.5' : 'Ej: 0.05'}
+                        data-testid="input-comision-venta-valor"
+                      />
+                    </div>
+                  </>
+                )}
               </div>
             </div>
             
