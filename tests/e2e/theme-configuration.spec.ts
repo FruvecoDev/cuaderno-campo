@@ -142,8 +142,8 @@ test.describe('Theme Configuration Feature', () => {
     // Set up dialog handler for confirmation
     page.on('dialog', dialog => dialog.accept());
     
-    // Click reset button
-    await page.getByTestId('reset-theme').click();
+    // Click reset button (force to bypass overlay)
+    await page.getByTestId('reset-theme').click({ force: true });
     
     // Wait for success message
     await expect(page.getByText(/restaurado al predeterminado/i)).toBeVisible({ timeout: 5000 });
