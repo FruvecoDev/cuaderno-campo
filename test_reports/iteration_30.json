@@ -1,0 +1,64 @@
+{
+  "summary": "SIGPAC Map Feature testing completed. All tests pass. Backend: 9/9 tests. Frontend: 21/21 tests. Map displays orange polygon geometry centered on parcel, layer selector works (Satellite/Street/Topo), expand/reduce fullscreen works, map modal from finca list works.",
+  "mode": "update",
+  "baseline_commit": "eb783c4b3890fa562a0df79652b63b1a367b53a5",
+  "head_commit": "a27e958856d22a524793f35743a61430e2dc2691",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "regression_results": {
+    "total_specs": 2,
+    "passed": 30,
+    "failed": 0,
+    "skipped": 0
+  },
+  "specs_created": [],
+  "specs_updated": [
+    "/app/tests/e2e/fincas.spec.ts",
+    "/app/backend/tests/test_sigpac_integration.py"
+  ],
+  "quarantined_tests": [],
+  "test_report_links": [
+    "/app/backend/tests/test_sigpac_integration.py",
+    "/app/test_reports/pytest/test_sigpac_map.xml",
+    "/app/tests/e2e/fincas.spec.ts"
+  ],
+  "action_items": [],
+  "updated_files": [
+    "/app/tests/e2e/fincas.spec.ts",
+    "/app/backend/tests/test_sigpac_integration.py"
+  ],
+  "success_rate": {
+    "backend": "100% (9/9)",
+    "frontend": "100% (21/21)"
+  },
+  "seed_data_creation": "No new seed data created. Tests used existing finca 'Finca La Esperanza' with SIGPAC data.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "SIGPAC Map Feature is fully tested and working. Features tested:\n\n1. Map displays in form after successful SIGPAC search:\n   - Orange polygon geometry drawn on satellite imagery\n   - Auto-centered on parcel location\n   - SIGPAC data panel shows Provincia, Municipio, Poligono, Parcela, Recinto, Uso\n\n2. 'Ver en Mapa' / 'Ocultar Mapa' toggle button works\n\n3. Map button in finca list (green map icon) opens floating modal map for fincas with SIGPAC data\n\n4. Layer selector (select-map-layer testid):\n   - Satellite (ESRI World Imagery)\n   - Callejero (OpenStreetMap)\n   - Topografico (OpenTopoMap)\n\n5. Ampliar/Reducir fullscreen toggle (btn-toggle-expand-map testid) works\n\n6. Close button on map (btn-close-map testid) closes the map modal\n\n7. MapaSigpac component (data-testid='mapa-sigpac-container') uses react-leaflet\n\n8. Backend SIGPAC endpoints all working:\n   - GET /api/sigpac/provincias - 52 Spanish provinces\n   - GET /api/sigpac/usos - Land use codes dictionary\n   - GET /api/sigpac/consulta - External HubCloud SIGPAC API query\n   - GET /api/sigpac/municipios/{provincia} - Municipalities per province",
+  "tested_features": {
+    "backend_endpoints": [
+      "GET /api/sigpac/provincias - List Spanish provinces with SIGPAC codes",
+      "GET /api/sigpac/usos - Dictionary of SIGPAC land use codes",
+      "GET /api/sigpac/consulta - Query external SIGPAC API for parcel data",
+      "GET /api/sigpac/municipios/{provincia} - Get municipalities for a province"
+    ],
+    "frontend_features": [
+      "MapaSigpac component renders Leaflet map with parcel polygon",
+      "Map shows orange polygon geometry from WKT data",
+      "SIGPAC data panel on map displays all parcel info",
+      "Layer selector switches between Satellite/Street/Topo",
+      "Ampliar/Reducir button toggles fullscreen mode",
+      "Ver en Mapa/Ocultar Mapa button toggles map visibility in form",
+      "Map button in finca list opens floating modal",
+      "Close button on map modal closes it",
+      "Map auto-centers on parcel location after SIGPAC search"
+    ]
+  }
+}
