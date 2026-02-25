@@ -274,7 +274,8 @@ const Recomendaciones = () => {
       fetchContratos(),
       fetchFitosanitarios(),
       fetchTipos(),
-      fetchStats()
+      fetchStats(),
+      fetchPlantillas()
     ]);
     setLoading(false);
   };
