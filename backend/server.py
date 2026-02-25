@@ -47,6 +47,7 @@ from routes_comisiones import router as comisiones_router
 from routes_config import router as config_router
 from routes_recomendaciones import router as recomendaciones_router
 from routes_plantillas_recomendaciones import router as plantillas_recomendaciones_router
+from routes_alertas_clima import router as alertas_clima_router
 
 app = FastAPI(title="FRUVECO - Agricultural Management System V1")
 
