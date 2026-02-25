@@ -977,7 +977,7 @@ const Parcelas = () => {
               </thead>
               <tbody>
                 {filteredParcelas.map((p) => (
-                  <tr key={p._id}>
+                  <tr key={p._id} data-parcela-id={p._id} style={{ transition: 'background-color 0.3s' }}>
                     {fieldsConfig.codigo_plantacion ? <td className="font-semibold">{p.codigo_plantacion}</td> : null}
                     {fieldsConfig.proveedor ? <td>{p.proveedor}</td> : null}
                     {fieldsConfig.finca ? <td>{p.finca}</td> : null}
