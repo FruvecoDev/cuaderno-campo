@@ -182,13 +182,24 @@ const LiquidacionComisiones = () => {
             <select
               className="form-select"
               value={filters.tipo_agente}
-              onChange={(e) => setFilters({ ...filters, tipo_agente: e.target.value })}
+              onChange={(e) => setFilters({ ...filters, tipo_agente: e.target.value, agente_id: '' })}
               data-testid="filter-tipo-agente"
             >
               <option value="">Todos</option>
               <option value="compra">Agentes de Compra</option>
               <option value="venta">Agentes de Venta</option>
             </select>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Buscar Agente</label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="Buscar por nombre..."
+              value={filters.busqueda_agente || ''}
+              onChange={(e) => setFilters({ ...filters, busqueda_agente: e.target.value })}
+              data-testid="filter-busqueda-agente"
+            />
           </div>
           <div className="form-group">
             <label className="form-label">Agente</label>
@@ -201,6 +212,7 @@ const LiquidacionComisiones = () => {
               <option value="">Todos los agentes</option>
               {agentes
                 .filter(a => !filters.tipo_agente || a.tipo === filters.tipo_agente)
+                .filter(a => !filters.busqueda_agente || a.nombre.toLowerCase().includes(filters.busqueda_agente.toLowerCase()))
                 .map(a => (
                   <option key={`${a.id}-${a.tipo}`} value={a.id}>
                     {a.nombre} ({a.tipo === 'compra' ? 'Compra' : 'Venta'})
