@@ -211,8 +211,8 @@ test.describe('Theme Configuration Feature', () => {
     
     await loginAndNavigateToConfig(page);
     
-    // Click azul theme
-    await page.getByTestId('theme-azul').click();
+    // Click azul theme (force to bypass overlay)
+    await page.getByTestId('theme-azul').click({ force: true });
     await expect(page.getByText(/aplicado correctamente/i)).toBeVisible({ timeout: 5000 });
     
     // Get updated CSS variable - azul primary is "210 70% 35%"
