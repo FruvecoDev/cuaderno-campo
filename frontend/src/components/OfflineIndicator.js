@@ -255,6 +255,31 @@ const OfflineIndicator = () => {
               flexDirection: 'column',
               gap: '0.5rem'
             }}>
+              {/* Notification toggle */}
+              <button
+                onClick={handleEnableNotifications}
+                className="btn btn-sm"
+                style={{ 
+                  width: '100%', 
+                  justifyContent: 'center',
+                  backgroundColor: notificationsEnabled ? '#dcfce7' : 'transparent',
+                  color: notificationsEnabled ? '#166534' : 'inherit'
+                }}
+                data-testid="btn-enable-notifications"
+              >
+                {notificationsEnabled ? (
+                  <>
+                    <Bell size={14} style={{ marginRight: '0.25rem' }} />
+                    Notificaciones activas
+                  </>
+                ) : (
+                  <>
+                    <BellOff size={14} style={{ marginRight: '0.25rem' }} />
+                    Activar notificaciones
+                  </>
+                )}
+              </button>
+              
               <button
                 onClick={handleCacheData}
                 disabled={!isOnline}
