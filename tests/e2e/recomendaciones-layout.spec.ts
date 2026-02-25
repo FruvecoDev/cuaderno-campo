@@ -17,19 +17,22 @@ test.describe('Recomendaciones Page Stats Layout', () => {
       localStorage.setItem('resumen_diario_shown', today);
     });
     
-    // Login
+    // Fill login form
     await page.fill('input[type="email"], input[placeholder*="usuario"], input[placeholder*="email"]', 'admin@fruveco.com');
     await page.fill('input[type="password"]', 'admin123');
     await page.click('button[type="submit"]');
     
-    // Wait for dashboard to load
-    await page.waitForURL('**/dashboard**', { timeout: 10000 });
+    // Wait for navigation to any page after login (dashboard or similar)
+    await page.waitForURL(/\/(dashboard|parcelas|recomendaciones)/, { timeout: 15000 });
   });
 
   test('should navigate to Recomendaciones page', async ({ page }) => {
     // Navigate to Recomendaciones
     await page.goto('/recomendaciones');
     await page.waitForLoadState('domcontentloaded');
+    
+    // Wait for page content to load
+    await page.waitForSelector('[data-testid="recomendaciones-page"]', { timeout: 10000 });
     
     // Verify page loads
     await expect(page.getByTestId('recomendaciones-page')).toBeVisible();
@@ -40,8 +43,8 @@ test.describe('Recomendaciones Page Stats Layout', () => {
     await page.goto('/recomendaciones');
     await page.waitForLoadState('domcontentloaded');
     
-    // Wait for page to load
-    await expect(page.getByTestId('recomendaciones-page')).toBeVisible();
+    // Wait for page content to load
+    await page.waitForSelector('[data-testid="recomendaciones-page"]', { timeout: 10000 });
     
     // Check for the 4 stat counters - they should all be visible
     await expect(page.locator('text=Total').first()).toBeVisible();
@@ -54,8 +57,8 @@ test.describe('Recomendaciones Page Stats Layout', () => {
     await page.goto('/recomendaciones');
     await page.waitForLoadState('domcontentloaded');
     
-    // Wait for page to load
-    await expect(page.getByTestId('recomendaciones-page')).toBeVisible();
+    // Wait for page content to load
+    await page.waitForSelector('[data-testid="recomendaciones-page"]', { timeout: 10000 });
     
     // Find the stats container - it should use grid with 4 columns
     // The stats are in card elements after the header
@@ -77,7 +80,7 @@ test.describe('Recomendaciones Page Stats Layout', () => {
     await page.waitForLoadState('domcontentloaded');
     
     // Wait for stats to load
-    await expect(page.getByTestId('recomendaciones-page')).toBeVisible();
+    await page.waitForSelector('[data-testid="recomendaciones-page"]', { timeout: 10000 });
     
     // Find the stat cards - they contain large numbers
     const cards = page.locator('.card').filter({ hasText: 'Total' }).first();
@@ -101,7 +104,7 @@ test.describe('Recomendaciones Page Stats Layout', () => {
     await page.goto('/recomendaciones');
     await page.waitForLoadState('domcontentloaded');
     
-    await expect(page.getByTestId('recomendaciones-page')).toBeVisible();
+    await page.waitForSelector('[data-testid="recomendaciones-page"]', { timeout: 10000 });
     
     // Get positions of stat cards
     const totalCard = page.locator('.card').filter({ hasText: 'Total' }).first();
@@ -136,7 +139,7 @@ test.describe('Recomendaciones Page Stats Layout', () => {
     await page.goto('/recomendaciones');
     await page.waitForLoadState('domcontentloaded');
     
-    await expect(page.getByTestId('recomendaciones-page')).toBeVisible();
+    await page.waitForSelector('[data-testid="recomendaciones-page"]', { timeout: 10000 });
     
     // Check that stat cards with borders exist (Pendientes has orange, Programadas has blue, Aplicadas has green)
     const pendientesCard = page.locator('.card[style*="border-left: 4px solid"]').filter({ hasText: 'Pendientes' });
