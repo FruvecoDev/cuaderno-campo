@@ -202,15 +202,74 @@ const Fincas = () => {
             hectareas: data.superficie_ha || prev.hectareas
           }));
         }
+        
+        // Guardar datos para el mapa
+        setMapData({
+          sigpac: data.sigpac,
+          wkt: data.geometria_wkt,
+          centroide: data.centroide,
+          superficie_ha: data.superficie_ha,
+          uso_sigpac: data.uso_sigpac
+        });
+        
+        // Mostrar el mapa automáticamente si hay geometría
+        if (data.geometria_wkt || data.centroide) {
+          setShowMap(true);
+        }
       } else {
         setSigpacError(data.message || data.error || 'Error al consultar SIGPAC');
+        setMapData(null);
       }
     } catch (err) {
       console.error('Error consultando SIGPAC:', err);
       setSigpacError('Error de conexión al servicio SIGPAC');
+      setMapData(null);
     }
     
     setSigpacLoading(false);
+  };
+  
+  // Función para ver mapa de una finca existente
+  const verMapaFinca = async (finca) => {
+    if (finca.sigpac && finca.sigpac.provincia && finca.sigpac.municipio && finca.sigpac.poligono && finca.sigpac.parcela) {
+      // Buscar datos en SIGPAC para obtener geometría
+      try {
+        const params = new URLSearchParams({
+          provincia: finca.sigpac.provincia,
+          municipio: finca.sigpac.municipio,
+          poligono: finca.sigpac.poligono,
+          parcela: finca.sigpac.parcela,
+          agregado: finca.sigpac.cod_agregado || '0',
+          zona: finca.sigpac.zona || '0'
+        });
+        
+        if (finca.sigpac.recinto) {
+          params.append('recinto', finca.sigpac.recinto);
+        }
+        
+        const res = await fetch(`${BACKEND_URL}/api/sigpac/consulta?${params}`, { headers });
+        const data = await res.json();
+        
+        if (data.success) {
+          setMapData({
+            sigpac: finca.sigpac,
+            wkt: data.geometria_wkt,
+            centroide: data.centroide,
+            superficie_ha: data.superficie_ha,
+            uso_sigpac: data.uso_sigpac,
+            denominacion: finca.denominacion || finca.nombre
+          });
+          setShowMap(true);
+        } else {
+          alert('No se encontró la parcela en SIGPAC');
+        }
+      } catch (err) {
+        console.error('Error consultando SIGPAC para mapa:', err);
+        alert('Error al cargar datos del mapa');
+      }
+    } else {
+      alert('Esta finca no tiene datos SIGPAC completos');
+    }
   };
 
   // Filtrar fincas
