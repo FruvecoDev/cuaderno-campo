@@ -64,6 +64,15 @@ const Fitosanitarios = () => {
   const [importLoading, setImportLoading] = useState(false);
   const [importResult, setImportResult] = useState(null);
   const fileInputRef = useRef(null);
+  const mapaFileInputRef = useRef(null);
+  
+  // MAPA Sync
+  const [showMapaPanel, setShowMapaPanel] = useState(false);
+  const [mapaInfo, setMapaInfo] = useState(null);
+  const [verifyingProduct, setVerifyingProduct] = useState(null);
+  const [verificationResult, setVerificationResult] = useState(null);
+  const [bulkVerifying, setBulkVerifying] = useState(false);
+  const [bulkVerifyResult, setBulkVerifyResult] = useState(null);
 
   // Filters
   const [filters, setFilters] = useState({
