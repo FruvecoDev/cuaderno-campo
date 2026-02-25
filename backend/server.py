@@ -108,6 +108,7 @@ app.include_router(recomendaciones_router)
 app.include_router(plantillas_recomendaciones_router)
 app.include_router(alertas_clima_router)
 app.include_router(notificaciones_router)
+app.include_router(resumen_diario_router)
 
 # Mount static files for uploaded images
 uploads_dir = "/app/uploads"
