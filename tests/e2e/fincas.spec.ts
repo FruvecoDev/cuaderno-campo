@@ -958,8 +958,6 @@ test.describe('Fincas Module - Polygon Drawing Feature', () => {
 });
 
 test.describe('Fincas Module - Geometry Persistence', () => {
-  const uniqueId = `TEST_GEOM_${Date.now()}`;
-  let createdFincaId: string | null = null;
 
   test.beforeEach(async ({ page }) => {
     await dismissToasts(page);
