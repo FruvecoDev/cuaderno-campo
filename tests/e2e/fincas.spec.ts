@@ -279,10 +279,11 @@ test.describe('Fincas Module - SIGPAC Integration', () => {
     // Click to open dropdown and verify options exist
     await provinciaSelect.click();
     
-    // Check for some known provinces
-    await expect(page.locator('option:has-text("Sevilla")')).toBeVisible();
-    await expect(page.locator('option:has-text("Madrid")')).toBeVisible();
-    await expect(page.locator('option:has-text("Barcelona")')).toBeVisible();
+    // Check for some known provinces within the SIGPAC select only
+    const sigpacSelect = page.getByTestId('input-sigpac-provincia');
+    await expect(sigpacSelect.locator('option:has-text("Sevilla")')).toBeVisible();
+    await expect(sigpacSelect.locator('option:has-text("Madrid")')).toBeVisible();
+    await expect(sigpacSelect.locator('option:has-text("Barcelona")')).toBeVisible();
   });
 
   test('should search SIGPAC and display success message on valid parcel', async ({ page }) => {
