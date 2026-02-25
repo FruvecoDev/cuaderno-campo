@@ -53,6 +53,7 @@ const Recomendaciones = () => {
   const [tipos, setTipos] = useState([]);
   const [subtipos, setSubtipos] = useState([]);
   const [stats, setStats] = useState(null);
+  const [plantillas, setPlantillas] = useState([]);
   
   // UI states
   const [loading, setLoading] = useState(true);
@@ -62,6 +63,33 @@ const Recomendaciones = () => {
   const [success, setSuccess] = useState(null);
   const [generatingTratamiento, setGeneratingTratamiento] = useState(null);
   const [showCalculadora, setShowCalculadora] = useState(false);
+  
+  // Plantillas states
+  const [activeTab, setActiveTab] = useState('recomendaciones'); // 'recomendaciones' | 'plantillas'
+  const [showPlantillaForm, setShowPlantillaForm] = useState(false);
+  const [editingPlantillaId, setEditingPlantillaId] = useState(null);
+  const [showPlantillaSelector, setShowPlantillaSelector] = useState(false);
+  const [showAplicacionMasiva, setShowAplicacionMasiva] = useState(false);
+  const [selectedPlantilla, setSelectedPlantilla] = useState(null);
+  const [selectedParcelas, setSelectedParcelas] = useState([]);
+  const [aplicacionMasivaLoading, setAplicacionMasivaLoading] = useState(false);
+  
+  // Plantilla form state
+  const [plantillaForm, setPlantillaForm] = useState({
+    nombre: '',
+    descripcion: '',
+    tipo: 'Tratamiento Fitosanitario',
+    subtipo: '',
+    producto_id: '',
+    producto_nombre: '',
+    dosis: '',
+    unidad_dosis: 'L/ha',
+    volumen_agua: '',
+    prioridad: 'Media',
+    motivo: '',
+    observaciones: '',
+    activo: true
+  });
   
   // Multiple recommendations
   const [recomendacionesPendientes, setRecomendacionesPendientes] = useState([]);
