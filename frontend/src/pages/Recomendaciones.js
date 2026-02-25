@@ -1155,15 +1155,115 @@ const Recomendaciones = () => {
               )}
             </div>
             
-            <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-              <button type="button" className="btn btn-secondary" onClick={resetForm}>
-                Cancelar
-              </button>
-              <button type="submit" className="btn btn-primary">
-                {editingId ? 'Actualizar' : 'Crear'} Recomendación
-              </button>
+            {/* Buttons section */}
+            <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.5rem', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {!editingId && (
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary"
+                    onClick={handleAddToPending}
+                    disabled={!formData.parcela_id}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                  >
+                    <Plus size={16} /> Añadir a la lista
+                  </button>
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button type="button" className="btn btn-secondary" onClick={resetForm}>
+                  Cancelar
+                </button>
+                {editingId ? (
+                  <button type="submit" className="btn btn-primary">
+                    Actualizar Recomendación
+                  </button>
+                ) : (
+                  <button type="submit" className="btn btn-primary" disabled={recomendacionesPendientes.length > 0}>
+                    Crear Recomendación
+                  </button>
+                )}
+              </div>
             </div>
           </form>
+          
+          {/* Pending Recommendations List */}
+          {recomendacionesPendientes.length > 0 && (
+            <div style={{ marginTop: '1.5rem', borderTop: '2px solid hsl(var(--border))', paddingTop: '1.5rem' }}>
+              <div className="flex justify-between items-center mb-3">
+                <h4 style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <FileText size={18} />
+                  Recomendaciones a guardar ({recomendacionesPendientes.length})
+                </h4>
+                <button 
+                  className="btn btn-primary"
+                  onClick={handleSaveAllPending}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                >
+                  <CheckCircle size={16} /> Guardar Todas
+                </button>
+              </div>
+              
+              <div className="table-responsive">
+                <table className="table" style={{ fontSize: '0.875rem' }}>
+                  <thead>
+                    <tr>
+                      <th>Parcela</th>
+                      <th>Cultivo</th>
+                      <th>Tipo</th>
+                      <th>Producto</th>
+                      <th>Dosis</th>
+                      <th>Prioridad</th>
+                      <th>Alertas</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recomendacionesPendientes.map((rec) => (
+                      <tr key={rec.id} style={{ backgroundColor: rec.alertas_bloqueantes ? '#fef2f2' : undefined }}>
+                        <td>{rec.parcela_codigo}</td>
+                        <td>{rec.cultivo} {rec.variedad && `(${rec.variedad})`}</td>
+                        <td>{rec.subtipo || rec.tipo}</td>
+                        <td>{rec.producto_nombre || '-'}</td>
+                        <td>{rec.dosis} {rec.unidad_dosis}</td>
+                        <td>
+                          <span style={{
+                            padding: '0.125rem 0.5rem',
+                            borderRadius: '9999px',
+                            fontSize: '0.7rem',
+                            backgroundColor: PRIORIDAD_COLORS[rec.prioridad]?.bg,
+                            color: PRIORIDAD_COLORS[rec.prioridad]?.text
+                          }}>
+                            {rec.prioridad}
+                          </span>
+                        </td>
+                        <td>
+                          {rec.alertas_bloqueantes ? (
+                            <span style={{ color: '#dc2626', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                              <AlertTriangle size={14} /> Bloqueante
+                            </span>
+                          ) : rec.tiene_alertas ? (
+                            <span style={{ color: '#d97706' }}>Advertencia</span>
+                          ) : (
+                            <span style={{ color: '#16a34a' }}>OK</span>
+                          )}
+                        </td>
+                        <td>
+                          <button
+                            className="btn btn-sm"
+                            style={{ backgroundColor: 'hsl(var(--destructive))', color: 'white', padding: '0.25rem 0.5rem' }}
+                            onClick={() => handleRemoveFromPending(rec.id)}
+                          >
+                            <X size={12} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
       
