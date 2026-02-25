@@ -29,11 +29,32 @@ const Layout = ({ children }) => {
   // Estado para el logo personalizado
   const [dashboardLogo, setDashboardLogo] = useState(null);
   
+  // Estado para Resumen Diario
+  const [showResumenDiario, setShowResumenDiario] = useState(false);
+  
   // Estado para secciones colapsadas
   const [collapsedSections, setCollapsedSections] = useState(() => {
     const saved = localStorage.getItem('menu_collapsed_sections');
     return saved ? JSON.parse(saved) : {};
   });
+  
+  // Mostrar Resumen Diario al iniciar sesión (una vez por día)
+  useEffect(() => {
+    if (user) {
+      const today = new Date().toISOString().split('T')[0];
+      const dismissed = localStorage.getItem('resumen_diario_dismissed');
+      const lastShown = localStorage.getItem('resumen_diario_shown');
+      
+      // Show if not dismissed today and not already shown today
+      if (dismissed !== today && lastShown !== today) {
+        // Small delay to let the page load first
+        setTimeout(() => {
+          setShowResumenDiario(true);
+          localStorage.setItem('resumen_diario_shown', today);
+        }, 500);
+      }
+    }
+  }, [user]);
   
   // Cargar logo personalizado
   useEffect(() => {
