@@ -1,0 +1,68 @@
+{
+  "summary": "Fincas (Farms) module fully tested. Backend: 18/18 tests pass (CRUD, filters, stats, SIGPAC data). Frontend: 9/9 E2E tests pass (page load, form display, CRUD operations, filters). All features working correctly including complete form with all sections, stat cards, filtering by type/provincia, expandable card details, and SIGPAC data persistence.",
+  "mode": "generate",
+  "baseline_commit": "0b876950196ec2defd78ad6cf68546bce3327022",
+  "head_commit": "16a038bb611ac21b2cc1bcad87f5ce842daf33d4",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "regression_results": {
+    "total_specs": 2,
+    "passed": 27,
+    "failed": 0,
+    "skipped": 0
+  },
+  "specs_created": [
+    "/app/backend/tests/test_fincas.py",
+    "/app/tests/e2e/fincas.spec.ts"
+  ],
+  "specs_updated": [],
+  "quarantined_tests": [],
+  "test_report_links": [
+    "/app/backend/tests/test_fincas.py",
+    "/app/test_reports/pytest/test_fincas.xml",
+    "/app/tests/e2e/fincas.spec.ts"
+  ],
+  "action_items": [],
+  "updated_files": [
+    "/app/backend/tests/test_fincas.py",
+    "/app/tests/e2e/fincas.spec.ts"
+  ],
+  "success_rate": {
+    "backend": "100% (18/18)",
+    "frontend": "100% (9/9)"
+  },
+  "seed_data_creation": "Test fincas created and deleted during tests. No persistent seed data added.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Fincas module is fully tested. The module provides complete CRUD for farm management including:\n- Create finca with all fields: Denominación, Provincia, Población, Polígono, Parcela, Subparcela, Finca Propia checkbox, Hectáreas, Áreas, Toneladas, Producción Esperada/Disponible, SIGPAC data (8 fields), Recolección (Semana, Año), Precios (Corte, Transporte, Proveedor), Observaciones\n- List fincas with filters by search, provincia, type (Propias/Alquiladas)\n- Expandable card view showing all details\n- Stats showing totals for fincas, hectareas, production\n- Note: Daily summary modal appears after login and may block interactions - use force:true on clicks or close it first with 'Entendido' button",
+  "tested_features": {
+    "backend_endpoints": [
+      "POST /api/fincas - Create new finca with all fields",
+      "GET /api/fincas - List fincas with filters (search, provincia, finca_propia)",
+      "GET /api/fincas/stats - Statistics (total, propias, alquiladas, hectareas, production)",
+      "GET /api/fincas/{id} - Get single finca",
+      "PUT /api/fincas/{id} - Update finca",
+      "DELETE /api/fincas/{id} - Delete finca",
+      "Duplicate name validation",
+      "SIGPAC data persistence"
+    ],
+    "frontend_features": [
+      "Page displays stats cards (Total Fincas, Fincas Propias, Alquiladas, Total Hectáreas, Prod. Esperada)",
+      "Filter section with search, provincia dropdown, type dropdown",
+      "Nueva Finca button opens form",
+      "Form displays all sections: Datos de la Finca, Superficie y Producción, Datos SIGPAC, Recolección, Precios, Observaciones",
+      "Form has all required fields with proper data-testid attributes",
+      "Create finca flow works end-to-end",
+      "Filter by type (Propias/Alquiladas) works",
+      "Expandable card details show all finca information",
+      "Clear filters button works"
+    ]
+  }
+}
