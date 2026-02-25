@@ -460,7 +460,7 @@ const MapaSigpac = ({
       )}
       
       {/* Map */}
-      <div style={{ height: isExpanded ? 'calc(100% - 52px)' : enableDrawing ? '412px' : '348px' }}>
+      <div style={{ height: effectiveExpanded ? 'calc(100% - 52px)' : enableDrawing ? '412px' : 'calc(100% - 52px)' }}>
         <MapContainer
           center={mapCenter}
           zoom={mapZoom}
