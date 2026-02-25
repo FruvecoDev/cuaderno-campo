@@ -32,6 +32,7 @@ import Agentes from './pages/Agentes';
 import Clientes from './pages/Clientes';
 import LiquidacionComisiones from './pages/LiquidacionComisiones';
 import Configuracion from './pages/Configuracion';
+import Recomendaciones from './pages/Recomendaciones';
 
 function App() {
   return (
