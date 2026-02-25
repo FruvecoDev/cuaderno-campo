@@ -409,12 +409,25 @@ const Fincas = () => {
       precio_transporte: finca.precio_transporte || 0,
       proveedor_corte: finca.proveedor_corte || '',
       observaciones: finca.observaciones || '',
-      parcelas_ids: finca.parcelas_ids || []
+      parcelas_ids: finca.parcelas_ids || [],
+      geometria_manual: finca.geometria_manual || null
     });
     setEditingId(finca._id);
     setShowForm(true);
     setSigpacResult(null);
     setSigpacError(null);
+    
+    // Cargar geometría dibujada si existe
+    if (finca.geometria_manual && finca.geometria_manual.coords) {
+      setDrawnGeometry({
+        coords: finca.geometria_manual.coords,
+        wkt: finca.geometria_manual.wkt,
+        area_ha: finca.geometria_manual.area_ha,
+        centroid: finca.geometria_manual.centroide
+      });
+    } else {
+      setDrawnGeometry(null);
+    }
   };
 
   const handleDelete = async (id) => {
