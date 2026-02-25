@@ -20,7 +20,8 @@ const LiquidacionComisiones = () => {
   const [filters, setFilters] = useState({
     campana: '',
     agente_id: '',
-    tipo_agente: ''
+    tipo_agente: '',
+    busqueda_agente: ''
   });
   
   useEffect(() => {
