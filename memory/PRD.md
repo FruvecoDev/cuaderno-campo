@@ -856,3 +856,23 @@ Módulos actualizados para seguir patrón consistente:
 - **Test Report**: `/app/test_reports/iteration_21.json` - 100% (24/24 tests)
 - **Estado**: ✅ COMPLETADO Y TESTEADO
 
+## Mejoras Módulo Recomendaciones (25/02/2026) - COMPLETADO
+- **Alcance**: Funcionalidades avanzadas para crear múltiples recomendaciones eficientemente
+- **Nuevas funcionalidades**:
+  - **Selector de Contrato**: Campo opcional que filtra las parcelas disponibles
+  - **Auto-relleno Cultivo/Variedad**: Al seleccionar parcela, se rellenan automáticamente desde los datos de la parcela (indicador visual con fondo verde)
+  - **Lista de recomendaciones pendientes**: 
+    - Botón "Añadir a la lista" añade la recomendación actual sin guardar
+    - Tabla muestra: Parcela, Cultivo, Tipo, Producto, Dosis, Prioridad, Alertas
+    - Botón para eliminar items de la lista
+    - Botón "Guardar Todas" guarda todas las recomendaciones de una vez
+  - **Persistencia Backend**: Campos `cultivo` y `variedad` se guardan correctamente en MongoDB
+- **Frontend modificado**: `/app/frontend/src/pages/Recomendaciones.js`
+  - Selector de contrato (línea 840-854)
+  - Filtrado de parcelas por contrato (línea 106-109)
+  - Funciones `handleAddToPending`, `handleRemoveFromPending`, `handleSaveAllPending`
+  - Tabla de recomendaciones pendientes (línea 1190-1266)
+- **Backend verificado**: `/app/backend/routes_recomendaciones.py` acepta y guarda campos `cultivo`, `variedad`, `contrato_id`
+- **Test Report**: `/app/test_reports/iteration_22.json` - 100% (32/32 tests: 21 backend + 11 frontend)
+- **Estado**: ✅ COMPLETADO Y TESTEADO
+
