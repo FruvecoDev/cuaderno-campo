@@ -1119,3 +1119,41 @@ Módulos actualizados para seguir patrón consistente:
 - Total: 30/30 tests passed
 
 ### Estado: ✅ COMPLETADO Y TESTEADO
+
+
+## Dibujo Manual de Polígonos (25/02/2026) - COMPLETADO
+- **Alcance**: Dibujar manualmente los límites de las parcelas en el mapa de forma visual
+- **Componente**: `/app/frontend/src/components/MapaSigpac.js` (actualizado con `react-leaflet-draw`)
+- **Dependencia**: `react-leaflet-draw@0.21.0`
+
+### Funcionalidad:
+1. **Botón "Dibujar Parcela"** (verde) en la sección SIGPAC del formulario de fincas
+2. **Mapa de dibujo** con herramientas de Leaflet Draw:
+   - Herramienta de polígono para dibujar los límites
+   - Herramienta de edición para modificar vértices
+   - Herramienta de borrado para eliminar polígonos
+3. **Cálculo automático de área**:
+   - Se calcula el área en hectáreas usando la fórmula de Shoelace
+   - El campo "Hectáreas" del formulario se actualiza automáticamente
+4. **Panel informativo** "Parcela Dibujada" mostrando:
+   - Número de polígonos dibujados
+   - Área total en hectáreas
+   - Número de vértices
+5. **Botón "Limpiar"** para borrar todos los dibujos
+6. **Indicador verde** cuando se oculta el mapa pero hay una parcela dibujada
+7. **Persistencia**: La geometría dibujada se puede guardar con la finca
+
+### Flujo de uso:
+1. Usuario abre formulario de nueva finca
+2. Hace clic en "Dibujar Parcela"
+3. Usa la herramienta de polígono para marcar los límites
+4. El área se calcula automáticamente y aparece en el campo Hectáreas
+5. Puede editar, borrar o limpiar el dibujo
+6. Al guardar la finca, la geometría se asocia
+
+### Test Report: `/app/test_reports/iteration_31.json`
+- Backend: 100% (9/9 tests)
+- Frontend: 100% (32/32 tests)
+- Total: 41 tests passed
+
+### Estado: ✅ COMPLETADO Y TESTEADO
