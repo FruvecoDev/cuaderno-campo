@@ -991,3 +991,54 @@ Módulos actualizados para seguir patrón consistente:
 - **Solución**: Cambio de CSS grid a `gridTemplateColumns: 'repeat(4, 1fr)'` para 4 columnas fijas
 - **Resultado**: Contadores (Total, Pendientes, Programadas, Aplicadas) ahora en fila horizontal
 - **Estado**: ✅ COMPLETADO Y TESTEADO
+
+
+## Módulo de Fincas Completo (25/02/2026) - COMPLETADO
+- **Alcance**: Gestión completa de fincas agrícolas con todos los campos solicitados por el usuario
+- **Backend**: `/app/backend/routes_fincas.py` - CRUD completo
+- **Frontend**: `/app/frontend/src/pages/Fincas.js` - Interfaz completa
+
+### Campos del Formulario (basado en imagen del usuario):
+- **Datos de la Finca**:
+  - Denominación (obligatorio)
+  - Provincia, Población, Polígono, Parcela, Subparcela
+  - Finca Propia (checkbox)
+- **Superficie y Producción**:
+  - Hectáreas, Áreas, Toneladas
+  - Producción Esperada, Producción Disponible
+- **Datos SIGPAC** (sección destacada en azul):
+  - Provincia, Municipio, Cod. Agregado, Zona
+  - Polígono, Parcela, Recinto, Cod. Uso
+- **Recolección**:
+  - Semana (1-52), Año
+- **Precios**:
+  - Precio Corte, Precio Transporte, Prov. Corte
+- **Observaciones**: Textarea
+
+### Funcionalidades UI:
+- **Estadísticas en tiempo real**: Total Fincas, Propias, Alquiladas, Total Hectáreas, Prod. Esperada
+- **Filtros**: Búsqueda, Provincia (dropdown), Tipo (Propias/Alquiladas)
+- **Listado con tarjetas**: 
+  - Etiqueta visual "Propia" (verde) o "Alquilada" (naranja)
+  - Información resumida: ubicación, hectáreas, producción
+  - Botón expandir para ver todos los detalles
+  - Secciones en detalle: Ubicación, Superficie y Producción, Datos SIGPAC, Recolección y Precios
+- **CRUD completo**: Crear, editar, eliminar fincas
+
+### API Endpoints:
+- `GET /api/fincas` - Lista con filtros (search, provincia, finca_propia)
+- `GET /api/fincas/stats` - Estadísticas agregadas
+- `GET /api/fincas/{id}` - Detalle de una finca
+- `POST /api/fincas` - Crear finca
+- `PUT /api/fincas/{id}` - Actualizar finca
+- `DELETE /api/fincas/{id}` - Eliminar finca
+- `GET /api/fincas/parcelas-disponibles` - Parcelas sin asignar a finca
+- `POST /api/fincas/{id}/parcelas/{parcela_id}` - Asociar parcela
+- `DELETE /api/fincas/{id}/parcelas/{parcela_id}` - Desasociar parcela
+
+### Test Report: `/app/test_reports/iteration_28.json`
+- Backend: 100% (18/18 tests)
+- Frontend: 100% (9/9 tests)
+- Total: 27/27 tests passed
+
+### Estado: ✅ COMPLETADO Y TESTEADO
