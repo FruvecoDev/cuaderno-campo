@@ -297,24 +297,26 @@ const LiquidacionComisiones = () => {
                   backgroundColor: 'hsl(var(--muted) / 0.3)'
                 }}>
                   <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Contratos</div>
-                    <div style={{ fontSize: '1.1rem', fontWeight: '600' }}>{agente.contratos?.length || 0}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Albaranes</div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: '600' }}>{agente.albaranes?.length || 0}</div>
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Total Kg</div>
                     <div style={{ fontSize: '1.1rem', fontWeight: '600' }}>{agente.total_kg?.toLocaleString('es-ES') || 0}</div>
                   </div>
                   <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Importe Contratos</div>
-                    <div style={{ fontSize: '1.1rem', fontWeight: '600' }}>€{agente.total_importe_contratos?.toLocaleString('es-ES', { minimumFractionDigits: 2 }) || '0.00'}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Importe Albaranes</div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: '600' }}>€{agente.total_importe_albaranes?.toLocaleString('es-ES', { minimumFractionDigits: 2 }) || '0.00'}</div>
                   </div>
                 </div>
                 
-                {/* Tabla de Contratos */}
+                {/* Tabla de Albaranes */}
                 <div className="table-container" style={{ maxHeight: '300px', overflowY: 'auto' }}>
                   <table style={{ fontSize: '0.85rem' }}>
                     <thead>
                       <tr>
+                        <th>Albarán</th>
+                        <th>Fecha</th>
                         <th>Contrato</th>
                         <th>Campaña</th>
                         <th>{agente.tipo === 'compra' ? 'Proveedor' : 'Cliente'}</th>
@@ -327,28 +329,30 @@ const LiquidacionComisiones = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {agente.contratos?.map((contrato, cIdx) => (
+                      {agente.albaranes?.map((albaran, cIdx) => (
                         <tr key={cIdx}>
-                          <td style={{ fontWeight: '500' }}>{contrato.numero}</td>
-                          <td>{contrato.campana}</td>
-                          <td>{contrato.proveedor || contrato.cliente || '-'}</td>
-                          <td>{contrato.cultivo}</td>
-                          <td style={{ textAlign: 'right' }}>{contrato.cantidad_kg?.toLocaleString('es-ES')}</td>
-                          <td style={{ textAlign: 'right' }}>{contrato.precio_kg?.toFixed(3)}</td>
-                          <td style={{ textAlign: 'right' }}>{contrato.importe_contrato?.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</td>
+                          <td style={{ fontWeight: '500' }}>{albaran.numero}</td>
+                          <td>{albaran.fecha}</td>
+                          <td style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>{albaran.contrato_numero}</td>
+                          <td>{albaran.campana}</td>
+                          <td>{albaran.proveedor || albaran.cliente || '-'}</td>
+                          <td>{albaran.cultivo}</td>
+                          <td style={{ textAlign: 'right' }}>{albaran.cantidad_kg?.toLocaleString('es-ES')}</td>
+                          <td style={{ textAlign: 'right' }}>{albaran.precio_kg?.toFixed(4)}</td>
+                          <td style={{ textAlign: 'right' }}>{albaran.importe_albaran?.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</td>
                           <td>
                             <span style={{
                               padding: '0.125rem 0.375rem',
                               borderRadius: '4px',
                               fontSize: '0.7rem',
-                              backgroundColor: contrato.comision_tipo === 'porcentaje' ? '#e3f2fd' : '#fff3e0',
-                              color: contrato.comision_tipo === 'porcentaje' ? '#1565c0' : '#e65100'
+                              backgroundColor: albaran.comision_tipo === 'porcentaje' ? '#e3f2fd' : '#fff3e0',
+                              color: albaran.comision_tipo === 'porcentaje' ? '#1565c0' : '#e65100'
                             }}>
-                              {contrato.comision_tipo === 'porcentaje' ? `${contrato.comision_valor}%` : `${contrato.comision_valor} €/kg`}
+                              {albaran.comision_tipo === 'porcentaje' ? `${albaran.comision_valor}%` : `${albaran.comision_valor} €/kg`}
                             </span>
                           </td>
                           <td style={{ textAlign: 'right', fontWeight: '600', color: '#2e7d32' }}>
-                            {contrato.importe_comision?.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                            {albaran.importe_comision?.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
                           </td>
                         </tr>
                       ))}
