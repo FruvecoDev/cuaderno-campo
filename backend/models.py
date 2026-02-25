@@ -242,6 +242,14 @@ class DatosSIGPAC(BaseModel):
     cod_uso: Optional[str] = None
 
 
+class GeometriaManual(BaseModel):
+    """Geometría dibujada manualmente en el mapa"""
+    wkt: Optional[str] = None  # POLYGON((lon lat, ...))
+    coords: Optional[List[List[float]]] = None  # [[lat, lon], ...]
+    centroide: Optional[Dict[str, float]] = None  # {"lat": x, "lon": y}
+    area_ha: Optional[float] = None  # Área calculada en hectáreas
+
+
 class FincaBase(BaseModel):
     denominacion: str  # Nombre de la finca
     
