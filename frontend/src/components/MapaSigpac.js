@@ -605,8 +605,8 @@ const MapaSigpac = ({
       {enableDrawing && drawnPolygons.length > 0 && (
         <div style={{
           position: 'absolute',
-          bottom: isExpanded ? '20px' : '10px',
-          left: isExpanded ? '20px' : '10px',
+          bottom: effectiveExpanded ? '20px' : '10px',
+          left: effectiveExpanded ? '20px' : '10px',
           backgroundColor: 'rgba(255,255,255,0.95)',
           padding: '0.75rem',
           borderRadius: '8px',
