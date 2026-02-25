@@ -1,0 +1,422 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - img "Logo" [ref=e7]
+      - navigation [ref=e8]:
+        - generic [ref=e9]:
+          - generic [ref=e10]:
+            - generic "Colapsar sección" [ref=e11] [cursor=pointer]:
+              - generic [ref=e12]: General
+              - img [ref=e14]
+            - generic [ref=e17]:
+              - link "Dashboard" [ref=e18] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=e19]
+                - text: Dashboard
+              - link "Asistente IA" [ref=e24] [cursor=pointer]:
+                - /url: /asistente-ia
+                - img [ref=e25]
+                - text: Asistente IA
+          - generic [ref=e33]:
+            - generic "Colapsar sección" [ref=e34] [cursor=pointer]:
+              - generic [ref=e35]: Gestión Principal
+              - img [ref=e37]
+            - generic [ref=e40]:
+              - link "Contratos" [ref=e41] [cursor=pointer]:
+                - /url: /contratos
+                - img [ref=e42]
+                - text: Contratos
+              - link "Parcelas" [ref=e45] [cursor=pointer]:
+                - /url: /parcelas
+                - img [ref=e46]
+                - text: Parcelas
+              - link "Fincas" [ref=e49] [cursor=pointer]:
+                - /url: /fincas
+                - img [ref=e50]
+                - text: Fincas
+          - generic [ref=e53]:
+            - generic "Colapsar sección" [ref=e54] [cursor=pointer]:
+              - generic [ref=e55]: Actividades
+              - img [ref=e57]
+            - generic [ref=e60]:
+              - link "Visitas" [ref=e61] [cursor=pointer]:
+                - /url: /visitas
+                - img [ref=e62]
+                - text: Visitas
+              - link "Recomendaciones" [ref=e64] [cursor=pointer]:
+                - /url: /recomendaciones
+                - img [ref=e65]
+                - text: Recomendaciones
+              - link "Alertas Climáticas" [ref=e68] [cursor=pointer]:
+                - /url: /alertas-clima
+                - img [ref=e69]
+                - text: Alertas Climáticas
+              - link "Tareas" [ref=e74] [cursor=pointer]:
+                - /url: /tareas
+                - img [ref=e75]
+                - text: Tareas
+              - link "Tratamientos" [ref=e78] [cursor=pointer]:
+                - /url: /tratamientos
+                - img [ref=e79]
+                - text: Tratamientos
+              - link "Irrigaciones" [ref=e82] [cursor=pointer]:
+                - /url: /irrigaciones
+                - img [ref=e83]
+                - text: Irrigaciones
+              - link "Evaluaciones" [ref=e86] [cursor=pointer]:
+                - /url: /evaluaciones
+                - img [ref=e87]
+                - text: Evaluaciones
+          - generic [ref=e91]:
+            - generic "Colapsar sección" [ref=e92] [cursor=pointer]:
+              - generic [ref=e93]: Administración
+              - img [ref=e95]
+            - generic [ref=e98]:
+              - link "Recetas" [ref=e99] [cursor=pointer]:
+                - /url: /recetas
+                - img [ref=e100]
+                - text: Recetas
+              - link "Albaranes" [ref=e102] [cursor=pointer]:
+                - /url: /albaranes
+                - img [ref=e103]
+                - text: Albaranes
+              - link "Cosechas" [ref=e106] [cursor=pointer]:
+                - /url: /cosechas
+                - img [ref=e107]
+                - text: Cosechas
+              - link "Documentos" [ref=e116] [cursor=pointer]:
+                - /url: /documentos
+                - img [ref=e117]
+                - text: Documentos
+              - link "Informes Gastos" [ref=e119] [cursor=pointer]:
+                - /url: /informes-gastos
+                - img [ref=e120]
+                - text: Informes Gastos
+              - link "Informes Ingresos" [ref=e122] [cursor=pointer]:
+                - /url: /informes-ingresos
+                - img [ref=e123]
+                - text: Informes Ingresos
+              - link "Liquidación Comisiones" [ref=e126] [cursor=pointer]:
+                - /url: /liquidacion-comisiones
+                - img [ref=e127]
+                - text: Liquidación Comisiones
+          - generic [ref=e130]:
+            - generic "Colapsar sección" [ref=e131] [cursor=pointer]:
+              - generic [ref=e132]: Catálogos
+              - img [ref=e134]
+            - generic [ref=e137]:
+              - link "Proveedores" [ref=e138] [cursor=pointer]:
+                - /url: /proveedores
+                - img [ref=e139]
+                - text: Proveedores
+              - link "Clientes" [ref=e143] [cursor=pointer]:
+                - /url: /clientes
+                - img [ref=e144]
+                - text: Clientes
+              - link "Cultivos" [ref=e149] [cursor=pointer]:
+                - /url: /cultivos
+                - img [ref=e150]
+                - text: Cultivos
+              - link "Maquinaria" [ref=e153] [cursor=pointer]:
+                - /url: /maquinaria
+                - img [ref=e154]
+                - text: Maquinaria
+              - link "Fitosanitarios" [ref=e165] [cursor=pointer]:
+                - /url: /fitosanitarios
+                - img [ref=e166]
+                - text: Fitosanitarios
+              - link "Técnicos Aplicadores" [ref=e168] [cursor=pointer]:
+                - /url: /tecnicos-aplicadores
+                - img [ref=e169]
+                - text: Técnicos Aplicadores
+              - link "Artículos Explotación" [ref=e173] [cursor=pointer]:
+                - /url: /articulos-explotacion
+                - img [ref=e174]
+                - text: Artículos Explotación
+              - link "Agentes" [ref=e178] [cursor=pointer]:
+                - /url: /agentes
+                - img [ref=e179]
+                - text: Agentes
+          - generic [ref=e184]:
+            - generic "Colapsar sección" [ref=e185] [cursor=pointer]:
+              - generic [ref=e186]: Configuración
+              - img [ref=e188]
+            - generic [ref=e191]:
+              - link "Usuarios" [ref=e192] [cursor=pointer]:
+                - /url: /usuarios
+                - img [ref=e193]
+                - text: Usuarios
+              - link "Traducciones" [ref=e198] [cursor=pointer]:
+                - /url: /traducciones
+                - img [ref=e199]
+                - text: Traducciones
+              - link "Configuración App" [ref=e202] [cursor=pointer]:
+                - /url: /configuracion
+                - img [ref=e203]
+                - text: Configuración App
+      - generic [ref=e206]:
+        - generic [ref=e207]:
+          - img [ref=e209]
+          - generic [ref=e212]:
+            - generic [ref=e213]: Administrador FRUVECO
+            - generic [ref=e214]: Admin
+          - button "ES" [ref=e216] [cursor=pointer]:
+            - img [ref=e217]
+            - generic [ref=e220]: ES
+        - button "Cerrar Sesión" [ref=e221] [cursor=pointer]:
+          - img [ref=e222]
+          - text: Cerrar Sesión
+    - generic [ref=e225]:
+      - generic [ref=e226]:
+        - button [ref=e228] [cursor=pointer]:
+          - img [ref=e229]
+        - button "Conectado" [ref=e233] [cursor=pointer]:
+          - img [ref=e235]
+          - generic [ref=e239]: Conectado
+      - generic [ref=e242]:
+        - generic [ref=e243]:
+          - heading "Fincas" [level=1] [ref=e244]:
+            - img [ref=e245]
+            - text: Fincas
+          - button "Nueva Finca" [ref=e248] [cursor=pointer]:
+            - img [ref=e249]
+            - text: Nueva Finca
+        - generic [ref=e251]:
+          - generic [ref=e252]:
+            - generic [ref=e253]: Total Fincas
+            - generic [ref=e254]: "11"
+          - generic [ref=e255]:
+            - generic [ref=e256]: Fincas Propias
+            - generic [ref=e257]: "5"
+          - generic [ref=e258]:
+            - generic [ref=e259]: Alquiladas
+            - generic [ref=e260]: "6"
+          - generic [ref=e261]:
+            - generic [ref=e262]: Total Hectáreas
+            - generic [ref=e263]: "142.5"
+          - generic [ref=e264]:
+            - generic [ref=e265]: Prod. Esperada (t)
+            - generic [ref=e266]: "400"
+        - generic [ref=e268]:
+          - generic [ref=e269]:
+            - heading "Nueva Finca" [level=3] [ref=e270]
+            - button [ref=e271] [cursor=pointer]:
+              - img [ref=e272]
+          - generic [ref=e275]:
+            - generic [ref=e276]:
+              - heading "Datos de la Finca" [level=4] [ref=e277]
+              - generic [ref=e278]:
+                - generic [ref=e279]:
+                  - generic [ref=e280]: Denominación *
+                  - textbox "Nombre de la finca" [ref=e281]: Finca Dibujada TEST_GEOM_1772048629312
+                - generic [ref=e282]:
+                  - generic [ref=e283]: Provincia
+                  - 'textbox "Ej: Sevilla" [ref=e284]': Sevilla
+                - generic [ref=e285]:
+                  - generic [ref=e286]: Población
+                  - 'textbox "Ej: Lebrija" [ref=e287]'
+                - generic [ref=e288]:
+                  - generic [ref=e289]: Polígono
+                  - textbox [ref=e290]
+                - generic [ref=e291]:
+                  - generic [ref=e292]: Parcela
+                  - textbox [ref=e293]
+                - generic [ref=e294]:
+                  - generic [ref=e295]: Subparcela
+                  - textbox [ref=e296]
+                - generic [ref=e298] [cursor=pointer]:
+                  - checkbox "Finca Propia" [ref=e299]
+                  - generic [ref=e300]: Finca Propia
+            - generic [ref=e301]:
+              - heading "Superficie y Producción" [level=4] [ref=e302]
+              - generic [ref=e303]:
+                - generic [ref=e304]:
+                  - generic [ref=e305]: Hectáreas
+                  - spinbutton [ref=e306]: "4992257.042765087"
+                - generic [ref=e307]:
+                  - generic [ref=e308]: Áreas
+                  - spinbutton [ref=e309]: "0"
+                - generic [ref=e310]:
+                  - generic [ref=e311]: Toneladas
+                  - spinbutton [ref=e312]: "0"
+                - generic [ref=e313]:
+                  - generic [ref=e314]: Producción Esperada
+                  - spinbutton [ref=e315]: "0"
+                - generic [ref=e316]:
+                  - generic [ref=e317]: Producción Disponible
+                  - spinbutton [ref=e318]: "0"
+            - generic [ref=e319]:
+              - generic [ref=e320]:
+                - heading "Datos SIGPAC" [level=4] [ref=e321]:
+                  - img [ref=e322]
+                  - text: Datos SIGPAC
+                - generic [ref=e324]:
+                  - button "Buscar en SIGPAC" [ref=e325] [cursor=pointer]:
+                    - img [ref=e327]
+                    - text: Buscar en SIGPAC
+                  - button "Dibujar Parcela" [ref=e330] [cursor=pointer]:
+                    - img [ref=e331]
+                    - text: Dibujar Parcela
+                  - link "Visor SIGPAC" [ref=e334] [cursor=pointer]:
+                    - /url: https://sigpac.mapa.es/fega/visor/
+                    - img [ref=e335]
+                    - text: Visor SIGPAC
+              - paragraph [ref=e339]: Introduzca los códigos SIGPAC y pulse "Buscar en SIGPAC", o use "Dibujar Parcela" para marcar manualmente los límites en el mapa.
+              - generic [ref=e341]:
+                - generic [ref=e342]:
+                  - img [ref=e343]
+                  - generic [ref=e346]:
+                    - strong [ref=e347]: Parcela dibujada manualmente
+                    - generic [ref=e348]:
+                      - text: "Área calculada:"
+                      - strong [ref=e349]: 4992257.0428 ha
+                - button "Editar" [ref=e350] [cursor=pointer]:
+                  - img [ref=e351]
+                  - text: Editar
+              - generic [ref=e353]:
+                - generic [ref=e354]:
+                  - generic [ref=e355]: Provincia *
+                  - combobox [ref=e356]:
+                    - option "Seleccionar..." [selected]
+                    - generic:
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                      - option "-"
+                - generic [ref=e357]:
+                  - generic [ref=e358]: Municipio *
+                  - 'textbox "Ej: 053" [ref=e359]'
+                - generic [ref=e360]:
+                  - generic [ref=e361]: Agregado
+                  - textbox "0" [ref=e362]
+                - generic [ref=e363]:
+                  - generic [ref=e364]: Zona
+                  - textbox "0" [ref=e365]
+                - generic [ref=e366]:
+                  - generic [ref=e367]: Polígono *
+                  - 'textbox "Ej: 5" [ref=e368]'
+                - generic [ref=e369]:
+                  - generic [ref=e370]: Parcela *
+                  - 'textbox "Ej: 12" [ref=e371]'
+                - generic [ref=e372]:
+                  - generic [ref=e373]: Recinto
+                  - textbox "1" [ref=e374]
+                - generic [ref=e375]:
+                  - generic [ref=e376]: Cod. Uso
+                  - textbox "TA" [ref=e377]
+            - generic [ref=e378]:
+              - generic [ref=e379]:
+                - heading "Recolección" [level=4] [ref=e380]
+                - generic [ref=e381]:
+                  - generic [ref=e382]:
+                    - generic [ref=e383]: Semana
+                    - spinbutton [ref=e384]
+                  - generic [ref=e385]:
+                    - generic [ref=e386]: Año
+                    - spinbutton [ref=e387]: "2026"
+              - generic [ref=e388]:
+                - heading "Precios" [level=4] [ref=e389]
+                - generic [ref=e390]:
+                  - generic [ref=e391]:
+                    - generic [ref=e392]: Precio Corte
+                    - spinbutton [ref=e393]: "0"
+                  - generic [ref=e394]:
+                    - generic [ref=e395]: Precio Transporte
+                    - spinbutton [ref=e396]: "0"
+                  - generic [ref=e397]:
+                    - generic [ref=e398]: Prov. Corte
+                    - textbox [ref=e399]
+            - generic [ref=e400]:
+              - generic [ref=e401]: Observaciones
+              - textbox "Notas adicionales sobre la finca..." [ref=e402]
+            - generic [ref=e403]:
+              - button "Guardar Finca" [ref=e404] [cursor=pointer]
+              - button "Cancelar" [ref=e405] [cursor=pointer]
+        - generic [ref=e406]:
+          - generic [ref=e407]:
+            - heading "Filtros" [level=3] [ref=e408]
+            - button "Limpiar" [ref=e410] [cursor=pointer]:
+              - img [ref=e411]
+              - text: Limpiar
+          - generic [ref=e414]:
+            - generic [ref=e415]:
+              - generic [ref=e416]: Buscar
+              - generic [ref=e417]:
+                - img [ref=e418]
+                - textbox "Nombre, provincia, población..." [active] [ref=e421]: TEST_GEOM_1772048629312
+            - generic [ref=e422]:
+              - generic [ref=e423]: Provincia
+              - combobox [ref=e424]:
+                - option "Todas" [selected]
+                - generic:
+                  - option
+                  - option
+                  - option
+                  - option
+            - generic [ref=e425]:
+              - generic [ref=e426]: Tipo
+              - combobox [ref=e427]:
+                - option "Todas" [selected]
+                - option "Propias"
+                - option "Alquiladas"
+        - generic [ref=e428]:
+          - heading "Listado de Fincas ( 0 )" [level=3] [ref=e429]:
+            - img [ref=e430]
+            - text: Listado de Fincas ( 0 )
+          - paragraph [ref=e435]: No hay fincas registradas
+  - link "Made with Emergent" [ref=e436] [cursor=pointer]:
+    - /url: https://app.emergent.sh/?utm_source=emergent-badge
+    - img [ref=e437]
+    - paragraph [ref=e440]: Made with Emergent
+```
