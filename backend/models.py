@@ -355,6 +355,7 @@ class FincaUpdate(BaseModel):
     proveedor_corte: Optional[str] = None
     parcelas_ids: Optional[List[str]] = None
     activo: Optional[bool] = None
+    geometria_manual: Optional[GeometriaManual] = None
 
 class FincaInDB(FincaBase):
     id: str = Field(alias="_id")
