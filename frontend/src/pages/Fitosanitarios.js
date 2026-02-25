@@ -290,6 +290,120 @@ const Fitosanitarios = () => {
     window.open('https://www.mapa.gob.es/es/agricultura/temas/sanidad-vegetal/productos-fitosanitarios/registro-productos/', '_blank');
   };
 
+  // Fetch MAPA info
+  const fetchMapaInfo = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/mapa-info`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setMapaInfo(data.info);
+      }
+    } catch (error) {
+      console.error('Error fetching MAPA info:', error);
+    }
+  };
+
+  // Import from MAPA Excel
+  const handleMapaFileSelect = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setImportLoading(true);
+    setImportResult(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/import-mapa-excel`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setImportResult({
+          success: true,
+          ...data
+        });
+        fetchProductos();
+        setSuccessMsg(`Importación MAPA: ${data.inserted} nuevos, ${data.updated} actualizados`);
+        setTimeout(() => setSuccessMsg(null), 5000);
+      } else {
+        setImportResult({
+          success: false,
+          error: data.detail || 'Error en la importación'
+        });
+      }
+    } catch (error) {
+      setImportResult({
+        success: false,
+        error: error.message
+      });
+    } finally {
+      setImportLoading(false);
+      e.target.value = '';
+    }
+  };
+
+  // Verify individual product with MAPA
+  const handleVerifyProduct = async (productoId) => {
+    setVerifyingProduct(productoId);
+    setVerificationResult(null);
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/verify-mapa/${productoId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        setVerificationResult(data);
+      } else {
+        setError(data.detail || 'Error en verificación');
+      }
+    } catch (error) {
+      setError('Error conectando con el servidor');
+    } finally {
+      setVerifyingProduct(null);
+    }
+  };
+
+  // Bulk verify products with MAPA
+  const handleBulkVerify = async () => {
+    if (!window.confirm('¿Verificar todos los productos activos contra el registro del MAPA? Esto puede tardar unos minutos.')) {
+      return;
+    }
+    
+    setBulkVerifying(true);
+    setBulkVerifyResult(null);
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/bulk-verify-mapa?limit=100`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        setBulkVerifyResult(data);
+        fetchProductos();
+        setSuccessMsg(`Verificación completada: ${data.encontrados} encontrados, ${data.no_encontrados} no encontrados`);
+        setTimeout(() => setSuccessMsg(null), 5000);
+      } else {
+        setError(data.detail || 'Error en verificación masiva');
+      }
+    } catch (error) {
+      setError('Error en verificación masiva');
+    } finally {
+      setBulkVerifying(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
