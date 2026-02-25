@@ -409,7 +409,7 @@ const MapaSigpac = ({
             ))}
           </select>
           <button
-            onClick={onToggleExpand}
+            onClick={handleToggleExpand}
             style={{
               background: 'rgba(255,255,255,0.2)',
               border: 'none',
@@ -423,8 +423,8 @@ const MapaSigpac = ({
             }}
             data-testid="btn-toggle-expand-map"
           >
-            {isExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-            {isExpanded ? 'Reducir' : 'Ampliar'}
+            {effectiveExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            {effectiveExpanded ? 'Reducir' : 'Ampliar'}
           </button>
           {onClose && (
             <button
