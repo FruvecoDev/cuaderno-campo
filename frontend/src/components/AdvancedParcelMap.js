@@ -317,8 +317,8 @@ function GeolocationControl({ onLocate }) {
       onClick={handleLocate}
       style={{
         position: 'absolute',
-        top: '80px',
-        right: '10px',
+        top: '10px',
+        left: '50px',
         zIndex: 1000,
         background: 'white',
         border: '2px solid rgba(0,0,0,0.2)',
