@@ -502,18 +502,28 @@ const Recomendaciones = () => {
     setAlerts({});
   };
   
+  const handleContratoChange = (contratoId) => {
+    const contrato = contratos.find(c => c._id === contratoId);
+    setFormData(prev => ({ 
+      ...prev, 
+      contrato_id: contratoId,
+      parcela_id: '', // Reset parcela when contrato changes
+      cultivo: contrato?.cultivo || '',
+      variedad: contrato?.variedad || '',
+      campana: contrato?.campana || prev.campana
+    }));
+  };
+  
   const handleParcelaChange = (parcelaId) => {
     const parcela = parcelas.find(p => p._id === parcelaId);
     setFormData(prev => ({ 
       ...prev, 
       parcela_id: parcelaId,
-      superficie_tratada: parcela?.superficie_total || ''
+      superficie_tratada: parcela?.superficie_total || '',
+      cultivo: parcela?.cultivo || prev.cultivo,
+      variedad: parcela?.variedad || prev.variedad,
+      contrato_id: parcela?.contrato_id || prev.contrato_id
     }));
-    
-    // Auto-fill contrato if parcela has one
-    if (parcela?.contrato_id) {
-      setFormData(prev => ({ ...prev, contrato_id: parcela.contrato_id }));
-    }
   };
   
   const handleProductoChange = (productoId) => {
