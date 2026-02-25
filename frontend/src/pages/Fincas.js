@@ -251,8 +251,27 @@ const Fincas = () => {
 
   // Opciones de filtros
   const filterOptions = useMemo(() => ({
-    provincias: [...new Set(fincas.map(f => f.provincia).filter(Boolean))]
+    provincias: [...new Set(fincas.map(f => f.provincia).filter(Boolean))].sort()
   }), [fincas]);
+
+  // Agrupar fincas por provincia
+  const fincasAgrupadas = useMemo(() => {
+    const grupos = {};
+    filteredFincas.forEach(finca => {
+      const provincia = finca.provincia || 'Sin provincia';
+      if (!grupos[provincia]) {
+        grupos[provincia] = [];
+      }
+      grupos[provincia].push(finca);
+    });
+    // Ordenar provincias alfabéticamente, "Sin provincia" al final
+    const provinciasOrdenadas = Object.keys(grupos).sort((a, b) => {
+      if (a === 'Sin provincia') return 1;
+      if (b === 'Sin provincia') return -1;
+      return a.localeCompare(b);
+    });
+    return { grupos, provinciasOrdenadas };
+  }, [filteredFincas]);
 
   const resetForm = () => {
     setFormData(emptyFormData);
