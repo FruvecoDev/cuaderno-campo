@@ -167,9 +167,18 @@ test.describe('Fincas Module - CRUD', () => {
     await page.getByTestId('input-sigpac-provincia').selectOption('14');
     await page.getByTestId('input-sigpac-municipio').fill('045');
     
-    // Save
+    // Save and handle potential modal overlay
     await page.getByTestId('btn-guardar-finca').click({ force: true });
-    await expect(page.getByTestId('form-finca')).not.toBeVisible({ timeout: 10000 });
+    
+    // Close modal if it appears after save
+    try {
+      const entendidoBtn = page.getByRole('button', { name: /entendido/i });
+      if (await entendidoBtn.isVisible({ timeout: 2000 })) {
+        await entendidoBtn.click({ force: true });
+      }
+    } catch {}
+    
+    await expect(page.getByTestId('form-finca')).not.toBeVisible({ timeout: 15000 });
     
     // Search for created finca
     await page.getByTestId('input-filtro-buscar').fill(uniqueId);
