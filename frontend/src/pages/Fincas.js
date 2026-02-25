@@ -260,6 +260,21 @@ const Fincas = () => {
   
   // Función para ver mapa de una finca existente
   const verMapaFinca = async (finca) => {
+    // Primero verificar si tiene geometría manual dibujada
+    if (finca.geometria_manual && finca.geometria_manual.coords) {
+      setMapData({
+        sigpac: finca.sigpac,
+        wkt: finca.geometria_manual.wkt,
+        centroide: finca.geometria_manual.centroide,
+        superficie_ha: finca.geometria_manual.area_ha,
+        denominacion: finca.denominacion || finca.nombre,
+        isManual: true
+      });
+      setShowMap(true);
+      return;
+    }
+    
+    // Si tiene datos SIGPAC, buscar la geometría
     if (finca.sigpac && finca.sigpac.provincia && finca.sigpac.municipio && finca.sigpac.poligono && finca.sigpac.parcela) {
       // Buscar datos en SIGPAC para obtener geometría
       try {
@@ -297,7 +312,7 @@ const Fincas = () => {
         alert('Error al cargar datos del mapa');
       }
     } else {
-      alert('Esta finca no tiene datos SIGPAC completos');
+      alert('Esta finca no tiene datos de ubicación (ni SIGPAC ni dibujo manual)');
     }
   };
 
