@@ -394,18 +394,13 @@ const Recomendaciones = () => {
         body: JSON.stringify(plantillaForm)
       });
       
-      // Clone response to handle potential double-read issues
-      const responseClone = response.clone();
+      // Read the response text first, then parse as JSON
+      const text = await response.text();
       let data;
       try {
-        data = await response.json();
-      } catch (jsonError) {
-        // If JSON parsing fails, try with clone
-        try {
-          data = await responseClone.json();
-        } catch (e) {
-          data = { detail: 'Error procesando respuesta del servidor' };
-        }
+        data = text ? JSON.parse(text) : {};
+      } catch (e) {
+        data = { detail: text || 'Error procesando respuesta' };
       }
       
       if (!response.ok) {
