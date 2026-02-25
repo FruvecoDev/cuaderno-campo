@@ -802,3 +802,42 @@ Módulos actualizados para seguir patrón consistente:
 - **Integración**: Usado en formulario de nueva/editar parcela y mapa general
 - **Test Report**: `/app/test_reports/iteration_20.json` - 100% (37/37 tests)
 - **Estado**: ✅ COMPLETADO Y TESTEADO
+
+
+## Módulo de Recomendaciones Técnicas (25/02/2026) - COMPLETADO
+- **Alcance**: Gestión de recomendaciones técnicas para parcelas y cultivos
+- **Ubicación en menú**: ACTIVIDADES > Recomendaciones (debajo de Visitas)
+- **Permisos**: Solo Técnicos, Managers y Admin pueden crear/editar
+- **Backend**:
+  - **Archivo**: `/app/backend/routes_recomendaciones.py`
+  - **Endpoints**:
+    - `GET /api/recomendaciones` - Listado con filtros
+    - `POST /api/recomendaciones` - Crear recomendación
+    - `PUT /api/recomendaciones/{id}` - Editar recomendación
+    - `DELETE /api/recomendaciones/{id}` - Eliminar recomendación
+    - `POST /api/recomendaciones/{id}/generar-tratamiento` - Crear tratamiento vinculado
+    - `GET /api/recomendaciones/stats/resumen` - Estadísticas
+    - `GET /api/recomendaciones/config/tipos` - Tipos y subtipos
+  - **MongoDB**: Colección `recomendaciones`
+- **Frontend**:
+  - **Página**: `/app/frontend/src/pages/Recomendaciones.js`
+  - **Campos del formulario**:
+    - Parcela (obligatorio)
+    - Campaña
+    - Tipo: Tratamiento Fitosanitario, Fertilización, Riego, Poda, Otro
+    - Subtipo: Herbicida, Insecticida, Fungicida, etc. (solo para tratamientos)
+    - Producto (de lista de fitosanitarios)
+    - Dosis y Unidad
+    - Fecha Programada
+    - Prioridad: Alta, Media, Baja
+    - Motivo/Justificación
+    - Observaciones
+  - **KPIs**: Total, Pendientes, Programadas, Aplicadas
+  - **Estados**: Pendiente, Programada, Aplicada, Cancelada
+- **Flujo de trabajo**:
+  - Técnico crea recomendación → Estado "Pendiente"
+  - Botón "Generar Tratamiento" → Crea tratamiento vinculado y cambia estado a "Aplicada"
+  - Una vez generado el tratamiento, la recomendación no se puede editar
+- **Test Report**: `/app/test_reports/iteration_21.json` - 100% (24/24 tests)
+- **Estado**: ✅ COMPLETADO Y TESTEADO
+
