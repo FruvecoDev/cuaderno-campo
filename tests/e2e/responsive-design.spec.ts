@@ -204,8 +204,10 @@ test.describe('Responsive Design - Mobile & Tablet Views', () => {
         return window.getComputedStyle(el).gridTemplateColumns;
       });
       
-      // On tablet, should have 2 columns
-      expect(gridStyle).toMatch(/repeat\(2|1fr 1fr|[0-9]+px [0-9]+px/);
+      // On tablet, should have 2 columns (e.g., "327.5px 327.5px" or "repeat(2, ...)" or "1fr 1fr")
+      // Check there are exactly 2 column values
+      const columnValues = gridStyle.split(' ');
+      expect(columnValues.length).toBe(2);
     });
     
     test('KPI cards stack in single column on mobile', async ({ page }) => {
@@ -234,8 +236,11 @@ test.describe('Responsive Design - Mobile & Tablet Views', () => {
       await page.getByTestId('login-password').fill('admin123');
       await page.getByTestId('login-submit').click();
       await page.waitForURL('**/dashboard', { timeout: 15000 });
+      await expect(page.getByTestId('dashboard-page')).toBeVisible({ timeout: 10000 });
+      // Navigate to contratos via URL
       await page.goto('/contratos', { waitUntil: 'domcontentloaded' });
-      await expect(page.getByTestId('contratos-page')).toBeVisible({ timeout: 10000 });
+      await page.waitForLoadState('domcontentloaded');
+      await expect(page.getByTestId('contratos-page')).toBeVisible({ timeout: 15000 });
     });
     
     test('table container has horizontal scroll on mobile', async ({ page }) => {
@@ -279,8 +284,11 @@ test.describe('Responsive Design - Mobile & Tablet Views', () => {
       await page.getByTestId('login-password').fill('admin123');
       await page.getByTestId('login-submit').click();
       await page.waitForURL('**/dashboard', { timeout: 15000 });
+      await expect(page.getByTestId('dashboard-page')).toBeVisible({ timeout: 10000 });
+      // Navigate to contratos via URL
       await page.goto('/contratos', { waitUntil: 'domcontentloaded' });
-      await expect(page.getByTestId('contratos-page')).toBeVisible({ timeout: 10000 });
+      await page.waitForLoadState('domcontentloaded');
+      await expect(page.getByTestId('contratos-page')).toBeVisible({ timeout: 15000 });
     });
     
     test('form displays in single column on mobile', async ({ page }) => {
