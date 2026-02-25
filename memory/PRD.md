@@ -962,3 +962,32 @@ Módulos actualizados para seguir patrón consistente:
   - Panel de configuración en `/app/frontend/src/pages/Configuracion.js`
 - **Test Report**: `/app/test_reports/iteration_26.json` - 100% (33/33 tests: 21 backend + 12 frontend)
 - **Estado**: ✅ COMPLETADO Y TESTEADO
+
+## Dashboard de Resumen Diario (25/02/2026) - COMPLETADO
+- **Alcance**: Modal de "briefing matutino" que aparece al iniciar sesión
+- **Funcionalidades implementadas**:
+  - Modal "Buenos días, [usuario]" con fecha actual
+  - 🌡️ **Alertas Climáticas Activas** - Con prioridad destacada si hay alertas altas
+  - 📋 **Tratamientos Hoy** - Contador y enlace a tratamientos
+  - 📄 **Contratos por Vencer** - Próximos 7 días
+  - 📊 **KPIs Generales**:
+    - Parcelas Activas
+    - Recomendaciones Pendientes
+    - Visitas Semana
+    - Cosechas Mes
+  - Checkbox "No mostrar hoy" que guarda preferencia en localStorage
+  - Botón "Entendido" para cerrar
+  - Se muestra una vez por día (controlado por localStorage)
+- **Backend**: `/app/backend/routes_resumen_diario.py`
+  - GET `/api/resumen-diario` - Retorna alertas, tratamientos, contratos, KPIs
+- **Frontend**:
+  - `/app/frontend/src/components/ResumenDiario.js` - Modal del resumen
+  - Integrado en `/app/frontend/src/components/Layout.js`
+- **Test Report**: `/app/test_reports/iteration_27.json` - 100% backend (12/12), 96% frontend (13/14)
+- **Estado**: ✅ COMPLETADO Y TESTEADO
+
+## Corrección Layout Recomendaciones (25/02/2026) - COMPLETADO
+- **Problema**: Los contadores/stats estaban apilados verticalmente
+- **Solución**: Cambio de CSS grid a `gridTemplateColumns: 'repeat(4, 1fr)'` para 4 columnas fijas
+- **Resultado**: Contadores (Total, Pendientes, Programadas, Aplicadas) ahora en fila horizontal
+- **Estado**: ✅ COMPLETADO Y TESTEADO
