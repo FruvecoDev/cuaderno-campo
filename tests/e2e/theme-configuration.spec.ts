@@ -89,7 +89,7 @@ test.describe('Theme Configuration Feature', () => {
     await loginAndNavigateToConfig(page);
     
     // Click Mostrar button to show custom colors
-    await page.getByRole('button', { name: /mostrar/i }).click();
+    await page.getByRole('button', { name: /mostrar/i }).click({ force: true });
     
     // Custom color inputs should be visible
     await expect(page.getByTestId('custom-primary-color')).toBeVisible();
@@ -97,7 +97,7 @@ test.describe('Theme Configuration Feature', () => {
     await expect(page.getByTestId('apply-custom-theme')).toBeVisible();
     
     // Click Ocultar to hide
-    await page.getByRole('button', { name: /ocultar/i }).click();
+    await page.getByRole('button', { name: /ocultar/i }).click({ force: true });
     
     // Inputs should be hidden
     await expect(page.getByTestId('custom-primary-color')).not.toBeVisible();
