@@ -85,7 +85,7 @@ test.describe('Plantillas - CRUD Operations', () => {
     // Wait for form to appear
     await expect(page.locator('h3').filter({ hasText: /Nueva Plantilla/i })).toBeVisible();
     
-    // Scroll to top to see the form
+    // Scroll to top to see the form completely
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.waitForTimeout(300);
     
@@ -109,8 +109,8 @@ test.describe('Plantillas - CRUD Operations', () => {
     // Submit
     await page.locator('button').filter({ hasText: /Crear Plantilla/i }).click();
     
-    // Should show success message
-    await expect(page.locator('.alert-success, text=Plantilla creada')).toBeVisible({ timeout: 5000 });
+    // Should show success message (text contains "Plantilla creada")
+    await expect(page.locator('text=Plantilla creada')).toBeVisible({ timeout: 5000 });
     
     // Cleanup: delete the created plantilla
     page.on('dialog', async dialog => await dialog.accept());
