@@ -2284,7 +2284,13 @@ const Recomendaciones = () => {
               </div>
             </div>
             
-            <div className="modal-footer">
+            <div className="modal-footer" style={{ 
+              display: 'flex', 
+              justifyContent: 'flex-end', 
+              gap: '0.5rem',
+              padding: '1rem 1.5rem',
+              borderTop: '1px solid hsl(var(--border))'
+            }}>
               <button 
                 className="btn btn-secondary" 
                 onClick={() => { setShowAplicacionMasiva(false); setSelectedPlantilla(null); setSelectedParcelas([]); }}
