@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, X, MapPin, Search, Home, ChevronDown, ChevronUp, Map, Layers, Loader2, ExternalLink, CheckCircle, AlertCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, MapPin, Search, Home, ChevronDown, ChevronUp, Map, Layers, Loader2, ExternalLink, CheckCircle, AlertCircle, Eye } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+
+// Lazy load map component
+const MapaSigpac = lazy(() => import('../components/MapaSigpac'));
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
