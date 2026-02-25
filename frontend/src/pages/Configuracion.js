@@ -744,7 +744,7 @@ const SchedulerConfig = ({ token }) => {
 // Main Configuration Page
 const Configuracion = () => {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const navigate = useNavigate();
   const [logos, setLogos] = useState({ login_logo: null, dashboard_logo: null });
   const [currentTheme, setCurrentTheme] = useState(null);
