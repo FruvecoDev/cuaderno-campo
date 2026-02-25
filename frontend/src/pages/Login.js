@@ -15,6 +15,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showInitAdmin, setShowInitAdmin] = useState(false);
+  const [loginLogo, setLoginLogo] = useState(null);
   const { login, initializeAdmin, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -24,6 +25,22 @@ const Login = () => {
       navigate('/dashboard');
     }
   }, [isAuthenticated, navigate]);
+  
+  // Fetch custom logo
+  useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/config/logos`);
+        const data = await response.json();
+        if (data.success && data.login_logo) {
+          setLoginLogo(`${API_URL}${data.login_logo}`);
+        }
+      } catch (err) {
+        console.error('Error fetching logo:', err);
+      }
+    };
+    fetchLogo();
+  }, []);
   
   const handleSubmit = async (e) => {
     e.preventDefault();
