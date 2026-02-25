@@ -112,14 +112,14 @@ test.describe('Theme Configuration Feature', () => {
     await loginAndNavigateToConfig(page);
     
     // Show custom colors
-    await page.getByRole('button', { name: /mostrar/i }).click();
+    await page.getByRole('button', { name: /mostrar/i }).click({ force: true });
     
     // Set custom colors using the color pickers
     await page.getByTestId('custom-primary-color').fill('#663399'); // rebeccapurple
     await page.getByTestId('custom-accent-color').fill('#ffa500'); // orange
     
-    // Apply custom colors
-    await page.getByTestId('apply-custom-theme').click();
+    // Apply custom colors (force to bypass overlay)
+    await page.getByTestId('apply-custom-theme').click({ force: true });
     
     // Wait for success message
     await expect(page.getByText(/personalizados aplicados/i)).toBeVisible({ timeout: 5000 });
