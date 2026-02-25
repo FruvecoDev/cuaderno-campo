@@ -310,6 +310,21 @@ const Layout = ({ children }) => {
       </aside>
       
       <div className="main-content">
+        {/* Header con indicador offline */}
+        <div style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 30,
+          backgroundColor: 'hsl(var(--background))',
+          borderBottom: '1px solid hsl(var(--border))',
+          padding: '0.5rem 1rem',
+          display: 'flex',
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+          gap: '0.5rem'
+        }}>
+          <OfflineIndicator />
+        </div>
         <div className="content">
           {children}
         </div>
