@@ -1600,6 +1600,7 @@ const Recomendaciones = () => {
       )}
       
       {/* List */}
+      {activeTab === 'recomendaciones' && (
       <div className="card">
         <h3 style={{ fontWeight: '600', marginBottom: '1rem' }}>
           Recomendaciones ({recomendaciones.length})
