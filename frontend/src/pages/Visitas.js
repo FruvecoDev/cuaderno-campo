@@ -226,15 +226,35 @@ const Visitas = () => {
   
   const fetchParcelas = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/parcelas`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setParcelas(data.parcelas || []);
+      // Intentar desde el servidor primero
+      if (navigator.onLine) {
+        const response = await fetch(`${BACKEND_URL}/api/parcelas`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setParcelas(data.parcelas || []);
+          return;
+        }
+      }
+      
+      // Si estamos offline o falló, cargar desde cache
+      const cachedParcelas = await offlineDB.getCachedParcelas();
+      if (cachedParcelas && cachedParcelas.length > 0) {
+        console.log('Loaded parcelas from cache:', cachedParcelas.length);
+        setParcelas(cachedParcelas);
       }
     } catch (error) {
       console.error('Error fetching parcelas:', error);
+      // Intentar desde cache como fallback
+      try {
+        const cachedParcelas = await offlineDB.getCachedParcelas();
+        if (cachedParcelas && cachedParcelas.length > 0) {
+          setParcelas(cachedParcelas);
+        }
+      } catch (cacheError) {
+        console.error('Error loading from cache:', cacheError);
+      }
     }
   };
   
