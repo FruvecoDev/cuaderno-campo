@@ -48,6 +48,8 @@ from routes_config import router as config_router
 from routes_recomendaciones import router as recomendaciones_router
 from routes_plantillas_recomendaciones import router as plantillas_recomendaciones_router
 from routes_alertas_clima import router as alertas_clima_router
+from routes_notificaciones import router as notificaciones_router
+from scheduler_service import init_scheduler, shutdown_scheduler
 
 app = FastAPI(title="FRUVECO - Agricultural Management System V1")
 
@@ -59,6 +61,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Startup/Shutdown events
+@app.on_event("startup")
+async def startup_event():
+    init_scheduler()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    shutdown_scheduler()
 
 # Include routers - Core modules
 app.include_router(auth_router)
