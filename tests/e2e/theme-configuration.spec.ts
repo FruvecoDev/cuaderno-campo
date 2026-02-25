@@ -156,17 +156,20 @@ test.describe('Theme Configuration Feature', () => {
     await page.getByTestId('login-submit').click();
     await expect(page).toHaveURL(/dashboard/, { timeout: 15000 });
     
+    // Wait for dashboard to fully load (not just "Cargando...")
+    await expect(page.getByText('Cargando...')).not.toBeVisible({ timeout: 10000 });
+    
     // Reload page
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
     
-    // Theme should still be morado (check CSS variable)
-    const primary = await page.evaluate(() => {
-      return getComputedStyle(document.documentElement).getPropertyValue('--primary');
-    });
-    
-    // Morado primary is "270 50% 40%"
-    expect(primary.trim()).toBe('270 50% 40%');
+    // Wait for theme to be applied (check that --primary changes from initial)
+    // The initializeTheme() is async, so we poll for the expected value
+    await expect.poll(async () => {
+      return page.evaluate(() => {
+        return getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
+      });
+    }, { timeout: 10000, intervals: [500] }).toBe('270 50% 40%');
   });
 
   test('theme is applied on app initial load', async ({ page, request }) => {
