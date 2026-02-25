@@ -4,7 +4,8 @@ import {
   Plus, Edit2, Trash2, Search, Filter, X, 
   AlertTriangle, CheckCircle, Clock, Calendar,
   FileText, Beaker, ArrowRight, Loader2, AlertCircle,
-  Calculator, Droplets, Info
+  Calculator, Droplets, Info, Copy, Layers, Zap, 
+  ToggleLeft, ToggleRight, Settings
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
