@@ -717,7 +717,27 @@ const Fincas = () => {
                 }}>
                   <CheckCircle size={20} style={{ color: '#2e7d32', flexShrink: 0, marginTop: '2px' }} />
                   <div style={{ flex: 1 }}>
-                    <strong style={{ color: '#2e7d32' }}>Parcela encontrada en SIGPAC</strong>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <strong style={{ color: '#2e7d32' }}>Parcela encontrada en SIGPAC</strong>
+                      {mapData && (
+                        <button
+                          type="button"
+                          className="btn btn-sm"
+                          style={{ 
+                            backgroundColor: '#1565c0', 
+                            color: 'white',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                          onClick={() => setShowMap(!showMap)}
+                          data-testid="btn-toggle-map"
+                        >
+                          <Eye size={14} />
+                          {showMap ? 'Ocultar Mapa' : 'Ver en Mapa'}
+                        </button>
+                      )}
+                    </div>
                     <div style={{ fontSize: '0.85rem', marginTop: '0.25rem' }}>
                       <span style={{ marginRight: '1rem' }}>
                         <strong>Superficie:</strong> {sigpacResult.superficie_ha?.toFixed(4)} ha
@@ -732,6 +752,23 @@ const Fincas = () => {
                       )}
                     </div>
                   </div>
+                </div>
+              )}
+              
+              {/* Mapa SIGPAC */}
+              {showMap && mapData && (
+                <div style={{ marginBottom: '1rem' }}>
+                  <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Cargando mapa...</div>}>
+                    <MapaSigpac
+                      sigpacData={mapData.sigpac}
+                      wkt={mapData.wkt}
+                      centroide={mapData.centroide}
+                      denominacion={formData.denominacion || mapData.denominacion}
+                      onClose={() => setShowMap(false)}
+                      isExpanded={mapExpanded}
+                      onToggleExpand={() => setMapExpanded(!mapExpanded)}
+                    />
+                  </Suspense>
                 </div>
               )}
               
