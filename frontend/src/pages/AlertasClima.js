@@ -182,7 +182,6 @@ const AlertasClima = () => {
       }
       
       const data = await response.json();
-      }
       
       setSuccess(data.message);
       setTimeout(() => setSuccess(null), 4000);
