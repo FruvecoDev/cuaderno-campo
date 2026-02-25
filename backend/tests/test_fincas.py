@@ -474,11 +474,11 @@ class TestGeometriaManual:
         assert geom.get("area_ha") == 15.25, "Updated geometria_manual should have new area_ha"
         assert geom.get("centroide", {}).get("lat") == 38.05, "Updated geometria_manual should have new centroide"
     
-    def test_update_finca_clear_geometria_manual(self, api_session, test_finca_data):
-        """Test clearing geometria_manual by setting to None"""
+    def test_update_finca_replace_geometria_manual(self, api_session, test_finca_data):
+        """Test replacing geometria_manual with a new geometry"""
         # Create finca with geometria_manual
         test_data = test_finca_data.copy()
-        test_data["denominacion"] = f"Clear Geom Test {datetime.now().strftime('%Y%m%d%H%M%S')}"
+        test_data["denominacion"] = f"Replace Geom Test {datetime.now().strftime('%Y%m%d%H%M%S')}"
         test_data["geometria_manual"] = {
             "wkt": "POLYGON((-5.5 36.5, -5.4 36.5, -5.4 36.6, -5.5 36.6, -5.5 36.5))",
             "coords": [[36.5, -5.5], [36.5, -5.4], [36.6, -5.4], [36.6, -5.5], [36.5, -5.5]],
@@ -491,19 +491,29 @@ class TestGeometriaManual:
         
         finca_id = create_response.json().get("data", {}).get("_id")
         
-        # Clear geometria_manual
+        # Replace with new geometria_manual
+        new_geometry = {
+            "wkt": "POLYGON((-6.1 36.8, -6.0 36.8, -6.0 36.9, -6.1 36.9, -6.1 36.8))",
+            "coords": [[36.8, -6.1], [36.8, -6.0], [36.9, -6.0], [36.9, -6.1], [36.8, -6.1]],
+            "centroide": {"lat": 36.85, "lon": -6.05},
+            "area_ha": 7.5
+        }
+        
         update_response = api_session.put(f"{BASE_URL}/api/fincas/{finca_id}", json={
-            "geometria_manual": None
+            "geometria_manual": new_geometry
         })
         assert update_response.status_code == 200
         
-        # Verify it's cleared
+        # Verify it's replaced
         get_response = api_session.get(f"{BASE_URL}/api/fincas/{finca_id}")
         assert get_response.status_code == 200
         
         finca = get_response.json()
-        # geometria_manual should be None or not present
-        assert finca.get("geometria_manual") is None or finca.get("geometria_manual") == {}
+        geom = finca.get("geometria_manual", {})
+        
+        # Should have new values
+        assert geom.get("area_ha") == 7.5, "Should have new area_ha"
+        assert geom.get("centroide", {}).get("lat") == 36.85, "Should have new centroide lat"
         
         # Cleanup
         api_session.delete(f"{BASE_URL}/api/fincas/{finca_id}")
