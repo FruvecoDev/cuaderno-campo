@@ -672,3 +672,387 @@ async def get_mapa_search_url(
             "4. Use la función 'Importar' en FRUVECO para cargar los datos"
         ]
     }
+
+
+# ==================== MEJORAS DE SINCRONIZACIÓN CON MAPA ====================
+
+# URLs oficiales del MAPA
+MAPA_REGISTRO_URL = "https://www.mapa.gob.es/es/agricultura/temas/sanidad-vegetal/productos-fitosanitarios/registro-productos/"
+MAPA_CONSULTA_URL = "https://www.mapa.gob.es/es/agricultura/temas/sanidad-vegetal/productos-fitosanitarios/registro/productos/conpam.asp"
+
+
+@router.post("/import-mapa-excel")
+async def import_mapa_excel(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Importa productos fitosanitarios desde un archivo Excel descargado del MAPA.
+    El archivo debe ser el formato oficial de exportación del registro del MAPA.
+    """
+    if current_user.get("role") not in ["Admin", "Manager"]:
+        raise HTTPException(status_code=403, detail="No tienes permisos para importar datos del MAPA")
+    
+    if not file.filename.endswith(('.xlsx', '.xls')):
+        raise HTTPException(status_code=400, detail="El archivo debe ser Excel (.xlsx o .xls)")
+    
+    try:
+        contents = await file.read()
+        
+        # Try to read with different possible structures from MAPA
+        try:
+            df = pd.read_excel(io.BytesIO(contents))
+        except Exception:
+            df = pd.read_excel(io.BytesIO(contents), header=1)  # Try with header in row 2
+        
+        # Normalize column names (MAPA uses various formats)
+        column_mapping = {
+            'nº registro': 'numero_registro',
+            'n registro': 'numero_registro',
+            'numero registro': 'numero_registro',
+            'num. registro': 'numero_registro',
+            'registro': 'numero_registro',
+            'nombre comercial': 'nombre_comercial',
+            'nombre': 'nombre_comercial',
+            'formulado': 'nombre_comercial',
+            'titular': 'empresa',
+            'empresa': 'empresa',
+            'fabricante': 'empresa',
+            'sustancia activa': 'materia_activa',
+            'sustancias activas': 'materia_activa',
+            'materia activa': 'materia_activa',
+            'tipo de producto': 'tipo',
+            'tipo': 'tipo',
+            'uso': 'tipo',
+            'plazo de seguridad': 'plazo_seguridad',
+            'plazo seguridad': 'plazo_seguridad',
+            'estado': 'estado_mapa',
+            'situacion': 'estado_mapa'
+        }
+        
+        # Normalize columns
+        df.columns = df.columns.str.lower().str.strip()
+        df = df.rename(columns=column_mapping)
+        
+        # Process rows
+        inserted = 0
+        updated = 0
+        errors = []
+        
+        for idx, row in df.iterrows():
+            try:
+                # Skip empty rows
+                if pd.isna(row.get('numero_registro')) and pd.isna(row.get('nombre_comercial')):
+                    continue
+                
+                numero_registro = str(row.get('numero_registro', '')).strip()
+                nombre_comercial = str(row.get('nombre_comercial', '')).strip()
+                
+                if not numero_registro and not nombre_comercial:
+                    continue
+                
+                # Build product data
+                producto_data = {
+                    "numero_registro": numero_registro,
+                    "nombre_comercial": nombre_comercial,
+                    "empresa": str(row.get('empresa', '')).strip() if pd.notna(row.get('empresa')) else '',
+                    "materia_activa": str(row.get('materia_activa', '')).strip() if pd.notna(row.get('materia_activa')) else '',
+                    "tipo": categorize_tipo(str(row.get('tipo', ''))) if pd.notna(row.get('tipo')) else 'Fitosanitario',
+                    "source": "MAPA_IMPORT",
+                    "imported_at": datetime.utcnow(),
+                    "activo": True
+                }
+                
+                # Handle plazo_seguridad if present
+                if pd.notna(row.get('plazo_seguridad')):
+                    try:
+                        plazo = str(row.get('plazo_seguridad'))
+                        # Extract number from string like "21 días" or just "21"
+                        import re
+                        numbers = re.findall(r'\d+', plazo)
+                        if numbers:
+                            producto_data["plazo_seguridad"] = int(numbers[0])
+                    except:
+                        pass
+                
+                # Check if product exists
+                existing = await fitosanitarios_collection.find_one({
+                    "$or": [
+                        {"numero_registro": numero_registro},
+                        {"nombre_comercial": nombre_comercial}
+                    ]
+                }) if numero_registro or nombre_comercial else None
+                
+                if existing:
+                    # Update existing product
+                    await fitosanitarios_collection.update_one(
+                        {"_id": existing["_id"]},
+                        {"$set": {
+                            **producto_data,
+                            "updated_at": datetime.utcnow()
+                        }}
+                    )
+                    updated += 1
+                else:
+                    # Insert new product
+                    producto_data["created_at"] = datetime.utcnow()
+                    await fitosanitarios_collection.insert_one(producto_data)
+                    inserted += 1
+                    
+            except Exception as e:
+                errors.append(f"Fila {idx + 2}: {str(e)}")
+        
+        return {
+            "success": True,
+            "message": f"Importación completada: {inserted} nuevos, {updated} actualizados",
+            "inserted": inserted,
+            "updated": updated,
+            "total_procesados": inserted + updated,
+            "errors": errors[:10] if errors else [],
+            "total_errors": len(errors)
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error procesando archivo: {str(e)}")
+
+
+def categorize_tipo(tipo_str: str) -> str:
+    """Categoriza el tipo de producto basándose en palabras clave"""
+    tipo_lower = tipo_str.lower()
+    
+    if 'herbicida' in tipo_lower or 'hierba' in tipo_lower:
+        return 'Herbicida'
+    elif 'insecticida' in tipo_lower or 'insecto' in tipo_lower:
+        return 'Insecticida'
+    elif 'fungicida' in tipo_lower or 'hongo' in tipo_lower:
+        return 'Fungicida'
+    elif 'acaricida' in tipo_lower or 'ácaro' in tipo_lower:
+        return 'Acaricida'
+    elif 'molusquicida' in tipo_lower or 'caracol' in tipo_lower or 'babosa' in tipo_lower:
+        return 'Molusquicida'
+    elif 'fertilizante' in tipo_lower or 'abono' in tipo_lower:
+        return 'Fertilizante'
+    elif 'nematicida' in tipo_lower:
+        return 'Nematicida'
+    elif 'regulador' in tipo_lower:
+        return 'Regulador'
+    else:
+        return 'Fitosanitario'
+
+
+@router.get("/verify-mapa/{producto_id}")
+async def verify_producto_mapa(
+    producto_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Verifica si un producto específico sigue vigente en el registro oficial del MAPA.
+    Genera el enlace directo para verificación manual y hace una comprobación básica.
+    """
+    try:
+        producto = await fitosanitarios_collection.find_one({"_id": ObjectId(producto_id)})
+        if not producto:
+            raise HTTPException(status_code=404, detail="Producto no encontrado")
+        
+        numero_registro = producto.get("numero_registro", "")
+        nombre_comercial = producto.get("nombre_comercial", "")
+        
+        # Generate direct search URL
+        search_url = f"{MAPA_CONSULTA_URL}?nombre={nombre_comercial.replace(' ', '+')}"
+        
+        verification_result = {
+            "producto_id": str(producto["_id"]),
+            "numero_registro": numero_registro,
+            "nombre_comercial": nombre_comercial,
+            "verificacion_url": search_url,
+            "registro_oficial_url": MAPA_REGISTRO_URL,
+            "last_verified": producto.get("last_mapa_verification"),
+            "source": producto.get("source", "Manual")
+        }
+        
+        # Try to do a basic verification via web request
+        try:
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                response = await client.get(
+                    MAPA_CONSULTA_URL,
+                    params={"nombre": nombre_comercial},
+                    follow_redirects=True
+                )
+                
+                if response.status_code == 200:
+                    html_content = response.text.lower()
+                    
+                    # Check if product name appears in results
+                    if nombre_comercial.lower() in html_content:
+                        verification_result["verificacion_automatica"] = "ENCONTRADO"
+                        verification_result["mensaje"] = "El producto parece estar en el registro. Verifique manualmente para confirmar estado."
+                        
+                        # Check for common status indicators
+                        if 'autorizado' in html_content:
+                            verification_result["estado_probable"] = "Autorizado"
+                        elif 'cancelado' in html_content or 'revocado' in html_content:
+                            verification_result["estado_probable"] = "Posiblemente cancelado"
+                        elif 'caducado' in html_content:
+                            verification_result["estado_probable"] = "Posiblemente caducado"
+                    else:
+                        verification_result["verificacion_automatica"] = "NO_ENCONTRADO"
+                        verification_result["mensaje"] = "El producto no se encontró con ese nombre exacto. Puede haber cambiado de nombre o estar dado de baja."
+                else:
+                    verification_result["verificacion_automatica"] = "ERROR_CONEXION"
+                    verification_result["mensaje"] = "No se pudo conectar con el servidor del MAPA. Use el enlace para verificar manualmente."
+                    
+        except httpx.TimeoutException:
+            verification_result["verificacion_automatica"] = "TIMEOUT"
+            verification_result["mensaje"] = "Tiempo de espera agotado. Use el enlace para verificar manualmente."
+        except Exception as e:
+            verification_result["verificacion_automatica"] = "ERROR"
+            verification_result["mensaje"] = f"Error en verificación automática: {str(e)}"
+        
+        # Update last verification timestamp
+        await fitosanitarios_collection.update_one(
+            {"_id": ObjectId(producto_id)},
+            {"$set": {"last_mapa_verification": datetime.utcnow()}}
+        )
+        
+        verification_result["verified_at"] = datetime.utcnow().isoformat()
+        
+        return {
+            "success": True,
+            **verification_result
+        }
+        
+    except Exception as e:
+        if "ObjectId" in str(e):
+            raise HTTPException(status_code=400, detail="ID de producto inválido")
+        raise HTTPException(status_code=500, detail=f"Error en verificación: {str(e)}")
+
+
+@router.post("/bulk-verify-mapa")
+async def bulk_verify_mapa(
+    tipo: Optional[str] = None,
+    limit: int = 50,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Verifica múltiples productos contra el registro del MAPA.
+    Solo para Admin/Manager.
+    """
+    if current_user.get("role") not in ["Admin", "Manager"]:
+        raise HTTPException(status_code=403, detail="No tienes permisos para esta operación")
+    
+    query = {"activo": True}
+    if tipo:
+        query["tipo"] = tipo
+    
+    productos = await fitosanitarios_collection.find(query).limit(limit).to_list(limit)
+    
+    results = {
+        "total_verificados": 0,
+        "encontrados": 0,
+        "no_encontrados": 0,
+        "errores": 0,
+        "detalles": []
+    }
+    
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        for producto in productos:
+            nombre = producto.get("nombre_comercial", "")
+            if not nombre:
+                continue
+                
+            try:
+                response = await client.get(
+                    MAPA_CONSULTA_URL,
+                    params={"nombre": nombre},
+                    follow_redirects=True
+                )
+                
+                if response.status_code == 200 and nombre.lower() in response.text.lower():
+                    status = "ENCONTRADO"
+                    results["encontrados"] += 1
+                else:
+                    status = "NO_ENCONTRADO"
+                    results["no_encontrados"] += 1
+                    
+            except Exception:
+                status = "ERROR"
+                results["errores"] += 1
+            
+            results["detalles"].append({
+                "id": str(producto["_id"]),
+                "nombre": nombre,
+                "status": status
+            })
+            results["total_verificados"] += 1
+            
+            # Update product
+            await fitosanitarios_collection.update_one(
+                {"_id": producto["_id"]},
+                {"$set": {
+                    "last_mapa_verification": datetime.utcnow(),
+                    "mapa_status": status
+                }}
+            )
+    
+    return {
+        "success": True,
+        "message": f"Verificación completada para {results['total_verificados']} productos",
+        **results
+    }
+
+
+@router.get("/mapa-info")
+async def get_mapa_info(
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Devuelve información sobre el registro del MAPA y cómo utilizarlo.
+    """
+    return {
+        "success": True,
+        "info": {
+            "nombre": "Registro de Productos Fitosanitarios del MAPA",
+            "descripcion": "El Ministerio de Agricultura, Pesca y Alimentación (MAPA) mantiene el registro oficial de productos fitosanitarios autorizados en España.",
+            "urls": {
+                "registro_oficial": MAPA_REGISTRO_URL,
+                "consulta": MAPA_CONSULTA_URL,
+                "buscador": "https://www.mapa.gob.es/es/agricultura/temas/sanidad-vegetal/productos-fitosanitarios/fitos.asp"
+            },
+            "funcionalidades_disponibles": [
+                {
+                    "nombre": "Importar Excel del MAPA",
+                    "descripcion": "Descargue los datos del MAPA en formato Excel y súbalos a FRUVECO",
+                    "endpoint": "POST /api/fitosanitarios/import-mapa-excel"
+                },
+                {
+                    "nombre": "Verificar Producto Individual",
+                    "descripcion": "Compruebe si un producto sigue vigente en el registro",
+                    "endpoint": "GET /api/fitosanitarios/verify-mapa/{producto_id}"
+                },
+                {
+                    "nombre": "Verificación Masiva",
+                    "descripcion": "Verifique múltiples productos a la vez",
+                    "endpoint": "POST /api/fitosanitarios/bulk-verify-mapa"
+                }
+            ],
+            "notas": [
+                "El MAPA no proporciona una API pública oficial",
+                "Los datos se obtienen mediante importación de archivos Excel",
+                "La verificación automática es orientativa; siempre confirme manualmente los datos críticos",
+                "Se recomienda actualizar los datos periódicamente (mensualmente)"
+            ]
+        },
+        "ultima_sincronizacion": await get_last_sync_date()
+    }
+
+
+async def get_last_sync_date():
+    """Get the date of the last MAPA import/sync"""
+    latest = await fitosanitarios_collection.find_one(
+        {"source": {"$in": ["MAPA", "MAPA_IMPORT"]}},
+        sort=[("imported_at", -1)]
+    )
+    if latest and latest.get("imported_at"):
+        return latest["imported_at"].isoformat()
+    return None
+
