@@ -106,6 +106,7 @@ const Layout = ({ children }) => {
     ]},
     { section: t('nav.activities'), items: [
       { path: '/visitas', label: t('nav.visits'), icon: Calendar, module: 'visitas' },
+      { path: '/recomendaciones', label: 'Recomendaciones', icon: FileText, module: 'visitas' },
       { path: '/tareas', label: t('nav.tasks'), icon: ListTodo, module: 'tareas' },
       { path: '/tratamientos', label: t('nav.treatments'), icon: Sprout, module: 'tratamientos' },
       { path: '/irrigaciones', label: t('nav.irrigations'), icon: Droplets, module: 'irrigaciones' },
