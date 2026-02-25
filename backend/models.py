@@ -289,6 +289,9 @@ class FincaBase(BaseModel):
     # Estado
     activo: bool = True
     
+    # Geometría manual (dibujada en el mapa)
+    geometria_manual: Optional[GeometriaManual] = None
+    
     # Legacy fields for compatibility
     campana: Optional[str] = None
     nombre: Optional[str] = None  # Alias for denominacion
@@ -323,6 +326,7 @@ class FincaCreate(BaseModel):
     proveedor_corte: Optional[str] = None
     parcelas_ids: List[str] = []
     activo: bool = True
+    geometria_manual: Optional[GeometriaManual] = None
     # Legacy
     campana: Optional[str] = None
     nombre: Optional[str] = None
