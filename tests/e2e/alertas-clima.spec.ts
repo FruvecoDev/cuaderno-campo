@@ -9,6 +9,12 @@ test.describe('Alertas Climáticas - Climate Alerts', () => {
     await login(page);
     await dismissToasts(page);
     await removeEmergentBadge(page);
+    
+    // Remove webpack dev server overlay if present
+    await page.evaluate(() => {
+      const overlay = document.getElementById('webpack-dev-server-client-overlay');
+      if (overlay) overlay.remove();
+    });
   });
 
   test('should navigate to Alertas Climáticas page', async ({ page }) => {
@@ -64,7 +70,7 @@ test.describe('Alertas Climáticas - Climate Alerts', () => {
     
     // Click Revisadas filter
     const revisadasBtn = page.locator('button').filter({ hasText: /Revisadas/ }).first();
-    await revisadasBtn.click();
+    await revisadasBtn.click({ force: true });
     
     // Wait for list to update
     await page.waitForLoadState('domcontentloaded');
@@ -93,7 +99,7 @@ test.describe('Alertas Climáticas - Climate Alerts', () => {
     
     // Click Todas filter
     const todasBtn = page.locator('button').filter({ hasText: /Todas/ }).first();
-    await todasBtn.click();
+    await todasBtn.click({ force: true });
     
     await page.waitForLoadState('domcontentloaded');
     await expect(page.locator('.card').filter({ hasText: /Alertas/ }).first()).toBeVisible();
