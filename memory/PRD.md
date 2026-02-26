@@ -80,6 +80,41 @@ Visita/Tratamiento → realizados sobre → Parcela
   - `/app/frontend/src/components/AdvancedParcelMap.js` - FitBounds, GeolocationControl
 - **Estado**: ✅ COMPLETADO Y VERIFICADO
 
+## Mejoras Tareas e Irrigaciones (26/02/2026) - COMPLETADO ✅
+
+### TAREAS - Nuevas funcionalidades:
+- **Prioridad**: Alta/Media/Baja con indicadores de color
+- **Tipos de tarea**: General, Tratamiento, Riego, Cosecha, Mantenimiento, Siembra, Poda, Fertilización, Otro
+- **Estados avanzados**: Pendiente, En Progreso, Completada, Cancelada
+- **Asignación a usuarios**: Selector de técnicos/usuarios asignables
+- **Subtareas/Checklist**: Añadir, marcar, eliminar subtareas dentro de cada tarea
+- **Vista Calendario**: Visualización mensual de tareas por día con navegación
+- **Filtros avanzados**: Estado, prioridad, tipo, asignado, rango de fechas
+- **KPIs**: Total, Pendientes, En Progreso, Completadas, Vencidas, Esta Semana, Costes
+- **Exportación Excel**: Descarga de tareas filtradas
+
+### IRRIGACIONES - Nuevas funcionalidades:
+- **Planificación de riegos**: Crear riegos futuros con fecha planificada
+- **Cálculo automático de consumo**: m³/ha calculado automáticamente por parcela
+- **Historial por parcela**: Modal con histórico de riegos, totales y distribución por sistema
+- **Estadísticas con gráficos**: Distribución por sistema (PieChart), Volumen por mes (BarChart)
+- **Calculadora interactiva**: Cálculo de consumo por hectárea en tiempo real
+- **Filtros avanzados**: Sistema, parcela, estado, cultivo, rango de fechas
+- **KPIs**: Total, Próx. 7 días, Volumen total, Horas, Coste, Ha Regadas
+- **Exportación Excel**: Descarga de irrigaciones filtradas
+- **Fuentes de agua**: Pozo, Embalse, Red, Canal, Balsa, Río
+- **Nuevos campos**: hora_inicio, hora_fin, caudal, presión, sector
+
+### Archivos creados/modificados:
+- `/app/backend/routes_tareas.py` (nuevo)
+- `/app/backend/routes_irrigaciones.py` (nuevo)
+- `/app/frontend/src/pages/Tareas.js` (reescrito)
+- `/app/frontend/src/pages/Irrigaciones.js` (reescrito)
+- `/app/backend/models.py` - TareaCreate actualizado
+- `/app/backend/models_tratamientos.py` - IrrigacionCreate actualizado
+
+### Test Report: `/app/test_reports/iteration_39.json` - 100% pass (30/30 tests)
+
 4. **Configuración de Campos por Usuario (Nuevo)**
    - Panel de configuración accesible con botón ⚙️
    - Checkboxes para mostrar/ocultar campos del formulario y columnas de tabla
