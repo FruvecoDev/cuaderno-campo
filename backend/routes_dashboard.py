@@ -45,9 +45,50 @@ async def get_dashboard_kpis():
     
     total_costes = total_coste_tratamientos + total_coste_riegos + total_coste_tareas
     
-    # Calculate surface
+    # Calculate surface from parcelas
     parcelas = await parcelas_collection.find().to_list(1000)
     total_superficie = sum(p.get("superficie_total", 0) for p in parcelas)
+    
+    # =============================================
+    # FINCAS KPIs
+    # =============================================
+    fincas = await fincas_collection.find().to_list(1000)
+    fincas_propias = sum(1 for f in fincas if f.get("finca_propia", False))
+    fincas_alquiladas = total_fincas - fincas_propias
+    
+    # Total hectáreas de fincas
+    total_hectareas_fincas = sum(f.get("hectareas", 0) for f in fincas)
+    
+    # Producción esperada de fincas
+    total_produccion_esperada = sum(f.get("produccion_esperada", 0) for f in fincas)
+    total_produccion_disponible = sum(f.get("produccion_disponible", 0) for f in fincas)
+    
+    # Fincas por provincia
+    fincas_por_provincia = {}
+    for finca in fincas:
+        provincia = finca.get("provincia") or "Sin provincia"
+        if provincia not in fincas_por_provincia:
+            fincas_por_provincia[provincia] = {
+                "count": 0,
+                "hectareas": 0,
+                "produccion_esperada": 0,
+                "propias": 0,
+                "alquiladas": 0
+            }
+        fincas_por_provincia[provincia]["count"] += 1
+        fincas_por_provincia[provincia]["hectareas"] += finca.get("hectareas", 0)
+        fincas_por_provincia[provincia]["produccion_esperada"] += finca.get("produccion_esperada", 0)
+        if finca.get("finca_propia", False):
+            fincas_por_provincia[provincia]["propias"] += 1
+        else:
+            fincas_por_provincia[provincia]["alquiladas"] += 1
+    
+    # Parcelas sin asignar a fincas
+    parcelas_asignadas_ids = set()
+    for finca in fincas:
+        parcelas_asignadas_ids.update(finca.get("parcelas_ids", []))
+    
+    parcelas_sin_asignar = sum(1 for p in parcelas if str(p.get("_id")) not in parcelas_asignadas_ids)
     
     # Production by crop
     produccion_por_cultivo = {}
@@ -78,6 +119,16 @@ async def get_dashboard_kpis():
             "riegos": total_riegos,
             "visitas": total_visitas,
             "cosechas": total_cosechas
+        },
+        "fincas": {
+            "total": total_fincas,
+            "propias": fincas_propias,
+            "alquiladas": fincas_alquiladas,
+            "hectareas_total": total_hectareas_fincas,
+            "produccion_esperada": total_produccion_esperada,
+            "produccion_disponible": total_produccion_disponible,
+            "por_provincia": fincas_por_provincia,
+            "parcelas_sin_asignar": parcelas_sin_asignar
         },
         "produccion": {
             "total_kg": total_produccion,
