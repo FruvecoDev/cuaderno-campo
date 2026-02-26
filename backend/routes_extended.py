@@ -102,6 +102,12 @@ async def update_receta(
     update_data = receta.dict()
     update_data["updated_at"] = datetime.now()
     
+    # Calcular plazo de seguridad máximo de los productos
+    if update_data.get("productos"):
+        max_plazo = max([p.get("plazo_seguridad", 0) or 0 for p in update_data["productos"]], default=0)
+        if max_plazo > update_data.get("plazo_seguridad", 0):
+            update_data["plazo_seguridad"] = max_plazo
+    
     result = await recetas_collection.update_one(
         {"_id": ObjectId(receta_id)},
         {"$set": update_data}
@@ -112,6 +118,85 @@ async def update_receta(
     
     updated = await recetas_collection.find_one({"_id": ObjectId(receta_id)})
     return {"success": True, "data": serialize_doc(updated)}
+
+
+@router.get("/recetas/stats/dashboard")
+async def get_recetas_stats(
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireRecetasAccess)
+):
+    """Obtener estadísticas del módulo de recetas"""
+    total = await recetas_collection.count_documents({})
+    activas = await recetas_collection.count_documents({"activa": {"$ne": False}})
+    
+    # Recetas por tipo de tratamiento
+    por_tipo = await recetas_collection.aggregate([
+        {"$group": {"_id": "$tipo_tratamiento", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}}
+    ]).to_list(20)
+    
+    # Recetas por cultivo
+    por_cultivo = await recetas_collection.aggregate([
+        {"$group": {"_id": "$cultivo_objetivo", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 10}
+    ]).to_list(10)
+    
+    # Promedio de productos por receta
+    avg_productos = await recetas_collection.aggregate([
+        {"$project": {"num_productos": {"$size": {"$ifNull": ["$productos", []]}}}},
+        {"$group": {"_id": None, "avg": {"$avg": "$num_productos"}}}
+    ]).to_list(1)
+    
+    return {
+        "total": total,
+        "activas": activas,
+        "inactivas": total - activas,
+        "por_tipo": {item["_id"] or "Sin tipo": item["count"] for item in por_tipo},
+        "por_cultivo": {item["_id"] or "Sin cultivo": item["count"] for item in por_cultivo},
+        "promedio_productos": round(avg_productos[0]["avg"], 1) if avg_productos else 0
+    }
+
+
+@router.post("/recetas/{receta_id}/calcular-dosis")
+async def calcular_dosis_receta(
+    receta_id: str,
+    superficie: float,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireRecetasAccess)
+):
+    """Calcular cantidades de productos para una superficie dada"""
+    if not ObjectId.is_valid(receta_id):
+        raise HTTPException(status_code=400, detail="Invalid ID")
+    
+    receta = await recetas_collection.find_one({"_id": ObjectId(receta_id)})
+    if not receta:
+        raise HTTPException(status_code=404, detail="Receta not found")
+    
+    productos_calculados = []
+    for producto in receta.get("productos", []):
+        dosis = producto.get("dosis", 0)
+        unidad = producto.get("unidad", "")
+        
+        # Calcular cantidad total
+        cantidad_total = dosis * superficie
+        
+        productos_calculados.append({
+            "nombre_comercial": producto.get("nombre_comercial", ""),
+            "materia_activa": producto.get("materia_activa", ""),
+            "dosis_por_ha": dosis,
+            "unidad": unidad,
+            "superficie_ha": superficie,
+            "cantidad_total": round(cantidad_total, 2),
+            "plazo_seguridad": producto.get("plazo_seguridad", 0)
+        })
+    
+    return {
+        "receta": receta.get("nombre"),
+        "superficie_ha": superficie,
+        "productos": productos_calculados,
+        "plazo_seguridad_max": receta.get("plazo_seguridad", 0)
+    }
 
 
 # ============================================================================
