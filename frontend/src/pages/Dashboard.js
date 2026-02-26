@@ -293,8 +293,24 @@ const Dashboard = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        setDashboardConfig(data.config);
-        setConfigWidgets(data.config?.widgets || data.available_widgets || []);
+        const availableWidgets = data.available_widgets || [];
+        const userConfig = data.config?.widgets || [];
+        
+        // Merge user config with available widgets to ensure names/descriptions exist
+        const mergedWidgets = availableWidgets.map((available, idx) => {
+          const userWidget = userConfig.find(w => w.widget_id === available.widget_id);
+          return {
+            ...available,
+            visible: userWidget ? userWidget.visible : true,
+            order: userWidget ? userWidget.order : idx
+          };
+        });
+        
+        // Sort by order
+        mergedWidgets.sort((a, b) => a.order - b.order);
+        
+        setDashboardConfig({ ...data.config, widgets: mergedWidgets });
+        setConfigWidgets(mergedWidgets);
       }
     } catch (error) {
       console.error('Error fetching dashboard config:', error);
