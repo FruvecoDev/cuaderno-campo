@@ -1271,90 +1271,211 @@ const Visitas = () => {
               {/* Galería de fotos */}
               {fotos.length > 0 && (
                 <div style={{ marginTop: '1rem' }}>
-                  <p style={{ fontSize: '0.875rem', fontWeight: '500', marginBottom: '0.5rem' }}>
-                    {fotos.length} foto{fotos.length !== 1 ? 's' : ''} adjunta{fotos.length !== 1 ? 's' : ''}
-                  </p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                    <p style={{ fontSize: '0.875rem', fontWeight: '500', margin: 0 }}>
+                      {fotos.length} foto{fotos.length !== 1 ? 's' : ''} adjunta{fotos.length !== 1 ? 's' : ''}
+                    </p>
+                    {editingId && fotos.length > 0 && !fotos.some(f => f.pending) && (
+                      <button
+                        type="button"
+                        onClick={() => analyzeAllFotos(editingId)}
+                        disabled={analyzingAll}
+                        className="btn btn-sm"
+                        style={{
+                          backgroundColor: 'hsl(var(--primary) / 0.1)',
+                          color: 'hsl(var(--primary))',
+                          border: '1px solid hsl(var(--primary) / 0.3)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.35rem'
+                        }}
+                        data-testid="btn-analizar-todas"
+                      >
+                        {analyzingAll ? (
+                          <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                        ) : (
+                          <Sparkles size={14} />
+                        )}
+                        {analyzingAll ? 'Analizando...' : 'Analizar todas con IA'}
+                      </button>
+                    )}
+                  </div>
                   <div style={{ 
                     display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', 
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', 
                     gap: '0.75rem' 
                   }}>
-                    {fotos.map((foto, index) => (
-                      <div 
-                        key={index}
-                        style={{
-                          position: 'relative',
-                          aspectRatio: '1',
-                          borderRadius: '0.5rem',
-                          overflow: 'hidden',
-                          border: '1px solid hsl(var(--border))',
-                          backgroundColor: 'hsl(var(--muted))'
-                        }}
-                      >
-                        <img
-                          src={foto.pending ? foto.preview : `${BACKEND_URL}${foto.url}`}
-                          alt={foto.filename || `Foto ${index + 1}`}
+                    {fotos.map((foto, index) => {
+                      const hasAnalysis = foto.ai_analysis && !foto.ai_analysis.error;
+                      const analysis = foto.ai_analysis;
+                      const severityStyle = hasAnalysis && analysis.detected ? getSeverityColor(analysis.severity) : null;
+                      
+                      return (
+                        <div 
+                          key={index}
                           style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover'
+                            position: 'relative',
+                            borderRadius: '0.5rem',
+                            overflow: 'hidden',
+                            border: hasAnalysis && analysis.detected 
+                              ? `2px solid ${severityStyle?.border}` 
+                              : '1px solid hsl(var(--border))',
+                            backgroundColor: 'hsl(var(--muted))'
                           }}
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'flex';
-                          }}
-                        />
-                        <div style={{
-                          display: 'none',
-                          width: '100%',
-                          height: '100%',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          backgroundColor: 'hsl(var(--muted))'
-                        }}>
-                          <Image size={32} style={{ color: 'hsl(var(--muted-foreground))' }} />
-                        </div>
-                        {/* Indicador de pendiente */}
-                        {foto.pending && (
-                          <div style={{
-                            position: 'absolute',
-                            top: '4px',
-                            left: '4px',
-                            backgroundColor: 'hsl(var(--warning))',
-                            color: 'white',
-                            fontSize: '0.65rem',
-                            padding: '2px 4px',
-                            borderRadius: '4px'
-                          }}>
-                            Pendiente
-                          </div>
-                        )}
-                        {/* Botón eliminar */}
-                        <button
-                          type="button"
-                          onClick={() => deleteFoto(editingId, index)}
-                          style={{
-                            position: 'absolute',
-                            top: '4px',
-                            right: '4px',
-                            width: '24px',
-                            height: '24px',
-                            borderRadius: '50%',
-                            backgroundColor: 'hsl(var(--destructive))',
-                            color: 'white',
-                            border: 'none',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                          title="Eliminar foto"
-                          data-testid={`delete-foto-${index}`}
                         >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    ))}
+                          <div style={{ aspectRatio: '1', position: 'relative' }}>
+                            <img
+                              src={foto.pending ? foto.preview : `${BACKEND_URL}${foto.url}`}
+                              alt={foto.filename || `Foto ${index + 1}`}
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover'
+                              }}
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'flex';
+                              }}
+                            />
+                            <div style={{
+                              display: 'none',
+                              width: '100%',
+                              height: '100%',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              backgroundColor: 'hsl(var(--muted))'
+                            }}>
+                              <Image size={32} style={{ color: 'hsl(var(--muted-foreground))' }} />
+                            </div>
+                            
+                            {/* Indicador de pendiente */}
+                            {foto.pending && (
+                              <div style={{
+                                position: 'absolute',
+                                top: '4px',
+                                left: '4px',
+                                backgroundColor: 'hsl(var(--warning))',
+                                color: 'white',
+                                fontSize: '0.65rem',
+                                padding: '2px 4px',
+                                borderRadius: '4px'
+                              }}>
+                                Pendiente
+                              </div>
+                            )}
+                            
+                            {/* Badge de análisis IA */}
+                            {hasAnalysis && (
+                              <div style={{
+                                position: 'absolute',
+                                top: '4px',
+                                left: '4px',
+                                backgroundColor: analysis.detected ? severityStyle?.bg : 'hsl(142, 76%, 95%)',
+                                color: analysis.detected ? severityStyle?.color : 'hsl(142, 76%, 30%)',
+                                fontSize: '0.6rem',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '3px',
+                                fontWeight: '600'
+                              }}>
+                                {analysis.detected ? <Bug size={10} /> : <CheckCircle size={10} />}
+                                {analysis.detected ? analysis.severity?.toUpperCase() : 'SANA'}
+                              </div>
+                            )}
+                            
+                            {/* Botones de acción */}
+                            <div style={{
+                              position: 'absolute',
+                              top: '4px',
+                              right: '4px',
+                              display: 'flex',
+                              gap: '4px'
+                            }}>
+                              {/* Botón analizar con IA */}
+                              {editingId && !foto.pending && (
+                                <button
+                                  type="button"
+                                  onClick={() => analyzeFoto(editingId, index)}
+                                  disabled={analyzingFoto === index}
+                                  style={{
+                                    width: '24px',
+                                    height: '24px',
+                                    borderRadius: '50%',
+                                    backgroundColor: 'hsl(var(--primary))',
+                                    color: 'white',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}
+                                  title="Analizar con IA"
+                                  data-testid={`analyze-foto-${index}`}
+                                >
+                                  {analyzingFoto === index ? (
+                                    <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} />
+                                  ) : (
+                                    <Sparkles size={12} />
+                                  )}
+                                </button>
+                              )}
+                              {/* Botón eliminar */}
+                              <button
+                                type="button"
+                                onClick={() => deleteFoto(editingId, index)}
+                                style={{
+                                  width: '24px',
+                                  height: '24px',
+                                  borderRadius: '50%',
+                                  backgroundColor: 'hsl(var(--destructive))',
+                                  color: 'white',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                                title="Eliminar foto"
+                                data-testid={`delete-foto-${index}`}
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                          </div>
+                          
+                          {/* Resultado del análisis debajo de la imagen */}
+                          {hasAnalysis && analysis.detected && (
+                            <div 
+                              style={{
+                                padding: '0.5rem',
+                                backgroundColor: severityStyle?.bg,
+                                borderTop: `1px solid ${severityStyle?.border}`,
+                                cursor: 'pointer'
+                              }}
+                              onClick={() => setShowAnalysisModal(analysis)}
+                            >
+                              <p style={{ 
+                                margin: 0, 
+                                fontSize: '0.7rem', 
+                                fontWeight: '600',
+                                color: severityStyle?.color 
+                              }}>
+                                {analysis.pest_or_disease}
+                              </p>
+                              <p style={{ 
+                                margin: '2px 0 0', 
+                                fontSize: '0.65rem',
+                                color: 'hsl(var(--muted-foreground))'
+                              }}>
+                                Confianza: {analysis.confidence}% • Clic para ver más
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
