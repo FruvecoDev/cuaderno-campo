@@ -110,7 +110,37 @@ Visita/Tratamiento → realizados sobre → Parcela
   - Modal con resultados detallados del análisis
   - Indicadores visuales de severidad con bordes de colores
 
-## Bug Fix: Error Leaflet "_leaflet_pos" (26/02/2026) - COMPLETADO
+## Módulos Mejorados (26/02/2026) - COMPLETADOS ✅
+
+### 1. Recetas Fitosanitarias
+- **KPIs**: Total, Activas, Inactivas, Promedio de productos por receta
+- **Productos fitosanitarios**: 
+  - Gestión de múltiples productos por receta
+  - Campos: Nombre comercial, Materia activa, Dosis, Unidad, Plazo seguridad
+- **Calculadora de dosis**: Calcular cantidades totales para una superficie dada
+- **Campos adicionales**: Tipo tratamiento, Objetivo, EPP requerido, Época aplicación, Condiciones, Intervalo entre aplicaciones, Máx. aplicaciones/campaña
+- **Vista detalle**: Modal con toda la información de la receta
+- **Endpoints nuevos**:
+  - `GET /api/recetas/stats/dashboard`
+  - `POST /api/recetas/{receta_id}/calcular-dosis`
+
+### 2. Albaranes
+- **KPIs**: Total, Entradas (Compras), Salidas (Ventas), Total Compras €
+- **Exportación Excel**: Botón para descargar CSV con todos los albaranes
+- **Endpoints nuevos**:
+  - `GET /api/albaranes/stats/dashboard`
+  - `GET /api/albaranes/export/excel`
+
+### 3. Cosechas
+- **KPIs**: Total, En Proceso, Completadas, Kg Reales (toneladas), Rendimiento %, Importe Total
+- **Exportación Excel**: Botón para descargar CSV con cosechas y cargas
+- **Endpoints nuevos**:
+  - `GET /api/cosechas/stats/dashboard`
+  - `GET /api/cosechas/export/excel`
+
+### CSS Añadido
+- `.stats-grid-horizontal`: Grid responsivo para KPIs en línea horizontal
+- Estilos para `.stat-icon`, `.stat-content`, `.stat-value`, `.stat-label`
 - **Problema**: Error intermitente "Cannot read properties of undefined (reading '_leaflet_pos')" en mapas
 - **Causa raíz**: Operaciones de mapa (fitBounds, flyTo) se ejecutaban mientras el componente se desmontaba o el mapa no estaba completamente inicializado
 - **Solución implementada**:
