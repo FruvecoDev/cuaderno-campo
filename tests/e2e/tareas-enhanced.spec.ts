@@ -85,8 +85,8 @@ test.describe('Tareas Module', () => {
     await expect(page.locator('.form-label').filter({ hasText: /^Prioridad$/i })).toBeVisible();
     await expect(page.locator('.form-label').filter({ hasText: /^Estado$/i })).toBeVisible();
     
-    // Verify subtasks section
-    await expect(page.getByText(/Subtareas|Checklist/i)).toBeVisible();
+    // Verify subtasks section - use heading specifically
+    await expect(page.getByRole('heading', { name: /Subtareas.*Checklist/i })).toBeVisible();
     
     // Cancel form
     const cancelBtn = page.getByRole('button', { name: /Cancelar/i });
