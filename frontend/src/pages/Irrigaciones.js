@@ -888,7 +888,7 @@ const Irrigaciones = () => {
 
       {/* Modal Historial - Diseño mejorado */}
       {showHistorial && historialData && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
           <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden animate-in fade-in zoom-in duration-200">
             {/* Header con gradiente */}
             <div className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white p-6">
