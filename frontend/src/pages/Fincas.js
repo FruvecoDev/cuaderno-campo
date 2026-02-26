@@ -1285,10 +1285,10 @@ const Fincas = () => {
                             <button
                               className="btn btn-sm"
                               style={{ backgroundColor: '#e3f2fd', color: '#1976d2', padding: '6px 10px' }}
-                              onClick={() => setExpandedFinca(expandedFinca === finca._id ? null : finca._id)}
+                              onClick={() => toggleFincaExpansion(finca._id)}
                               data-testid={`btn-expand-${finca._id}`}
                             >
-                              {expandedFinca === finca._id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                              {expandedFincas.has(finca._id) ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                             </button>
                             <button
                               className="btn btn-sm"
@@ -1310,7 +1310,7 @@ const Fincas = () => {
                         </div>
                         
                         {/* Detalle expandido */}
-                        {expandedFinca === finca._id && (
+                        {expandedFincas.has(finca._id) && (
                           <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #e0e0e0' }}>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
                               {/* Ubicación */}
