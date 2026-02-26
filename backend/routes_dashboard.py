@@ -314,5 +314,7 @@ async def get_dashboard_kpis():
         },
         "proximas_cosechas": proximas_cosechas,
         "tratamientos_pendientes": tratamientos_pendientes_list,
-        "fincas_recoleccion_semana": fincas_recoleccion_list
+        "fincas_recoleccion_semana": fincas_recoleccion_list,
+        "contratos_activos": contratos_activos[:10],  # Top 10
+        "contratos_stats": contratos_stats
     }
