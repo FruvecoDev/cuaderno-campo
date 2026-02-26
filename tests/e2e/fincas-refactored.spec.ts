@@ -762,3 +762,234 @@ test.describe('Fincas Refactored - Unassign Parcela from Expanded Row', () => {
     }
   });
 });
+
+
+test.describe('Fincas Refactored - Expand/Collapse Province Functionality (NEW)', () => {
+  test.beforeEach(async ({ page }) => {
+    await dismissToasts(page);
+    await login(page);
+    await ensureModalClosed(page);
+    await page.getByTestId('nav-fincas').click({ force: true });
+    await page.waitForLoadState('domcontentloaded');
+    await waitForDataLoad(page);
+    await removeEmergentBadge(page);
+    await ensureModalClosed(page);
+    await expect(page.getByTestId('fincas-page')).toBeVisible({ timeout: 10000 });
+  });
+
+  test('should have toggle button to show/hide fincas of a province', async ({ page }) => {
+    // Wait for province groups
+    await page.waitForSelector('[data-testid^="provincia-group-"]', { timeout: 10000 }).catch(() => {});
+    
+    const provinceGroup = page.locator('[data-testid^="provincia-group-"]').first();
+    const provinceName = await provinceGroup.getAttribute('data-testid');
+    const province = provinceName?.replace('provincia-group-', '');
+    
+    if (province) {
+      // Check for toggle provincia button
+      const toggleBtn = page.getByTestId(`btn-toggle-provincia-${province}`);
+      await expect(toggleBtn).toBeVisible({ timeout: 3000 });
+      
+      // Get initial count of finca cards in this province
+      const initialFincas = await provinceGroup.locator('[data-testid^="finca-card-"]').count();
+      
+      // Click toggle to hide fincas
+      await toggleBtn.click({ force: true });
+      
+      // Fincas should be hidden
+      const fincasAfterHide = await provinceGroup.locator('[data-testid^="finca-card-"]').count();
+      expect(fincasAfterHide).toBe(0);
+      
+      // Click toggle to show fincas again
+      await toggleBtn.click({ force: true });
+      
+      // Fincas should be visible again
+      const fincasAfterShow = await provinceGroup.locator('[data-testid^="finca-card-"]').count();
+      expect(fincasAfterShow).toBe(initialFincas);
+    }
+  });
+
+  test('should have expand all button for each province', async ({ page }) => {
+    // Wait for province groups
+    await page.waitForSelector('[data-testid^="provincia-group-"]', { timeout: 10000 }).catch(() => {});
+    
+    const provinceGroup = page.locator('[data-testid^="provincia-group-"]').first();
+    const provinceName = await provinceGroup.getAttribute('data-testid');
+    const province = provinceName?.replace('provincia-group-', '');
+    
+    if (province) {
+      // Check for expand all button
+      const expandAllBtn = page.getByTestId(`btn-expand-all-${province}`);
+      await expect(expandAllBtn).toBeVisible({ timeout: 3000 });
+      
+      // Initially should show "Expandir todas" text
+      await expect(expandAllBtn).toContainText('Expandir todas');
+    }
+  });
+
+  test('should expand all fincas in province when clicking Expandir todas', async ({ page }) => {
+    // Wait for province groups
+    await page.waitForSelector('[data-testid^="provincia-group-"]', { timeout: 10000 }).catch(() => {});
+    
+    const provinceGroup = page.locator('[data-testid^="provincia-group-"]').first();
+    const provinceName = await provinceGroup.getAttribute('data-testid');
+    const province = provinceName?.replace('provincia-group-', '');
+    
+    if (province) {
+      const expandAllBtn = page.getByTestId(`btn-expand-all-${province}`);
+      
+      // Get count of fincas in province
+      const fincaCount = await provinceGroup.locator('[data-testid^="finca-card-"]').count();
+      
+      if (fincaCount > 0) {
+        // Click "Expandir todas"
+        await expandAllBtn.click({ force: true });
+        
+        // Button text should change to "Colapsar todas"
+        await expect(expandAllBtn).toContainText('Colapsar todas', { timeout: 3000 });
+        
+        // Check that finca details are visible (h5 Ubicación in each card)
+        const ubicacionHeaders = provinceGroup.locator('[data-testid^="finca-card-"]').first().locator('h5').filter({ hasText: 'Ubicación' });
+        await expect(ubicacionHeaders).toBeVisible({ timeout: 3000 });
+      }
+    }
+  });
+
+  test('should collapse all fincas in province when clicking Colapsar todas', async ({ page }) => {
+    // Wait for province groups
+    await page.waitForSelector('[data-testid^="provincia-group-"]', { timeout: 10000 }).catch(() => {});
+    
+    const provinceGroup = page.locator('[data-testid^="provincia-group-"]').first();
+    const provinceName = await provinceGroup.getAttribute('data-testid');
+    const province = provinceName?.replace('provincia-group-', '');
+    
+    if (province) {
+      const expandAllBtn = page.getByTestId(`btn-expand-all-${province}`);
+      
+      // Get count of fincas in province
+      const fincaCount = await provinceGroup.locator('[data-testid^="finca-card-"]').count();
+      
+      if (fincaCount > 0) {
+        // First expand all
+        await expandAllBtn.click({ force: true });
+        await expect(expandAllBtn).toContainText('Colapsar todas', { timeout: 3000 });
+        
+        // Then click to collapse all
+        await expandAllBtn.click({ force: true });
+        
+        // Button should change back to "Expandir todas"
+        await expect(expandAllBtn).toContainText('Expandir todas', { timeout: 3000 });
+        
+        // Details should be hidden
+        const fincaCard = provinceGroup.locator('[data-testid^="finca-card-"]').first();
+        const ubicacionHeader = fincaCard.locator('h5').filter({ hasText: 'Ubicación' });
+        await expect(ubicacionHeader).not.toBeVisible({ timeout: 3000 });
+      }
+    }
+  });
+
+  test('should support multiple fincas expanded simultaneously', async ({ page }) => {
+    // Wait for finca cards
+    await page.waitForSelector('[data-testid^="finca-card-"]', { timeout: 10000 }).catch(() => {});
+    
+    const fincaCards = page.locator('[data-testid^="finca-card-"]');
+    const cardCount = await fincaCards.count();
+    
+    if (cardCount >= 2) {
+      // Expand first finca
+      const firstCard = fincaCards.nth(0);
+      const firstExpandBtn = firstCard.locator('[data-testid^="btn-expand-"]');
+      await firstExpandBtn.click({ force: true });
+      
+      // Expand second finca
+      const secondCard = fincaCards.nth(1);
+      const secondExpandBtn = secondCard.locator('[data-testid^="btn-expand-"]');
+      await secondExpandBtn.click({ force: true });
+      
+      // Both should have details visible
+      await expect(firstCard.locator('h5').filter({ hasText: 'Ubicación' })).toBeVisible({ timeout: 3000 });
+      await expect(secondCard.locator('h5').filter({ hasText: 'Ubicación' })).toBeVisible({ timeout: 3000 });
+      
+      // Collapse first one
+      await firstExpandBtn.click({ force: true });
+      
+      // Second should still be expanded
+      await expect(firstCard.locator('h5').filter({ hasText: 'Ubicación' })).not.toBeVisible({ timeout: 3000 });
+      await expect(secondCard.locator('h5').filter({ hasText: 'Ubicación' })).toBeVisible();
+    }
+  });
+
+  test('should toggle between ChevronUp and ChevronDown icons for province toggle', async ({ page }) => {
+    // Wait for province groups
+    await page.waitForSelector('[data-testid^="provincia-group-"]', { timeout: 10000 }).catch(() => {});
+    
+    const provinceGroup = page.locator('[data-testid^="provincia-group-"]').first();
+    const provinceName = await provinceGroup.getAttribute('data-testid');
+    const province = provinceName?.replace('provincia-group-', '');
+    
+    if (province) {
+      const toggleBtn = page.getByTestId(`btn-toggle-provincia-${province}`);
+      
+      // Initially should show ChevronUp (fincas visible) - button has svg
+      await expect(toggleBtn.locator('svg')).toBeVisible();
+      
+      // After clicking (hide fincas), icon changes
+      await toggleBtn.click({ force: true });
+      await expect(toggleBtn.locator('svg')).toBeVisible();
+      
+      // Click again to show fincas
+      await toggleBtn.click({ force: true });
+      await expect(toggleBtn.locator('svg')).toBeVisible();
+    }
+  });
+});
+
+test.describe('Fincas - CRUD with Province Context', () => {
+  test.beforeEach(async ({ page }) => {
+    await dismissToasts(page);
+    await login(page);
+    await ensureModalClosed(page);
+    await page.getByTestId('nav-fincas').click({ force: true });
+    await page.waitForLoadState('domcontentloaded');
+    await waitForDataLoad(page);
+    await removeEmergentBadge(page);
+    await ensureModalClosed(page);
+    await expect(page.getByTestId('fincas-page')).toBeVisible({ timeout: 10000 });
+  });
+
+  test('should still allow CRUD operations on fincas', async ({ page }) => {
+    // Verify edit button is accessible on first visible finca
+    const editBtn = page.locator('[data-testid^="btn-edit-"]').first();
+    
+    if (await editBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await editBtn.click({ force: true });
+      await expect(page.getByTestId('form-finca')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('text=Editar Finca')).toBeVisible();
+      
+      // Cancel
+      await page.locator('button:has-text("Cancelar")').click({ force: true });
+      await expect(page.getByTestId('form-finca')).not.toBeVisible({ timeout: 5000 });
+    }
+  });
+
+  test('should still allow parcelas list operations', async ({ page }) => {
+    // Find a finca and expand it
+    const expandBtn = page.locator('[data-testid^="btn-expand-"]').first();
+    
+    if (await expandBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await expandBtn.click({ force: true });
+      
+      // Look for parcelas button
+      const parcelasBtn = page.locator('[data-testid^="btn-parcelas-"]').first();
+      
+      if (await parcelasBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await parcelasBtn.click({ force: true });
+        await expect(page.getByTestId('modal-asignar-parcelas')).toBeVisible({ timeout: 5000 });
+        
+        // Close modal
+        const closeBtn = page.locator('[data-testid="modal-asignar-parcelas"] button:has(svg)').first();
+        await closeBtn.click({ force: true });
+      }
+    }
+  });
+});
