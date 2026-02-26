@@ -298,6 +298,164 @@ async def update_albaran(
     return {"success": True, "data": serialize_doc(updated)}
 
 
+@router.get("/albaranes/stats/dashboard")
+async def get_albaranes_stats(
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireAlbaranesAccess)
+):
+    """Obtener estadísticas del módulo de albaranes"""
+    total = await albaranes_collection.count_documents({})
+    
+    # Por tipo
+    entradas = await albaranes_collection.count_documents({"tipo": "Entrada"})
+    salidas = await albaranes_collection.count_documents({"tipo": "Salida"})
+    
+    # Totales de importes
+    pipeline_totales = [
+        {"$group": {
+            "_id": "$tipo",
+            "total_importe": {"$sum": "$total_albaran"},
+            "count": {"$sum": 1}
+        }}
+    ]
+    totales_tipo = await albaranes_collection.aggregate(pipeline_totales).to_list(10)
+    
+    total_entradas = next((t["total_importe"] for t in totales_tipo if t["_id"] == "Entrada"), 0)
+    total_salidas = next((t["total_importe"] for t in totales_tipo if t["_id"] == "Salida"), 0)
+    
+    # Por proveedor (top 5)
+    pipeline_proveedor = [
+        {"$match": {"proveedor": {"$ne": None, "$ne": ""}}},
+        {"$group": {"_id": "$proveedor", "count": {"$sum": 1}, "total": {"$sum": "$total_albaran"}}},
+        {"$sort": {"total": -1}},
+        {"$limit": 5}
+    ]
+    por_proveedor = await albaranes_collection.aggregate(pipeline_proveedor).to_list(5)
+    
+    # Por cultivo (top 5)
+    pipeline_cultivo = [
+        {"$match": {"cultivo": {"$ne": None, "$ne": ""}}},
+        {"$group": {"_id": "$cultivo", "count": {"$sum": 1}, "total": {"$sum": "$total_albaran"}}},
+        {"$sort": {"total": -1}},
+        {"$limit": 5}
+    ]
+    por_cultivo = await albaranes_collection.aggregate(pipeline_cultivo).to_list(5)
+    
+    # Promedio de líneas por albarán
+    avg_items = await albaranes_collection.aggregate([
+        {"$project": {"num_items": {"$size": {"$ifNull": ["$items", []]}}}},
+        {"$group": {"_id": None, "avg": {"$avg": "$num_items"}}}
+    ]).to_list(1)
+    
+    return {
+        "total": total,
+        "entradas": entradas,
+        "salidas": salidas,
+        "total_entradas": round(total_entradas, 2),
+        "total_salidas": round(total_salidas, 2),
+        "balance": round(total_entradas - total_salidas, 2),
+        "por_proveedor": [{
+            "proveedor": p["_id"],
+            "count": p["count"],
+            "total": round(p["total"], 2)
+        } for p in por_proveedor],
+        "por_cultivo": [{
+            "cultivo": c["_id"],
+            "count": c["count"],
+            "total": round(c["total"], 2)
+        } for c in por_cultivo],
+        "promedio_items": round(avg_items[0]["avg"], 1) if avg_items else 0
+    }
+
+
+@router.get("/albaranes/export/excel")
+async def export_albaranes_excel(
+    tipo: Optional[str] = None,
+    fecha_desde: Optional[str] = None,
+    fecha_hasta: Optional[str] = None,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireAlbaranesAccess)
+):
+    """Exportar albaranes a formato Excel (JSON preparado para frontend)"""
+    query = {}
+    if tipo:
+        query["tipo"] = tipo
+    if fecha_desde or fecha_hasta:
+        query["fecha"] = {}
+        if fecha_desde:
+            query["fecha"]["$gte"] = fecha_desde
+        if fecha_hasta:
+            query["fecha"]["$lte"] = fecha_hasta
+    
+    albaranes = await albaranes_collection.find(query).sort("fecha", -1).to_list(1000)
+    
+    # Preparar datos para Excel
+    rows = []
+    for a in albaranes:
+        # Una fila por cada línea del albarán
+        items = a.get("items", [])
+        if items:
+            for item in items:
+                rows.append({
+                    "id": str(a.get("_id", "")),
+                    "tipo": a.get("tipo", ""),
+                    "fecha": a.get("fecha", ""),
+                    "proveedor": a.get("proveedor", ""),
+                    "cultivo": a.get("cultivo", ""),
+                    "parcela": a.get("parcela_codigo", ""),
+                    "campana": a.get("campana", ""),
+                    "producto": item.get("descripcion") or item.get("producto", ""),
+                    "lote": item.get("lote", ""),
+                    "cantidad": item.get("cantidad", 0),
+                    "unidad": item.get("unidad", "kg"),
+                    "precio_unitario": item.get("precio_unitario", 0),
+                    "total_linea": item.get("total", 0),
+                    "total_albaran": a.get("total_albaran", 0),
+                    "observaciones": a.get("observaciones", "")
+                })
+        else:
+            # Albarán sin líneas
+            rows.append({
+                "id": str(a.get("_id", "")),
+                "tipo": a.get("tipo", ""),
+                "fecha": a.get("fecha", ""),
+                "proveedor": a.get("proveedor", ""),
+                "cultivo": a.get("cultivo", ""),
+                "parcela": a.get("parcela_codigo", ""),
+                "campana": a.get("campana", ""),
+                "producto": "",
+                "lote": "",
+                "cantidad": 0,
+                "unidad": "",
+                "precio_unitario": 0,
+                "total_linea": 0,
+                "total_albaran": a.get("total_albaran", 0),
+                "observaciones": a.get("observaciones", "")
+            })
+    
+    return {
+        "data": rows,
+        "columns": [
+            {"key": "tipo", "header": "Tipo"},
+            {"key": "fecha", "header": "Fecha"},
+            {"key": "proveedor", "header": "Proveedor"},
+            {"key": "cultivo", "header": "Cultivo"},
+            {"key": "parcela", "header": "Parcela"},
+            {"key": "campana", "header": "Campaña"},
+            {"key": "producto", "header": "Producto"},
+            {"key": "lote", "header": "Lote"},
+            {"key": "cantidad", "header": "Cantidad"},
+            {"key": "unidad", "header": "Unidad"},
+            {"key": "precio_unitario", "header": "Precio Unit."},
+            {"key": "total_linea", "header": "Total Línea"},
+            {"key": "total_albaran", "header": "Total Albarán"},
+            {"key": "observaciones", "header": "Observaciones"}
+        ],
+        "total_rows": len(rows),
+        "filename": f"albaranes_export_{datetime.now().strftime('%Y%m%d')}"
+    }
+
+
 # ============================================================================
 # DOCUMENTOS - File Upload
 # ============================================================================
