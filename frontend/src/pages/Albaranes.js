@@ -670,6 +670,50 @@ const Albaranes = () => {
         </div>
       )}
 
+      {/* KPIs Dashboard */}
+      {stats && (
+        <div className="stats-grid-horizontal" style={{ marginBottom: '1.5rem' }} data-testid="albaranes-kpis">
+          <div className="stat-card">
+            <div className="stat-icon" style={{ backgroundColor: 'hsl(var(--primary) / 0.1)' }}>
+              <FileSpreadsheet size={20} style={{ color: 'hsl(var(--primary))' }} />
+            </div>
+            <div className="stat-content">
+              <p className="stat-value">{stats.total}</p>
+              <p className="stat-label">Total Albaranes</p>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon" style={{ backgroundColor: 'hsl(142, 76%, 95%)' }}>
+              <TrendingDown size={20} style={{ color: 'hsl(142, 76%, 36%)' }} />
+            </div>
+            <div className="stat-content">
+              <p className="stat-value">{stats.entradas}</p>
+              <p className="stat-label">Entradas (Compras)</p>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon" style={{ backgroundColor: 'hsl(38, 92%, 95%)' }}>
+              <TrendingUp size={20} style={{ color: 'hsl(38, 92%, 50%)' }} />
+            </div>
+            <div className="stat-content">
+              <p className="stat-value">{stats.salidas}</p>
+              <p className="stat-label">Salidas (Ventas)</p>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon" style={{ backgroundColor: stats.balance >= 0 ? 'hsl(142, 76%, 95%)' : 'hsl(0, 84%, 95%)' }}>
+              <ArrowUpDown size={20} style={{ color: stats.balance >= 0 ? 'hsl(142, 76%, 36%)' : 'hsl(0, 84%, 60%)' }} />
+            </div>
+            <div className="stat-content">
+              <p className="stat-value" style={{ fontSize: '1.2rem' }}>
+                {stats.total_entradas?.toLocaleString('es-ES', { minimumFractionDigits: 2 })}€
+              </p>
+              <p className="stat-label">Total Compras</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Filtros */}
       <div className="card mb-6">
         <div className="flex justify-between items-center mb-4">
