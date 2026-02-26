@@ -364,5 +364,7 @@ async def get_dashboard_kpis():
         "tratamientos_pendientes": tratamientos_pendientes_list,
         "fincas_recoleccion_semana": fincas_recoleccion_list,
         "contratos_activos": contratos_activos[:10],  # Top 10
-        "contratos_stats": contratos_stats
+        "contratos_stats": contratos_stats,
+        "visitas_proximas": visitas_proximas,
+        "visitas_stats": visitas_stats
     }
