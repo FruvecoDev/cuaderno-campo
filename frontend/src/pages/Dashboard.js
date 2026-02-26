@@ -1690,7 +1690,7 @@ const Dashboard = () => {
       
       {/* Mapa de Parcelas */}
       {isWidgetVisible('mapa_parcelas') && (
-      <div className="card mb-6" data-testid="mapa-parcelas">
+      <div className="card mb-6" data-testid="mapa-parcelas" style={{ order: getWidgetOrder('mapa_parcelas') }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <MapPin size={20} /> {t('dashboard.map.title')}
