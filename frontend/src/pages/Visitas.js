@@ -1296,7 +1296,31 @@ const Visitas = () => {
               <tbody>
                 {filteredVisitas.map((visita) => (
                   <tr key={visita._id}>
-                    {tableConfig.objetivo ? <td className="font-semibold">{visita.objetivo}</td> : null}
+                    {tableConfig.objetivo ? (
+                      <td className="font-semibold">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          {visita.objetivo}
+                          {visita.fotos && visita.fotos.length > 0 && (
+                            <span 
+                              title={`${visita.fotos.length} foto(s)`}
+                              style={{ 
+                                display: 'inline-flex', 
+                                alignItems: 'center', 
+                                gap: '2px',
+                                backgroundColor: 'hsl(var(--primary) / 0.1)',
+                                color: 'hsl(var(--primary))',
+                                padding: '2px 6px',
+                                borderRadius: '9999px',
+                                fontSize: '0.7rem'
+                              }}
+                            >
+                              <Camera size={12} />
+                              {visita.fotos.length}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                    ) : null}
                     {tableConfig.parcela ? <td>{visita.codigo_plantacion || 'N/A'}</td> : null}
                     {tableConfig.proveedor ? <td>{visita.proveedor || 'N/A'}</td> : null}
                     {tableConfig.cultivo ? <td>{visita.cultivo || 'N/A'}</td> : null}
