@@ -678,17 +678,50 @@ const Tareas = () => {
             <div className="grid-2">
               <div className="form-group">
                 <label className="form-label">Parcelas asignadas</label>
+                {/* Buscador de parcelas */}
+                <div style={{ position: 'relative', marginBottom: '0.5rem' }}>
+                  <Search size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                  <input
+                    type="text"
+                    className="form-input"
+                    style={{ paddingLeft: '36px', fontSize: '14px' }}
+                    placeholder="Buscar parcela por código, cultivo..."
+                    value={searchParcela}
+                    onChange={(e) => setSearchParcela(e.target.value)}
+                  />
+                  {searchParcela && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchParcela('')}
+                      style={{ 
+                        position: 'absolute', 
+                        right: '10px', 
+                        top: '50%', 
+                        transform: 'translateY(-50%)', 
+                        background: 'none', 
+                        border: 'none', 
+                        cursor: 'pointer',
+                        color: '#6b7280'
+                      }}
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+                {/* Lista de parcelas */}
                 <div style={{ 
                   border: '1px solid #d1d5db', 
                   borderRadius: '6px', 
-                  maxHeight: '150px', 
+                  maxHeight: '180px', 
                   overflowY: 'auto',
                   backgroundColor: '#f9fafb'
                 }}>
-                  {parcelas.length === 0 ? (
-                    <div style={{ padding: '0.75rem', color: '#6b7280', fontSize: '14px' }}>No hay parcelas disponibles</div>
+                  {filteredParcelas.length === 0 ? (
+                    <div style={{ padding: '0.75rem', color: '#6b7280', fontSize: '14px', textAlign: 'center' }}>
+                      {parcelas.length === 0 ? 'No hay parcelas disponibles' : 'No se encontraron parcelas'}
+                    </div>
                   ) : (
-                    parcelas.map(p => (
+                    filteredParcelas.map(p => (
                       <label 
                         key={p._id} 
                         style={{ 
@@ -698,7 +731,8 @@ const Tareas = () => {
                           padding: '0.5rem 0.75rem',
                           cursor: 'pointer',
                           borderBottom: '1px solid #e5e7eb',
-                          backgroundColor: formData.parcelas_ids.includes(p._id) ? '#dcfce7' : 'transparent'
+                          backgroundColor: formData.parcelas_ids.includes(p._id) ? '#dcfce7' : 'transparent',
+                          transition: 'background-color 0.15s'
                         }}
                       >
                         <input
@@ -721,11 +755,17 @@ const Tareas = () => {
                     ))
                   )}
                 </div>
-                {formData.parcelas_ids.length > 0 && (
-                  <div style={{ marginTop: '0.5rem', fontSize: '13px', color: '#2d5a27' }}>
-                    {formData.parcelas_ids.length} parcela(s) seleccionada(s)
-                  </div>
-                )}
+                {/* Info de selección */}
+                <div style={{ marginTop: '0.5rem', fontSize: '13px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#6b7280' }}>
+                    {filteredParcelas.length} de {parcelas.length} parcelas
+                  </span>
+                  {formData.parcelas_ids.length > 0 && (
+                    <span style={{ color: '#2d5a27', fontWeight: '500' }}>
+                      {formData.parcelas_ids.length} seleccionada(s)
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="form-group">
                 <label className="form-label">Descripción</label>
