@@ -90,10 +90,29 @@ const FitBounds = ({ coords }) => {
   const map = useMap();
   
   useEffect(() => {
-    if (coords && coords.length > 0) {
-      const bounds = L.latLngBounds(coords);
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 18 });
-    }
+    if (!map || !map._container) return;
+    
+    let isMounted = true;
+    
+    const fitBounds = () => {
+      if (!isMounted || !map || !map._container) return;
+      
+      if (coords && coords.length > 0) {
+        try {
+          const bounds = L.latLngBounds(coords);
+          map.fitBounds(bounds, { padding: [50, 50], maxZoom: 18 });
+        } catch (e) {
+          console.debug('FitBounds skipped:', e.message);
+        }
+      }
+    };
+    
+    const timeoutId = setTimeout(fitBounds, 100);
+    
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
   }, [coords, map]);
   
   return null;
@@ -104,9 +123,28 @@ const FlyToLocation = ({ center, zoom }) => {
   const map = useMap();
   
   useEffect(() => {
-    if (center) {
-      map.flyTo(center, zoom || 16, { duration: 1.5 });
-    }
+    if (!map || !map._container) return;
+    
+    let isMounted = true;
+    
+    const flyTo = () => {
+      if (!isMounted || !map || !map._container) return;
+      
+      if (center) {
+        try {
+          map.flyTo(center, zoom || 16, { duration: 1.5 });
+        } catch (e) {
+          console.debug('FlyTo skipped:', e.message);
+        }
+      }
+    };
+    
+    const timeoutId = setTimeout(flyTo, 100);
+    
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
   }, [center, zoom, map]);
   
   return null;
