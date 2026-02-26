@@ -2052,7 +2052,7 @@ const Dashboard = () => {
       
       {/* Recent Activity */}
       {isWidgetVisible('actividad_reciente') && kpis.actividad_reciente && (
-        <div className="grid-2">
+        <div className="grid-2" style={{ order: getWidgetOrder('actividad_reciente') + 1 }}>
           <div className="card">
             <h2 className="card-title">{t('dashboard.visits.recentVisits')}</h2>
             {kpis.actividad_reciente.visitas.length > 0 ? (
