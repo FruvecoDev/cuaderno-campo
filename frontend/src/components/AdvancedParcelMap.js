@@ -275,21 +275,40 @@ function FitBounds({ polygon, parcelas }) {
   const map = useMap();
   
   useEffect(() => {
-    if (polygon && polygon.length > 0) {
-      const bounds = L.latLngBounds(polygon.map(p => [p.lat, p.lng]));
-      map.fitBounds(bounds, { padding: [50, 50] });
-    } else if (parcelas && parcelas.length > 0) {
-      const allCoords = [];
-      parcelas.forEach(p => {
-        if (p.recintos && p.recintos[0]?.geometria) {
-          p.recintos[0].geometria.forEach(c => allCoords.push([c.lat, c.lng]));
+    if (!map || !map._container) return;
+    
+    let isMounted = true;
+    
+    const fitBounds = () => {
+      if (!isMounted || !map || !map._container) return;
+      
+      try {
+        if (polygon && polygon.length > 0) {
+          const bounds = L.latLngBounds(polygon.map(p => [p.lat, p.lng]));
+          map.fitBounds(bounds, { padding: [50, 50] });
+        } else if (parcelas && parcelas.length > 0) {
+          const allCoords = [];
+          parcelas.forEach(p => {
+            if (p.recintos && p.recintos[0]?.geometria) {
+              p.recintos[0].geometria.forEach(c => allCoords.push([c.lat, c.lng]));
+            }
+          });
+          if (allCoords.length > 0) {
+            const bounds = L.latLngBounds(allCoords);
+            map.fitBounds(bounds, { padding: [50, 50] });
+          }
         }
-      });
-      if (allCoords.length > 0) {
-        const bounds = L.latLngBounds(allCoords);
-        map.fitBounds(bounds, { padding: [50, 50] });
+      } catch (e) {
+        console.debug('FitBounds skipped:', e.message);
       }
-    }
+    };
+    
+    const timeoutId = setTimeout(fitBounds, 100);
+    
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
   }, [map, polygon, parcelas]);
   
   return null;
@@ -300,16 +319,22 @@ function GeolocationControl({ onLocate }) {
   const map = useMap();
   
   const handleLocate = () => {
-    map.locate({ setView: true, maxZoom: 16 });
-    map.on('locationfound', (e) => {
-      L.marker(e.latlng).addTo(map)
-        .bindPopup('Tu ubicación actual')
-        .openPopup();
-      if (onLocate) onLocate(e.latlng);
-    });
-    map.on('locationerror', () => {
-      alert('No se pudo obtener tu ubicación');
-    });
+    if (!map || !map._container) return;
+    
+    try {
+      map.locate({ setView: true, maxZoom: 16 });
+      map.on('locationfound', (e) => {
+        L.marker(e.latlng).addTo(map)
+          .bindPopup('Tu ubicación actual')
+          .openPopup();
+        if (onLocate) onLocate(e.latlng);
+      });
+      map.on('locationerror', () => {
+        alert('No se pudo obtener tu ubicación');
+      });
+    } catch (e) {
+      console.debug('Geolocation skipped:', e.message);
+    }
   };
   
   return (
