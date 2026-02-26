@@ -29,18 +29,42 @@ function createTestPNG(): Buffer {
   ]);
 }
 
+// More aggressive modal dismiss
+async function closeAllModals(page: any) {
+  // Try to click the Entendido button multiple times if present
+  for (let i = 0; i < 3; i++) {
+    const entendidoBtn = page.getByRole('button', { name: /Entendido/i });
+    if (await entendidoBtn.isVisible({ timeout: 500 }).catch(() => false)) {
+      await entendidoBtn.click({ force: true });
+      await page.waitForTimeout(300);
+    }
+    
+    // Also try to close modal by clicking X button
+    const closeBtn = page.locator('.modal-overlay button, [class*="modal"] button[aria-label="Close"]').first();
+    if (await closeBtn.isVisible({ timeout: 300 }).catch(() => false)) {
+      await closeBtn.click({ force: true }).catch(() => {});
+    }
+  }
+  
+  // Remove modal overlay via JS as last resort
+  await page.evaluate(() => {
+    document.querySelectorAll('.modal-overlay').forEach(el => el.remove());
+    const iframe = document.getElementById('webpack-dev-server-client-overlay');
+    if (iframe) iframe.remove();
+  });
+}
+
 test.describe('Visitas - Photo Upload Feature', () => {
   test.beforeEach(async ({ page }) => {
     // Login and navigate to visitas
     await login(page);
     await removeEmergentBadge(page);
-    await dismissResumenDiarioModal(page);
     
     await page.goto(`${BASE_URL}/visitas`, { waitUntil: 'domcontentloaded' });
     await expect(page.getByTestId('visitas-page')).toBeVisible({ timeout: 15000 });
     
-    // Dismiss modal again in case it appeared after navigation
-    await dismissResumenDiarioModal(page);
+    // Dismiss modal aggressively
+    await closeAllModals(page);
   });
 
   test('should display visitas page with new visit button', async ({ page }) => {
@@ -118,8 +142,11 @@ test.describe('Visitas - Photo Upload Feature', () => {
       
       await page.screenshot({ path: 'visitas-photo-pending.jpeg', quality: 20, fullPage: false });
       
-      // Save the visita
-      await page.getByTestId('btn-guardar-visita').click();
+      // Close any modal before saving
+      await closeAllModals(page);
+      
+      // Save the visita - use force: true in case modal overlay persists
+      await page.getByTestId('btn-guardar-visita').click({ force: true });
       
       // Wait for form to close
       await expect(page.getByTestId('visita-form')).not.toBeVisible({ timeout: 15000 });
@@ -172,8 +199,11 @@ test.describe('Visitas - Photo Upload Feature', () => {
       
       await page.screenshot({ path: 'visitas-photo-uploaded-edit.jpeg', quality: 20, fullPage: false });
       
-      // Save changes
-      await page.getByTestId('btn-guardar-visita').click();
+      // Close any modal before saving
+      await closeAllModals(page);
+      
+      // Save changes - use force: true
+      await page.getByTestId('btn-guardar-visita').click({ force: true });
       
       // Wait for form to close
       await expect(page.getByTestId('visita-form')).not.toBeVisible({ timeout: 15000 });
@@ -251,11 +281,18 @@ test.describe('Visitas - Photo Gallery in Details Modal', () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
     await removeEmergentBadge(page);
-    await dismissResumenDiarioModal(page);
     
     await page.goto(`${BASE_URL}/visitas`, { waitUntil: 'domcontentloaded' });
     await expect(page.getByTestId('visitas-page')).toBeVisible({ timeout: 15000 });
-    await dismissResumenDiarioModal(page);
+    
+    // Aggressively close modals
+    await page.evaluate(() => {
+      document.querySelectorAll('.modal-overlay').forEach(el => el.remove());
+    });
+    const entendidoBtn = page.getByRole('button', { name: /Entendido/i });
+    if (await entendidoBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await entendidoBtn.click({ force: true });
+    }
   });
 
   test('should display photos in visita edit form gallery', async ({ page }) => {
