@@ -1085,6 +1085,161 @@ const Dashboard = () => {
         </div>
       )}
       
+      {/* Widget de Próximas Visitas */}
+      {kpis.visitas_stats && (
+        <div className="card mb-6" data-testid="proximas-visitas">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <ClipboardList size={22} style={{ color: '#00897b' }} />
+              Próximas Visitas
+            </h2>
+            <button
+              onClick={() => navigate('/visitas')}
+              className="btn btn-sm btn-secondary"
+              style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+            >
+              Ver todas
+            </button>
+          </div>
+          
+          {/* KPIs de Visitas */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
+            gap: '1rem',
+            marginBottom: '1.5rem'
+          }}>
+            <div style={{ 
+              backgroundColor: '#e0f2f1', 
+              padding: '1rem', 
+              borderRadius: '8px',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '0.75rem', color: '#00695c', fontWeight: '500' }}>Visitas Este Mes</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#00897b' }}>
+                {kpis.visitas_stats.total_mes || 0}
+              </div>
+            </div>
+            
+            <div style={{ 
+              backgroundColor: '#e8f5e9', 
+              padding: '1rem', 
+              borderRadius: '8px',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '0.75rem', color: '#2e7d32', fontWeight: '500' }}>Realizadas</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#43a047' }}>
+                {kpis.visitas_stats.realizadas_mes || 0}
+              </div>
+            </div>
+            
+            <div style={{ 
+              backgroundColor: '#fff3e0', 
+              padding: '1rem', 
+              borderRadius: '8px',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '0.75rem', color: '#e65100', fontWeight: '500' }}>Pendientes</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#f57c00' }}>
+                {kpis.visitas_stats.pendientes || 0}
+              </div>
+            </div>
+            
+            <div style={{ 
+              backgroundColor: '#e3f2fd', 
+              padding: '1rem', 
+              borderRadius: '8px',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '0.75rem', color: '#1565c0', fontWeight: '500' }}>Próx. 14 días</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1976d2' }}>
+                {kpis.visitas_stats.proximas_14_dias || 0}
+              </div>
+            </div>
+          </div>
+          
+          {/* Lista de Próximas Visitas */}
+          {kpis.visitas_proximas?.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {kpis.visitas_proximas.map((visita, idx) => {
+                const fechaVisita = new Date(visita.fecha);
+                const hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+                const diasRestantes = Math.ceil((fechaVisita - hoy) / (1000 * 60 * 60 * 24));
+                const esHoy = diasRestantes === 0;
+                const esManana = diasRestantes === 1;
+                
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0.75rem',
+                      backgroundColor: esHoy ? '#e0f2f1' : esManana ? '#e8f5e9' : 'hsl(var(--muted))',
+                      borderRadius: '8px',
+                      borderLeft: `4px solid ${esHoy ? '#00897b' : esManana ? '#43a047' : '#90a4ae'}`
+                    }}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: '600', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        {esHoy && <Clock size={14} style={{ color: '#00897b' }} />}
+                        {visita.objetivo || 'Visita'}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
+                        {visita.parcela} | {visita.proveedor} | {visita.cultivo}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{
+                        fontWeight: '600',
+                        fontSize: '0.85rem',
+                        color: esHoy ? '#00695c' : esManana ? '#2e7d32' : '#546e7a'
+                      }}>
+                        {fechaVisita.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))' }}>
+                        {esHoy ? '¡Hoy!' : esManana ? 'Mañana' : `En ${diasRestantes} días`}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => navigate(`/visitas?ver=${visita.id}`)}
+                      className="btn btn-sm"
+                      style={{ 
+                        marginLeft: '0.75rem',
+                        backgroundColor: 'hsl(var(--muted))', 
+                        padding: '4px 8px'
+                      }}
+                      title="Ver visita"
+                    >
+                      <Eye size={14} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div style={{
+              padding: '2rem',
+              textAlign: 'center',
+              backgroundColor: 'hsl(var(--muted))',
+              borderRadius: '8px'
+            }}>
+              <ClipboardList size={40} style={{ color: 'hsl(var(--muted-foreground))', marginBottom: '0.5rem' }} />
+              <p className="text-muted">No hay visitas planificadas para los próximos 14 días</p>
+              <button
+                onClick={() => navigate('/visitas')}
+                className="btn btn-sm btn-primary"
+                style={{ marginTop: '0.5rem' }}
+              >
+                Planificar visita
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+      
       {/* Charts */}
       <div className="grid-2" style={{ marginBottom: '2rem' }}>
         {cultivoData.length > 0 && (
