@@ -289,6 +289,118 @@ const Visitas = () => {
     }
   };
   
+  // Funciones para manejo de fotos
+  const handleFileSelect = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+    
+    // Validar antes de subir
+    const validFiles = files.filter(file => {
+      const ext = file.name.split('.').pop().toLowerCase();
+      const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif'];
+      if (!validExtensions.includes(ext)) {
+        setUploadError(`${file.name}: Formato no permitido`);
+        return false;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        setUploadError(`${file.name}: Excede 10MB`);
+        return false;
+      }
+      return true;
+    });
+    
+    if (validFiles.length === 0) return;
+    
+    // Si estamos editando, subir directamente
+    if (editingId) {
+      await uploadFotos(editingId, validFiles);
+    } else {
+      // Si es nueva visita, guardar localmente hasta crear
+      const newFotos = validFiles.map(file => ({
+        file,
+        preview: URL.createObjectURL(file),
+        filename: file.name,
+        pending: true
+      }));
+      setFotos(prev => [...prev, ...newFotos]);
+    }
+    
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+  
+  const uploadFotos = async (visitaId, files) => {
+    setUploadingFotos(true);
+    setUploadError(null);
+    
+    try {
+      const formData = new FormData();
+      files.forEach(file => {
+        formData.append('files', file);
+      });
+      
+      const response = await fetch(`${BACKEND_URL}/api/visitas/${visitaId}/fotos`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Error al subir fotos');
+      }
+      
+      const data = await response.json();
+      setFotos(data.fotos || []);
+      
+      // Actualizar visita en la lista
+      fetchVisitas();
+      
+      return data;
+    } catch (error) {
+      console.error('Error uploading photos:', error);
+      setUploadError(error.message);
+      throw error;
+    } finally {
+      setUploadingFotos(false);
+    }
+  };
+  
+  const deleteFoto = async (visitaId, fotoIndex) => {
+    if (!window.confirm('¿Eliminar esta foto?')) return;
+    
+    // Si es foto pendiente (no subida aún)
+    if (fotos[fotoIndex]?.pending) {
+      setFotos(prev => prev.filter((_, i) => i !== fotoIndex));
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/visitas/${visitaId}/fotos/${fotoIndex}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Error al eliminar foto');
+      }
+      
+      const data = await response.json();
+      setFotos(data.fotos || []);
+      fetchVisitas();
+    } catch (error) {
+      console.error('Error deleting photo:', error);
+      setUploadError(error.message);
+    }
+  };
+  
   // Filtrar visitas
   const filteredVisitas = visitas.filter(v => {
     if (filters.proveedor && v.proveedor !== filters.proveedor) return false;
