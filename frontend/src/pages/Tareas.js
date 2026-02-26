@@ -862,6 +862,19 @@ const Tareas = () => {
                             <Clock size={14} /> Vence: {tarea.fecha_vencimiento}
                           </span>
                         )}
+                        {tarea.parcelas_ids?.length > 0 && (
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span style={{ 
+                              backgroundColor: '#dcfce7', 
+                              color: '#166534', 
+                              padding: '2px 6px', 
+                              borderRadius: '4px',
+                              fontSize: '12px'
+                            }}>
+                              {tarea.parcelas_ids.length} parcela(s)
+                            </span>
+                          </span>
+                        )}
                         {tarea.cultivo && <span>Cultivo: {tarea.cultivo}</span>}
                       </div>
                       
