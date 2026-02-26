@@ -1,19 +1,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
-  Plus, Edit2, Trash2, X, CheckCircle, Circle, Search, Calendar, 
-  Filter, Download, ChevronLeft, ChevronRight, Clock, AlertTriangle,
-  User, Flag, CheckSquare, Square, ChevronDown, ChevronUp, Settings
+  Plus, Edit2, Trash2, X, Search, Calendar, Filter, Download, 
+  ChevronLeft, ChevronRight, Clock, User, Flag, CheckSquare, 
+  Square, ChevronDown, ChevronUp, ClipboardList
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { PermissionButton, usePermissions } from '../utils/permissions';
+import { usePermissions } from '../utils/permissions';
+import '../App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 const PRIORIDAD_COLORS = {
-  alta: { bg: '#fee2e2', text: '#dc2626', border: '#fecaca' },
-  media: { bg: '#fef3c7', text: '#d97706', border: '#fde68a' },
-  baja: { bg: '#dcfce7', text: '#16a34a', border: '#bbf7d0' }
+  alta: { bg: '#fee2e2', text: '#dc2626' },
+  media: { bg: '#fef3c7', text: '#d97706' },
+  baja: { bg: '#dcfce7', text: '#16a34a' }
 };
 
 const ESTADO_COLORS = {
@@ -177,6 +178,7 @@ const Tareas = () => {
   }, [tareas, filters]);
 
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
+  const activeFiltersCount = Object.values(filters).filter(v => v !== '').length;
 
   const clearFilters = () => {
     setFilters({
@@ -329,17 +331,17 @@ const Tareas = () => {
   // Calendario helpers
   const getDaysInMonth = (month, year) => new Date(year, month, 0).getDate();
   const getFirstDayOfMonth = (month, year) => new Date(year, month - 1, 1).getDay();
+  const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
   const renderCalendario = () => {
     const daysInMonth = getDaysInMonth(mesCalendario, anoCalendario);
     const firstDay = getFirstDayOfMonth(mesCalendario, anoCalendario);
     const days = [];
-    const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-                        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
     // Empty cells before first day
     for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} className="p-2 bg-gray-50"></div>);
+      days.push(<div key={`empty-${i}`} style={{ padding: '0.5rem', backgroundColor: '#f9fafb' }}></div>);
     }
 
     // Days of month
@@ -351,15 +353,27 @@ const Tareas = () => {
       days.push(
         <div 
           key={day} 
-          className={`p-2 min-h-24 border ${isToday ? 'bg-blue-50 border-blue-300' : 'bg-white'}`}
+          style={{ 
+            padding: '0.5rem', 
+            minHeight: '100px', 
+            border: '1px solid #e5e7eb',
+            backgroundColor: isToday ? '#eff6ff' : 'white',
+            borderColor: isToday ? '#3b82f6' : '#e5e7eb'
+          }}
         >
-          <div className={`text-sm font-semibold mb-1 ${isToday ? 'text-blue-600' : ''}`}>{day}</div>
-          <div className="space-y-1">
+          <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '4px', color: isToday ? '#2563eb' : '#374151' }}>{day}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
             {tareasDelDia.slice(0, 3).map(tarea => (
               <div 
                 key={tarea._id}
-                className="text-xs p-1 rounded truncate cursor-pointer"
                 style={{ 
+                  fontSize: '11px', 
+                  padding: '2px 4px', 
+                  borderRadius: '4px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  cursor: 'pointer',
                   backgroundColor: PRIORIDAD_COLORS[tarea.prioridad]?.bg || '#f3f4f6',
                   color: PRIORIDAD_COLORS[tarea.prioridad]?.text || '#374151'
                 }}
@@ -370,7 +384,7 @@ const Tareas = () => {
               </div>
             ))}
             {tareasDelDia.length > 3 && (
-              <div className="text-xs text-gray-500">+{tareasDelDia.length - 3} más</div>
+              <div style={{ fontSize: '11px', color: '#6b7280' }}>+{tareasDelDia.length - 3} más</div>
             )}
           </div>
         </div>
@@ -379,7 +393,7 @@ const Tareas = () => {
 
     return (
       <div className="card">
-        <div className="flex justify-between items-center mb-4">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <button 
             className="btn btn-secondary"
             onClick={() => {
@@ -393,7 +407,7 @@ const Tareas = () => {
           >
             <ChevronLeft size={16} />
           </button>
-          <h3 className="text-lg font-semibold">{monthNames[mesCalendario - 1]} {anoCalendario}</h3>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: '600' }}>{monthNames[mesCalendario - 1]} {anoCalendario}</h3>
           <button 
             className="btn btn-secondary"
             onClick={() => {
@@ -408,9 +422,9 @@ const Tareas = () => {
             <ChevronRight size={16} />
           </button>
         </div>
-        <div className="grid grid-cols-7 gap-px bg-gray-200">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1px', backgroundColor: '#e5e7eb' }}>
           {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(d => (
-            <div key={d} className="p-2 bg-gray-100 text-center text-sm font-medium">{d}</div>
+            <div key={d} style={{ padding: '0.5rem', backgroundColor: '#f3f4f6', textAlign: 'center', fontSize: '14px', fontWeight: '500' }}>{d}</div>
           ))}
           {days}
         </div>
@@ -420,8 +434,12 @@ const Tareas = () => {
 
   return (
     <div data-testid="tareas-page">
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>{t('tasks.title', 'Tareas')}</h1>
+        <h1 className="page-title">
+          <ClipboardList className="inline mr-2" size={28} style={{ color: '#2d5a27' }} />
+          {t('tasks.title', 'Tareas')}
+        </h1>
         <div className="flex gap-2">
           <button 
             className={`btn ${vista === 'lista' ? 'btn-primary' : 'btn-secondary'}`}
@@ -441,7 +459,11 @@ const Tareas = () => {
             Excel
           </button>
           {canCreate && (
-            <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true); }}>
+            <button 
+              className="btn btn-primary" 
+              onClick={() => { resetForm(); setShowForm(true); }}
+              data-testid="btn-nueva-tarea"
+            >
               <Plus size={18} />
               Nueva Tarea
             </button>
@@ -451,30 +473,32 @@ const Tareas = () => {
 
       {/* Stats */}
       {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
-          <div className="card p-4">
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <div className="text-sm text-gray-500">Total</div>
+        <div className="stats-grid mb-4">
+          <div className="stat-card">
+            <div className="stat-icon"><ClipboardList size={20} /></div>
+            <div className="stat-value">{stats.total}</div>
+            <div className="stat-label">Total</div>
           </div>
-          <div className="card p-4" style={{ backgroundColor: ESTADO_COLORS.pendiente.bg }}>
-            <div className="text-2xl font-bold" style={{ color: ESTADO_COLORS.pendiente.text }}>{stats.pendientes}</div>
-            <div className="text-sm">Pendientes</div>
+          <div className="stat-card" style={{ backgroundColor: ESTADO_COLORS.pendiente.bg }}>
+            <div className="stat-value" style={{ color: ESTADO_COLORS.pendiente.text }}>{stats.pendientes}</div>
+            <div className="stat-label">Pendientes</div>
           </div>
-          <div className="card p-4" style={{ backgroundColor: ESTADO_COLORS.en_progreso.bg }}>
-            <div className="text-2xl font-bold" style={{ color: ESTADO_COLORS.en_progreso.text }}>{stats.en_progreso}</div>
-            <div className="text-sm">En Progreso</div>
+          <div className="stat-card" style={{ backgroundColor: ESTADO_COLORS.en_progreso.bg }}>
+            <div className="stat-value" style={{ color: ESTADO_COLORS.en_progreso.text }}>{stats.en_progreso}</div>
+            <div className="stat-label">En Progreso</div>
           </div>
-          <div className="card p-4" style={{ backgroundColor: ESTADO_COLORS.completada.bg }}>
-            <div className="text-2xl font-bold" style={{ color: ESTADO_COLORS.completada.text }}>{stats.completadas}</div>
-            <div className="text-sm">Completadas</div>
+          <div className="stat-card" style={{ backgroundColor: ESTADO_COLORS.completada.bg }}>
+            <div className="stat-value" style={{ color: ESTADO_COLORS.completada.text }}>{stats.completadas}</div>
+            <div className="stat-label">Completadas</div>
           </div>
-          <div className="card p-4" style={{ backgroundColor: '#fee2e2' }}>
-            <div className="text-2xl font-bold text-red-600">{stats.vencidas}</div>
-            <div className="text-sm">Vencidas</div>
+          <div className="stat-card" style={{ backgroundColor: '#fee2e2' }}>
+            <div className="stat-value" style={{ color: '#dc2626' }}>{stats.vencidas}</div>
+            <div className="stat-label">Vencidas</div>
           </div>
-          <div className="card p-4">
-            <div className="text-2xl font-bold">{stats.esta_semana}</div>
-            <div className="text-sm text-gray-500">Esta Semana</div>
+          <div className="stat-card">
+            <div className="stat-icon"><Calendar size={20} /></div>
+            <div className="stat-value">{stats.esta_semana}</div>
+            <div className="stat-label">Esta Semana</div>
           </div>
         </div>
       )}
@@ -482,42 +506,56 @@ const Tareas = () => {
       {/* Filtros */}
       {vista === 'lista' && (
         <div className="card mb-4" data-testid="tareas-filtros">
-          <div className="flex justify-between items-center mb-2">
+          <div className="flex justify-between items-center mb-3">
             <div className="flex items-center gap-2 flex-1">
-              <div className="relative flex-1 max-w-xs">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <div className="relative" style={{ maxWidth: '300px', flex: 1 }}>
+                <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
                 <input
-                  className="form-input pl-10"
+                  className="form-input"
+                  style={{ paddingLeft: '40px' }}
                   placeholder="Buscar tareas..."
                   value={filters.search}
                   onChange={(e) => setFilters({...filters, search: e.target.value})}
+                  data-testid="input-buscar-tareas"
                 />
               </div>
               <button
-                className="btn btn-secondary flex items-center gap-1"
+                className="btn btn-secondary"
                 onClick={() => setShowFilters(!showFilters)}
+                data-testid="btn-toggle-filtros"
               >
                 <Filter size={16} />
-                Filtros
+                Filtros avanzados
                 {hasActiveFilters && (
-                  <span className="bg-blue-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">
-                    {Object.values(filters).filter(v => v).length}
+                  <span style={{ 
+                    backgroundColor: '#2d5a27', 
+                    color: 'white', 
+                    borderRadius: '9999px', 
+                    width: '20px', 
+                    height: '20px', 
+                    fontSize: '12px', 
+                    display: 'inline-flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    marginLeft: '6px'
+                  }}>
+                    {activeFiltersCount}
                   </span>
                 )}
               </button>
             </div>
             {hasActiveFilters && (
-              <button className="btn btn-sm btn-secondary" onClick={clearFilters}>
-                <X size={14} /> Limpiar
+              <button className="btn btn-secondary" onClick={clearFilters} data-testid="btn-limpiar-filtros">
+                <X size={14} /> Limpiar filtros
               </button>
             )}
           </div>
 
           {showFilters && (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 pt-4 border-t">
-              <div className="form-group mb-0">
-                <label className="form-label text-xs">Estado</label>
-                <select className="form-select" value={filters.estado} onChange={(e) => setFilters({...filters, estado: e.target.value})}>
+            <div className="grid-6 pt-4" style={{ borderTop: '1px solid #e5e7eb' }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: '12px' }}>Estado</label>
+                <select className="form-select" value={filters.estado} onChange={(e) => setFilters({...filters, estado: e.target.value})} data-testid="select-filtro-estado">
                   <option value="">Todos</option>
                   <option value="pendiente">Pendiente</option>
                   <option value="en_progreso">En Progreso</option>
@@ -525,70 +563,72 @@ const Tareas = () => {
                   <option value="cancelada">Cancelada</option>
                 </select>
               </div>
-              <div className="form-group mb-0">
-                <label className="form-label text-xs">Prioridad</label>
-                <select className="form-select" value={filters.prioridad} onChange={(e) => setFilters({...filters, prioridad: e.target.value})}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: '12px' }}>Prioridad</label>
+                <select className="form-select" value={filters.prioridad} onChange={(e) => setFilters({...filters, prioridad: e.target.value})} data-testid="select-filtro-prioridad">
                   <option value="">Todas</option>
                   <option value="alta">Alta</option>
                   <option value="media">Media</option>
                   <option value="baja">Baja</option>
                 </select>
               </div>
-              <div className="form-group mb-0">
-                <label className="form-label text-xs">Tipo</label>
-                <select className="form-select" value={filters.tipo_tarea} onChange={(e) => setFilters({...filters, tipo_tarea: e.target.value})}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: '12px' }}>Tipo</label>
+                <select className="form-select" value={filters.tipo_tarea} onChange={(e) => setFilters({...filters, tipo_tarea: e.target.value})} data-testid="select-filtro-tipo">
                   <option value="">Todos</option>
                   {tipos.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
                 </select>
               </div>
-              <div className="form-group mb-0">
-                <label className="form-label text-xs">Asignado a</label>
-                <select className="form-select" value={filters.asignado_a} onChange={(e) => setFilters({...filters, asignado_a: e.target.value})}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: '12px' }}>Asignado a</label>
+                <select className="form-select" value={filters.asignado_a} onChange={(e) => setFilters({...filters, asignado_a: e.target.value})} data-testid="select-filtro-asignado">
                   <option value="">Todos</option>
                   {usuarios.map(u => <option key={u._id} value={u._id}>{u.name || u.email}</option>)}
                 </select>
               </div>
-              <div className="form-group mb-0">
-                <label className="form-label text-xs">Desde</label>
-                <input type="date" className="form-input" value={filters.fecha_desde} onChange={(e) => setFilters({...filters, fecha_desde: e.target.value})} />
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: '12px' }}>Fecha Desde</label>
+                <input type="date" className="form-input" value={filters.fecha_desde} onChange={(e) => setFilters({...filters, fecha_desde: e.target.value})} data-testid="input-filtro-fecha-desde" />
               </div>
-              <div className="form-group mb-0">
-                <label className="form-label text-xs">Hasta</label>
-                <input type="date" className="form-input" value={filters.fecha_hasta} onChange={(e) => setFilters({...filters, fecha_hasta: e.target.value})} />
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: '12px' }}>Fecha Hasta</label>
+                <input type="date" className="form-input" value={filters.fecha_hasta} onChange={(e) => setFilters({...filters, fecha_hasta: e.target.value})} data-testid="input-filtro-fecha-hasta" />
               </div>
             </div>
           )}
 
-          <div className="mt-2 text-sm text-gray-500">
+          <div style={{ marginTop: '0.75rem', fontSize: '14px', color: '#6b7280' }}>
             Mostrando <strong>{filteredTareas.length}</strong> de <strong>{tareas.length}</strong> tareas
+            {hasActiveFilters && ' (filtradas)'}
           </div>
         </div>
       )}
 
       {/* Formulario */}
       {showForm && (
-        <div className="card mb-6">
+        <div className="card mb-4">
           <h2 className="card-title">{editingId ? 'Editar Tarea' : 'Nueva Tarea'}</h2>
           <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="form-group lg:col-span-2">
+            <div className="grid-4">
+              <div className="form-group" style={{ gridColumn: 'span 2' }}>
                 <label className="form-label">Nombre *</label>
                 <input
                   className="form-input"
                   value={formData.nombre}
                   onChange={(e) => setFormData({...formData, nombre: e.target.value})}
                   required
+                  data-testid="input-nombre"
                 />
               </div>
               <div className="form-group">
                 <label className="form-label">Tipo</label>
-                <select className="form-select" value={formData.tipo_tarea} onChange={(e) => setFormData({...formData, tipo_tarea: e.target.value})}>
+                <select className="form-select" value={formData.tipo_tarea} onChange={(e) => setFormData({...formData, tipo_tarea: e.target.value})} data-testid="select-tipo">
                   {tipos.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
                 </select>
               </div>
               <div className="form-group">
                 <label className="form-label">Prioridad</label>
-                <select className="form-select" value={formData.prioridad} onChange={(e) => setFormData({...formData, prioridad: e.target.value})}>
+                <select className="form-select" value={formData.prioridad} onChange={(e) => setFormData({...formData, prioridad: e.target.value})} data-testid="select-prioridad">
                   <option value="alta">Alta</option>
                   <option value="media">Media</option>
                   <option value="baja">Baja</option>
@@ -596,10 +636,10 @@ const Tareas = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid-4">
               <div className="form-group">
                 <label className="form-label">Estado</label>
-                <select className="form-select" value={formData.estado} onChange={(e) => setFormData({...formData, estado: e.target.value})}>
+                <select className="form-select" value={formData.estado} onChange={(e) => setFormData({...formData, estado: e.target.value})} data-testid="select-estado">
                   <option value="pendiente">Pendiente</option>
                   <option value="en_progreso">En Progreso</option>
                   <option value="completada">Completada</option>
@@ -608,22 +648,22 @@ const Tareas = () => {
               </div>
               <div className="form-group">
                 <label className="form-label">Asignado a</label>
-                <select className="form-select" value={formData.asignado_a} onChange={(e) => setFormData({...formData, asignado_a: e.target.value})}>
+                <select className="form-select" value={formData.asignado_a} onChange={(e) => setFormData({...formData, asignado_a: e.target.value})} data-testid="select-asignado">
                   <option value="">Sin asignar</option>
                   {usuarios.map(u => <option key={u._id} value={u._id}>{u.name || u.email}</option>)}
                 </select>
               </div>
               <div className="form-group">
                 <label className="form-label">Fecha Inicio</label>
-                <input type="date" className="form-input" value={formData.fecha_inicio} onChange={(e) => setFormData({...formData, fecha_inicio: e.target.value})} />
+                <input type="date" className="form-input" value={formData.fecha_inicio} onChange={(e) => setFormData({...formData, fecha_inicio: e.target.value})} data-testid="input-fecha-inicio" />
               </div>
               <div className="form-group">
                 <label className="form-label">Fecha Vencimiento</label>
-                <input type="date" className="form-input" value={formData.fecha_vencimiento} onChange={(e) => setFormData({...formData, fecha_vencimiento: e.target.value})} />
+                <input type="date" className="form-input" value={formData.fecha_vencimiento} onChange={(e) => setFormData({...formData, fecha_vencimiento: e.target.value})} data-testid="input-fecha-vencimiento" />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid-2">
               <div className="form-group">
                 <label className="form-label">Parcelas</label>
                 <select 
@@ -632,25 +672,27 @@ const Tareas = () => {
                   value={formData.parcelas_ids} 
                   onChange={(e) => setFormData({...formData, parcelas_ids: Array.from(e.target.selectedOptions, o => o.value)})}
                   style={{ minHeight: '100px' }}
+                  data-testid="select-parcelas"
                 >
                   {parcelas.map(p => <option key={p._id} value={p._id}>{p.codigo_plantacion} - {p.cultivo}</option>)}
                 </select>
               </div>
               <div className="form-group">
                 <label className="form-label">Descripción</label>
-                <textarea className="form-textarea" rows={3} value={formData.descripcion} onChange={(e) => setFormData({...formData, descripcion: e.target.value})} />
+                <textarea className="form-textarea" rows={3} value={formData.descripcion} onChange={(e) => setFormData({...formData, descripcion: e.target.value})} data-testid="textarea-descripcion" />
               </div>
             </div>
 
             {/* Subtareas */}
-            <div className="p-4 bg-gray-50 rounded-lg mb-4">
-              <h4 className="font-semibold mb-2 flex items-center gap-2">
+            <div style={{ padding: '1rem', backgroundColor: '#f9fafb', borderRadius: '8px', marginBottom: '1rem' }}>
+              <h4 style={{ fontWeight: '600', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <CheckSquare size={16} />
                 Subtareas / Checklist
               </h4>
               <div className="flex gap-2 mb-2">
                 <input
-                  className="form-input flex-1"
+                  className="form-input"
+                  style={{ flex: 1 }}
                   placeholder="Añadir subtarea..."
                   value={newSubtarea}
                   onChange={(e) => setNewSubtarea(e.target.value)}
@@ -661,12 +703,12 @@ const Tareas = () => {
                 </button>
               </div>
               {formData.subtareas.length > 0 && (
-                <div className="space-y-1">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   {formData.subtareas.map(st => (
-                    <div key={st.id} className="flex items-center gap-2 p-2 bg-white rounded">
-                      {st.completada ? <CheckSquare size={16} className="text-green-500" /> : <Square size={16} className="text-gray-400" />}
-                      <span className={st.completada ? 'line-through text-gray-400' : ''}>{st.descripcion}</span>
-                      <button type="button" className="ml-auto text-red-500" onClick={() => removeSubtarea(st.id)}>
+                    <div key={st.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem', backgroundColor: 'white', borderRadius: '4px' }}>
+                      {st.completada ? <CheckSquare size={16} style={{ color: '#16a34a' }} /> : <Square size={16} style={{ color: '#9ca3af' }} />}
+                      <span style={{ textDecoration: st.completada ? 'line-through' : 'none', color: st.completada ? '#9ca3af' : '#374151' }}>{st.descripcion}</span>
+                      <button type="button" style={{ marginLeft: 'auto', color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => removeSubtarea(st.id)}>
                         <X size={14} />
                       </button>
                     </div>
@@ -675,19 +717,19 @@ const Tareas = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="form-group mb-0">
+            <div className="grid-2 mb-4">
+              <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Coste Estimado (€)</label>
                 <input type="number" step="0.01" className="form-input" value={formData.coste_estimado} onChange={(e) => setFormData({...formData, coste_estimado: parseFloat(e.target.value) || 0})} />
               </div>
-              <div className="form-group mb-0">
+              <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Coste Real (€)</label>
                 <input type="number" step="0.01" className="form-input" value={formData.coste_real} onChange={(e) => setFormData({...formData, coste_real: parseFloat(e.target.value) || 0})} />
               </div>
             </div>
 
             <div className="flex gap-2">
-              <button type="submit" className="btn btn-primary">{editingId ? 'Guardar' : 'Crear'}</button>
+              <button type="submit" className="btn btn-primary" data-testid="btn-guardar-tarea">{editingId ? 'Guardar' : 'Crear'}</button>
               <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }}>Cancelar</button>
             </div>
           </form>
@@ -697,25 +739,37 @@ const Tareas = () => {
       {/* Vista */}
       {vista === 'calendario' ? renderCalendario() : (
         <div className="card">
-          <h2 className="card-title">Tareas</h2>
+          <h2 className="card-title">Lista de Tareas</h2>
           {loading ? (
-            <p>Cargando...</p>
+            <p>{t('common.loading', 'Cargando...')}</p>
           ) : filteredTareas.length === 0 ? (
-            <p className="text-gray-500">No hay tareas</p>
+            <p className="text-muted">{t('common.noData', 'No hay tareas')}</p>
           ) : (
-            <div className="space-y-2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {filteredTareas.map(tarea => (
                 <div 
                   key={tarea._id} 
-                  className="border rounded-lg p-4 hover:shadow-sm transition-shadow"
-                  style={{ borderLeftWidth: '4px', borderLeftColor: PRIORIDAD_COLORS[tarea.prioridad]?.text || '#9ca3af' }}
+                  style={{ 
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    padding: '1rem',
+                    borderLeftWidth: '4px',
+                    borderLeftColor: PRIORIDAD_COLORS[tarea.prioridad]?.text || '#9ca3af',
+                    transition: 'box-shadow 0.2s'
+                  }}
+                  className="hover-shadow"
+                  data-testid={`tarea-item-${tarea._id}`}
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ flex: 1 }}>
+                      {/* Badges */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
                         <span 
-                          className="px-2 py-0.5 rounded text-xs font-medium"
                           style={{ 
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            fontWeight: '500',
                             backgroundColor: ESTADO_COLORS[tarea.estado || 'pendiente']?.bg,
                             color: ESTADO_COLORS[tarea.estado || 'pendiente']?.text
                           }}
@@ -723,36 +777,50 @@ const Tareas = () => {
                           {tarea.estado || 'pendiente'}
                         </span>
                         <span 
-                          className="px-2 py-0.5 rounded text-xs"
                           style={{ 
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            fontSize: '12px',
                             backgroundColor: PRIORIDAD_COLORS[tarea.prioridad]?.bg,
-                            color: PRIORIDAD_COLORS[tarea.prioridad]?.text
+                            color: PRIORIDAD_COLORS[tarea.prioridad]?.text,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
                           }}
                         >
-                          <Flag size={10} className="inline mr-1" />
+                          <Flag size={10} />
                           {tarea.prioridad}
                         </span>
                         {tarea.tipo_tarea && tarea.tipo_tarea !== 'general' && (
-                          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                          <span style={{ fontSize: '12px', color: '#6b7280', backgroundColor: '#f3f4f6', padding: '2px 8px', borderRadius: '4px' }}>
                             {tipos.find(t => t.id === tarea.tipo_tarea)?.nombre || tarea.tipo_tarea}
                           </span>
                         )}
                       </div>
-                      <h3 className="font-semibold text-lg">{tarea.nombre}</h3>
-                      {tarea.descripcion && <p className="text-sm text-gray-600 mt-1">{tarea.descripcion}</p>}
-                      <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-500">
+                      
+                      {/* Title */}
+                      <h3 style={{ fontWeight: '600', fontSize: '1.1rem', marginBottom: '0.25rem' }}>{tarea.nombre}</h3>
+                      {tarea.descripcion && <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '0.5rem' }}>{tarea.descripcion}</p>}
+                      
+                      {/* Meta info */}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', fontSize: '14px', color: '#6b7280' }}>
                         {tarea.asignado_nombre && (
-                          <span className="flex items-center gap-1">
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <User size={14} /> {tarea.asignado_nombre}
                           </span>
                         )}
                         {tarea.fecha_inicio && (
-                          <span className="flex items-center gap-1">
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <Calendar size={14} /> {tarea.fecha_inicio}
                           </span>
                         )}
                         {tarea.fecha_vencimiento && (
-                          <span className={`flex items-center gap-1 ${new Date(tarea.fecha_vencimiento) < new Date() && tarea.estado !== 'completada' ? 'text-red-500' : ''}`}>
+                          <span style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '4px',
+                            color: new Date(tarea.fecha_vencimiento) < new Date() && tarea.estado !== 'completada' ? '#dc2626' : '#6b7280'
+                          }}>
                             <Clock size={14} /> Vence: {tarea.fecha_vencimiento}
                           </span>
                         )}
@@ -761,9 +829,9 @@ const Tareas = () => {
                       
                       {/* Subtareas preview */}
                       {tarea.subtareas?.length > 0 && (
-                        <div className="mt-2">
+                        <div style={{ marginTop: '0.5rem' }}>
                           <button 
-                            className="text-sm text-gray-500 flex items-center gap-1"
+                            style={{ fontSize: '14px', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                             onClick={() => setExpandedTarea(expandedTarea === tarea._id ? null : tarea._id)}
                           >
                             <CheckSquare size={14} />
@@ -771,18 +839,18 @@ const Tareas = () => {
                             {expandedTarea === tarea._id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                           </button>
                           {expandedTarea === tarea._id && (
-                            <div className="mt-2 space-y-1 pl-4">
+                            <div style={{ marginTop: '0.5rem', paddingLeft: '1rem', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                               {tarea.subtareas.map(st => (
                                 <div 
                                   key={st.id} 
-                                  className="flex items-center gap-2 text-sm cursor-pointer"
+                                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '14px', cursor: 'pointer' }}
                                   onClick={() => handleToggleSubtarea(tarea._id, st.id, st.completada)}
                                 >
                                   {st.completada ? 
-                                    <CheckSquare size={14} className="text-green-500" /> : 
-                                    <Square size={14} className="text-gray-400" />
+                                    <CheckSquare size={14} style={{ color: '#16a34a' }} /> : 
+                                    <Square size={14} style={{ color: '#9ca3af' }} />
                                   }
-                                  <span className={st.completada ? 'line-through text-gray-400' : ''}>{st.descripcion}</span>
+                                  <span style={{ textDecoration: st.completada ? 'line-through' : 'none', color: st.completada ? '#9ca3af' : '#374151' }}>{st.descripcion}</span>
                                 </div>
                               ))}
                             </div>
@@ -791,10 +859,12 @@ const Tareas = () => {
                       )}
                     </div>
                     
-                    <div className="flex items-center gap-2 ml-4">
+                    {/* Actions */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: '1rem' }}>
                       {tarea.estado !== 'completada' && canEdit && (
                         <select 
-                          className="form-select text-sm py-1"
+                          className="form-select"
+                          style={{ fontSize: '14px', padding: '0.25rem 0.5rem', width: 'auto' }}
                           value={tarea.estado || 'pendiente'}
                           onChange={(e) => handleEstadoChange(tarea._id, e.target.value)}
                         >
@@ -805,12 +875,12 @@ const Tareas = () => {
                         </select>
                       )}
                       {canEdit && (
-                        <button className="btn btn-sm btn-secondary" onClick={() => handleEdit(tarea)}>
+                        <button className="btn btn-sm btn-secondary" onClick={() => handleEdit(tarea)} data-testid={`btn-editar-${tarea._id}`}>
                           <Edit2 size={14} />
                         </button>
                       )}
                       {canDelete && (
-                        <button className="btn btn-sm btn-error" onClick={() => handleDelete(tarea._id)}>
+                        <button className="btn btn-sm" style={{ backgroundColor: '#fee2e2', color: '#dc2626' }} onClick={() => handleDelete(tarea._id)} data-testid={`btn-eliminar-${tarea._id}`}>
                           <Trash2 size={14} />
                         </button>
                       )}
