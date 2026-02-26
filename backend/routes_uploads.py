@@ -174,3 +174,158 @@ async def get_visita_fotos(
         raise HTTPException(status_code=404, detail="Visita no encontrada")
     
     return {"fotos": visita.get("fotos", [])}
+
+
+
+# ============================================================================
+# AI PEST AND DISEASE ANALYSIS ENDPOINTS
+# ============================================================================
+
+@router.post("/visitas/{visita_id}/fotos/{foto_index}/analizar")
+async def analyze_visita_foto(
+    visita_id: str,
+    foto_index: int,
+    current_user: dict = Depends(get_current_user)
+):
+    """Analyze a specific photo for pests and diseases using AI"""
+    if not ObjectId.is_valid(visita_id):
+        raise HTTPException(status_code=400, detail="ID de visita inválido")
+    
+    visita = await visitas_collection.find_one({"_id": ObjectId(visita_id)})
+    if not visita:
+        raise HTTPException(status_code=404, detail="Visita no encontrada")
+    
+    fotos = visita.get("fotos", [])
+    
+    if foto_index < 0 or foto_index >= len(fotos):
+        raise HTTPException(status_code=400, detail="Índice de foto inválido")
+    
+    foto = fotos[foto_index]
+    file_url = foto.get("url", "")
+    
+    if not file_url.startswith("/api/uploads/"):
+        raise HTTPException(status_code=400, detail="URL de foto inválida")
+    
+    # Get file path
+    file_path = file_url.replace("/api/uploads/", f"{UPLOAD_DIR}/")
+    
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Archivo de foto no encontrado")
+    
+    # Get crop type from visita if available
+    crop_type = visita.get("cultivo", None)
+    
+    # Analyze image
+    analysis_result = await analyze_image_for_pests(file_path, crop_type)
+    
+    # Save analysis result to the photo
+    fotos[foto_index]["ai_analysis"] = {
+        **analysis_result,
+        "analyzed_at": datetime.now().isoformat(),
+        "analyzed_by": current_user.get("email", "unknown")
+    }
+    
+    await visitas_collection.update_one(
+        {"_id": ObjectId(visita_id)},
+        {"$set": {"fotos": fotos, "updated_at": datetime.now()}}
+    )
+    
+    return {
+        "success": True,
+        "analysis": analysis_result,
+        "foto": fotos[foto_index]
+    }
+
+
+@router.post("/analizar-imagen")
+async def analyze_uploaded_image(
+    file: UploadFile = File(...),
+    crop_type: Optional[str] = Form(None),
+    current_user: dict = Depends(get_current_user)
+):
+    """Analyze an uploaded image for pests and diseases (standalone endpoint)"""
+    # Validate file
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="Formato de imagen no permitido")
+    
+    # Read file content
+    content = await file.read()
+    
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail="El archivo excede el tamaño máximo de 10MB")
+    
+    # Convert to base64
+    image_base64 = base64.b64encode(content).decode("utf-8")
+    
+    # Analyze
+    analysis_result = await analyze_image_base64(image_base64, crop_type)
+    
+    return {
+        "success": True,
+        "analysis": analysis_result
+    }
+
+
+@router.post("/visitas/{visita_id}/fotos/analizar-todas")
+async def analyze_all_visita_fotos(
+    visita_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Analyze all photos in a visit for pests and diseases"""
+    if not ObjectId.is_valid(visita_id):
+        raise HTTPException(status_code=400, detail="ID de visita inválido")
+    
+    visita = await visitas_collection.find_one({"_id": ObjectId(visita_id)})
+    if not visita:
+        raise HTTPException(status_code=404, detail="Visita no encontrada")
+    
+    fotos = visita.get("fotos", [])
+    
+    if not fotos:
+        raise HTTPException(status_code=400, detail="La visita no tiene fotos")
+    
+    crop_type = visita.get("cultivo", None)
+    results = []
+    
+    for i, foto in enumerate(fotos):
+        file_url = foto.get("url", "")
+        
+        if not file_url.startswith("/api/uploads/"):
+            results.append({"index": i, "error": True, "message": "URL inválida"})
+            continue
+        
+        file_path = file_url.replace("/api/uploads/", f"{UPLOAD_DIR}/")
+        
+        if not os.path.exists(file_path):
+            results.append({"index": i, "error": True, "message": "Archivo no encontrado"})
+            continue
+        
+        # Analyze image
+        analysis_result = await analyze_image_for_pests(file_path, crop_type)
+        
+        # Save analysis result
+        fotos[i]["ai_analysis"] = {
+            **analysis_result,
+            "analyzed_at": datetime.now().isoformat(),
+            "analyzed_by": current_user.get("email", "unknown")
+        }
+        
+        results.append({
+            "index": i,
+            "filename": foto.get("filename", ""),
+            "analysis": analysis_result
+        })
+    
+    # Update visita with all analyses
+    await visitas_collection.update_one(
+        {"_id": ObjectId(visita_id)},
+        {"$set": {"fotos": fotos, "updated_at": datetime.now()}}
+    )
+    
+    return {
+        "success": True,
+        "total_analyzed": len(results),
+        "results": results,
+        "fotos": fotos
+    }
