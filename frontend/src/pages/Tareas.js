@@ -181,6 +181,17 @@ const Tareas = () => {
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
   const activeFiltersCount = Object.values(filters).filter(v => v !== '').length;
 
+  // Filtrar parcelas para el selector
+  const filteredParcelas = useMemo(() => {
+    if (!searchParcela.trim()) return parcelas;
+    const search = searchParcela.toLowerCase();
+    return parcelas.filter(p => 
+      p.codigo_plantacion?.toLowerCase().includes(search) ||
+      p.cultivo?.toLowerCase().includes(search) ||
+      p.proveedor?.toLowerCase().includes(search)
+    );
+  }, [parcelas, searchParcela]);
+
   const clearFilters = () => {
     setFilters({
       search: '', estado: '', prioridad: '', tipo_tarea: '',
