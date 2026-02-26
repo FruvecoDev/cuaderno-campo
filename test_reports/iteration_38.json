@@ -1,0 +1,62 @@
+{
+  "summary": "Tested advanced filters feature in Contratos page. All 12 frontend tests passed covering: filter UI rendering, toggle panel, search filter, proveedor/cultivo/campana/tipo dropdown filters, date range filters (desde/hasta), clear filters button, active filters badge count, combining multiple filters, and result count updates.",
+  "mode": "generate",
+  "baseline_commit": "35c4909f4822558bb39394ff3a09ef650476d8ce",
+  "head_commit": "467fd665ef06d227050a52184842f98a18d36863",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "runtime_errors": [
+      {
+        "component": "Leaflet map",
+        "issue": "Cannot read properties of undefined (reading '_leaflet_pos') - appears intermittently in dashboard/map views but does not affect Contratos functionality",
+        "priority": "LOW"
+      }
+    ]
+  },
+  "regression_results": {
+    "total_specs": 12,
+    "passed": 12,
+    "failed": 0,
+    "skipped": 0
+  },
+  "specs_created": ["/app/tests/e2e/contratos-filtros.spec.ts"],
+  "specs_updated": [],
+  "quarantined_tests": [],
+  "test_report_links": [
+    "/app/tests/e2e/contratos-filtros.spec.ts"
+  ],
+  "action_items": [],
+  "updated_files": [
+    "/app/tests/e2e/contratos-filtros.spec.ts"
+  ],
+  "success_rate": {
+    "backend": "100% (API /api/contratos verified)",
+    "frontend": "100% (12/12 tests passed)"
+  },
+  "seed_data_creation": "No new seed data created - tests work with existing contratos data",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Advanced filters in Contratos page fully tested:\n\nTEST IDS USED:\n- contratos-page: main page container\n- contratos-filtros: filter section container\n- input-buscar-contratos: search text input\n- btn-toggle-filtros: toggle advanced filters panel button\n- select-filtro-proveedor: proveedor dropdown filter\n- select-filtro-cultivo: cultivo dropdown filter\n- select-filtro-campana: campana dropdown filter\n- select-filtro-tipo: tipo dropdown filter\n- input-filtro-fecha-desde: date from input\n- input-filtro-fecha-hasta: date to input\n- btn-limpiar-filtros: clear all filters button\n\nKEY BEHAVIORS VERIFIED:\n1. Filters panel toggles visibility on btn-toggle-filtros click\n2. All filter dropdowns populate with unique values from existing contratos\n3. Date range filters work correctly\n4. Badge shows count of active filters (excludes search from count)\n5. Clear button resets all filters and hides when no filters active\n6. Result summary text shows 'filtrados' when filters applied\n\nKNOWN ISSUE: ResumenDiario modal and webpack-dev-server iframe can block clicks - tests handle this by dismissing modal and removing overlay in beforeEach",
+  "tested_features": {
+    "contratos_advanced_filters": [
+      "Filter section renders correctly",
+      "Toggle advanced filters panel",
+      "Search text filter",
+      "Proveedor dropdown filter",
+      "Cultivo dropdown filter",
+      "Campaña dropdown filter",
+      "Tipo dropdown filter",
+      "Date range filter (desde/hasta)",
+      "Clear all filters button",
+      "Active filters badge count",
+      "Combining multiple filters",
+      "Result count updates when filtering"
+    ]
+  }
+}
