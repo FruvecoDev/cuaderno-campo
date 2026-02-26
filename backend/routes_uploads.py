@@ -1,5 +1,6 @@
 """
 Routes for File Uploads - Handle image uploads for visits and other modules
+Includes AI-powered pest and disease analysis
 """
 
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
@@ -10,9 +11,11 @@ from datetime import datetime
 import os
 import uuid
 import aiofiles
+import base64
 
 from database import visitas_collection, serialize_doc
 from rbac_guards import RequireEdit, get_current_user
+from services.pest_analysis_service import analyze_image_for_pests, analyze_image_base64
 
 router = APIRouter(prefix="/api", tags=["uploads"])
 
