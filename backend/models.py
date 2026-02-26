@@ -510,12 +510,36 @@ class AIReportInDB(AIReportBase):
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
 
+class SubTarea(BaseModel):
+    """Subtarea o item de checklist"""
+    id: str  # UUID generado
+    descripcion: str
+    completada: bool = False
+    completada_por: Optional[str] = None
+    completada_fecha: Optional[str] = None
+
 class TareaCreate(BaseModel):
     nombre: str
-    superficie_tratar: float
-    parcelas_ids: List[str]
+    descripcion: Optional[str] = None
+    superficie_tratar: float = 0
+    parcelas_ids: List[str] = []
     fecha_inicio: Optional[str] = None
+    fecha_fin: Optional[str] = None
+    fecha_vencimiento: Optional[str] = None  # Fecha límite
     observaciones: Optional[str] = None
+    # Nuevos campos
+    prioridad: str = "media"  # alta, media, baja
+    estado: str = "pendiente"  # pendiente, en_progreso, completada, cancelada
+    asignado_a: Optional[str] = None  # user_id del técnico asignado
+    asignado_nombre: Optional[str] = None  # Nombre del usuario asignado
+    tipo_tarea: str = "general"  # general, tratamiento, riego, cosecha, mantenimiento, otro
+    subtareas: List[SubTarea] = []
+    coste_estimado: float = 0
+    coste_real: float = 0
+    # Campos heredados de parcela
+    cultivo: Optional[str] = None
+    campana: Optional[str] = None
+    proveedor: Optional[str] = None
 
 class TareaInDB(TareaBase):
     id: str = Field(alias="_id")
