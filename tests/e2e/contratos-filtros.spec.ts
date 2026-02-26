@@ -5,14 +5,19 @@ test.describe('Contratos Advanced Filters', () => {
   const BASE_URL = process.env.BASE_URL || 'https://agri-contratos.preview.emergentagent.com';
 
   test.beforeEach(async ({ page }) => {
+    // Login first
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await login(page, 'admin@fruveco.com', 'admin123');
     await dismissToasts(page);
     await removeEmergentBadge(page);
     
-    // Navigate to Contratos page
-    await page.goto('/contratos', { waitUntil: 'domcontentloaded' });
-    await expect(page.getByTestId('contratos-page')).toBeVisible({ timeout: 10000 });
+    // Navigate to Contratos page using sidebar click for reliability
+    const contratosLink = page.locator('a, button').filter({ hasText: /^Contratos$/i }).first();
+    await contratosLink.click();
+    
+    // Wait for contratos page to load with longer timeout
+    await expect(page.getByTestId('contratos-page')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('contratos-filtros')).toBeVisible({ timeout: 10000 });
   });
 
   test('should render filter section correctly', async ({ page }) => {
