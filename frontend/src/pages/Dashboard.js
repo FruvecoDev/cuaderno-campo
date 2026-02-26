@@ -720,9 +720,10 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+      )}
       
       {/* Sección de Fincas */}
-      {kpis.fincas && (
+      {isWidgetVisible('resumen_fincas') && kpis.fincas && (
         <div className="card mb-6" data-testid="dashboard-fincas">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
