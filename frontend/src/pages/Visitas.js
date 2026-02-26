@@ -582,6 +582,8 @@ const Visitas = () => {
       });
       setCuestionarioPlagas(initialPlagas);
     }
+    // Cargar fotos existentes
+    setFotos(visita.fotos || []);
     setShowForm(true);
   };
   
