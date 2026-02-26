@@ -1451,6 +1451,65 @@ const Visitas = () => {
                   </div>
                 </div>
               )}
+              
+              {/* Galería de fotos en el modal */}
+              {viewingVisita.fotos && viewingVisita.fotos.length > 0 && (
+                <div data-testid="modal-fotos-gallery">
+                  <label style={{ fontWeight: '600', fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Camera size={16} />
+                    Fotos ({viewingVisita.fotos.length})
+                  </label>
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', 
+                    gap: '0.75rem' 
+                  }}>
+                    {viewingVisita.fotos.map((foto, index) => (
+                      <div 
+                        key={index}
+                        style={{
+                          position: 'relative',
+                          aspectRatio: '1',
+                          borderRadius: '0.5rem',
+                          overflow: 'hidden',
+                          border: '1px solid hsl(var(--border))',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => window.open(`${BACKEND_URL}${foto.url}`, '_blank')}
+                        title="Clic para ver en tamaño completo"
+                      >
+                        <img
+                          src={`${BACKEND_URL}${foto.url}`}
+                          alt={foto.filename || `Foto ${index + 1}`}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            transition: 'transform 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                          onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                        />
+                        <div style={{
+                          position: 'absolute',
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          padding: '0.25rem 0.5rem',
+                          backgroundColor: 'rgba(0,0,0,0.6)',
+                          color: 'white',
+                          fontSize: '0.65rem',
+                          textOverflow: 'ellipsis',
+                          overflow: 'hidden',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {foto.filename || `Foto ${index + 1}`}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             
             <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
