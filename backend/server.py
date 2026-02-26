@@ -52,6 +52,7 @@ from routes_notificaciones import router as notificaciones_router
 from routes_resumen_diario import router as resumen_diario_router
 from routes_tareas import router as tareas_router
 from routes_irrigaciones import router as irrigaciones_router
+from routes_uploads import router as uploads_router
 from scheduler_service import init_scheduler, shutdown_scheduler
 
 app = FastAPI(title="FRUVECO - Agricultural Management System V1")
@@ -113,6 +114,7 @@ app.include_router(notificaciones_router)
 app.include_router(resumen_diario_router)
 app.include_router(tareas_router)
 app.include_router(irrigaciones_router)
+app.include_router(uploads_router)
 
 # Mount static files for uploaded images
 uploads_dir = "/app/uploads"
