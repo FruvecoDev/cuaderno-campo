@@ -607,7 +607,7 @@ const Dashboard = () => {
             </div>
             
             <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1.5rem' }}>
-              Selecciona qué secciones quieres ver en tu dashboard. Los cambios se guardarán para tu usuario.
+              Activa/desactiva las secciones y usa las flechas para cambiar el orden de visualización. Los cambios se guardarán para tu usuario.
             </p>
             
             {/* Lista de Widgets */}
@@ -622,13 +622,66 @@ const Dashboard = () => {
                     backgroundColor: widget.visible ? '#e8f5e9' : '#f5f5f5',
                     borderRadius: '8px',
                     border: `1px solid ${widget.visible ? '#a5d6a7' : '#e0e0e0'}`,
-                    cursor: 'pointer',
                     transition: 'all 0.2s ease'
                   }}
-                  onClick={() => toggleWidgetVisibility(widget.widget_id)}
                 >
-                  <GripVertical size={18} style={{ color: '#bbb', marginRight: '0.75rem' }} />
-                  <div style={{ flex: 1 }}>
+                  {/* Botones de orden */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginRight: '0.75rem' }}>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); moveWidgetUp(idx); }}
+                      disabled={idx === 0}
+                      style={{
+                        background: idx === 0 ? '#f0f0f0' : '#e3f2fd',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '2px 4px',
+                        cursor: idx === 0 ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                      title="Subir"
+                    >
+                      <ArrowUp size={14} style={{ color: idx === 0 ? '#bbb' : '#1976d2' }} />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); moveWidgetDown(idx); }}
+                      disabled={idx === configWidgets.length - 1}
+                      style={{
+                        background: idx === configWidgets.length - 1 ? '#f0f0f0' : '#e3f2fd',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '2px 4px',
+                        cursor: idx === configWidgets.length - 1 ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                      title="Bajar"
+                    >
+                      <ArrowDown size={14} style={{ color: idx === configWidgets.length - 1 ? '#bbb' : '#1976d2' }} />
+                    </button>
+                  </div>
+                  
+                  {/* Número de orden */}
+                  <div style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '50%',
+                    backgroundColor: widget.visible ? '#2d5a27' : '#999',
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    marginRight: '0.75rem'
+                  }}>
+                    {idx + 1}
+                  </div>
+                  
+                  {/* Info del widget */}
+                  <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => toggleWidgetVisibility(widget.widget_id)}>
                     <div style={{ fontWeight: '600', fontSize: '0.95rem' }}>
                       {widget.name}
                     </div>
@@ -636,14 +689,20 @@ const Dashboard = () => {
                       {widget.description}
                     </div>
                   </div>
-                  <div style={{
-                    width: '48px',
-                    height: '26px',
-                    backgroundColor: widget.visible ? '#4caf50' : '#ccc',
-                    borderRadius: '13px',
-                    position: 'relative',
-                    transition: 'background-color 0.2s ease'
-                  }}>
+                  
+                  {/* Toggle */}
+                  <div 
+                    onClick={() => toggleWidgetVisibility(widget.widget_id)}
+                    style={{
+                      width: '48px',
+                      height: '26px',
+                      backgroundColor: widget.visible ? '#4caf50' : '#ccc',
+                      borderRadius: '13px',
+                      position: 'relative',
+                      transition: 'background-color 0.2s ease',
+                      cursor: 'pointer'
+                    }}
+                  >
                     <div style={{
                       width: '22px',
                       height: '22px',
