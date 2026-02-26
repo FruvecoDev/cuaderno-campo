@@ -510,9 +510,154 @@ const Dashboard = () => {
     <div data-testid="dashboard-page">
       <div className="flex justify-between items-center mb-6">
         <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>{t('dashboard.title')}</h1>
+        <button
+          onClick={() => setShowConfigModal(true)}
+          className="btn btn-secondary"
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          data-testid="btn-config-dashboard"
+        >
+          <Settings size={18} />
+          Configurar
+        </button>
       </div>
       
+      {/* Modal de Configuración */}
+      {showConfigModal && (
+        <>
+          <div 
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              zIndex: 9998
+            }}
+            onClick={() => setShowConfigModal(false)}
+          />
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '1.5rem',
+            width: '90%',
+            maxWidth: '600px',
+            maxHeight: '80vh',
+            overflow: 'auto',
+            zIndex: 9999,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
+          }} data-testid="modal-config-dashboard">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Settings size={24} style={{ color: '#1976d2' }} />
+                Configurar Dashboard
+              </h2>
+              <button 
+                className="btn btn-sm btn-secondary"
+                onClick={() => setShowConfigModal(false)}
+              >
+                <X size={16} />
+              </button>
+            </div>
+            
+            <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1.5rem' }}>
+              Selecciona qué secciones quieres ver en tu dashboard. Los cambios se guardarán para tu usuario.
+            </p>
+            
+            {/* Lista de Widgets */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
+              {configWidgets.map((widget, idx) => (
+                <div
+                  key={widget.widget_id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '0.75rem 1rem',
+                    backgroundColor: widget.visible ? '#e8f5e9' : '#f5f5f5',
+                    borderRadius: '8px',
+                    border: `1px solid ${widget.visible ? '#a5d6a7' : '#e0e0e0'}`,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onClick={() => toggleWidgetVisibility(widget.widget_id)}
+                >
+                  <GripVertical size={18} style={{ color: '#bbb', marginRight: '0.75rem' }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: '600', fontSize: '0.95rem' }}>
+                      {widget.name}
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#666' }}>
+                      {widget.description}
+                    </div>
+                  </div>
+                  <div style={{
+                    width: '48px',
+                    height: '26px',
+                    backgroundColor: widget.visible ? '#4caf50' : '#ccc',
+                    borderRadius: '13px',
+                    position: 'relative',
+                    transition: 'background-color 0.2s ease'
+                  }}>
+                    <div style={{
+                      width: '22px',
+                      height: '22px',
+                      backgroundColor: 'white',
+                      borderRadius: '50%',
+                      position: 'absolute',
+                      top: '2px',
+                      left: widget.visible ? '24px' : '2px',
+                      transition: 'left 0.2s ease',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+                    }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {/* Botones de acción */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
+              <button
+                onClick={resetDashboardConfig}
+                className="btn btn-secondary"
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              >
+                <RotateCcw size={16} />
+                Restaurar por defecto
+              </button>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  onClick={() => setShowConfigModal(false)}
+                  className="btn btn-secondary"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={saveDashboardConfig}
+                  className="btn btn-primary"
+                  disabled={savingConfig}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                >
+                  {savingConfig ? (
+                    <>Guardando...</>
+                  ) : (
+                    <>
+                      <Save size={16} />
+                      Guardar cambios
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+      
       {/* KPI Cards */}
+      {isWidgetVisible('kpis_principales') && (
       <div className="stats-grid" data-testid="dashboard-kpis">
         {puedeCompra && (
         <div className="stat-card">
