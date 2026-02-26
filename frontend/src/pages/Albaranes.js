@@ -627,6 +627,25 @@ const Albaranes = () => {
           >
             <Settings size={18} />
           </button>
+          <button
+            className="btn btn-secondary"
+            onClick={exportToExcel}
+            disabled={exportLoading || albaranes.length === 0}
+            title="Exportar a Excel"
+            data-testid="btn-export-excel"
+          >
+            {exportLoading ? (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Download size={18} className="animate-spin" />
+                Exportando...
+              </span>
+            ) : (
+              <>
+                <Download size={18} />
+                Exportar
+              </>
+            )}
+          </button>
           <PermissionButton
             permission="create"
             onClick={() => { resetForm(); setShowForm(!showForm); setEditingId(null); }}
