@@ -71,6 +71,30 @@ export async function removeEmergentBadge(page: Page) {
   });
 }
 
+export async function dismissResumenDiarioModal(page: Page) {
+  // Try to close the ResumenDiario modal if present
+  try {
+    const entendidoBtn = page.getByRole('button', { name: /Entendido/i });
+    if (await entendidoBtn.isVisible({ timeout: 2000 })) {
+      await entendidoBtn.click();
+    }
+  } catch {
+    // Modal not present, continue
+  }
+  
+  // Also remove webpack dev server overlay
+  await page.evaluate(() => {
+    const iframe = document.getElementById('webpack-dev-server-client-overlay');
+    if (iframe) iframe.remove();
+    
+    // Remove any modal overlay that might be blocking
+    const overlays = document.querySelectorAll('.modal-overlay');
+    overlays.forEach(overlay => {
+      if (overlay) overlay.remove();
+    });
+  });
+}
+
 export function generateUniqueId(): string {
   return `TEST_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 }
