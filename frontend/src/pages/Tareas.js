@@ -75,6 +75,7 @@ const Tareas = () => {
   });
 
   const [newSubtarea, setNewSubtarea] = useState('');
+  const [searchParcela, setSearchParcela] = useState('');
 
   const headers = {
     'Content-Type': 'application/json',
