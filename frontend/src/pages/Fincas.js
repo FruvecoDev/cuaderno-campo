@@ -1489,6 +1489,7 @@ const Fincas = () => {
                     );
                   })}
                 </div>
+                )}
               </div>
             ))}
           </div>
