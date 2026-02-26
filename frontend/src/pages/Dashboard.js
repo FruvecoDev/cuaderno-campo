@@ -1630,8 +1630,10 @@ const Dashboard = () => {
           </div>
         )}
       </div>
+      )}
       
       {/* Calendario y Planificador de Visitas */}
+      {isWidgetVisible('calendario') && (
       <div className="grid-2 mb-6">
         {/* Calendario Visual */}
         <div className="card" data-testid="calendario-visitas">
