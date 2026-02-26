@@ -28,20 +28,42 @@ function FitAllBounds({ parcelas }) {
   const map = useMap();
   
   useEffect(() => {
-    if (parcelas && parcelas.length > 0) {
-      const allCoords = [];
-      parcelas.forEach(p => {
-        if (p.recintos && p.recintos[0]?.geometria) {
-          p.recintos[0].geometria.forEach(coord => {
-            allCoords.push([coord.lat, coord.lng]);
-          });
+    // Guard against unmounted map or invalid map instance
+    if (!map || !map._container) return;
+    
+    let isMounted = true;
+    
+    const fitBounds = () => {
+      if (!isMounted || !map || !map._container) return;
+      
+      if (parcelas && parcelas.length > 0) {
+        const allCoords = [];
+        parcelas.forEach(p => {
+          if (p.recintos && p.recintos[0]?.geometria) {
+            p.recintos[0].geometria.forEach(coord => {
+              allCoords.push([coord.lat, coord.lng]);
+            });
+          }
+        });
+        if (allCoords.length > 0) {
+          try {
+            const bounds = L.latLngBounds(allCoords);
+            map.fitBounds(bounds, { padding: [30, 30] });
+          } catch (e) {
+            // Silently ignore errors when map is being unmounted
+            console.debug('Map bounds adjustment skipped:', e.message);
+          }
         }
-      });
-      if (allCoords.length > 0) {
-        const bounds = L.latLngBounds(allCoords);
-        map.fitBounds(bounds, { padding: [30, 30] });
       }
-    }
+    };
+    
+    // Small delay to ensure map is fully initialized
+    const timeoutId = setTimeout(fitBounds, 100);
+    
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
   }, [map, parcelas]);
   
   return null;
