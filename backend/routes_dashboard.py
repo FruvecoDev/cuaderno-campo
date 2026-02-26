@@ -252,5 +252,8 @@ async def get_dashboard_kpis():
         "actividad_reciente": {
             "visitas": serialize_docs(recent_visitas),
             "tratamientos": serialize_docs(recent_tratamientos)
-        }
+        },
+        "proximas_cosechas": proximas_cosechas,
+        "tratamientos_pendientes": tratamientos_pendientes_list,
+        "fincas_recoleccion_semana": fincas_recoleccion_list
     }
