@@ -107,6 +107,106 @@ async def get_dashboard_kpis():
     recent_visitas = await visitas_collection.find().sort("created_at", -1).limit(5).to_list(5)
     recent_tratamientos = await tratamientos_collection.find().sort("created_at", -1).limit(5).to_list(5)
     
+    # =============================================
+    # PRÓXIMAS COSECHAS (planificadas)
+    # =============================================
+    from datetime import datetime, timedelta
+    
+    hoy = datetime.now().strftime("%Y-%m-%d")
+    proximas_cosechas = []
+    
+    cosechas_all = await cosechas_collection.find({
+        "estado": {"$in": ["planificada", "en_curso"]}
+    }).to_list(100)
+    
+    for cosecha in cosechas_all:
+        for planif in cosecha.get("planificaciones", []):
+            fecha_plan = planif.get("fecha_planificada", "")
+            if fecha_plan and fecha_plan >= hoy:
+                proximas_cosechas.append({
+                    "cosecha_id": str(cosecha.get("_id")),
+                    "contrato_id": cosecha.get("contrato_id"),
+                    "proveedor": cosecha.get("proveedor", ""),
+                    "cultivo": cosecha.get("cultivo", ""),
+                    "variedad": cosecha.get("variedad", ""),
+                    "fecha_planificada": fecha_plan,
+                    "kilos_estimados": planif.get("kilos_estimados", 0),
+                    "estado": cosecha.get("estado", "planificada"),
+                    "parcela": cosecha.get("parcela", "")
+                })
+    
+    # Ordenar por fecha más próxima
+    proximas_cosechas.sort(key=lambda x: x["fecha_planificada"])
+    proximas_cosechas = proximas_cosechas[:10]  # Top 10
+    
+    # También buscar parcelas con fecha de siega planificada
+    parcelas_con_siega = await parcelas_collection.find({
+        "fecha_prevista_siega": {"$gte": hoy}
+    }).sort("fecha_prevista_siega", 1).limit(10).to_list(10)
+    
+    for p in parcelas_con_siega:
+        existe = any(c["parcela"] == p.get("codigo_plantacion") for c in proximas_cosechas)
+        if not existe:
+            proximas_cosechas.append({
+                "cosecha_id": None,
+                "contrato_id": p.get("contrato_id"),
+                "proveedor": p.get("proveedor", ""),
+                "cultivo": p.get("cultivo", ""),
+                "variedad": p.get("variedad", ""),
+                "fecha_planificada": p.get("fecha_prevista_siega", ""),
+                "kilos_estimados": 0,
+                "estado": "siega_planificada",
+                "parcela": p.get("codigo_plantacion", "")
+            })
+    
+    proximas_cosechas.sort(key=lambda x: x["fecha_planificada"])
+    proximas_cosechas = proximas_cosechas[:10]
+    
+    # =============================================
+    # TRATAMIENTOS PENDIENTES
+    # =============================================
+    tratamientos_pendientes = await tratamientos_collection.find({
+        "$or": [
+            {"estado": "pendiente"},
+            {"estado": "programado"},
+            {"realizado": False}
+        ]
+    }).sort("fecha_tratamiento", 1).limit(10).to_list(10)
+    
+    tratamientos_pendientes_list = []
+    for t in tratamientos_pendientes:
+        tratamientos_pendientes_list.append({
+            "id": str(t.get("_id")),
+            "tipo_tratamiento": t.get("tipo_tratamiento", ""),
+            "parcela": t.get("parcela", ""),
+            "cultivo": t.get("cultivo", ""),
+            "fecha_tratamiento": t.get("fecha_tratamiento", ""),
+            "superficie_aplicacion": t.get("superficie_aplicacion", 0),
+            "estado": t.get("estado", "pendiente"),
+            "prioridad": t.get("prioridad", "normal")
+        })
+    
+    # También buscar fincas con recolección planificada esta semana
+    semana_actual = datetime.now().isocalendar()[1]
+    ano_actual = datetime.now().year
+    
+    fincas_recoleccion = await fincas_collection.find({
+        "recoleccion_semana": semana_actual,
+        "recoleccion_ano": ano_actual
+    }).to_list(20)
+    
+    fincas_recoleccion_list = []
+    for f in fincas_recoleccion:
+        fincas_recoleccion_list.append({
+            "id": str(f.get("_id")),
+            "denominacion": f.get("denominacion", f.get("nombre", "")),
+            "provincia": f.get("provincia", ""),
+            "hectareas": f.get("hectareas", 0),
+            "produccion_esperada": f.get("produccion_esperada", 0),
+            "semana": f.get("recoleccion_semana"),
+            "ano": f.get("recoleccion_ano")
+        })
+    
     return {
         "totales": {
             "contratos": total_contratos,
