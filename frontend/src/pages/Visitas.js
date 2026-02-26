@@ -514,6 +514,17 @@ const Visitas = () => {
       
       const data = await response.json();
       if (data.success) {
+        // Si hay fotos pendientes y es una creación nueva, subirlas
+        const pendingFotos = fotos.filter(f => f.pending);
+        if (!editingId && pendingFotos.length > 0 && data.data?._id) {
+          try {
+            await uploadFotos(data.data._id, pendingFotos.map(f => f.file));
+          } catch (uploadError) {
+            console.error('Error uploading photos after create:', uploadError);
+            // La visita se creó, solo falló la subida de fotos
+          }
+        }
+        
         setShowForm(false);
         setEditingId(null);
         fetchVisitas();
