@@ -250,21 +250,35 @@ class IrrigacionInDB(IrrigacionBase):
         json_encoders = {ObjectId: str}
 
 # ============================================================================
-# RECETAS
+# RECETAS (Recetas Fitosanitarias)
 # ============================================================================
 
 class RecetaProducto(BaseModel):
+    """Producto fitosanitario con dosificación"""
+    producto_id: Optional[str] = None  # Ref a fitosanitarios collection
+    nombre_comercial: str
     materia_activa: str
-    dosis: float
-    unidad: str
+    num_registro: Optional[str] = None
+    dosis: float  # Cantidad por unidad de superficie
+    unidad: str  # kg/ha, L/ha, g/ha, mL/ha
+    concentracion: Optional[float] = None  # % o g/L
+    plazo_seguridad: Optional[int] = None  # días
+    objetivo: Optional[str] = None  # Plaga o enfermedad objetivo
 
 class RecetaBase(BaseModel):
     nombre: str
     cultivo_objetivo: str
+    tipo_tratamiento: str = "Fitosanitario"  # Fitosanitario, Nutricional, Herbicida, etc.
+    objetivo_tratamiento: Optional[str] = None  # Plaga/Enfermedad/Deficiencia específica
     productos: List[RecetaProducto] = []
     instrucciones: Optional[str] = None
-    plazo_seguridad: int  # días
+    plazo_seguridad: int  # días (máximo de todos los productos)
     ppe_requerido: Optional[str] = None  # Equipo de protección personal
+    epoca_aplicacion: Optional[str] = None  # Momento óptimo de aplicación
+    condiciones_aplicacion: Optional[str] = None  # Condiciones ambientales
+    intervalo_aplicaciones: Optional[int] = None  # días entre aplicaciones
+    max_aplicaciones: Optional[int] = None  # Máximo de aplicaciones por campaña
+    activa: bool = True
     
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
@@ -272,8 +286,17 @@ class RecetaBase(BaseModel):
 class RecetaCreate(BaseModel):
     nombre: str
     cultivo_objetivo: str
-    plazo_seguridad: int
+    tipo_tratamiento: str = "Fitosanitario"
+    objetivo_tratamiento: Optional[str] = None
+    productos: List[RecetaProducto] = []
+    plazo_seguridad: int = 0
     instrucciones: Optional[str] = None
+    ppe_requerido: Optional[str] = None
+    epoca_aplicacion: Optional[str] = None
+    condiciones_aplicacion: Optional[str] = None
+    intervalo_aplicaciones: Optional[int] = None
+    max_aplicaciones: Optional[int] = None
+    activa: bool = True
 
 class RecetaInDB(RecetaBase):
     id: str = Field(alias="_id")
