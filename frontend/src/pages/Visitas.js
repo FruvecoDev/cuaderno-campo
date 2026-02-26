@@ -555,6 +555,12 @@ const Visitas = () => {
     setCuestionarioPlagas(initialPlagas);
     setSelectedParcelaInfo(null);
     setParcelaSearch({ proveedor: '', cultivo: '', campana: '' });
+    // Limpiar fotos
+    fotos.forEach(f => {
+      if (f.preview) URL.revokeObjectURL(f.preview);
+    });
+    setFotos([]);
+    setUploadError(null);
   };
   
   const handleEdit = (visita) => {
