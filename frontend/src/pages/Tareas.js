@@ -233,6 +233,7 @@ const Tareas = () => {
       subtareas: [], coste_estimado: 0, coste_real: 0
     });
     setNewSubtarea('');
+    setSearchParcela('');
   };
 
   const handleEdit = (tarea) => {
