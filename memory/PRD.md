@@ -1043,6 +1043,52 @@ Módulos actualizados para seguir patrón consistente:
 
 ### Estado: ✅ COMPLETADO Y TESTEADO
 
+## Dashboard Configurable con Reordenamiento (26/02/2026) - COMPLETADO
+- **Alcance**: Mejorar la configuración del Dashboard con capacidad de reordenar widgets
+
+### Funcionalidades:
+1. **Reordenamiento de Widgets**:
+   - Flechas arriba/abajo en cada widget para cambiar el orden
+   - Número de posición visible en círculo
+   - El orden se guarda por usuario
+
+2. **Activar/Desactivar Widgets**:
+   - Toggle individual para mostrar/ocultar cada widget
+   - Widgets desactivados se muestran en gris
+
+3. **Botones de Acción**:
+   - "Restaurar por defecto" - Vuelve a la configuración original
+   - "Cancelar" - Cierra sin guardar
+   - "Guardar cambios" - Persiste la configuración
+
+### UI del Modal:
+- Título: "Configurar Dashboard"
+- Descripción: "Activa/desactiva las secciones y usa las flechas para cambiar el orden de visualización"
+- Lista de 10 widgets con:
+  - Flechas subir/bajar
+  - Número de orden
+  - Nombre y descripción
+  - Toggle de visibilidad
+
+### Widgets Disponibles (10):
+1. KPIs Principales
+2. Resumen de Fincas
+3. Próximas Cosechas
+4. Tratamientos Pendientes
+5. Contratos Activos
+6. Próximas Visitas
+7. Gráficos de Cultivos
+8. Mapa de Parcelas
+9. Calendario
+10. Actividad Reciente
+
+### Test: Verificado con screenshots
+- UI: ✅ Modal con nombres, descripciones, flechas y toggles
+- Reordenamiento: ✅ Los widgets cambian de posición correctamente
+
+### Estado: ✅ COMPLETADO Y TESTEADO
+
+
 ## Dashboard Configurable por Usuario (26/02/2026) - COMPLETADO
 - **Alcance**: Permitir a cada usuario personalizar qué widgets ver en su dashboard
 
