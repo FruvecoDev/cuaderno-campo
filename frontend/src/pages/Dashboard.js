@@ -1487,7 +1487,7 @@ const Dashboard = () => {
       
       {/* Widget de Próximas Visitas */}
       {isWidgetVisible('proximas_visitas') && kpis.visitas_stats && (
-        <div className="card mb-6" data-testid="proximas-visitas">
+        <div className="card mb-6" data-testid="proximas-visitas" style={{ order: getWidgetOrder('proximas_visitas') }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <ClipboardList size={22} style={{ color: '#00897b' }} />
