@@ -50,6 +50,8 @@ from routes_plantillas_recomendaciones import router as plantillas_recomendacion
 from routes_alertas_clima import router as alertas_clima_router
 from routes_notificaciones import router as notificaciones_router
 from routes_resumen_diario import router as resumen_diario_router
+from routes_tareas import router as tareas_router
+from routes_irrigaciones import router as irrigaciones_router
 from scheduler_service import init_scheduler, shutdown_scheduler
 
 app = FastAPI(title="FRUVECO - Agricultural Management System V1")
