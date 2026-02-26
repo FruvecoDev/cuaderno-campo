@@ -1128,32 +1128,84 @@ const Fincas = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {fincasAgrupadas.provinciasOrdenadas.map((provincia) => (
               <div key={provincia} data-testid={`provincia-group-${provincia}`}>
-                {/* Cabecera de provincia */}
+                {/* Cabecera de provincia con controles */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.75rem',
+                  justifyContent: 'space-between',
                   marginBottom: '0.75rem',
                   paddingBottom: '0.5rem',
                   borderBottom: '2px solid #2d5a27'
                 }}>
-                  <MapPin size={20} style={{ color: '#2d5a27' }} />
-                  <h4 style={{ margin: 0, fontWeight: '600', color: '#2d5a27', fontSize: '1.1rem' }}>
-                    {provincia}
-                  </h4>
-                  <span style={{
-                    backgroundColor: '#e8f5e9',
-                    color: '#2d5a27',
-                    padding: '2px 10px',
-                    borderRadius: '12px',
-                    fontSize: '0.8rem',
-                    fontWeight: '500'
-                  }}>
-                    {fincasAgrupadas.grupos[provincia].length} finca{fincasAgrupadas.grupos[provincia].length > 1 ? 's' : ''}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <button
+                      onClick={() => toggleProvinciaCollapse(provincia)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        color: '#2d5a27'
+                      }}
+                      title={collapsedProvincias.has(provincia) ? 'Mostrar fincas' : 'Ocultar fincas'}
+                      data-testid={`btn-toggle-provincia-${provincia}`}
+                    >
+                      {collapsedProvincias.has(provincia) ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
+                    </button>
+                    <MapPin size={20} style={{ color: '#2d5a27' }} />
+                    <h4 style={{ margin: 0, fontWeight: '600', color: '#2d5a27', fontSize: '1.1rem' }}>
+                      {provincia}
+                    </h4>
+                    <span style={{
+                      backgroundColor: '#e8f5e9',
+                      color: '#2d5a27',
+                      padding: '2px 10px',
+                      borderRadius: '12px',
+                      fontSize: '0.8rem',
+                      fontWeight: '500'
+                    }}>
+                      {fincasAgrupadas.grupos[provincia].length} finca{fincasAgrupadas.grupos[provincia].length > 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  
+                  {/* Botones expandir/colapsar todas */}
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                      onClick={() => areAllFincasExpanded(provincia) 
+                        ? collapseAllFincasInProvincia(provincia) 
+                        : expandAllFincasInProvincia(provincia)}
+                      className="btn btn-sm"
+                      style={{
+                        backgroundColor: '#e8f5e9',
+                        color: '#2d5a27',
+                        padding: '4px 10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontSize: '0.75rem'
+                      }}
+                      title={areAllFincasExpanded(provincia) ? 'Colapsar todas' : 'Expandir todas'}
+                      data-testid={`btn-expand-all-${provincia}`}
+                    >
+                      {areAllFincasExpanded(provincia) ? (
+                        <>
+                          <ChevronUp size={14} />
+                          Colapsar todas
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown size={14} />
+                          Expandir todas
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
                 
                 {/* Fincas de esta provincia */}
+                {!collapsedProvincias.has(provincia) && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', paddingLeft: '0.5rem' }}>
                   {fincasAgrupadas.grupos[provincia].map((finca) => {
                     const parcelasDeFinca = getParcelasDeFinca(finca);
