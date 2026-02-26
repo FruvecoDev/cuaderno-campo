@@ -1,8 +1,7 @@
 """
 Routes for Extended modules - Smaller CRUD operations
-Includes: Irrigaciones, Recetas, Albaranes, Tareas, Documentos
-These modules are kept together as they are relatively small.
-Refactored: Tratamientos and Cosechas moved to dedicated router files.
+Includes: Recetas, Albaranes, Documentos
+Refactored: Irrigaciones and Tareas moved to dedicated router files.
 """
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
@@ -10,119 +9,18 @@ from typing import Optional
 from bson import ObjectId
 from datetime import datetime
 
-from models_tratamientos import (
-    IrrigacionCreate, RecetaCreate, AlbaranCreate
-)
-from models import TareaCreate
+from models_tratamientos import RecetaCreate, AlbaranCreate
 from database import (
-    irrigaciones_collection, recetas_collection,
-    albaranes_collection, tareas_collection,
+    recetas_collection, albaranes_collection,
     documentos_collection, serialize_doc, serialize_docs
 )
 from rbac_guards import (
     RequireCreate, RequireEdit, RequireDelete,
-    RequireIrrigacionesAccess, RequireRecetasAccess,
-    RequireAlbaranesAccess, RequireTareasAccess,
+    RequireRecetasAccess, RequireAlbaranesAccess,
     get_current_user
 )
 
 router = APIRouter(prefix="/api", tags=["extended"])
-
-
-# ============================================================================
-# IRRIGACIONES
-# ============================================================================
-
-@router.post("/irrigaciones", response_model=dict)
-async def create_irrigacion(
-    irrigacion: IrrigacionCreate,
-    current_user: dict = Depends(RequireCreate),
-    _access: dict = Depends(RequireIrrigacionesAccess)
-):
-    irrigacion_dict = irrigacion.dict()
-    irrigacion_dict.update({
-        "created_at": datetime.now(),
-        "updated_at": datetime.now()
-    })
-    
-    result = await irrigaciones_collection.insert_one(irrigacion_dict)
-    created = await irrigaciones_collection.find_one({"_id": result.inserted_id})
-    
-    return {"success": True, "data": serialize_doc(created)}
-
-
-@router.get("/irrigaciones")
-async def get_irrigaciones(
-    skip: int = 0,
-    limit: int = 100,
-    parcela_id: Optional[str] = None,
-    current_user: dict = Depends(get_current_user),
-    _access: dict = Depends(RequireIrrigacionesAccess)
-):
-    query = {}
-    if parcela_id:
-        query["parcela_id"] = parcela_id
-    
-    irrigaciones = await irrigaciones_collection.find(query).skip(skip).limit(limit).to_list(limit)
-    return {"irrigaciones": serialize_docs(irrigaciones), "total": await irrigaciones_collection.count_documents(query)}
-
-
-@router.get("/irrigaciones/{irrigacion_id}")
-async def get_irrigacion(
-    irrigacion_id: str,
-    current_user: dict = Depends(get_current_user),
-    _access: dict = Depends(RequireIrrigacionesAccess)
-):
-    if not ObjectId.is_valid(irrigacion_id):
-        raise HTTPException(status_code=400, detail="Invalid ID")
-    
-    irrigacion = await irrigaciones_collection.find_one({"_id": ObjectId(irrigacion_id)})
-    if not irrigacion:
-        raise HTTPException(status_code=404, detail="Irrigacion not found")
-    
-    return serialize_doc(irrigacion)
-
-
-@router.delete("/irrigaciones/{irrigacion_id}")
-async def delete_irrigacion(
-    irrigacion_id: str,
-    current_user: dict = Depends(RequireDelete),
-    _access: dict = Depends(RequireIrrigacionesAccess)
-):
-    if not ObjectId.is_valid(irrigacion_id):
-        raise HTTPException(status_code=400, detail="Invalid ID")
-    
-    result = await irrigaciones_collection.delete_one({"_id": ObjectId(irrigacion_id)})
-    
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Irrigacion not found")
-    
-    return {"success": True, "message": "Irrigacion deleted"}
-
-
-@router.put("/irrigaciones/{irrigacion_id}")
-async def update_irrigacion(
-    irrigacion_id: str,
-    irrigacion: IrrigacionCreate,
-    current_user: dict = Depends(RequireEdit),
-    _access: dict = Depends(RequireIrrigacionesAccess)
-):
-    if not ObjectId.is_valid(irrigacion_id):
-        raise HTTPException(status_code=400, detail="Invalid ID")
-    
-    update_data = irrigacion.dict()
-    update_data["updated_at"] = datetime.now()
-    
-    result = await irrigaciones_collection.update_one(
-        {"_id": ObjectId(irrigacion_id)},
-        {"$set": update_data}
-    )
-    
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Irrigacion not found")
-    
-    updated = await irrigaciones_collection.find_one({"_id": ObjectId(irrigacion_id)})
-    return {"success": True, "data": serialize_doc(updated)}
 
 
 # ============================================================================
@@ -137,7 +35,6 @@ async def create_receta(
 ):
     receta_dict = receta.dict()
     receta_dict.update({
-        "productos": [],
         "created_at": datetime.now(),
         "updated_at": datetime.now()
     })
@@ -156,7 +53,7 @@ async def get_recetas(
     _access: dict = Depends(RequireRecetasAccess)
 ):
     recetas = await recetas_collection.find().skip(skip).limit(limit).to_list(limit)
-    return {"recetas": serialize_docs(recetas)}
+    return {"recetas": serialize_docs(recetas), "total": await recetas_collection.count_documents({})}
 
 
 @router.get("/recetas/{receta_id}")
@@ -218,7 +115,7 @@ async def update_receta(
 
 
 # ============================================================================
-# ALBARANES (Delivery Notes)
+# ALBARANES
 # ============================================================================
 
 @router.post("/albaranes", response_model=dict)
@@ -243,15 +140,18 @@ async def create_albaran(
 async def get_albaranes(
     skip: int = 0,
     limit: int = 100,
+    tipo: Optional[str] = None,
     contrato_id: Optional[str] = None,
     current_user: dict = Depends(get_current_user),
     _access: dict = Depends(RequireAlbaranesAccess)
 ):
     query = {}
+    if tipo:
+        query["tipo"] = tipo
     if contrato_id:
         query["contrato_id"] = contrato_id
     
-    albaranes = await albaranes_collection.find(query).skip(skip).limit(limit).to_list(limit)
+    albaranes = await albaranes_collection.find(query).sort("fecha", -1).skip(skip).limit(limit).to_list(limit)
     return {"albaranes": serialize_docs(albaranes), "total": await albaranes_collection.count_documents(query)}
 
 
@@ -314,72 +214,6 @@ async def update_albaran(
 
 
 # ============================================================================
-# TAREAS (Tasks)
-# ============================================================================
-
-@router.post("/tareas", response_model=dict)
-async def create_tarea(
-    tarea: TareaCreate,
-    current_user: dict = Depends(RequireCreate),
-    _access: dict = Depends(RequireTareasAccess)
-):
-    tarea_dict = tarea.dict()
-    tarea_dict.update({
-        "created_at": datetime.now(),
-        "updated_at": datetime.now()
-    })
-    
-    result = await tareas_collection.insert_one(tarea_dict)
-    created = await tareas_collection.find_one({"_id": result.inserted_id})
-    
-    return {"success": True, "data": serialize_doc(created)}
-
-
-@router.get("/tareas")
-async def get_tareas(
-    skip: int = 0,
-    limit: int = 100,
-    current_user: dict = Depends(get_current_user),
-    _access: dict = Depends(RequireTareasAccess)
-):
-    tareas = await tareas_collection.find().skip(skip).limit(limit).to_list(limit)
-    return {"tareas": serialize_docs(tareas)}
-
-
-@router.get("/tareas/{tarea_id}")
-async def get_tarea(
-    tarea_id: str,
-    current_user: dict = Depends(get_current_user),
-    _access: dict = Depends(RequireTareasAccess)
-):
-    if not ObjectId.is_valid(tarea_id):
-        raise HTTPException(status_code=400, detail="Invalid ID")
-    
-    tarea = await tareas_collection.find_one({"_id": ObjectId(tarea_id)})
-    if not tarea:
-        raise HTTPException(status_code=404, detail="Tarea not found")
-    
-    return serialize_doc(tarea)
-
-
-@router.delete("/tareas/{tarea_id}")
-async def delete_tarea(
-    tarea_id: str,
-    current_user: dict = Depends(RequireDelete),
-    _access: dict = Depends(RequireTareasAccess)
-):
-    if not ObjectId.is_valid(tarea_id):
-        raise HTTPException(status_code=400, detail="Invalid ID")
-    
-    result = await tareas_collection.delete_one({"_id": ObjectId(tarea_id)})
-    
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Tarea not found")
-    
-    return {"success": True, "message": "Tarea deleted"}
-
-
-# ============================================================================
 # DOCUMENTOS - File Upload
 # ============================================================================
 
@@ -417,7 +251,10 @@ async def upload_documento(
 @router.get("/documentos")
 async def get_documentos(
     entidad_tipo: Optional[str] = None,
-    entidad_id: Optional[str] = None
+    entidad_id: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 100,
+    current_user: dict = Depends(get_current_user)
 ):
     query = {}
     if entidad_tipo:
@@ -425,21 +262,17 @@ async def get_documentos(
     if entidad_id:
         query["entidad_id"] = entidad_id
     
-    documentos = await documentos_collection.find(query).to_list(100)
-    return {"documentos": serialize_docs(documentos)}
+    documentos = await documentos_collection.find(query).skip(skip).limit(limit).to_list(limit)
+    return {"documentos": serialize_docs(documentos), "total": await documentos_collection.count_documents(query)}
 
 
 @router.delete("/documentos/{documento_id}")
-async def delete_documento(documento_id: str):
+async def delete_documento(
+    documento_id: str,
+    current_user: dict = Depends(RequireDelete)
+):
     if not ObjectId.is_valid(documento_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
-    
-    # Get document to delete file
-    documento = await documentos_collection.find_one({"_id": ObjectId(documento_id)})
-    if documento and "url" in documento:
-        import os
-        if os.path.exists(documento["url"]):
-            os.remove(documento["url"])
     
     result = await documentos_collection.delete_one({"_id": ObjectId(documento_id)})
     
