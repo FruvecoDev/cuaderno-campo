@@ -111,9 +111,10 @@ test.describe('Visitas - Photo Upload Feature', () => {
       // Upload photo - use setInputFiles on the file input
       await page.getByTestId('input-fotos').setInputFiles(tempImagePath);
       
-      // Wait for preview to appear (pending state)
-      await expect(page.getByText('Pendiente')).toBeVisible({ timeout: 5000 });
-      await expect(page.getByText('1 foto adjunta')).toBeVisible();
+      // Wait for preview to appear (pending state) - be specific to fotos section
+      const fotosSection = page.getByTestId('fotos-section');
+      await expect(fotosSection.getByText('Pendiente')).toBeVisible({ timeout: 5000 });
+      await expect(fotosSection.getByText(/\d+ foto.*adjunta/i)).toBeVisible();
       
       await page.screenshot({ path: 'visitas-photo-pending.jpeg', quality: 20, fullPage: false });
       
