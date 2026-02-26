@@ -192,18 +192,15 @@ test.describe('Contratos Advanced Filters', () => {
     const toggleBtn = page.getByTestId('btn-toggle-filtros');
     await toggleBtn.click();
     
-    // Initially no badge or badge shows 0
+    // Initially no badge
     // Set some filters
     await page.getByTestId('input-filtro-fecha-desde').fill('2024-01-01');
     await page.getByTestId('input-filtro-fecha-hasta').fill('2025-12-31');
     
     // Badge should show count (2 filters active: fecha_desde and fecha_hasta)
-    // The badge is inside the toggle button
-    const badgeText = toggleBtn.locator('span').filter({ hasText: /\d+/ });
-    await expect(badgeText).toBeVisible();
-    
-    // Badge should show 2 (two date filters)
-    await expect(badgeText).toContainText('2');
+    // Use more specific selector - look for span with only digit content and specific styles
+    const badge = toggleBtn.locator('span').filter({ hasText: /^2$/ }).last();
+    await expect(badge).toBeVisible();
   });
 
   test('should combine multiple filters correctly', async ({ page }) => {
