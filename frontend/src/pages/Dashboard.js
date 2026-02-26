@@ -263,6 +263,13 @@ const Dashboard = () => {
   const [notificationStatus, setNotificationStatus] = useState(null);
   const [sendingNotification, setSendingNotification] = useState(false);
   const [notificationResult, setNotificationResult] = useState(null);
+  
+  // Dashboard configuration
+  const [dashboardConfig, setDashboardConfig] = useState(null);
+  const [showConfigModal, setShowConfigModal] = useState(false);
+  const [configWidgets, setConfigWidgets] = useState([]);
+  const [savingConfig, setSavingConfig] = useState(false);
+  
   const { token, user, canDoOperacion } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -276,7 +283,76 @@ const Dashboard = () => {
     fetchParcelas();
     fetchVisitasPlanificadas();
     fetchNotificationStatus();
+    fetchDashboardConfig();
   }, []);
+  
+  const fetchDashboardConfig = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/dashboard/config`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setDashboardConfig(data.config);
+        setConfigWidgets(data.config?.widgets || data.available_widgets || []);
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard config:', error);
+    }
+  };
+  
+  const saveDashboardConfig = async () => {
+    setSavingConfig(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/dashboard/config`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          widgets: configWidgets,
+          layout: dashboardConfig?.layout || 'default'
+        })
+      });
+      if (response.ok) {
+        setDashboardConfig({ ...dashboardConfig, widgets: configWidgets });
+        setShowConfigModal(false);
+      }
+    } catch (error) {
+      console.error('Error saving dashboard config:', error);
+    } finally {
+      setSavingConfig(false);
+    }
+  };
+  
+  const resetDashboardConfig = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/dashboard/config/reset`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setDashboardConfig(data.config);
+        setConfigWidgets(data.config?.widgets || []);
+      }
+    } catch (error) {
+      console.error('Error resetting dashboard config:', error);
+    }
+  };
+  
+  const toggleWidgetVisibility = (widgetId) => {
+    setConfigWidgets(prev => prev.map(w => 
+      w.widget_id === widgetId ? { ...w, visible: !w.visible } : w
+    ));
+  };
+  
+  const isWidgetVisible = (widgetId) => {
+    if (!dashboardConfig?.widgets) return true;
+    const widget = dashboardConfig.widgets.find(w => w.widget_id === widgetId);
+    return widget ? widget.visible : true;
+  };
   
   const fetchDashboardData = async () => {
     try {
