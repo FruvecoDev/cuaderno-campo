@@ -65,6 +65,21 @@ Visita/Tratamiento → realizados sobre → Parcela
      - Contador "Mostrando X de Y contratos (filtrados)"
      - Test Report: `/app/test_reports/iteration_38.json` - 100% pass (12/12 tests)
 
+## Bug Fix: Error Leaflet "_leaflet_pos" (26/02/2026) - COMPLETADO
+- **Problema**: Error intermitente "Cannot read properties of undefined (reading '_leaflet_pos')" en mapas
+- **Causa raíz**: Operaciones de mapa (fitBounds, flyTo) se ejecutaban mientras el componente se desmontaba o el mapa no estaba completamente inicializado
+- **Solución implementada**:
+  - Añadidas verificaciones de seguridad `!map || !map._container` antes de operaciones
+  - Variable `isMounted` con cleanup en return del useEffect
+  - Try-catch para capturar errores silenciosamente durante desmontaje
+  - Timeout de 100ms para asegurar inicialización completa del mapa
+- **Archivos corregidos**:
+  - `/app/frontend/src/pages/Dashboard.js` - FitAllBounds
+  - `/app/frontend/src/components/MapaSigpac.js` - FitBounds, FlyToLocation
+  - `/app/frontend/src/pages/Parcelas.js` - FitBounds
+  - `/app/frontend/src/components/AdvancedParcelMap.js` - FitBounds, GeolocationControl
+- **Estado**: ✅ COMPLETADO Y VERIFICADO
+
 4. **Configuración de Campos por Usuario (Nuevo)**
    - Panel de configuración accesible con botón ⚙️
    - Checkboxes para mostrar/ocultar campos del formulario y columnas de tabla
