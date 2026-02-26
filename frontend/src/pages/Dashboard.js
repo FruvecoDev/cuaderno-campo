@@ -434,6 +434,36 @@ const Dashboard = () => {
       .map(w => w.widget_id);
   }, [dashboardConfig]);
   
+  // Helper function to render widget by ID
+  const renderWidget = (widgetId) => {
+    if (!isWidgetVisible(widgetId)) return null;
+    
+    switch(widgetId) {
+      case 'kpis_principales':
+        return renderKPIsWidget();
+      case 'resumen_fincas':
+        return renderFincasWidget();
+      case 'proximas_cosechas':
+        return renderCosechasWidget();
+      case 'tratamientos_pendientes':
+        return renderTratamientosWidget();
+      case 'contratos_activos':
+        return renderContratosWidget();
+      case 'proximas_visitas':
+        return renderVisitasWidget();
+      case 'graficos_cultivos':
+        return renderGraficosWidget();
+      case 'mapa_parcelas':
+        return renderMapaWidget();
+      case 'calendario':
+        return renderCalendarioWidget();
+      case 'actividad_reciente':
+        return renderActividadWidget();
+      default:
+        return null;
+    }
+  };
+  
   const fetchDashboardData = async () => {
     try {
       const response = await fetch(`${BACKEND_URL}/api/dashboard/kpis`);
