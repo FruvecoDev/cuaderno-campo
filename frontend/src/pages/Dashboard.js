@@ -900,8 +900,10 @@ const Dashboard = () => {
       )}
       
       {/* Widgets: Próximas Cosechas y Tratamientos Pendientes */}
+      {(isWidgetVisible('proximas_cosechas') || isWidgetVisible('tratamientos_pendientes')) && (
       <div className="grid-2 mb-6" data-testid="dashboard-widgets">
         {/* Próximas Cosechas */}
+        {isWidgetVisible('proximas_cosechas') && (
         <div className="card" data-testid="proximas-cosechas">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
