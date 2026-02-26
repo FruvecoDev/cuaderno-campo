@@ -1020,8 +1020,10 @@ const Dashboard = () => {
             </div>
           )}
         </div>
+        )}
         
         {/* Tratamientos Pendientes */}
+        {isWidgetVisible('tratamientos_pendientes') && (
         <div className="card" data-testid="tratamientos-pendientes">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
