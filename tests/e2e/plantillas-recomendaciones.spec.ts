@@ -5,7 +5,7 @@
 import { test, expect } from '@playwright/test';
 import { login, dismissToasts, removeEmergentBadge, generateUniqueId } from '../fixtures/helpers';
 
-const BASE_URL = process.env.BASE_URL || 'https://campo-fincas.preview.emergentagent.com';
+const BASE_URL = process.env.BASE_URL || 'https://agri-contratos.preview.emergentagent.com';
 
 test.describe('Plantillas - Tab Navigation', () => {
   test.beforeEach(async ({ page }) => {

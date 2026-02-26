@@ -27,68 +27,63 @@ El usuario ha solicitado recientemente la creación de un módulo Fincas con un 
 **User's preferred language**: Español
 
 **what currently exists?**
-Una aplicación full-stack (FastAPI, React, MongoDB) para gestión agrícola. En la sesión actual se han desarrollado las siguientes funcionalidades, todas probadas y verificadas:
-1.  **Módulo Fincas (Versión 1):** Se implementó un CRUD completo para Fincas con un formulario detallado basado en la imagen del usuario.
-2.  **Integración SIGPAC:** Se añadió funcionalidad en los módulos Fincas y Parcelas para buscar una parcela por sus datos SIGPAC a través de una API REST externa, autocompletando el formulario y mostrando la geometría en un mapa.
-3.  **Visualización y Dibujo en Mapa:** Se integró Leaflet.js para visualizar las geometrías de las parcelas (obtenidas de SIGPAC o dibujadas) y se añadió la capacidad de dibujar polígonos manualmente usando . La geometría dibujada se guarda en la base de datos.
-4.  **Corrección de Bug:** Se solucionó un error en el módulo de Parcelas que impedía cargar el mapa para editar una parcela que tenía un polígono dibujado pero no datos SIGPAC.
-
-La última petición del usuario es refactorizar el módulo de Fincas para que actúe como un contenedor de parcelas existentes, eliminando la funcionalidad de mapa y dibujo de dicho módulo.
+Una aplicación full-stack (FastAPI, React, MongoDB) de gestión agrícola. En esta sesión se han realizado múltiples mejoras, todas guiadas por el usuario:
+1.  **Módulo Fincas**: Se ha refactorizado completamente. Ahora las fincas se agrupan por provincia y se pueden expandir/colapsar. Las parcelas asociadas se muestran como una lista en lugar de tarjetas.
+2.  **Dashboard**: Se ha mejorado enormemente. Se añadieron KPIs y gráficos para Fincas, y widgets para Próximas Cosechas, Tratamientos Pendientes, Contratos Activos y Próximas Visitas.
+3.  **Dashboard Configurable**: Se implementó una funcionalidad clave que permite a cada usuario habilitar/deshabilitar y reordenar los widgets del dashboard a su gusto. Las preferencias se guardan por usuario en la base de datos.
+4.  **Módulo Contratos**: Se ha iniciado la implementación de filtros avanzados.
 
 **Last working item**:
--   **Last item agent was working**: Atendiendo a la última solicitud del usuario: refactorizar el módulo Fincas. El objetivo es eliminar toda la funcionalidad de mapas (búsqueda SIGPAC, visualización, dibujo) y, en su lugar, implementar un sistema para asociar múltiples parcelas existentes a una finca.
--   **Status**: NOT STARTED
+-   **Last item agent was working**: Implementación de filtros avanzados en el módulo de Contratos. El usuario solicitó poder filtrar por proveedor, cultivo, campaña y rango de fechas. El agente ha añadido el código para la UI y la lógica de filtrado en el frontend.
+-   **Status**: IN PROGRESS
 -   **Agent Testing Done**: N
--   **Which testing method agent to use?**: both. Se requerirán pruebas de backend para el nuevo modelo de datos de Fincas (asociación con parcelas) y pruebas de frontend para verificar la nueva interfaz sin mapas y con el selector de parcelas.
+-   **Which testing method agent to use?**: frontend testing agent. El agente debe verificar visualmente los filtros y luego ejecutar el  para asegurar que no hay regresiones y que la nueva funcionalidad está cubierta por tests.
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Refactorizar el módulo Fincas para gestionar parcelas asociadas (P0)**
+-   **Issue 1: Verificar la implementación de los filtros avanzados en Contratos (P0)**
 
 **Issues Detail**:
--   **Issue 1: Refactorizar el módulo Fincas para gestionar parcelas asociadas**
-    -   **Attempted fixes**: Ninguno. El agente acaba de recibir la petición y estaba a punto de empezar a reescribir el componente .
+-   **Issue 1: Verificar la implementación de los filtros avanzados en Contratos**
+    -   **Attempted fixes**: El código fue implementado en  pero no ha sido probado.
     -   **Next debug checklist**:
-        1.  **Backend:**
-            -   Modificar el modelo  en  para que almacene una lista de referencias a  (ej. ).
-            -   Actualizar los endpoints CRUD en  para gestionar esta lista de IDs de parcelas.
-            -   Asegurar que el endpoint  devuelva la información de las parcelas asociadas (ya sea los IDs o los objetos completos mediante un populate).
-        2.  **Frontend ():**
-            -   Eliminar toda la lógica y componentes relacionados con mapas: , , estados , , , etc.
-            -   En el formulario de Fincas, añadir una sección para Parcelas Asociadas que permita seleccionar múltiples parcelas de una lista (usando un componente de selección múltiple o una tabla con checkboxes).
-            -   En la vista de detalle de una Finca, mostrar la lista de sus parcelas asociadas.
-    -   **Why fix this issue and what will be achieved with the fix?**: Para alinear la aplicación con el flujo de trabajo refinado del usuario, donde las Fincas son agrupaciones lógicas de Parcelas en lugar de entidades geográficas independientes.
-    -   **Status**: NOT STARTED
+        1.  Verificar visualmente que la UI de los filtros (desplegables de proveedor y cultivo, selector de campaña y rango de fechas) se renderiza correctamente en la página de Contratos.
+        2.  Aplicar uno o varios filtros para confirmar que la lista de contratos se actualiza como es debido.
+        3.  Ejecutar  para validar la funcionalidad y crear pruebas de regresión.
+    -   **Why fix this issue and what will be achieved with the fix?**: Completar la solicitud del usuario para facilitar la búsqueda y gestión de contratos, mejorando la usabilidad del módulo.
+    -   **Status**: IN PROGRESS
     -   **Is recurring issue?**: N
-    -   **Should Test frontend/backend/both after fix?**: both
+    -   **Should Test frontend/backend/both after fix?**: frontend
     -   **Blocked on other issue**: None
 
 **In progress Task List**:
--   **Task 1: Completar la refactorización del Módulo Fincas (P0)**
-    -   **Where to resume**: Empezar la modificación del fichero  para eliminar la funcionalidad de mapas. El agente estaba a punto de usar el comando .
-    -   **What will be achieved with this?**: El módulo de Fincas permitirá a los usuarios crear una finca y asignarle un conjunto de parcelas ya existentes en el sistema.
-    -   **Status**: NOT STARTED
-    -   **Should Test frontend/backend/both after fix?**: both
+-   **Task 1: Finalizar la implementación de filtros en el módulo Contratos (P0)**
+    -   **Where to resume**: En el fichero . El trabajo de codificación está hecho. Se debe proceder con la fase de pruebas.
+    -   **What will be achieved with this?**: Los usuarios podrán filtrar la lista de contratos por múltiples criterios, agilizando su consulta.
+    -   **Status**: IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?**: frontend
     -   **Blocked on something**: No
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks**:
-    -   **P1**: **Finalizar notificaciones por email**: La integración con Resend sigue bloqueada a la espera de la  del usuario.
+    -   **P1**: **Implementar subida de fotos en Visitas**: El agente mencionó esta mejora al revisar el módulo de Visitas, y es un siguiente paso lógico.
+    -   **P2**: **Finalizar notificaciones por email**: La integración con Resend sigue bloqueada a la espera de la  del usuario.
 -   **Future Tasks**:
-    -   Implementar los módulos restantes del PRD: Contratos, Visitas, Tareas, Cosechas, Tratamientos, etc.
+    -   Implementar los módulos restantes del PRD: Tareas, Irrigaciones, Recetas, Albaranes, etc.
     -   Desarrollar la generación de informes en PDF y Excel.
-    -   Construir el Dashboard principal con KPIs.
     -   Implementar las integraciones de IA (resúmenes de contratos, predicciones).
+    -   Añadir la funcionalidad de arrastrar y soltar (drag-and-drop) para reordenar los widgets del dashboard, como se previó en la UI del modal de configuración.
 
 **Completed work in this session**
--   **Feature**: Módulo de Fincas implementado con formulario detallado, búsqueda SIGPAC, visualización de mapas y dibujo manual de polígonos. (DONE, Verified by testing agent).
--   **Feature**: Funcionalidad SIGPAC (búsqueda y mapa) añadida al módulo de Parcelas. (DONE, Verified by testing agent).
--   **Bug Fix**: Corregido un error de Javascript que impedía editar parcelas con polígonos dibujados si no tenían datos SIGPAC. (DONE, Verified by testing agent).
+-   **Feature**: Refactorización completa del módulo Fincas, mostrando las fincas agrupadas por provincia con funcionalidad de expandir/colapsar, y las parcelas asociadas en formato de lista. (DONE)
+-   **Feature**: Mejora masiva del Dashboard con una nueva sección de Resumen de Fincas (KPIs y gráficos) y widgets para Próximas Cosechas, Tratamientos Pendientes, Contratos Activos y Próximas Visitas. (DONE)
+-   **Feature**: Implementación de un Dashboard personalizable donde cada usuario puede mostrar/ocultar y reordenar los widgets. Las preferencias se guardan en el perfil del usuario. (DONE)
+-   Se inició la implementación de filtros avanzados en el módulo Contratos.
 
 **Earlier issues found/mentioned but not fixed**
 -   **Issue 1: Error body stream already read en el frontend**
-    -   **Debug checklist**: La causa raíz parece ser la falta de un manejador de peticiones API centralizado en el frontend. La solución temporal ha sido verificar  antes de procesar el cuerpo de la respuesta.
-    -   **Why to solve this issue and what will be achieved with this?**: Crear un wrapper para la función  haría el código más robusto, simplificaría el manejo de errores en toda la aplicación y evitaría la reaparición de este bug.
+    -   **Debug checklist**: La causa raíz parece ser la falta de un manejador de peticiones API centralizado. Se recomienda crear un wrapper para  para gestionar errores y respuestas de forma consistente.
+    -   **Why to solve this issue and what will be achieved with this?**: Haría el código más robusto, simplificaría el manejo de errores en toda la aplicación y evitaría la reaparición de este bug.
     -   **Should Test frontend/backend/both after fix**: frontend
     -   **Is recurring issue?**: Y
 
@@ -99,66 +94,64 @@ La última petición del usuario es refactorizar el módulo de Fincas para que a
 
 
 **Key Technical Concepts**
--   **API Externa**: Integración con la API REST de SIGPAC para obtener datos geoespaciales.
--   **Mapas Interactivos**: Uso de , ,  y  para visualización y dibujo de polígonos (GeoJSON).
--   **Gestión de Estado Complejo en React**: Manejo de formularios con lógica condicional, modales, mapas y datos asíncronos en los componentes  y .
+-   **Dashboard Dinámico**: Renderizado de componentes React basado en una configuración de orden y visibilidad obtenida del backend, permitiendo una personalización por usuario.
+-   **Gestión de Estado Compleja**: Uso extensivo de ,  y  en React para manejar UI interactivas con datos asíncronos (Dashboard, Fincas).
+-   **Agregación de Datos en Backend**: El endpoint  fue modificado varias veces para agregar y consolidar datos de múltiples colecciones (Fincas, Parcelas, Cosechas, Tratamientos, Contratos, Visitas) en una sola llamada.
+-   **Persistencia de Preferencias de Usuario**: Creación de un endpoint y modificación del modelo  para guardar y recuperar la configuración del dashboard del usuario.
 
 **key DB schema**
--   **fincas**: , , , . **Nota:** Este modelo será modificado para reemplazar  y  por una lista de referencias a .
--   **parcelas**: Contiene , donde cada uno puede tener una  (polígono).
--   **provincias**: Almacena la lista de provincias de España para los dropdowns.
+-   **users**: Se ha añadido el campo  para almacenar un array de widgets con su orden y visibilidad.
+-   **fincas**: Contiene  para la asociación con parcelas.
+-   **contratos**: Contiene campos como , , , , , que se usarán para los nuevos filtros.
 
 **changes in tech stack**
--   : Añadido al frontend para la funcionalidad de dibujo en el mapa.
--   : Añadido al frontend como dependencia.
+-   No se añadieron nuevas dependencias, pero se hizo un uso intensivo de la librería  para los gráficos del dashboard.
 
 **All files of reference**
--   **/app/frontend/src/pages/Fincas.js**: Componente principal a refactorizar.
--   **/app/frontend/src/pages/Parcelas.js**: Componente donde se replicó la funcionalidad SIGPAC y se corrigió un bug.
--   **/app/frontend/src/components/MapaSigpac.js**: Componente de mapa que probablemente será eliminado o modificado.
--   **/app/backend/models.py**: Contiene los modelos  y  que necesitan ser ajustados.
--   **/app/backend/routes/routes_fincas.py**: Rutas del backend que necesitarán ser actualizadas.
+-   **/app/frontend/src/pages/Dashboard.js**: Componente principal del Dashboard, ahora es totalmente dinámico y configurable.
+-   **/app/frontend/src/pages/Fincas.js**: Componente que muestra las fincas agrupadas por provincia.
+-   **/app/frontend/src/pages/Contratos.js**: Componente donde se han añadido los filtros pendientes de probar.
+-   **/app/backend/routes/routes_dashboard.py**: Endpoint principal que alimenta de datos a todo el dashboard.
+-   **/app/backend/models.py**: Contiene el modelo  con la nueva configuración del dashboard.
 -   **/app/memory/PRD.md**: Documento de requisitos del producto.
 
 **Areas that need refactoring**:
--   ****: Este componente está a punto de sufrir una refactorización importante según la última petición del usuario.
--   **Manejo de API en Frontend**: Se recomienda crear un servicio o wrapper centralizado para las llamadas  para manejar errores de forma consistente y evitar el bug body stream already read.
+-   ****: Este componente se ha vuelto monolítico. Contiene la lógica de renderizado de todos los widgets. Sería beneficioso refactorizarlo extrayendo cada widget (Resumen de Fincas, Próximas Cosechas, etc.) a su propio componente para mejorar la mantenibilidad.
+-   **Manejo de API en Frontend**: Sigue pendiente la creación de un servicio o wrapper centralizado para las llamadas , que solucionaría problemas recurrentes como el error body stream already read.
 
 **key api endpoints**
--   : Endpoints CRUD para Fincas.
--   : Endpoint para consultar la API externa de SIGPAC.
--   : Endpoints CRUD para Parcelas.
+-   : Endpoint agregado que provee toda la información para los widgets del dashboard.
+-   : Endpoints para obtener y guardar la configuración personalizada del dashboard de un usuario.
+-   : Endpoint que lista los contratos y cuya respuesta será filtrada en el frontend.
 
 **Critical Info for New Agent**
-1.  **Prioridad 0: Refactorizar el Módulo de Fincas**. Tu tarea principal e inmediata es modificar el módulo Fincas. El usuario ya no quiere mapas ni dibujo en esta sección. En su lugar, una finca debe poder asociarse con múltiples parcelas existentes.
-2.  **Cambios en Backend y Frontend**: Esto requerirá modificar tanto el modelo  en el backend para almacenar una lista de IDs de parcelas, como la UI en el frontend () para eliminar los mapas y añadir un selector de parcelas.
-3.  **No implementes nuevas features**: Concéntrate exclusivamente en esta refactorización solicitada por el usuario antes de proponer cualquier otra mejora o funcionalidad.
+1.  **Prioridad 0: Probar Filtros de Contratos**. Tu primera tarea es verificar que los filtros recién implementados en la página de Contratos funcionan correctamente. Utiliza la UI y luego confirma con el .
+2.  **Dashboard Personalizable**. Ten en cuenta que el Dashboard ahora es dinámico. El orden y la visibilidad de los widgets dependen de la configuración guardada para el usuario (). Cualquier cambio futuro debe respetar esta estructura.
+3.  **Fallas en Tests Anteriores**. En la última ejecución de tests, el agente anterior reportó 8 fallos pero los descartó como problemas de infraestructura. Deberías investigar estas fallas para determinar si son tests inestables (flaky) o regresiones reales antes de proceder con nuevas funcionalidades.
 
 **documents and test reports created in this job**
 -    (actualizado en cada )
 -   
 -   
 -   
--   
--   
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  : Petición del usuario para refactorizar el módulo de Fincas. (Estado: NOT STARTED)
-2.  : El usuario aclara que el bug de no guarda se refiere al módulo de Parcelas. (Estado: RESOLVED)
-3.  : El usuario reporta un bug sobre el dibujo de polígonos. (Estado: IN PROGRESS, llevó a la corrección del bug)
-4.  : Acepta la sugerencia de persistir la geometría dibujada en Fincas. (Estado: COMPLETED)
-5.  : Acepta la sugerencia de añadir dibujo manual de parcelas en Fincas. (Estado: COMPLETED)
-6.  : Petición de añadir mapas a la funcionalidad SIGPAC en Fincas. (Estado: COMPLETED)
-7.  : Acepta la sugerencia de integrar SIGPAC en Fincas. (Estado: COMPLETED)
-8.  : Confirmación para empezar a implementar el módulo de Fincas. (Estado: COMPLETED)
-9.  : El agente confirma la recepción de la imagen para el formulario de Fincas. (Estado: COMPLETED)
-10. : El usuario proporciona los requisitos iniciales para el módulo Fincas. (Estado: COMPLETED)
+1.  : Solicitud para añadir filtros al módulo de contratos. (Estado: IN PROGRESS)
+2.  : Solicitud para poder reordenar los widgets del dashboard. (Estado: COMPLETED)
+3.  : Confirmación del usuario para proceder con la personalización del dashboard. (Estado: COMPLETED)
+4.  : Solicitud inicial para hacer el dashboard configurable. (Estado: COMPLETED)
+5.  : Confirmación para proceder con las mejoras del dashboard. (Estado: COMPLETED)
+6.  : Confirmación para añadir más widgets al dashboard. (Estado: COMPLETED)
+7.  : Confirmación para mejorar el módulo de Contratos (lo que llevó a un widget en el dashboard). (Estado: COMPLETED)
+8.  : Confirmación para añadir el widget de Próximas Visitas. (Estado: COMPLETED)
+9.  : Confirmación genérica para continuar con las mejoras. (Estado: COMPLETED)
+10. : Solicitud para refactorizar la UI del módulo Fincas. (Estado: COMPLETED)
 
 **Project Health Check:**
--   **Broken**: Ninguna funcionalidad está rota. La última acción fue corregir un bug.
+-   **Broken**: Ninguna funcionalidad está rota. La última característica (filtros en Contratos) está pendiente de pruebas.
 -   **Mocked**:
     -   La integración con  para notificaciones por email sigue bloqueada a la espera de una clave API del usuario.
-    -   La integración con  para alertas climáticas automáticas está preparada en el backend pero inactiva, a la espera de una clave API.
+    -   La integración con  para alertas climáticas está preparada pero inactiva, a la espera de una clave API.
 
 **3rd Party Integrations**
 -   **OpenAI GPT-4o**: Usa Emergent LLM Key (para futuras implementaciones de IA).
@@ -166,21 +159,17 @@ La última petición del usuario es refactorizar el módulo de Fincas para que a
 -   **OpenWeatherMap**: Preparado para alertas climáticas (Bloqueado, requiere clave de usuario).
 -   **APScheduler**: Integrado en backend.
 -   **Leaflet.js / react-leaflet**: Para mapas interactivos.
--   **leaflet-draw / react-leaflet-draw**: Para dibujar geometrías en el mapa.
--   **SIGPAC HubCloud API**: Integración REST para consulta de datos de parcelas.
+-   **recharts**: Para gráficos en el dashboard.
 
 **Testing status**
--   **Testing agent used after significant changes**: YES. Se usó el agente de testing después de cada feature principal y para verificar la corrección de bugs, con resultados 100% exitosos en las últimas ejecuciones.
+-   **Testing agent used after significant changes**: YES. Se utilizó el agente de pruebas después de la refactorización de Fincas y la implementación del dashboard personalizable.
 -   **Troubleshoot agent used after agent stuck in loop**: NO
--   **Test files created**:
-    -   
-    -   
-    -   Tests de backend actualizados para Fincas y Parcelas.
--   **Known regressions**: None.
+-   **Test files created**: Los archivos de test existentes para el frontend fueron actualizados. Se necesitarán nuevos tests para los filtros de Contratos.
+-   **Known regressions**: La última ejecución del  (iteration_132.json) reportó 8 tests fallidos, que el agente anterior ignoró. Es crucial investigar si son regresiones reales.
 
 **Credentials to test flow:**
 -   **Admin**:  / 
--   **Manager**:  / 
 
 **What agent forgot to execute**
-Nada. El agente estaba a punto de comenzar a trabajar en la última solicitud del usuario para refactorizar el módulo Fincas justo cuando la sesión terminó.</analysis>
+-   El agente no probó la funcionalidad de filtros en el módulo Contratos después de implementarla.
+-   El agente no investigó a fondo los 8 tests que fallaron en la última ejecución del , asumiendo que eran problemas de infraestructura sin pruebas. Esto debe ser verificado.</analysis>
