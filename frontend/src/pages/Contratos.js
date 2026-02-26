@@ -172,6 +172,67 @@ const Contratos = () => {
     }
   };
   
+  // Filtrar contratos
+  const filteredContratos = useMemo(() => {
+    return contratos.filter(contrato => {
+      // Filtro de búsqueda general
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        const matchesSearch = 
+          contrato.proveedor?.toLowerCase().includes(searchLower) ||
+          contrato.cliente?.toLowerCase().includes(searchLower) ||
+          contrato.cultivo?.toLowerCase().includes(searchLower) ||
+          contrato.campana?.toLowerCase().includes(searchLower) ||
+          contrato.observaciones?.toLowerCase().includes(searchLower) ||
+          `${contrato.serie}-${contrato.año}-${contrato.numero}`.toLowerCase().includes(searchLower);
+        if (!matchesSearch) return false;
+      }
+      
+      // Filtro por proveedor
+      if (filters.proveedor && contrato.proveedor !== filters.proveedor) return false;
+      
+      // Filtro por cultivo
+      if (filters.cultivo && contrato.cultivo !== filters.cultivo) return false;
+      
+      // Filtro por campaña
+      if (filters.campana && contrato.campana !== filters.campana) return false;
+      
+      // Filtro por tipo
+      if (filters.tipo && contrato.tipo !== filters.tipo) return false;
+      
+      // Filtro por fecha desde
+      if (filters.fecha_desde && contrato.fecha_contrato < filters.fecha_desde) return false;
+      
+      // Filtro por fecha hasta
+      if (filters.fecha_hasta && contrato.fecha_contrato > filters.fecha_hasta) return false;
+      
+      return true;
+    });
+  }, [contratos, filters]);
+  
+  // Opciones únicas para los filtros
+  const filterOptions = useMemo(() => ({
+    proveedores: [...new Set(contratos.map(c => c.proveedor).filter(Boolean))].sort(),
+    cultivos: [...new Set(contratos.map(c => c.cultivo).filter(Boolean))].sort(),
+    campanas: [...new Set(contratos.map(c => c.campana).filter(Boolean))].sort(),
+    tipos: [...new Set(contratos.map(c => c.tipo).filter(Boolean))]
+  }), [contratos]);
+  
+  const clearFilters = () => {
+    setFilters({
+      search: '',
+      proveedor: '',
+      cultivo: '',
+      campana: '',
+      tipo: '',
+      fecha_desde: '',
+      fecha_hasta: ''
+    });
+  };
+  
+  const hasActiveFilters = filters.search || filters.proveedor || filters.cultivo || 
+                           filters.campana || filters.tipo || filters.fecha_desde || filters.fecha_hasta;
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
