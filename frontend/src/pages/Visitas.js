@@ -1081,6 +1081,181 @@ const Visitas = () => {
               </div>
             )}
             
+            {/* SECCIÓN DE FOTOS */}
+            <div className="form-group" data-testid="fotos-section">
+              <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Camera size={18} />
+                Fotos de la Visita
+                <span style={{ 
+                  fontSize: '0.7rem', 
+                  backgroundColor: '#e8f5e9', 
+                  color: '#2e7d32', 
+                  padding: '2px 6px', 
+                  borderRadius: '4px' 
+                }}>
+                  Opcional - JPG, PNG, WebP (máx. 10MB)
+                </span>
+              </label>
+              
+              {/* Zona de subida */}
+              <div 
+                style={{
+                  border: '2px dashed hsl(var(--border))',
+                  borderRadius: '0.5rem',
+                  padding: '1.5rem',
+                  textAlign: 'center',
+                  backgroundColor: 'hsl(var(--muted) / 0.3)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = 'hsl(var(--primary))'; }}
+                onDragLeave={(e) => { e.currentTarget.style.borderColor = 'hsl(var(--border))'; }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.style.borderColor = 'hsl(var(--border))';
+                  const files = Array.from(e.dataTransfer.files);
+                  if (files.length > 0) {
+                    const dataTransfer = new DataTransfer();
+                    files.forEach(f => dataTransfer.items.add(f));
+                    fileInputRef.current.files = dataTransfer.files;
+                    handleFileSelect({ target: { files: dataTransfer.files } });
+                  }
+                }}
+              >
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileSelect}
+                  accept="image/*"
+                  multiple
+                  style={{ display: 'none' }}
+                  data-testid="input-fotos"
+                />
+                {uploadingFotos ? (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                    <Loader2 size={24} className="animate-spin" style={{ animation: 'spin 1s linear infinite' }} />
+                    <span>Subiendo fotos...</span>
+                  </div>
+                ) : (
+                  <>
+                    <Upload size={32} style={{ color: 'hsl(var(--muted-foreground))', marginBottom: '0.5rem' }} />
+                    <p style={{ margin: 0, color: 'hsl(var(--muted-foreground))' }}>
+                      Arrastra fotos aquí o <span style={{ color: 'hsl(var(--primary))', fontWeight: '500' }}>haz clic para seleccionar</span>
+                    </p>
+                    <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                      Máximo 10 fotos por subida
+                    </p>
+                  </>
+                )}
+              </div>
+              
+              {/* Error de subida */}
+              {uploadError && (
+                <div style={{ 
+                  marginTop: '0.5rem', 
+                  padding: '0.5rem', 
+                  backgroundColor: 'hsl(var(--destructive) / 0.1)', 
+                  borderRadius: '0.375rem',
+                  color: 'hsl(var(--destructive))',
+                  fontSize: '0.875rem'
+                }}>
+                  {uploadError}
+                </div>
+              )}
+              
+              {/* Galería de fotos */}
+              {fotos.length > 0 && (
+                <div style={{ marginTop: '1rem' }}>
+                  <p style={{ fontSize: '0.875rem', fontWeight: '500', marginBottom: '0.5rem' }}>
+                    {fotos.length} foto{fotos.length !== 1 ? 's' : ''} adjunta{fotos.length !== 1 ? 's' : ''}
+                  </p>
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', 
+                    gap: '0.75rem' 
+                  }}>
+                    {fotos.map((foto, index) => (
+                      <div 
+                        key={index}
+                        style={{
+                          position: 'relative',
+                          aspectRatio: '1',
+                          borderRadius: '0.5rem',
+                          overflow: 'hidden',
+                          border: '1px solid hsl(var(--border))',
+                          backgroundColor: 'hsl(var(--muted))'
+                        }}
+                      >
+                        <img
+                          src={foto.pending ? foto.preview : `${BACKEND_URL}${foto.url}`}
+                          alt={foto.filename || `Foto ${index + 1}`}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                        <div style={{
+                          display: 'none',
+                          width: '100%',
+                          height: '100%',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: 'hsl(var(--muted))'
+                        }}>
+                          <Image size={32} style={{ color: 'hsl(var(--muted-foreground))' }} />
+                        </div>
+                        {/* Indicador de pendiente */}
+                        {foto.pending && (
+                          <div style={{
+                            position: 'absolute',
+                            top: '4px',
+                            left: '4px',
+                            backgroundColor: 'hsl(var(--warning))',
+                            color: 'white',
+                            fontSize: '0.65rem',
+                            padding: '2px 4px',
+                            borderRadius: '4px'
+                          }}>
+                            Pendiente
+                          </div>
+                        )}
+                        {/* Botón eliminar */}
+                        <button
+                          type="button"
+                          onClick={() => deleteFoto(editingId, index)}
+                          style={{
+                            position: 'absolute',
+                            top: '4px',
+                            right: '4px',
+                            width: '24px',
+                            height: '24px',
+                            borderRadius: '50%',
+                            backgroundColor: 'hsl(var(--destructive))',
+                            color: 'white',
+                            border: 'none',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                          title="Eliminar foto"
+                          data-testid={`delete-foto-${index}`}
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            
             <div className="flex gap-2">
               <button type="submit" className="btn btn-primary" data-testid="btn-guardar-visita">
                 {editingId ? 'Actualizar Visita' : 'Guardar Visita'}
