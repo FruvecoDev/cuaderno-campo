@@ -1,0 +1,96 @@
+{
+  "summary": "Tested enhanced Tareas and Irrigaciones modules. All backend API tests (18) and frontend E2E tests (12) passed. Features verified: KPIs/stats, calendar view, advanced filters, subtasks/checklist, status changes, consumption calculator, parcel history, Excel export.",
+  "mode": "generate",
+  "baseline_commit": "467fd665ef06d227050a52184842f98a18d36863",
+  "head_commit": "fffb6e83799ada88ff943d2e20d54ba626c329ee",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "runtime_errors": [
+      {
+        "component": "Leaflet map",
+        "issue": "Cannot read properties of undefined (reading '_leaflet_pos') - appears intermittently in dashboard/map views but does not affect Tareas/Irrigaciones functionality",
+        "priority": "LOW"
+      }
+    ]
+  },
+  "regression_results": {
+    "total_specs": 30,
+    "passed": 30,
+    "failed": 0,
+    "skipped": 0
+  },
+  "specs_created": [
+    "/app/tests/e2e/tareas-enhanced.spec.ts",
+    "/app/tests/e2e/irrigaciones-enhanced.spec.ts",
+    "/app/backend/tests/test_tareas_irrigaciones_enhanced.py"
+  ],
+  "specs_updated": [
+    "/app/tests/fixtures/helpers.ts"
+  ],
+  "quarantined_tests": [],
+  "test_report_links": [
+    "/app/tests/e2e/tareas-enhanced.spec.ts",
+    "/app/tests/e2e/irrigaciones-enhanced.spec.ts",
+    "/app/backend/tests/test_tareas_irrigaciones_enhanced.py",
+    "/app/test_reports/pytest/test_tareas_irrigaciones_enhanced.xml"
+  ],
+  "action_items": [],
+  "updated_files": [
+    "/app/tests/e2e/tareas-enhanced.spec.ts",
+    "/app/tests/e2e/irrigaciones-enhanced.spec.ts",
+    "/app/backend/tests/test_tareas_irrigaciones_enhanced.py",
+    "/app/tests/fixtures/helpers.ts"
+  ],
+  "success_rate": {
+    "backend": "100% (18/18 tests passed)",
+    "frontend": "100% (12/12 tests passed)"
+  },
+  "seed_data_creation": "No new seed data created - tests create and clean up their own data",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Enhanced Tareas and Irrigaciones modules fully tested.\n\nTAREAS FEATURES TESTED:\n- KPIs/stats: /api/tareas/stats - returns total, pendientes, en_progreso, completadas, canceladas, vencidas, esta_semana, costs\n- Calendar view: /api/tareas/calendario?mes=N&ano=YYYY - returns tasks grouped by day\n- Task types: /api/tareas/tipos - returns tipos, prioridades, estados\n- Create task with priority and type: POST /api/tareas\n- Subtasks: Toggle completion via PATCH /api/tareas/{id}/subtarea/{subtarea_id}?completada=true/false\n- Status change: PATCH /api/tareas/{id}/estado?estado=X\n- Excel export: GET /api/tareas/export/excel\n- Filters: estado, prioridad, tipo_tarea, asignado_a, fecha_desde, fecha_hasta\n\nIRRIGACIONES FEATURES TESTED:\n- KPIs/stats: /api/irrigaciones/stats - returns totals, por_sistema, por_mes\n- Systems: /api/irrigaciones/sistemas - returns sistemas, fuentes_agua, estados\n- Consumption calculator: /api/irrigaciones/calcular-consumo?parcela_id=X&volumen=Y\n- Parcel history: /api/irrigaciones/historial/{parcela_id}\n- Planned irrigations: /api/irrigaciones/planificadas?dias=N\n- Excel export: GET /api/irrigaciones/export/excel\n- Filters: sistema, parcela_id, estado, fecha_desde, fecha_hasta, cultivo\n\nDATA-TESTIDS USED:\n- tareas-page: main container for Tareas\n- tareas-filtros: filter section in Tareas\n- irrigaciones-page: main container for Irrigaciones\n\nKNOWN ISSUES:\n- ResumenDiario modal appears after login and can block clicks - handled by dismissResumenDiarioModal() helper\n- webpack-dev-server overlay can intercept clicks - removed in dismissResumenDiarioModal()\n- Leaflet map intermittent error (low priority, doesn't affect these modules)",
+  "tested_features": {
+    "tareas": [
+      "Page loads with action buttons (Lista, Calendario, Excel, Nueva Tarea)",
+      "KPIs display correctly",
+      "Calendar view toggle",
+      "Advanced filters panel (Estado, Prioridad, Tipo, Asignado, Desde, Hasta)",
+      "Create new tarea form with all fields",
+      "Subtasks/Checklist section in form",
+      "Excel export button"
+    ],
+    "irrigaciones": [
+      "Page loads with action buttons (Lista, Estadísticas, Calculadora, Excel, Nuevo Riego)",
+      "KPIs display correctly",
+      "Statistics view with charts (Distribución por Sistema, Volumen por Mes)",
+      "Consumption calculator opens and calculates",
+      "Advanced filters panel (Sistema, Parcela, Estado, Cultivo, Desde, Hasta)",
+      "List view shows irrigation records table",
+      "Create new irrigation form",
+      "Excel export button"
+    ],
+    "backend_api": [
+      "GET /api/tareas/stats",
+      "GET /api/tareas/tipos",
+      "GET /api/tareas/calendario",
+      "POST /api/tareas (with priority and subtasks)",
+      "PATCH /api/tareas/{id}/subtarea/{subtarea_id}",
+      "PATCH /api/tareas/{id}/estado",
+      "GET /api/tareas?estado=X&prioridad=Y",
+      "GET /api/tareas/export/excel",
+      "GET /api/irrigaciones/stats",
+      "GET /api/irrigaciones/sistemas",
+      "GET /api/irrigaciones/historial/{parcela_id}",
+      "GET /api/irrigaciones/calcular-consumo",
+      "GET /api/irrigaciones/planificadas",
+      "GET /api/irrigaciones?sistema=X&estado=Y",
+      "GET /api/irrigaciones/export/excel"
+    ]
+  }
+}
