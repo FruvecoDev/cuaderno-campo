@@ -631,85 +631,8 @@ const Dashboard = () => {
         </button>
       </div>
       
-      {/* Container for ordered widgets */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        {sortedWidgetIds.map(widgetId => {
-          if (!isWidgetVisible(widgetId)) return null;
-          const order = getWidgetOrder(widgetId);
-          
-          switch(widgetId) {
-            case 'kpis_principales':
-              return (
-                <div key={widgetId} style={{ order }} data-widget-id={widgetId}>
-                  <div className="stats-grid" data-testid="dashboard-kpis">
-                    {puedeCompra && (
-                    <div className="stat-card">
-                      <div className="stat-label">{t('dashboard.stats.purchaseContracts')}</div>
-                      <div className="stat-value">{kpis.totales.contratos_compra || 0}</div>
-                      <div className="text-sm text-muted">{t('common.active')}</div>
-                    </div>
-                    )}
-                    
-                    {puedeVenta && (
-                    <div className="stat-card">
-                      <div className="stat-label">{t('dashboard.stats.saleContracts')}</div>
-                      <div className="stat-value">{kpis.totales.contratos_venta || 0}</div>
-                      <div className="text-sm text-muted">{t('common.active')}</div>
-                    </div>
-                    )}
-                    
-                    <div className="stat-card">
-                      <div className="stat-label">{t('dashboard.stats.activeParcels')}</div>
-                      <div className="stat-value">{kpis.totales.parcelas_activas}</div>
-                      <div className="text-sm text-muted">de {kpis.totales.parcelas} {t('common.total').toLowerCase()}</div>
-                    </div>
-                    
-                    <div className="stat-card">
-                      <div className="stat-label">{t('parcels.surface')} {t('common.total')}</div>
-                      <div className="stat-value">{kpis.superficie.total_ha.toFixed(2)}</div>
-                      <div className="text-sm text-muted">{t('units.hectares')}</div>
-                    </div>
-                    
-                    <div className="stat-card">
-                      <div className="stat-label">{t('dashboard.stats.treatments')}</div>
-                      <div className="stat-value">{kpis.totales.tratamientos}</div>
-                      <div className="text-sm text-muted">{t('common.total')}</div>
-                    </div>
-                    
-                    <div className="stat-card">
-                      <div className="stat-label">{t('dashboard.stats.totalProduction')}</div>
-                      <div className="stat-value">{(kpis.produccion.total_kg / 1000).toFixed(1)}</div>
-                      <div className="text-sm text-muted">{t('dashboard.stats.tons')}</div>
-                    </div>
-                    
-                    <div className="stat-card">
-                      <div className="stat-label">{t('dashboard.stats.income')}</div>
-                      <div className="stat-value">€{kpis.produccion.total_ingresos.toLocaleString()}</div>
-                      <div className="text-sm text-muted">{t('dashboard.stats.totalBilled')}</div>
-                    </div>
-                    
-                    <div className="stat-card">
-                      <div className="stat-label">{t('dashboard.stats.costs')}</div>
-                      <div className="stat-value">€{kpis.costes.total.toLocaleString()}</div>
-                      <div className="text-sm text-muted">{t('dashboard.stats.totalExpenses')}</div>
-                    </div>
-                    
-                    <div className="stat-card">
-                      <div className="stat-label">{t('dashboard.stats.grossMargin')}</div>
-                      <div className="stat-value">€{kpis.rentabilidad.margen_bruto.toLocaleString()}</div>
-                      <div className="stat-change positive">
-                        <TrendingUp size={14} style={{ display: 'inline' }} />
-                        {((kpis.rentabilidad.margen_bruto / kpis.produccion.total_ingresos) * 100).toFixed(1)}% {t('dashboard.stats.margin')}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            default:
-              return null;
-          }
-        })}
-      </div>
+      {/* Widgets container with flexbox ordering */}
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
       
       {/* Modal de Configuración */}
       {showConfigModal && (
