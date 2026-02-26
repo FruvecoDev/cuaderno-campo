@@ -1642,7 +1642,7 @@ const Dashboard = () => {
       
       {/* Charts */}
       {isWidgetVisible('graficos_cultivos') && (
-      <div className="grid-2" style={{ marginBottom: '2rem' }}>
+      <div className="grid-2" style={{ marginBottom: '2rem', order: getWidgetOrder('graficos_cultivos') }}>
         {cultivoData.length > 0 && (
           <div className="card">
             <h2 className="card-title">{t('dashboard.charts.surfaceByCrop')}</h2>
