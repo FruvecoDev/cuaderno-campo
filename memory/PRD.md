@@ -1043,6 +1043,36 @@ Módulos actualizados para seguir patrón consistente:
 
 ### Estado: ✅ COMPLETADO Y TESTEADO
 
+## Dashboard - Widgets Próximas Cosechas y Tratamientos Pendientes (26/02/2026) - COMPLETADO
+- **Alcance**: Añadir widgets informativos al Dashboard
+
+### Backend (`routes_dashboard.py`):
+- `proximas_cosechas`: Lista de cosechas planificadas ordenadas por fecha
+- `tratamientos_pendientes`: Lista de tratamientos con estado pendiente/programado
+- `fincas_recoleccion_semana`: Fincas con recolección planificada para la semana actual
+
+### Frontend (`Dashboard.js`):
+1. **Widget "Próximas Cosechas"**:
+   - Badge con número de cosechas planificadas
+   - Lista con cultivo, proveedor, kg estimados, fecha
+   - Indicador de urgencia (colores y iconos según días restantes)
+   - Sección "Fincas en recolección esta semana"
+
+2. **Widget "Tratamientos Pendientes"**:
+   - Badge con número de tratamientos pendientes
+   - Lista con tipo, parcela, superficie, fecha
+   - Indicador de vencimiento y prioridad
+   - Botón "Ver todos los tratamientos"
+
+### Iconos añadidos: Wheat, Droplets, Clock, Package
+
+### Test: Verificado con curl y screenshot
+- Endpoint: ✅ Retorna datos correctamente (3 cosechas, 10 tratamientos)
+- UI: ✅ Se muestran ambos widgets con datos
+
+### Estado: ✅ COMPLETADO Y TESTEADO
+
+
 ## Dashboard - Sección de Fincas (26/02/2026) - COMPLETADO
 - **Alcance**: Añadir KPIs y gráficos de Fincas al Dashboard principal
 
