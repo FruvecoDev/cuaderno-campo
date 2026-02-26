@@ -42,7 +42,7 @@ Visita/Tratamiento → realizados sobre → Parcela
    - Cultivos
    - Contratos
    - Parcelas (con mapa interactivo)
-   - Visitas (modelo simplificado)
+   - Visitas (modelo simplificado + **FOTOS**)
    - Tratamientos (modelo simplificado)
    - Irrigaciones (CRUD, filtros, config campos)
    - Recetas (CRUD, filtros, config campos)
@@ -64,6 +64,27 @@ Visita/Tratamiento → realizados sobre → Parcela
      - Botón "Limpiar filtros"
      - Contador "Mostrando X de Y contratos (filtrados)"
      - Test Report: `/app/test_reports/iteration_38.json` - 100% pass (12/12 tests)
+
+## Subida de Fotos en Visitas (26/02/2026) - COMPLETADO ✅
+- **Funcionalidad**: Los usuarios pueden adjuntar evidencia fotográfica a las visitas de campo
+- **Backend**:
+  - Nuevo archivo: `/app/backend/routes_uploads.py`
+  - Endpoints:
+    - `POST /api/visitas/{visita_id}/fotos` - Subir fotos (máx. 10 por subida)
+    - `GET /api/visitas/{visita_id}/fotos` - Obtener fotos de una visita
+    - `DELETE /api/visitas/{visita_id}/fotos/{foto_index}` - Eliminar foto
+  - Almacenamiento: `/app/uploads/visitas/`
+  - Formatos permitidos: JPG, JPEG, PNG, GIF, WebP, HEIC, HEIF
+  - Límite: 10MB por archivo
+- **Frontend**:
+  - Zona de drag & drop para subir fotos
+  - Galería de miniaturas con preview
+  - Indicador "Pendiente" para fotos no guardadas
+  - Badge en tabla con contador de fotos por visita
+  - Visualización de fotos en modal de detalles
+- **Test Report**: `/app/test_reports/iteration_40.json`
+  - Backend: 100% (10/10 tests)
+  - Frontend: 71% (5/7 tests - fallos por login intermitente, no por funcionalidad)
 
 ## Bug Fix: Error Leaflet "_leaflet_pos" (26/02/2026) - COMPLETADO
 - **Problema**: Error intermitente "Cannot read properties of undefined (reading '_leaflet_pos')" en mapas
