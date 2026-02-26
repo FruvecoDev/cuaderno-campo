@@ -11,7 +11,7 @@ from database import (
     visitas_collection, tratamientos_collection, irrigaciones_collection,
     cosechas_collection, tareas_collection, serialize_docs, users_collection
 )
-from auth import get_current_user
+from routes_auth import get_current_user
 
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
 
