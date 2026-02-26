@@ -508,32 +508,69 @@ const Irrigaciones = () => {
         </div>
       )}
 
-      {/* Stats resumen */}
+      {/* Stats resumen - KPIs en línea horizontal */}
       {vista === 'lista' && stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
-          <div className="card p-4">
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <div className="text-sm text-gray-500">Total</div>
-          </div>
-          <div className="card p-4" style={{ backgroundColor: ESTADO_COLORS.planificado.bg }}>
-            <div className="text-2xl font-bold" style={{ color: ESTADO_COLORS.planificado.text }}>{stats.proximos_7_dias}</div>
-            <div className="text-sm">Próx. 7 días</div>
-          </div>
-          <div className="card p-4">
-            <div className="text-2xl font-bold text-blue-600">{stats.totales?.volumen?.toLocaleString()}</div>
-            <div className="text-sm text-gray-500">m³ Total</div>
-          </div>
-          <div className="card p-4">
-            <div className="text-2xl font-bold">{stats.totales?.horas?.toLocaleString()}</div>
-            <div className="text-sm text-gray-500">Horas</div>
-          </div>
-          <div className="card p-4">
-            <div className="text-2xl font-bold text-green-600">€{stats.totales?.coste?.toLocaleString()}</div>
-            <div className="text-sm text-gray-500">Coste</div>
-          </div>
-          <div className="card p-4">
-            <div className="text-2xl font-bold">{stats.totales?.superficie?.toLocaleString()}</div>
-            <div className="text-sm text-gray-500">Ha Regadas</div>
+        <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl border border-blue-100">
+          <div className="flex flex-wrap justify-between items-center gap-4">
+            <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-lg shadow-sm">
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                <Droplets size={20} className="text-blue-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-gray-800">{stats.total}</div>
+                <div className="text-xs text-gray-500 uppercase tracking-wide">Total Riegos</div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-lg shadow-sm">
+              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                <Calendar size={20} className="text-amber-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-amber-600">{stats.proximos_7_dias}</div>
+                <div className="text-xs text-gray-500 uppercase tracking-wide">Próx. 7 días</div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-lg shadow-sm">
+              <div className="w-10 h-10 bg-cyan-100 rounded-full flex items-center justify-center">
+                <Droplets size={20} className="text-cyan-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-cyan-600">{stats.totales?.volumen?.toLocaleString() || 0}</div>
+                <div className="text-xs text-gray-500 uppercase tracking-wide">m³ Total</div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-lg shadow-sm">
+              <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                <Clock size={20} className="text-purple-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-purple-600">{stats.totales?.horas?.toLocaleString() || 0}</div>
+                <div className="text-xs text-gray-500 uppercase tracking-wide">Horas</div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-lg shadow-sm">
+              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                <span className="text-green-600 font-bold">€</span>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-green-600">{stats.totales?.coste?.toLocaleString() || 0}</div>
+                <div className="text-xs text-gray-500 uppercase tracking-wide">Coste Total</div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-lg shadow-sm">
+              <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
+                <span className="text-emerald-600 font-bold text-sm">Ha</span>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-emerald-600">{stats.totales?.superficie?.toLocaleString() || 0}</div>
+                <div className="text-xs text-gray-500 uppercase tracking-wide">Ha Regadas</div>
+              </div>
+            </div>
           </div>
         </div>
       )}
