@@ -1469,6 +1469,7 @@ const Dashboard = () => {
       )}
       
       {/* Charts */}
+      {isWidgetVisible('graficos_cultivos') && (
       <div className="grid-2" style={{ marginBottom: '2rem' }}>
         {cultivoData.length > 0 && (
           <div className="card">
@@ -1513,8 +1514,10 @@ const Dashboard = () => {
           </ResponsiveContainer>
         </div>
       </div>
+      )}
       
       {/* Mapa de Parcelas */}
+      {isWidgetVisible('mapa_parcelas') && (
       <div className="card mb-6" data-testid="mapa-parcelas">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
