@@ -884,76 +884,171 @@ const Irrigaciones = () => {
         </div>
       )}
 
-      {/* Modal Historial */}
+      {/* Modal Historial - Diseño mejorado */}
       {showHistorial && historialData && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h2 className="text-xl font-bold">Historial de Riegos</h2>
-                <p className="text-gray-600">{historialData.parcela?.codigo} - {historialData.parcela?.cultivo}</p>
-              </div>
-              <button onClick={() => setShowHistorial(null)} className="text-gray-500 hover:text-gray-700">
-                <X size={24} />
-              </button>
-            </div>
-
-            {/* Totales */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="p-3 bg-blue-50 rounded">
-                <div className="text-2xl font-bold text-blue-600">{historialData.totales?.riegos}</div>
-                <div className="text-sm text-gray-600">Riegos</div>
-              </div>
-              <div className="p-3 bg-green-50 rounded">
-                <div className="text-2xl font-bold text-green-600">{historialData.totales?.volumen_total} m³</div>
-                <div className="text-sm text-gray-600">Volumen Total</div>
-              </div>
-              <div className="p-3 bg-purple-50 rounded">
-                <div className="text-2xl font-bold text-purple-600">{historialData.totales?.volumen_por_ha} m³/ha</div>
-                <div className="text-sm text-gray-600">Volumen/ha</div>
-              </div>
-              <div className="p-3 bg-orange-50 rounded">
-                <div className="text-2xl font-bold text-orange-600">€{historialData.totales?.coste_total}</div>
-                <div className="text-sm text-gray-600">Coste Total</div>
-              </div>
-            </div>
-
-            {/* Por sistema */}
-            <div className="mb-4">
-              <h4 className="font-semibold mb-2">Por Sistema</h4>
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(historialData.por_sistema || {}).map(([sistema, data]) => (
-                  <div key={sistema} className="px-3 py-1 bg-gray-100 rounded text-sm">
-                    {sistema}: {data.count} riegos ({data.volumen} m³)
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden animate-in fade-in zoom-in duration-200">
+            {/* Header con gradiente */}
+            <div className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white p-6">
+              <div className="flex justify-between items-start">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <History size={24} />
+                    <h2 className="text-2xl font-bold">Historial de Riegos</h2>
                   </div>
-                ))}
+                  <p className="text-blue-100 flex items-center gap-2">
+                    <span className="bg-white/20 px-2 py-0.5 rounded text-sm font-medium">
+                      {historialData.parcela?.codigo}
+                    </span>
+                    <span>{historialData.parcela?.cultivo}</span>
+                    <span className="text-blue-200">•</span>
+                    <span>{historialData.parcela?.superficie} ha</span>
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setShowHistorial(null)} 
+                  className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                >
+                  <X size={24} />
+                </button>
               </div>
             </div>
+            
+            {/* Contenido con scroll */}
+            <div className="p-6 overflow-y-auto max-h-[calc(85vh-180px)]">
+              {/* KPIs del historial */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
+                      <Droplets size={24} className="text-white" />
+                    </div>
+                    <div>
+                      <div className="text-3xl font-bold text-blue-700">{historialData.totales?.riegos}</div>
+                      <div className="text-sm text-blue-600">Riegos Realizados</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 p-4 rounded-xl border border-cyan-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-200">
+                      <Droplets size={24} className="text-white" />
+                    </div>
+                    <div>
+                      <div className="text-3xl font-bold text-cyan-700">{historialData.totales?.volumen_total}</div>
+                      <div className="text-sm text-cyan-600">m³ Total</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-200">
+                      <BarChart3 size={24} className="text-white" />
+                    </div>
+                    <div>
+                      <div className="text-3xl font-bold text-purple-700">{historialData.totales?.volumen_por_ha}</div>
+                      <div className="text-sm text-purple-600">m³ por Ha</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center shadow-lg shadow-green-200">
+                      <span className="text-white font-bold text-xl">€</span>
+                    </div>
+                    <div>
+                      <div className="text-3xl font-bold text-green-700">{historialData.totales?.coste_total}</div>
+                      <div className="text-sm text-green-600">Coste Total</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-            {/* Lista */}
-            <div className="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Fecha</th>
-                    <th>Sistema</th>
-                    <th>Duración</th>
-                    <th>Volumen</th>
-                    <th>Coste</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {historialData.historial?.map(h => (
-                    <tr key={h._id}>
-                      <td>{h.fecha}</td>
-                      <td>{h.sistema}</td>
-                      <td>{h.duracion} h</td>
-                      <td>{h.volumen} m³</td>
-                      <td>€{h.coste || 0}</td>
-                    </tr>
+              {/* Distribución por sistema */}
+              <div className="mb-6">
+                <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                  <Settings size={18} />
+                  Distribución por Sistema
+                </h4>
+                <div className="flex flex-wrap gap-3">
+                  {Object.entries(historialData.por_sistema || {}).map(([sistema, data], index) => (
+                    <div 
+                      key={sistema} 
+                      className="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
+                      style={{ 
+                        backgroundColor: `${SISTEMA_COLORS[index % SISTEMA_COLORS.length]}15`,
+                        color: SISTEMA_COLORS[index % SISTEMA_COLORS.length],
+                        border: `1px solid ${SISTEMA_COLORS[index % SISTEMA_COLORS.length]}40`
+                      }}
+                    >
+                      <div 
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: SISTEMA_COLORS[index % SISTEMA_COLORS.length] }}
+                      />
+                      <span className="font-semibold">{sistema}</span>
+                      <span className="text-gray-500">•</span>
+                      <span>{data.count} riegos</span>
+                      <span className="text-gray-500">•</span>
+                      <span>{data.volumen} m³</span>
+                    </div>
                   ))}
-                </tbody>
-              </table>
+                </div>
+              </div>
+
+              {/* Tabla de historial */}
+              <div>
+                <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                  <Calendar size={18} />
+                  Detalle de Riegos
+                </h4>
+                <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-200">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-gray-100 border-b border-gray-200">
+                        <th className="text-left py-3 px-4 font-semibold text-gray-600">Fecha</th>
+                        <th className="text-left py-3 px-4 font-semibold text-gray-600">Sistema</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-600">Duración</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-600">Volumen</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-600">Coste</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {historialData.historial?.map((h, idx) => (
+                        <tr 
+                          key={h._id} 
+                          className={`border-b border-gray-100 hover:bg-blue-50/50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
+                        >
+                          <td className="py-3 px-4">
+                            <span className="font-medium text-gray-800">{h.fecha}</span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                              <Droplets size={14} />
+                              {h.sistema}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-right font-medium text-gray-700">{h.duracion} h</td>
+                          <td className="py-3 px-4 text-right font-medium text-cyan-600">{h.volumen} m³</td>
+                          <td className="py-3 px-4 text-right font-medium text-green-600">€{h.coste || 0}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div className="border-t border-gray-200 bg-gray-50 px-6 py-4 flex justify-end">
+              <button 
+                onClick={() => setShowHistorial(null)}
+                className="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors"
+              >
+                Cerrar
+              </button>
             </div>
           </div>
         </div>
