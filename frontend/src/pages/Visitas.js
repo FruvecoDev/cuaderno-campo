@@ -406,6 +406,105 @@ const Visitas = () => {
     }
   };
   
+  // Funciones para análisis de IA
+  const analyzeFoto = async (visitaId, fotoIndex) => {
+    if (!visitaId) return;
+    
+    setAnalyzingFoto(fotoIndex);
+    setUploadError(null);
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/visitas/${visitaId}/fotos/${fotoIndex}/analizar`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Error al analizar la foto');
+      }
+      
+      const data = await response.json();
+      
+      // Actualizar fotos con el resultado del análisis
+      setFotos(prev => {
+        const updated = [...prev];
+        if (updated[fotoIndex]) {
+          updated[fotoIndex] = data.foto;
+        }
+        return updated;
+      });
+      
+      // Mostrar el modal con el resultado
+      setShowAnalysisModal(data.analysis);
+      
+      fetchVisitas();
+    } catch (error) {
+      console.error('Error analyzing photo:', error);
+      setUploadError(error.message);
+    } finally {
+      setAnalyzingFoto(null);
+    }
+  };
+  
+  const analyzeAllFotos = async (visitaId) => {
+    if (!visitaId) return;
+    
+    setAnalyzingAll(true);
+    setUploadError(null);
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/visitas/${visitaId}/fotos/analizar-todas`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Error al analizar las fotos');
+      }
+      
+      const data = await response.json();
+      setFotos(data.fotos || []);
+      fetchVisitas();
+      
+      // Mostrar resumen de detecciones
+      const detections = data.results.filter(r => r.analysis?.detected);
+      if (detections.length > 0) {
+        setShowAnalysisModal({
+          summary: true,
+          total: data.total_analyzed,
+          detections: detections.map(d => d.analysis)
+        });
+      } else {
+        setShowAnalysisModal({
+          summary: true,
+          total: data.total_analyzed,
+          detections: [],
+          message: 'No se detectaron plagas ni enfermedades en ninguna foto.'
+        });
+      }
+    } catch (error) {
+      console.error('Error analyzing all photos:', error);
+      setUploadError(error.message);
+    } finally {
+      setAnalyzingAll(false);
+    }
+  };
+  
+  const getSeverityColor = (severity) => {
+    switch (severity) {
+      case 'grave': return { bg: 'hsl(0, 84%, 95%)', color: 'hsl(0, 84%, 40%)', border: 'hsl(0, 84%, 60%)' };
+      case 'moderado': return { bg: 'hsl(38, 92%, 95%)', color: 'hsl(38, 92%, 40%)', border: 'hsl(38, 92%, 50%)' };
+      case 'leve': return { bg: 'hsl(142, 76%, 95%)', color: 'hsl(142, 76%, 30%)', border: 'hsl(142, 76%, 40%)' };
+      default: return { bg: 'hsl(var(--muted))', color: 'hsl(var(--muted-foreground))', border: 'hsl(var(--border))' };
+    }
+  };
+  
   // Filtrar visitas
   const filteredVisitas = visitas.filter(v => {
     if (filters.proveedor && v.proveedor !== filters.proveedor) return false;
