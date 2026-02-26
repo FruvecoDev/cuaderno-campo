@@ -1806,7 +1806,7 @@ const Dashboard = () => {
       
       {/* Calendario y Planificador de Visitas */}
       {isWidgetVisible('calendario') && (
-      <div className="grid-2 mb-6">
+      <div className="grid-2 mb-6" style={{ order: getWidgetOrder('calendario') }}>
         {/* Calendario Visual */}
         <div className="card" data-testid="calendario-visitas">
           <h2 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
