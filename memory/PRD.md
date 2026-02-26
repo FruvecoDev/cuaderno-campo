@@ -1043,6 +1043,33 @@ Módulos actualizados para seguir patrón consistente:
 
 ### Estado: ✅ COMPLETADO Y TESTEADO
 
+## Dashboard - Widget Contratos Activos (26/02/2026) - COMPLETADO
+- **Alcance**: Añadir widget de Contratos Activos al Dashboard
+
+### Backend (`routes_dashboard.py`):
+- `contratos_activos`: Lista de contratos dentro del periodo activo (periodo_desde <= hoy <= periodo_hasta)
+- `contratos_stats`: Estadísticas de contratos:
+  - `total_activos`: Número de contratos activos
+  - `compra`: { count, cantidad_total, valor_total }
+  - `venta`: { count, cantidad_total, valor_total }
+  - `por_cultivo`: Desglose por cultivo
+
+### Frontend (`Dashboard.js`):
+1. **Widget "Contratos Activos"**:
+   - KPIs: Total Activos, Compra (count, toneladas, €), Venta (count, toneladas, €), Balance
+   - Indicador de Balance con color verde/rojo según si venta >= compra
+   - Tabla con lista de contratos activos (número, tipo, proveedor/cliente, cultivo, cantidad, valor)
+   - Botón "Ver todos" para navegar a /contratos
+
+### Iconos añadidos: FileSignature, ShoppingCart, TrendingDown
+
+### Test: Verificado con curl y screenshot
+- Endpoint: ✅ Retorna datos correctamente
+- UI: ✅ Se muestra widget con KPIs y tabla
+
+### Estado: ✅ COMPLETADO Y TESTEADO
+
+
 ## Dashboard - Widgets Próximas Cosechas y Tratamientos Pendientes (26/02/2026) - COMPLETADO
 - **Alcance**: Añadir widgets informativos al Dashboard
 
