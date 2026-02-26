@@ -152,6 +152,11 @@ const Visitas = () => {
   const [uploadError, setUploadError] = useState(null);
   const fileInputRef = useRef(null);
   
+  // Estado para análisis de IA
+  const [analyzingFoto, setAnalyzingFoto] = useState(null); // índice de foto siendo analizada
+  const [analyzingAll, setAnalyzingAll] = useState(false);
+  const [showAnalysisModal, setShowAnalysisModal] = useState(null); // datos del análisis a mostrar
+  
   useEffect(() => {
     fetchVisitas();
     fetchParcelas();
