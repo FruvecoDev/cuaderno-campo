@@ -1314,7 +1314,7 @@ const Dashboard = () => {
       )}
       
       {/* Widget de Próximas Visitas */}
-      {kpis.visitas_stats && (
+      {isWidgetVisible('proximas_visitas') && kpis.visitas_stats && (
         <div className="card mb-6" data-testid="proximas-visitas">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
