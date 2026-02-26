@@ -323,15 +323,95 @@ const Cosechas = () => {
     <div data-testid="cosechas-page">
       <div className="flex justify-between items-center mb-6">
         <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>Cosechas</h1>
-        <button 
-          className="btn btn-primary" 
-          onClick={() => setShowForm(!showForm)}
-          data-testid="btn-nueva-cosecha"
-        >
-          <Plus size={18} style={{ marginRight: '0.5rem' }} />
-          Nueva Cosecha
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button
+            className="btn btn-secondary"
+            onClick={exportToExcel}
+            disabled={exportLoading || cosechas.length === 0}
+            title="Exportar a Excel"
+            data-testid="btn-export-excel"
+          >
+            {exportLoading ? (
+              <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
+            ) : (
+              <Download size={18} />
+            )}
+            Exportar
+          </button>
+          <button 
+            className="btn btn-primary" 
+            onClick={() => setShowForm(!showForm)}
+            data-testid="btn-nueva-cosecha"
+          >
+            <Plus size={18} style={{ marginRight: '0.5rem' }} />
+            Nueva Cosecha
+          </button>
+        </div>
       </div>
+      
+      {/* KPIs Dashboard */}
+      {stats && (
+        <div className="stats-grid-horizontal" style={{ marginBottom: '1.5rem' }} data-testid="cosechas-kpis">
+          <div className="stat-card">
+            <div className="stat-icon" style={{ backgroundColor: 'hsl(var(--primary) / 0.1)' }}>
+              <Package size={20} style={{ color: 'hsl(var(--primary))' }} />
+            </div>
+            <div className="stat-content">
+              <p className="stat-value">{stats.total}</p>
+              <p className="stat-label">Total Cosechas</p>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon" style={{ backgroundColor: 'hsl(38, 92%, 95%)' }}>
+              <Clock size={20} style={{ color: 'hsl(38, 92%, 50%)' }} />
+            </div>
+            <div className="stat-content">
+              <p className="stat-value">{stats.planificadas + stats.en_curso}</p>
+              <p className="stat-label">En Proceso</p>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon" style={{ backgroundColor: 'hsl(142, 76%, 95%)' }}>
+              <CheckCircle size={20} style={{ color: 'hsl(142, 76%, 36%)' }} />
+            </div>
+            <div className="stat-content">
+              <p className="stat-value">{stats.completadas}</p>
+              <p className="stat-label">Completadas</p>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon" style={{ backgroundColor: 'hsl(var(--primary) / 0.1)' }}>
+              <Scale size={20} style={{ color: 'hsl(var(--primary))' }} />
+            </div>
+            <div className="stat-content">
+              <p className="stat-value" style={{ fontSize: '1.1rem' }}>
+                {(stats.kilos_reales / 1000).toFixed(1)}t
+              </p>
+              <p className="stat-label">Kg Reales</p>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon" style={{ backgroundColor: stats.rendimiento_porcentaje >= 100 ? 'hsl(142, 76%, 95%)' : 'hsl(0, 84%, 95%)' }}>
+              <Target size={20} style={{ color: stats.rendimiento_porcentaje >= 100 ? 'hsl(142, 76%, 36%)' : 'hsl(0, 84%, 60%)' }} />
+            </div>
+            <div className="stat-content">
+              <p className="stat-value">{stats.rendimiento_porcentaje}%</p>
+              <p className="stat-label">Rendimiento</p>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon" style={{ backgroundColor: 'hsl(142, 76%, 95%)' }}>
+              <DollarSign size={20} style={{ color: 'hsl(142, 76%, 36%)' }} />
+            </div>
+            <div className="stat-content">
+              <p className="stat-value" style={{ fontSize: '1rem' }}>
+                {stats.importe_total?.toLocaleString('es-ES')}€
+              </p>
+              <p className="stat-label">Importe Total</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Formulario Nueva Cosecha */}
       {showForm && (
