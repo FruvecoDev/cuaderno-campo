@@ -27,63 +27,51 @@ El usuario ha solicitado recientemente la creación de un módulo Fincas con un 
 **User's preferred language**: Español
 
 **what currently exists?**
-Una aplicación full-stack (FastAPI, React, MongoDB) de gestión agrícola. En esta sesión se han realizado múltiples mejoras, todas guiadas por el usuario:
-1.  **Módulo Fincas**: Se ha refactorizado completamente. Ahora las fincas se agrupan por provincia y se pueden expandir/colapsar. Las parcelas asociadas se muestran como una lista en lugar de tarjetas.
-2.  **Dashboard**: Se ha mejorado enormemente. Se añadieron KPIs y gráficos para Fincas, y widgets para Próximas Cosechas, Tratamientos Pendientes, Contratos Activos y Próximas Visitas.
-3.  **Dashboard Configurable**: Se implementó una funcionalidad clave que permite a cada usuario habilitar/deshabilitar y reordenar los widgets del dashboard a su gusto. Las preferencias se guardan por usuario en la base de datos.
-4.  **Módulo Contratos**: Se ha iniciado la implementación de filtros avanzados.
+Una aplicación full-stack (FastAPI, React, MongoDB) de gestión agrícola. En esta sesión, se han implementado y mejorado significativamente varios módulos clave:
+1.  **Contratos**: Se finalizó la implementación de filtros avanzados, corrigiendo un bug y validando la funcionalidad con tests automatizados.
+2.  **Dashboard**: Se corrigió un error intermitente de Leaflet () que afectaba al mapa de parcelas.
+3.  **Tareas e Irrigaciones**: Ambos módulos han sido completamente refactorizados y mejorados con funcionalidades avanzadas (calendarios, estadísticas, subtareas, calculadoras, etc.) y un rediseño completo de su UI para que sea visualmente consistente con el resto de la aplicación.
+4.  **Componentes Reutilizables**: Se ha mejorado el formulario de Tareas con un selector de parcelas múltiple que incluye un buscador, siendo un componente altamente usable.
 
 **Last working item**:
--   **Last item agent was working**: Implementación de filtros avanzados en el módulo de Contratos. El usuario solicitó poder filtrar por proveedor, cultivo, campaña y rango de fechas. El agente ha añadido el código para la UI y la lógica de filtrado en el frontend.
--   **Status**: IN PROGRESS
+-   **Last item agent was working**: Implementar la funcionalidad de subida de fotos en el módulo de Visitas. El agente comenzó a analizar los archivos relevantes pero no inició la implementación.
+-   **Status**: NOT STARTED
 -   **Agent Testing Done**: N
--   **Which testing method agent to use?**: frontend testing agent. El agente debe verificar visualmente los filtros y luego ejecutar el  para asegurar que no hay regresiones y que la nueva funcionalidad está cubierta por tests.
+-   **Which testing method agent to use?**: both. Esta tarea requiere crear un endpoint en el backend para manejar la subida y almacenamiento de archivos, y modificar el frontend para incluir el componente de subida. Se recomienda  para validar el flujo E2E.
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Verificar la implementación de los filtros avanzados en Contratos (P0)**
-
-**Issues Detail**:
--   **Issue 1: Verificar la implementación de los filtros avanzados en Contratos**
-    -   **Attempted fixes**: El código fue implementado en  pero no ha sido probado.
-    -   **Next debug checklist**:
-        1.  Verificar visualmente que la UI de los filtros (desplegables de proveedor y cultivo, selector de campaña y rango de fechas) se renderiza correctamente en la página de Contratos.
-        2.  Aplicar uno o varios filtros para confirmar que la lista de contratos se actualiza como es debido.
-        3.  Ejecutar  para validar la funcionalidad y crear pruebas de regresión.
-    -   **Why fix this issue and what will be achieved with the fix?**: Completar la solicitud del usuario para facilitar la búsqueda y gestión de contratos, mejorando la usabilidad del módulo.
-    -   **Status**: IN PROGRESS
-    -   **Is recurring issue?**: N
-    -   **Should Test frontend/backend/both after fix?**: frontend
-    -   **Blocked on other issue**: None
+No hay issues pendientes.
 
 **In progress Task List**:
--   **Task 1: Finalizar la implementación de filtros en el módulo Contratos (P0)**
-    -   **Where to resume**: En el fichero . El trabajo de codificación está hecho. Se debe proceder con la fase de pruebas.
-    -   **What will be achieved with this?**: Los usuarios podrán filtrar la lista de contratos por múltiples criterios, agilizando su consulta.
-    -   **Status**: IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?**: frontend
+-   **Task 1: Implementar subida de fotos en Visitas (P1)**
+    -   **Where to resume**: El agente debe comenzar por diseñar e implementar el endpoint en el backend para manejar la subida de imágenes (probablemente en un nuevo archivo de rutas o en ). Luego, modificar el frontend en  para añadir la UI de subida.
+    -   **What will be achieved with this?**: Los usuarios podrán adjuntar evidencia fotográfica a sus visitas de campo, enriqueciendo los registros.
+    -   **Status**: NOT STARTED
+    -   **Should Test frontend/backend/both after fix?**: both
     -   **Blocked on something**: No
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks**:
-    -   **P1**: **Implementar subida de fotos en Visitas**: El agente mencionó esta mejora al revisar el módulo de Visitas, y es un siguiente paso lógico.
-    -   **P2**: **Finalizar notificaciones por email**: La integración con Resend sigue bloqueada a la espera de la  del usuario.
+    -   **P2**: Finalizar notificaciones por email: La integración con Resend sigue bloqueada a la espera de la  del usuario.
 -   **Future Tasks**:
-    -   Implementar los módulos restantes del PRD: Tareas, Irrigaciones, Recetas, Albaranes, etc.
-    -   Desarrollar la generación de informes en PDF y Excel.
-    -   Implementar las integraciones de IA (resúmenes de contratos, predicciones).
-    -   Añadir la funcionalidad de arrastrar y soltar (drag-and-drop) para reordenar los widgets del dashboard, como se previó en la UI del modal de configuración.
+    -   Implementar los módulos restantes del PRD: Recetas, Albaranes, Cosechas (actualmente simple), etc.
+    -   Desarrollar la generación de informes en PDF y Excel para todos los módulos.
+    -   Implementar las integraciones de IA (resúmenes de contratos, predicciones de cosecha).
+    -   Añadir la funcionalidad de arrastrar y soltar (drag-and-drop) para reordenar los widgets del dashboard.
 
 **Completed work in this session**
--   **Feature**: Refactorización completa del módulo Fincas, mostrando las fincas agrupadas por provincia con funcionalidad de expandir/colapsar, y las parcelas asociadas en formato de lista. (DONE)
--   **Feature**: Mejora masiva del Dashboard con una nueva sección de Resumen de Fincas (KPIs y gráficos) y widgets para Próximas Cosechas, Tratamientos Pendientes, Contratos Activos y Próximas Visitas. (DONE)
--   **Feature**: Implementación de un Dashboard personalizable donde cada usuario puede mostrar/ocultar y reordenar los widgets. Las preferencias se guardan en el perfil del usuario. (DONE)
--   Se inició la implementación de filtros avanzados en el módulo Contratos.
+-   **Filtros en Contratos**: Se finalizó y probó la funcionalidad de filtros avanzados (proveedor, cultivo, campaña, fecha). Se corrigió un bug que impedía que los filtros se aplicaran a la tabla. (DONE)
+-   **Corrección de Bug en Mapa**: Se solucionó un error intermitente () en los componentes de mapa de Leaflet, añadiendo verificaciones de seguridad. (DONE)
+-   **Módulo de Tareas (Avanzado)**: Se implementaron funcionalidades avanzadas: vista de calendario, KPIs, estados, prioridades, subtareas, asignación a múltiples parcelas y exportación a Excel. (DONE)
+-   **Módulo de Irrigaciones (Avanzado)**: Se implementaron funcionalidades avanzadas: KPIs, estadísticas, calculadora de consumo, historial por parcela, riegos planificados y exportación a Excel. (DONE)
+-   **Rediseño de UI (Tareas e Irrigaciones)**: Se rediseñó completamente la UI de los módulos de Tareas e Irrigaciones para hacerla consistente con el estilo visual del resto de la aplicación (uso de tarjetas, badges de colores, KPIs horizontales y modales mejorados). (DONE)
+-   **Selector de Parcelas Mejorado**: Se implementó un buscador dentro del selector de parcelas en el formulario de Tareas para facilitar la selección en listas largas. (DONE)
 
 **Earlier issues found/mentioned but not fixed**
 -   **Issue 1: Error body stream already read en el frontend**
-    -   **Debug checklist**: La causa raíz parece ser la falta de un manejador de peticiones API centralizado. Se recomienda crear un wrapper para  para gestionar errores y respuestas de forma consistente.
-    -   **Why to solve this issue and what will be achieved with this?**: Haría el código más robusto, simplificaría el manejo de errores en toda la aplicación y evitaría la reaparición de este bug.
+    -   **Debug checklist**: La causa raíz parece ser la falta de un manejador de peticiones API centralizado. Se recomienda crear un wrapper para  para gestionar errores y respuestas de forma consistente en toda la aplicación.
+    -   **Why to solve this issue and what will be achieved with this?**: Haría el código más robusto, simplificaría el manejo de errores y evitaría la reaparición de este bug.
     -   **Should Test frontend/backend/both after fix**: frontend
     -   **Is recurring issue?**: Y
 
@@ -94,61 +82,61 @@ Una aplicación full-stack (FastAPI, React, MongoDB) de gestión agrícola. En e
 
 
 **Key Technical Concepts**
--   **Dashboard Dinámico**: Renderizado de componentes React basado en una configuración de orden y visibilidad obtenida del backend, permitiendo una personalización por usuario.
--   **Gestión de Estado Compleja**: Uso extensivo de ,  y  en React para manejar UI interactivas con datos asíncronos (Dashboard, Fincas).
--   **Agregación de Datos en Backend**: El endpoint  fue modificado varias veces para agregar y consolidar datos de múltiples colecciones (Fincas, Parcelas, Cosechas, Tratamientos, Contratos, Visitas) en una sola llamada.
--   **Persistencia de Preferencias de Usuario**: Creación de un endpoint y modificación del modelo  para guardar y recuperar la configuración del dashboard del usuario.
+-   **Modularización del Backend**: Se extrajeron las rutas de Tareas e Irrigaciones a sus propios archivos (, ), mejorando la organización y escalabilidad del código.
+-   **UI Consistente**: Se aplicó un rediseño exhaustivo en los módulos de Tareas e Irrigaciones para unificar el estilo visual con el resto de la aplicación, utilizando un sistema de diseño basado en tarjetas, badges y KPIs estandarizados.
+-   **Componentes de UI Complejos**: Se desarrolló un selector de parcelas con búsqueda integrada y selección múltiple mediante checkboxes, mejorando significativamente la experiencia de usuario.
+-   **Testing Automatizado**: Se hizo un uso extensivo del  para validar las nuevas funcionalidades y correcciones de bugs, creando suites de tests persistentes.
 
 **key DB schema**
--   **users**: Se ha añadido el campo  para almacenar un array de widgets con su orden y visibilidad.
--   **fincas**: Contiene  para la asociación con parcelas.
--   **contratos**: Contiene campos como , , , , , que se usarán para los nuevos filtros.
+-   **Tarea**: Se añadieron los campos: , , , , , .
+-   **Irrigacion**: Se añadieron los campos: , , , , , , .
 
 **changes in tech stack**
--   No se añadieron nuevas dependencias, pero se hizo un uso intensivo de la librería  para los gráficos del dashboard.
+-   No se han producido cambios en el stack tecnológico.
 
 **All files of reference**
--   **/app/frontend/src/pages/Dashboard.js**: Componente principal del Dashboard, ahora es totalmente dinámico y configurable.
--   **/app/frontend/src/pages/Fincas.js**: Componente que muestra las fincas agrupadas por provincia.
--   **/app/frontend/src/pages/Contratos.js**: Componente donde se han añadido los filtros pendientes de probar.
--   **/app/backend/routes/routes_dashboard.py**: Endpoint principal que alimenta de datos a todo el dashboard.
--   **/app/backend/models.py**: Contiene el modelo  con la nueva configuración del dashboard.
--   **/app/memory/PRD.md**: Documento de requisitos del producto.
+-   : Módulo de Tareas completamente refactorizado.
+-   : Módulo de Irrigaciones completamente refactorizado.
+-   : Nuevas rutas para la gestión avanzada de tareas.
+-   : Nuevas rutas para la gestión avanzada de irrigaciones.
+-   : Modelos de datos actualizados para Tareas e Irrigaciones.
+-   : Estilos globales añadidos para soportar los nuevos diseños de KPIs.
 
 **Areas that need refactoring**:
--   ****: Este componente se ha vuelto monolítico. Contiene la lógica de renderizado de todos los widgets. Sería beneficioso refactorizarlo extrayendo cada widget (Resumen de Fincas, Próximas Cosechas, etc.) a su propio componente para mejorar la mantenibilidad.
 -   **Manejo de API en Frontend**: Sigue pendiente la creación de un servicio o wrapper centralizado para las llamadas , que solucionaría problemas recurrentes como el error body stream already read.
+-   ****: Este componente sigue siendo monolítico. Se recomienda extraer cada widget a su propio componente para mejorar la mantenibilidad.
 
 **key api endpoints**
--   : Endpoint agregado que provee toda la información para los widgets del dashboard.
--   : Endpoints para obtener y guardar la configuración personalizada del dashboard de un usuario.
--   : Endpoint que lista los contratos y cuya respuesta será filtrada en el frontend.
+-   : Endpoints CRUD completos para el módulo de Tareas.
+-   : Endpoint para las estadísticas del dashboard de Tareas.
+-   : Endpoints CRUD completos para el módulo de Irrigaciones.
+-   : Endpoint para las estadísticas del dashboard de Irrigaciones.
+-   : Endpoint para obtener el historial de riego de una parcela.
 
 **Critical Info for New Agent**
-1.  **Prioridad 0: Probar Filtros de Contratos**. Tu primera tarea es verificar que los filtros recién implementados en la página de Contratos funcionan correctamente. Utiliza la UI y luego confirma con el .
-2.  **Dashboard Personalizable**. Ten en cuenta que el Dashboard ahora es dinámico. El orden y la visibilidad de los widgets dependen de la configuración guardada para el usuario (). Cualquier cambio futuro debe respetar esta estructura.
-3.  **Fallas en Tests Anteriores**. En la última ejecución de tests, el agente anterior reportó 8 fallos pero los descartó como problemas de infraestructura. Deberías investigar estas fallas para determinar si son tests inestables (flaky) o regresiones reales antes de proceder con nuevas funcionalidades.
+1.  **Prioridad 1: Subida de Fotos en Visitas**: La siguiente tarea es implementar la subida de fotos en el módulo Visitas, según la petición del usuario. Deberás abordar tanto el backend (almacenamiento) como el frontend (UI de subida). Considera usar una estrategia de subida por chunks si los archivos pueden ser grandes.
+2.  **Consistencia de UI**: El usuario valora mucho la consistencia visual. Cualquier nuevo desarrollo o modificación debe seguir el patrón de diseño establecido en los módulos de Tareas e Irrigaciones (tarjetas para KPIs, tablas estandarizadas, modales con diseño cuidado, etc.).
+3.  **Modularidad del Backend**: Continúa con el patrón de separar las rutas de los módulos principales en sus propios archivos dentro de  para mantener el código organizado.
 
 **documents and test reports created in this job**
--    (actualizado en cada )
 -   
--   
--   
+-   Test reports de la ejecución para Tareas e Irrigaciones (no se especificó el nombre del archivo, pero se ejecutaron 30 tests con éxito).
+-    (actualizado con las nuevas funcionalidades)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  : Solicitud para añadir filtros al módulo de contratos. (Estado: IN PROGRESS)
-2.  : Solicitud para poder reordenar los widgets del dashboard. (Estado: COMPLETED)
-3.  : Confirmación del usuario para proceder con la personalización del dashboard. (Estado: COMPLETED)
-4.  : Solicitud inicial para hacer el dashboard configurable. (Estado: COMPLETED)
-5.  : Confirmación para proceder con las mejoras del dashboard. (Estado: COMPLETED)
-6.  : Confirmación para añadir más widgets al dashboard. (Estado: COMPLETED)
-7.  : Confirmación para mejorar el módulo de Contratos (lo que llevó a un widget en el dashboard). (Estado: COMPLETED)
-8.  : Confirmación para añadir el widget de Próximas Visitas. (Estado: COMPLETED)
-9.  : Confirmación genérica para continuar con las mejoras. (Estado: COMPLETED)
-10. : Solicitud para refactorizar la UI del módulo Fincas. (Estado: COMPLETED)
+1.  : Petición para empezar con la siguiente tarea de prioridad 1 (subida de fotos en Visitas). (Status: NOT STARTED)
+2.  : Petición para añadir un buscador al selector de parcelas en el formulario de Tareas. (Status: COMPLETED)
+3.  : Aclaración sobre la funcionalidad de asignación de parcelas en Tareas. (Status: COMPLETED)
+4.  : Petición para rediseñar el módulo de Tareas para que sea consistente. (Status: COMPLETED)
+5.  : Petición para rediseñar el módulo de Irrigaciones para que sea consistente. (Status: COMPLETED)
+6.  : Petición de mejoras específicas de UI en el módulo de Irrigaciones. (Status: COMPLETED)
+7.  : Petición para implementar funcionalidades avanzadas en Tareas e Irrigaciones. (Status: COMPLETED)
+8.  : Petición para arreglar un bug en el mapa. (Status: COMPLETED)
+9.  : Confirmación del usuario para implementar todas las mejoras sugeridas para Tareas e Irrigaciones. (Status: COMPLETED)
+10. : Confirmación genérica del usuario.
 
 **Project Health Check:**
--   **Broken**: Ninguna funcionalidad está rota. La última característica (filtros en Contratos) está pendiente de pruebas.
+-   **Broken**: Ninguna funcionalidad está rota.
 -   **Mocked**:
     -   La integración con  para notificaciones por email sigue bloqueada a la espera de una clave API del usuario.
     -   La integración con  para alertas climáticas está preparada pero inactiva, a la espera de una clave API.
@@ -162,14 +150,14 @@ Una aplicación full-stack (FastAPI, React, MongoDB) de gestión agrícola. En e
 -   **recharts**: Para gráficos en el dashboard.
 
 **Testing status**
--   **Testing agent used after significant changes**: YES. Se utilizó el agente de pruebas después de la refactorización de Fincas y la implementación del dashboard personalizable.
--   **Troubleshoot agent used after agent stuck in loop**: NO
--   **Test files created**: Los archivos de test existentes para el frontend fueron actualizados. Se necesitarán nuevos tests para los filtros de Contratos.
--   **Known regressions**: La última ejecución del  (iteration_132.json) reportó 8 tests fallidos, que el agente anterior ignoró. Es crucial investigar si son regresiones reales.
+-   **Testing agent used after significant changes**: YES. Se utilizó el  con éxito para validar los filtros de Contratos y las funcionalidades avanzadas y rediseño de Tareas e Irrigaciones.
+-   **Troubleshoot agent used after agent stuck in loop**: NO.
+-   **Test files created**: Sí, se crearon y actualizaron varios archivos de test en  y .
+-   **Known regressions**: Ninguna. El issue de Leaflet reportado por un test anterior fue investigado y corregido.
 
 **Credentials to test flow:**
 -   **Admin**:  / 
 
 **What agent forgot to execute**
--   El agente no probó la funcionalidad de filtros en el módulo Contratos después de implementarla.
--   El agente no investigó a fondo los 8 tests que fallaron en la última ejecución del , asumiendo que eran problemas de infraestructura sin pruebas. Esto debe ser verificado.</analysis>
+-   El agente no implementó el wrapper de  para centralizar las llamadas API en el frontend, lo que podría solucionar el problema recurrente body stream already read.
+-   El agente no refactorizó el componente  para extraer los widgets, como se había sugerido para mejorar la mantenibilidad.</analysis>

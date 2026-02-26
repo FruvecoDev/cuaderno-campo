@@ -15,7 +15,7 @@ import uuid
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 if not BASE_URL:
-    BASE_URL = "https://agri-contratos.preview.emergentagent.com"
+    BASE_URL = "https://field-log-hub.preview.emergentagent.com"
 
 # Test data - known parcela with contrato_id
 TEST_PARCELA_ID = "699c66b30212bdd0ecbc6f5e"
