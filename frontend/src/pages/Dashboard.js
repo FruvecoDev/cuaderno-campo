@@ -1953,7 +1953,7 @@ const Dashboard = () => {
       
       {/* Panel de Notificaciones por Email */}
       {isWidgetVisible('actividad_reciente') && (
-      <div className="card mb-6" data-testid="panel-notificaciones">
+      <div className="card mb-6" data-testid="panel-notificaciones" style={{ order: getWidgetOrder('actividad_reciente') }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Mail size={20} /> {t('dashboard.notifications.title')}
