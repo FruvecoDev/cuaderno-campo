@@ -2097,6 +2097,8 @@ const Dashboard = () => {
         </div>
       )}
       
+      </div>{/* Cierre del container flex de widgets */}
+      
       {/* Modal de Detalles de Visita */}
       {selectedVisita && (
         <div 
