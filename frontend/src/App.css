@@ -552,6 +552,10 @@ tr:hover {
     grid-template-columns: repeat(2, 1fr);
   }
   
+  .grid-6 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
   .grid-3, .grid-responsive-3 {
     grid-template-columns: repeat(2, 1fr);
   }
