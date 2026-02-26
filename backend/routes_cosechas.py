@@ -326,3 +326,178 @@ async def delete_cosecha(
         raise HTTPException(status_code=404, detail="Cosecha not found")
     
     return {"success": True, "message": "Cosecha deleted"}
+
+
+
+@router.get("/cosechas/stats/dashboard")
+async def get_cosechas_stats(
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireCosechasAccess)
+):
+    """Obtener estadísticas del módulo de cosechas"""
+    total = await cosechas_collection.count_documents({})
+    
+    # Por estado
+    planificadas = await cosechas_collection.count_documents({"estado": "planificada"})
+    en_curso = await cosechas_collection.count_documents({"estado": "en_curso"})
+    completadas = await cosechas_collection.count_documents({"estado": "completada"})
+    
+    # Totales de kilos
+    pipeline_totales = [
+        {"$group": {
+            "_id": None,
+            "total_estimado": {"$sum": "$kilos_totales_estimados"},
+            "total_real": {"$sum": "$kilos_totales_reales"},
+            "total_descuentos": {"$sum": "$kilos_descuentos"},
+            "total_neto": {"$sum": "$kilos_netos"},
+            "total_importe": {"$sum": "$importe_neto"}
+        }}
+    ]
+    totales = await cosechas_collection.aggregate(pipeline_totales).to_list(1)
+    totales_data = totales[0] if totales else {}
+    
+    # Rendimiento (real vs estimado)
+    total_estimado = totales_data.get("total_estimado", 0)
+    total_real = totales_data.get("total_real", 0)
+    rendimiento = round((total_real / total_estimado * 100), 1) if total_estimado > 0 else 0
+    
+    # Por cultivo
+    pipeline_cultivo = [
+        {"$match": {"cultivo": {"$ne": None}}},
+        {"$group": {
+            "_id": "$cultivo",
+            "count": {"$sum": 1},
+            "kilos_estimados": {"$sum": "$kilos_totales_estimados"},
+            "kilos_reales": {"$sum": "$kilos_totales_reales"}
+        }},
+        {"$sort": {"kilos_reales": -1}},
+        {"$limit": 5}
+    ]
+    por_cultivo = await cosechas_collection.aggregate(pipeline_cultivo).to_list(5)
+    
+    # Por proveedor (top 5)
+    pipeline_proveedor = [
+        {"$match": {"proveedor": {"$ne": None}}},
+        {"$group": {
+            "_id": "$proveedor",
+            "count": {"$sum": 1},
+            "kilos_reales": {"$sum": "$kilos_totales_reales"},
+            "importe": {"$sum": "$importe_neto"}
+        }},
+        {"$sort": {"kilos_reales": -1}},
+        {"$limit": 5}
+    ]
+    por_proveedor = await cosechas_collection.aggregate(pipeline_proveedor).to_list(5)
+    
+    return {
+        "total": total,
+        "planificadas": planificadas,
+        "en_curso": en_curso,
+        "completadas": completadas,
+        "kilos_estimados": round(totales_data.get("total_estimado", 0), 2),
+        "kilos_reales": round(totales_data.get("total_real", 0), 2),
+        "kilos_descuentos": round(totales_data.get("total_descuentos", 0), 2),
+        "kilos_netos": round(totales_data.get("total_neto", 0), 2),
+        "importe_total": round(totales_data.get("total_importe", 0), 2),
+        "rendimiento_porcentaje": rendimiento,
+        "por_cultivo": [{
+            "cultivo": c["_id"],
+            "count": c["count"],
+            "kilos_estimados": round(c["kilos_estimados"], 2),
+            "kilos_reales": round(c["kilos_reales"], 2)
+        } for c in por_cultivo],
+        "por_proveedor": [{
+            "proveedor": p["_id"],
+            "count": p["count"],
+            "kilos_reales": round(p["kilos_reales"], 2),
+            "importe": round(p["importe"], 2)
+        } for p in por_proveedor]
+    }
+
+
+@router.get("/cosechas/export/excel")
+async def export_cosechas_excel(
+    estado: Optional[str] = None,
+    campana: Optional[str] = None,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireCosechasAccess)
+):
+    """Exportar cosechas a formato Excel (JSON preparado para frontend)"""
+    query = {}
+    if estado:
+        query["estado"] = estado
+    if campana:
+        query["campana"] = campana
+    
+    cosechas = await cosechas_collection.find(query).sort("created_at", -1).to_list(1000)
+    
+    # Preparar datos para Excel
+    rows = []
+    for c in cosechas:
+        # Datos base de la cosecha
+        base_row = {
+            "id": str(c.get("_id", "")),
+            "estado": c.get("estado", ""),
+            "proveedor": c.get("proveedor", ""),
+            "cultivo": c.get("cultivo", ""),
+            "variedad": c.get("variedad", ""),
+            "parcela": c.get("parcela", ""),
+            "campana": c.get("campana", ""),
+            "precio_contrato": c.get("precio_contrato", 0),
+            "kilos_estimados": c.get("kilos_totales_estimados", 0),
+            "kilos_reales": c.get("kilos_totales_reales", 0),
+            "kilos_descuentos": c.get("kilos_descuentos", 0),
+            "kilos_netos": c.get("kilos_netos", 0),
+            "importe_bruto": c.get("importe_bruto", 0),
+            "importe_descuentos": c.get("importe_descuentos", 0),
+            "importe_neto": c.get("importe_neto", 0)
+        }
+        
+        # Si tiene cargas, una fila por carga
+        cargas = c.get("cargas", [])
+        if cargas:
+            for carga in cargas:
+                rows.append({
+                    **base_row,
+                    "id_carga": carga.get("id_carga", ""),
+                    "fecha_carga": carga.get("fecha", ""),
+                    "kilos_carga": carga.get("kilos_reales", 0),
+                    "es_descuento": "Sí" if carga.get("es_descuento") else "No",
+                    "tipo_descuento": carga.get("tipo_descuento", ""),
+                    "tenderometria": carga.get("valor_tenderometria", ""),
+                    "albaran": carga.get("num_albaran", "")
+                })
+        else:
+            rows.append({
+                **base_row,
+                "id_carga": "",
+                "fecha_carga": "",
+                "kilos_carga": 0,
+                "es_descuento": "",
+                "tipo_descuento": "",
+                "tenderometria": "",
+                "albaran": ""
+            })
+    
+    return {
+        "data": rows,
+        "columns": [
+            {"key": "estado", "header": "Estado"},
+            {"key": "proveedor", "header": "Proveedor"},
+            {"key": "cultivo", "header": "Cultivo"},
+            {"key": "variedad", "header": "Variedad"},
+            {"key": "parcela", "header": "Parcela"},
+            {"key": "campana", "header": "Campaña"},
+            {"key": "precio_contrato", "header": "Precio €/kg"},
+            {"key": "kilos_estimados", "header": "Kg Estimados"},
+            {"key": "kilos_reales", "header": "Kg Reales"},
+            {"key": "kilos_netos", "header": "Kg Netos"},
+            {"key": "importe_neto", "header": "Importe Neto €"},
+            {"key": "id_carga", "header": "ID Carga"},
+            {"key": "fecha_carga", "header": "Fecha Carga"},
+            {"key": "kilos_carga", "header": "Kg Carga"},
+            {"key": "tenderometria", "header": "Tenderometría"}
+        ],
+        "total_rows": len(rows),
+        "filename": f"cosechas_export_{datetime.now().strftime('%Y%m%d')}"
+    }
