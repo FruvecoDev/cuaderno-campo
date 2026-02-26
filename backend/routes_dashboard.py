@@ -3,14 +3,102 @@ Dashboard Routes for FRUVECO
 Contains KPIs and dashboard-related endpoints.
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
+from typing import List, Optional
 from database import (
     contratos_collection, parcelas_collection, fincas_collection,
     visitas_collection, tratamientos_collection, irrigaciones_collection,
-    cosechas_collection, tareas_collection, serialize_docs
+    cosechas_collection, tareas_collection, serialize_docs, users_collection
 )
+from auth import get_current_user
 
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
+
+
+# Modelo para configuración del dashboard
+class DashboardWidgetConfig(BaseModel):
+    widget_id: str
+    visible: bool = True
+    order: int = 0
+
+class DashboardConfig(BaseModel):
+    widgets: List[DashboardWidgetConfig]
+    layout: Optional[str] = "default"  # "default", "compact", "expanded"
+
+
+# Widgets disponibles por defecto
+DEFAULT_WIDGETS = [
+    {"widget_id": "kpis_principales", "visible": True, "order": 0, "name": "KPIs Principales", "description": "Contratos, parcelas, superficie, costes, ingresos"},
+    {"widget_id": "resumen_fincas", "visible": True, "order": 1, "name": "Resumen de Fincas", "description": "KPIs y gráficos de fincas por provincia"},
+    {"widget_id": "proximas_cosechas", "visible": True, "order": 2, "name": "Próximas Cosechas", "description": "Cosechas planificadas y fincas en recolección"},
+    {"widget_id": "tratamientos_pendientes", "visible": True, "order": 3, "name": "Tratamientos Pendientes", "description": "Tratamientos programados y vencidos"},
+    {"widget_id": "contratos_activos", "visible": True, "order": 4, "name": "Contratos Activos", "description": "Balance de compra/venta y contratos vigentes"},
+    {"widget_id": "proximas_visitas", "visible": True, "order": 5, "name": "Próximas Visitas", "description": "Visitas planificadas y estadísticas"},
+    {"widget_id": "graficos_cultivos", "visible": True, "order": 6, "name": "Gráficos de Cultivos", "description": "Superficie por cultivo y distribución de costes"},
+    {"widget_id": "mapa_parcelas", "visible": True, "order": 7, "name": "Mapa de Parcelas", "description": "Mapa interactivo con ubicación de parcelas"},
+    {"widget_id": "calendario", "visible": True, "order": 8, "name": "Calendario", "description": "Eventos y actividades programadas"},
+    {"widget_id": "actividad_reciente", "visible": True, "order": 9, "name": "Actividad Reciente", "description": "Últimas visitas y tratamientos"}
+]
+
+
+@router.get("/config")
+async def get_dashboard_config(current_user: dict = Depends(get_current_user)):
+    """Get user's dashboard configuration"""
+    user = await users_collection.find_one({"email": current_user["email"]})
+    
+    if user and "dashboard_config" in user:
+        return {
+            "success": True,
+            "config": user["dashboard_config"],
+            "available_widgets": DEFAULT_WIDGETS
+        }
+    
+    # Return default config
+    return {
+        "success": True,
+        "config": {
+            "widgets": DEFAULT_WIDGETS,
+            "layout": "default"
+        },
+        "available_widgets": DEFAULT_WIDGETS
+    }
+
+
+@router.post("/config")
+async def save_dashboard_config(config: DashboardConfig, current_user: dict = Depends(get_current_user)):
+    """Save user's dashboard configuration"""
+    try:
+        result = await users_collection.update_one(
+            {"email": current_user["email"]},
+            {"$set": {"dashboard_config": config.dict()}}
+        )
+        
+        if result.modified_count > 0 or result.matched_count > 0:
+            return {"success": True, "message": "Configuración guardada"}
+        else:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/config/reset")
+async def reset_dashboard_config(current_user: dict = Depends(get_current_user)):
+    """Reset user's dashboard configuration to default"""
+    try:
+        default_config = {
+            "widgets": DEFAULT_WIDGETS,
+            "layout": "default"
+        }
+        
+        await users_collection.update_one(
+            {"email": current_user["email"]},
+            {"$set": {"dashboard_config": default_config}}
+        )
+        
+        return {"success": True, "message": "Configuración restaurada", "config": default_config}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/kpis")
