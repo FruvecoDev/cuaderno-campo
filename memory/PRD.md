@@ -1043,6 +1043,33 @@ Módulos actualizados para seguir patrón consistente:
 
 ### Estado: ✅ COMPLETADO Y TESTEADO
 
+## Dashboard - Sección de Fincas (26/02/2026) - COMPLETADO
+- **Alcance**: Añadir KPIs y gráficos de Fincas al Dashboard principal
+
+### Nuevos KPIs añadidos al endpoint `/api/dashboard/kpis`:
+- `fincas.total`: Total de fincas
+- `fincas.propias`: Fincas propias
+- `fincas.alquiladas`: Fincas alquiladas
+- `fincas.hectareas_total`: Total hectáreas de fincas
+- `fincas.produccion_esperada`: Producción esperada total
+- `fincas.produccion_disponible`: Producción disponible total
+- `fincas.por_provincia`: Desglose por provincia con count, hectareas, propias, alquiladas
+- `fincas.parcelas_sin_asignar`: Número de parcelas sin asignar a ninguna finca
+
+### Nueva UI en Dashboard (`Dashboard.js`):
+1. **Sección "Resumen de Fincas"**:
+   - Alerta de parcelas sin asignar con botón "Asignar"
+   - KPIs: Total, Propias, Alquiladas, Hectáreas, Prod. Esperada, Prod. Disponible
+   - Gráfico "Fincas por Provincia" (barras apiladas horizontal)
+   - Gráfico "Distribución por Tipo" (donut chart Propias vs Alquiladas)
+
+### Test: Verificado con curl y screenshot
+- Endpoint: ✅ Retorna datos de fincas correctamente
+- UI: ✅ Se muestra la sección de fincas con gráficos
+
+### Estado: ✅ COMPLETADO Y TESTEADO
+
+
 ## Expandir/Colapsar Fincas por Provincia (26/02/2026) - COMPLETADO
 - **Alcance**: Controles para expandir/colapsar fincas a nivel de provincia
 
