@@ -631,9 +631,6 @@ const Dashboard = () => {
         </button>
       </div>
       
-      {/* Widgets container with flexbox ordering */}
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-      
       {/* Modal de Configuración */}
       {showConfigModal && (
         <>
