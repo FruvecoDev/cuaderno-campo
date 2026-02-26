@@ -665,17 +665,55 @@ const Tareas = () => {
 
             <div className="grid-2">
               <div className="form-group">
-                <label className="form-label">Parcelas</label>
-                <select 
-                  className="form-select" 
-                  multiple 
-                  value={formData.parcelas_ids} 
-                  onChange={(e) => setFormData({...formData, parcelas_ids: Array.from(e.target.selectedOptions, o => o.value)})}
-                  style={{ minHeight: '100px' }}
-                  data-testid="select-parcelas"
-                >
-                  {parcelas.map(p => <option key={p._id} value={p._id}>{p.codigo_plantacion} - {p.cultivo}</option>)}
-                </select>
+                <label className="form-label">Parcelas asignadas</label>
+                <div style={{ 
+                  border: '1px solid #d1d5db', 
+                  borderRadius: '6px', 
+                  maxHeight: '150px', 
+                  overflowY: 'auto',
+                  backgroundColor: '#f9fafb'
+                }}>
+                  {parcelas.length === 0 ? (
+                    <div style={{ padding: '0.75rem', color: '#6b7280', fontSize: '14px' }}>No hay parcelas disponibles</div>
+                  ) : (
+                    parcelas.map(p => (
+                      <label 
+                        key={p._id} 
+                        style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '0.5rem', 
+                          padding: '0.5rem 0.75rem',
+                          cursor: 'pointer',
+                          borderBottom: '1px solid #e5e7eb',
+                          backgroundColor: formData.parcelas_ids.includes(p._id) ? '#dcfce7' : 'transparent'
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formData.parcelas_ids.includes(p._id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setFormData({...formData, parcelas_ids: [...formData.parcelas_ids, p._id]});
+                            } else {
+                              setFormData({...formData, parcelas_ids: formData.parcelas_ids.filter(id => id !== p._id)});
+                            }
+                          }}
+                          style={{ accentColor: '#2d5a27' }}
+                        />
+                        <span style={{ fontSize: '14px' }}>
+                          <strong>{p.codigo_plantacion}</strong> - {p.cultivo}
+                          {p.superficie_total && <span style={{ color: '#6b7280' }}> ({p.superficie_total} ha)</span>}
+                        </span>
+                      </label>
+                    ))
+                  )}
+                </div>
+                {formData.parcelas_ids.length > 0 && (
+                  <div style={{ marginTop: '0.5rem', fontSize: '13px', color: '#2d5a27' }}>
+                    {formData.parcelas_ids.length} parcela(s) seleccionada(s)
+                  </div>
+                )}
               </div>
               <div className="form-group">
                 <label className="form-label">Descripción</label>
