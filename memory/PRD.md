@@ -1043,6 +1043,35 @@ Módulos actualizados para seguir patrón consistente:
 
 ### Estado: ✅ COMPLETADO Y TESTEADO
 
+## Dashboard - Widget Próximas Visitas (26/02/2026) - COMPLETADO
+- **Alcance**: Añadir widget de Próximas Visitas al Dashboard
+
+### Backend (`routes_dashboard.py`):
+- `visitas_proximas`: Lista de visitas planificadas para los próximos 14 días
+- `visitas_stats`: Estadísticas de visitas:
+  - `total_mes`: Visitas este mes
+  - `realizadas_mes`: Visitas realizadas este mes
+  - `pendientes`: Total de visitas pendientes
+  - `proximas_14_dias`: Número de visitas en próximos 14 días
+
+### Frontend (`Dashboard.js`):
+1. **Widget "Próximas Visitas"**:
+   - KPIs: Visitas Este Mes, Realizadas, Pendientes, Próx. 14 días
+   - Lista de próximas visitas con:
+     - Objetivo de la visita
+     - Parcela, proveedor, cultivo
+     - Fecha con indicador (¡Hoy!, Mañana, En X días)
+     - Botón para ver detalles
+   - Mensaje cuando no hay visitas planificadas con botón "Planificar visita"
+
+### Iconos añadidos: ClipboardList, Users
+
+### Test: Verificado con screenshot
+- UI: ✅ Se muestra widget con KPIs y lista de visitas
+
+### Estado: ✅ COMPLETADO Y TESTEADO
+
+
 ## Dashboard - Widget Contratos Activos (26/02/2026) - COMPLETADO
 - **Alcance**: Añadir widget de Contratos Activos al Dashboard
 
