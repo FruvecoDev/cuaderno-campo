@@ -207,6 +207,65 @@ async def get_dashboard_kpis():
             "ano": f.get("recoleccion_ano")
         })
     
+    # =============================================
+    # CONTRATOS ACTIVOS (dentro del periodo actual)
+    # =============================================
+    contratos_activos = []
+    all_contratos = await contratos_collection.find({}).to_list(1000)
+    
+    for contrato in all_contratos:
+        periodo_desde = contrato.get("periodo_desde", "")
+        periodo_hasta = contrato.get("periodo_hasta", "")
+        
+        # Verificar si está en periodo activo
+        es_activo = True
+        if periodo_desde and periodo_hasta:
+            es_activo = periodo_desde <= hoy <= periodo_hasta
+        
+        if es_activo:
+            contratos_activos.append({
+                "id": str(contrato.get("_id")),
+                "numero": f"{contrato.get('serie', 'MP')}-{contrato.get('año', '')}-{str(contrato.get('numero', 0)).zfill(3)}",
+                "tipo": contrato.get("tipo", "Compra"),
+                "proveedor": contrato.get("proveedor", ""),
+                "cliente": contrato.get("cliente", ""),
+                "cultivo": contrato.get("cultivo", ""),
+                "cantidad": contrato.get("cantidad", 0),
+                "precio": contrato.get("precio", 0),
+                "valor_total": (contrato.get("cantidad", 0) or 0) * (contrato.get("precio", 0) or 0),
+                "periodo_desde": periodo_desde,
+                "periodo_hasta": periodo_hasta,
+                "campana": contrato.get("campana", "")
+            })
+    
+    # Estadísticas de contratos
+    contratos_compra = [c for c in contratos_activos if c["tipo"] == "Compra"]
+    contratos_venta = [c for c in contratos_activos if c["tipo"] == "Venta"]
+    
+    contratos_stats = {
+        "total_activos": len(contratos_activos),
+        "compra": {
+            "count": len(contratos_compra),
+            "cantidad_total": sum(c["cantidad"] for c in contratos_compra),
+            "valor_total": sum(c["valor_total"] for c in contratos_compra)
+        },
+        "venta": {
+            "count": len(contratos_venta),
+            "cantidad_total": sum(c["cantidad"] for c in contratos_venta),
+            "valor_total": sum(c["valor_total"] for c in contratos_venta)
+        },
+        "por_cultivo": {}
+    }
+    
+    # Agrupar por cultivo
+    for c in contratos_activos:
+        cultivo = c["cultivo"] or "Sin cultivo"
+        if cultivo not in contratos_stats["por_cultivo"]:
+            contratos_stats["por_cultivo"][cultivo] = {"count": 0, "cantidad": 0, "valor": 0}
+        contratos_stats["por_cultivo"][cultivo]["count"] += 1
+        contratos_stats["por_cultivo"][cultivo]["cantidad"] += c["cantidad"]
+        contratos_stats["por_cultivo"][cultivo]["valor"] += c["valor_total"]
+    
     return {
         "totales": {
             "contratos": total_contratos,
