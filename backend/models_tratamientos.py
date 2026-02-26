@@ -218,11 +218,29 @@ class IrrigacionBase(BaseModel):
 
 class IrrigacionCreate(BaseModel):
     fecha: str
-    sistema: str
-    duracion: float
-    volumen: float
-    coste: float
-    parcela_id: Optional[str] = ""  # Optional - frontend can send empty string
+    sistema: str  # Goteo, Aspersión, Inundación, Microaspersión, Pivot, Manguera
+    duracion: float  # horas
+    volumen: float  # m³
+    coste: float = 0
+    parcela_id: Optional[str] = ""
+    # Nuevos campos
+    es_planificada: bool = False  # True si es riego planificado futuro
+    fecha_planificada: Optional[str] = None  # Fecha programada para el riego
+    hora_inicio: Optional[str] = None  # HH:MM
+    hora_fin: Optional[str] = None
+    caudal: Optional[float] = None  # L/hora
+    presion: Optional[float] = None  # bar
+    fuente_agua: Optional[str] = None  # Pozo, Embalse, Red, Canal
+    sector: Optional[str] = None  # Sector de riego
+    superficie_regada: Optional[float] = None  # ha
+    consumo_por_ha: Optional[float] = None  # m³/ha (calculado)
+    estado: str = "completado"  # planificado, en_curso, completado, cancelado
+    alerta_enviada: bool = False  # Si se envió alerta de recordatorio
+    observaciones: Optional[str] = None
+    # Campos heredados de parcela
+    parcela_codigo: Optional[str] = None
+    cultivo: Optional[str] = None
+    campana: Optional[str] = None
 
 class IrrigacionInDB(IrrigacionBase):
     id: str = Field(alias="_id")
