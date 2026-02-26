@@ -156,10 +156,29 @@ function FitBounds({ polygon }) {
   const map = useMap();
   
   useEffect(() => {
-    if (polygon && polygon.length > 0) {
-      const bounds = L.latLngBounds(polygon.map(p => [p.lat, p.lng]));
-      map.fitBounds(bounds, { padding: [50, 50] });
-    }
+    if (!map || !map._container) return;
+    
+    let isMounted = true;
+    
+    const fitBounds = () => {
+      if (!isMounted || !map || !map._container) return;
+      
+      if (polygon && polygon.length > 0) {
+        try {
+          const bounds = L.latLngBounds(polygon.map(p => [p.lat, p.lng]));
+          map.fitBounds(bounds, { padding: [50, 50] });
+        } catch (e) {
+          console.debug('FitBounds skipped:', e.message);
+        }
+      }
+    };
+    
+    const timeoutId = setTimeout(fitBounds, 100);
+    
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
   }, [map, polygon]);
   
   return null;
