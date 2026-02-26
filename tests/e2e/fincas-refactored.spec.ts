@@ -323,14 +323,16 @@ test.describe('Fincas Refactored - CRUD Operations', () => {
   });
 
   test('should expand finca to see details', async ({ page }) => {
-    const expandBtn = page.locator('[data-testid^="btn-expand-"]').first();
+    // Find first finca card with expand button
+    const fincaCard = page.locator('[data-testid^="finca-card-"]').first();
+    const expandBtn = fincaCard.locator('[data-testid^="btn-expand-"]');
     
     if (await expandBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
       await expandBtn.click({ force: true });
       
-      // Verify expanded details are shown
-      await expect(page.locator('h5').filter({ hasText: 'Ubicación' })).toBeVisible({ timeout: 3000 });
-      await expect(page.locator('h5').filter({ hasText: 'Superficie y Producción' })).toBeVisible();
+      // Verify expanded details are shown - scoped to the specific finca card
+      await expect(fincaCard.locator('h5').filter({ hasText: 'Ubicación' })).toBeVisible({ timeout: 3000 });
+      await expect(fincaCard.locator('h5').filter({ hasText: 'Superficie y Producción' })).toBeVisible();
       
       // Collapse
       await expandBtn.click({ force: true });
