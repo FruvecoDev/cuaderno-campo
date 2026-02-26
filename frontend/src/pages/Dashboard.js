@@ -1876,9 +1876,10 @@ const Dashboard = () => {
           </p>
         )}
       </div>
+      )}
       
       {/* Recent Activity */}
-      {kpis.actividad_reciente && (
+      {isWidgetVisible('actividad_reciente') && kpis.actividad_reciente && (
         <div className="grid-2">
           <div className="card">
             <h2 className="card-title">{t('dashboard.visits.recentVisits')}</h2>
