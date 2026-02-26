@@ -54,6 +54,7 @@ const Cosechas = () => {
   useEffect(() => {
     fetchCosechas();
     fetchContratos();
+    fetchStats();
   }, []);
 
   const fetchCosechas = async () => {
@@ -74,6 +75,58 @@ const Cosechas = () => {
       setContratos(data.contratos || []);
     } catch (err) {
       console.error('Error fetching contratos:', err);
+    }
+  };
+  
+  const fetchStats = async () => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/cosechas/stats/dashboard`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setStats(data);
+      }
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+    }
+  };
+  
+  const exportToExcel = async () => {
+    setExportLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (filters.estado) params.append('estado', filters.estado);
+      if (filters.campana) params.append('campana', filters.campana);
+      
+      const res = await fetch(`${BACKEND_URL}/api/cosechas/export/excel?${params}`, { headers });
+      
+      if (res.ok) {
+        const data = await res.json();
+        
+        // Crear CSV
+        const csvHeaders = data.columns.map(c => c.header).join(',');
+        const csvRows = data.data.map(row => 
+          data.columns.map(c => {
+            const val = row[c.key];
+            if (typeof val === 'string' && (val.includes(',') || val.includes('"'))) {
+              return `"${val.replace(/"/g, '""')}"`;
+            }
+            return val ?? '';
+          }).join(',')
+        ).join('\n');
+        
+        const csvContent = `${csvHeaders}\n${csvRows}`;
+        const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${data.filename}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch (err) {
+      console.error('Error exporting:', err);
+    } finally {
+      setExportLoading(false);
     }
   };
 
