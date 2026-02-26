@@ -2,11 +2,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
   Plus, Edit2, Trash2, Filter, Settings, X, Droplets, Search,
-  Download, Calendar, Clock, AlertTriangle, BarChart3, History,
-  Calculator, ChevronDown, ChevronUp
+  Download, Calendar, Clock, History, Calculator, BarChart3
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
+import { usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 
@@ -19,7 +18,7 @@ const ESTADO_COLORS = {
   cancelado: { bg: '#fee2e2', text: '#dc2626' }
 };
 
-const SISTEMA_COLORS = ['#2563eb', '#16a34a', '#d97706', '#dc2626', '#8b5cf6', '#06b6d4', '#f59e0b'];
+const SISTEMA_COLORS = ['#2d5a27', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899'];
 
 const Irrigaciones = () => {
   const { t } = useTranslation();
@@ -40,7 +39,7 @@ const Irrigaciones = () => {
   const { handlePermissionError } = usePermissionError();
   
   // Vista
-  const [vista, setVista] = useState('lista'); // lista, planificadas, graficos
+  const [vista, setVista] = useState('lista');
   
   // Filtros
   const [showFilters, setShowFilters] = useState(false);
@@ -181,6 +180,7 @@ const Irrigaciones = () => {
   }, [irrigaciones, filters]);
 
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
+  const activeFiltersCount = Object.values(filters).filter(v => v !== '').length;
 
   const clearFilters = () => {
     setFilters({
@@ -290,21 +290,6 @@ const Irrigaciones = () => {
     }
   };
 
-  const handleEstadoChange = async (id, nuevoEstado) => {
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/irrigaciones/${id}/estado?estado=${nuevoEstado}`, {
-        method: 'PATCH',
-        headers
-      });
-      if (res.ok) {
-        fetchIrrigaciones();
-        fetchStats();
-      }
-    } catch (err) {
-      console.error('Error updating estado:', err);
-    }
-  };
-
   const handleExportExcel = async () => {
     try {
       const params = new URLSearchParams();
@@ -349,39 +334,38 @@ const Irrigaciones = () => {
     return (
       <div className="space-y-6">
         {/* KPIs */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          <div className="card p-4">
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <div className="text-sm text-gray-500">Total Riegos</div>
+        <div className="stats-grid">
+          <div className="stat-card">
+            <div className="stat-value">{stats.total}</div>
+            <div className="stat-label">Total Riegos</div>
           </div>
-          <div className="card p-4" style={{ backgroundColor: ESTADO_COLORS.completado.bg }}>
-            <div className="text-2xl font-bold" style={{ color: ESTADO_COLORS.completado.text }}>{stats.completados}</div>
-            <div className="text-sm">Completados</div>
+          <div className="stat-card" style={{ backgroundColor: '#dcfce7' }}>
+            <div className="stat-value" style={{ color: '#16a34a' }}>{stats.completados}</div>
+            <div className="stat-label">Completados</div>
           </div>
-          <div className="card p-4" style={{ backgroundColor: ESTADO_COLORS.planificado.bg }}>
-            <div className="text-2xl font-bold" style={{ color: ESTADO_COLORS.planificado.text }}>{stats.planificados}</div>
-            <div className="text-sm">Planificados</div>
+          <div className="stat-card" style={{ backgroundColor: '#fef3c7' }}>
+            <div className="stat-value" style={{ color: '#d97706' }}>{stats.planificados}</div>
+            <div className="stat-label">Planificados</div>
           </div>
-          <div className="card p-4">
-            <div className="text-2xl font-bold text-blue-600">{stats.totales?.volumen?.toLocaleString()} m³</div>
-            <div className="text-sm text-gray-500">Volumen Total</div>
+          <div className="stat-card">
+            <div className="stat-value" style={{ color: '#2d5a27' }}>{stats.totales?.volumen?.toLocaleString() || 0} m³</div>
+            <div className="stat-label">Volumen Total</div>
           </div>
-          <div className="card p-4">
-            <div className="text-2xl font-bold">{stats.totales?.horas?.toLocaleString()} h</div>
-            <div className="text-sm text-gray-500">Horas Total</div>
+          <div className="stat-card">
+            <div className="stat-value">{stats.totales?.horas?.toLocaleString() || 0} h</div>
+            <div className="stat-label">Horas Total</div>
           </div>
-          <div className="card p-4">
-            <div className="text-2xl font-bold text-green-600">€{stats.totales?.coste?.toLocaleString()}</div>
-            <div className="text-sm text-gray-500">Coste Total</div>
+          <div className="stat-card">
+            <div className="stat-value" style={{ color: '#16a34a' }}>€{stats.totales?.coste?.toLocaleString() || 0}</div>
+            <div className="stat-label">Coste Total</div>
           </div>
         </div>
 
         {/* Gráficos */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Por Sistema */}
-          <div className="card p-4">
-            <h3 className="font-semibold mb-4">Distribución por Sistema</h3>
-            <ResponsiveContainer width="100%" height={250}>
+        <div className="grid-2">
+          <div className="card">
+            <h3 className="card-title">Distribución por Sistema</h3>
+            <ResponsiveContainer width="100%" height={280}>
               <PieChart>
                 <Pie
                   data={stats.por_sistema}
@@ -389,7 +373,7 @@ const Irrigaciones = () => {
                   nameKey="sistema"
                   cx="50%"
                   cy="50%"
-                  outerRadius={80}
+                  outerRadius={90}
                   label={({ sistema, count }) => `${sistema}: ${count}`}
                 >
                   {stats.por_sistema?.map((entry, index) => (
@@ -402,16 +386,15 @@ const Irrigaciones = () => {
             </ResponsiveContainer>
           </div>
 
-          {/* Por Mes */}
-          <div className="card p-4">
-            <h3 className="font-semibold mb-4">Volumen por Mes (últimos 12 meses)</h3>
-            <ResponsiveContainer width="100%" height={250}>
+          <div className="card">
+            <h3 className="card-title">Volumen por Mes (últimos 12 meses)</h3>
+            <ResponsiveContainer width="100%" height={280}>
               <BarChart data={stats.por_mes}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="mes" />
                 <YAxis />
                 <Tooltip formatter={(value) => `${value} m³`} />
-                <Bar dataKey="volumen" fill="#2563eb" name="Volumen (m³)" />
+                <Bar dataKey="volumen" fill="#2d5a27" name="Volumen (m³)" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -422,16 +405,23 @@ const Irrigaciones = () => {
 
   return (
     <div data-testid="irrigaciones-page">
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>
-          <Droplets className="inline mr-2" size={28} />
+        <h1 className="page-title">
+          <Droplets className="inline mr-2" size={28} style={{ color: '#2d5a27' }} />
           {t('irrigations.title', 'Irrigaciones')}
         </h1>
         <div className="flex gap-2">
-          <button className={`btn ${vista === 'lista' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setVista('lista')}>
+          <button 
+            className={`btn ${vista === 'lista' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setVista('lista')}
+          >
             Lista
           </button>
-          <button className={`btn ${vista === 'graficos' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setVista('graficos')}>
+          <button 
+            className={`btn ${vista === 'graficos' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setVista('graficos')}
+          >
             <BarChart3 size={16} className="mr-1" />
             Estadísticas
           </button>
@@ -444,7 +434,11 @@ const Irrigaciones = () => {
             Excel
           </button>
           {canCreate && (
-            <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true); }}>
+            <button 
+              className="btn btn-primary" 
+              onClick={() => { resetForm(); setShowForm(true); }}
+              data-testid="btn-nuevo-riego"
+            >
               <Plus size={18} />
               Nuevo Riego
             </button>
@@ -453,21 +447,21 @@ const Irrigaciones = () => {
       </div>
 
       {error && (
-        <div className="card mb-4 p-4 bg-red-50 border border-red-200">
-          <p className="text-red-600">{error}</p>
+        <div className="card mb-4" style={{ backgroundColor: '#fee2e2', borderColor: '#fecaca' }}>
+          <p style={{ color: '#dc2626' }}>{error}</p>
         </div>
       )}
 
       {/* Calculadora */}
       {showCalculadora && (
-        <div className="card mb-4 p-4 bg-blue-50 border border-blue-200">
-          <h3 className="font-semibold mb-3 flex items-center gap-2">
+        <div className="card mb-4" style={{ backgroundColor: '#eff6ff', borderColor: '#bfdbfe' }}>
+          <h3 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Calculator size={18} />
             Calculadora de Consumo por Hectárea
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="form-group mb-0">
-              <label className="form-label text-sm">Parcela</label>
+          <div className="grid-4">
+            <div className="form-group">
+              <label className="form-label">Parcela</label>
               <select 
                 className="form-select"
                 value={calcData.parcela_id}
@@ -479,8 +473,8 @@ const Irrigaciones = () => {
                 ))}
               </select>
             </div>
-            <div className="form-group mb-0">
-              <label className="form-label text-sm">Volumen (m³)</label>
+            <div className="form-group">
+              <label className="form-label">Volumen (m³)</label>
               <input 
                 type="number" 
                 className="form-input"
@@ -488,152 +482,135 @@ const Irrigaciones = () => {
                 onChange={(e) => setCalcData({...calcData, volumen: parseFloat(e.target.value) || 0})}
               />
             </div>
-            <div className="form-group mb-0">
-              <label className="form-label text-sm">Superficie (ha)</label>
-              <input type="text" className="form-input bg-gray-100" value={calcData.superficie} readOnly />
+            <div className="form-group">
+              <label className="form-label">Superficie (ha)</label>
+              <input type="text" className="form-input" value={calcData.superficie} readOnly style={{ backgroundColor: '#f3f4f6' }} />
             </div>
-            <div className="form-group mb-0">
-              <label className="form-label text-sm">Consumo (m³/ha)</label>
+            <div className="form-group">
+              <label className="form-label">Consumo (m³/ha)</label>
               <input 
                 type="text" 
-                className="form-input bg-green-100 font-bold text-green-700" 
+                className="form-input" 
                 value={calcData.consumo_por_ha} 
                 readOnly 
+                style={{ backgroundColor: '#dcfce7', fontWeight: 'bold', color: '#16a34a' }}
               />
             </div>
           </div>
-          <button className="btn btn-primary mt-3" onClick={calcularConsumo}>
+          <button className="btn btn-primary" onClick={calcularConsumo}>
             Calcular
           </button>
         </div>
       )}
 
-      {/* Stats resumen - KPIs en línea horizontal */}
+      {/* Stats resumen */}
       {vista === 'lista' && stats && (
-        <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl border border-blue-100">
-          <div className="flex flex-wrap justify-between items-center gap-4">
-            <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-lg shadow-sm">
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                <Droplets size={20} className="text-blue-600" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-gray-800">{stats.total}</div>
-                <div className="text-xs text-gray-500 uppercase tracking-wide">Total Riegos</div>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-lg shadow-sm">
-              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
-                <Calendar size={20} className="text-amber-600" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-amber-600">{stats.proximos_7_dias}</div>
-                <div className="text-xs text-gray-500 uppercase tracking-wide">Próx. 7 días</div>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-lg shadow-sm">
-              <div className="w-10 h-10 bg-cyan-100 rounded-full flex items-center justify-center">
-                <Droplets size={20} className="text-cyan-600" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-cyan-600">{stats.totales?.volumen?.toLocaleString() || 0}</div>
-                <div className="text-xs text-gray-500 uppercase tracking-wide">m³ Total</div>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-lg shadow-sm">
-              <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                <Clock size={20} className="text-purple-600" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-purple-600">{stats.totales?.horas?.toLocaleString() || 0}</div>
-                <div className="text-xs text-gray-500 uppercase tracking-wide">Horas</div>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-lg shadow-sm">
-              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                <span className="text-green-600 font-bold">€</span>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-green-600">{stats.totales?.coste?.toLocaleString() || 0}</div>
-                <div className="text-xs text-gray-500 uppercase tracking-wide">Coste Total</div>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-lg shadow-sm">
-              <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
-                <span className="text-emerald-600 font-bold text-sm">Ha</span>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-emerald-600">{stats.totales?.superficie?.toLocaleString() || 0}</div>
-                <div className="text-xs text-gray-500 uppercase tracking-wide">Ha Regadas</div>
-              </div>
-            </div>
+        <div className="stats-grid mb-4">
+          <div className="stat-card">
+            <div className="stat-icon"><Droplets size={20} /></div>
+            <div className="stat-value">{stats.total}</div>
+            <div className="stat-label">Total Riegos</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon"><Calendar size={20} /></div>
+            <div className="stat-value" style={{ color: '#d97706' }}>{stats.proximos_7_dias}</div>
+            <div className="stat-label">Próx. 7 días</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon"><Droplets size={20} /></div>
+            <div className="stat-value" style={{ color: '#2d5a27' }}>{stats.totales?.volumen?.toLocaleString() || 0}</div>
+            <div className="stat-label">m³ Total</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon"><Clock size={20} /></div>
+            <div className="stat-value">{stats.totales?.horas?.toLocaleString() || 0}</div>
+            <div className="stat-label">Horas</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value" style={{ color: '#16a34a' }}>€{stats.totales?.coste?.toLocaleString() || 0}</div>
+            <div className="stat-label">Coste Total</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">{stats.totales?.superficie?.toLocaleString() || 0}</div>
+            <div className="stat-label">Ha Regadas</div>
           </div>
         </div>
       )}
 
       {/* Filtros */}
       {vista === 'lista' && (
-        <div className="card mb-4">
-          <div className="flex justify-between items-center mb-2">
+        <div className="card mb-4" data-testid="irrigaciones-filtros">
+          <div className="flex justify-between items-center mb-3">
             <div className="flex items-center gap-2 flex-1">
-              <div className="relative flex-1 max-w-xs">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <div className="relative" style={{ maxWidth: '300px', flex: 1 }}>
+                <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
                 <input
-                  className="form-input pl-10"
-                  placeholder="Buscar..."
+                  className="form-input"
+                  style={{ paddingLeft: '40px' }}
+                  placeholder="Buscar irrigaciones..."
                   value={filters.search}
                   onChange={(e) => setFilters({...filters, search: e.target.value})}
+                  data-testid="input-buscar-irrigaciones"
                 />
               </div>
               <button
-                className="btn btn-secondary flex items-center gap-1"
+                className="btn btn-secondary"
                 onClick={() => setShowFilters(!showFilters)}
+                data-testid="btn-toggle-filtros"
               >
                 <Filter size={16} />
-                Filtros
+                Filtros avanzados
                 {hasActiveFilters && (
-                  <span className="bg-blue-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">
-                    {Object.values(filters).filter(v => v).length}
+                  <span style={{ 
+                    backgroundColor: '#2d5a27', 
+                    color: 'white', 
+                    borderRadius: '9999px', 
+                    width: '20px', 
+                    height: '20px', 
+                    fontSize: '12px', 
+                    display: 'inline-flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    marginLeft: '6px'
+                  }}>
+                    {activeFiltersCount}
                   </span>
                 )}
               </button>
               <button
                 className="btn btn-secondary"
                 onClick={() => setShowFieldsConfig(!showFieldsConfig)}
+                title="Configurar columnas"
               >
                 <Settings size={16} />
               </button>
             </div>
             {hasActiveFilters && (
-              <button className="btn btn-sm btn-secondary" onClick={clearFilters}>
-                <X size={14} /> Limpiar
+              <button className="btn btn-secondary" onClick={clearFilters} data-testid="btn-limpiar-filtros">
+                <X size={14} /> Limpiar filtros
               </button>
             )}
           </div>
 
           {showFilters && (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 pt-4 border-t">
-              <div className="form-group mb-0">
-                <label className="form-label text-xs">Sistema</label>
-                <select className="form-select" value={filters.sistema} onChange={(e) => setFilters({...filters, sistema: e.target.value})}>
+            <div className="grid-6 pt-4" style={{ borderTop: '1px solid #e5e7eb' }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: '12px' }}>Sistema</label>
+                <select className="form-select" value={filters.sistema} onChange={(e) => setFilters({...filters, sistema: e.target.value})} data-testid="select-filtro-sistema">
                   <option value="">Todos</option>
                   {filterOptions.sistemas.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
-              <div className="form-group mb-0">
-                <label className="form-label text-xs">Parcela</label>
-                <select className="form-select" value={filters.parcela_id} onChange={(e) => setFilters({...filters, parcela_id: e.target.value})}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: '12px' }}>Parcela</label>
+                <select className="form-select" value={filters.parcela_id} onChange={(e) => setFilters({...filters, parcela_id: e.target.value})} data-testid="select-filtro-parcela">
                   <option value="">Todas</option>
                   {filterOptions.parcelas.map(p => <option key={p.id} value={p.id}>{p.codigo}</option>)}
                 </select>
               </div>
-              <div className="form-group mb-0">
-                <label className="form-label text-xs">Estado</label>
-                <select className="form-select" value={filters.estado} onChange={(e) => setFilters({...filters, estado: e.target.value})}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: '12px' }}>Estado</label>
+                <select className="form-select" value={filters.estado} onChange={(e) => setFilters({...filters, estado: e.target.value})} data-testid="select-filtro-estado">
                   <option value="">Todos</option>
                   <option value="planificado">Planificado</option>
                   <option value="en_curso">En Curso</option>
@@ -641,30 +618,30 @@ const Irrigaciones = () => {
                   <option value="cancelado">Cancelado</option>
                 </select>
               </div>
-              <div className="form-group mb-0">
-                <label className="form-label text-xs">Cultivo</label>
-                <select className="form-select" value={filters.cultivo} onChange={(e) => setFilters({...filters, cultivo: e.target.value})}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: '12px' }}>Cultivo</label>
+                <select className="form-select" value={filters.cultivo} onChange={(e) => setFilters({...filters, cultivo: e.target.value})} data-testid="select-filtro-cultivo">
                   <option value="">Todos</option>
                   {filterOptions.cultivos.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
-              <div className="form-group mb-0">
-                <label className="form-label text-xs">Desde</label>
-                <input type="date" className="form-input" value={filters.fecha_desde} onChange={(e) => setFilters({...filters, fecha_desde: e.target.value})} />
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: '12px' }}>Fecha Desde</label>
+                <input type="date" className="form-input" value={filters.fecha_desde} onChange={(e) => setFilters({...filters, fecha_desde: e.target.value})} data-testid="input-filtro-fecha-desde" />
               </div>
-              <div className="form-group mb-0">
-                <label className="form-label text-xs">Hasta</label>
-                <input type="date" className="form-input" value={filters.fecha_hasta} onChange={(e) => setFilters({...filters, fecha_hasta: e.target.value})} />
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: '12px' }}>Fecha Hasta</label>
+                <input type="date" className="form-input" value={filters.fecha_hasta} onChange={(e) => setFilters({...filters, fecha_hasta: e.target.value})} data-testid="input-filtro-fecha-hasta" />
               </div>
             </div>
           )}
 
           {showFieldsConfig && (
-            <div className="pt-4 border-t mt-4">
-              <h4 className="font-semibold mb-2">Columnas visibles</h4>
-              <div className="flex flex-wrap gap-3">
+            <div style={{ paddingTop: '1rem', borderTop: '1px solid #e5e7eb', marginTop: '1rem' }}>
+              <h4 style={{ fontWeight: '600', marginBottom: '0.5rem' }}>Columnas visibles</h4>
+              <div className="flex flex-wrap gap-4">
                 {Object.entries(fieldsConfig).map(([field, visible]) => (
-                  <label key={field} className="flex items-center gap-1 text-sm">
+                  <label key={field} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '14px' }}>
                     <input
                       type="checkbox"
                       checked={visible}
@@ -677,21 +654,22 @@ const Irrigaciones = () => {
             </div>
           )}
 
-          <div className="mt-2 text-sm text-gray-500">
+          <div style={{ marginTop: '0.75rem', fontSize: '14px', color: '#6b7280' }}>
             Mostrando <strong>{filteredIrrigaciones.length}</strong> de <strong>{irrigaciones.length}</strong> registros
+            {hasActiveFilters && ' (filtrados)'}
           </div>
         </div>
       )}
 
       {/* Formulario */}
       {showForm && (
-        <div className="card mb-6">
+        <div className="card mb-4">
           <h2 className="card-title">{editingId ? 'Editar Riego' : 'Nuevo Riego'}</h2>
           <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid-4">
               <div className="form-group">
                 <label className="form-label">Parcela *</label>
-                <select className="form-select" value={formData.parcela_id} onChange={(e) => setFormData({...formData, parcela_id: e.target.value})} required>
+                <select className="form-select" value={formData.parcela_id} onChange={(e) => setFormData({...formData, parcela_id: e.target.value})} required data-testid="select-parcela">
                   <option value="">Seleccionar...</option>
                   {parcelas.map(p => (
                     <option key={p._id} value={p._id}>{p.codigo_plantacion} - {p.cultivo} ({p.superficie_total} ha)</option>
@@ -700,17 +678,17 @@ const Irrigaciones = () => {
               </div>
               <div className="form-group">
                 <label className="form-label">Sistema *</label>
-                <select className="form-select" value={formData.sistema} onChange={(e) => setFormData({...formData, sistema: e.target.value})} required>
+                <select className="form-select" value={formData.sistema} onChange={(e) => setFormData({...formData, sistema: e.target.value})} required data-testid="select-sistema">
                   {sistemas.map(s => <option key={s.id} value={s.nombre}>{s.nombre}</option>)}
                 </select>
               </div>
               <div className="form-group">
                 <label className="form-label">Fecha *</label>
-                <input type="date" className="form-input" value={formData.fecha} onChange={(e) => setFormData({...formData, fecha: e.target.value})} required />
+                <input type="date" className="form-input" value={formData.fecha} onChange={(e) => setFormData({...formData, fecha: e.target.value})} required data-testid="input-fecha" />
               </div>
               <div className="form-group">
                 <label className="form-label">Estado</label>
-                <select className="form-select" value={formData.estado} onChange={(e) => setFormData({...formData, estado: e.target.value})}>
+                <select className="form-select" value={formData.estado} onChange={(e) => setFormData({...formData, estado: e.target.value})} data-testid="select-estado">
                   <option value="planificado">Planificado</option>
                   <option value="en_curso">En Curso</option>
                   <option value="completado">Completado</option>
@@ -719,22 +697,22 @@ const Irrigaciones = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid-4">
               <div className="form-group">
                 <label className="form-label">Duración (horas) *</label>
-                <input type="number" step="0.1" className="form-input" value={formData.duracion} onChange={(e) => setFormData({...formData, duracion: e.target.value})} required />
+                <input type="number" step="0.1" className="form-input" value={formData.duracion} onChange={(e) => setFormData({...formData, duracion: e.target.value})} required data-testid="input-duracion" />
               </div>
               <div className="form-group">
                 <label className="form-label">Volumen (m³) *</label>
-                <input type="number" step="0.1" className="form-input" value={formData.volumen} onChange={(e) => setFormData({...formData, volumen: e.target.value})} required />
+                <input type="number" step="0.1" className="form-input" value={formData.volumen} onChange={(e) => setFormData({...formData, volumen: e.target.value})} required data-testid="input-volumen" />
               </div>
               <div className="form-group">
                 <label className="form-label">Coste (€)</label>
-                <input type="number" step="0.01" className="form-input" value={formData.coste} onChange={(e) => setFormData({...formData, coste: e.target.value})} />
+                <input type="number" step="0.01" className="form-input" value={formData.coste} onChange={(e) => setFormData({...formData, coste: e.target.value})} data-testid="input-coste" />
               </div>
               <div className="form-group">
                 <label className="form-label">Fuente de Agua</label>
-                <select className="form-select" value={formData.fuente_agua} onChange={(e) => setFormData({...formData, fuente_agua: e.target.value})}>
+                <select className="form-select" value={formData.fuente_agua} onChange={(e) => setFormData({...formData, fuente_agua: e.target.value})} data-testid="select-fuente-agua">
                   <option value="">Seleccionar...</option>
                   <option value="Pozo">Pozo</option>
                   <option value="Embalse">Embalse</option>
@@ -746,7 +724,7 @@ const Irrigaciones = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid-4">
               <div className="form-group">
                 <label className="form-label">Hora Inicio</label>
                 <input type="time" className="form-input" value={formData.hora_inicio} onChange={(e) => setFormData({...formData, hora_inicio: e.target.value})} />
@@ -771,7 +749,7 @@ const Irrigaciones = () => {
             </div>
 
             <div className="flex items-center gap-4 mb-4">
-              <label className="flex items-center gap-2">
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <input 
                   type="checkbox" 
                   checked={formData.es_planificada}
@@ -780,8 +758,8 @@ const Irrigaciones = () => {
                 Es riego planificado (futuro)
               </label>
               {formData.es_planificada && (
-                <div className="form-group mb-0">
-                  <label className="form-label text-sm">Fecha Planificada</label>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Fecha Planificada</label>
                   <input 
                     type="date" 
                     className="form-input"
@@ -793,7 +771,7 @@ const Irrigaciones = () => {
             </div>
 
             <div className="flex gap-2">
-              <button type="submit" className="btn btn-primary">{editingId ? 'Guardar' : 'Crear'}</button>
+              <button type="submit" className="btn btn-primary" data-testid="btn-guardar-riego">{editingId ? 'Guardar' : 'Crear'}</button>
               <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }}>Cancelar</button>
             </div>
           </form>
@@ -805,12 +783,12 @@ const Irrigaciones = () => {
         <div className="card">
           <h2 className="card-title">Registros de Riego</h2>
           {loading ? (
-            <p>Cargando...</p>
+            <p>{t('common.loading', 'Cargando...')}</p>
           ) : filteredIrrigaciones.length === 0 ? (
-            <p className="text-gray-500">No hay registros de riego</p>
+            <p className="text-muted">{t('common.noData', 'No hay datos')}</p>
           ) : (
             <div className="table-container">
-              <table>
+              <table data-testid="irrigaciones-table">
                 <thead>
                   <tr>
                     {fieldsConfig.fecha && <th>Fecha</th>}
@@ -821,7 +799,7 @@ const Irrigaciones = () => {
                     {fieldsConfig.consumo_por_ha && <th>m³/ha</th>}
                     {fieldsConfig.coste && <th>Coste (€)</th>}
                     {fieldsConfig.estado && <th>Estado</th>}
-                    <th>Acciones</th>
+                    <th>{t('common.actions', 'Acciones')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -830,8 +808,8 @@ const Irrigaciones = () => {
                       {fieldsConfig.fecha && <td>{irrig.fecha}</td>}
                       {fieldsConfig.parcela_id && (
                         <td>
-                          <div className="font-medium">{irrig.parcela_codigo}</div>
-                          <div className="text-xs text-gray-500">{irrig.cultivo}</div>
+                          <div style={{ fontWeight: '500' }}>{irrig.parcela_codigo || '-'}</div>
+                          <div style={{ fontSize: '12px', color: '#6b7280' }}>{irrig.cultivo || ''}</div>
                         </td>
                       )}
                       {fieldsConfig.sistema && <td>{irrig.sistema}</td>}
@@ -842,8 +820,11 @@ const Irrigaciones = () => {
                       {fieldsConfig.estado && (
                         <td>
                           <span 
-                            className="px-2 py-0.5 rounded text-xs font-medium"
                             style={{ 
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              fontSize: '12px',
+                              fontWeight: '500',
                               backgroundColor: ESTADO_COLORS[irrig.estado || 'completado']?.bg,
                               color: ESTADO_COLORS[irrig.estado || 'completado']?.text
                             }}
@@ -864,12 +845,12 @@ const Irrigaciones = () => {
                             </button>
                           )}
                           {canEdit && (
-                            <button className="btn btn-sm btn-secondary" onClick={() => handleEdit(irrig)}>
+                            <button className="btn btn-sm btn-secondary" onClick={() => handleEdit(irrig)} data-testid={`btn-editar-${irrig._id}`}>
                               <Edit2 size={14} />
                             </button>
                           )}
                           {canDelete && (
-                            <button className="btn btn-sm btn-error" onClick={() => handleDelete(irrig._id)}>
+                            <button className="btn btn-sm" style={{ backgroundColor: '#fee2e2', color: '#dc2626' }} onClick={() => handleDelete(irrig._id)} data-testid={`btn-eliminar-${irrig._id}`}>
                               <Trash2 size={14} />
                             </button>
                           )}
@@ -884,7 +865,7 @@ const Irrigaciones = () => {
         </div>
       )}
 
-      {/* Modal Historial - Diseño mejorado */}
+      {/* Modal Historial */}
       {showHistorial && historialData && (
         <div 
           style={{
@@ -893,175 +874,124 @@ const Irrigaciones = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.6)',
-            backdropFilter: 'blur(4px)',
+            backgroundColor: 'rgba(0,0,0,0.5)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             padding: '1rem',
             zIndex: 9999
           }}
+          onClick={() => setShowHistorial(null)}
         >
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden">
-            {/* Header con gradiente */}
-            <div className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white p-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <History size={24} />
-                    <h2 className="text-2xl font-bold">Historial de Riegos</h2>
-                  </div>
-                  <p className="text-blue-100 flex items-center gap-2">
-                    <span className="bg-white/20 px-2 py-0.5 rounded text-sm font-medium">
-                      {historialData.parcela?.codigo}
-                    </span>
-                    <span>{historialData.parcela?.cultivo}</span>
-                    <span className="text-blue-200">•</span>
-                    <span>{historialData.parcela?.superficie} ha</span>
-                  </p>
-                </div>
-                <button 
-                  onClick={() => setShowHistorial(null)} 
-                  className="p-2 hover:bg-white/20 rounded-full transition-colors"
-                >
-                  <X size={24} />
-                </button>
+          <div 
+            className="card" 
+            style={{ maxWidth: '900px', width: '100%', maxHeight: '85vh', overflow: 'hidden' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{ 
+              background: 'linear-gradient(135deg, #2d5a27, #3b82f6)', 
+              color: 'white', 
+              padding: '1.5rem', 
+              margin: '-1rem -1rem 1rem -1rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start'
+            }}>
+              <div>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  <History size={24} />
+                  Historial de Riegos
+                </h2>
+                <p style={{ opacity: 0.9 }}>
+                  <span style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '4px', marginRight: '0.5rem' }}>
+                    {historialData.parcela?.codigo}
+                  </span>
+                  {historialData.parcela?.cultivo} • {historialData.parcela?.superficie} ha
+                </p>
               </div>
+              <button 
+                onClick={() => setShowHistorial(null)} 
+                style={{ padding: '0.5rem', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
             </div>
             
-            {/* Contenido con scroll */}
-            <div className="p-6 overflow-y-auto max-h-[calc(85vh-180px)]">
-              {/* KPIs del historial */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
-                      <Droplets size={24} className="text-white" />
-                    </div>
-                    <div>
-                      <div className="text-3xl font-bold text-blue-700">{historialData.totales?.riegos}</div>
-                      <div className="text-sm text-blue-600">Riegos Realizados</div>
-                    </div>
-                  </div>
+            {/* Content */}
+            <div style={{ overflowY: 'auto', maxHeight: 'calc(85vh - 160px)' }}>
+              {/* KPIs */}
+              <div className="stats-grid mb-4">
+                <div className="stat-card" style={{ backgroundColor: '#eff6ff' }}>
+                  <div className="stat-value" style={{ color: '#2563eb' }}>{historialData.totales?.riegos}</div>
+                  <div className="stat-label">Riegos</div>
                 </div>
-                
-                <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 p-4 rounded-xl border border-cyan-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-200">
-                      <Droplets size={24} className="text-white" />
-                    </div>
-                    <div>
-                      <div className="text-3xl font-bold text-cyan-700">{historialData.totales?.volumen_total}</div>
-                      <div className="text-sm text-cyan-600">m³ Total</div>
-                    </div>
-                  </div>
+                <div className="stat-card" style={{ backgroundColor: '#ecfdf5' }}>
+                  <div className="stat-value" style={{ color: '#059669' }}>{historialData.totales?.volumen_total} m³</div>
+                  <div className="stat-label">Volumen Total</div>
                 </div>
-                
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-200">
-                      <BarChart3 size={24} className="text-white" />
-                    </div>
-                    <div>
-                      <div className="text-3xl font-bold text-purple-700">{historialData.totales?.volumen_por_ha}</div>
-                      <div className="text-sm text-purple-600">m³ por Ha</div>
-                    </div>
-                  </div>
+                <div className="stat-card" style={{ backgroundColor: '#faf5ff' }}>
+                  <div className="stat-value" style={{ color: '#7c3aed' }}>{historialData.totales?.volumen_por_ha} m³/ha</div>
+                  <div className="stat-label">Por Hectárea</div>
                 </div>
-                
-                <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center shadow-lg shadow-green-200">
-                      <span className="text-white font-bold text-xl">€</span>
-                    </div>
-                    <div>
-                      <div className="text-3xl font-bold text-green-700">{historialData.totales?.coste_total}</div>
-                      <div className="text-sm text-green-600">Coste Total</div>
-                    </div>
-                  </div>
+                <div className="stat-card" style={{ backgroundColor: '#fef3c7' }}>
+                  <div className="stat-value" style={{ color: '#d97706' }}>€{historialData.totales?.coste_total}</div>
+                  <div className="stat-label">Coste Total</div>
                 </div>
               </div>
 
-              {/* Distribución por sistema */}
-              <div className="mb-6">
-                <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                  <Settings size={18} />
-                  Distribución por Sistema
-                </h4>
-                <div className="flex flex-wrap gap-3">
-                  {Object.entries(historialData.por_sistema || {}).map(([sistema, data], index) => (
-                    <div 
+              {/* Por sistema */}
+              <div style={{ marginBottom: '1rem' }}>
+                <h4 style={{ fontWeight: '600', marginBottom: '0.5rem' }}>Distribución por Sistema</h4>
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(historialData.por_sistema || {}).map(([sistema, data], idx) => (
+                    <span 
                       key={sistema} 
-                      className="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
                       style={{ 
-                        backgroundColor: `${SISTEMA_COLORS[index % SISTEMA_COLORS.length]}15`,
-                        color: SISTEMA_COLORS[index % SISTEMA_COLORS.length],
-                        border: `1px solid ${SISTEMA_COLORS[index % SISTEMA_COLORS.length]}40`
+                        padding: '4px 12px', 
+                        borderRadius: '9999px', 
+                        fontSize: '14px',
+                        backgroundColor: `${SISTEMA_COLORS[idx % SISTEMA_COLORS.length]}20`,
+                        color: SISTEMA_COLORS[idx % SISTEMA_COLORS.length],
+                        border: `1px solid ${SISTEMA_COLORS[idx % SISTEMA_COLORS.length]}40`
                       }}
                     >
-                      <div 
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: SISTEMA_COLORS[index % SISTEMA_COLORS.length] }}
-                      />
-                      <span className="font-semibold">{sistema}</span>
-                      <span className="text-gray-500">•</span>
-                      <span>{data.count} riegos</span>
-                      <span className="text-gray-500">•</span>
-                      <span>{data.volumen} m³</span>
-                    </div>
+                      {sistema}: {data.count} riegos ({data.volumen} m³)
+                    </span>
                   ))}
                 </div>
               </div>
 
-              {/* Tabla de historial */}
-              <div>
-                <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                  <Calendar size={18} />
-                  Detalle de Riegos
-                </h4>
-                <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-200">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gray-100 border-b border-gray-200">
-                        <th className="text-left py-3 px-4 font-semibold text-gray-600">Fecha</th>
-                        <th className="text-left py-3 px-4 font-semibold text-gray-600">Sistema</th>
-                        <th className="text-right py-3 px-4 font-semibold text-gray-600">Duración</th>
-                        <th className="text-right py-3 px-4 font-semibold text-gray-600">Volumen</th>
-                        <th className="text-right py-3 px-4 font-semibold text-gray-600">Coste</th>
+              {/* Tabla */}
+              <div className="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Sistema</th>
+                      <th>Duración</th>
+                      <th>Volumen</th>
+                      <th>Coste</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {historialData.historial?.map(h => (
+                      <tr key={h._id}>
+                        <td>{h.fecha}</td>
+                        <td>{h.sistema}</td>
+                        <td>{h.duracion} h</td>
+                        <td>{h.volumen} m³</td>
+                        <td>€{h.coste || 0}</td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {historialData.historial?.map((h, idx) => (
-                        <tr 
-                          key={h._id} 
-                          className={`border-b border-gray-100 hover:bg-blue-50/50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
-                        >
-                          <td className="py-3 px-4">
-                            <span className="font-medium text-gray-800">{h.fecha}</span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-                              <Droplets size={14} />
-                              {h.sistema}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-right font-medium text-gray-700">{h.duracion} h</td>
-                          <td className="py-3 px-4 text-right font-medium text-cyan-600">{h.volumen} m³</td>
-                          <td className="py-3 px-4 text-right font-medium text-green-600">€{h.coste || 0}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
             
             {/* Footer */}
-            <div className="border-t border-gray-200 bg-gray-50 px-6 py-4 flex justify-end">
-              <button 
-                onClick={() => setShowHistorial(null)}
-                className="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors"
-              >
+            <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '1rem', marginTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
+              <button className="btn btn-secondary" onClick={() => setShowHistorial(null)}>
                 Cerrar
               </button>
             </div>
