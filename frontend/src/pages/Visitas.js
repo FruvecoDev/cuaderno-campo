@@ -146,6 +146,12 @@ const Visitas = () => {
     return initial;
   });
   
+  // Estado para fotos
+  const [fotos, setFotos] = useState([]);
+  const [uploadingFotos, setUploadingFotos] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+  const fileInputRef = useRef(null);
+  
   useEffect(() => {
     fetchVisitas();
     fetchParcelas();
