@@ -1043,6 +1043,30 @@ Módulos actualizados para seguir patrón consistente:
 
 ### Estado: ✅ COMPLETADO Y TESTEADO
 
+## Expandir/Colapsar Fincas por Provincia (26/02/2026) - COMPLETADO
+- **Alcance**: Controles para expandir/colapsar fincas a nivel de provincia
+
+### Funcionalidades Añadidas:
+1. **Toggle de Provincia**: Botón para mostrar/ocultar todas las fincas de una provincia
+   - Flecha hacia arriba = fincas visibles
+   - Flecha hacia abajo = fincas ocultas
+   - data-testid='btn-toggle-provincia-{provincia}'
+
+2. **Expandir/Colapsar Todas**: Botón para expandir o colapsar los detalles de todas las fincas de una provincia
+   - "Expandir todas" cuando hay fincas colapsadas
+   - "Colapsar todas" cuando todas están expandidas
+   - data-testid='btn-expand-all-{provincia}'
+
+3. **Expansiones Múltiples**: Ahora múltiples fincas pueden estar expandidas simultáneamente
+   - expandedFincas cambió de ID único a Set de IDs
+
+### Test Report: `/app/test_reports/iteration_37.json`
+- Frontend: 30/38 tests passed (8 fallos por infraestructura de tests, no bugs)
+- Nueva funcionalidad: 100% funcional
+
+### Estado: ✅ COMPLETADO Y TESTEADO
+
+
 ## UI Mejoras - Fincas Agrupadas y Lista de Parcelas (25/02/2026) - COMPLETADO
 - **Alcance**: Mejoras de UI solicitadas por el usuario
 
