@@ -348,11 +348,53 @@ const Dashboard = () => {
     ));
   };
   
+  const moveWidgetUp = (index) => {
+    if (index === 0) return;
+    setConfigWidgets(prev => {
+      const newWidgets = [...prev];
+      const temp = newWidgets[index];
+      newWidgets[index] = newWidgets[index - 1];
+      newWidgets[index - 1] = temp;
+      // Update order values
+      return newWidgets.map((w, i) => ({ ...w, order: i }));
+    });
+  };
+  
+  const moveWidgetDown = (index) => {
+    if (index === configWidgets.length - 1) return;
+    setConfigWidgets(prev => {
+      const newWidgets = [...prev];
+      const temp = newWidgets[index];
+      newWidgets[index] = newWidgets[index + 1];
+      newWidgets[index + 1] = temp;
+      // Update order values
+      return newWidgets.map((w, i) => ({ ...w, order: i }));
+    });
+  };
+  
   const isWidgetVisible = (widgetId) => {
     if (!dashboardConfig?.widgets) return true;
     const widget = dashboardConfig.widgets.find(w => w.widget_id === widgetId);
     return widget ? widget.visible : true;
   };
+  
+  const getWidgetOrder = (widgetId) => {
+    if (!dashboardConfig?.widgets) return 999;
+    const widget = dashboardConfig.widgets.find(w => w.widget_id === widgetId);
+    return widget ? widget.order : 999;
+  };
+  
+  // Get sorted widgets for rendering
+  const sortedWidgetIds = useMemo(() => {
+    if (!dashboardConfig?.widgets) {
+      return ['kpis_principales', 'resumen_fincas', 'proximas_cosechas', 'tratamientos_pendientes', 
+              'contratos_activos', 'proximas_visitas', 'graficos_cultivos', 'mapa_parcelas', 
+              'calendario', 'actividad_reciente'];
+    }
+    return [...dashboardConfig.widgets]
+      .sort((a, b) => a.order - b.order)
+      .map(w => w.widget_id);
+  }, [dashboardConfig]);
   
   const fetchDashboardData = async () => {
     try {
