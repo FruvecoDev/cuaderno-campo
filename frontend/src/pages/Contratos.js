@@ -1047,7 +1047,7 @@ const Contratos = () => {
                 </tr>
               </thead>
               <tbody>
-                {contratos
+                {filteredContratos
                   .filter(contrato => {
                     // Filtrar contratos según permiso de operación del usuario
                     const tipoContrato = contrato.tipo || 'Compra';
