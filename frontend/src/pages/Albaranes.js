@@ -46,6 +46,10 @@ const Albaranes = () => {
   const { handlePermissionError } = usePermissionError();
   const { t } = useTranslation();
   
+  // Stats
+  const [stats, setStats] = useState(null);
+  const [exportLoading, setExportLoading] = useState(false);
+  
   // Permisos de operación
   const puedeCompra = canDoOperacion('compra');
   const puedeVenta = canDoOperacion('venta');
