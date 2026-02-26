@@ -1073,7 +1073,7 @@ const Dashboard = () => {
       
       {/* Widgets: Próximas Cosechas y Tratamientos Pendientes */}
       {(isWidgetVisible('proximas_cosechas') || isWidgetVisible('tratamientos_pendientes')) && (
-      <div className="grid-2 mb-6" data-testid="dashboard-widgets">
+      <div className="grid-2 mb-6" data-testid="dashboard-widgets" style={{ order: Math.min(getWidgetOrder('proximas_cosechas'), getWidgetOrder('tratamientos_pendientes')) }}>
         {/* Próximas Cosechas */}
         {isWidgetVisible('proximas_cosechas') && (
         <div className="card" data-testid="proximas-cosechas">
