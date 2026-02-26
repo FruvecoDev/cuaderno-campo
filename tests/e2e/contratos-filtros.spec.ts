@@ -4,12 +4,38 @@ import { login, waitForAppReady, dismissToasts, removeEmergentBadge } from '../f
 test.describe('Contratos Advanced Filters', () => {
   const BASE_URL = process.env.BASE_URL || 'https://agri-contratos.preview.emergentagent.com';
 
+  // Helper to close the daily summary modal if present
+  async function closeResumenDiarioModal(page: Page) {
+    try {
+      const entendidoBtn = page.locator('button').filter({ hasText: 'Entendido' }).first();
+      if (await entendidoBtn.isVisible({ timeout: 2000 })) {
+        await entendidoBtn.click();
+        await page.waitForTimeout(300);
+      }
+    } catch (e) {
+      // Modal not present, continue
+    }
+    
+    // Also remove the webpack dev overlay iframe
+    await page.evaluate(() => {
+      const overlay = document.getElementById('webpack-dev-server-client-overlay');
+      if (overlay) overlay.remove();
+      
+      // Remove any modal overlays
+      const modalOverlays = document.querySelectorAll('.modal-overlay');
+      modalOverlays.forEach(el => el.remove());
+    });
+  }
+
   test.beforeEach(async ({ page }) => {
     // Login first
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await login(page, 'admin@fruveco.com', 'admin123');
     await dismissToasts(page);
     await removeEmergentBadge(page);
+    
+    // Close any daily summary modal that might appear
+    await closeResumenDiarioModal(page);
     
     // Navigate to Contratos page using sidebar click for reliability
     const contratosLink = page.locator('a, button').filter({ hasText: /^Contratos$/i }).first();
@@ -18,6 +44,9 @@ test.describe('Contratos Advanced Filters', () => {
     // Wait for contratos page to load with longer timeout
     await expect(page.getByTestId('contratos-page')).toBeVisible({ timeout: 15000 });
     await expect(page.getByTestId('contratos-filtros')).toBeVisible({ timeout: 10000 });
+    
+    // Close modal again if it appears on new page
+    await closeResumenDiarioModal(page);
   });
 
   test('should render filter section correctly', async ({ page }) => {
