@@ -35,7 +35,8 @@ const Fincas = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [stats, setStats] = useState(null);
-  const [expandedFinca, setExpandedFinca] = useState(null);
+  const [expandedFincas, setExpandedFincas] = useState(new Set()); // Changed to Set for multiple expansions
+  const [collapsedProvincias, setCollapsedProvincias] = useState(new Set()); // Track collapsed provinces
   
   // Estado para búsqueda SIGPAC
   const [sigpacLoading, setSigpacLoading] = useState(false);
