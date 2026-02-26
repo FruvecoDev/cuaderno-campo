@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Trash2, Edit2, Package, TrendingUp, TrendingDown, Check, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Plus, Trash2, Edit2, Package, TrendingUp, TrendingDown, Check, ChevronDown, ChevronUp, X, Download, Target, Scale, DollarSign, Clock, CheckCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
@@ -14,6 +14,10 @@ const Cosechas = () => {
   const [showForm, setShowForm] = useState(false);
   const [showCargaForm, setShowCargaForm] = useState(null);
   const [expandedCosecha, setExpandedCosecha] = useState(null);
+  
+  // Stats y exportación
+  const [stats, setStats] = useState(null);
+  const [exportLoading, setExportLoading] = useState(false);
   
   // Filtros
   const [filters, setFilters] = useState({
