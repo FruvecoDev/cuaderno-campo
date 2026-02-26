@@ -152,10 +152,8 @@ const Irrigaciones = () => {
 
   const fetchHistorial = async (parcelaId) => {
     try {
-      console.log('Fetching historial for parcela:', parcelaId);
       const res = await fetch(`${BACKEND_URL}/api/irrigaciones/historial/${parcelaId}`, { headers });
       const data = await res.json();
-      console.log('Historial data received:', data);
       setHistorialData(data);
       setShowHistorial(parcelaId);
     } catch (err) {
