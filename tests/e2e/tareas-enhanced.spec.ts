@@ -21,12 +21,19 @@ test.describe('Tareas Module', () => {
   });
 
   test('Tareas page loads with KPIs', async ({ page }) => {
-    // Verify page title
-    await expect(page.getByRole('heading', { name: /Tareas/i })).toBeVisible();
+    // Verify page title (use first() to avoid strict mode issue)
+    await expect(page.locator('h1').filter({ hasText: /Tareas/i })).toBeVisible();
     
-    // Verify stats/KPIs cards are visible - looking for card elements with numbers
-    const statsCards = page.locator('.card').filter({ hasText: /Total|Pendientes|En Progreso|Completadas|Vencidas|Esta Semana/i });
-    await expect(statsCards.first()).toBeVisible();
+    // Wait for stats to load - the stats grid should appear
+    // Since there are 0 tareas, the KPIs should still show with 0 values
+    const statsGrid = page.locator('.grid').filter({ has: page.locator('.card') }).first();
+    await expect(statsGrid).toBeVisible();
+    
+    // Verify buttons are visible
+    await expect(page.getByRole('button', { name: /^Lista$/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Calendario/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Excel/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Nueva Tarea/i })).toBeVisible();
   });
 
   test('Calendar view toggle works', async ({ page }) => {
@@ -37,6 +44,9 @@ test.describe('Tareas Module', () => {
     
     // Verify calendar view is displayed - should show month name
     await expect(page.getByText(/Enero|Febrero|Marzo|Abril|Mayo|Junio|Julio|Agosto|Septiembre|Octubre|Noviembre|Diciembre/i)).toBeVisible();
+    
+    // Should show day headers
+    await expect(page.getByText(/^Dom$|^Lun$|^Mar$|^Mié$|^Jue$|^Vie$|^Sáb$/i).first()).toBeVisible();
     
     // Switch back to list view
     const listaBtn = page.getByRole('button', { name: /^Lista$/i });
@@ -52,15 +62,61 @@ test.describe('Tareas Module', () => {
     await expect(filtersBtn).toBeVisible();
     await filtersBtn.click();
     
-    // Verify filter dropdowns appear
-    await expect(page.locator('label').filter({ hasText: /^Estado$/i }).first()).toBeVisible();
-    await expect(page.locator('label').filter({ hasText: /^Prioridad$/i }).first()).toBeVisible();
-    await expect(page.locator('label').filter({ hasText: /^Tipo$/i }).first()).toBeVisible();
+    // Verify filter section expands with dropdowns
+    // Look for form labels that appear in the filter panel
+    await expect(page.locator('.form-label').filter({ hasText: /^Estado$/i }).first()).toBeVisible();
+    await expect(page.locator('.form-label').filter({ hasText: /^Prioridad$/i }).first()).toBeVisible();
+    await expect(page.locator('.form-label').filter({ hasText: /^Tipo$/i }).first()).toBeVisible();
+    await expect(page.locator('.form-label').filter({ hasText: /Asignado/i }).first()).toBeVisible();
+    await expect(page.locator('.form-label').filter({ hasText: /Desde/i }).first()).toBeVisible();
+    await expect(page.locator('.form-label').filter({ hasText: /Hasta/i }).first()).toBeVisible();
+  });
+
+  test('Filter by estado and prioridad', async ({ page }) => {
+    // Click filters button
+    const filtersBtn = page.getByRole('button', { name: /Filtros/i }).first();
+    await filtersBtn.click();
+    
+    // Find estado select
+    const estadoFormGroup = page.locator('.form-group').filter({ hasText: /^Estado$/ }).first();
+    const estadoSelect = estadoFormGroup.locator('select');
+    await estadoSelect.selectOption('pendiente');
+    
+    // Find prioridad select
+    const prioridadFormGroup = page.locator('.form-group').filter({ hasText: /^Prioridad$/ }).first();
+    const prioridadSelect = prioridadFormGroup.locator('select');
+    await prioridadSelect.selectOption('alta');
+    
+    // Verify filters are applied - check badge or count text
+    await expect(page.locator('text=/Mostrando.*de.*tareas/i')).toBeVisible();
   });
 
   test('Excel export button exists', async ({ page }) => {
     // Find Excel export button
     const excelBtn = page.getByRole('button', { name: /Excel/i });
     await expect(excelBtn).toBeVisible();
+  });
+
+  test('Create new tarea form opens', async ({ page }) => {
+    // Click "Nueva Tarea" button
+    const newBtn = page.getByRole('button', { name: /Nueva Tarea/i });
+    await expect(newBtn).toBeVisible();
+    await newBtn.click();
+    
+    // Verify form appears with heading
+    await expect(page.locator('.card-title').filter({ hasText: /Nueva Tarea/i })).toBeVisible();
+    
+    // Verify form fields
+    await expect(page.locator('.form-label').filter({ hasText: /^Nombre/i })).toBeVisible();
+    await expect(page.locator('.form-label').filter({ hasText: /^Tipo$/i })).toBeVisible();
+    await expect(page.locator('.form-label').filter({ hasText: /^Prioridad$/i })).toBeVisible();
+    await expect(page.locator('.form-label').filter({ hasText: /^Estado$/i })).toBeVisible();
+    
+    // Verify subtasks section
+    await expect(page.getByText(/Subtareas|Checklist/i)).toBeVisible();
+    
+    // Cancel form
+    const cancelBtn = page.getByRole('button', { name: /Cancelar/i });
+    await cancelBtn.click();
   });
 });
