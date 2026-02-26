@@ -406,7 +406,7 @@ const Dashboard = () => {
     );
   }
   
-  const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))'];
+  const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', '#8884d8', '#82ca9d', '#ffc658'];
   
   // Prepare chart data
   const cultivoData = Object.entries(kpis.produccion.por_cultivo || {}).map(([name, data]) => ({
@@ -414,6 +414,21 @@ const Dashboard = () => {
     parcelas: data.parcelas,
     superficie: data.superficie
   }));
+  
+  // Prepare fincas chart data
+  const fincasData = kpis.fincas ? Object.entries(kpis.fincas.por_provincia || {}).map(([name, data]) => ({
+    name: name.length > 12 ? name.substring(0, 12) + '...' : name,
+    fullName: name,
+    fincas: data.count,
+    hectareas: data.hectareas,
+    propias: data.propias,
+    alquiladas: data.alquiladas
+  })).sort((a, b) => b.fincas - a.fincas) : [];
+  
+  const fincasTipoData = kpis.fincas ? [
+    { name: 'Propias', value: kpis.fincas.propias, color: '#2d5a27' },
+    { name: 'Alquiladas', value: kpis.fincas.alquiladas, color: '#f57c00' }
+  ] : [];
   
   return (
     <div data-testid="dashboard-page">
