@@ -266,6 +266,54 @@ async def get_dashboard_kpis():
         contratos_stats["por_cultivo"][cultivo]["cantidad"] += c["cantidad"]
         contratos_stats["por_cultivo"][cultivo]["valor"] += c["valor_total"]
     
+    # =============================================
+    # PRÓXIMAS VISITAS PLANIFICADAS
+    # =============================================
+    visitas_proximas = []
+    
+    # Buscar visitas con fecha en los próximos 14 días
+    en_14_dias = (datetime.now() + timedelta(days=14)).strftime("%Y-%m-%d")
+    
+    visitas_query = {
+        "$or": [
+            {"fecha_planificada": {"$gte": hoy, "$lte": en_14_dias}},
+            {"fecha_visita": {"$gte": hoy, "$lte": en_14_dias}, "realizado": False}
+        ]
+    }
+    
+    visitas_planificadas = await visitas_collection.find(visitas_query).sort("fecha_visita", 1).limit(10).to_list(10)
+    
+    for v in visitas_planificadas:
+        fecha = v.get("fecha_planificada") or v.get("fecha_visita")
+        visitas_proximas.append({
+            "id": str(v.get("_id")),
+            "objetivo": v.get("objetivo", ""),
+            "parcela": v.get("codigo_plantacion", ""),
+            "proveedor": v.get("proveedor", ""),
+            "cultivo": v.get("cultivo", ""),
+            "fecha": fecha,
+            "realizado": v.get("realizado", False)
+        })
+    
+    # Estadísticas de visitas
+    total_visitas_mes = await visitas_collection.count_documents({
+        "fecha_visita": {"$gte": (datetime.now().replace(day=1)).strftime("%Y-%m-%d")}
+    })
+    visitas_realizadas_mes = await visitas_collection.count_documents({
+        "fecha_visita": {"$gte": (datetime.now().replace(day=1)).strftime("%Y-%m-%d")},
+        "realizado": True
+    })
+    visitas_pendientes = await visitas_collection.count_documents({
+        "realizado": False
+    })
+    
+    visitas_stats = {
+        "total_mes": total_visitas_mes,
+        "realizadas_mes": visitas_realizadas_mes,
+        "pendientes": visitas_pendientes,
+        "proximas_14_dias": len(visitas_proximas)
+    }
+    
     return {
         "totales": {
             "contratos": total_contratos,
