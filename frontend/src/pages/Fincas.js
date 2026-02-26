@@ -474,6 +474,58 @@ const Fincas = () => {
     setShowAsignarParcela(true);
   };
 
+  // Toggle expansión de una finca individual
+  const toggleFincaExpansion = (fincaId) => {
+    setExpandedFincas(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(fincaId)) {
+        newSet.delete(fincaId);
+      } else {
+        newSet.add(fincaId);
+      }
+      return newSet;
+    });
+  };
+
+  // Toggle colapso/expansión de todas las fincas de una provincia
+  const toggleProvinciaCollapse = (provincia) => {
+    setCollapsedProvincias(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(provincia)) {
+        newSet.delete(provincia);
+      } else {
+        newSet.add(provincia);
+      }
+      return newSet;
+    });
+  };
+
+  // Expandir todas las fincas de una provincia
+  const expandAllFincasInProvincia = (provincia) => {
+    const fincasIds = fincasAgrupadas.grupos[provincia]?.map(f => f._id) || [];
+    setExpandedFincas(prev => {
+      const newSet = new Set(prev);
+      fincasIds.forEach(id => newSet.add(id));
+      return newSet;
+    });
+  };
+
+  // Colapsar todas las fincas de una provincia
+  const collapseAllFincasInProvincia = (provincia) => {
+    const fincasIds = fincasAgrupadas.grupos[provincia]?.map(f => f._id) || [];
+    setExpandedFincas(prev => {
+      const newSet = new Set(prev);
+      fincasIds.forEach(id => newSet.delete(id));
+      return newSet;
+    });
+  };
+
+  // Verificar si todas las fincas de una provincia están expandidas
+  const areAllFincasExpanded = (provincia) => {
+    const fincasIds = fincasAgrupadas.grupos[provincia]?.map(f => f._id) || [];
+    return fincasIds.length > 0 && fincasIds.every(id => expandedFincas.has(id));
+  };
+
   return (
     <div data-testid="fincas-page">
       <div className="flex justify-between items-center mb-6">
