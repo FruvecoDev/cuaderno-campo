@@ -825,6 +825,9 @@ const Dashboard = () => {
         </>
       )}
       
+      {/* Widgets container with flexbox ordering */}
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+      
       {/* KPI Cards */}
       {isWidgetVisible('kpis_principales') && (
       <div className="stats-grid" data-testid="dashboard-kpis" style={{ order: getWidgetOrder('kpis_principales') }}>
