@@ -1043,6 +1043,47 @@ Módulos actualizados para seguir patrón consistente:
 
 ### Estado: ✅ COMPLETADO Y TESTEADO
 
+## Dashboard Configurable por Usuario (26/02/2026) - COMPLETADO
+- **Alcance**: Permitir a cada usuario personalizar qué widgets ver en su dashboard
+
+### Backend (`routes_dashboard.py`):
+Nuevos endpoints:
+- `GET /api/dashboard/config`: Obtiene configuración del usuario
+- `POST /api/dashboard/config`: Guarda configuración del usuario
+- `POST /api/dashboard/config/reset`: Restaura configuración por defecto
+
+Widgets disponibles (10):
+1. KPIs Principales
+2. Resumen de Fincas
+3. Próximas Cosechas
+4. Tratamientos Pendientes
+5. Contratos Activos
+6. Próximas Visitas
+7. Gráficos de Cultivos
+8. Mapa de Parcelas
+9. Calendario
+10. Actividad Reciente
+
+### Frontend (`Dashboard.js`):
+1. **Botón "Configurar"** en header del Dashboard
+2. **Modal de configuración**:
+   - Lista de widgets con toggles para activar/desactivar
+   - Nombre y descripción de cada widget
+   - Botón "Restaurar por defecto"
+   - Botones "Cancelar" y "Guardar cambios"
+3. **Widgets condicionales**: Se muestran según la configuración del usuario
+
+### Persistencia:
+- Configuración guardada en campo `dashboard_config` del usuario
+- Cada usuario puede tener una configuración diferente
+
+### Test: Verificado con curl y screenshots
+- Endpoint: ✅ GET/POST funcionando con autenticación
+- UI: ✅ Modal funciona correctamente
+
+### Estado: ✅ COMPLETADO Y TESTEADO
+
+
 ## Dashboard - Widget Próximas Visitas (26/02/2026) - COMPLETADO
 - **Alcance**: Añadir widget de Próximas Visitas al Dashboard
 
