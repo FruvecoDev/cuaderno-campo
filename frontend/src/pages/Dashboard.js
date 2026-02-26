@@ -587,8 +587,8 @@ const Dashboard = () => {
             borderRadius: '12px',
             padding: '1.5rem',
             width: '90%',
-            maxWidth: '600px',
-            maxHeight: '80vh',
+            maxWidth: '700px',
+            maxHeight: '85vh',
             overflow: 'auto',
             zIndex: 9999,
             boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
