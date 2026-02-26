@@ -242,6 +242,51 @@ tr:hover {
   padding: 1.5rem;
 }
 
+/* Stats grid horizontal - para KPIs en línea */
+.stats-grid-horizontal {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.stats-grid-horizontal .stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+}
+
+.stats-grid-horizontal .stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stats-grid-horizontal .stat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.stats-grid-horizontal .stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.stats-grid-horizontal .stat-label {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .stat-label {
   font-size: 0.875rem;
   color: hsl(var(--muted-foreground));
