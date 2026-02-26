@@ -52,6 +52,18 @@ Visita/Tratamiento → realizados sobre → Parcela
    - Parcelas: filtrar por Proveedor, Cultivo, Campaña, Parcela
    - Visitas: filtrar por Proveedor, Cultivo, Campaña, Parcela
    - Tratamientos: filtrar por Proveedor, Cultivo, Campaña, Tipo
+   - **Contratos (26/02/2026)**: Filtros avanzados completos
+     - Búsqueda rápida (texto libre)
+     - Filtro por Proveedor (dropdown)
+     - Filtro por Cultivo (dropdown)
+     - Filtro por Campaña (dropdown)
+     - Filtro por Tipo (Compra/Venta)
+     - Filtro por Rango de Fechas (Desde/Hasta)
+     - Botón "Filtros avanzados" expandible
+     - Badge con contador de filtros activos
+     - Botón "Limpiar filtros"
+     - Contador "Mostrando X de Y contratos (filtrados)"
+     - Test Report: `/app/test_reports/iteration_38.json` - 100% pass (12/12 tests)
 
 4. **Configuración de Campos por Usuario (Nuevo)**
    - Panel de configuración accesible con botón ⚙️
