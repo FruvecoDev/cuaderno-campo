@@ -1314,7 +1314,7 @@ const Dashboard = () => {
       
       {/* Widget de Contratos Activos */}
       {isWidgetVisible('contratos_activos') && kpis.contratos_stats && (
-        <div className="card mb-6" data-testid="contratos-activos">
+        <div className="card mb-6" data-testid="contratos-activos" style={{ order: getWidgetOrder('contratos_activos') }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FileSignature size={22} style={{ color: '#7b1fa2' }} />
