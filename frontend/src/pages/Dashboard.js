@@ -677,6 +677,241 @@ const Dashboard = () => {
         </div>
       )}
       
+      {/* Widgets: Próximas Cosechas y Tratamientos Pendientes */}
+      <div className="grid-2 mb-6" data-testid="dashboard-widgets">
+        {/* Próximas Cosechas */}
+        <div className="card" data-testid="proximas-cosechas">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Wheat size={20} style={{ color: '#f57c00' }} />
+              Próximas Cosechas
+            </h2>
+            {kpis.proximas_cosechas?.length > 0 && (
+              <span style={{
+                backgroundColor: '#fff3e0',
+                color: '#e65100',
+                padding: '2px 8px',
+                borderRadius: '12px',
+                fontSize: '0.75rem',
+                fontWeight: '600'
+              }}>
+                {kpis.proximas_cosechas.length} planificadas
+              </span>
+            )}
+          </div>
+          
+          {kpis.proximas_cosechas?.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '320px', overflowY: 'auto' }}>
+              {kpis.proximas_cosechas.map((cosecha, idx) => {
+                const fechaCosecha = new Date(cosecha.fecha_planificada);
+                const hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+                const diasRestantes = Math.ceil((fechaCosecha - hoy) / (1000 * 60 * 60 * 24));
+                const esUrgente = diasRestantes <= 3 && diasRestantes >= 0;
+                const esProxima = diasRestantes <= 7 && diasRestantes > 3;
+                
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0.75rem',
+                      backgroundColor: esUrgente ? '#fff3e0' : esProxima ? '#fffde7' : 'hsl(var(--muted))',
+                      borderRadius: '8px',
+                      borderLeft: `4px solid ${esUrgente ? '#f57c00' : esProxima ? '#fbc02d' : '#4caf50'}`
+                    }}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: '600', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        {esUrgente && <Clock size={14} style={{ color: '#f57c00' }} />}
+                        {cosecha.cultivo || 'Sin cultivo'}
+                        {cosecha.variedad && <span style={{ fontWeight: '400', color: '#666' }}>- {cosecha.variedad}</span>}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
+                        {cosecha.proveedor} {cosecha.parcela && `| ${cosecha.parcela}`}
+                      </div>
+                      {cosecha.kilos_estimados > 0 && (
+                        <div style={{ fontSize: '0.75rem', color: '#4caf50', fontWeight: '500' }}>
+                          <Package size={12} style={{ display: 'inline', marginRight: '4px' }} />
+                          {cosecha.kilos_estimados.toLocaleString()} kg estimados
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{
+                        fontWeight: '600',
+                        fontSize: '0.85rem',
+                        color: esUrgente ? '#e65100' : esProxima ? '#f9a825' : '#2e7d32'
+                      }}>
+                        {fechaCosecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))' }}>
+                        {diasRestantes === 0 ? '¡Hoy!' :
+                         diasRestantes === 1 ? 'Mañana' :
+                         diasRestantes < 0 ? `Hace ${Math.abs(diasRestantes)} días` :
+                         `En ${diasRestantes} días`}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div style={{
+              padding: '2rem',
+              textAlign: 'center',
+              backgroundColor: 'hsl(var(--muted))',
+              borderRadius: '8px'
+            }}>
+              <Wheat size={40} style={{ color: 'hsl(var(--muted-foreground))', marginBottom: '0.5rem' }} />
+              <p className="text-muted">No hay cosechas planificadas próximamente</p>
+            </div>
+          )}
+          
+          {/* Fincas con recolección esta semana */}
+          {kpis.fincas_recoleccion_semana?.length > 0 && (
+            <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid hsl(var(--border))' }}>
+              <h4 style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Home size={14} />
+                Fincas en recolección esta semana
+              </h4>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                {kpis.fincas_recoleccion_semana.map((f, idx) => (
+                  <div key={idx} style={{
+                    backgroundColor: '#e8f5e9',
+                    padding: '0.4rem 0.75rem',
+                    borderRadius: '6px',
+                    fontSize: '0.8rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    <span style={{ fontWeight: '600', color: '#2d5a27' }}>{f.denominacion}</span>
+                    <span style={{ color: '#666' }}>({f.hectareas} ha)</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Tratamientos Pendientes */}
+        <div className="card" data-testid="tratamientos-pendientes">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Droplets size={20} style={{ color: '#1976d2' }} />
+              Tratamientos Pendientes
+            </h2>
+            {kpis.tratamientos_pendientes?.length > 0 && (
+              <span style={{
+                backgroundColor: '#e3f2fd',
+                color: '#1565c0',
+                padding: '2px 8px',
+                borderRadius: '12px',
+                fontSize: '0.75rem',
+                fontWeight: '600'
+              }}>
+                {kpis.tratamientos_pendientes.length} pendientes
+              </span>
+            )}
+          </div>
+          
+          {kpis.tratamientos_pendientes?.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '320px', overflowY: 'auto' }}>
+              {kpis.tratamientos_pendientes.map((trat, idx) => {
+                const fechaTrat = trat.fecha_tratamiento ? new Date(trat.fecha_tratamiento) : null;
+                const hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+                const diasRestantes = fechaTrat ? Math.ceil((fechaTrat - hoy) / (1000 * 60 * 60 * 24)) : null;
+                const esVencido = diasRestantes !== null && diasRestantes < 0;
+                const esUrgente = diasRestantes !== null && diasRestantes <= 2 && diasRestantes >= 0;
+                const prioridadAlta = trat.prioridad === 'alta' || trat.prioridad === 'urgente';
+                
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0.75rem',
+                      backgroundColor: esVencido ? '#ffebee' : esUrgente || prioridadAlta ? '#fff3e0' : 'hsl(var(--muted))',
+                      borderRadius: '8px',
+                      borderLeft: `4px solid ${esVencido ? '#c62828' : esUrgente || prioridadAlta ? '#f57c00' : '#1976d2'}`
+                    }}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: '600', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        {(esVencido || prioridadAlta) && <AlertCircle size={14} style={{ color: esVencido ? '#c62828' : '#f57c00' }} />}
+                        {trat.tipo_tratamiento || 'Tratamiento'}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
+                        {trat.cultivo} {trat.parcela && `| ${trat.parcela}`}
+                      </div>
+                      {trat.superficie_aplicacion > 0 && (
+                        <div style={{ fontSize: '0.75rem', color: '#1976d2' }}>
+                          {trat.superficie_aplicacion} ha a tratar
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      {fechaTrat ? (
+                        <>
+                          <div style={{
+                            fontWeight: '600',
+                            fontSize: '0.85rem',
+                            color: esVencido ? '#c62828' : esUrgente ? '#e65100' : '#1565c0'
+                          }}>
+                            {fechaTrat.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                          </div>
+                          <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))' }}>
+                            {diasRestantes === 0 ? '¡Hoy!' :
+                             diasRestantes === 1 ? 'Mañana' :
+                             esVencido ? `Hace ${Math.abs(diasRestantes)} días` :
+                             `En ${diasRestantes} días`}
+                          </div>
+                        </>
+                      ) : (
+                        <span style={{
+                          backgroundColor: '#e3f2fd',
+                          color: '#1565c0',
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          fontSize: '0.7rem'
+                        }}>
+                          {trat.estado || 'Pendiente'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div style={{
+              padding: '2rem',
+              textAlign: 'center',
+              backgroundColor: 'hsl(var(--muted))',
+              borderRadius: '8px'
+            }}>
+              <CheckCircle size={40} style={{ color: '#4caf50', marginBottom: '0.5rem' }} />
+              <p className="text-muted">No hay tratamientos pendientes</p>
+              <p style={{ fontSize: '0.8rem', color: '#4caf50' }}>¡Todo al día!</p>
+            </div>
+          )}
+          
+          <button
+            onClick={() => navigate('/tratamientos')}
+            className="btn btn-sm btn-secondary"
+            style={{ marginTop: '1rem', width: '100%' }}
+          >
+            Ver todos los tratamientos
+          </button>
+        </div>
+      </div>
+      
       {/* Charts */}
       <div className="grid-2" style={{ marginBottom: '2rem' }}>
         {cultivoData.length > 0 && (
