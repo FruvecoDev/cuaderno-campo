@@ -28,6 +28,18 @@ const Contratos = () => {
   const [clientes, setClientes] = useState([]);
   const [cultivos, setCultivos] = useState([]);
   
+  // Estados para filtros
+  const [filters, setFilters] = useState({
+    search: '',
+    proveedor: '',
+    cultivo: '',
+    campana: '',
+    tipo: '',
+    fecha_desde: '',
+    fecha_hasta: ''
+  });
+  const [showFilters, setShowFilters] = useState(false);
+  
   const [formData, setFormData] = useState({
     tipo: puedeCompra ? 'Compra' : 'Venta',  // Compra o Venta según permiso
     campana: '2025/26',
