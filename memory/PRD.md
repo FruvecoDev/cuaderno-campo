@@ -86,6 +86,30 @@ Visita/Tratamiento → realizados sobre → Parcela
   - Backend: 100% (10/10 tests)
   - Frontend: 71% (5/7 tests - fallos por login intermitente, no por funcionalidad)
 
+## Análisis de Plagas con IA - GPT-4o Vision (26/02/2026) - COMPLETADO ✅
+- **Funcionalidad**: Reconocimiento automático de plagas y enfermedades en fotos de cultivos
+- **Integración**: OpenAI GPT-4o Vision con Emergent LLM Key
+- **Backend**:
+  - Nuevo servicio: `/app/backend/services/pest_analysis_service.py`
+  - Endpoints:
+    - `POST /api/visitas/{visita_id}/fotos/{foto_index}/analizar` - Analizar foto individual
+    - `POST /api/visitas/{visita_id}/fotos/analizar-todas` - Analizar todas las fotos
+    - `POST /api/analizar-imagen` - Analizar imagen standalone
+  - Respuesta estructurada JSON con:
+    - Plaga/enfermedad detectada
+    - Categoría (plaga, enfermedad, deficiencia nutricional, estrés hídrico)
+    - Nivel de severidad (leve, moderado, grave)
+    - Confianza del diagnóstico (0-100%)
+    - Tratamiento recomendado
+    - Medidas preventivas
+    - Urgencia de actuación
+- **Frontend**:
+  - Botón "Analizar con IA" (✨) en cada foto
+  - Botón "Analizar todas con IA" para análisis masivo
+  - Badge de estado (SANA/LEVE/MODERADO/GRAVE) con colores
+  - Modal con resultados detallados del análisis
+  - Indicadores visuales de severidad con bordes de colores
+
 ## Bug Fix: Error Leaflet "_leaflet_pos" (26/02/2026) - COMPLETADO
 - **Problema**: Error intermitente "Cannot read properties of undefined (reading '_leaflet_pos')" en mapas
 - **Causa raíz**: Operaciones de mapa (fitBounds, flyTo) se ejecutaban mientras el componente se desmontaba o el mapa no estaba completamente inicializado
