@@ -830,7 +830,7 @@ const Dashboard = () => {
       
       {/* KPI Cards */}
       {isWidgetVisible('kpis_principales') && (
-      <div className="stats-grid" data-testid="dashboard-kpis">
+      <div className="stats-grid" data-testid="dashboard-kpis" style={{ order: getWidgetOrder('kpis_principales') }}>
         {puedeCompra && (
         <div className="stat-card">
           <div className="stat-label">{t('dashboard.stats.purchaseContracts')}</div>
@@ -896,7 +896,7 @@ const Dashboard = () => {
       
       {/* Sección de Fincas */}
       {isWidgetVisible('resumen_fincas') && kpis.fincas && (
-        <div className="card mb-6" data-testid="dashboard-fincas">
+        <div className="card mb-6" data-testid="dashboard-fincas" style={{ order: getWidgetOrder('resumen_fincas') }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Home size={22} style={{ color: '#2d5a27' }} />
