@@ -123,16 +123,7 @@ const Fitosanitarios = () => {
       if (filters.search) params.append('search', filters.search);
       if (filters.activo !== '') params.append('activo', filters.activo);
 
-      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios?${params}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
-      }
-
-      const data = await response.json();
+      const data = await api.get(`/api/fitosanitarios?${params}`);
       setProductos(data.productos || []);
     } catch (error) {
       console.error('Error fetching productos:', error);
@@ -150,12 +141,7 @@ const Fitosanitarios = () => {
 
     try {
       setError(null);
-      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/seed`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      const data = await response.json();
+      const data = await api.post('/api/fitosanitarios/seed');
       
       if (data.success) {
         setSuccessMsg(data.message);
@@ -177,10 +163,7 @@ const Fitosanitarios = () => {
   // Download template
   const handleDownloadTemplate = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/template`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get('/api/fitosanitarios/template');
       
       if (data.success) {
         // Convert base64 to blob and download
@@ -213,10 +196,7 @@ const Fitosanitarios = () => {
       const params = new URLSearchParams();
       if (filters.tipo) params.append('tipo', filters.tipo);
       
-      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/export?${params}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get(`/api/fitosanitarios/export?${params}`);
       
       if (data.success) {
         const byteCharacters = atob(data.data);
