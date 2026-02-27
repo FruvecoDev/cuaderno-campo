@@ -3,42 +3,63 @@ import { test, expect, Page } from '@playwright/test';
 // Helper functions
 async function login(page: Page) {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await page.waitForLoadState('networkidle');
   
   // Check if login page visible (login form)
   const emailInput = page.locator('input[type="email"], input[placeholder*="email"], input[placeholder*="usuario"]').first();
   
   if (await emailInput.isVisible({ timeout: 3000 })) {
+    await emailInput.click();
+    await emailInput.clear();
     await emailInput.fill('admin@fruveco.com');
+    await page.locator('input[type="password"]').first().clear();
     await page.locator('input[type="password"]').first().fill('admin123');
-    const loginBtn = page.locator('button:has-text("Iniciar"), button[type="submit"]').first();
-    await loginBtn.click();
+    await page.locator('button:has-text("Iniciar"), button[type="submit"]').first().click();
     await page.waitForLoadState('networkidle');
   }
   
-  // Dismiss modal
-  await dismissOverlays(page);
+  // Dismiss the ResumenDiario modal
+  await dismissResumenDiario(page);
 }
 
-async function navigateToRRHH(page: Page) {
-  await dismissOverlays(page);
-  await page.goto('/rrhh', { waitUntil: 'domcontentloaded' });
-  await page.waitForLoadState('networkidle');
-  await expect(page.locator('.page-title:has-text("Recursos Humanos")')).toBeVisible({ timeout: 10000 });
-  await dismissOverlays(page);
-}
-
-async function dismissOverlays(page: Page) {
+async function dismissResumenDiario(page: Page) {
+  // Remove Emergent badge
   await page.evaluate(() => {
     const badge = document.querySelector('[class*="emergent"], [id*="emergent-badge"]');
     if (badge) badge.remove();
   });
   
+  // Close the ResumenDiario modal by clicking "Entendido"
   try {
     const entendidoBtn = page.getByRole('button', { name: /Entendido/i });
-    if (await entendidoBtn.isVisible({ timeout: 2000 })) {
-      await entendidoBtn.click();
+    if (await entendidoBtn.isVisible({ timeout: 3000 })) {
+      await entendidoBtn.click({ force: true });
+      // Wait for modal to close
+      await page.waitForTimeout(500);
     }
   } catch {}
+  
+  // Also try to remove any modal overlay
+  await page.evaluate(() => {
+    const modals = document.querySelectorAll('.modal-overlay');
+    modals.forEach(m => m.remove());
+  });
+}
+
+async function navigateToRRHH(page: Page) {
+  // Dismiss modal first
+  await dismissResumenDiario(page);
+  
+  // Click on RRHH in sidebar using force click
+  const rrhhLink = page.getByTestId('nav-recursos humanos');
+  await rrhhLink.click({ force: true });
+  
+  // Wait for RRHH page to load
+  await page.waitForLoadState('networkidle');
+  await expect(page.locator('h1.page-title')).toContainText('Recursos Humanos', { timeout: 10000 });
+  
+  // Dismiss any modal again
+  await dismissResumenDiario(page);
 }
 
 test.describe('RRHH Module - Core Features', () => {
@@ -48,6 +69,7 @@ test.describe('RRHH Module - Core Features', () => {
   });
 
   test('should display employee list and stats', async ({ page }) => {
+    // Verify KPI cards are visible
     await expect(page.getByText('Total Empleados').first()).toBeVisible();
     await expect(page.locator('.card').filter({ hasText: /Activos/ }).first()).toBeVisible();
     await expect(page.getByRole('columnheader', { name: /Código/i })).toBeVisible();
