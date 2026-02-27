@@ -631,18 +631,7 @@ const Visitas = () => {
     
     try {
       setError(null);
-      const response = await fetch(`${BACKEND_URL}/api/visitas/${visitaId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
-      }
-      
+      await api.delete(`/api/visitas/${visitaId}`);
       fetchVisitas();
     } catch (error) {
       console.error('Error deleting visita:', error);
