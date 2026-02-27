@@ -4,10 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { Lock, User, AlertCircle } from 'lucide-react';
 import LanguageSelector from '../components/LanguageSelector';
+import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
 import defaultLogo from '../assets/logo.png';
-
-const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -30,10 +29,9 @@ const Login = () => {
   useEffect(() => {
     const fetchLogo = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/config/logos`);
-        const data = await response.json();
+        const data = await api.get('/api/config/logos', { includeAuth: false });
         if (data.success && data.login_logo) {
-          setLoginLogo(`${API_URL}${data.login_logo}`);
+          setLoginLogo(`${BACKEND_URL}${data.login_logo}`);
         }
       } catch (err) {
         console.error('Error fetching logo:', err);
