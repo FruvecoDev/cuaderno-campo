@@ -5,7 +5,7 @@ import {
   LayoutDashboard, FileText, MapPin, Home, Calendar, ListTodo,
   Sprout, Droplets, BookOpen, FileBarChart, Wheat, FolderOpen,
   LogOut, User, Users, Package, Leaf, Cog, ClipboardCheck, Beaker, BarChart3, Globe, Brain, UserCheck,
-  ChevronDown, ChevronRight, TrendingUp, Menu, X, Settings, CloudSun
+  ChevronDown, ChevronRight, TrendingUp, Menu, X, Settings, CloudSun, ChevronsLeft, ChevronsRight
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
@@ -26,6 +26,12 @@ const Layout = ({ children }) => {
   // Estado para sidebar móvil
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
+  // Estado para sidebar colapsado (solo iconos)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem('sidebar_collapsed');
+    return saved === 'true';
+  });
+  
   // Estado para el logo personalizado
   const [dashboardLogo, setDashboardLogo] = useState(null);
   
@@ -37,6 +43,11 @@ const Layout = ({ children }) => {
     const saved = localStorage.getItem('menu_collapsed_sections');
     return saved ? JSON.parse(saved) : {};
   });
+  
+  // Guardar estado del sidebar colapsado
+  useEffect(() => {
+    localStorage.setItem('sidebar_collapsed', isSidebarCollapsed.toString());
+  }, [isSidebarCollapsed]);
   
   // Mostrar Resumen Diario al iniciar sesión (una vez por día)
   useEffect(() => {
