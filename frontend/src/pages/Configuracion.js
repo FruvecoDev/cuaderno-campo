@@ -465,10 +465,7 @@ const SchedulerConfig = ({ token }) => {
 
   const fetchConfig = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/notificaciones/scheduler/config`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get('/api/notificaciones/scheduler/config');
       setConfig(data.config || {
         activa: true,
         hora_verificacion: '07:00',
@@ -486,10 +483,7 @@ const SchedulerConfig = ({ token }) => {
 
   const fetchStatus = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/notificaciones/scheduler/status`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get('/api/notificaciones/scheduler/status');
       setStatus(data);
     } catch (err) {
       console.error('Error fetching scheduler status:', err);
@@ -499,26 +493,14 @@ const SchedulerConfig = ({ token }) => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/notificaciones/scheduler/config`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          verificacion_clima_activa: config.activa,
-          hora_verificacion: config.hora_verificacion,
-          frecuencia: config.frecuencia,
-          notificar_app: config.notificar_app,
-          notificar_email: config.notificar_email,
-          roles_notificar: config.roles_notificar
-        })
+      await api.put('/api/notificaciones/scheduler/config', {
+        verificacion_clima_activa: config.activa,
+        hora_verificacion: config.hora_verificacion,
+        frecuencia: config.frecuencia,
+        notificar_app: config.notificar_app,
+        notificar_email: config.notificar_email,
+        roles_notificar: config.roles_notificar
       });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.detail || 'Error al guardar');
-      }
 
       setMessage({ type: 'success', text: 'Configuración guardada correctamente' });
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
@@ -533,15 +515,7 @@ const SchedulerConfig = ({ token }) => {
   const handleExecuteNow = async () => {
     setExecuting(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/notificaciones/scheduler/ejecutar`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.detail || 'Error al ejecutar');
-      }
+      await api.post('/api/notificaciones/scheduler/ejecutar');
 
       setMessage({ type: 'success', text: 'Verificación climática iniciada. Revisa las alertas en unos segundos.' });
       setTimeout(() => setMessage({ type: '', text: '' }), 5000);
