@@ -478,12 +478,7 @@ const Parcelas = () => {
   
   const fetchParcelas = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/parcelas`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const data = await response.json();
+      const data = await api.get('/api/parcelas');
       setParcelas(data.parcelas || []);
     } catch (error) {
       console.error('Error fetching parcelas:', error);
@@ -494,12 +489,7 @@ const Parcelas = () => {
   
   const fetchContratos = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/contratos`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const data = await response.json();
+      const data = await api.get('/api/contratos');
       setContratos(data.contratos || []);
     } catch (error) {
       console.error('Error fetching contratos:', error);
