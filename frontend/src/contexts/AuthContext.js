@@ -25,11 +25,17 @@ export const AuthProvider = ({ children }) => {
   
   const fetchCurrentUser = useCallback(async () => {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+      
       const response = await fetch(`${BACKEND_URL}/api/auth/me`, {
         headers: {
           'Authorization': `Bearer ${token}`
-        }
+        },
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       if (response.ok) {
         const data = await response.json();
@@ -39,8 +45,16 @@ export const AuthProvider = ({ children }) => {
         logout();
       }
     } catch (error) {
-      console.error('Error fetching user:', error);
-      logout();
+      // Don't logout on network errors or aborts, just log them
+      if (error.name === 'AbortError') {
+        console.warn('Request timeout fetching user');
+      } else {
+        console.error('Error fetching user:', error);
+      }
+      // Only logout if it's not a temporary network issue
+      if (error.message && !error.message.includes('network') && !error.message.includes('postMessage')) {
+        logout();
+      }
     } finally {
       setLoading(false);
     }
