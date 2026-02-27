@@ -309,30 +309,25 @@ const Dashboard = () => {
   
   const fetchDashboardConfig = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/dashboard/config`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const data = await api.get('/api/dashboard/config');
+      const availableWidgets = data.available_widgets || [];
+      const userConfig = data.config?.widgets || [];
+      
+      // Merge user config with available widgets to ensure names/descriptions exist
+      const mergedWidgets = availableWidgets.map((available, idx) => {
+        const userWidget = userConfig.find(w => w.widget_id === available.widget_id);
+        return {
+          ...available,
+          visible: userWidget ? userWidget.visible : true,
+          order: userWidget ? userWidget.order : idx
+        };
       });
-      if (response.ok) {
-        const data = await response.json();
-        const availableWidgets = data.available_widgets || [];
-        const userConfig = data.config?.widgets || [];
-        
-        // Merge user config with available widgets to ensure names/descriptions exist
-        const mergedWidgets = availableWidgets.map((available, idx) => {
-          const userWidget = userConfig.find(w => w.widget_id === available.widget_id);
-          return {
-            ...available,
-            visible: userWidget ? userWidget.visible : true,
-            order: userWidget ? userWidget.order : idx
-          };
-        });
-        
-        // Sort by order
-        mergedWidgets.sort((a, b) => a.order - b.order);
-        
-        setDashboardConfig({ ...data.config, widgets: mergedWidgets });
-        setConfigWidgets(mergedWidgets);
-      }
+      
+      // Sort by order
+      mergedWidgets.sort((a, b) => a.order - b.order);
+      
+      setDashboardConfig({ ...data.config, widgets: mergedWidgets });
+      setConfigWidgets(mergedWidgets);
     } catch (error) {
       console.error('Error fetching dashboard config:', error);
     }
@@ -341,21 +336,12 @@ const Dashboard = () => {
   const saveDashboardConfig = async () => {
     setSavingConfig(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/dashboard/config`, {
-        method: 'POST',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          widgets: configWidgets,
-          layout: dashboardConfig?.layout || 'default'
-        })
+      await api.post('/api/dashboard/config', {
+        widgets: configWidgets,
+        layout: dashboardConfig?.layout || 'default'
       });
-      if (response.ok) {
-        setDashboardConfig({ ...dashboardConfig, widgets: configWidgets });
-        setShowConfigModal(false);
-      }
+      setDashboardConfig({ ...dashboardConfig, widgets: configWidgets });
+      setShowConfigModal(false);
     } catch (error) {
       console.error('Error saving dashboard config:', error);
     } finally {
@@ -365,15 +351,9 @@ const Dashboard = () => {
   
   const resetDashboardConfig = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/dashboard/config/reset`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setDashboardConfig(data.config);
-        setConfigWidgets(data.config?.widgets || []);
-      }
+      const data = await api.post('/api/dashboard/config/reset', {});
+      setDashboardConfig(data.config);
+      setConfigWidgets(data.config?.widgets || []);
     } catch (error) {
       console.error('Error resetting dashboard config:', error);
     }
