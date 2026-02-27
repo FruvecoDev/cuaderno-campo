@@ -1035,26 +1035,13 @@ const Tratamientos = () => {
     try {
       setError(null);
       const url = editingId 
-        ? `${BACKEND_URL}/api/tratamientos/${editingId}`
-        : `${BACKEND_URL}/api/tratamientos`;
+        ? `/api/tratamientos/${editingId}`
+        : `/api/tratamientos`;
       
-      const method = editingId ? 'PUT' : 'POST';
+      const data = editingId 
+        ? await api.put(url, payload)
+        : await api.post(url, payload);
       
-      const response = await fetch(url, {
-        method: method,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
-      }
-      
-      const data = await response.json();
       if (data.success) {
         setShowForm(false);
         setEditingId(null);
