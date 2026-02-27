@@ -119,6 +119,7 @@ app.include_router(resumen_diario_router)
 app.include_router(tareas_router)
 app.include_router(irrigaciones_router)
 app.include_router(uploads_router)
+app.include_router(rrhh_router)
 
 # Mount static files for uploaded images
 uploads_dir = "/app/uploads"
