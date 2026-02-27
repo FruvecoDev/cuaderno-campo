@@ -5,6 +5,7 @@ import { PermissionButton, usePermissions, usePermissionError } from '../utils/p
 import { useAuth } from '../contexts/AuthContext';
 import syncService from '../services/syncService';
 import offlineDB from '../services/offlineDB';
+import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
 
 
