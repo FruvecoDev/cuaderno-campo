@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, Edit2, Package, TrendingUp, TrendingDown, Check, ChevronDown, ChevronUp, X, Download, Target, Scale, DollarSign, Clock, CheckCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 const Cosechas = () => {
   const { token } = useAuth();

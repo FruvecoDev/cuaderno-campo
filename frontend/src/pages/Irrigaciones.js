@@ -9,7 +9,6 @@ import { usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 const ESTADO_COLORS = {
   planificado: { bg: '#fef3c7', text: '#d97706' },

@@ -11,7 +11,6 @@ import { useAuth } from '../contexts/AuthContext';
 import AdvancedParcelMap from '../components/AdvancedParcelMap';
 import '../App.css';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 // Fix leaflet icon
 delete L.Icon.Default.prototype._getIconUrl;

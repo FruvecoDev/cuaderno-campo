@@ -7,7 +7,6 @@ import syncService from '../services/syncService';
 import offlineDB from '../services/offlineDB';
 import '../App.css';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 // ============================================================================
 // CALCULADORA DE FITOSANITARIOS
