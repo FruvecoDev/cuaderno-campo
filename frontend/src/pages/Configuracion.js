@@ -740,8 +740,7 @@ const Configuracion = () => {
 
   const fetchLogos = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/config/logos`);
-      const data = await response.json();
+      const data = await api.get('/api/config/logos');
       if (data.success) {
         setLogos({ login_logo: data.login_logo, dashboard_logo: data.dashboard_logo });
       }
@@ -752,8 +751,7 @@ const Configuracion = () => {
 
   const fetchTheme = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/config/theme`);
-      const data = await response.json();
+      const data = await api.get('/api/config/theme');
       if (data.success) {
         setCurrentTheme(data);
         applyThemeToDOM(data.primary, data.accent);
@@ -767,8 +765,7 @@ const Configuracion = () => {
 
   const fetchThemes = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/config/themes`);
-      const data = await response.json();
+      const data = await api.get('/api/config/themes');
       if (data.success) {
         setThemes(data.themes);
       }
@@ -790,18 +787,10 @@ const Configuracion = () => {
   };
 
   const handleLogoUpload = async (type, file) => {
-    const token = localStorage.getItem('token');
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(`${BACKEND_URL}/api/config/logo/${type}`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` },
-      body: formData
-    });
-
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.detail || 'Error al subir el logo');
+    const data = await api.upload(`/api/config/logo/${type}`, formData);
 
     setLogos(prev => ({ ...prev, [`${type}_logo`]: data.logo_url }));
     setMessage({ type: 'success', text: data.message });
