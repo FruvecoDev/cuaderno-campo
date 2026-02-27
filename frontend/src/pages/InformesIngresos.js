@@ -67,13 +67,8 @@ const InformesIngresos = () => {
   
   const fetchFiltrosOpciones = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/ingresos/filtros-opciones`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setFiltrosOpciones(data);
-      }
+      const data = await api.get('/api/ingresos/filtros-opciones');
+      setFiltrosOpciones(data);
     } catch (error) {
       console.error('Error fetching filtros opciones:', error);
     }
@@ -81,13 +76,8 @@ const InformesIngresos = () => {
   
   const fetchCampanas = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/ingresos/campanas`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setCampanas(data.campanas || []);
-      }
+      const data = await api.get('/api/ingresos/campanas');
+      setCampanas(data.campanas || []);
     } catch (error) {
       console.error('Error fetching campanas:', error);
     }
@@ -107,19 +97,11 @@ const InformesIngresos = () => {
       if (filters.cliente) params.append('cliente', filters.cliente);
       if (filters.parcela_codigo) params.append('parcela_codigo', filters.parcela_codigo);
       
-      const response = await fetch(`${BACKEND_URL}/api/ingresos/resumen?${params}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Error al cargar el resumen de ingresos');
-      }
-      
-      const data = await response.json();
+      const data = await api.get(`/api/ingresos/resumen?${params}`);
       setResumen(data);
     } catch (error) {
       console.error('Error:', error);
-      setError(error.message);
+      setError(api.getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -138,15 +120,9 @@ const InformesIngresos = () => {
       if (filters.fecha_hasta) params.append('fecha_hasta', filters.fecha_hasta);
       if (filters.campana) params.append('campana', filters.campana);
       
-      const response = await fetch(`${BACKEND_URL}/api/ingresos/detalle-albaranes?${params}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setDetalleAlbaranes(data.albaranes || []);
-        setDetalleView({ tipo, valor, total: data.total });
-      }
+      const data = await api.get(`/api/ingresos/detalle-albaranes?${params}`);
+      setDetalleAlbaranes(data.albaranes || []);
+      setDetalleView({ tipo, valor, total: data.total });
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -195,21 +171,7 @@ const InformesIngresos = () => {
       if (filters.cliente) params.append('cliente', filters.cliente);
       if (filters.cultivo) params.append('cultivo', filters.cultivo);
       
-      const response = await fetch(`${BACKEND_URL}/api/ingresos/export/excel?${params}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `informe_ingresos_${new Date().toISOString().slice(0,10)}.xlsx`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-      }
+      await api.download(`/api/ingresos/export/excel?${params}`, `informe_ingresos_${new Date().toISOString().slice(0,10)}.xlsx`);
     } catch (error) {
       console.error('Error exporting Excel:', error);
       setError('Error al exportar a Excel');
@@ -228,21 +190,7 @@ const InformesIngresos = () => {
       if (filters.cliente) params.append('cliente', filters.cliente);
       if (filters.cultivo) params.append('cultivo', filters.cultivo);
       
-      const response = await fetch(`${BACKEND_URL}/api/ingresos/export/pdf?${params}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `informe_ingresos_${new Date().toISOString().slice(0,10)}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-      }
+      await api.download(`/api/ingresos/export/pdf?${params}`, `informe_ingresos_${new Date().toISOString().slice(0,10)}.pdf`);
     } catch (error) {
       console.error('Error exporting PDF:', error);
       setError('Error al exportar a PDF');

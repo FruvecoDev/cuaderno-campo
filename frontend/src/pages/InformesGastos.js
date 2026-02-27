@@ -67,13 +67,8 @@ const InformesGastos = () => {
   
   const fetchFiltrosOpciones = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/gastos/filtros-opciones`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setFiltrosOpciones(data);
-      }
+      const data = await api.get('/api/gastos/filtros-opciones');
+      setFiltrosOpciones(data);
     } catch (error) {
       console.error('Error fetching filtros opciones:', error);
     }
@@ -81,13 +76,8 @@ const InformesGastos = () => {
   
   const fetchCampanas = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/gastos/campanas`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setCampanas(data.campanas || []);
-      }
+      const data = await api.get('/api/gastos/campanas');
+      setCampanas(data.campanas || []);
     } catch (error) {
       console.error('Error fetching campanas:', error);
     }
@@ -107,19 +97,11 @@ const InformesGastos = () => {
       if (filters.proveedor) params.append('proveedor', filters.proveedor);
       if (filters.parcela_codigo) params.append('parcela_codigo', filters.parcela_codigo);
       
-      const response = await fetch(`${BACKEND_URL}/api/gastos/resumen?${params}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Error al cargar el resumen de gastos');
-      }
-      
-      const data = await response.json();
+      const data = await api.get(`/api/gastos/resumen?${params}`);
       setResumen(data);
     } catch (error) {
       console.error('Error:', error);
-      setError(error.message);
+      setError(api.getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -138,15 +120,9 @@ const InformesGastos = () => {
       if (filters.fecha_hasta) params.append('fecha_hasta', filters.fecha_hasta);
       if (filters.campana) params.append('campana', filters.campana);
       
-      const response = await fetch(`${BACKEND_URL}/api/gastos/detalle-albaranes?${params}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setDetalleAlbaranes(data.albaranes || []);
-        setDetalleView({ tipo, valor, total: data.total_sum });
-      }
+      const data = await api.get(`/api/gastos/detalle-albaranes?${params}`);
+      setDetalleAlbaranes(data.albaranes || []);
+      setDetalleView({ tipo, valor, total: data.total_sum });
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -193,21 +169,7 @@ const InformesGastos = () => {
       if (filters.fecha_hasta) params.append('fecha_hasta', filters.fecha_hasta);
       if (filters.campana) params.append('campana', filters.campana);
       
-      const response = await fetch(`${BACKEND_URL}/api/gastos/export/excel?${params}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `informe_gastos_${new Date().toISOString().slice(0,10)}.xlsx`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-      }
+      await api.download(`/api/gastos/export/excel?${params}`, `informe_gastos_${new Date().toISOString().slice(0,10)}.xlsx`);
     } catch (error) {
       console.error('Error exporting Excel:', error);
       setError('Error al exportar a Excel');
@@ -224,21 +186,7 @@ const InformesGastos = () => {
       if (filters.fecha_hasta) params.append('fecha_hasta', filters.fecha_hasta);
       if (filters.campana) params.append('campana', filters.campana);
       
-      const response = await fetch(`${BACKEND_URL}/api/gastos/export/pdf?${params}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `informe_gastos_${new Date().toISOString().slice(0,10)}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-      }
+      await api.download(`/api/gastos/export/pdf?${params}`, `informe_gastos_${new Date().toISOString().slice(0,10)}.pdf`);
     } catch (error) {
       console.error('Error exporting PDF:', error);
       setError('Error al exportar a PDF');
