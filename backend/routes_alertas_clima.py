@@ -24,7 +24,7 @@ datos_clima_collection = db['datos_clima']
 config_alertas_collection = db['config_alertas']
 
 # OpenWeatherMap API - Free tier (1000 calls/day)
-OPENWEATHER_API_KEY = os.environ.get('OPENWEATHER_API_KEY', '')  # Demo key
+OPENWEATHER_API_KEY = os.environ.get('OPENWEATHER_API_KEY', '')  # Set in .env file
 OPENWEATHER_BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
 
 # Default alert rules - maps conditions to plantilla suggestions
