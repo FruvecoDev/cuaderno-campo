@@ -238,25 +238,15 @@ const Fitosanitarios = () => {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/import`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData
-      });
+      const data = await api.upload('/api/fitosanitarios/import', formData);
       
-      const data = await response.json();
-      
-      if (response.ok) {
-        setImportResult(data);
-        if (data.inserted > 0) {
-          fetchProductos();
-        }
-      } else {
-        setError(data.detail || t('phytosanitary.errorImport'));
+      setImportResult(data);
+      if (data.inserted > 0) {
+        fetchProductos();
       }
     } catch (error) {
       console.error('Error importing:', error);
-      setError(t('phytosanitary.errorImportFile'));
+      setError(error.message || t('phytosanitary.errorImportFile'));
     } finally {
       setImportLoading(false);
       if (fileInputRef.current) {
@@ -273,10 +263,7 @@ const Fitosanitarios = () => {
   // Fetch MAPA info
   const fetchMapaInfo = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/mapa-info`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get('/api/fitosanitarios/mapa-info');
       if (data.success) {
         setMapaInfo(data.info);
       }
@@ -297,28 +284,15 @@ const Fitosanitarios = () => {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/import-mapa-excel`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData
-      });
-
-      const data = await response.json();
+      const data = await api.upload('/api/fitosanitarios/import-mapa-excel', formData);
       
-      if (response.ok) {
-        setImportResult({
-          success: true,
-          ...data
-        });
-        fetchProductos();
-        setSuccessMsg(`Importación MAPA: ${data.inserted} nuevos, ${data.updated} actualizados`);
-        setTimeout(() => setSuccessMsg(null), 5000);
-      } else {
-        setImportResult({
-          success: false,
-          error: data.detail || 'Error en la importación'
-        });
-      }
+      setImportResult({
+        success: true,
+        ...data
+      });
+      fetchProductos();
+      setSuccessMsg(`Importación MAPA: ${data.inserted} nuevos, ${data.updated} actualizados`);
+      setTimeout(() => setSuccessMsg(null), 5000);
     } catch (error) {
       setImportResult({
         success: false,
