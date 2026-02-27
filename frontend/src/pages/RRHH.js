@@ -881,9 +881,36 @@ const ControlHorario = ({ empleados }) => {
   const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState('');
   const [tipoFichaje, setTipoFichaje] = useState('entrada');
   
+  // Estados para QR Scanner
+  const [scannerActive, setScannerActive] = useState(false);
+  const [scanResult, setScanResult] = useState(null);
+  const [scanError, setScanError] = useState(null);
+  
+  // Estados para Facial
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const [cameraActive, setCameraActive] = useState(false);
+  const [capturedPhoto, setCapturedPhoto] = useState(null);
+  const [facialEmpleado, setFacialEmpleado] = useState('');
+  
+  // Estado para feedback
+  const [fichajeResult, setFichajeResult] = useState(null);
+  
   useEffect(() => {
     fetchFichajesHoy();
   }, []);
+  
+  // Limpiar cámara al cerrar modal
+  useEffect(() => {
+    if (!showFicharModal) {
+      stopCamera();
+      setScannerActive(false);
+      setScanResult(null);
+      setScanError(null);
+      setCapturedPhoto(null);
+      setFichajeResult(null);
+    }
+  }, [showFicharModal]);
   
   const fetchFichajesHoy = async () => {
     try {
@@ -902,7 +929,7 @@ const ControlHorario = ({ empleados }) => {
     
     try {
       const now = new Date();
-      await api.post('/api/rrhh/fichajes', {
+      const result = await api.post('/api/rrhh/fichajes', {
         empleado_id: empleadoSeleccionado,
         tipo: tipoFichaje,
         fecha: now.toISOString().split('T')[0],
@@ -910,11 +937,114 @@ const ControlHorario = ({ empleados }) => {
         metodo_identificacion: 'manual'
       });
       
-      setShowFicharModal(false);
+      setFichajeResult({ success: true, data: result.data });
       setEmpleadoSeleccionado('');
       fetchFichajesHoy();
+      
+      setTimeout(() => {
+        setShowFicharModal(false);
+        setFichajeResult(null);
+      }, 2000);
     } catch (err) {
       console.error('Error fichando:', err);
+      setFichajeResult({ success: false, error: api.getErrorMessage(err) });
+    }
+  };
+  
+  // Handler para escaneo QR
+  const handleQRScan = async (result, error) => {
+    if (result) {
+      const qrCode = result?.text;
+      if (qrCode && !scanResult) {
+        setScannerActive(false);
+        setScanResult(qrCode);
+        
+        try {
+          const now = new Date();
+          const response = await api.post('/api/rrhh/fichajes/qr', {
+            qr_code: qrCode,
+            tipo: tipoFichaje
+          });
+          
+          setFichajeResult({ success: true, data: response.data });
+          fetchFichajesHoy();
+          
+          setTimeout(() => {
+            setShowFicharModal(false);
+            setFichajeResult(null);
+            setScanResult(null);
+          }, 2000);
+        } catch (err) {
+          setScanError(api.getErrorMessage(err));
+          setFichajeResult({ success: false, error: api.getErrorMessage(err) });
+        }
+      }
+    }
+    if (error && error?.message !== 'No QR code found') {
+      console.error('QR Error:', error);
+    }
+  };
+  
+  // Funciones para cámara (Facial)
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'user', width: 320, height: 240 } 
+      });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        setCameraActive(true);
+      }
+    } catch (err) {
+      console.error('Error accessing camera:', err);
+      setScanError('No se pudo acceder a la cámara');
+    }
+  };
+  
+  const stopCamera = () => {
+    if (videoRef.current?.srcObject) {
+      const tracks = videoRef.current.srcObject.getTracks();
+      tracks.forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    setCameraActive(false);
+  };
+  
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const canvas = canvasRef.current;
+      const video = videoRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0);
+      const photoData = canvas.toDataURL('image/jpeg', 0.7);
+      setCapturedPhoto(photoData);
+      stopCamera();
+    }
+  };
+  
+  const handleFichaFacial = async () => {
+    if (!facialEmpleado || !capturedPhoto) return;
+    
+    try {
+      const response = await api.post('/api/rrhh/fichajes/facial', {
+        empleado_id: facialEmpleado,
+        foto_capturada: capturedPhoto,
+        tipo: tipoFichaje
+      });
+      
+      setFichajeResult({ success: true, data: response.data });
+      fetchFichajesHoy();
+      
+      setTimeout(() => {
+        setShowFicharModal(false);
+        setFichajeResult(null);
+        setCapturedPhoto(null);
+        setFacialEmpleado('');
+      }, 2000);
+    } catch (err) {
+      setFichajeResult({ success: false, error: api.getErrorMessage(err) });
     }
   };
   
