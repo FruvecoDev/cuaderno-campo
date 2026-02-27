@@ -274,13 +274,8 @@ const Tareas = () => {
 
   const handleToggleSubtarea = async (tareaId, subtareaId, completada) => {
     try {
-      const res = await fetch(
-        `${BACKEND_URL}/api/tareas/${tareaId}/subtarea/${subtareaId}?completada=${!completada}`,
-        { method: 'PATCH', headers }
-      );
-      if (res.ok) {
-        fetchTareas();
-      }
+      await api.patch(`/api/tareas/${tareaId}/subtarea/${subtareaId}?completada=${!completada}`, {});
+      fetchTareas();
     } catch (err) {
       console.error('Error toggling subtarea:', err);
     }
@@ -312,7 +307,11 @@ const Tareas = () => {
       if (filters.estado) params.append('estado', filters.estado);
       if (filters.prioridad) params.append('prioridad', filters.prioridad);
       
-      const res = await fetch(`${BACKEND_URL}/api/tareas/export/excel?${params}`, { headers });
+      // For file downloads, we still need the BACKEND_URL
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${BACKEND_URL}/api/tareas/export/excel?${params}`, { 
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
