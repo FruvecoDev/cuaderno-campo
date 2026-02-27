@@ -75,16 +75,7 @@ const Proveedores = () => {
   const fetchProveedores = async () => {
     try {
       setError(null);
-      const response = await fetch(`${BACKEND_URL}/api/proveedores`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
-      }
-      
-      const data = await response.json();
+      const data = await api.get('/api/proveedores');
       setProveedores(data.proveedores || []);
     } catch (error) {
       console.error('Error fetching proveedores:', error);
@@ -99,22 +90,10 @@ const Proveedores = () => {
     e.preventDefault();
     try {
       setError(null);
-      const url = editingId 
-        ? `${BACKEND_URL}/api/proveedores/${editingId}`
-        : `${BACKEND_URL}/api/proveedores`;
-      
-      const response = await fetch(url, {
-        method: editingId ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(formData)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
+      if (editingId) {
+        await api.put(`/api/proveedores/${editingId}`, formData);
+      } else {
+        await api.post('/api/proveedores', formData);
       }
       
       setShowForm(false);
@@ -142,16 +121,7 @@ const Proveedores = () => {
     
     try {
       setError(null);
-      const response = await fetch(`${BACKEND_URL}/api/proveedores/${proveedorId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
-      }
-      
+      await api.delete(`/api/proveedores/${proveedorId}`);
       fetchProveedores();
     } catch (error) {
       console.error('Error deleting proveedor:', error);
