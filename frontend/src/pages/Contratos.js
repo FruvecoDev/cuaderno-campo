@@ -354,7 +354,7 @@ const Contratos = () => {
   const handleGenerateCuaderno = async (contratoId) => {
     setGeneratingCuaderno(contratoId);
     try {
-      // For file download, we still need raw fetch to handle blob
+      // For file download, we use a raw fetch to handle blob response
       const token = localStorage.getItem('token');
       const response = await fetch(`${BACKEND_URL}/api/cuaderno-campo/generar`, {
         method: 'POST',
