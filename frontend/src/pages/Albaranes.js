@@ -435,19 +435,10 @@ const Albaranes = () => {
       delete payload.cliente_contrato;
       delete payload.tipo_contrato;
       
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw { status: response.status, message: data.detail || 'Error al guardar' };
+      if (editingId) {
+        await api.put(`/api/albaranes/${editingId}`, payload);
+      } else {
+        await api.post('/api/albaranes', payload);
       }
       
       setShowForm(false);
@@ -502,17 +493,7 @@ const Albaranes = () => {
     }
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/albaranes/${albaranId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw { status: response.status, message: data.detail || 'Error al eliminar' };
-      }
-      
+      await api.delete(`/api/albaranes/${albaranId}`);
       reloadAlbaranes();
     } catch (error) {
       console.error('Error deleting albaran:', error);
