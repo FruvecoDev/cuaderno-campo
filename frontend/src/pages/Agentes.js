@@ -100,14 +100,8 @@ const Agentes = () => {
       if (searchTerm) params.append('search', searchTerm);
       if (filterActivo !== '') params.append('activo', filterActivo);
       
-      const response = await fetch(`${BACKEND_URL}/api/agentes?${params}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setAgentes(data.agentes || []);
-      }
+      const data = await api.get(`/api/agentes?${params}`);
+      setAgentes(data.agentes || []);
     } catch (err) {
       setError('Error cargando agentes');
     } finally {
@@ -118,31 +112,16 @@ const Agentes = () => {
   const fetchReferencias = async () => {
     try {
       // Fetch contratos
-      const contratosRes = await fetch(`${BACKEND_URL}/api/contratos`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (contratosRes.ok) {
-        const data = await contratosRes.json();
-        setContratos(data.contratos || []);
-      }
+      const contratosData = await api.get('/api/contratos');
+      setContratos(contratosData.contratos || []);
       
       // Fetch cultivos
-      const cultivosRes = await fetch(`${BACKEND_URL}/api/catalogos/cultivos`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (cultivosRes.ok) {
-        const data = await cultivosRes.json();
-        setCultivos(data.cultivos || []);
-      }
+      const cultivosData = await api.get('/api/catalogos/cultivos');
+      setCultivos(cultivosData.cultivos || []);
       
       // Fetch parcelas
-      const parcelasRes = await fetch(`${BACKEND_URL}/api/parcelas`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (parcelasRes.ok) {
-        const data = await parcelasRes.json();
-        setParcelas(data.parcelas || []);
-      }
+      const parcelasData = await api.get('/api/parcelas');
+      setParcelas(parcelasData.parcelas || []);
     } catch (err) {
       console.error('Error fetching referencias:', err);
     }
@@ -150,13 +129,8 @@ const Agentes = () => {
 
   const fetchComisiones = async (agenteId) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/agentes/${agenteId}/comisiones`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setComisiones(data.comisiones || []);
-      }
+      const data = await api.get(`/api/agentes/${agenteId}/comisiones`);
+      setComisiones(data.comisiones || []);
     } catch (err) {
       console.error('Error fetching comisiones:', err);
     }
@@ -171,42 +145,26 @@ const Agentes = () => {
     }
     
     try {
-      const url = editingId 
-        ? `${BACKEND_URL}/api/agentes/${editingId}`
-        : `${BACKEND_URL}/api/agentes`;
-      
-      const response = await fetch(url, {
-        method: editingId ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({...formData, tipo: activeTab})
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        const agenteId = editingId || result.data._id;
-        
-        // Upload foto if selected
-        if (selectedFoto && agenteId) {
-          const fotoFormData = new FormData();
-          fotoFormData.append('file', selectedFoto);
-          await fetch(`${BACKEND_URL}/api/agentes/${agenteId}/upload-foto`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
-            body: fotoFormData
-          });
-        }
-        
-        resetForm();
-        fetchAgentes();
+      let result;
+      if (editingId) {
+        result = await api.put(`/api/agentes/${editingId}`, {...formData, tipo: activeTab});
       } else {
-        const err = await response.json();
-        setError(err.detail || 'Error guardando agente');
+        result = await api.post('/api/agentes', {...formData, tipo: activeTab});
       }
+      
+      const agenteId = editingId || result.data._id;
+      
+      // Upload foto if selected
+      if (selectedFoto && agenteId) {
+        const fotoFormData = new FormData();
+        fotoFormData.append('file', selectedFoto);
+        await api.upload(`/api/agentes/${agenteId}/upload-foto`, fotoFormData);
+      }
+      
+      resetForm();
+      fetchAgentes();
     } catch (err) {
-      setError('Error de conexión');
+      setError(err.message || 'Error de conexión');
     }
   };
 
