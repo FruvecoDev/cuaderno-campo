@@ -263,44 +263,24 @@ class SyncService {
       try {
         let endpoint = '';
         if (item.type === 'visita') {
-          endpoint = `${BACKEND_URL}/api/visitas`;
+          endpoint = '/api/visitas';
         } else if (item.type === 'tratamiento') {
-          endpoint = `${BACKEND_URL}/api/tratamientos`;
+          endpoint = '/api/tratamientos';
         } else {
           console.warn('Unknown item type:', item.type);
           continue;
         }
 
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(item.data)
-        });
-
-        if (response.ok) {
-          await offlineDB.removePendingSyncItem(item.id);
-          synced++;
-          console.log(`Synced ${item.type} #${item.id}`);
-        } else {
-          const errorData = await response.json().catch(() => ({}));
-          console.error(`Failed to sync ${item.type} #${item.id}:`, errorData);
-          
-          await offlineDB.updatePendingSyncItem(item.id, {
-            status: item.attempts >= 2 ? 'failed' : 'pending',
-            attempts: item.attempts + 1,
-            lastError: errorData.detail || 'Error desconocido',
-            lastAttempt: new Date().toISOString()
-          });
-          failed++;
-        }
+        await api.post(endpoint, item.data);
+        await offlineDB.removePendingSyncItem(item.id);
+        synced++;
+        console.log(`Synced ${item.type} #${item.id}`);
       } catch (error) {
         console.error(`Error syncing ${item.type} #${item.id}:`, error);
         await offlineDB.updatePendingSyncItem(item.id, {
+          status: item.attempts >= 2 ? 'failed' : 'pending',
           attempts: item.attempts + 1,
-          lastError: error.message,
+          lastError: api.getErrorMessage(error),
           lastAttempt: new Date().toISOString()
         });
         failed++;
