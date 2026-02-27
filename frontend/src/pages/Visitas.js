@@ -531,26 +531,13 @@ const Visitas = () => {
     try {
       setError(null);
       const url = editingId 
-        ? `${BACKEND_URL}/api/visitas/${editingId}`
-        : `${BACKEND_URL}/api/visitas`;
+        ? `/api/visitas/${editingId}`
+        : `/api/visitas`;
       
-      const method = editingId ? 'PUT' : 'POST';
+      const data = editingId 
+        ? await api.put(url, payload)
+        : await api.post(url, payload);
       
-      const response = await fetch(url, {
-        method: method,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
-      }
-      
-      const data = await response.json();
       if (data.success) {
         // Si hay fotos pendientes y es una creación nueva, subirlas
         const pendingFotos = fotos.filter(f => f.pending);
