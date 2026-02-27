@@ -449,17 +449,8 @@ const Parcelas = () => {
     setShowHistorial(true);
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/tratamientos/parcela/${parcela._id}/historial`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setHistorialData(data);
-      } else {
-        console.error('Error fetching historial');
-        setHistorialData(null);
-      }
+      const data = await api.get(`/api/tratamientos/parcela/${parcela._id}/historial`);
+      setHistorialData(data);
     } catch (error) {
       console.error('Error:', error);
       setHistorialData(null);
