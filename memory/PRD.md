@@ -1783,3 +1783,35 @@ Migrar todas las llamadas `fetch` directas al nuevo servicio centralizado `api.j
 
 
 ### Estado: ✅ COMPLETADO (verificado en entorno preview, pendiente validación en entorno local del usuario)
+
+
+
+## Módulo RRHH - Recursos Humanos (27/02/2026) - COMPLETADO
+
+### Funcionalidades Implementadas:
+
+**1. Gestión de Empleados**
+- CRUD completo con datos personales, laborales y económicos
+- Códigos únicos autogenerados (EMP-0001, etc.)
+- Filtros por puesto, tipo de contrato y estado
+
+**2. Control Horario (Fichajes)**
+- Registro entrada/salida con múltiples métodos: Manual, QR, NFC, Facial
+- Soporte offline con sincronización posterior
+- Estadísticas del día en tiempo real
+
+**3. Productividad**
+- Dashboard en tiempo real con KPIs
+- Top empleados por productividad
+- Registro por tipo de trabajo
+
+**4. Prenómina**
+- Cálculo automático basado en fichajes
+- Exportación CSV para software de nóminas
+
+### Archivos Creados:
+- `/app/backend/routes/routes_rrhh.py` - API completa
+- `/app/backend/models.py` - Modelos RRHH añadidos
+- `/app/frontend/src/pages/RRHH.js` - Interfaz con tabs
+
+### Estado: ✅ COMPLETADO Y TESTEADO
