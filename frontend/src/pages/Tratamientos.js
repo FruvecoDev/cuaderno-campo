@@ -1148,18 +1148,7 @@ const Tratamientos = () => {
     
     try {
       setError(null);
-      const response = await fetch(`${BACKEND_URL}/api/tratamientos/${tratamientoId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
-      }
-      
+      await api.delete(`/api/tratamientos/${tratamientoId}`);
       fetchTratamientos();
     } catch (error) {
       console.error('Error deleting tratamiento:', error);
