@@ -71,8 +71,7 @@ const Layout = ({ children }) => {
   useEffect(() => {
     const fetchLogo = async () => {
       try {
-        const response = await fetch(`${BACKEND_URL}/api/config/logos`);
-        const data = await response.json();
+        const data = await api.get('/api/config/logos', { includeAuth: false });
         if (data.success && data.dashboard_logo) {
           setDashboardLogo(`${BACKEND_URL}${data.dashboard_logo}`);
         }
