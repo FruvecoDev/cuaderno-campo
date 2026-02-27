@@ -787,21 +787,8 @@ const Recomendaciones = () => {
     
     for (const rec of recomendacionesPendientes) {
       try {
-        const response = await fetch(`${BACKEND_URL}/api/recomendaciones`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(rec)
-        });
-        
-        if (response.ok) {
-          savedCount++;
-        } else {
-          const data = await response.json();
-          errors.push(`${rec.producto_nombre}: ${data.detail}`);
-        }
+        await api.post('/api/recomendaciones', rec);
+        savedCount++;
       } catch (err) {
         errors.push(`${rec.producto_nombre}: ${err.message}`);
       }
