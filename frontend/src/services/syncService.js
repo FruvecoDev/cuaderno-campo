@@ -99,9 +99,15 @@ class SyncService {
     return () => this.listeners.delete(callback);
   }
 
-  // Notify all listeners
+  // Notify all listeners (with error protection)
   notifyListeners(event) {
-    this.listeners.forEach(callback => callback(event));
+    this.listeners.forEach(callback => {
+      try {
+        callback(event);
+      } catch (err) {
+        console.warn('Error in sync listener callback:', err);
+      }
+    });
   }
 
   handleOnline() {
@@ -109,14 +115,20 @@ class SyncService {
     this.isOnline = true;
     this.notifyListeners({ type: 'online' });
     
-    // Show notification when back online
-    this.showNotification('Conexión restaurada', {
-      body: 'Sincronizando datos pendientes...',
-      icon: '/logo192.png'
-    });
+    // Show notification when back online (safely)
+    try {
+      this.showNotification('Conexión restaurada', {
+        body: 'Sincronizando datos pendientes...',
+        icon: '/logo192.png'
+      });
+    } catch (err) {
+      console.warn('Error showing notification:', err);
+    }
     
-    // Auto-sync when coming back online
-    this.syncPendingItems();
+    // Auto-sync when coming back online (safely)
+    this.syncPendingItems().catch(err => {
+      console.warn('Error during auto-sync:', err);
+    });
   }
 
   handleOffline() {
