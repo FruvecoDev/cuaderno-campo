@@ -266,21 +266,13 @@ const Recetas = () => {
         max_aplicaciones: formData.max_aplicaciones ? parseInt(formData.max_aplicaciones) : null
       };
       
-      const response = await fetch(url, {
-        method: method,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
+      let data;
+      if (editingId) {
+        data = await api.put(`/api/recetas/${editingId}`, payload);
+      } else {
+        data = await api.post('/api/recetas', payload);
       }
       
-      const data = await response.json();
       if (data.success) {
         setShowForm(false);
         setEditingId(null);
@@ -335,16 +327,7 @@ const Recetas = () => {
     
     try {
       setError(null);
-      const response = await fetch(`${BACKEND_URL}/api/recetas/${recetaId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
-      }
-      
+      await api.delete(`/api/recetas/${recetaId}`);
       fetchRecetas();
       fetchStats();
     } catch (error) {
@@ -360,15 +343,8 @@ const Recetas = () => {
     if (!recetaCalculo || !superficieCalculo) return;
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/recetas/${recetaCalculo._id}/calcular-dosis?superficie=${superficieCalculo}`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setResultadoCalculo(data);
-      }
+      const data = await api.post(`/api/recetas/${recetaCalculo._id}/calcular-dosis?superficie=${superficieCalculo}`);
+      setResultadoCalculo(data);
     } catch (error) {
       console.error('Error calculando dosis:', error);
     }
