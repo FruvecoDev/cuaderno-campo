@@ -119,13 +119,12 @@ const TecnicosAplicadores = () => {
   const fetchTecnicos = async () => {
     try {
       setLoading(true);
-      let url = `${BACKEND_URL}/api/tecnicos-aplicadores?`;
-      if (searchTerm) url += `search=${encodeURIComponent(searchTerm)}&`;
-      if (filterNivel) url += `nivel=${encodeURIComponent(filterNivel)}&`;
-      if (filterActivo !== '') url += `activo=${filterActivo}&`;
+      const params = new URLSearchParams();
+      if (searchTerm) params.append('search', searchTerm);
+      if (filterNivel) params.append('nivel', filterNivel);
+      if (filterActivo !== '') params.append('activo', filterActivo);
       
-      const res = await fetch(url, { headers });
-      const data = await res.json();
+      const data = await api.get(`/api/tecnicos-aplicadores?${params}`);
       setTecnicos(data.tecnicos || []);
     } catch (err) {
       setError('Error al cargar técnicos aplicadores');
@@ -136,8 +135,7 @@ const TecnicosAplicadores = () => {
 
   const fetchNiveles = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/tecnicos-aplicadores/niveles`, { headers });
-      const data = await res.json();
+      const data = await api.get('/api/tecnicos-aplicadores/niveles');
       setNivelesCapacitacion(data.niveles || []);
     } catch (err) {
       console.error('Error fetching niveles:', err);
@@ -148,23 +146,14 @@ const TecnicosAplicadores = () => {
     e.preventDefault();
     
     try {
-      const url = editingId 
-        ? `${BACKEND_URL}/api/tecnicos-aplicadores/${editingId}`
-        : `${BACKEND_URL}/api/tecnicos-aplicadores`;
-      
-      const res = await fetch(url, {
-        method: editingId ? 'PUT' : 'POST',
-        headers,
-        body: JSON.stringify(formData)
-      });
-      
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw { status: res.status, message: errorData.detail };
+      let result;
+      if (editingId) {
+        result = await api.put(`/api/tecnicos-aplicadores/${editingId}`, formData);
+      } else {
+        result = await api.post('/api/tecnicos-aplicadores', formData);
       }
       
       // Si hay archivo seleccionado, subir certificado
-      const result = await res.json();
       const tecnicoId = result.data?._id || editingId;
       if (selectedFile && tecnicoId) {
         await uploadCertificado(tecnicoId);
@@ -192,20 +181,8 @@ const TecnicosAplicadores = () => {
       const formDataFile = new FormData();
       formDataFile.append('file', selectedFile);
       
-      const response = await fetch(`${BACKEND_URL}/api/tecnicos-aplicadores/${tecnicoId}/certificado`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formDataFile
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Upload error:', errorData);
-        setError('Error al subir el certificado');
-        setTimeout(() => setError(null), 5000);
-      } else {
-        console.log('Certificate uploaded successfully');
-      }
+      await api.upload(`/api/tecnicos-aplicadores/${tecnicoId}/certificado`, formDataFile);
+      console.log('Certificate uploaded successfully');
     } catch (err) {
       console.error('Error uploading certificado:', err);
       setError('Error al subir el certificado');
@@ -249,16 +226,7 @@ const TecnicosAplicadores = () => {
     }
     
     try {
-      const res = await fetch(`${BACKEND_URL}/api/tecnicos-aplicadores/${id}`, {
-        method: 'DELETE',
-        headers
-      });
-      
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw { status: res.status, message: errorData.detail };
-      }
-      
+      await api.delete(`/api/tecnicos-aplicadores/${id}`);
       fetchTecnicos();
     } catch (err) {
       const errorMsg = handlePermissionError(err, 'eliminar');
@@ -269,10 +237,7 @@ const TecnicosAplicadores = () => {
 
   const handleToggleActivo = async (id) => {
     try {
-      await fetch(`${BACKEND_URL}/api/tecnicos-aplicadores/${id}/toggle-activo`, {
-        method: 'PUT',
-        headers
-      });
+      await api.put(`/api/tecnicos-aplicadores/${id}/toggle-activo`);
       fetchTecnicos();
     } catch (err) {
       console.error('Error toggling activo:', err);
