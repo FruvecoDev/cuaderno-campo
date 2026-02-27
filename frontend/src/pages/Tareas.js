@@ -266,7 +266,6 @@ const Tareas = () => {
       await api.patch(`/api/tareas/${id}/estado?estado=${nuevoEstado}`, {});
       fetchTareas();
       fetchStats();
-      }
     } catch (err) {
       console.error('Error updating estado:', err);
     }
