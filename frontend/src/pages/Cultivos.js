@@ -37,16 +37,7 @@ const Cultivos = () => {
   const fetchCultivos = async () => {
     try {
       setError(null);
-      const response = await fetch(`${BACKEND_URL}/api/cultivos`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
-      }
-      
-      const data = await response.json();
+      const data = await api.get('/api/cultivos');
       setCultivos(data.cultivos || []);
     } catch (error) {
       console.error('Error fetching cultivos:', error);
@@ -61,22 +52,10 @@ const Cultivos = () => {
     e.preventDefault();
     try {
       setError(null);
-      const url = editingId 
-        ? `${BACKEND_URL}/api/cultivos/${editingId}`
-        : `${BACKEND_URL}/api/cultivos`;
-      
-      const response = await fetch(url, {
-        method: editingId ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(formData)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
+      if (editingId) {
+        await api.put(`/api/cultivos/${editingId}`, formData);
+      } else {
+        await api.post('/api/cultivos', formData);
       }
       
       setShowForm(false);
@@ -104,16 +83,7 @@ const Cultivos = () => {
     
     try {
       setError(null);
-      const response = await fetch(`${BACKEND_URL}/api/cultivos/${cultivoId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
-      }
-      
+      await api.delete(`/api/cultivos/${cultivoId}`);
       fetchCultivos();
     } catch (error) {
       console.error('Error deleting cultivo:', error);
