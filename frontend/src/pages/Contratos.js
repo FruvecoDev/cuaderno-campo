@@ -200,10 +200,8 @@ const Contratos = () => {
     e.preventDefault();
     try {
       const url = editingId 
-        ? `${BACKEND_URL}/api/contratos/${editingId}`
-        : `${BACKEND_URL}/api/contratos`;
-      
-      const method = editingId ? 'PUT' : 'POST';
+        ? `/api/contratos/${editingId}`
+        : `/api/contratos`;
       
       // Preparar datos incluyendo precios_calidad si es guisante
       const submitData = {
@@ -219,15 +217,9 @@ const Contratos = () => {
         })) : []
       };
       
-      const response = await fetch(url, {
-        method: method,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(submitData)
-      });
-      const data = await response.json();
+      const data = editingId 
+        ? await api.put(url, submitData)
+        : await api.post(url, submitData);
       if (data.success) {
         setShowForm(false);
         setEditingId(null);
