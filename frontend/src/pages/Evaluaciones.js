@@ -594,18 +594,7 @@ const Evaluaciones = () => {
     }
     
     try {
-      const response = await fetch(
-        `${BACKEND_URL}/api/evaluaciones/config/preguntas/${preguntaId}?seccion=${seccion}`,
-        {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` }
-        }
-      );
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
-      }
+      await api.delete(`/api/evaluaciones/config/preguntas/${preguntaId}?seccion=${seccion}`);
       
       // Actualizar estado local inmediatamente
       setCustomPreguntas(prev => {
