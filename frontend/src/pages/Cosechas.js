@@ -160,23 +160,17 @@ const Cosechas = () => {
       }));
     
     try {
-      const res = await fetch(`${BACKEND_URL}/api/cosechas`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          contrato_id: formData.contrato_id,
-          planificaciones
-        })
+      await api.post('/api/cosechas', {
+        contrato_id: formData.contrato_id,
+        planificaciones
       });
       
-      if (res.ok) {
-        setShowForm(false);
-        setFormData({
-          contrato_id: '',
-          planificaciones: [{ fecha_planificada: '', kilos_estimados: '', observaciones: '' }]
-        });
-        fetchCosechas();
-      }
+      setShowForm(false);
+      setFormData({
+        contrato_id: '',
+        planificaciones: [{ fecha_planificada: '', kilos_estimados: '', observaciones: '' }]
+      });
+      fetchCosechas();
     } catch (err) {
       console.error('Error creating cosecha:', err);
     }
@@ -194,26 +188,20 @@ const Cosechas = () => {
         payload.valor_tenderometria = parseFloat(cargaForm.valor_tenderometria);
       }
       
-      const res = await fetch(`${BACKEND_URL}/api/cosechas/${cosechaId}/cargas`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(payload)
-      });
+      await api.post(`/api/cosechas/${cosechaId}/cargas`, payload);
       
-      if (res.ok) {
-        setShowCargaForm(null);
-        setCargaForm({
-          id_carga: '',
-          fecha: new Date().toISOString().split('T')[0],
-          kilos_reales: '',
-          es_descuento: false,
-          tipo_descuento: '',
-          valor_tenderometria: '',
-          num_albaran: '',
-          observaciones: ''
-        });
-        fetchCosechas();
-      }
+      setShowCargaForm(null);
+      setCargaForm({
+        id_carga: '',
+        fecha: new Date().toISOString().split('T')[0],
+        kilos_reales: '',
+        es_descuento: false,
+        tipo_descuento: '',
+        valor_tenderometria: '',
+        num_albaran: '',
+        observaciones: ''
+      });
+      fetchCosechas();
     } catch (err) {
       console.error('Error adding carga:', err);
     }
@@ -224,10 +212,7 @@ const Cosechas = () => {
     if (!window.confirm('¿Eliminar esta carga?')) return;
     
     try {
-      await fetch(`${BACKEND_URL}/api/cosechas/${cosechaId}/cargas/${idCarga}`, {
-        method: 'DELETE',
-        headers
-      });
+      await api.delete(`/api/cosechas/${cosechaId}/cargas/${idCarga}`);
       fetchCosechas();
     } catch (err) {
       console.error('Error deleting carga:', err);
@@ -239,10 +224,7 @@ const Cosechas = () => {
     if (!window.confirm('¿Marcar cosecha como completada?')) return;
     
     try {
-      await fetch(`${BACKEND_URL}/api/cosechas/${cosechaId}/completar`, {
-        method: 'PUT',
-        headers
-      });
+      await api.put(`/api/cosechas/${cosechaId}/completar`);
       fetchCosechas();
     } catch (err) {
       console.error('Error completing cosecha:', err);
@@ -254,10 +236,7 @@ const Cosechas = () => {
     if (!window.confirm('¿Eliminar esta cosecha y todas sus cargas?')) return;
     
     try {
-      await fetch(`${BACKEND_URL}/api/cosechas/${cosechaId}`, {
-        method: 'DELETE',
-        headers
-      });
+      await api.delete(`/api/cosechas/${cosechaId}`);
       fetchCosechas();
     } catch (err) {
       console.error('Error deleting cosecha:', err);
