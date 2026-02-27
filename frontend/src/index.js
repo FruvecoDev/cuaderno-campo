@@ -19,6 +19,29 @@ if ('serviceWorker' in navigator) {
   }).catch(err => {
     console.log('Error unregistering service workers:', err);
   });
+  
+  // Also clear any service worker caches
+  if ('caches' in window) {
+    caches.keys().then(names => {
+      names.forEach(name => {
+        caches.delete(name);
+        console.log('Cache deleted:', name);
+      });
+    }).catch(err => {
+      console.log('Error clearing caches:', err);
+    });
+  }
+}
+
+// Validate localStorage token format to prevent issues
+try {
+  const token = localStorage.getItem('token');
+  if (token && typeof token !== 'string') {
+    localStorage.removeItem('token');
+    console.log('Invalid token format cleared');
+  }
+} catch (err) {
+  console.warn('Error validating localStorage:', err);
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
