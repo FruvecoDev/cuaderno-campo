@@ -1,6 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+import api from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -25,40 +24,18 @@ export const AuthProvider = ({ children }) => {
   
   const fetchCurrentUser = useCallback(async () => {
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
-      
-      const response = await fetch(`${BACKEND_URL}/api/auth/me`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
-      
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data);
-      } else {
-        // Token invalid, clear it
-        logout();
-      }
+      const data = await api.get('/api/auth/me', { timeout: 10000 });
+      setUser(data);
     } catch (error) {
-      // Don't logout on network errors or aborts, just log them
-      if (error.name === 'AbortError') {
-        console.warn('Request timeout fetching user');
-      } else {
-        console.error('Error fetching user:', error);
-      }
-      // Only logout if it's not a temporary network issue
-      if (error.message && !error.message.includes('network') && !error.message.includes('postMessage')) {
+      console.error('Error fetching user:', error);
+      // Only logout if it's an auth error (401/403), not network issues
+      if (error.status === 401 || error.status === 403) {
         logout();
       }
     } finally {
       setLoading(false);
     }
-  }, [token, logout]);
+  }, [logout]);
   
   useEffect(() => {
     // Check if user is logged in on mount
@@ -71,42 +48,23 @@ export const AuthProvider = ({ children }) => {
   
   const login = async (email, password) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.detail || 'Login failed');
-      }
+      const data = await api.post('/api/auth/login', { email, password }, { includeAuth: false });
       
       setToken(data.access_token);
       setUser(data.user);
       localStorage.setItem('token', data.access_token);
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: api.getErrorMessage(error) };
     }
   };
   
   const initializeAdmin = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/auth/init-admin`, {
-        method: 'POST'
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        return { success: true, credentials: data.credentials };
-      } else {
-        return { success: false, error: data.detail };
-      }
+      const data = await api.post('/api/auth/init-admin', {}, { includeAuth: false });
+      return { success: true, credentials: data.credentials };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: api.getErrorMessage(error) };
     }
   };
   
