@@ -197,16 +197,14 @@ const Tareas = () => {
     e.preventDefault();
     try {
       const url = editingId 
-        ? `${BACKEND_URL}/api/tareas/${editingId}`
-        : `${BACKEND_URL}/api/tareas`;
+        ? `/api/tareas/${editingId}`
+        : `/api/tareas`;
       
-      const res = await fetch(url, {
-        method: editingId ? 'PUT' : 'POST',
-        headers,
-        body: JSON.stringify(formData)
-      });
+      const data = editingId 
+        ? await api.put(url, formData)
+        : await api.post(url, formData);
       
-      if (res.ok) {
+      if (data) {
         setShowForm(false);
         setEditingId(null);
         resetForm();
@@ -255,14 +253,9 @@ const Tareas = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('¿Eliminar esta tarea?')) return;
     try {
-      const res = await fetch(`${BACKEND_URL}/api/tareas/${id}`, {
-        method: 'DELETE',
-        headers
-      });
-      if (res.ok) {
-        fetchTareas();
-        fetchStats();
-      }
+      await api.delete(`/api/tareas/${id}`);
+      fetchTareas();
+      fetchStats();
     } catch (err) {
       console.error('Error deleting tarea:', err);
     }
@@ -270,13 +263,9 @@ const Tareas = () => {
 
   const handleEstadoChange = async (id, nuevoEstado) => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/tareas/${id}/estado?estado=${nuevoEstado}`, {
-        method: 'PATCH',
-        headers
-      });
-      if (res.ok) {
-        fetchTareas();
-        fetchStats();
+      await api.patch(`/api/tareas/${id}/estado?estado=${nuevoEstado}`, {});
+      fetchTareas();
+      fetchStats();
       }
     } catch (err) {
       console.error('Error updating estado:', err);
