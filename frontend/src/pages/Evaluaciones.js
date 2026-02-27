@@ -238,16 +238,7 @@ const Evaluaciones = () => {
   const fetchEvaluaciones = async () => {
     try {
       setError(null);
-      const response = await fetch(`${BACKEND_URL}/api/evaluaciones`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
-      }
-      
-      const data = await response.json();
+      const data = await api.get('/api/evaluaciones');
       setEvaluaciones(data.evaluaciones || []);
     } catch (error) {
       console.error('Error fetching evaluaciones:', error);
@@ -260,13 +251,8 @@ const Evaluaciones = () => {
   
   const fetchParcelas = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/parcelas`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setParcelas(data.parcelas || []);
-      }
+      const data = await api.get('/api/parcelas');
+      setParcelas(data.parcelas || []);
     } catch (error) {
       console.error('Error fetching parcelas:', error);
     }
@@ -274,13 +260,8 @@ const Evaluaciones = () => {
   
   const fetchContratos = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/contratos`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setContratos(data.contratos || []);
-      }
+      const data = await api.get('/api/contratos');
+      setContratos(data.contratos || []);
     } catch (error) {
       console.error('Error fetching contratos:', error);
     }
@@ -288,13 +269,8 @@ const Evaluaciones = () => {
   
   const fetchPreguntasConfig = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/evaluaciones/config/preguntas`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setCustomPreguntas(data.custom || {});
-      }
+      const data = await api.get('/api/evaluaciones/config/preguntas');
+      setCustomPreguntas(data.custom || {});
     } catch (error) {
       console.error('Error fetching preguntas config:', error);
     }
