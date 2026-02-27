@@ -518,28 +518,10 @@ const Evaluaciones = () => {
     }
   };
   
-  // Descargar PDF - mantiene fetch para blob
+  // Descargar PDF - usa api.download
   const handleDownloadPDF = async (id) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${BACKEND_URL}/api/evaluaciones/${id}/pdf`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Error al descargar PDF');
-      }
-      
-      // Descargar el archivo
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `evaluacion_${id}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      await api.download(`/api/evaluaciones/${id}/pdf`, `evaluacion_${id}.pdf`);
     } catch (error) {
       const errorMsg = handlePermissionError(error, 'descargar el PDF');
       setError(errorMsg);

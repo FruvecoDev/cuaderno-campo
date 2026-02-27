@@ -323,23 +323,9 @@ const Maquinaria = () => {
       const formDataImage = new FormData();
       formDataImage.append('file', selectedImage);
       
-      console.log('Sending upload request to:', `${BACKEND_URL}/api/maquinaria/${maquinariaId}/imagen-placa-ce`);
+      console.log('Sending upload request');
       
-      const response = await fetch(`${BACKEND_URL}/api/maquinaria/${maquinariaId}/imagen-placa-ce`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formDataImage
-      });
-      
-      console.log('Upload response status:', response.status);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Upload error:', errorData);
-        throw { status: response.status, message: errorData.detail };
-      }
-      
-      const result = await response.json();
+      const result = await api.upload(`/api/maquinaria/${maquinariaId}/imagen-placa-ce`, formDataImage);
       console.log('Upload success:', result);
       return result;
     } catch (error) {
