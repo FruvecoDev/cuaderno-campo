@@ -3,9 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Download, FileText, Edit2, Trash2, BookOpen, Loader2, Search, X, Filter } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
+import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 const Contratos = () => {
   const [contratos, setContratos] = useState([]);
