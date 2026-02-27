@@ -19,17 +19,20 @@ test.describe('API Migration - RRHH & Informes', () => {
     await page.goto('/rrhh', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('domcontentloaded');
     
-    // Dismiss the daily summary modal if present
-    const entendidoBtn = page.getByRole('button', { name: /Entendido/i });
-    if (await entendidoBtn.isVisible({ timeout: 3000 })) {
+    // Dismiss the daily summary modal if present - must wait for it to be visible
+    try {
+      const entendidoBtn = page.getByRole('button', { name: /Entendido/i });
+      await expect(entendidoBtn).toBeVisible({ timeout: 5000 });
       await entendidoBtn.click();
+    } catch {
+      // Modal not present
     }
     
     await page.waitForLoadState('domcontentloaded');
     
-    // Check page loads - look for tabs or data
-    const tableOrContent = page.locator('table, [class*="card"], [role="tablist"], button').first();
-    await expect(tableOrContent).toBeVisible({ timeout: 10000 });
+    // Check for visible RRHH table headers or employee data
+    const visibleContent = page.locator('th, td, [class*="table"]').first();
+    await expect(visibleContent).toBeVisible({ timeout: 10000 });
     
     await page.screenshot({ path: '/app/tests/e2e/rrhh-empleados.jpeg', quality: 20, fullPage: false });
   });
@@ -115,17 +118,20 @@ test.describe('API Migration - RRHH & Informes', () => {
     await page.goto('/configuracion', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('domcontentloaded');
     
-    // Dismiss the daily summary modal if present
-    const entendidoBtn = page.getByRole('button', { name: /Entendido/i });
-    if (await entendidoBtn.isVisible({ timeout: 3000 })) {
+    // Dismiss the daily summary modal if present - must wait for it to be visible
+    try {
+      const entendidoBtn = page.getByRole('button', { name: /Entendido/i });
+      await expect(entendidoBtn).toBeVisible({ timeout: 5000 });
       await entendidoBtn.click();
+    } catch {
+      // Modal not present
     }
     
     await page.waitForLoadState('domcontentloaded');
     
-    // Check page loads
-    const tableOrContent = page.locator('[class*="config"], [class*="settings"], button, form').first();
-    await expect(tableOrContent).toBeVisible({ timeout: 10000 });
+    // Check for visible configuration content - look for Logo section or theme options
+    const visibleContent = page.locator('h2, h3, [class*="logo"], [class*="theme"]').first();
+    await expect(visibleContent).toBeVisible({ timeout: 10000 });
     
     await page.screenshot({ path: '/app/tests/e2e/configuracion.jpeg', quality: 20, fullPage: false });
   });
