@@ -496,25 +496,12 @@ const Recomendaciones = () => {
     setError(null);
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/plantillas-recomendaciones/aplicar-masivo`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          plantilla_id: selectedPlantilla._id,
-          parcela_ids: selectedParcelas,
-          campana: new Date().getFullYear().toString(),
-          fecha_programada: formData.fecha_programada || null
-        })
+      const data = await api.post('/api/plantillas-recomendaciones/aplicar-masivo', {
+        plantilla_id: selectedPlantilla._id,
+        parcela_ids: selectedParcelas,
+        campana: new Date().getFullYear().toString(),
+        fecha_programada: formData.fecha_programada || null
       });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.detail || 'Error al aplicar plantilla');
-      }
       
       setSuccess(`${data.created_count} recomendación(es) creada(s) desde plantilla "${data.plantilla_usada}"`);
       setTimeout(() => setSuccess(null), 4000);
@@ -550,16 +537,7 @@ const Recomendaciones = () => {
   
   const handleSeedPlantillas = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/plantillas-recomendaciones/seed`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.detail || 'Error al cargar plantillas');
-      }
-      
+      const data = await api.post('/api/plantillas-recomendaciones/seed');
       setSuccess(data.message);
       setTimeout(() => setSuccess(null), 3000);
       fetchPlantillas();
