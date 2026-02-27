@@ -257,6 +257,51 @@ const api = {
   },
 
   /**
+   * Download file via POST request (for endpoints that need request body)
+   * @param {string} endpoint - API endpoint
+   * @param {object} body - Request body
+   * @param {string} filename - Suggested filename for download
+   * @param {object} options - Additional options
+   */
+  downloadWithPost: async (endpoint, body, filename, options = {}) => {
+    const url = endpoint.startsWith('http') ? endpoint : `${BACKEND_URL}${endpoint}`;
+    const token = getToken();
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        ...options.headers
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!response.ok) {
+      const errorData = await parseResponse(response);
+      throw new ApiError(
+        errorData?.detail || 'Error al descargar archivo',
+        response.status
+      );
+    }
+
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    // Try to get filename from content-disposition header
+    const contentDisposition = response.headers.get('content-disposition');
+    const serverFilename = contentDisposition?.split('filename=')[1]?.replace(/"/g, '');
+    link.download = serverFilename || filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+    
+    return true;
+  },
+
+  /**
    * Check if error is an API error
    */
   isApiError: (error) => error instanceof ApiError,
