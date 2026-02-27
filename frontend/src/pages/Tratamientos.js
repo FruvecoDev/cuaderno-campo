@@ -132,13 +132,8 @@ const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
           'fertilizante': 'Fertilizante'
         };
         const tipo = tipoMap[calcData.tipoProducto] || calcData.tipoProducto;
-        const response = await fetch(`${BACKEND_URL}/api/fitosanitarios?tipo=${tipo}&activo=true`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setProductosDB(data.productos || []);
-        }
+        const data = await api.get(`/api/fitosanitarios?tipo=${tipo}&activo=true`);
+        setProductosDB(data.productos || []);
       } catch (error) {
         console.error('Error loading productos:', error);
       } finally {
