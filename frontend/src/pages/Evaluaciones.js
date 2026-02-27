@@ -415,21 +415,13 @@ const Evaluaciones = () => {
         calibracion_mantenimiento: buildSeccionRespuestas('calibracion_mantenimiento')
       };
       
-      const response = await fetch(url, {
-        method: method,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
+      let data;
+      if (editingId) {
+        data = await api.put(`/api/evaluaciones/${editingId}`, payload);
+      } else {
+        data = await api.post('/api/evaluaciones', payload);
       }
       
-      const data = await response.json();
       if (data.success) {
         setShowForm(false);
         setEditingId(null);
