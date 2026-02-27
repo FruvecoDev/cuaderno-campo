@@ -759,6 +759,7 @@ const RRHH = () => {
                   {editingId ? 'Guardar Cambios' : 'Crear Empleado'}
                 </button>
               </div>
+              </div>
             </form>
           </div>
         </div>
