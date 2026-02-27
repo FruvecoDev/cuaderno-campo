@@ -194,10 +194,6 @@ const Irrigaciones = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const url = editingId 
-        ? `${BACKEND_URL}/api/irrigaciones/${editingId}`
-        : `${BACKEND_URL}/api/irrigaciones`;
-      
       const submitData = {
         ...formData,
         duracion: parseFloat(formData.duracion) || 0,
@@ -207,19 +203,17 @@ const Irrigaciones = () => {
         presion: formData.presion ? parseFloat(formData.presion) : null
       };
       
-      const res = await fetch(url, {
-        method: editingId ? 'PUT' : 'POST',
-        headers,
-        body: JSON.stringify(submitData)
-      });
-      
-      if (res.ok) {
-        setShowForm(false);
-        setEditingId(null);
-        resetForm();
-        fetchIrrigaciones();
-        fetchStats();
+      if (editingId) {
+        await api.put(`/api/irrigaciones/${editingId}`, submitData);
+      } else {
+        await api.post('/api/irrigaciones', submitData);
       }
+      
+      setShowForm(false);
+      setEditingId(null);
+      resetForm();
+      fetchIrrigaciones();
+      fetchStats();
     } catch (err) {
       console.error('Error saving irrigacion:', err);
     }
@@ -272,27 +266,26 @@ const Irrigaciones = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('¿Eliminar este registro de riego?')) return;
     try {
-      const res = await fetch(`${BACKEND_URL}/api/irrigaciones/${id}`, {
-        method: 'DELETE',
-        headers
-      });
-      if (res.ok) {
-        fetchIrrigaciones();
-        fetchStats();
-      }
+      await api.delete(`/api/irrigaciones/${id}`);
+      fetchIrrigaciones();
+      fetchStats();
     } catch (err) {
       console.error('Error deleting irrigacion:', err);
     }
   };
 
+  // Export to Excel - uses fetch for blob
   const handleExportExcel = async () => {
     try {
+      const token = localStorage.getItem('token');
       const params = new URLSearchParams();
       if (filters.parcela_id) params.append('parcela_id', filters.parcela_id);
       if (filters.fecha_desde) params.append('fecha_desde', filters.fecha_desde);
       if (filters.fecha_hasta) params.append('fecha_hasta', filters.fecha_hasta);
       
-      const res = await fetch(`${BACKEND_URL}/api/irrigaciones/export/excel?${params}`, { headers });
+      const res = await fetch(`${BACKEND_URL}/api/irrigaciones/export/excel?${params}`, { 
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
