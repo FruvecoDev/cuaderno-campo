@@ -53,7 +53,9 @@ from routes_resumen_diario import router as resumen_diario_router
 from routes_tareas import router as tareas_router
 from routes_irrigaciones import router as irrigaciones_router
 from routes_uploads import router as uploads_router
+from routes.routes_rrhh import router as rrhh_router, set_database as set_rrhh_db
 from scheduler_service import init_scheduler, shutdown_scheduler
+from database import db
 
 app = FastAPI(title="FRUVECO - Agricultural Management System V1")
 
