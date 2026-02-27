@@ -72,20 +72,15 @@ const ArticulosExplotacion = () => {
   const fetchArticulos = async () => {
     try {
       setLoading(true);
-      let url = `${BACKEND_URL}/api/articulos?limit=500`;
+      let params = new URLSearchParams();
+      params.append('limit', '500');
       
-      if (searchTerm) url += `&search=${encodeURIComponent(searchTerm)}`;
-      if (filterCategoria) url += `&categoria=${encodeURIComponent(filterCategoria)}`;
-      if (filterActivo !== '') url += `&activo=${filterActivo}`;
+      if (searchTerm) params.append('search', searchTerm);
+      if (filterCategoria) params.append('categoria', filterCategoria);
+      if (filterActivo !== '') params.append('activo', filterActivo);
       
-      const response = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setArticulos(data.articulos || []);
-      }
+      const data = await api.get(`/api/articulos?${params}`);
+      setArticulos(data.articulos || []);
     } catch (err) {
       console.error('Error fetching articulos:', err);
     } finally {
@@ -128,9 +123,6 @@ const ArticulosExplotacion = () => {
     
     try {
       setError(null);
-      const url = editingId 
-        ? `${BACKEND_URL}/api/articulos/${editingId}`
-        : `${BACKEND_URL}/api/articulos`;
       
       const payload = {
         ...formData,
@@ -142,18 +134,10 @@ const ArticulosExplotacion = () => {
         stock_minimo: formData.stock_minimo ? parseFloat(formData.stock_minimo) : null
       };
       
-      const response = await fetch(url, {
-        method: editingId ? 'PUT' : 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
+      if (editingId) {
+        await api.put(`/api/articulos/${editingId}`, payload);
+      } else {
+        await api.post('/api/articulos', payload);
       }
       
       setShowForm(false);
@@ -162,7 +146,7 @@ const ArticulosExplotacion = () => {
       resetForm();
     } catch (err) {
       const errorMsg = handlePermissionError(err, editingId ? 'actualizar' : 'crear');
-      setError(err.message || errorMsg);
+      setError(api.getErrorMessage(err) || errorMsg);
       setTimeout(() => setError(null), 5000);
     }
   };
@@ -190,34 +174,19 @@ const ArticulosExplotacion = () => {
     if (!window.confirm('¿Estás seguro de que quieres eliminar este artículo?')) return;
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/articulos/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
-      }
-      
+      await api.delete(`/api/articulos/${id}`);
       fetchArticulos();
     } catch (err) {
       const errorMsg = handlePermissionError(err, 'eliminar');
-      setError(err.message || errorMsg);
+      setError(api.getErrorMessage(err) || errorMsg);
       setTimeout(() => setError(null), 5000);
     }
   };
 
   const handleToggleActivo = async (id) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/articulos/${id}/toggle-activo`, {
-        method: 'PATCH',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        fetchArticulos();
-      }
+      await api.patch(`/api/articulos/${id}/toggle-activo`);
+      fetchArticulos();
     } catch (err) {
       console.error('Error toggling activo:', err);
     }

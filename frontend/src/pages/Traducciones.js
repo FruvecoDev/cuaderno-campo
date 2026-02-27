@@ -101,8 +101,7 @@ const Traducciones = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/translations/categories`);
-      const data = await response.json();
+      const data = await api.get('/api/translations/categories', { includeAuth: false });
       setCategories(data.categories || []);
       setLanguages(data.languages || []);
     } catch (err) {
@@ -118,11 +117,10 @@ const Traducciones = () => {
       if (filters.approvedOnly) params.append('approved_only', 'true');
       
       const queryString = params.toString();
-      const url = queryString 
-        ? `${BACKEND_URL}/api/translations/?${queryString}`
-        : `${BACKEND_URL}/api/translations/`;
-      const response = await fetch(url);
-      const data = await response.json();
+      const endpoint = queryString 
+        ? `/api/translations/?${queryString}`
+        : `/api/translations/`;
+      const data = await api.get(endpoint, { includeAuth: false });
       setTranslations(data.translations || []);
     } catch (err) {
       console.error('Error fetching translations:', err);
@@ -158,11 +156,6 @@ const Traducciones = () => {
     
     try {
       setError(null);
-      const url = editingId 
-        ? `${BACKEND_URL}/api/translations/${editingId}`
-        : `${BACKEND_URL}/api/translations`;
-      
-      const method = editingId ? 'PUT' : 'POST';
       
       // Filter out empty translations
       const cleanTranslations = {};
@@ -174,16 +167,9 @@ const Traducciones = () => {
         ? { translations: cleanTranslations, description: formData.description, region: formData.region }
         : { ...formData, translations: cleanTranslations };
       
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-      
-      const data = await response.json();
+      const data = editingId 
+        ? await api.put(`/api/translations/${editingId}`, payload)
+        : await api.post('/api/translations', payload);
       
       if (data.success) {
         setSuccessMsg(editingId ? t('messages.savedSuccessfully') : t('translations.created'));
@@ -222,16 +208,10 @@ const Traducciones = () => {
     if (!window.confirm(t('translations.confirmDelete'))) return;
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/translations/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        setSuccessMsg(t('messages.deletedSuccessfully'));
-        fetchTranslations();
-        setTimeout(() => setSuccessMsg(null), 3000);
-      }
+      await api.delete(`/api/translations/${id}`);
+      setSuccessMsg(t('messages.deletedSuccessfully'));
+      fetchTranslations();
+      setTimeout(() => setSuccessMsg(null), 3000);
     } catch (err) {
       console.error('Error deleting:', err);
       setError(t('messages.errorDeleting'));
@@ -240,16 +220,10 @@ const Traducciones = () => {
 
   const handleApprove = async (id) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/translations/${id}/approve`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        setSuccessMsg(t('translations.approved'));
-        fetchTranslations();
-        setTimeout(() => setSuccessMsg(null), 3000);
-      }
+      await api.post(`/api/translations/${id}/approve`);
+      setSuccessMsg(t('translations.approved'));
+      fetchTranslations();
+      setTimeout(() => setSuccessMsg(null), 3000);
     } catch (err) {
       console.error('Error approving:', err);
     }
@@ -259,12 +233,7 @@ const Traducciones = () => {
     if (!window.confirm(t('translations.confirmSeed'))) return;
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/translations/seed`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      const data = await response.json();
+      const data = await api.post('/api/translations/seed');
       
       if (data.success) {
         setSuccessMsg(data.message);
