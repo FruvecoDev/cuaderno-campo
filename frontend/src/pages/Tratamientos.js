@@ -878,13 +878,8 @@ const Tratamientos = () => {
   
   const fetchParcelas = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/parcelas`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setParcelas(data.parcelas || []);
-      }
+      const data = await api.get('/api/parcelas');
+      setParcelas(data.parcelas || []);
     } catch (error) {
       console.error('Error fetching parcelas:', error);
     }
@@ -892,13 +887,8 @@ const Tratamientos = () => {
   
   const fetchMaquinaria = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/maquinaria`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setMaquinaria(data.maquinaria || []);
-      }
+      const data = await api.get('/api/maquinaria');
+      setMaquinaria(data.maquinaria || []);
     } catch (error) {
       console.error('Error fetching maquinaria:', error);
     }
@@ -906,13 +896,8 @@ const Tratamientos = () => {
   
   const fetchTecnicosAplicadores = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/tecnicos-aplicadores/activos`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setTecnicosAplicadores(data.tecnicos || []);
-      }
+      const data = await api.get('/api/tecnicos-aplicadores/activos');
+      setTecnicosAplicadores(data.tecnicos || []);
     } catch (error) {
       console.error('Error fetching tecnicos aplicadores:', error);
     }
@@ -921,18 +906,7 @@ const Tratamientos = () => {
   const fetchTratamientos = async () => {
     try {
       setError(null);
-      const response = await fetch(`${BACKEND_URL}/api/tratamientos`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
-      }
-      
-      const data = await response.json();
+      const data = await api.get('/api/tratamientos');
       setTratamientos(data.tratamientos || []);
     } catch (error) {
       console.error('Error fetching tratamientos:', error);
