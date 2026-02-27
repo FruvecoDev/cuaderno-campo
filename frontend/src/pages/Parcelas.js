@@ -9,6 +9,7 @@ import 'leaflet-draw/dist/leaflet.draw.css';
 import { Plus, Map as MapIcon, Edit2, Trash2, Filter, Settings, X, ClipboardCheck, Layers, Satellite, History, Beaker, Calendar, FileText, ChevronDown, ChevronUp, BookOpen, Loader2, Eye, Search, ExternalLink, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import AdvancedParcelMap from '../components/AdvancedParcelMap';
+import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
 
 
