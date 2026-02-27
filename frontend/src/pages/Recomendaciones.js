@@ -287,7 +287,7 @@ const Recomendaciones = () => {
         if (value) params.append(key, value);
       });
       
-      const response = await fetch(`${API_URL}/api/recomendaciones?${params}`, {
+      const response = await fetch(`${BACKEND_URL}/api/recomendaciones?${params}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -299,7 +299,7 @@ const Recomendaciones = () => {
   
   const fetchParcelas = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/parcelas`, {
+      const response = await fetch(`${BACKEND_URL}/api/parcelas`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -311,7 +311,7 @@ const Recomendaciones = () => {
   
   const fetchContratos = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/contratos`, {
+      const response = await fetch(`${BACKEND_URL}/api/contratos`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -323,7 +323,7 @@ const Recomendaciones = () => {
   
   const fetchFitosanitarios = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/fitosanitarios?activo=true`, {
+      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios?activo=true`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -335,7 +335,7 @@ const Recomendaciones = () => {
   
   const fetchTipos = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/recomendaciones/config/tipos`, {
+      const response = await fetch(`${BACKEND_URL}/api/recomendaciones/config/tipos`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -348,7 +348,7 @@ const Recomendaciones = () => {
   
   const fetchStats = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/recomendaciones/stats/resumen`, {
+      const response = await fetch(`${BACKEND_URL}/api/recomendaciones/stats/resumen`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -360,7 +360,7 @@ const Recomendaciones = () => {
   
   const fetchPlantillas = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/plantillas-recomendaciones`, {
+      const response = await fetch(`${BACKEND_URL}/api/plantillas-recomendaciones`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!response.ok) {
@@ -386,8 +386,8 @@ const Recomendaciones = () => {
     
     try {
       const url = editingPlantillaId 
-        ? `${API_URL}/api/plantillas-recomendaciones/${editingPlantillaId}`
-        : `${API_URL}/api/plantillas-recomendaciones`;
+        ? `${BACKEND_URL}/api/plantillas-recomendaciones/${editingPlantillaId}`
+        : `${BACKEND_URL}/api/plantillas-recomendaciones`;
       
       // Prepare data - convert types and clean empty values
       const dataToSend = {
@@ -463,7 +463,7 @@ const Recomendaciones = () => {
     if (!window.confirm('¿Está seguro de eliminar esta plantilla?')) return;
     
     try {
-      const response = await fetch(`${API_URL}/api/plantillas-recomendaciones/${id}`, {
+      const response = await fetch(`${BACKEND_URL}/api/plantillas-recomendaciones/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -483,7 +483,7 @@ const Recomendaciones = () => {
   
   const handleTogglePlantillaActivo = async (plantilla) => {
     try {
-      const response = await fetch(`${API_URL}/api/plantillas-recomendaciones/${plantilla._id}/toggle-activo`, {
+      const response = await fetch(`${BACKEND_URL}/api/plantillas-recomendaciones/${plantilla._id}/toggle-activo`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -554,7 +554,7 @@ const Recomendaciones = () => {
     setError(null);
     
     try {
-      const response = await fetch(`${API_URL}/api/plantillas-recomendaciones/aplicar-masivo`, {
+      const response = await fetch(`${BACKEND_URL}/api/plantillas-recomendaciones/aplicar-masivo`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -608,7 +608,7 @@ const Recomendaciones = () => {
   
   const handleSeedPlantillas = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/plantillas-recomendaciones/seed`, {
+      const response = await fetch(`${BACKEND_URL}/api/plantillas-recomendaciones/seed`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -647,8 +647,8 @@ const Recomendaciones = () => {
     
     try {
       const url = editingId 
-        ? `${API_URL}/api/recomendaciones/${editingId}`
-        : `${API_URL}/api/recomendaciones`;
+        ? `${BACKEND_URL}/api/recomendaciones/${editingId}`
+        : `${BACKEND_URL}/api/recomendaciones`;
       
       const response = await fetch(url, {
         method: editingId ? 'PUT' : 'POST',
@@ -702,7 +702,7 @@ const Recomendaciones = () => {
     if (!window.confirm('¿Está seguro de eliminar esta recomendación?')) return;
     
     try {
-      const response = await fetch(`${API_URL}/api/recomendaciones/${id}`, {
+      const response = await fetch(`${BACKEND_URL}/api/recomendaciones/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -738,7 +738,7 @@ const Recomendaciones = () => {
     setGeneratingTratamiento(rec._id);
     
     try {
-      const response = await fetch(`${API_URL}/api/recomendaciones/${rec._id}/generar-tratamiento`, {
+      const response = await fetch(`${BACKEND_URL}/api/recomendaciones/${rec._id}/generar-tratamiento`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -898,7 +898,7 @@ const Recomendaciones = () => {
     
     for (const rec of recomendacionesPendientes) {
       try {
-        const response = await fetch(`${API_URL}/api/recomendaciones`, {
+        const response = await fetch(`${BACKEND_URL}/api/recomendaciones`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

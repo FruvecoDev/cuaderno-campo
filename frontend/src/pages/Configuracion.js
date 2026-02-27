@@ -66,7 +66,7 @@ const LogoUploader = ({ type, currentLogo, onUpload, onDelete, loading }) => {
     }
   };
 
-  const displayLogo = preview || (currentLogo ? `${API_URL}${currentLogo}` : null);
+  const displayLogo = preview || (currentLogo ? `${BACKEND_URL}${currentLogo}` : null);
 
   return (
     <div className="card" style={{ padding: '1.5rem' }}>
@@ -465,7 +465,7 @@ const SchedulerConfig = ({ token }) => {
 
   const fetchConfig = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/notificaciones/scheduler/config`, {
+      const response = await fetch(`${BACKEND_URL}/api/notificaciones/scheduler/config`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -486,7 +486,7 @@ const SchedulerConfig = ({ token }) => {
 
   const fetchStatus = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/notificaciones/scheduler/status`, {
+      const response = await fetch(`${BACKEND_URL}/api/notificaciones/scheduler/status`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -499,7 +499,7 @@ const SchedulerConfig = ({ token }) => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const response = await fetch(`${API_URL}/api/notificaciones/scheduler/config`, {
+      const response = await fetch(`${BACKEND_URL}/api/notificaciones/scheduler/config`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -533,7 +533,7 @@ const SchedulerConfig = ({ token }) => {
   const handleExecuteNow = async () => {
     setExecuting(true);
     try {
-      const response = await fetch(`${API_URL}/api/notificaciones/scheduler/ejecutar`, {
+      const response = await fetch(`${BACKEND_URL}/api/notificaciones/scheduler/ejecutar`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -766,7 +766,7 @@ const Configuracion = () => {
 
   const fetchLogos = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/config/logos`);
+      const response = await fetch(`${BACKEND_URL}/api/config/logos`);
       const data = await response.json();
       if (data.success) {
         setLogos({ login_logo: data.login_logo, dashboard_logo: data.dashboard_logo });
@@ -778,7 +778,7 @@ const Configuracion = () => {
 
   const fetchTheme = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/config/theme`);
+      const response = await fetch(`${BACKEND_URL}/api/config/theme`);
       const data = await response.json();
       if (data.success) {
         setCurrentTheme(data);
@@ -793,7 +793,7 @@ const Configuracion = () => {
 
   const fetchThemes = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/config/themes`);
+      const response = await fetch(`${BACKEND_URL}/api/config/themes`);
       const data = await response.json();
       if (data.success) {
         setThemes(data.themes);
@@ -820,7 +820,7 @@ const Configuracion = () => {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(`${API_URL}/api/config/logo/${type}`, {
+    const response = await fetch(`${BACKEND_URL}/api/config/logo/${type}`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: formData
@@ -837,7 +837,7 @@ const Configuracion = () => {
   const handleLogoDelete = async (type) => {
     const token = localStorage.getItem('token');
     
-    const response = await fetch(`${API_URL}/api/config/logo/${type}`, {
+    const response = await fetch(`${BACKEND_URL}/api/config/logo/${type}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` }
     });
@@ -855,7 +855,7 @@ const Configuracion = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/api/config/theme?theme_id=${themeId}`, {
+      const response = await fetch(`${BACKEND_URL}/api/config/theme?theme_id=${themeId}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -879,7 +879,7 @@ const Configuracion = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/api/config/theme?primary=${encodeURIComponent(primary)}&accent=${encodeURIComponent(accent)}`, {
+      const response = await fetch(`${BACKEND_URL}/api/config/theme?primary=${encodeURIComponent(primary)}&accent=${encodeURIComponent(accent)}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -905,7 +905,7 @@ const Configuracion = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/api/config/theme`, {
+      const response = await fetch(`${BACKEND_URL}/api/config/theme`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
