@@ -59,8 +59,7 @@ const Cosechas = () => {
 
   const fetchCosechas = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/cosechas`, { headers });
-      const data = await res.json();
+      const data = await api.get('/api/cosechas');
       setCosechas(data.cosechas || []);
     } catch (err) {
       console.error('Error fetching cosechas:', err);
@@ -70,8 +69,7 @@ const Cosechas = () => {
 
   const fetchContratos = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/contratos`, { headers });
-      const data = await res.json();
+      const data = await api.get('/api/contratos');
       setContratos(data.contratos || []);
     } catch (err) {
       console.error('Error fetching contratos:', err);
@@ -80,11 +78,8 @@ const Cosechas = () => {
   
   const fetchStats = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/cosechas/stats/dashboard`, { headers });
-      if (res.ok) {
-        const data = await res.json();
-        setStats(data);
-      }
+      const data = await api.get('/api/cosechas/stats/dashboard');
+      setStats(data);
     } catch (err) {
       console.error('Error fetching stats:', err);
     }
@@ -97,32 +92,28 @@ const Cosechas = () => {
       if (filters.estado) params.append('estado', filters.estado);
       if (filters.campana) params.append('campana', filters.campana);
       
-      const res = await fetch(`${BACKEND_URL}/api/cosechas/export/excel?${params}`, { headers });
+      const data = await api.get(`/api/cosechas/export/excel?${params}`);
       
-      if (res.ok) {
-        const data = await res.json();
-        
-        // Crear CSV
-        const csvHeaders = data.columns.map(c => c.header).join(',');
-        const csvRows = data.data.map(row => 
-          data.columns.map(c => {
-            const val = row[c.key];
-            if (typeof val === 'string' && (val.includes(',') || val.includes('"'))) {
-              return `"${val.replace(/"/g, '""')}"`;
-            }
-            return val ?? '';
-          }).join(',')
-        ).join('\n');
-        
-        const csvContent = `${csvHeaders}\n${csvRows}`;
-        const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${data.filename}.csv`;
-        link.click();
-        URL.revokeObjectURL(url);
-      }
+      // Crear CSV
+      const csvHeaders = data.columns.map(c => c.header).join(',');
+      const csvRows = data.data.map(row => 
+        data.columns.map(c => {
+          const val = row[c.key];
+          if (typeof val === 'string' && (val.includes(',') || val.includes('"'))) {
+            return `"${val.replace(/"/g, '""')}"`;
+          }
+          return val ?? '';
+        }).join(',')
+      ).join('\n');
+      
+      const csvContent = `${csvHeaders}\n${csvRows}`;
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${data.filename}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Error exporting:', err);
     } finally {
