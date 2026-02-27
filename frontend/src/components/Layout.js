@@ -218,20 +218,60 @@ const Layout = ({ children }) => {
         {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
       
-      <aside className={`sidebar ${isMobileMenuOpen ? 'open' : ''}`}>
+      <aside className={`sidebar ${isMobileMenuOpen ? 'open' : ''} ${isSidebarCollapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-title" style={{ justifyContent: 'center' }}>
-            <img 
-              src={dashboardLogo || defaultLogo} 
-              alt="Logo" 
-              style={{ 
-                maxWidth: '160px', 
-                height: 'auto',
-                objectFit: 'contain'
-              }} 
-            />
+            {isSidebarCollapsed ? (
+              <img 
+                src={dashboardLogo || defaultLogo} 
+                alt="Logo" 
+                style={{ 
+                  maxWidth: '40px', 
+                  height: 'auto',
+                  objectFit: 'contain'
+                }} 
+              />
+            ) : (
+              <img 
+                src={dashboardLogo || defaultLogo} 
+                alt="Logo" 
+                style={{ 
+                  maxWidth: '160px', 
+                  height: 'auto',
+                  objectFit: 'contain'
+                }} 
+              />
+            )}
           </div>
         </div>
+        
+        {/* Botón para colapsar/expandir sidebar */}
+        <button
+          onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          className="sidebar-collapse-btn"
+          title={isSidebarCollapsed ? 'Expandir menú' : 'Colapsar menú'}
+          style={{
+            position: 'absolute',
+            top: '70px',
+            right: isSidebarCollapsed ? '50%' : '-12px',
+            transform: isSidebarCollapsed ? 'translateX(50%)' : 'none',
+            width: '24px',
+            height: '24px',
+            borderRadius: '50%',
+            border: '1px solid hsl(var(--border))',
+            background: 'hsl(var(--background))',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100,
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            transition: 'all 0.3s ease'
+          }}
+        >
+          {isSidebarCollapsed ? <ChevronsRight size={14} /> : <ChevronsLeft size={14} />}
+        </button>
+        
         <nav className="sidebar-nav">
           {filteredNavItems.map((section, idx) => {
             const isCollapsed = collapsedSections[section.section];
@@ -239,50 +279,52 @@ const Layout = ({ children }) => {
             
             return (
               <div key={idx} className="nav-section">
-                <div 
-                  className="nav-section-title"
-                  onClick={() => toggleSection(section.section)}
-                  style={{ 
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    userSelect: 'none',
-                    padding: '0.5rem 0.75rem',
-                    marginBottom: isCollapsed ? '0' : '0.25rem',
-                    borderRadius: '0.375rem',
-                    transition: 'all 0.2s ease',
-                    backgroundColor: hasActiveItem && isCollapsed ? 'hsl(var(--primary) / 0.1)' : 'transparent'
-                  }}
-                  title={isCollapsed ? 'Expandir sección' : 'Colapsar sección'}
-                >
-                  <span style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '0.5rem',
-                    fontWeight: hasActiveItem ? '600' : '500'
-                  }}>
-                    {section.section}
-                    {hasActiveItem && isCollapsed && (
-                      <span style={{
-                        width: '6px',
-                        height: '6px',
-                        borderRadius: '50%',
-                        backgroundColor: 'hsl(var(--primary))'
-                      }} />
+                {!isSidebarCollapsed && (
+                  <div 
+                    className="nav-section-title"
+                    onClick={() => toggleSection(section.section)}
+                    style={{ 
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      userSelect: 'none',
+                      padding: '0.5rem 0.75rem',
+                      marginBottom: isCollapsed ? '0' : '0.25rem',
+                      borderRadius: '0.375rem',
+                      transition: 'all 0.2s ease',
+                      backgroundColor: hasActiveItem && isCollapsed ? 'hsl(var(--primary) / 0.1)' : 'transparent'
+                    }}
+                    title={isCollapsed ? 'Expandir sección' : 'Colapsar sección'}
+                  >
+                    <span style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '0.5rem',
+                      fontWeight: hasActiveItem ? '600' : '500'
+                    }}>
+                      {section.section}
+                      {hasActiveItem && isCollapsed && (
+                        <span style={{
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '50%',
+                          backgroundColor: 'hsl(var(--primary))'
+                        }} />
+                      )}
+                    </span>
+                    {isCollapsed ? (
+                      <ChevronRight size={16} style={{ opacity: 0.7 }} />
+                    ) : (
+                      <ChevronDown size={16} style={{ opacity: 0.7 }} />
                     )}
-                  </span>
-                  {isCollapsed ? (
-                    <ChevronRight size={16} style={{ opacity: 0.7 }} />
-                  ) : (
-                    <ChevronDown size={16} style={{ opacity: 0.7 }} />
-                  )}
-                </div>
+                  </div>
+                )}
                 <div style={{
-                  maxHeight: isCollapsed ? '0' : '500px',
+                  maxHeight: (isCollapsed && !isSidebarCollapsed) ? '0' : '500px',
                   overflow: 'hidden',
                   transition: 'max-height 0.3s ease-in-out',
-                  opacity: isCollapsed ? 0 : 1
+                  opacity: (isCollapsed && !isSidebarCollapsed) ? 0 : 1
                 }}>
                   {section.items.map((item) => {
                     const Icon = item.icon;
@@ -293,9 +335,14 @@ const Layout = ({ children }) => {
                         to={item.path}
                         className={`nav-link ${isActive ? 'active' : ''}`}
                         data-testid={`nav-${item.label.toLowerCase()}`}
+                        title={isSidebarCollapsed ? item.label : ''}
+                        style={isSidebarCollapsed ? {
+                          justifyContent: 'center',
+                          padding: '0.75rem'
+                        } : {}}
                       >
                         <Icon size={18} />
-                        {item.label}
+                        {!isSidebarCollapsed && item.label}
                       </Link>
                     );
                   })}
