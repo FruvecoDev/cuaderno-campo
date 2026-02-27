@@ -1,5 +1,5 @@
 // Theme service - loads and applies theme globally
-import { BACKEND_URL } from './api';
+import api, { BACKEND_URL } from './api';
 
 export const applyThemeToDOM = (primary, accent) => {
   if (primary) {
@@ -15,8 +15,7 @@ export const applyThemeToDOM = (primary, accent) => {
 
 export const loadAndApplyTheme = async () => {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/config/theme`);
-    const data = await response.json();
+    const data = await api.get('/api/config/theme', { includeAuth: false });
     if (data.success && data.primary && data.accent) {
       applyThemeToDOM(data.primary, data.accent);
       return data;

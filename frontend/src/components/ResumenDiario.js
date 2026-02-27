@@ -20,14 +20,8 @@ const ResumenDiario = ({ onClose }) => {
 
   const fetchResumen = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/resumen-diario`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        setData(result);
-      }
+      const data = await api.get('/api/resumen-diario');
+      setData(data);
     } catch (err) {
       console.error('Error fetching resumen:', err);
     } finally {

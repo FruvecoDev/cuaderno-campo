@@ -306,17 +306,7 @@ const Tareas = () => {
       if (filters.estado) params.append('estado', filters.estado);
       if (filters.prioridad) params.append('prioridad', filters.prioridad);
       
-      // For file downloads, we still need the BACKEND_URL
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${BACKEND_URL}/api/tareas/export/excel?${params}`, { 
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `tareas_${new Date().toISOString().split('T')[0]}.xlsx`;
-      a.click();
+      await api.download(`/api/tareas/export/excel?${params}`, `tareas_${new Date().toISOString().split('T')[0]}.xlsx`);
     } catch (err) {
       console.error('Error exporting:', err);
     }

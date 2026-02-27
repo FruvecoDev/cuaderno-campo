@@ -274,24 +274,15 @@ const Irrigaciones = () => {
     }
   };
 
-  // Export to Excel - uses fetch for blob
+  // Export to Excel - uses api.download
   const handleExportExcel = async () => {
     try {
-      const token = localStorage.getItem('token');
       const params = new URLSearchParams();
       if (filters.parcela_id) params.append('parcela_id', filters.parcela_id);
       if (filters.fecha_desde) params.append('fecha_desde', filters.fecha_desde);
       if (filters.fecha_hasta) params.append('fecha_hasta', filters.fecha_hasta);
       
-      const res = await fetch(`${BACKEND_URL}/api/irrigaciones/export/excel?${params}`, { 
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `irrigaciones_${new Date().toISOString().split('T')[0]}.xlsx`;
-      a.click();
+      await api.download(`/api/irrigaciones/export/excel?${params}`, `irrigaciones_${new Date().toISOString().split('T')[0]}.xlsx`);
     } catch (err) {
       console.error('Error exporting:', err);
     }
