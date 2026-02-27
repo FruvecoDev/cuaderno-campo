@@ -35,10 +35,7 @@ const LiquidacionComisiones = () => {
   
   const fetchCampanas = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/comisiones/campanas`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get('/api/comisiones/campanas');
       if (data.success) {
         setCampanas(data.campanas || []);
       }
@@ -49,10 +46,7 @@ const LiquidacionComisiones = () => {
   
   const fetchAgentes = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/comisiones/agentes`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get('/api/comisiones/agentes');
       if (data.success) {
         setAgentes(data.agentes || []);
       }
@@ -69,10 +63,7 @@ const LiquidacionComisiones = () => {
       if (filters.agente_id) params.append('agente_id', filters.agente_id);
       if (filters.tipo_agente) params.append('tipo_agente', filters.tipo_agente);
       
-      const response = await fetch(`${BACKEND_URL}/api/comisiones/resumen?${params}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get(`/api/comisiones/resumen?${params}`);
       if (data.success) {
         setComisiones(data.comisiones || []);
         setTotales(data.totales || { total_comision_compra: 0, total_comision_venta: 0, total_general: 0 });
@@ -92,21 +83,10 @@ const LiquidacionComisiones = () => {
       params.append('tipo_agente', tipoAgente);
       if (filters.campana) params.append('campana', filters.campana);
       
-      const response = await fetch(`${BACKEND_URL}/api/comisiones/liquidacion/pdf?${params}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!response.ok) throw new Error('Error generando PDF');
-      
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Liquidacion_${agenteNombre.replace(/\s+/g, '_')}_${tipoAgente}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+      await api.download(
+        `/api/comisiones/liquidacion/pdf?${params}`,
+        `Liquidacion_${agenteNombre.replace(/\s+/g, '_')}_${tipoAgente}.pdf`
+      );
     } catch (error) {
       console.error('Error downloading PDF:', error);
       alert('Error al generar el PDF');

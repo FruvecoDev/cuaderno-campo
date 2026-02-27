@@ -46,13 +46,8 @@ const NotificacionesDropdown = () => {
 
   const fetchCount = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/notificaciones/count`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setNoLeidas(data.no_leidas || 0);
-      }
+      const data = await api.get('/api/notificaciones/count');
+      setNoLeidas(data.no_leidas || 0);
     } catch (err) {
       console.error('Error fetching notification count:', err);
     }
@@ -61,14 +56,9 @@ const NotificacionesDropdown = () => {
   const fetchNotificaciones = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/notificaciones?limit=20`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setNotificaciones(data.notificaciones || []);
-        setNoLeidas(data.no_leidas || 0);
-      }
+      const data = await api.get('/api/notificaciones?limit=20');
+      setNotificaciones(data.notificaciones || []);
+      setNoLeidas(data.no_leidas || 0);
     } catch (err) {
       console.error('Error fetching notifications:', err);
     } finally {
@@ -85,16 +75,11 @@ const NotificacionesDropdown = () => {
 
   const handleMarcarLeida = async (id) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/notificaciones/${id}/leer`, {
-        method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        setNotificaciones(prev => 
-          prev.map(n => n._id === id ? { ...n, leida: true } : n)
-        );
-        setNoLeidas(prev => Math.max(0, prev - 1));
-      }
+      await api.put(`/api/notificaciones/${id}/leer`);
+      setNotificaciones(prev => 
+        prev.map(n => n._id === id ? { ...n, leida: true } : n)
+      );
+      setNoLeidas(prev => Math.max(0, prev - 1));
     } catch (err) {
       console.error('Error marking notification as read:', err);
     }
@@ -102,14 +87,9 @@ const NotificacionesDropdown = () => {
 
   const handleMarcarTodasLeidas = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/notificaciones/leer-todas`, {
-        method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        setNotificaciones(prev => prev.map(n => ({ ...n, leida: true })));
-        setNoLeidas(0);
-      }
+      await api.put('/api/notificaciones/leer-todas');
+      setNotificaciones(prev => prev.map(n => ({ ...n, leida: true })));
+      setNoLeidas(0);
     } catch (err) {
       console.error('Error marking all as read:', err);
     }

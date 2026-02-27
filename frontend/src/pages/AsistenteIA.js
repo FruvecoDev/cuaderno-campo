@@ -40,11 +40,6 @@ const AsistenteIA = () => {
   const [expandedSuggestion, setExpandedSuggestion] = useState(null);
   const [expandedRisk, setExpandedRisk] = useState(null);
 
-  const headers = {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-  };
-
   useEffect(() => {
     fetchParcelas();
     fetchContratos();
@@ -52,8 +47,7 @@ const AsistenteIA = () => {
 
   const fetchParcelas = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/ai/parcelas-for-suggestions`, { headers });
-      const data = await res.json();
+      const data = await api.get('/api/ai/parcelas-for-suggestions');
       setParcelas(data.parcelas || []);
     } catch (err) {
       console.error('Error fetching parcelas:', err);
@@ -62,8 +56,7 @@ const AsistenteIA = () => {
 
   const fetchContratos = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/ai/contratos-for-predictions`, { headers });
-      const data = await res.json();
+      const data = await api.get('/api/ai/contratos-for-predictions');
       setContratos(data.contratos || []);
     } catch (err) {
       console.error('Error fetching contratos:', err);
@@ -83,24 +76,17 @@ const AsistenteIA = () => {
 
     try {
       const parcela = parcelas.find(p => p._id === selectedParcela);
-      const res = await fetch(
-        `${BACKEND_URL}/api/ai/suggest-treatments/${selectedParcela}?problema=${encodeURIComponent(problema)}&cultivo=${encodeURIComponent(parcela?.cultivo || '')}`,
-        { method: 'POST', headers }
+      const data = await api.post(
+        `/api/ai/suggest-treatments/${selectedParcela}?problema=${encodeURIComponent(problema)}&cultivo=${encodeURIComponent(parcela?.cultivo || '')}`
       );
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || 'Error al generar sugerencias');
-      }
-
-      const data = await res.json();
       if (data.success) {
         setSuggestions(data);
       } else {
         throw new Error('No se pudieron generar las sugerencias');
       }
     } catch (err) {
-      setSuggestionsError(err.message);
+      setSuggestionsError(api.getErrorMessage(err));
     } finally {
       setLoadingSuggestions(false);
     }
@@ -118,24 +104,15 @@ const AsistenteIA = () => {
     setPrediction(null);
 
     try {
-      const res = await fetch(
-        `${BACKEND_URL}/api/ai/predict-yield/${selectedContrato}`,
-        { method: 'POST', headers }
-      );
+      const data = await api.post(`/api/ai/predict-yield/${selectedContrato}`);
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || 'Error al generar predicción');
-      }
-
-      const data = await res.json();
       if (data.success) {
         setPrediction(data);
       } else {
         throw new Error('No se pudo generar la predicción');
       }
     } catch (err) {
-      setPredictionError(err.message);
+      setPredictionError(api.getErrorMessage(err));
     } finally {
       setLoadingPrediction(false);
     }
