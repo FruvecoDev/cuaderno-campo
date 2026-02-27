@@ -627,3 +627,338 @@ class CosechaInDB(CosechaBase):
     class Config:
         populate_by_name = True
         json_encoders = {ObjectId: str}
+
+
+# ============================================================================
+# RECURSOS HUMANOS (RRHH)
+# ============================================================================
+
+class EmpleadoBase(BaseModel):
+    """Modelo base para empleados"""
+    # Datos personales
+    codigo: str  # Código único del empleado (ej: EMP-001)
+    nombre: str
+    apellidos: str
+    dni_nie: str
+    fecha_nacimiento: Optional[str] = None
+    direccion: Optional[str] = None
+    codigo_postal: Optional[str] = None
+    localidad: Optional[str] = None
+    provincia: Optional[str] = None
+    telefono: Optional[str] = None
+    email: Optional[str] = None
+    
+    # Datos laborales
+    fecha_alta: str
+    fecha_baja: Optional[str] = None
+    tipo_contrato: str = "Temporal"  # Temporal, Indefinido, Fijo-Discontinuo
+    puesto: str = "Operario"  # Operario, Encargado, Técnico, Administrativo
+    departamento: Optional[str] = None
+    categoria_profesional: Optional[str] = None
+    
+    # Datos bancarios
+    iban: Optional[str] = None
+    
+    # Datos de identificación biométrica
+    foto_url: Optional[str] = None  # Foto para reconocimiento facial
+    qr_code: Optional[str] = None  # Código QR único
+    nfc_id: Optional[str] = None  # ID de tarjeta NFC
+    
+    # Firma digital
+    firma_url: Optional[str] = None  # Imagen de la firma
+    
+    # Salario
+    salario_hora: float = 0.0
+    salario_hora_extra: Optional[float] = None
+    salario_hora_nocturna: Optional[float] = None
+    salario_hora_festivo: Optional[float] = None
+    
+    # Estado
+    activo: bool = True
+    
+    # Metadata
+    notas: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
+
+class EmpleadoCreate(BaseModel):
+    """Para crear un nuevo empleado"""
+    nombre: str
+    apellidos: str
+    dni_nie: str
+    fecha_nacimiento: Optional[str] = None
+    direccion: Optional[str] = None
+    codigo_postal: Optional[str] = None
+    localidad: Optional[str] = None
+    provincia: Optional[str] = None
+    telefono: Optional[str] = None
+    email: Optional[str] = None
+    fecha_alta: str
+    tipo_contrato: str = "Temporal"
+    puesto: str = "Operario"
+    departamento: Optional[str] = None
+    categoria_profesional: Optional[str] = None
+    iban: Optional[str] = None
+    salario_hora: float = 0.0
+    salario_hora_extra: Optional[float] = None
+    salario_hora_nocturna: Optional[float] = None
+    salario_hora_festivo: Optional[float] = None
+    notas: Optional[str] = None
+
+class EmpleadoInDB(EmpleadoBase):
+    id: str = Field(alias="_id")
+    
+    class Config:
+        populate_by_name = True
+        json_encoders = {ObjectId: str}
+
+# Fichajes / Control Horario
+class FichajeBase(BaseModel):
+    """Registro de fichaje (entrada/salida)"""
+    empleado_id: str
+    tipo: str  # "entrada" o "salida"
+    fecha: str  # YYYY-MM-DD
+    hora: str  # HH:MM:SS
+    
+    # Método de identificación
+    metodo_identificacion: str = "manual"  # manual, qr, nfc, facial
+    
+    # Ubicación (si disponible)
+    latitud: Optional[float] = None
+    longitud: Optional[float] = None
+    ubicacion_nombre: Optional[str] = None  # Ej: "Parcela Norte"
+    
+    # Para fichajes en parcelas/tareas específicas
+    parcela_id: Optional[str] = None
+    tarea_id: Optional[str] = None
+    
+    # Validación
+    validado: bool = False
+    validado_por: Optional[str] = None
+    validado_fecha: Optional[str] = None
+    
+    # Offline sync
+    offline: bool = False  # Si se creó offline
+    sincronizado: bool = True
+    
+    # Foto de verificación (para fichaje facial)
+    foto_verificacion_url: Optional[str] = None
+    
+    notas: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.now)
+
+class FichajeCreate(BaseModel):
+    empleado_id: str
+    tipo: str
+    fecha: str
+    hora: str
+    metodo_identificacion: str = "manual"
+    latitud: Optional[float] = None
+    longitud: Optional[float] = None
+    ubicacion_nombre: Optional[str] = None
+    parcela_id: Optional[str] = None
+    tarea_id: Optional[str] = None
+    offline: bool = False
+    foto_verificacion_url: Optional[str] = None
+    notas: Optional[str] = None
+
+class FichajeInDB(FichajeBase):
+    id: str = Field(alias="_id")
+    
+    class Config:
+        populate_by_name = True
+        json_encoders = {ObjectId: str}
+
+# Registro de Productividad
+class RegistroProductividadBase(BaseModel):
+    """Registro de productividad de un empleado"""
+    empleado_id: str
+    fecha: str
+    
+    # Asociación a parcela/tarea
+    parcela_id: Optional[str] = None
+    tarea_id: Optional[str] = None
+    contrato_id: Optional[str] = None
+    
+    # Tipo de trabajo
+    tipo_trabajo: str  # recoleccion, tratamiento, riego, poda, plantacion, otros
+    
+    # Métricas de productividad
+    kilos_recogidos: Optional[float] = None
+    hectareas_trabajadas: Optional[float] = None
+    plantas_tratadas: Optional[int] = None
+    unidades_procesadas: Optional[int] = None
+    
+    # Tiempo
+    hora_inicio: str
+    hora_fin: str
+    horas_trabajadas: float = 0.0
+    minutos_descanso: int = 0
+    
+    # Calidad del trabajo (1-5)
+    calidad: Optional[int] = None
+    
+    # Validación
+    validado: bool = False
+    validado_por: Optional[str] = None
+    
+    notas: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.now)
+
+class RegistroProductividadCreate(BaseModel):
+    empleado_id: str
+    fecha: str
+    parcela_id: Optional[str] = None
+    tarea_id: Optional[str] = None
+    contrato_id: Optional[str] = None
+    tipo_trabajo: str
+    kilos_recogidos: Optional[float] = None
+    hectareas_trabajadas: Optional[float] = None
+    plantas_tratadas: Optional[int] = None
+    unidades_procesadas: Optional[int] = None
+    hora_inicio: str
+    hora_fin: str
+    minutos_descanso: int = 0
+    calidad: Optional[int] = None
+    notas: Optional[str] = None
+
+class RegistroProductividadInDB(RegistroProductividadBase):
+    id: str = Field(alias="_id")
+    
+    class Config:
+        populate_by_name = True
+        json_encoders = {ObjectId: str}
+
+# Documentos de Empleado
+class DocumentoEmpleadoBase(BaseModel):
+    """Documento asociado a un empleado"""
+    empleado_id: str
+    tipo: str  # contrato, nomina, certificado, dni, permiso_trabajo, formacion, otros
+    nombre: str
+    descripcion: Optional[str] = None
+    archivo_url: str
+    
+    # Fechas
+    fecha_documento: Optional[str] = None
+    fecha_vencimiento: Optional[str] = None
+    
+    # Firma
+    requiere_firma: bool = False
+    firmado: bool = False
+    firma_empleado_url: Optional[str] = None
+    fecha_firma: Optional[str] = None
+    
+    # Estado
+    activo: bool = True
+    
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
+
+class DocumentoEmpleadoCreate(BaseModel):
+    empleado_id: str
+    tipo: str
+    nombre: str
+    descripcion: Optional[str] = None
+    archivo_url: str
+    fecha_documento: Optional[str] = None
+    fecha_vencimiento: Optional[str] = None
+    requiere_firma: bool = False
+
+class DocumentoEmpleadoInDB(DocumentoEmpleadoBase):
+    id: str = Field(alias="_id")
+    
+    class Config:
+        populate_by_name = True
+        json_encoders = {ObjectId: str}
+
+# Prenómina
+class ConceptoPrenomina(BaseModel):
+    """Concepto individual de la prenómina"""
+    concepto: str  # horas_normales, horas_extra, horas_nocturnas, horas_festivos, plus_productividad
+    cantidad: float  # Número de horas o unidades
+    precio_unitario: float
+    importe: float
+
+class PrenominaBase(BaseModel):
+    """Prenómina mensual de un empleado"""
+    empleado_id: str
+    periodo_mes: int  # 1-12
+    periodo_ano: int
+    
+    # Resumen de horas
+    horas_normales: float = 0.0
+    horas_extra: float = 0.0
+    horas_nocturnas: float = 0.0
+    horas_festivos: float = 0.0
+    total_horas: float = 0.0
+    
+    # Días trabajados
+    dias_trabajados: int = 0
+    
+    # Desglose de conceptos
+    conceptos: List[ConceptoPrenomina] = []
+    
+    # Importes
+    importe_bruto: float = 0.0
+    deducciones: float = 0.0
+    importe_neto: float = 0.0
+    
+    # Plus productividad (opcional)
+    plus_productividad: float = 0.0
+    kilos_totales: float = 0.0
+    
+    # Estado
+    estado: str = "borrador"  # borrador, validada, exportada, pagada
+    validada_por: Optional[str] = None
+    fecha_validacion: Optional[str] = None
+    
+    notas: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
+
+class PrenominaCreate(BaseModel):
+    empleado_id: str
+    periodo_mes: int
+    periodo_ano: int
+
+class PrenominaInDB(PrenominaBase):
+    id: str = Field(alias="_id")
+    
+    class Config:
+        populate_by_name = True
+        json_encoders = {ObjectId: str}
+
+# Ausencias/Vacaciones
+class AusenciaBase(BaseModel):
+    """Registro de ausencia o vacaciones"""
+    empleado_id: str
+    tipo: str  # vacaciones, baja_medica, permiso, ausencia_justificada, ausencia_injustificada
+    fecha_inicio: str
+    fecha_fin: str
+    dias_totales: int = 1
+    
+    motivo: Optional[str] = None
+    documento_url: Optional[str] = None  # Justificante médico, etc.
+    
+    # Estado
+    estado: str = "pendiente"  # pendiente, aprobada, rechazada
+    aprobada_por: Optional[str] = None
+    fecha_aprobacion: Optional[str] = None
+    
+    notas: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.now)
+
+class AusenciaCreate(BaseModel):
+    empleado_id: str
+    tipo: str
+    fecha_inicio: str
+    fecha_fin: str
+    motivo: Optional[str] = None
+    documento_url: Optional[str] = None
+
+class AusenciaInDB(AusenciaBase):
+    id: str = Field(alias="_id")
+    
+    class Config:
+        populate_by_name = True
+        json_encoders = {ObjectId: str}
