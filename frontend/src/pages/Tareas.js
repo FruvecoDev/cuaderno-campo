@@ -98,8 +98,7 @@ const Tareas = () => {
 
   const fetchTareas = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/tareas`, { headers });
-      const data = await res.json();
+      const data = await api.get('/api/tareas');
       setTareas(data.tareas || []);
     } catch (err) {
       console.error('Error fetching tareas:', err);
@@ -109,8 +108,7 @@ const Tareas = () => {
 
   const fetchParcelas = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/parcelas`, { headers });
-      const data = await res.json();
+      const data = await api.get('/api/parcelas');
       setParcelas(data.parcelas || []);
     } catch (err) {
       console.error('Error fetching parcelas:', err);
@@ -119,8 +117,7 @@ const Tareas = () => {
 
   const fetchUsuarios = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/tareas/usuarios-asignables`, { headers });
-      const data = await res.json();
+      const data = await api.get('/api/tareas/usuarios-asignables');
       setUsuarios(data.usuarios || []);
     } catch (err) {
       console.error('Error fetching usuarios:', err);
@@ -129,8 +126,7 @@ const Tareas = () => {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/tareas/stats`, { headers });
-      const data = await res.json();
+      const data = await api.get('/api/tareas/stats');
       setStats(data);
     } catch (err) {
       console.error('Error fetching stats:', err);
@@ -139,8 +135,7 @@ const Tareas = () => {
 
   const fetchTipos = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/tareas/tipos`, { headers });
-      const data = await res.json();
+      const data = await api.get('/api/tareas/tipos');
       setTipos(data.tipos || []);
     } catch (err) {
       console.error('Error fetching tipos:', err);
@@ -149,8 +144,7 @@ const Tareas = () => {
 
   const fetchTareasCalendario = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/tareas/calendario?mes=${mesCalendario}&ano=${anoCalendario}`, { headers });
-      const data = await res.json();
+      const data = await api.get(`/api/tareas/calendario?mes=${mesCalendario}&ano=${anoCalendario}`);
       setTareasCalendario(data.calendario || {});
     } catch (err) {
       console.error('Error fetching calendario:', err);
