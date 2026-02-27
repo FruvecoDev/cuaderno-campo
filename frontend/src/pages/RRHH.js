@@ -2381,25 +2381,32 @@ const DocumentosEmpleado = ({ empleados }) => {
       
       {/* Modal Firma Digital */}
       {showFirmaModal && documentoAFirmar && (
-        <div className="modal-overlay" onClick={() => setShowFirmaModal(false)} style={{
+        <div onClick={() => setShowFirmaModal(false)} style={{
           position: 'fixed',
           top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(0,0,0,0.5)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000
+          zIndex: 1000,
+          padding: '2rem'
         }}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ 
+          <div onClick={e => e.stopPropagation()} style={{ 
             background: 'hsl(var(--card))',
             borderRadius: '12px',
             maxWidth: '600px',
-            width: '90%',
+            width: '100%',
             maxHeight: '85vh', 
             overflow: 'auto'
           }}>
-            <div className="modal-header">
-              <h2>{documentoAFirmar.firmado ? 'Ver Firma' : 'Firmar Documento'}</h2>
+            <div style={{
+              padding: '1.5rem',
+              borderBottom: '1px solid hsl(var(--border))',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <h2 style={{ margin: 0 }}>{documentoAFirmar.firmado ? 'Ver Firma' : 'Firmar Documento'}</h2>
               <button onClick={() => setShowFirmaModal(false)} className="btn btn-ghost">
                 <X size={20} />
               </button>
