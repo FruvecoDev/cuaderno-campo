@@ -273,28 +273,18 @@ const Agentes = () => {
     }
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/agentes/${selectedAgente._id}/comisiones`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(comisionForm)
+      await api.post(`/api/agentes/${selectedAgente._id}/comisiones`, comisionForm);
+      fetchComisiones(selectedAgente._id);
+      setComisionForm({
+        tipo_comision: 'porcentaje',
+        valor: '',
+        aplicar_a: 'contrato',
+        referencia_id: '',
+        referencia_nombre: '',
+        fecha_desde: '',
+        fecha_hasta: '',
+        activa: true
       });
-      
-      if (response.ok) {
-        fetchComisiones(selectedAgente._id);
-        setComisionForm({
-          tipo_comision: 'porcentaje',
-          valor: '',
-          aplicar_a: 'contrato',
-          referencia_id: '',
-          referencia_nombre: '',
-          fecha_desde: '',
-          fecha_hasta: '',
-          activa: true
-        });
-      }
     } catch (err) {
       console.error('Error adding comision:', err);
     }
@@ -304,10 +294,7 @@ const Agentes = () => {
     if (!window.confirm('¿Eliminar esta comisión?')) return;
     
     try {
-      await fetch(`${BACKEND_URL}/api/comisiones/${comisionId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      await api.delete(`/api/comisiones/${comisionId}`);
       fetchComisiones(selectedAgente._id);
     } catch (err) {
       console.error('Error deleting comision:', err);
