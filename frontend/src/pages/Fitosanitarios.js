@@ -430,15 +430,7 @@ const Fitosanitarios = () => {
     }
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/${productoId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
-      }
+      await api.delete(`/api/fitosanitarios/${productoId}`);
 
       fetchProductos();
       setSuccessMsg(t('messages.deletedSuccessfully'));
