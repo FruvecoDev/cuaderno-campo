@@ -382,28 +382,12 @@ const Recomendaciones = () => {
         activo: plantillaForm.activo
       };
       
-      const response = await fetch(url, {
-        method: editingPlantillaId ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(dataToSend)
-      });
-      
-      if (!response.ok) {
-        let errorMsg = 'Error al guardar plantilla';
-        try {
-          const errorData = await response.json();
-          errorMsg = errorData.detail || errorMsg;
-        } catch (e) {
-          // Ignore JSON parse errors for error response
-        }
-        throw new Error(errorMsg);
+      let data;
+      if (editingPlantillaId) {
+        data = await api.put(`/api/plantillas-recomendaciones/${editingPlantillaId}`, dataToSend);
+      } else {
+        data = await api.post('/api/plantillas-recomendaciones', dataToSend);
       }
-      
-      // Success case - parse response
-      const data = await response.json();
       
       setSuccess(editingPlantillaId ? 'Plantilla actualizada' : 'Plantilla creada');
       setTimeout(() => setSuccess(null), 3000);
@@ -439,16 +423,7 @@ const Recomendaciones = () => {
     if (!window.confirm('¿Está seguro de eliminar esta plantilla?')) return;
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/plantillas-recomendaciones/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.detail || 'Error al eliminar');
-      }
-      
+      await api.delete(`/api/plantillas-recomendaciones/${id}`);
       setSuccess('Plantilla eliminada');
       setTimeout(() => setSuccess(null), 3000);
       fetchPlantillas();
@@ -459,16 +434,7 @@ const Recomendaciones = () => {
   
   const handleTogglePlantillaActivo = async (plantilla) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/plantillas-recomendaciones/${plantilla._id}/toggle-activo`, {
-        method: 'PATCH',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.detail || 'Error al cambiar estado');
-      }
-      
+      await api.patch(`/api/plantillas-recomendaciones/${plantilla._id}/toggle-activo`);
       fetchPlantillas();
     } catch (err) {
       setError(err.message);
