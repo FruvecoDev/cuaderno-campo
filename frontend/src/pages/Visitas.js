@@ -329,20 +329,7 @@ const Visitas = () => {
         formData.append('files', file);
       });
       
-      const response = await fetch(`${BACKEND_URL}/api/visitas/${visitaId}/fotos`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Error al subir fotos');
-      }
-      
-      const data = await response.json();
+      const data = await api.upload(`/api/visitas/${visitaId}/fotos`, formData);
       setFotos(data.fotos || []);
       
       // Actualizar visita en la lista
@@ -351,7 +338,7 @@ const Visitas = () => {
       return data;
     } catch (error) {
       console.error('Error uploading photos:', error);
-      setUploadError(error.message);
+      setUploadError(api.getErrorMessage(error));
       throw error;
     } finally {
       setUploadingFotos(false);
@@ -368,24 +355,12 @@ const Visitas = () => {
     }
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/visitas/${visitaId}/fotos/${fotoIndex}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Error al eliminar foto');
-      }
-      
-      const data = await response.json();
+      const data = await api.delete(`/api/visitas/${visitaId}/fotos/${fotoIndex}`);
       setFotos(data.fotos || []);
       fetchVisitas();
     } catch (error) {
       console.error('Error deleting photo:', error);
-      setUploadError(error.message);
+      setUploadError(api.getErrorMessage(error));
     }
   };
   
@@ -397,19 +372,7 @@ const Visitas = () => {
     setUploadError(null);
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/visitas/${visitaId}/fotos/${fotoIndex}/analizar`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Error al analizar la foto');
-      }
-      
-      const data = await response.json();
+      const data = await api.post(`/api/visitas/${visitaId}/fotos/${fotoIndex}/analizar`, {});
       
       // Actualizar fotos con el resultado del análisis
       setFotos(prev => {
@@ -426,7 +389,7 @@ const Visitas = () => {
       fetchVisitas();
     } catch (error) {
       console.error('Error analyzing photo:', error);
-      setUploadError(error.message);
+      setUploadError(api.getErrorMessage(error));
     } finally {
       setAnalyzingFoto(null);
     }
@@ -439,19 +402,7 @@ const Visitas = () => {
     setUploadError(null);
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/visitas/${visitaId}/fotos/analizar-todas`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Error al analizar las fotos');
-      }
-      
-      const data = await response.json();
+      const data = await api.post(`/api/visitas/${visitaId}/fotos/analizar-todas`, {});
       setFotos(data.fotos || []);
       fetchVisitas();
       
@@ -473,7 +424,7 @@ const Visitas = () => {
       }
     } catch (error) {
       console.error('Error analyzing all photos:', error);
-      setUploadError(error.message);
+      setUploadError(api.getErrorMessage(error));
     } finally {
       setAnalyzingAll(false);
     }
