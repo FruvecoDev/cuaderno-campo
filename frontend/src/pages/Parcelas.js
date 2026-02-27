@@ -674,39 +674,14 @@ const Parcelas = () => {
   const handleGenerateCuaderno = async (parcelaId, campana) => {
     setGeneratingCuaderno(parcelaId);
     try {
-      // For file download, we still need raw fetch to handle blob
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${BACKEND_URL}/api/cuaderno-campo/generar`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          parcela_id: parcelaId,
-          campana: campana,
-          include_ai_summary: true
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Error generando cuaderno');
-      }
-
-      // Download PDF
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = response.headers.get('content-disposition')?.split('filename=')[1] || 'Cuaderno_Campo.pdf';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+      await api.downloadWithPost('/api/cuaderno-campo/generar', {
+        parcela_id: parcelaId,
+        campana: campana,
+        include_ai_summary: true
+      }, 'Cuaderno_Campo.pdf');
     } catch (error) {
       console.error('Error generating cuaderno:', error);
-      alert(error.message || t('fieldNotebook.errorGenerating'));
+      alert(api.getErrorMessage(error) || t('fieldNotebook.errorGenerating'));
     } finally {
       setGeneratingCuaderno(null);
     }
