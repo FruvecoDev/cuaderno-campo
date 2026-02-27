@@ -134,13 +134,8 @@ const Recetas = () => {
   
   const fetchStats = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/recetas/stats/dashboard`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data);
-      }
+      const data = await api.get('/api/recetas/stats/dashboard');
+      setStats(data);
     } catch (error) {
       console.error('Error fetching stats:', error);
     }
@@ -148,13 +143,8 @@ const Recetas = () => {
   
   const fetchCultivos = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/cultivos`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setCultivos(data.cultivos || []);
-      }
+      const data = await api.get('/api/cultivos');
+      setCultivos(data.cultivos || []);
     } catch (error) {
       console.error('Error fetching cultivos:', error);
     }
@@ -163,16 +153,7 @@ const Recetas = () => {
   const fetchRecetas = async () => {
     try {
       setError(null);
-      const response = await fetch(`${BACKEND_URL}/api/recetas`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
-      }
-      
-      const data = await response.json();
+      const data = await api.get('/api/recetas');
       setRecetas(data.recetas || []);
     } catch (error) {
       console.error('Error fetching recetas:', error);
