@@ -6,13 +6,13 @@ import {
   Calendar, Download, RefreshCw, FileDown, PieChart
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import api, { BACKEND_URL } from '../services/api';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart as RechartsPieChart, Pie, Cell, Legend
 } from 'recharts';
 import '../App.css';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 // Colores para los gráficos (verdes para ingresos)
 const CHART_COLORS = ['#16a34a', '#22c55e', '#4ade80', '#86efac', '#bbf7d0', '#15803d', '#166534', '#14532d'];

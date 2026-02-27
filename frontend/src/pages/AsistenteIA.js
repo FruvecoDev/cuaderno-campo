@@ -6,9 +6,9 @@ import {
   BarChart3, Lightbulb, Shield, Clock, Target, ArrowRight
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 // Tab type constants
 const TABS = {

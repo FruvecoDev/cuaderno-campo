@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download, FileText, Euro, Users, TrendingUp, Filter, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 const LiquidacionComisiones = () => {
   const [comisiones, setComisiones] = useState([]);

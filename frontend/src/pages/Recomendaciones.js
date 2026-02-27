@@ -8,9 +8,9 @@ import {
   ToggleLeft, ToggleRight, Settings
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const PRIORIDAD_COLORS = {
   'Alta': { bg: '#fef2f2', text: '#dc2626', border: '#fecaca' },

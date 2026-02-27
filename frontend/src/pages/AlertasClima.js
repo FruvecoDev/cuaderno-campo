@@ -6,9 +6,9 @@ import {
   ChevronDown, ChevronUp, MapPin, Loader2, Wind
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 // Icon mapping
 const ICON_MAP = {
