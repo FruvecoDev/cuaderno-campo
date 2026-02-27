@@ -79,10 +79,7 @@ const AlertasClima = () => {
         params.append('estado', filtroEstado);
       }
       
-      const response = await fetch(`${BACKEND_URL}/api/alertas-clima?${params}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get(`/api/alertas-clima?${params}`);
       setAlertas(data.alertas || []);
     } catch (err) {
       console.error('Error fetching alertas:', err);
@@ -91,10 +88,7 @@ const AlertasClima = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/stats`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get('/api/alertas-clima/stats');
       setStats(data);
     } catch (err) {
       console.error('Error fetching stats:', err);
@@ -103,10 +97,7 @@ const AlertasClima = () => {
 
   const fetchReglas = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/reglas/config`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get('/api/alertas-clima/reglas/config');
       setReglas(data.reglas || []);
     } catch (err) {
       console.error('Error fetching reglas:', err);
@@ -118,21 +109,7 @@ const AlertasClima = () => {
     setError(null);
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/verificar-todas`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!response.ok) {
-        let errorMsg = 'Error al verificar';
-        try {
-          const errorData = await response.json();
-          errorMsg = errorData.detail || errorMsg;
-        } catch (e) {}
-        throw new Error(errorMsg);
-      }
-      
-      const data = await response.json();
+      const data = await api.post('/api/alertas-clima/verificar-todas');
       
       setSuccess(data.message);
       setTimeout(() => setSuccess(null), 4000);
@@ -163,16 +140,7 @@ const AlertasClima = () => {
         descripcion: datosManual.descripcion || null
       };
       
-      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/clima/manual`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(dataToSend)
-      });
-      
-      if (!response.ok) {
+      const data = await api.post('/api/alertas-clima/clima/manual', dataToSend);
         let errorMsg = 'Error al registrar datos';
         try {
           const errorData = await response.json();
