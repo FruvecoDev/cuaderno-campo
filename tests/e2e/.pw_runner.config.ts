@@ -2,13 +2,13 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: '/app/tests/e2e',
-  outputDir: '/root/.emergent/automation_output/20260226_143928/test-results',
+  outputDir: '/root/.emergent/automation_output/20260227_152305/test-results',
   timeout: 60000,
   retries: 0,
   workers: 1,
   reporter: [
     ['line'],
-    ['json', { outputFile: '/root/.emergent/automation_output/20260226_143928/results.json' }],
+    ['json', { outputFile: '/root/.emergent/automation_output/20260227_152305/results.json' }],
   ],
   use: {
     baseURL: 'https://agro-rrhh-app.preview.emergentagent.com',
