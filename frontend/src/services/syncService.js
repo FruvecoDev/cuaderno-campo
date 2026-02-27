@@ -157,23 +157,18 @@ class SyncService {
     try {
       this.notifyListeners({ type: 'caching', message: 'Descargando datos para modo offline...' });
 
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      };
-
-      // Fetch all reference data in parallel
-      const [parcelasRes, cultivosRes, contratosRes, proveedoresRes] = await Promise.all([
-        fetch(`${BACKEND_URL}/api/parcelas`, { headers }),
-        fetch(`${BACKEND_URL}/api/cultivos`, { headers }),
-        fetch(`${BACKEND_URL}/api/contratos`, { headers }),
-        fetch(`${BACKEND_URL}/api/proveedores`, { headers })
+      // Fetch all reference data in parallel using the api service
+      const [parcelasData, cultivosData, contratosData, proveedoresData] = await Promise.all([
+        api.get('/api/parcelas'),
+        api.get('/api/cultivos'),
+        api.get('/api/contratos'),
+        api.get('/api/proveedores')
       ]);
 
-      const parcelas = (await parcelasRes.json()).parcelas || [];
-      const cultivos = (await cultivosRes.json()).cultivos || [];
-      const contratos = (await contratosRes.json()).contratos || [];
-      const proveedores = (await proveedoresRes.json()).proveedores || [];
+      const parcelas = parcelasData.parcelas || [];
+      const cultivos = cultivosData.cultivos || [];
+      const contratos = contratosData.contratos || [];
+      const proveedores = proveedoresData.proveedores || [];
 
       await offlineDB.cacheReferenceData(parcelas, cultivos, contratos, proveedores);
 
