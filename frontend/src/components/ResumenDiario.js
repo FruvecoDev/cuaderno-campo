@@ -20,7 +20,7 @@ const ResumenDiario = ({ onClose }) => {
 
   const fetchResumen = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/resumen-diario`, {
+      const response = await fetch(`${BACKEND_URL}/api/resumen-diario`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       

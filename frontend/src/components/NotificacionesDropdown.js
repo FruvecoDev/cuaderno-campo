@@ -46,7 +46,7 @@ const NotificacionesDropdown = () => {
 
   const fetchCount = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/notificaciones/count`, {
+      const response = await fetch(`${BACKEND_URL}/api/notificaciones/count`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
@@ -61,7 +61,7 @@ const NotificacionesDropdown = () => {
   const fetchNotificaciones = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/api/notificaciones?limit=20`, {
+      const response = await fetch(`${BACKEND_URL}/api/notificaciones?limit=20`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
@@ -85,7 +85,7 @@ const NotificacionesDropdown = () => {
 
   const handleMarcarLeida = async (id) => {
     try {
-      const response = await fetch(`${API_URL}/api/notificaciones/${id}/leer`, {
+      const response = await fetch(`${BACKEND_URL}/api/notificaciones/${id}/leer`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -102,7 +102,7 @@ const NotificacionesDropdown = () => {
 
   const handleMarcarTodasLeidas = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/notificaciones/leer-todas`, {
+      const response = await fetch(`${BACKEND_URL}/api/notificaciones/leer-todas`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });

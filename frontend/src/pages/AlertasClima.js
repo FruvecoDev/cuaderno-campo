@@ -79,7 +79,7 @@ const AlertasClima = () => {
         params.append('estado', filtroEstado);
       }
       
-      const response = await fetch(`${API_URL}/api/alertas-clima?${params}`, {
+      const response = await fetch(`${BACKEND_URL}/api/alertas-clima?${params}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -91,7 +91,7 @@ const AlertasClima = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/alertas-clima/stats`, {
+      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/stats`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -103,7 +103,7 @@ const AlertasClima = () => {
 
   const fetchReglas = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/alertas-clima/reglas/config`, {
+      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/reglas/config`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -118,7 +118,7 @@ const AlertasClima = () => {
     setError(null);
     
     try {
-      const response = await fetch(`${API_URL}/api/alertas-clima/verificar-todas`, {
+      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/verificar-todas`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -163,7 +163,7 @@ const AlertasClima = () => {
         descripcion: datosManual.descripcion || null
       };
       
-      const response = await fetch(`${API_URL}/api/alertas-clima/clima/manual`, {
+      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/clima/manual`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -196,7 +196,7 @@ const AlertasClima = () => {
 
   const handleUpdateAlertaEstado = async (alertaId, nuevoEstado) => {
     try {
-      const response = await fetch(`${API_URL}/api/alertas-clima/${alertaId}`, {
+      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/${alertaId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -219,7 +219,7 @@ const AlertasClima = () => {
 
   const handleToggleRegla = async (regla) => {
     try {
-      const response = await fetch(`${API_URL}/api/alertas-clima/reglas/${regla.id}`, {
+      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/reglas/${regla.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
