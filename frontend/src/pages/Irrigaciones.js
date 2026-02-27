@@ -300,11 +300,7 @@ const Irrigaciones = () => {
   const calcularConsumo = async () => {
     if (!calcData.parcela_id || !calcData.volumen) return;
     try {
-      const res = await fetch(
-        `${BACKEND_URL}/api/irrigaciones/calcular-consumo?parcela_id=${calcData.parcela_id}&volumen=${calcData.volumen}`,
-        { headers }
-      );
-      const data = await res.json();
+      const data = await api.get(`/api/irrigaciones/calcular-consumo?parcela_id=${calcData.parcela_id}&volumen=${calcData.volumen}`);
       setCalcData({
         ...calcData,
         superficie: data.superficie_ha,
