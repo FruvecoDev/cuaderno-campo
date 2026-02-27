@@ -637,17 +637,7 @@ const Recomendaciones = () => {
     setGeneratingTratamiento(rec._id);
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/recomendaciones/${rec._id}/generar-tratamiento`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.detail || 'Error al generar tratamiento');
-      }
-      
+      const data = await api.post(`/api/recomendaciones/${rec._id}/generar-tratamiento`);
       setSuccess('Tratamiento generado correctamente');
       setTimeout(() => setSuccess(null), 3000);
       fetchRecomendaciones();
