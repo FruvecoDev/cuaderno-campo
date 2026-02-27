@@ -7,9 +7,8 @@ import 'leaflet/dist/leaflet.css';
 import { TrendingUp, MapPin, FileText, Sprout, Euro, Calendar as CalendarIcon, Bell, Layers, Satellite, ChevronLeft, ChevronRight, Mail, Send, CheckCircle, AlertCircle, Eye, Edit2, Home, AlertTriangle, Building2, Wheat, Droplets, Clock, Package, FileSignature, ShoppingCart, TrendingDown, ClipboardList, Users, Settings, X, GripVertical, RotateCcw, Save, ChevronUp, ChevronDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import api from '../services/api';
 import '../App.css';
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 // Tile layers para el mapa
 const TILE_LAYERS = {
