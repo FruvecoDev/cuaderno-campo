@@ -217,14 +217,9 @@ const Clientes = () => {
     setLoadingResumen(true);
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/clientes/${cliente._id}/resumen-ventas`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        const data = await api.get(`/api/clientes/${cliente._id}/resumen-ventas`);
-        setResumenVentas(data);
-      } catch (err) {
+      const data = await api.get(`/api/clientes/${cliente._id}/resumen-ventas`);
+      setResumenVentas(data);
+    } catch (err) {
       console.error('Error fetching resumen ventas:', err);
       setError('Error al cargar resumen de ventas');
       setTimeout(() => setError(null), 5000);
