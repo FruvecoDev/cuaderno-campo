@@ -222,13 +222,9 @@ const Clientes = () => {
       });
       
       if (response.ok) {
-        const data = await response.json();
+        const data = await api.get(`/api/clientes/${cliente._id}/resumen-ventas`);
         setResumenVentas(data);
-      } else {
-        setError('Error al cargar resumen de ventas');
-        setTimeout(() => setError(null), 5000);
-      }
-    } catch (err) {
+      } catch (err) {
       console.error('Error fetching resumen ventas:', err);
       setError('Error al cargar resumen de ventas');
       setTimeout(() => setError(null), 5000);
@@ -247,12 +243,7 @@ const Clientes = () => {
     if (!window.confirm('¿Está seguro de eliminar este cliente?')) return;
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/clientes/${clienteId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      const data = await response.json();
+      const data = await api.delete(`/api/clientes/${clienteId}`);
       
       if (data.success) {
         fetchClientes();
@@ -269,14 +260,8 @@ const Clientes = () => {
   
   const handleToggleActivo = async (clienteId) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/clientes/${clienteId}/toggle-activo`, {
-        method: 'PATCH',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        fetchClientes();
-      }
+      await api.patch(`/api/clientes/${clienteId}/toggle-activo`);
+      fetchClientes();
     } catch (err) {
       console.error('Error toggling activo:', err);
     }
@@ -288,15 +273,8 @@ const Clientes = () => {
       const formDataUpload = new FormData();
       formDataUpload.append('file', file);
       
-      const response = await fetch(`${BACKEND_URL}/api/clientes/${clienteId}/foto`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formDataUpload
-      });
-      
-      if (response.ok) {
-        fetchClientes();
-      }
+      await api.upload(`/api/clientes/${clienteId}/foto`, formDataUpload);
+      fetchClientes();
     } catch (err) {
       console.error('Error uploading foto:', err);
     } finally {
