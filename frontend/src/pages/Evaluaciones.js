@@ -664,17 +664,7 @@ const Evaluaciones = () => {
     // Guardar en el servidor
     try {
       const ordenIds = newOrder.map(p => p.id);
-      await fetch(
-        `${BACKEND_URL}/api/evaluaciones/config/preguntas/reorder?seccion=${seccionKey}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(ordenIds)
-        }
-      );
+      await api.put(`/api/evaluaciones/config/preguntas/reorder?seccion=${seccionKey}`, ordenIds);
     } catch (error) {
       console.error('Error al guardar el orden:', error);
       // Revertir si hay error
