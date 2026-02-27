@@ -1243,10 +1243,39 @@ const ControlHorario = ({ empleados }) => {
       
       {/* Modal Fichar */}
       {showFicharModal && (
-        <div className="modal-overlay" onClick={() => setShowFicharModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px' }}>
-            <div className="modal-header">
-              <h2>Registrar Fichaje</h2>
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '2rem'
+        }} onClick={() => setShowFicharModal(false)}>
+          <div onClick={e => e.stopPropagation()} style={{ 
+            backgroundColor: 'hsl(var(--card))',
+            borderRadius: '12px',
+            width: '100%',
+            maxWidth: '500px',
+            maxHeight: '90vh',
+            overflow: 'auto'
+          }}>
+            <div style={{
+              padding: '1.5rem',
+              borderBottom: '1px solid hsl(var(--border))',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              position: 'sticky',
+              top: 0,
+              backgroundColor: 'hsl(var(--card))',
+              zIndex: 1
+            }}>
+              <h2 style={{ margin: 0 }}>Registrar Fichaje</h2>
               <button onClick={() => setShowFicharModal(false)} className="btn btn-ghost">
                 <X size={20} />
               </button>
