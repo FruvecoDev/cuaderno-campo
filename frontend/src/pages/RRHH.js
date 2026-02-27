@@ -282,12 +282,13 @@ const RRHH = () => {
       )}
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid hsl(var(--border))', paddingBottom: '0.5rem' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid hsl(var(--border))', paddingBottom: '0.5rem', overflowX: 'auto' }}>
         {[
           { id: 'empleados', label: 'Empleados', icon: Users },
           { id: 'fichajes', label: 'Control Horario', icon: Clock },
           { id: 'productividad', label: 'Productividad', icon: TrendingUp },
-          { id: 'prenomina', label: 'Prenómina', icon: FileText }
+          { id: 'documentos', label: 'Documentos', icon: FileText },
+          { id: 'prenomina', label: 'Prenómina', icon: CreditCard }
         ].map(tab => {
           const Icon = tab.icon;
           return (
