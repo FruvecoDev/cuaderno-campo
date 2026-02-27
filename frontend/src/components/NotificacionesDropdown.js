@@ -4,8 +4,8 @@ import {
   CheckCircle, AlertCircle, Clock, ExternalLink, Trash2
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import api, { BACKEND_URL } from '../services/api';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const TIPO_ICONS = {
   'info': { icon: Info, color: '#3b82f6' },
