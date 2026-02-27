@@ -1976,6 +1976,8 @@ const DocumentosEmpleado = ({ empleados }) => {
   const [documentos, setDocumentos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState('');
+  const [busquedaEmpleado, setBusquedaEmpleado] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
   const [showNuevoDoc, setShowNuevoDoc] = useState(false);
   const [showFirmaModal, setShowFirmaModal] = useState(false);
   const [documentoAFirmar, setDocumentoAFirmar] = useState(null);
@@ -1989,6 +1991,35 @@ const DocumentosEmpleado = ({ empleados }) => {
   // Referencia al canvas de firma
   const sigCanvasRef = useRef(null);
   const [firmaGuardada, setFirmaGuardada] = useState(null);
+  const dropdownRef = useRef(null);
+  
+  // Filtrar empleados por búsqueda (nombre o DNI)
+  const empleadosFiltrados = empleados.filter(emp => {
+    if (!busquedaEmpleado) return emp.activo;
+    const busqueda = busquedaEmpleado.toLowerCase();
+    const nombreCompleto = `${emp.nombre} ${emp.apellidos}`.toLowerCase();
+    const dni = (emp.dni_nie || '').toLowerCase();
+    const codigo = (emp.codigo || '').toLowerCase();
+    return emp.activo && (
+      nombreCompleto.includes(busqueda) || 
+      dni.includes(busqueda) ||
+      codigo.includes(busqueda)
+    );
+  });
+  
+  // Cerrar dropdown al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+  
+  // Obtener empleado seleccionado
+  const empleadoActual = empleados.find(e => e._id === empleadoSeleccionado);
   
   const tiposDocumento = [
     { value: 'contrato', label: 'Contrato de Trabajo' },
