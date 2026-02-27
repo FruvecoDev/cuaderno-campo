@@ -221,19 +221,9 @@ const Usuarios = () => {
 
   const handleEditRole = async (userId, newRole) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/auth/users/${userId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ role: newRole })
-      });
-      
-      if (response.ok) {
-        fetchUsers();
-        setEditingUser(null);
-      }
+      await api.put(`/api/auth/users/${userId}`, { role: newRole });
+      fetchUsers();
+      setEditingUser(null);
     } catch (error) {
       console.error('Error updating role:', error);
     }
@@ -261,23 +251,10 @@ const Usuarios = () => {
     
     setSavingTipoOp(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/auth/users/${selectedUserForTipoOp._id}/tipo-operacion`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ tipo_operacion: tipoOperacionValue })
-      });
-      
-      if (response.ok) {
-        setShowTipoOperacionModal(false);
-        setSelectedUserForTipoOp(null);
-        fetchUsers();
-      } else {
-        const error = await response.json();
-        alert(`Error: ${error.detail}`);
-      }
+      await api.put(`/api/auth/users/${selectedUserForTipoOp._id}/tipo-operacion`, { tipo_operacion: tipoOperacionValue });
+      setShowTipoOperacionModal(false);
+      setSelectedUserForTipoOp(null);
+      fetchUsers();
     } catch (error) {
       console.error('Error saving tipo operacion:', error);
       alert('Error guardando tipo de operación');
