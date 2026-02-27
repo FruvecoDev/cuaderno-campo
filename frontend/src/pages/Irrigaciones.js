@@ -109,8 +109,7 @@ const Irrigaciones = () => {
   const fetchIrrigaciones = async () => {
     try {
       setError(null);
-      const res = await fetch(`${BACKEND_URL}/api/irrigaciones`, { headers });
-      const data = await res.json();
+      const data = await api.get('/api/irrigaciones');
       setIrrigaciones(data.irrigaciones || []);
     } catch (err) {
       console.error('Error fetching irrigaciones:', err);
@@ -121,8 +120,7 @@ const Irrigaciones = () => {
 
   const fetchParcelas = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/parcelas`, { headers });
-      const data = await res.json();
+      const data = await api.get('/api/parcelas');
       setParcelas(data.parcelas || []);
     } catch (err) {
       console.error('Error fetching parcelas:', err);
@@ -131,8 +129,7 @@ const Irrigaciones = () => {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/irrigaciones/stats`, { headers });
-      const data = await res.json();
+      const data = await api.get('/api/irrigaciones/stats');
       setStats(data);
     } catch (err) {
       console.error('Error fetching stats:', err);
@@ -141,8 +138,7 @@ const Irrigaciones = () => {
 
   const fetchSistemas = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/irrigaciones/sistemas`, { headers });
-      const data = await res.json();
+      const data = await api.get('/api/irrigaciones/sistemas');
       setSistemas(data.sistemas || []);
     } catch (err) {
       console.error('Error fetching sistemas:', err);
@@ -151,8 +147,7 @@ const Irrigaciones = () => {
 
   const fetchHistorial = async (parcelaId) => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/irrigaciones/historial/${parcelaId}`, { headers });
-      const data = await res.json();
+      const data = await api.get(`/api/irrigaciones/historial/${parcelaId}`);
       setHistorialData(data);
       setShowHistorial(parcelaId);
     } catch (err) {
