@@ -661,18 +661,8 @@ const Parcelas = () => {
     }
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/parcelas/${parcelaId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (response.ok) {
-        fetchParcelas();
-      } else {
-        alert(t('messages.errorDeleting'));
-      }
+      await api.delete(`/api/parcelas/${parcelaId}`);
+      fetchParcelas();
     } catch (error) {
       console.error('Error deleting parcela:', error);
       alert(t('messages.errorDeleting'));
@@ -683,6 +673,8 @@ const Parcelas = () => {
   const handleGenerateCuaderno = async (parcelaId, campana) => {
     setGeneratingCuaderno(parcelaId);
     try {
+      // For file download, we still need raw fetch to handle blob
+      const token = localStorage.getItem('token');
       const response = await fetch(`${BACKEND_URL}/api/cuaderno-campo/generar`, {
         method: 'POST',
         headers: {
