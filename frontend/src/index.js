@@ -9,6 +9,18 @@ import { initializeTheme } from './services/themeService';
 // Load theme on app start
 initializeTheme();
 
+// Unregister any existing service workers to prevent postMessage errors
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    registrations.forEach(registration => {
+      registration.unregister();
+      console.log('Service Worker unregistered:', registration.scope);
+    });
+  }).catch(err => {
+    console.log('Error unregistering service workers:', err);
+  });
+}
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <BrowserRouter>
