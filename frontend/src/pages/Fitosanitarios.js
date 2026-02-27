@@ -310,10 +310,7 @@ const Fitosanitarios = () => {
     setVerificationResult(null);
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/verify-mapa/${productoId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get(`/api/fitosanitarios/verify-mapa/${productoId}`);
       
       if (data.success) {
         setVerificationResult(data);
@@ -337,11 +334,7 @@ const Fitosanitarios = () => {
     setBulkVerifyResult(null);
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/bulk-verify-mapa?limit=100`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.post('/api/fitosanitarios/bulk-verify-mapa?limit=100');
       
       if (data.success) {
         setBulkVerifyResult(data);
@@ -368,11 +361,6 @@ const Fitosanitarios = () => {
 
     try {
       setError(null);
-      const url = editingId
-        ? `${BACKEND_URL}/api/fitosanitarios/${editingId}`
-        : `${BACKEND_URL}/api/fitosanitarios`;
-
-      const method = editingId ? 'PUT' : 'POST';
 
       // Process plagas as array
       const plagasArray = formData.plagas_objetivo
@@ -389,18 +377,10 @@ const Fitosanitarios = () => {
         plagas_objetivo: plagasArray
       };
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
+      if (editingId) {
+        await api.put(`/api/fitosanitarios/${editingId}`, payload);
+      } else {
+        await api.post('/api/fitosanitarios', payload);
       }
 
       setSuccessMsg(editingId ? t('messages.savedSuccessfully') : t('messages.savedSuccessfully'));
