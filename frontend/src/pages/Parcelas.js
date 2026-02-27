@@ -531,10 +531,8 @@ const Parcelas = () => {
     
     try {
       const url = editingId 
-        ? `${BACKEND_URL}/api/parcelas/${editingId}`
-        : `${BACKEND_URL}/api/parcelas`;
-      
-      const method = editingId ? 'PUT' : 'POST';
+        ? `/api/parcelas/${editingId}`
+        : `/api/parcelas`;
       
       const payload = {
         ...formData,
@@ -546,16 +544,10 @@ const Parcelas = () => {
         payload.recintos = [{ geometria: polygon }];
       }
       
-      const response = await fetch(url, {
-        method: method,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
+      const data = editingId 
+        ? await api.put(url, payload)
+        : await api.post(url, payload);
       
-      const data = await response.json();
       if (data.success) {
         setShowForm(false);
         setEditingId(null);
