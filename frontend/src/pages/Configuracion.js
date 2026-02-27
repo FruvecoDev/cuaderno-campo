@@ -798,15 +798,7 @@ const Configuracion = () => {
   };
 
   const handleLogoDelete = async (type) => {
-    const token = localStorage.getItem('token');
-    
-    const response = await fetch(`${BACKEND_URL}/api/config/logo/${type}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.detail || 'Error al eliminar el logo');
+    const data = await api.delete(`/api/config/logo/${type}`);
 
     setLogos(prev => ({ ...prev, [`${type}_logo`]: null }));
     setMessage({ type: 'success', text: data.message });
@@ -814,17 +806,10 @@ const Configuracion = () => {
   };
 
   const handleSelectTheme = async (themeId) => {
-    const token = localStorage.getItem('token');
     setLoading(true);
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/config/theme?theme_id=${themeId}`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || 'Error al aplicar el tema');
+      const data = await api.post(`/api/config/theme?theme_id=${themeId}`);
 
       setCurrentTheme(data);
       applyThemeToDOM(data.primary, data.accent);
@@ -838,17 +823,10 @@ const Configuracion = () => {
   };
 
   const handleCustomColor = async (primary, accent) => {
-    const token = localStorage.getItem('token');
     setLoading(true);
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/config/theme?primary=${encodeURIComponent(primary)}&accent=${encodeURIComponent(accent)}`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || 'Error al aplicar el tema');
+      const data = await api.post(`/api/config/theme?primary=${encodeURIComponent(primary)}&accent=${encodeURIComponent(accent)}`);
 
       setCurrentTheme(data);
       applyThemeToDOM(data.primary, data.accent);
@@ -864,17 +842,10 @@ const Configuracion = () => {
   const handleResetTheme = async () => {
     if (!window.confirm('¿Restaurar el tema predeterminado (Verde)?')) return;
 
-    const token = localStorage.getItem('token');
     setLoading(true);
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/config/theme`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || 'Error al restaurar el tema');
+      const data = await api.delete('/api/config/theme');
 
       // Reset to default
       const defaultTheme = { theme_id: 'verde', primary: '122 37% 27%', accent: '74 85% 40%', is_custom: false };
