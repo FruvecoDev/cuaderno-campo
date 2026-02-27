@@ -1686,4 +1686,57 @@ El error estaba relacionado con Service Workers obsoletos cacheados en el navega
 2. Actualizar código local (`git pull`)
 3. Limpiar caché del navegador o usar ventana de incógnito la primera vez
 
+
+## Wrapper Centralizado para API (27/02/2026) - COMPLETADO
+
+### Problema:
+Error recurrente "body stream already read" en el frontend causado por la falta de un manejador centralizado de peticiones API.
+
+### Solución Implementada:
+Se creó un servicio API centralizado (`/app/frontend/src/services/api.js`) que:
+
+1. **Clona las respuestas** antes de leerlas para evitar el error "body stream already read"
+2. **Maneja automáticamente** los headers de autenticación (Bearer token)
+3. **Proporciona timeout** configurable para las peticiones (default: 30s)
+4. **Estandariza** el manejo de errores con la clase `ApiError`
+5. **Ofrece métodos** convenientes: `api.get()`, `api.post()`, `api.put()`, `api.delete()`, `api.upload()`, `api.download()`
+
+### Archivos Creados/Modificados:
+- `/app/frontend/src/services/api.js` - **NUEVO** - Servicio centralizado
+- `/app/frontend/src/contexts/AuthContext.js` - Migrado a usar `api`
+- `/app/frontend/src/services/syncService.js` - Migrado a usar `api`
+- `/app/frontend/src/pages/Dashboard.js` - Migrado a usar `api`
+- `/app/frontend/src/pages/Login.js` - Migrado a usar `api`
+
+### Uso del nuevo servicio:
+```javascript
+import api from '../services/api';
+
+// GET request
+const data = await api.get('/api/users');
+
+// POST request
+const newUser = await api.post('/api/users', { name: 'John', email: 'john@example.com' });
+
+// Con opciones
+const data = await api.get('/api/data', { 
+  timeout: 5000,           // 5 segundos
+  includeAuth: false       // Sin token
+});
+
+// Upload de archivos
+const formData = new FormData();
+formData.append('file', file);
+await api.upload('/api/upload', formData);
+
+// Descargar archivo
+await api.download('/api/export/excel', 'informe.xlsx');
+```
+
+### Estado: ✅ COMPLETADO Y VERIFICADO
+- Login funciona correctamente
+- Dashboard carga sin errores
+- No más errores "body stream already read"
+
+
 ### Estado: ✅ COMPLETADO (verificado en entorno preview, pendiente validación en entorno local del usuario)
