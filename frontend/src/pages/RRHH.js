@@ -4,10 +4,12 @@ import {
   Plus, Edit2, Trash2, Search, Filter, X, User, QrCode, 
   CreditCard, Camera, Download, Upload, FileText, Clock,
   TrendingUp, Users, UserCheck, UserX, ChevronDown, Eye,
-  Smartphone, Fingerprint
+  Smartphone, Fingerprint, Check, PenTool
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
+import { QrReader } from 'react-qr-reader';
+import SignatureCanvas from 'react-signature-canvas';
 import '../App.css';
 
 const RRHH = () => {
