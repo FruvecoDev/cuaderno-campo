@@ -287,10 +287,7 @@ const Recomendaciones = () => {
         if (value) params.append(key, value);
       });
       
-      const response = await fetch(`${BACKEND_URL}/api/recomendaciones?${params}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get(`/api/recomendaciones?${params}`);
       setRecomendaciones(data.recomendaciones || []);
     } catch (err) {
       console.error('Error fetching recomendaciones:', err);
@@ -299,10 +296,7 @@ const Recomendaciones = () => {
   
   const fetchParcelas = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/parcelas`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get('/api/parcelas');
       setParcelas(data.parcelas || []);
     } catch (err) {
       console.error('Error fetching parcelas:', err);
@@ -311,10 +305,7 @@ const Recomendaciones = () => {
   
   const fetchContratos = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/contratos`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get('/api/contratos');
       setContratos(data.contratos || []);
     } catch (err) {
       console.error('Error fetching contratos:', err);
@@ -323,10 +314,7 @@ const Recomendaciones = () => {
   
   const fetchFitosanitarios = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios?activo=true`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get('/api/fitosanitarios?activo=true');
       setFitosanitarios(data.productos || []);
     } catch (err) {
       console.error('Error fetching fitosanitarios:', err);
@@ -335,10 +323,7 @@ const Recomendaciones = () => {
   
   const fetchTipos = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/recomendaciones/config/tipos`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get('/api/recomendaciones/config/tipos');
       setTipos(data.tipos || []);
       setSubtipos(data.subtipos_tratamiento || []);
     } catch (err) {
@@ -348,10 +333,7 @@ const Recomendaciones = () => {
   
   const fetchStats = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/recomendaciones/stats/resumen`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get('/api/recomendaciones/stats/resumen');
       setStats(data);
     } catch (err) {
       console.error('Error fetching stats:', err);
@@ -360,13 +342,7 @@ const Recomendaciones = () => {
   
   const fetchPlantillas = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/plantillas-recomendaciones`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!response.ok) {
-        throw new Error('Error fetching plantillas');
-      }
-      const data = await response.json();
+      const data = await api.get('/api/plantillas-recomendaciones');
       setPlantillas(data.plantillas || []);
     } catch (err) {
       console.error('Error fetching plantillas:', err);
