@@ -483,6 +483,11 @@ const RRHH = () => {
         <Productividad empleados={empleados} />
       )}
 
+      {/* Tab Content: Documentos */}
+      {activeTab === 'documentos' && (
+        <DocumentosEmpleado empleados={empleados} />
+      )}
+
       {/* Tab Content: Prenómina */}
       {activeTab === 'prenomina' && (
         <Prenomina empleados={empleados} />
