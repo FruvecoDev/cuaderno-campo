@@ -2153,21 +2153,148 @@ const DocumentosEmpleado = ({ empleados }) => {
         </div>
       </div>
       
-      {/* Toolbar */}
+      {/* Toolbar con Buscador */}
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-        <select
-          value={empleadoSeleccionado}
-          onChange={e => setEmpleadoSeleccionado(e.target.value)}
-          className="form-select"
-          style={{ minWidth: '250px' }}
-        >
-          <option value="">Todos los empleados</option>
-          {empleados.filter(e => e.activo).map(emp => (
-            <option key={emp._id} value={emp._id}>
-              {emp.codigo} - {emp.nombre} {emp.apellidos}
-            </option>
-          ))}
-        </select>
+        {/* Buscador de empleados */}
+        <div ref={dropdownRef} style={{ position: 'relative', minWidth: '350px' }}>
+          <div style={{ position: 'relative' }}>
+            <Search size={18} style={{ 
+              position: 'absolute', 
+              left: '12px', 
+              top: '50%', 
+              transform: 'translateY(-50%)',
+              color: 'hsl(var(--muted-foreground))'
+            }} />
+            <input
+              type="text"
+              className="form-input"
+              placeholder="Buscar por nombre, DNI o código..."
+              value={empleadoActual ? `${empleadoActual.codigo} - ${empleadoActual.nombre} ${empleadoActual.apellidos}` : busquedaEmpleado}
+              onChange={e => {
+                setBusquedaEmpleado(e.target.value);
+                setEmpleadoSeleccionado('');
+                setShowDropdown(true);
+              }}
+              onFocus={() => setShowDropdown(true)}
+              style={{ paddingLeft: '40px', paddingRight: empleadoSeleccionado ? '36px' : '12px' }}
+            />
+            {empleadoSeleccionado && (
+              <button
+                onClick={() => {
+                  setEmpleadoSeleccionado('');
+                  setBusquedaEmpleado('');
+                }}
+                style={{
+                  position: 'absolute',
+                  right: '8px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  color: 'hsl(var(--muted-foreground))'
+                }}
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+          
+          {/* Dropdown de resultados */}
+          {showDropdown && !empleadoSeleccionado && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              right: 0,
+              background: 'hsl(var(--card))',
+              border: '1px solid hsl(var(--border))',
+              borderRadius: '0.5rem',
+              marginTop: '4px',
+              maxHeight: '250px',
+              overflowY: 'auto',
+              zIndex: 100,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+            }}>
+              {/* Opción para ver todos */}
+              <div
+                onClick={() => {
+                  setEmpleadoSeleccionado('');
+                  setBusquedaEmpleado('');
+                  setShowDropdown(false);
+                }}
+                style={{
+                  padding: '0.75rem 1rem',
+                  cursor: 'pointer',
+                  borderBottom: '1px solid hsl(var(--border))',
+                  background: 'hsl(var(--muted) / 0.3)',
+                  fontWeight: '500'
+                }}
+                onMouseEnter={e => e.target.style.background = 'hsl(var(--muted))'}
+                onMouseLeave={e => e.target.style.background = 'hsl(var(--muted) / 0.3)'}
+              >
+                📋 Ver todos los documentos
+              </div>
+              
+              {empleadosFiltrados.length === 0 ? (
+                <div style={{ padding: '1rem', textAlign: 'center', color: 'hsl(var(--muted-foreground))' }}>
+                  No se encontraron empleados
+                </div>
+              ) : (
+                empleadosFiltrados.slice(0, 10).map(emp => (
+                  <div
+                    key={emp._id}
+                    onClick={() => {
+                      setEmpleadoSeleccionado(emp._id);
+                      setBusquedaEmpleado('');
+                      setShowDropdown(false);
+                    }}
+                    style={{
+                      padding: '0.75rem 1rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      borderBottom: '1px solid hsl(var(--border) / 0.5)'
+                    }}
+                    onMouseEnter={e => e.target.style.background = 'hsl(var(--muted))'}
+                    onMouseLeave={e => e.target.style.background = 'transparent'}
+                  >
+                    <div>
+                      <div style={{ fontWeight: '500' }}>{emp.nombre} {emp.apellidos}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                        {emp.codigo} • DNI: {emp.dni_nie || 'N/A'}
+                      </div>
+                    </div>
+                    <span style={{ 
+                      fontSize: '0.7rem', 
+                      background: 'hsl(var(--primary) / 0.1)', 
+                      color: 'hsl(var(--primary))',
+                      padding: '2px 8px',
+                      borderRadius: '4px'
+                    }}>
+                      {emp.puesto || 'Sin puesto'}
+                    </span>
+                  </div>
+                ))
+              )}
+              {empleadosFiltrados.length > 10 && (
+                <div style={{ 
+                  padding: '0.5rem 1rem', 
+                  textAlign: 'center', 
+                  fontSize: '0.75rem',
+                  color: 'hsl(var(--muted-foreground))',
+                  background: 'hsl(var(--muted) / 0.3)'
+                }}>
+                  +{empleadosFiltrados.length - 10} empleados más...
+                </div>
+              )}
+            </div>
+          )}
+        </div>
         
         <button
           onClick={() => setShowNuevoDoc(true)}
