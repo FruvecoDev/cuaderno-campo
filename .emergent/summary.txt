@@ -34,24 +34,22 @@ El usuario ha solicitado recientemente la creación de un módulo RRHH para la g
 **User's preferred language**: Español
 
 **what currently exists?**
-Una aplicación full-stack (FastAPI, React, MongoDB) de gestión agrícola. En esta sesión se han implementado las siguientes funcionalidades:
-1.  **Resolución de Error Crítico**: Se solucionó el error  que impedía al usuario usar la app en su entorno local, mediante la eliminación de Service Workers antiguos.
-2.  **Wrapper de API Centralizado**: Se creó un servicio  para centralizar todas las llamadas  del frontend. Esto resuelve el error recurrente  y estandariza la autenticación y el manejo de errores. La migración de los componentes a este nuevo servicio está en progreso.
-3.  **Menú Lateral Colapsable**: Se implementó un menú lateral que se puede colapsar para mostrar solo los iconos, mejorando el espacio de trabajo. El estado se guarda en .
-4.  **Módulo de RRHH (Fase 1)**: Se ha iniciado la construcción de un nuevo módulo de Recursos Humanos. Se ha creado el backend (modelos y API para Empleados, Fichajes, etc.) y una interfaz de frontend básica con KPIs y una tabla de empleados.
-5.  **Instrucciones de Despliegue Local**: Se proporcionó al usuario una guía detallada para configurar y ejecutar el proyecto en su máquina local.
+Una aplicación full-stack (FastAPI, React, MongoDB) de gestión agrícola. En esta sesión se han completado las funcionalidades avanzadas del módulo de RRHH y se ha avanzado significativamente en una refactorización crítica del frontend.
+1.  **Módulo de RRHH (Fase 1 Completa)**: Se implementó la pestaña Documentos con un flujo completo de firma digital usando . Se verificó que el fichaje por QR y facial funcionaban.
+2.  **Mejoras de UI/UX en RRHH**: Se corrigió el estilo de todos los modales del módulo RRHH (Nuevo Empleado, Fichar, QR, etc.) para que se muestren centrados y con un overlay oscuro, igual que en el resto de la aplicación. Además, se añadió un buscador de empleados por nombre/DNI en la sección de documentos para facilitar la gestión.
+3.  **Refactorización del API Service**: Se ha continuado la migración masiva de llamadas  al wrapper centralizado . Se han migrado aproximadamente un 70% de las llamadas, reduciendo significativamente la deuda técnica y el riesgo de errores .
 
 **Last working item**:
--   **Last item agent was working**: Implementando las funcionalidades avanzadas para el nuevo módulo de RRHH. Específicamente, se estaban integrando las librerías  y  en el componente  para permitir el fichaje de empleados mediante escaneo de QR y captura de foto facial desde la cámara.
+-   **Last item agent was working**: Migrando sistemáticamente las llamadas  restantes en el frontend al nuevo wrapper centralizado . El agente estaba procesando los archivos restantes en lotes para completar esta refactorización crítica.
 -   **Status**: IN PROGRESS
--   **Agent Testing Done**: N
--   **Which testing method agent to use?**: frontend testing agent. La funcionalidad implica interacciones con la cámara y la UI, lo cual es ideal para un test e2e que pueda simular estas acciones.
+-   **Agent Testing Done**: Y (El agente verificó la compilación del frontend y la funcionalidad básica de la aplicación después de cada lote de migraciones).
+-   **Which testing method agent to use?**: frontend testing agent. Al ser una refactorización que afecta a toda la aplicación, es necesario un test de regresión completo para asegurar que no se ha roto ninguna funcionalidad.
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Migración incompleta al servicio de API (P1)**
-    -   **Description**: El error recurrente  se está solucionando mediante la migración de todas las llamadas  a un nuevo wrapper . La migración está a un 20% de completarse, con unas 181 llamadas  restantes por refactorizar.
-    -   **Attempted fixes**: Se creó  y se migraron componentes clave como , , , ,  y .
+-   **Issue 1: Migración incompleta al servicio de API (P0)**
+    -   **Description**: Tarea crítica de refactorización para eliminar el error recurrente  y estandarizar las llamadas a la API. Se inició con 193 llamadas  y quedan aproximadamente 57 (~30%). La finalización de esta tarea es la máxima prioridad.
+    -   **Attempted fixes**: Se han migrado con éxito ~136 llamadas en más de 20 archivos, incluyendo componentes complejos como , , , , , , ,  y muchos otros.
     -   **Next debug checklist**:
         1.  Ejecutar frontend/src/components/Layout.js:        const response = await fetch(`${BACKEND_URL}/api/config/logos`);
 frontend/src/components/AdvancedParcelMap.js:      const response = await fetch(
@@ -60,180 +58,42 @@ frontend/src/components/NotificacionesDropdown.js:      const response = await f
 frontend/src/components/NotificacionesDropdown.js:      const response = await fetch(`${BACKEND_URL}/api/notificaciones/${id}/leer`, {
 frontend/src/components/NotificacionesDropdown.js:      const response = await fetch(`${BACKEND_URL}/api/notificaciones/leer-todas`, {
 frontend/src/components/ResumenDiario.js:      const response = await fetch(`${BACKEND_URL}/api/resumen-diario`, {
-frontend/src/pages/Fincas.js:      const res = await fetch(`${BACKEND_URL}/api/fincas`, { headers });
-frontend/src/pages/Fincas.js:      const res = await fetch(`${BACKEND_URL}/api/fincas/stats`, { headers });
-frontend/src/pages/Fincas.js:      const res = await fetch(`${BACKEND_URL}/api/sigpac/provincias`, { headers });
-frontend/src/pages/Fincas.js:      const res = await fetch(`${BACKEND_URL}/api/parcelas`, { headers });
-frontend/src/pages/Fincas.js:      const res = await fetch(`${BACKEND_URL}/api/fincas/parcelas-disponibles`, { headers });
-frontend/src/pages/Fincas.js:      const res = await fetch(`${BACKEND_URL}/api/sigpac/consulta?${params}`, { headers });
-frontend/src/pages/Fincas.js:      const res = await fetch(url, {
-frontend/src/pages/Fincas.js:      const res = await fetch(`${BACKEND_URL}/api/fincas/${id}`, {
-frontend/src/pages/Fincas.js:      const res = await fetch(`${BACKEND_URL}/api/fincas/${fincaId}/parcelas/${parcelaId}`, {
-frontend/src/pages/Fincas.js:      const res = await fetch(`${BACKEND_URL}/api/fincas/${fincaId}/parcelas/${parcelaId}`, {
 frontend/src/pages/InformesIngresos.js:      const response = await fetch(`${BACKEND_URL}/api/ingresos/filtros-opciones`, {
 frontend/src/pages/InformesIngresos.js:      const response = await fetch(`${BACKEND_URL}/api/ingresos/campanas`, {
 frontend/src/pages/InformesIngresos.js:      const response = await fetch(`${BACKEND_URL}/api/ingresos/resumen?${params}`, {
 frontend/src/pages/InformesIngresos.js:      const response = await fetch(`${BACKEND_URL}/api/ingresos/detalle-albaranes?${params}`, {
 frontend/src/pages/InformesIngresos.js:      const response = await fetch(`${BACKEND_URL}/api/ingresos/export/excel?${params}`, {
 frontend/src/pages/InformesIngresos.js:      const response = await fetch(`${BACKEND_URL}/api/ingresos/export/pdf?${params}`, {
-frontend/src/pages/AlertasClima.js:      const response = await fetch(`${BACKEND_URL}/api/alertas-clima?${params}`, {
-frontend/src/pages/AlertasClima.js:      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/stats`, {
-frontend/src/pages/AlertasClima.js:      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/reglas/config`, {
-frontend/src/pages/AlertasClima.js:      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/verificar-todas`, {
-frontend/src/pages/AlertasClima.js:      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/clima/manual`, {
-frontend/src/pages/AlertasClima.js:      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/${alertaId}`, {
-frontend/src/pages/AlertasClima.js:      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/reglas/${regla.id}`, {
-frontend/src/pages/Configuracion.js:      const response = await fetch(`${BACKEND_URL}/api/notificaciones/scheduler/config`, {
-frontend/src/pages/Configuracion.js:      const response = await fetch(`${BACKEND_URL}/api/notificaciones/scheduler/status`, {
-frontend/src/pages/Configuracion.js:      const response = await fetch(`${BACKEND_URL}/api/notificaciones/scheduler/config`, {
-frontend/src/pages/Configuracion.js:      const response = await fetch(`${BACKEND_URL}/api/notificaciones/scheduler/ejecutar`, {
-frontend/src/pages/Configuracion.js:      const response = await fetch(`${BACKEND_URL}/api/config/logos`);
-frontend/src/pages/Configuracion.js:      const response = await fetch(`${BACKEND_URL}/api/config/theme`);
-frontend/src/pages/Configuracion.js:      const response = await fetch(`${BACKEND_URL}/api/config/themes`);
-frontend/src/pages/Configuracion.js:    const response = await fetch(`${BACKEND_URL}/api/config/logo/${type}`, {
-frontend/src/pages/Configuracion.js:    const response = await fetch(`${BACKEND_URL}/api/config/logo/${type}`, {
-frontend/src/pages/Configuracion.js:      const response = await fetch(`${BACKEND_URL}/api/config/theme?theme_id=${themeId}`, {
-frontend/src/pages/Configuracion.js:      const response = await fetch(`${BACKEND_URL}/api/config/theme?primary=${encodeURIComponent(primary)}&accent=${encodeURIComponent(accent)}`, {
-frontend/src/pages/Configuracion.js:      const response = await fetch(`${BACKEND_URL}/api/config/theme`, {
 frontend/src/pages/ArticulosExplotacion.js:      const response = await fetch(url, {
 frontend/src/pages/ArticulosExplotacion.js:      const response = await fetch(url, {
 frontend/src/pages/ArticulosExplotacion.js:      const response = await fetch(`${BACKEND_URL}/api/articulos/${id}`, {
 frontend/src/pages/ArticulosExplotacion.js:      const response = await fetch(`${BACKEND_URL}/api/articulos/${id}/toggle-activo`, {
-frontend/src/pages/Clientes.js:      const response = await fetch(url, {
-frontend/src/pages/Clientes.js:      const response = await fetch(`${BACKEND_URL}/api/clientes/tipos`, {
-frontend/src/pages/Clientes.js:      const response = await fetch(`${BACKEND_URL}/api/clientes/provincias`, {
-frontend/src/pages/Clientes.js:      const response = await fetch(url, {
-frontend/src/pages/Clientes.js:      const response = await fetch(`${BACKEND_URL}/api/clientes/${cliente._id}/resumen-ventas`, {
-frontend/src/pages/Clientes.js:      const response = await fetch(`${BACKEND_URL}/api/clientes/${clienteId}`, {
-frontend/src/pages/Clientes.js:      const response = await fetch(`${BACKEND_URL}/api/clientes/${clienteId}/toggle-activo`, {
-frontend/src/pages/Clientes.js:      const response = await fetch(`${BACKEND_URL}/api/clientes/${clienteId}/foto`, {
 frontend/src/pages/Traducciones.js:      const response = await fetch(`${BACKEND_URL}/api/translations/categories`);
 frontend/src/pages/Traducciones.js:      const response = await fetch(url);
 frontend/src/pages/Traducciones.js:      const response = await fetch(url, {
 frontend/src/pages/Traducciones.js:      const response = await fetch(`${BACKEND_URL}/api/translations/${id}`, {
 frontend/src/pages/Traducciones.js:      const response = await fetch(`${BACKEND_URL}/api/translations/${id}/approve`, {
 frontend/src/pages/Traducciones.js:      const response = await fetch(`${BACKEND_URL}/api/translations/seed`, {
-frontend/src/pages/Proveedores.js:      const response = await fetch(`${BACKEND_URL}/api/proveedores`, {
-frontend/src/pages/Proveedores.js:      const response = await fetch(url, {
-frontend/src/pages/Proveedores.js:      const response = await fetch(`${BACKEND_URL}/api/proveedores/${proveedorId}`, {
 frontend/src/pages/Tareas.js:      const res = await fetch(`${BACKEND_URL}/api/tareas/export/excel?${params}`, { 
 frontend/src/pages/Contratos.js:      const response = await fetch(`${BACKEND_URL}/api/cuaderno-campo/generar`, {
 frontend/src/pages/AsistenteIA.js:      const res = await fetch(`${BACKEND_URL}/api/ai/parcelas-for-suggestions`, { headers });
 frontend/src/pages/AsistenteIA.js:      const res = await fetch(`${BACKEND_URL}/api/ai/contratos-for-predictions`, { headers });
 frontend/src/pages/AsistenteIA.js:      const res = await fetch(
 frontend/src/pages/AsistenteIA.js:      const res = await fetch(
-frontend/src/pages/Albaranes.js:      const response = await fetch(`${BACKEND_URL}/api/albaranes/stats/dashboard`, {
-frontend/src/pages/Albaranes.js:      const response = await fetch(`${BACKEND_URL}/api/albaranes/export/excel?${params}`, {
-frontend/src/pages/Albaranes.js:      const response = await fetch(url, {
-frontend/src/pages/Albaranes.js:      const response = await fetch(`${BACKEND_URL}/api/albaranes/${albaranId}`, {
-frontend/src/pages/Agentes.js:      const response = await fetch(`${BACKEND_URL}/api/agentes?${params}`, {
-frontend/src/pages/Agentes.js:      const contratosRes = await fetch(`${BACKEND_URL}/api/contratos`, {
-frontend/src/pages/Agentes.js:      const cultivosRes = await fetch(`${BACKEND_URL}/api/catalogos/cultivos`, {
-frontend/src/pages/Agentes.js:      const parcelasRes = await fetch(`${BACKEND_URL}/api/parcelas`, {
-frontend/src/pages/Agentes.js:      const response = await fetch(`${BACKEND_URL}/api/agentes/${agenteId}/comisiones`, {
-frontend/src/pages/Agentes.js:      const response = await fetch(url, {
-frontend/src/pages/Agentes.js:          await fetch(`${BACKEND_URL}/api/agentes/${agenteId}/upload-foto`, {
-frontend/src/pages/Agentes.js:      const response = await fetch(`${BACKEND_URL}/api/agentes/${id}`, {
-frontend/src/pages/Agentes.js:      await fetch(`${BACKEND_URL}/api/agentes/${id}/toggle-activo`, {
-frontend/src/pages/Agentes.js:      const response = await fetch(`${BACKEND_URL}/api/agentes/${selectedAgente._id}/comisiones`, {
-frontend/src/pages/Agentes.js:      await fetch(`${BACKEND_URL}/api/comisiones/${comisionId}`, {
 frontend/src/pages/LiquidacionComisiones.js:      const response = await fetch(`${BACKEND_URL}/api/comisiones/campanas`, {
 frontend/src/pages/LiquidacionComisiones.js:      const response = await fetch(`${BACKEND_URL}/api/comisiones/agentes`, {
 frontend/src/pages/LiquidacionComisiones.js:      const response = await fetch(`${BACKEND_URL}/api/comisiones/resumen?${params}`, {
 frontend/src/pages/LiquidacionComisiones.js:      const response = await fetch(`${BACKEND_URL}/api/comisiones/liquidacion/pdf?${params}`, {
-frontend/src/pages/Cosechas.js:      const res = await fetch(`${BACKEND_URL}/api/cosechas`, { headers });
-frontend/src/pages/Cosechas.js:      const res = await fetch(`${BACKEND_URL}/api/contratos`, { headers });
-frontend/src/pages/Cosechas.js:      const res = await fetch(`${BACKEND_URL}/api/cosechas/stats/dashboard`, { headers });
-frontend/src/pages/Cosechas.js:      const res = await fetch(`${BACKEND_URL}/api/cosechas/export/excel?${params}`, { headers });
-frontend/src/pages/Cosechas.js:      const res = await fetch(`${BACKEND_URL}/api/cosechas`, {
-frontend/src/pages/Cosechas.js:      const res = await fetch(`${BACKEND_URL}/api/cosechas/${cosechaId}/cargas`, {
-frontend/src/pages/Cosechas.js:      await fetch(`${BACKEND_URL}/api/cosechas/${cosechaId}/cargas/${idCarga}`, {
-frontend/src/pages/Cosechas.js:      await fetch(`${BACKEND_URL}/api/cosechas/${cosechaId}/completar`, {
-frontend/src/pages/Cosechas.js:      await fetch(`${BACKEND_URL}/api/cosechas/${cosechaId}`, {
-frontend/src/pages/Irrigaciones.js:      const res = await fetch(`${BACKEND_URL}/api/irrigaciones`, { headers });
-frontend/src/pages/Irrigaciones.js:      const res = await fetch(`${BACKEND_URL}/api/parcelas`, { headers });
-frontend/src/pages/Irrigaciones.js:      const res = await fetch(`${BACKEND_URL}/api/irrigaciones/stats`, { headers });
-frontend/src/pages/Irrigaciones.js:      const res = await fetch(`${BACKEND_URL}/api/irrigaciones/sistemas`, { headers });
-frontend/src/pages/Irrigaciones.js:      const res = await fetch(`${BACKEND_URL}/api/irrigaciones/historial/${parcelaId}`, { headers });
-frontend/src/pages/Irrigaciones.js:      const res = await fetch(url, {
-frontend/src/pages/Irrigaciones.js:      const res = await fetch(`${BACKEND_URL}/api/irrigaciones/${id}`, {
-frontend/src/pages/Irrigaciones.js:      const res = await fetch(`${BACKEND_URL}/api/irrigaciones/export/excel?${params}`, { headers });
-frontend/src/pages/Irrigaciones.js:      const res = await fetch(
-frontend/src/pages/Evaluaciones.js:      const response = await fetch(`${BACKEND_URL}/api/evaluaciones`, {
-frontend/src/pages/Evaluaciones.js:      const response = await fetch(`${BACKEND_URL}/api/parcelas`, {
-frontend/src/pages/Evaluaciones.js:      const response = await fetch(`${BACKEND_URL}/api/contratos`, {
-frontend/src/pages/Evaluaciones.js:      const response = await fetch(`${BACKEND_URL}/api/evaluaciones/config/preguntas`, {
-frontend/src/pages/Evaluaciones.js:      const response = await fetch(url, {
-frontend/src/pages/Evaluaciones.js:      const response = await fetch(`${BACKEND_URL}/api/evaluaciones/${id}`, {
+frontend/src/pages/Irrigaciones.js:      const res = await fetch(`${BACKEND_URL}/api/irrigaciones/export/excel?${params}`, { 
 frontend/src/pages/Evaluaciones.js:      const response = await fetch(`${BACKEND_URL}/api/evaluaciones/${id}/pdf`, {
-frontend/src/pages/Evaluaciones.js:      const response = await fetch(
-frontend/src/pages/Evaluaciones.js:      const response = await fetch(
-frontend/src/pages/Evaluaciones.js:      await fetch(
 frontend/src/pages/InformesGastos.js:      const response = await fetch(`${BACKEND_URL}/api/gastos/filtros-opciones`, {
 frontend/src/pages/InformesGastos.js:      const response = await fetch(`${BACKEND_URL}/api/gastos/campanas`, {
 frontend/src/pages/InformesGastos.js:      const response = await fetch(`${BACKEND_URL}/api/gastos/resumen?${params}`, {
 frontend/src/pages/InformesGastos.js:      const response = await fetch(`${BACKEND_URL}/api/gastos/detalle-albaranes?${params}`, {
 frontend/src/pages/InformesGastos.js:      const response = await fetch(`${BACKEND_URL}/api/gastos/export/excel?${params}`, {
 frontend/src/pages/InformesGastos.js:      const response = await fetch(`${BACKEND_URL}/api/gastos/export/pdf?${params}`, {
-frontend/src/pages/Maquinaria.js:      const response = await fetch(`${BACKEND_URL}/api/maquinaria`, {
-frontend/src/pages/Maquinaria.js:      const response = await fetch(url, {
 frontend/src/pages/Maquinaria.js:      const response = await fetch(`${BACKEND_URL}/api/maquinaria/${maquinariaId}/imagen-placa-ce`, {
-frontend/src/pages/Maquinaria.js:      const response = await fetch(`${BACKEND_URL}/api/maquinaria/${maquinariaId}/imagen-placa-ce`, {
-frontend/src/pages/Maquinaria.js:      const response = await fetch(`${BACKEND_URL}/api/maquinaria/${id}`, {
-frontend/src/pages/TecnicosAplicadores.js:      const res = await fetch(url, { headers });
-frontend/src/pages/TecnicosAplicadores.js:      const res = await fetch(`${BACKEND_URL}/api/tecnicos-aplicadores/niveles`, { headers });
-frontend/src/pages/TecnicosAplicadores.js:      const res = await fetch(url, {
-frontend/src/pages/TecnicosAplicadores.js:      const response = await fetch(`${BACKEND_URL}/api/tecnicos-aplicadores/${tecnicoId}/certificado`, {
-frontend/src/pages/TecnicosAplicadores.js:      const res = await fetch(`${BACKEND_URL}/api/tecnicos-aplicadores/${id}`, {
-frontend/src/pages/TecnicosAplicadores.js:      await fetch(`${BACKEND_URL}/api/tecnicos-aplicadores/${id}/toggle-activo`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/recomendaciones?${params}`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/parcelas`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/contratos`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios?activo=true`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/recomendaciones/config/tipos`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/recomendaciones/stats/resumen`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/plantillas-recomendaciones`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(url, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/plantillas-recomendaciones/${id}`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/plantillas-recomendaciones/${plantilla._id}/toggle-activo`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/plantillas-recomendaciones/aplicar-masivo`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/plantillas-recomendaciones/seed`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(url, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/recomendaciones/${id}`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/recomendaciones/${rec._id}/generar-tratamiento`, {
-frontend/src/pages/Recomendaciones.js:        const response = await fetch(`${BACKEND_URL}/api/recomendaciones`, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios?${params}`, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/seed`, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/template`, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/export?${params}`, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/import`, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/mapa-info`, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/import-mapa-excel`, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/verify-mapa/${productoId}`, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/bulk-verify-mapa?limit=100`, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(url, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/${productoId}`, {
 frontend/src/pages/Parcelas.js:      const response = await fetch(`${BACKEND_URL}/api/cuaderno-campo/generar`, {
-frontend/src/pages/Documentos.js:      const res = await fetch(`${BACKEND_URL}/api/documentos`);
-frontend/src/pages/Documentos.js:      await fetch(`${BACKEND_URL}/api/documentos/upload`, { method: 'POST', body: formData });
-frontend/src/pages/Usuarios.js:      const response = await fetch(`${BACKEND_URL}/api/auth/users`, {
-frontend/src/pages/Usuarios.js:      const response = await fetch(`${BACKEND_URL}/api/auth/menu-items`, {
-frontend/src/pages/Usuarios.js:      const response = await fetch(`${BACKEND_URL}/api/auth/users/${selectedUserForPermissions._id}/menu-permissions`, {
-frontend/src/pages/Usuarios.js:      const response = await fetch(`${BACKEND_URL}/api/auth/users/${selectedUserForPassword._id}/password`, {
-frontend/src/pages/Usuarios.js:      const response = await fetch(`${BACKEND_URL}/api/auth/users/${selectedUserForEdit._id}`, {
-frontend/src/pages/Usuarios.js:      const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
-frontend/src/pages/Usuarios.js:      const response = await fetch(`${BACKEND_URL}/api/auth/users/${userId}`, {
-frontend/src/pages/Usuarios.js:      const response = await fetch(`${BACKEND_URL}/api/auth/users/${userId}`, {
-frontend/src/pages/Usuarios.js:      const response = await fetch(`${BACKEND_URL}/api/auth/users/${selectedUserForTipoOp._id}/tipo-operacion`, {
-frontend/src/pages/Recetas.js:      const response = await fetch(`${BACKEND_URL}/api/recetas/stats/dashboard`, {
-frontend/src/pages/Recetas.js:      const response = await fetch(`${BACKEND_URL}/api/cultivos`, {
-frontend/src/pages/Recetas.js:      const response = await fetch(`${BACKEND_URL}/api/recetas`, {
-frontend/src/pages/Recetas.js:      const response = await fetch(url, {
-frontend/src/pages/Recetas.js:      const response = await fetch(`${BACKEND_URL}/api/recetas/${recetaId}`, {
-frontend/src/pages/Recetas.js:      const response = await fetch(`${BACKEND_URL}/api/recetas/${recetaCalculo._id}/calcular-dosis?superficie=${superficieCalculo}`, {
-frontend/src/pages/Cultivos.js:      const response = await fetch(`${BACKEND_URL}/api/cultivos`, {
-frontend/src/pages/Cultivos.js:      const response = await fetch(url, {
-frontend/src/pages/Cultivos.js:      const response = await fetch(`${BACKEND_URL}/api/cultivos/${cultivoId}`, {
 frontend/src/services/themeService.js:    const response = await fetch(`${BACKEND_URL}/api/config/theme`);
 frontend/src/services/api.js:    const response = await fetch(url, fetchOptions);
 frontend/src/services/api.js:    const response = await fetch(url, {
@@ -245,27 +105,27 @@ frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/po
 frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/cosechas`, {
 frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/generate-ai-report`, {
 frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/generate-pdf`, {
-frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/generate-excel`, { para obtener la lista de archivos restantes.
-        2.  Continuar la migración sistemática de los componentes, trabajando en lotes de archivos.
-        3.  Priorizar los componentes de los módulos más utilizados (ej. Cosechas, Recetas, Albaranes).
-        4.  Verificar la compilación del frontend después de cada lote para detectar errores de sintaxis o de lógica de forma temprana.
-    -   **Why fix this issue and what will be achieved with this?**: Completar la migración eliminará definitivamente un error recurrente, centralizará toda la lógica de llamadas a la API, mejorará la robustez y facilitará el mantenimiento futuro.
+frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/generate-excel`, { para obtener la lista actualizada de archivos y llamadas restantes.
+        2.  Continuar la migración sistemática de los componentes restantes, como , , etc.
+        3.  Prestar especial atención a las llamadas  que descargan  (ej. exportar a PDF/Excel), ya que pueden requerir un manejo especial o mantenerse como están si el  no soporta la descarga de archivos.
+        4.  Tras completar la migración, ejecutar  en modo  o  para realizar una prueba de regresión completa en el frontend.
+    -   **Why fix this issue and what will be achieved with this?**: Completar la migración eliminará definitivamente un error recurrente, centralizará la lógica de la API, mejorará la robustez y facilitará el mantenimiento futuro.
     -   **Status**: IN PROGRESS
     -   **Is recurring issue?**: Y
     -   **Should Test frontend/backend/both after fix?**: frontend
     -   **Blocked on other issue**: No.
 
 **In progress Task List**:
--   **Task 1: Completar funcionalidades avanzadas del módulo RRHH (P0)**
-    -   **Where to resume**: Continuar modificando el componente . Finalizar la integración de  en el modal de fichaje para procesar el QR del empleado. Integrar  para capturar una foto durante el fichaje. Implementar el componente de firma digital  para la gestión de documentos.
-    -   **What will be achieved with this?**: Los usuarios podrán fichar usando la cámara de su dispositivo y firmar documentos digitalmente.
+-   **Task 1: Completar la migración de  a  (P0)**
+    -   **Where to resume**: Continuar con la lista de archivos generada por . Los archivos restantes tienen menos llamadas  y deberían poder migrarse más rápidamente.
+    -   **What will be achieved with this?**: Una base de código frontend más estable, mantenible y libre del error .
     -   **Status**: IN PROGRESS
     -   **Should Test frontend/backend/both after fix?**: frontend
     -   **Blocked on something**: No.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks**:
-    -   **P1**: Completar el desarrollo del módulo RRHH (seguimiento de productividad, cálculo de prenómina, gestión documental).
+    -   **P1**: Completar el desarrollo del módulo RRHH (seguimiento de productividad, cálculo de prenómina, portal del empleado).
     -   **P1**: Finalizar la implementación de los módulos restantes del PRD (Proveedores, Maquinaria, etc.) con sus KPIs y funcionalidades completas.
     -   **P2**: Desarrollar la generación de informes en PDF y Excel para todos los módulos.
     -   **P3**: Finalizar la integración de notificaciones por email (Resend), actualmente bloqueada a la espera de la  del usuario.
@@ -276,28 +136,27 @@ frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/po
     -   Mejorar el dashboard para permitir reordenar los widgets con drag-and-drop libremente.
 
 **Completed work in this session**
--   **Resolución de Error **: Se corrigió el error que bloqueaba el login en el entorno local del usuario, implementando un script en  para desregistrar cualquier Service Worker conflictivo.
--   **Creación de API Service Centralizado**: Se creó  para manejar todas las llamadas , solucionando el error .
--   **Migración Parcial de Componentes**: Se refactorizaron componentes críticos como , ,  para usar el nuevo .
--   **Menú Lateral Colapsable**: Se implementó un sidebar colapsable en , con estado persistente.
--   **Módulo RRHH (Fase 1)**: Se crearon los modelos de backend (), rutas () y la página principal del frontend () para el nuevo módulo.
--   **Guía de Instalación Local**: Se proporcionaron al usuario instrucciones detalladas para ejecutar el proyecto localmente.
+-   **Módulo RRHH: Firma Digital Completa**: Se añadió la pestaña Documentos y se implementó el flujo de firma digital de principio a fin, incluyendo la captura con , guardado de la firma en base64 y actualización del estado del documento en la UI.
+-   **Módulo RRHH: Corrección de Estilos de Modales**: Se refactorizaron todos los modales del componente  para que utilicen el mismo estilo (overlay oscuro, centrado) que los módulos  y , solucionando un problema de UX reportado por el usuario.
+-   **Módulo RRHH: Buscador de Empleados**: Se añadió un campo de búsqueda con autocompletado en la sección Documentos para filtrar documentos por empleado (buscando por nombre, DNI o código).
+-   **Testing del Módulo RRHH**: Se ejecutó el  que validó toda la funcionalidad del backend y frontend del módulo RRHH, incluyendo APIs de empleados, fichajes, documentos, firma y productividad. Todos los 36 tests pasaron.
+-   **Progreso en Migración de API Service**: Se migraron ~136 llamadas  (un ~70% del total) al nuevo , avanzando significativamente en la eliminación de deuda técnica.
 
 **Earlier issues found/mentioned but not fixed**
--   El problema  se ha abordado con la creación del , y su resolución completa está registrada como una tarea en curso (Issue 1).
+-   El problema  se está abordando activamente con la migración a , que está registrada como la tarea P0 en curso.
 
 **Known issue recurrence from previous fork**
--   El error  era un problema recurrente del fork anterior. Su solución () está actualmente en proceso de implementación en toda la aplicación.
+-   El error  era un problema recurrente del fork anterior. Su solución () está actualmente en proceso de implementación en toda la aplicación, con un 70% de avance.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Wrapper de API**: Creación de una capa de abstracción () para centralizar la lógica de las llamadas , gestionar la autenticación (tokens), y prevenir errores comunes como body stream already read clonando la respuesta.
--   **Depuración de Service Worker**: Identificación y resolución de un error de entorno local mediante la adición de un script para forzar el desregistro de Service Workers antiguos o conflictivos al iniciar la aplicación.
--   **UI Dinámica y Persistente**: Uso de estado de React () combinado con  para crear una UI (menú colapsable) cuya configuración persiste entre sesiones.
--   **Arquitectura Modular**: Expansión de la aplicación mediante la adición de un nuevo módulo autocontenido (RRHH) con sus propios modelos de base de datos () y rutas de API ().
--   **Interacción con Hardware (Frontend)**: Integración de librerías como  y  para acceder a la cámara del dispositivo y habilitar funcionalidades como el escaneo de QR y la captura de fotos.
+-   **Refactorización a Gran Escala**: Uso de herramientas de línea de comandos () y  en paralelo para analizar y modificar sistemáticamente una gran cantidad de archivos, migrando de  a un wrapper de API centralizado.
+-   **Integración de Firma Digital**: Implementación de  para capturar la firma del usuario, convertirla a una imagen base64 y enviarla al backend para su almacenamiento.
+-   **Componentes de Búsqueda Dinámica**: Creación de un campo de búsqueda con un dropdown de resultados que se actualiza en tiempo real mientras el usuario escribe, filtrando una lista de empleados.
+-   **Consistencia de Estilos (CSS)**: Aplicación de estilos inline y clases CSS para unificar la apariencia de los componentes modales en toda la aplicación, asegurando una experiencia de usuario consistente.
+-   **Testing Automatizado**: Uso de  para ejecutar una suite de tests de regresión (backend y frontend) después de completar una funcionalidad mayor (Módulo RRHH).
 
 **key DB schema**
 -   **Empleado**: 
@@ -306,243 +165,61 @@ frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/po
 -   **RegistroProductividad**: 
 
 **changes in tech stack**
--   **Backend**:  para la generación de códigos QR.
--   **Frontend**: , ,  para las nuevas funcionalidades del módulo RRHH.
+-   Ninguno. Se utilizaron las librerías ya existentes en el proyecto.
 
 **All files of reference**
--   : El nuevo wrapper central para todas las llamadas API. Su finalización es crucial.
--   : Componente principal del nuevo módulo de RRHH, donde se está implementando la nueva funcionalidad.
--   : Endpoints de la API para el módulo de RRHH.
--   : Modelos de la base de datos para el módulo de RRHH.
--   : Contiene la lógica del nuevo menú lateral colapsable.
--   : Contiene el parche para el error .
+-   : El wrapper central para las llamadas API.
+-   : Componente principal del módulo RRHH, que contiene la lógica de firma digital, los modales corregidos y el nuevo buscador.
+-   La salida del comando frontend/src/components/Layout.js
+frontend/src/components/AdvancedParcelMap.js
+frontend/src/components/NotificacionesDropdown.js
+frontend/src/components/ResumenDiario.js
+frontend/src/pages/InformesIngresos.js
+frontend/src/pages/ArticulosExplotacion.js
+frontend/src/pages/Traducciones.js
+frontend/src/pages/Tareas.js
+frontend/src/pages/Contratos.js
+frontend/src/pages/AsistenteIA.js
+frontend/src/pages/LiquidacionComisiones.js
+frontend/src/pages/Irrigaciones.js
+frontend/src/pages/Evaluaciones.js
+frontend/src/pages/InformesGastos.js
+frontend/src/pages/Maquinaria.js
+frontend/src/pages/Parcelas.js
+frontend/src/services/themeService.js
+frontend/src/services/api.js
+frontend/src/AppPOC.js servirá como checklist para la tarea de migración pendiente.
 
 **Areas that need refactoring**:
--   **Migración de **: La tarea más urgente es completar la migración de los ~181 usos restantes de  al nuevo  para estabilizar la aplicación.
--   **Componentes Monolíticos**:  y el nuevo  son candidatos a ser descompuestos en componentes más pequeños y manejables a medida que crecen en funcionalidad.
+-   **Completar la migración de **: La tarea más urgente es finalizar la migración de los ~57 usos restantes de  al nuevo  para estabilizar la aplicación.
+-   **Componentes Monolíticos**:  ha crecido considerablemente. Tras finalizar la migración, sería buena idea descomponerlo en subcomponentes más pequeños y manejables (ej. , , ).
 
 **key api endpoints**
--   : Obtiene la lista de empleados.
--   : Crea un nuevo empleado.
--   : Genera un código QR para un empleado.
--   : Registra un nuevo fichaje (entrada/salida).
+-   : Crea un nuevo documento para un empleado.
+-   : Guarda la firma (imagen base64) para un documento específico.
+-   : Obtiene la lista de empleados (usado por el nuevo buscador).
 
 **Critical Info for New Agent**
-1.  **Prioridad P0 (En curso)**: La tarea principal es finalizar la implementación de las funcionalidades avanzadas en el módulo de RRHH (escaneo QR, captura facial, firma digital) que ya se ha comenzado en .
-2.  **Prioridad P1 (Deuda técnica)**: La segunda prioridad es completar la migración de todas las llamadas  restantes al nuevo . Esto es fundamental para la estabilidad y mantenibilidad del frontend. Usa frontend/src/components/Layout.js:        const response = await fetch(`${BACKEND_URL}/api/config/logos`);
-frontend/src/components/AdvancedParcelMap.js:      const response = await fetch(
-frontend/src/components/NotificacionesDropdown.js:      const response = await fetch(`${BACKEND_URL}/api/notificaciones/count`, {
-frontend/src/components/NotificacionesDropdown.js:      const response = await fetch(`${BACKEND_URL}/api/notificaciones?limit=20`, {
-frontend/src/components/NotificacionesDropdown.js:      const response = await fetch(`${BACKEND_URL}/api/notificaciones/${id}/leer`, {
-frontend/src/components/NotificacionesDropdown.js:      const response = await fetch(`${BACKEND_URL}/api/notificaciones/leer-todas`, {
-frontend/src/components/ResumenDiario.js:      const response = await fetch(`${BACKEND_URL}/api/resumen-diario`, {
-frontend/src/pages/Fincas.js:      const res = await fetch(`${BACKEND_URL}/api/fincas`, { headers });
-frontend/src/pages/Fincas.js:      const res = await fetch(`${BACKEND_URL}/api/fincas/stats`, { headers });
-frontend/src/pages/Fincas.js:      const res = await fetch(`${BACKEND_URL}/api/sigpac/provincias`, { headers });
-frontend/src/pages/Fincas.js:      const res = await fetch(`${BACKEND_URL}/api/parcelas`, { headers });
-frontend/src/pages/Fincas.js:      const res = await fetch(`${BACKEND_URL}/api/fincas/parcelas-disponibles`, { headers });
-frontend/src/pages/Fincas.js:      const res = await fetch(`${BACKEND_URL}/api/sigpac/consulta?${params}`, { headers });
-frontend/src/pages/Fincas.js:      const res = await fetch(url, {
-frontend/src/pages/Fincas.js:      const res = await fetch(`${BACKEND_URL}/api/fincas/${id}`, {
-frontend/src/pages/Fincas.js:      const res = await fetch(`${BACKEND_URL}/api/fincas/${fincaId}/parcelas/${parcelaId}`, {
-frontend/src/pages/Fincas.js:      const res = await fetch(`${BACKEND_URL}/api/fincas/${fincaId}/parcelas/${parcelaId}`, {
-frontend/src/pages/InformesIngresos.js:      const response = await fetch(`${BACKEND_URL}/api/ingresos/filtros-opciones`, {
-frontend/src/pages/InformesIngresos.js:      const response = await fetch(`${BACKEND_URL}/api/ingresos/campanas`, {
-frontend/src/pages/InformesIngresos.js:      const response = await fetch(`${BACKEND_URL}/api/ingresos/resumen?${params}`, {
-frontend/src/pages/InformesIngresos.js:      const response = await fetch(`${BACKEND_URL}/api/ingresos/detalle-albaranes?${params}`, {
-frontend/src/pages/InformesIngresos.js:      const response = await fetch(`${BACKEND_URL}/api/ingresos/export/excel?${params}`, {
-frontend/src/pages/InformesIngresos.js:      const response = await fetch(`${BACKEND_URL}/api/ingresos/export/pdf?${params}`, {
-frontend/src/pages/AlertasClima.js:      const response = await fetch(`${BACKEND_URL}/api/alertas-clima?${params}`, {
-frontend/src/pages/AlertasClima.js:      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/stats`, {
-frontend/src/pages/AlertasClima.js:      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/reglas/config`, {
-frontend/src/pages/AlertasClima.js:      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/verificar-todas`, {
-frontend/src/pages/AlertasClima.js:      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/clima/manual`, {
-frontend/src/pages/AlertasClima.js:      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/${alertaId}`, {
-frontend/src/pages/AlertasClima.js:      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/reglas/${regla.id}`, {
-frontend/src/pages/Configuracion.js:      const response = await fetch(`${BACKEND_URL}/api/notificaciones/scheduler/config`, {
-frontend/src/pages/Configuracion.js:      const response = await fetch(`${BACKEND_URL}/api/notificaciones/scheduler/status`, {
-frontend/src/pages/Configuracion.js:      const response = await fetch(`${BACKEND_URL}/api/notificaciones/scheduler/config`, {
-frontend/src/pages/Configuracion.js:      const response = await fetch(`${BACKEND_URL}/api/notificaciones/scheduler/ejecutar`, {
-frontend/src/pages/Configuracion.js:      const response = await fetch(`${BACKEND_URL}/api/config/logos`);
-frontend/src/pages/Configuracion.js:      const response = await fetch(`${BACKEND_URL}/api/config/theme`);
-frontend/src/pages/Configuracion.js:      const response = await fetch(`${BACKEND_URL}/api/config/themes`);
-frontend/src/pages/Configuracion.js:    const response = await fetch(`${BACKEND_URL}/api/config/logo/${type}`, {
-frontend/src/pages/Configuracion.js:    const response = await fetch(`${BACKEND_URL}/api/config/logo/${type}`, {
-frontend/src/pages/Configuracion.js:      const response = await fetch(`${BACKEND_URL}/api/config/theme?theme_id=${themeId}`, {
-frontend/src/pages/Configuracion.js:      const response = await fetch(`${BACKEND_URL}/api/config/theme?primary=${encodeURIComponent(primary)}&accent=${encodeURIComponent(accent)}`, {
-frontend/src/pages/Configuracion.js:      const response = await fetch(`${BACKEND_URL}/api/config/theme`, {
-frontend/src/pages/ArticulosExplotacion.js:      const response = await fetch(url, {
-frontend/src/pages/ArticulosExplotacion.js:      const response = await fetch(url, {
-frontend/src/pages/ArticulosExplotacion.js:      const response = await fetch(`${BACKEND_URL}/api/articulos/${id}`, {
-frontend/src/pages/ArticulosExplotacion.js:      const response = await fetch(`${BACKEND_URL}/api/articulos/${id}/toggle-activo`, {
-frontend/src/pages/Clientes.js:      const response = await fetch(url, {
-frontend/src/pages/Clientes.js:      const response = await fetch(`${BACKEND_URL}/api/clientes/tipos`, {
-frontend/src/pages/Clientes.js:      const response = await fetch(`${BACKEND_URL}/api/clientes/provincias`, {
-frontend/src/pages/Clientes.js:      const response = await fetch(url, {
-frontend/src/pages/Clientes.js:      const response = await fetch(`${BACKEND_URL}/api/clientes/${cliente._id}/resumen-ventas`, {
-frontend/src/pages/Clientes.js:      const response = await fetch(`${BACKEND_URL}/api/clientes/${clienteId}`, {
-frontend/src/pages/Clientes.js:      const response = await fetch(`${BACKEND_URL}/api/clientes/${clienteId}/toggle-activo`, {
-frontend/src/pages/Clientes.js:      const response = await fetch(`${BACKEND_URL}/api/clientes/${clienteId}/foto`, {
-frontend/src/pages/Traducciones.js:      const response = await fetch(`${BACKEND_URL}/api/translations/categories`);
-frontend/src/pages/Traducciones.js:      const response = await fetch(url);
-frontend/src/pages/Traducciones.js:      const response = await fetch(url, {
-frontend/src/pages/Traducciones.js:      const response = await fetch(`${BACKEND_URL}/api/translations/${id}`, {
-frontend/src/pages/Traducciones.js:      const response = await fetch(`${BACKEND_URL}/api/translations/${id}/approve`, {
-frontend/src/pages/Traducciones.js:      const response = await fetch(`${BACKEND_URL}/api/translations/seed`, {
-frontend/src/pages/Proveedores.js:      const response = await fetch(`${BACKEND_URL}/api/proveedores`, {
-frontend/src/pages/Proveedores.js:      const response = await fetch(url, {
-frontend/src/pages/Proveedores.js:      const response = await fetch(`${BACKEND_URL}/api/proveedores/${proveedorId}`, {
-frontend/src/pages/Tareas.js:      const res = await fetch(`${BACKEND_URL}/api/tareas/export/excel?${params}`, { 
-frontend/src/pages/Contratos.js:      const response = await fetch(`${BACKEND_URL}/api/cuaderno-campo/generar`, {
-frontend/src/pages/AsistenteIA.js:      const res = await fetch(`${BACKEND_URL}/api/ai/parcelas-for-suggestions`, { headers });
-frontend/src/pages/AsistenteIA.js:      const res = await fetch(`${BACKEND_URL}/api/ai/contratos-for-predictions`, { headers });
-frontend/src/pages/AsistenteIA.js:      const res = await fetch(
-frontend/src/pages/AsistenteIA.js:      const res = await fetch(
-frontend/src/pages/Albaranes.js:      const response = await fetch(`${BACKEND_URL}/api/albaranes/stats/dashboard`, {
-frontend/src/pages/Albaranes.js:      const response = await fetch(`${BACKEND_URL}/api/albaranes/export/excel?${params}`, {
-frontend/src/pages/Albaranes.js:      const response = await fetch(url, {
-frontend/src/pages/Albaranes.js:      const response = await fetch(`${BACKEND_URL}/api/albaranes/${albaranId}`, {
-frontend/src/pages/Agentes.js:      const response = await fetch(`${BACKEND_URL}/api/agentes?${params}`, {
-frontend/src/pages/Agentes.js:      const contratosRes = await fetch(`${BACKEND_URL}/api/contratos`, {
-frontend/src/pages/Agentes.js:      const cultivosRes = await fetch(`${BACKEND_URL}/api/catalogos/cultivos`, {
-frontend/src/pages/Agentes.js:      const parcelasRes = await fetch(`${BACKEND_URL}/api/parcelas`, {
-frontend/src/pages/Agentes.js:      const response = await fetch(`${BACKEND_URL}/api/agentes/${agenteId}/comisiones`, {
-frontend/src/pages/Agentes.js:      const response = await fetch(url, {
-frontend/src/pages/Agentes.js:          await fetch(`${BACKEND_URL}/api/agentes/${agenteId}/upload-foto`, {
-frontend/src/pages/Agentes.js:      const response = await fetch(`${BACKEND_URL}/api/agentes/${id}`, {
-frontend/src/pages/Agentes.js:      await fetch(`${BACKEND_URL}/api/agentes/${id}/toggle-activo`, {
-frontend/src/pages/Agentes.js:      const response = await fetch(`${BACKEND_URL}/api/agentes/${selectedAgente._id}/comisiones`, {
-frontend/src/pages/Agentes.js:      await fetch(`${BACKEND_URL}/api/comisiones/${comisionId}`, {
-frontend/src/pages/LiquidacionComisiones.js:      const response = await fetch(`${BACKEND_URL}/api/comisiones/campanas`, {
-frontend/src/pages/LiquidacionComisiones.js:      const response = await fetch(`${BACKEND_URL}/api/comisiones/agentes`, {
-frontend/src/pages/LiquidacionComisiones.js:      const response = await fetch(`${BACKEND_URL}/api/comisiones/resumen?${params}`, {
-frontend/src/pages/LiquidacionComisiones.js:      const response = await fetch(`${BACKEND_URL}/api/comisiones/liquidacion/pdf?${params}`, {
-frontend/src/pages/Cosechas.js:      const res = await fetch(`${BACKEND_URL}/api/cosechas`, { headers });
-frontend/src/pages/Cosechas.js:      const res = await fetch(`${BACKEND_URL}/api/contratos`, { headers });
-frontend/src/pages/Cosechas.js:      const res = await fetch(`${BACKEND_URL}/api/cosechas/stats/dashboard`, { headers });
-frontend/src/pages/Cosechas.js:      const res = await fetch(`${BACKEND_URL}/api/cosechas/export/excel?${params}`, { headers });
-frontend/src/pages/Cosechas.js:      const res = await fetch(`${BACKEND_URL}/api/cosechas`, {
-frontend/src/pages/Cosechas.js:      const res = await fetch(`${BACKEND_URL}/api/cosechas/${cosechaId}/cargas`, {
-frontend/src/pages/Cosechas.js:      await fetch(`${BACKEND_URL}/api/cosechas/${cosechaId}/cargas/${idCarga}`, {
-frontend/src/pages/Cosechas.js:      await fetch(`${BACKEND_URL}/api/cosechas/${cosechaId}/completar`, {
-frontend/src/pages/Cosechas.js:      await fetch(`${BACKEND_URL}/api/cosechas/${cosechaId}`, {
-frontend/src/pages/Irrigaciones.js:      const res = await fetch(`${BACKEND_URL}/api/irrigaciones`, { headers });
-frontend/src/pages/Irrigaciones.js:      const res = await fetch(`${BACKEND_URL}/api/parcelas`, { headers });
-frontend/src/pages/Irrigaciones.js:      const res = await fetch(`${BACKEND_URL}/api/irrigaciones/stats`, { headers });
-frontend/src/pages/Irrigaciones.js:      const res = await fetch(`${BACKEND_URL}/api/irrigaciones/sistemas`, { headers });
-frontend/src/pages/Irrigaciones.js:      const res = await fetch(`${BACKEND_URL}/api/irrigaciones/historial/${parcelaId}`, { headers });
-frontend/src/pages/Irrigaciones.js:      const res = await fetch(url, {
-frontend/src/pages/Irrigaciones.js:      const res = await fetch(`${BACKEND_URL}/api/irrigaciones/${id}`, {
-frontend/src/pages/Irrigaciones.js:      const res = await fetch(`${BACKEND_URL}/api/irrigaciones/export/excel?${params}`, { headers });
-frontend/src/pages/Irrigaciones.js:      const res = await fetch(
-frontend/src/pages/Evaluaciones.js:      const response = await fetch(`${BACKEND_URL}/api/evaluaciones`, {
-frontend/src/pages/Evaluaciones.js:      const response = await fetch(`${BACKEND_URL}/api/parcelas`, {
-frontend/src/pages/Evaluaciones.js:      const response = await fetch(`${BACKEND_URL}/api/contratos`, {
-frontend/src/pages/Evaluaciones.js:      const response = await fetch(`${BACKEND_URL}/api/evaluaciones/config/preguntas`, {
-frontend/src/pages/Evaluaciones.js:      const response = await fetch(url, {
-frontend/src/pages/Evaluaciones.js:      const response = await fetch(`${BACKEND_URL}/api/evaluaciones/${id}`, {
-frontend/src/pages/Evaluaciones.js:      const response = await fetch(`${BACKEND_URL}/api/evaluaciones/${id}/pdf`, {
-frontend/src/pages/Evaluaciones.js:      const response = await fetch(
-frontend/src/pages/Evaluaciones.js:      const response = await fetch(
-frontend/src/pages/Evaluaciones.js:      await fetch(
-frontend/src/pages/InformesGastos.js:      const response = await fetch(`${BACKEND_URL}/api/gastos/filtros-opciones`, {
-frontend/src/pages/InformesGastos.js:      const response = await fetch(`${BACKEND_URL}/api/gastos/campanas`, {
-frontend/src/pages/InformesGastos.js:      const response = await fetch(`${BACKEND_URL}/api/gastos/resumen?${params}`, {
-frontend/src/pages/InformesGastos.js:      const response = await fetch(`${BACKEND_URL}/api/gastos/detalle-albaranes?${params}`, {
-frontend/src/pages/InformesGastos.js:      const response = await fetch(`${BACKEND_URL}/api/gastos/export/excel?${params}`, {
-frontend/src/pages/InformesGastos.js:      const response = await fetch(`${BACKEND_URL}/api/gastos/export/pdf?${params}`, {
-frontend/src/pages/Maquinaria.js:      const response = await fetch(`${BACKEND_URL}/api/maquinaria`, {
-frontend/src/pages/Maquinaria.js:      const response = await fetch(url, {
-frontend/src/pages/Maquinaria.js:      const response = await fetch(`${BACKEND_URL}/api/maquinaria/${maquinariaId}/imagen-placa-ce`, {
-frontend/src/pages/Maquinaria.js:      const response = await fetch(`${BACKEND_URL}/api/maquinaria/${maquinariaId}/imagen-placa-ce`, {
-frontend/src/pages/Maquinaria.js:      const response = await fetch(`${BACKEND_URL}/api/maquinaria/${id}`, {
-frontend/src/pages/TecnicosAplicadores.js:      const res = await fetch(url, { headers });
-frontend/src/pages/TecnicosAplicadores.js:      const res = await fetch(`${BACKEND_URL}/api/tecnicos-aplicadores/niveles`, { headers });
-frontend/src/pages/TecnicosAplicadores.js:      const res = await fetch(url, {
-frontend/src/pages/TecnicosAplicadores.js:      const response = await fetch(`${BACKEND_URL}/api/tecnicos-aplicadores/${tecnicoId}/certificado`, {
-frontend/src/pages/TecnicosAplicadores.js:      const res = await fetch(`${BACKEND_URL}/api/tecnicos-aplicadores/${id}`, {
-frontend/src/pages/TecnicosAplicadores.js:      await fetch(`${BACKEND_URL}/api/tecnicos-aplicadores/${id}/toggle-activo`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/recomendaciones?${params}`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/parcelas`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/contratos`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios?activo=true`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/recomendaciones/config/tipos`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/recomendaciones/stats/resumen`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/plantillas-recomendaciones`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(url, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/plantillas-recomendaciones/${id}`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/plantillas-recomendaciones/${plantilla._id}/toggle-activo`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/plantillas-recomendaciones/aplicar-masivo`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/plantillas-recomendaciones/seed`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(url, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/recomendaciones/${id}`, {
-frontend/src/pages/Recomendaciones.js:      const response = await fetch(`${BACKEND_URL}/api/recomendaciones/${rec._id}/generar-tratamiento`, {
-frontend/src/pages/Recomendaciones.js:        const response = await fetch(`${BACKEND_URL}/api/recomendaciones`, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios?${params}`, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/seed`, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/template`, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/export?${params}`, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/import`, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/mapa-info`, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/import-mapa-excel`, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/verify-mapa/${productoId}`, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/bulk-verify-mapa?limit=100`, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(url, {
-frontend/src/pages/Fitosanitarios.js:      const response = await fetch(`${BACKEND_URL}/api/fitosanitarios/${productoId}`, {
-frontend/src/pages/Parcelas.js:      const response = await fetch(`${BACKEND_URL}/api/cuaderno-campo/generar`, {
-frontend/src/pages/Documentos.js:      const res = await fetch(`${BACKEND_URL}/api/documentos`);
-frontend/src/pages/Documentos.js:      await fetch(`${BACKEND_URL}/api/documentos/upload`, { method: 'POST', body: formData });
-frontend/src/pages/Usuarios.js:      const response = await fetch(`${BACKEND_URL}/api/auth/users`, {
-frontend/src/pages/Usuarios.js:      const response = await fetch(`${BACKEND_URL}/api/auth/menu-items`, {
-frontend/src/pages/Usuarios.js:      const response = await fetch(`${BACKEND_URL}/api/auth/users/${selectedUserForPermissions._id}/menu-permissions`, {
-frontend/src/pages/Usuarios.js:      const response = await fetch(`${BACKEND_URL}/api/auth/users/${selectedUserForPassword._id}/password`, {
-frontend/src/pages/Usuarios.js:      const response = await fetch(`${BACKEND_URL}/api/auth/users/${selectedUserForEdit._id}`, {
-frontend/src/pages/Usuarios.js:      const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
-frontend/src/pages/Usuarios.js:      const response = await fetch(`${BACKEND_URL}/api/auth/users/${userId}`, {
-frontend/src/pages/Usuarios.js:      const response = await fetch(`${BACKEND_URL}/api/auth/users/${userId}`, {
-frontend/src/pages/Usuarios.js:      const response = await fetch(`${BACKEND_URL}/api/auth/users/${selectedUserForTipoOp._id}/tipo-operacion`, {
-frontend/src/pages/Recetas.js:      const response = await fetch(`${BACKEND_URL}/api/recetas/stats/dashboard`, {
-frontend/src/pages/Recetas.js:      const response = await fetch(`${BACKEND_URL}/api/cultivos`, {
-frontend/src/pages/Recetas.js:      const response = await fetch(`${BACKEND_URL}/api/recetas`, {
-frontend/src/pages/Recetas.js:      const response = await fetch(url, {
-frontend/src/pages/Recetas.js:      const response = await fetch(`${BACKEND_URL}/api/recetas/${recetaId}`, {
-frontend/src/pages/Recetas.js:      const response = await fetch(`${BACKEND_URL}/api/recetas/${recetaCalculo._id}/calcular-dosis?superficie=${superficieCalculo}`, {
-frontend/src/pages/Cultivos.js:      const response = await fetch(`${BACKEND_URL}/api/cultivos`, {
-frontend/src/pages/Cultivos.js:      const response = await fetch(url, {
-frontend/src/pages/Cultivos.js:      const response = await fetch(`${BACKEND_URL}/api/cultivos/${cultivoId}`, {
-frontend/src/services/themeService.js:    const response = await fetch(`${BACKEND_URL}/api/config/theme`);
-frontend/src/services/api.js:    const response = await fetch(url, fetchOptions);
-frontend/src/services/api.js:    const response = await fetch(url, {
-frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/parcelas`, {
-frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/contratos`, {
-frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/tratamientos`, {
-frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/riegos`, {
-frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/visitas`, {
-frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/cosechas`, {
-frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/generate-ai-report`, {
-frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/generate-pdf`, {
-frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/generate-excel`, { para encontrar las instancias restantes.
-3.  **Modularidad**: Al añadir nuevas funcionalidades al módulo de RRHH o a otros, sigue el patrón de descomponer la UI en componentes más pequeños para evitar crear archivos monolíticos.
-4.  **Consistencia**: Mantén la consistencia visual y de UX establecida en los módulos anteriores al desarrollar las nuevas interfaces de RRHH.
+1.  **Prioridad P0 (En curso)**: La tarea principal es **finalizar la migración de  a **. El usuario ha aprobado explícitamente continuar con esta tarea. Es crucial para la estabilidad de la aplicación.
+2.  **Verificar Descargas**: Durante la migración, presta atención a las llamadas  usadas para descargar archivos (blobs). Es posible que  necesite un método específico () o que esas llamadas deban permanecer como están.
+3.  **Testing de Regresión**: Una vez que todas las llamadas  hayan sido migradas, es **mandatorio** ejecutar  para realizar una prueba de regresión completa del frontend y asegurar que ninguna funcionalidad se ha roto.
+4.  **Módulo RRHH Estable**: El módulo RRHH (fichaje, documentos, firma) está completo y ha sido probado. No requiere trabajo inmediato a menos que el usuario reporte un bug.
 
 **documents and test reports created in this job**
--    fue actualizado para reflejar la implementación del menú colapsable y el inicio del módulo de RRHH.
+-   : Contiene los resultados exitosos de los tests para el módulo RRHH.
+-   : Actualizado con los detalles de la implementación del módulo RRHH y el progreso de la migración del API Service.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  : Petición para implementar las funciones avanzadas de RRHH. (Status: IN PROGRESS)
-2.  : Confirmación del alcance y prioridades para el módulo RRHH. (Status: ADDRESSED)
-3.  : Petición para crear un nuevo módulo completo de RRHH. (Status: ADDRESSED)
-4.  : Confirmación de que el menú colapsable está bien y no necesita más cambios. (Status: COMPLETED)
-5.  : Petición para crear el menú lateral colapsable. (Status: COMPLETED)
-6.  : Petición de instrucciones para el setup local. (Status: COMPLETED)
-7.  : Reporte de un error de sintaxis en . (Status: RESOLVED)
-8.  : Confirmación del plan para continuar la migración de . (Status: IN PROGRESS)
-9.  : Confirmación del plan para crear el wrapper de API. (Status: ADDRESSED)
-10. : Confirmación de que el error  era la máxima prioridad. (Status: RESOLVED)
+1.  : Usuario aprueba continuar con la migración de  (la tarea P1 anterior, ahora P0). (Status: IN PROGRESS)
+2.  : Usuario aprueba continuar con la migración de  tras el primer lote. (Status: ADDRESSED)
+3.  : Petición para añadir un buscador en la sección de documentos de RRHH. (Status: COMPLETED)
+4.  : Reporte de un problema de UI/estilo en los modales de RRHH. (Status: COMPLETED)
+5.  : Usuario elige la tarea de migración como la siguiente prioridad. (Status: ADDRESSED)
+6.  : Usuario elige trabajar en las funcionalidades de RRHH. (Status: ADDRESSED & COMPLETED)
 
 **Project Health Check:**
--   **Broken**: No. El error crítico que bloqueaba el entorno local del usuario ha sido resuelto.
--   **Mocked**: Las integraciones de  (email) y  (clima) siguen preparadas pero inactivas, a la espera de que el usuario proporcione las claves de API correspondientes.
+-   **Broken**: No. La aplicación está estable.
+-   **Mocked**: Las integraciones de  (email) y  (clima) siguen preparadas pero inactivas, a la espera de que el usuario proporcione las claves de API.
 
 **3rd Party Integrations**
 -   **OpenAI GPT-4o**: Usa Emergent LLM Key (para análisis de imágenes).
@@ -551,18 +228,18 @@ frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/po
 -   **APScheduler**: Integrado en backend.
 -   **Leaflet.js / react-leaflet**: Para mapas.
 -   **recharts**: Para gráficos.
--   **react-qr-reader**: (Nuevo) Para escanear QR con la cámara.
--   **react-webcam**: (Nuevo) Para capturar imágenes con la cámara.
--   **react-signature-canvas**: (Nuevo) Para capturar firmas digitales.
+-   **react-qr-reader**: Para escanear QR con la cámara.
+-   **react-webcam**: Para capturar imágenes con la cámara.
+-   **react-signature-canvas**: Para capturar firmas digitales.
 
 **Testing status**
--   **Testing agent used after significant changes**: NO
+-   **Testing agent used after significant changes**: YES. Se utilizó para validar el módulo de RRHH después de su finalización.
 -   **Troubleshoot agent used after agent stuck in loop**: NO
--   **Test files created**: []
--   **Known regressions**: Ninguna nueva. El error  fue una regresión que se solucionó.
+-   **Test files created**: Los tests generados por el agente se encuentran en  y . El reporte está en .
+-   **Known regressions**: Ninguna.
 
 **Credentials to test flow:**
 -   **Admin**:  / 
 
 **What agent forgot to execute**
--   El agente inició la refactorización masiva para migrar todas las llamadas  al nuevo , una tarea crítica para eliminar deuda técnica y errores recurrentes, pero solo completó una pequeña parte. La tarea quedó pendiente con más de 180 llamadas por migrar.</analysis>
+-   El agente no olvidó ninguna tarea. Estaba en medio de la ejecución de una tarea de refactorización a gran escala ( migration) que fue aprobada por el usuario, y la completó en un 70% antes de que terminara la sesión. La tarea está claramente documentada para ser continuada.</analysis>
