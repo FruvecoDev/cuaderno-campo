@@ -340,19 +340,7 @@ const Contratos = () => {
     
     try {
       setError(null);
-      const response = await fetch(`${BACKEND_URL}/api/contratos/${contratoId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw { status: response.status, message: data.detail };
-      }
-      
+      await api.delete(`/api/contratos/${contratoId}`);
       fetchContratos();
     } catch (error) {
       console.error('Error deleting contrato:', error);
@@ -366,6 +354,8 @@ const Contratos = () => {
   const handleGenerateCuaderno = async (contratoId) => {
     setGeneratingCuaderno(contratoId);
     try {
+      // For file download, we still need raw fetch to handle blob
+      const token = localStorage.getItem('token');
       const response = await fetch(`${BACKEND_URL}/api/cuaderno-campo/generar`, {
         method: 'POST',
         headers: {
