@@ -83,22 +83,12 @@ const Contratos = () => {
   const fetchAgentes = async () => {
     try {
       // Agentes de Compra
-      const resCompra = await fetch(`${BACKEND_URL}/api/agentes/activos?tipo=Compra`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (resCompra.ok) {
-        const data = await resCompra.json();
-        setAgentesCompra(data.agentes || []);
-      }
+      const dataCompra = await api.get('/api/agentes/activos?tipo=Compra');
+      setAgentesCompra(dataCompra.agentes || []);
       
       // Agentes de Venta
-      const resVenta = await fetch(`${BACKEND_URL}/api/agentes/activos?tipo=Venta`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (resVenta.ok) {
-        const data = await resVenta.json();
-        setAgentesVenta(data.agentes || []);
-      }
+      const dataVenta = await api.get('/api/agentes/activos?tipo=Venta');
+      setAgentesVenta(dataVenta.agentes || []);
     } catch (error) {
       console.error('Error fetching agentes:', error);
     }
@@ -106,13 +96,8 @@ const Contratos = () => {
   
   const fetchProveedores = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/proveedores?activo=true`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setProveedores(data.proveedores || []);
-      }
+      const data = await api.get('/api/proveedores?activo=true');
+      setProveedores(data.proveedores || []);
     } catch (error) {
       console.error('Error fetching proveedores:', error);
     }
@@ -120,13 +105,8 @@ const Contratos = () => {
   
   const fetchClientes = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/clientes/activos`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setClientes(data.clientes || []);
-      }
+      const data = await api.get('/api/clientes/activos');
+      setClientes(data.clientes || []);
     } catch (error) {
       console.error('Error fetching clientes:', error);
     }
@@ -134,13 +114,8 @@ const Contratos = () => {
   
   const fetchCultivos = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/cultivos?activo=true`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setCultivos(data.cultivos || []);
-      }
+      const data = await api.get('/api/cultivos?activo=true');
+      setCultivos(data.cultivos || []);
     } catch (error) {
       console.error('Error fetching cultivos:', error);
     }
@@ -149,18 +124,7 @@ const Contratos = () => {
   const fetchContratos = async () => {
     try {
       setError(null);
-      const response = await fetch(`${BACKEND_URL}/api/contratos`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw { status: response.status, message: data.detail };
-      }
-      
+      const data = await api.get('/api/contratos');
       setContratos(data.contratos || []);
     } catch (error) {
       console.error('Error fetching contratos:', error);
