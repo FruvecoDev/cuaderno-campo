@@ -110,11 +110,8 @@ const Fincas = () => {
 
   const fetchFincas = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/fincas`, { headers });
-      if (res.ok) {
-        const data = await res.json();
-        setFincas(data.fincas || []);
-      }
+      const data = await api.get('/api/fincas');
+      setFincas(data.fincas || []);
     } catch (err) {
       console.error('Error fetching fincas:', err);
     }
@@ -123,11 +120,8 @@ const Fincas = () => {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/fincas/stats`, { headers });
-      if (res.ok) {
-        const data = await res.json();
-        setStats(data);
-      }
+      const data = await api.get('/api/fincas/stats');
+      setStats(data);
     } catch (err) {
       console.error('Error fetching stats:', err);
     }
@@ -135,12 +129,9 @@ const Fincas = () => {
 
   const fetchProvincias = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/sigpac/provincias`, { headers });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) {
-          setProvincias(data.provincias);
-        }
+      const data = await api.get('/api/sigpac/provincias');
+      if (data.success) {
+        setProvincias(data.provincias);
       }
     } catch (err) {
       console.error('Error fetching provincias:', err);
@@ -149,11 +140,8 @@ const Fincas = () => {
 
   const fetchParcelas = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/parcelas`, { headers });
-      if (res.ok) {
-        const data = await res.json();
-        setParcelas(data.parcelas || data || []);
-      }
+      const data = await api.get('/api/parcelas');
+      setParcelas(data.parcelas || data || []);
     } catch (err) {
       console.error('Error fetching parcelas:', err);
     }
@@ -162,11 +150,8 @@ const Fincas = () => {
   // Obtener parcelas disponibles (sin asignar a ninguna finca)
   const fetchParcelasDisponibles = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/fincas/parcelas-disponibles`, { headers });
-      if (res.ok) {
-        const data = await res.json();
-        setParcelasDisponibles(data.parcelas || []);
-      }
+      const data = await api.get('/api/fincas/parcelas-disponibles');
+      setParcelasDisponibles(data.parcelas || []);
     } catch (err) {
       console.error('Error fetching parcelas disponibles:', err);
       // Fallback: filtrar manualmente
@@ -203,8 +188,7 @@ const Fincas = () => {
         params.append('recinto', recinto);
       }
       
-      const res = await fetch(`${BACKEND_URL}/api/sigpac/consulta?${params}`, { headers });
-      const data = await res.json();
+      const data = await api.get(`/api/sigpac/consulta?${params}`);
       
       if (data.success) {
         setSigpacResult(data);
