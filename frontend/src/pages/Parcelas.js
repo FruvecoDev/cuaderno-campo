@@ -306,14 +306,9 @@ const Parcelas = () => {
   // Fetch provincias SIGPAC
   const fetchProvincias = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/sigpac/provincias`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) {
-          setProvincias(data.provincias);
-        }
+      const data = await api.get('/api/sigpac/provincias');
+      if (data.success) {
+        setProvincias(data.provincias);
       }
     } catch (err) {
       console.error('Error fetching provincias:', err);
@@ -347,10 +342,7 @@ const Parcelas = () => {
         params.append('recinto', recinto);
       }
       
-      const res = await fetch(`${BACKEND_URL}/api/sigpac/consulta?${params}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await res.json();
+      const data = await api.get(`/api/sigpac/consulta?${params}`);
       
       if (data.success) {
         setSigpacResult(data);
