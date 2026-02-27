@@ -11,12 +11,24 @@ class SyncService {
     this.syncInterval = null;
     this.notificationsEnabled = false;
     
-    // Listen to online/offline events
-    window.addEventListener('online', () => this.handleOnline());
-    window.addEventListener('offline', () => this.handleOffline());
+    // Safely add event listeners with error handling
+    try {
+      window.addEventListener('online', () => this.handleOnline());
+      window.addEventListener('offline', () => this.handleOffline());
+    } catch (err) {
+      console.warn('Error setting up network listeners:', err);
+    }
     
-    // Check notification permission on init
-    this.checkNotificationPermission();
+    // Check notification permission on init (safely)
+    this.safeInit();
+  }
+  
+  async safeInit() {
+    try {
+      await this.checkNotificationPermission();
+    } catch (err) {
+      console.warn('Error during sync service init:', err);
+    }
   }
 
   // Check and request notification permission
