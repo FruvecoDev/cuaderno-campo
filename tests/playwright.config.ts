@@ -11,7 +11,7 @@ export default defineConfig({
     ['json', { outputFile: './test-results/results.json' }],
   ],
   use: {
-    baseURL: process.env.BASE_URL || 'https://agri-tracker-25.preview.emergentagent.com',
+    baseURL: process.env.BASE_URL || 'https://agro-rrhh-app.preview.emergentagent.com',
     screenshot: 'on',
     trace: 'on-first-retry',
     headless: true,
