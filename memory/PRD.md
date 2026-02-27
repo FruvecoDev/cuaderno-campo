@@ -1650,3 +1650,40 @@ class GeometriaManual(BaseModel):
 - Nuevo archivo de tests: `/app/tests/e2e/parcelas-sigpac.spec.ts`
 
 ### Estado: ✅ COMPLETADO Y TESTEADO
+
+
+
+## Corrección Error `postMessage` en Login (27/02/2026) - COMPLETADO
+
+### Problema:
+El usuario reportó un error `Failed to execute 'postMessage' on 'Window': Request object could not be cloned.` que ocurría en su entorno local después de hacer login, impidiendo el uso de la aplicación.
+
+### Causa Raíz:
+El error estaba relacionado con Service Workers obsoletos cacheados en el navegador del usuario de versiones anteriores del código, o con extensiones del navegador que interceptaban las peticiones.
+
+### Solución Implementada:
+1. **Desregistro automático de Service Workers** (`/app/frontend/src/index.js`):
+   - Se añadió código que desregistra automáticamente cualquier SW existente al cargar la app
+   - Se limpian todas las cachés del navegador asociadas
+
+2. **Protección en SyncService** (`/app/frontend/src/services/syncService.js`):
+   - Los listeners ahora están protegidos con try-catch
+   - El constructor maneja errores de inicialización de forma segura
+   - Las operaciones asíncronas capturan errores sin romper la app
+
+3. **Mejora del AuthContext** (`/app/frontend/src/contexts/AuthContext.js`):
+   - Añadido timeout de 10s para peticiones de autenticación
+   - Manejo más robusto de errores de red
+   - No se cierra sesión por errores temporales de red o relacionados con `postMessage`
+
+### Archivos Modificados:
+- `/app/frontend/src/index.js` - Desregistro de SW y limpieza de caché
+- `/app/frontend/src/services/syncService.js` - Protección de callbacks
+- `/app/frontend/src/contexts/AuthContext.js` - Manejo robusto de errores
+
+### Instrucciones para el Usuario:
+1. Guardar cambios en GitHub (usar "Save to GitHub")
+2. Actualizar código local (`git pull`)
+3. Limpiar caché del navegador o usar ventana de incógnito la primera vez
+
+### Estado: ✅ COMPLETADO (verificado en entorno preview, pendiente validación en entorno local del usuario)
