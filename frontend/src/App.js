@@ -229,6 +229,12 @@ function App() {
             <Layout><AlertasClima /></Layout>
           </ProtectedRoute>
         } />
+        
+        <Route path="/rrhh" element={
+          <ProtectedRoute>
+            <Layout><RRHH /></Layout>
+          </ProtectedRoute>
+        } />
       </Routes>
     </AuthProvider>
   );
