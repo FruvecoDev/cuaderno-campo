@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import api, { BACKEND_URL } from '../services/api';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, FileText, ChevronDown, ChevronUp, Settings, Save, X, CheckCircle, Clock, Archive, Download, Copy, GripVertical } from 'lucide-react';

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, Filter, Search, X, Package, Check, XCircle, DollarSign } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';

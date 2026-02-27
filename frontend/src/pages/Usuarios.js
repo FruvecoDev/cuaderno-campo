@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, UserX, UserCheck, Shield, Settings, X, Check, Eye, EyeOff, Key, ShoppingBag } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';

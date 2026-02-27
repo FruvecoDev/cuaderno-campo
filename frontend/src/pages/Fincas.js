@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, X, MapPin, Search, Home, ChevronDown, ChevronUp, Layers, Loader2, ExternalLink, CheckCircle, AlertCircle, Link2, Unlink, Map, Eye } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
