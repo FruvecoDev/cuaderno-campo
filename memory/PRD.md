@@ -1847,39 +1847,35 @@ Centralizar todas las llamadas `fetch` del frontend en `apiService.js` para:
 
 ### Progreso
 - **Total llamadas fetch iniciales**: 193
-- **Llamadas migradas**: 61
-- **Llamadas pendientes**: 132
-- **Progreso**: ~32%
+- **Llamadas migradas**: 121
+- **Llamadas pendientes**: 72
+- **Progreso**: ~63%
 
 ### Archivos Migrados Completamente:
 - `pages/Recomendaciones.js` (16 llamadas)
 - `pages/Configuracion.js` (12 llamadas)
 - `pages/Fitosanitarios.js` (11 llamadas)
+- `pages/Fincas.js` (10 llamadas)
+- `pages/Evaluaciones.js` (9 llamadas) - 1 fetch blob pendiente
 - `pages/Agentes.js` (10 llamadas)
+- `pages/Cosechas.js` (9 llamadas)
+- `pages/Usuarios.js` (9 llamadas)
+- `pages/Irrigaciones.js` (8 llamadas) - 1 fetch blob pendiente
+- `pages/Clientes.js` (8 llamadas)
+- `pages/AlertasClima.js` (7 llamadas)
 - `pages/Albaranes.js` (4 llamadas)
 - `pages/Cultivos.js` (3 llamadas)
 - `pages/Documentos.js` (2 llamadas)
 
-### Archivos Pendientes (Prioritarios):
-- `pages/Cosechas.js` (9 llamadas)
-- `pages/Clientes.js` (8 llamadas)
-- `pages/AlertasClima.js` (7 llamadas)
-- `pages/Evaluaciones.js` (10 llamadas)
-- `components/AdvancedParcelMap.js` (6 llamadas)
-- Y otros ~15 archivos
+### Archivos Pendientes:
+- `AppPOC.js` (9 llamadas)
+- `pages/Traducciones.js` (6 llamadas)
+- `pages/TecnicosAplicadores.js` (5 llamadas)
+- `pages/Proveedores.js` (3 llamadas)
+- Y otros ~10 archivos menores
 
-### Patrón de Migración:
-```javascript
-// ANTES:
-const response = await fetch(`${BACKEND_URL}/api/endpoint`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-  body: JSON.stringify(data)
-});
-const result = await response.json();
+### Notas:
+- Los `fetch` para descargas de blob (PDF, Excel) se mantienen porque `api.js` no maneja blobs directamente
+- La migración está en progreso constante
 
-// DESPUÉS:
-const result = await api.post('/api/endpoint', data);
-```
-
-### Estado: 🟡 EN PROGRESO
+### Estado: 🟡 EN PROGRESO (63%)
