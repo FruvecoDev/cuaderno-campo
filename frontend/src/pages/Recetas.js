@@ -5,7 +5,6 @@ import { PermissionButton, usePermissions, usePermissionError } from '../utils/p
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 // Tipos de tratamiento
 const TIPOS_TRATAMIENTO = [

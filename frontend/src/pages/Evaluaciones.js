@@ -22,7 +22,6 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import '../App.css';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 // Preguntas por defecto para cada sección
 const PREGUNTAS_DEFAULT = {

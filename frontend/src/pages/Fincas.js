@@ -4,7 +4,6 @@ import { Plus, Edit2, Trash2, X, MapPin, Search, Home, ChevronDown, ChevronUp, L
 import { useAuth } from '../contexts/AuthContext';
 import MapaSigpac from '../components/MapaSigpac';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 // Diccionario de usos SIGPAC
 const USOS_SIGPAC = {
