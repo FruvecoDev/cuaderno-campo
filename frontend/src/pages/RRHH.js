@@ -534,6 +534,7 @@ const RRHH = () => {
             </div>
             
             <form onSubmit={handleSubmit}>
+              <div style={{ padding: '1.5rem' }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
                 {/* Datos Personales */}
                 <div style={{ gridColumn: 'span 2' }}>
