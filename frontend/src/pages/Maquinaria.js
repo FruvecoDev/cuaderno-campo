@@ -357,16 +357,7 @@ const Maquinaria = () => {
     }
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/maquinaria/${maquinariaId}/imagen-placa-ce`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
-      }
-      
+      await api.delete(`/api/maquinaria/${maquinariaId}/imagen-placa-ce`);
       fetchMaquinaria();
     } catch (error) {
       console.error('Error deleting image:', error);
