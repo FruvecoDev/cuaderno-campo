@@ -1736,6 +1736,49 @@ await api.download('/api/export/excel', 'informe.xlsx');
 ### Estado: ✅ COMPLETADO Y VERIFICADO
 - Login funciona correctamente
 - Dashboard carga sin errores
+
+
+## Migración de Componentes al API Service (27/02/2026) - EN PROGRESO
+
+### Objetivo:
+Migrar todas las llamadas `fetch` directas al nuevo servicio centralizado `api.js` para:
+- Prevenir el error "body stream already read"
+- Estandarizar el manejo de errores
+- Centralizar la autenticación
+
+### Progreso:
+- **Total inicial de llamadas fetch**: 224
+- **Llamadas fetch migradas**: 43 (19%)
+- **Llamadas fetch restantes**: 181
+
+### Archivos Completamente Migrados:
+1. `/app/frontend/src/contexts/AuthContext.js` ✅
+2. `/app/frontend/src/services/syncService.js` ✅
+3. `/app/frontend/src/services/themeService.js` ✅
+4. `/app/frontend/src/pages/Dashboard.js` ✅
+5. `/app/frontend/src/pages/Login.js` ✅
+6. `/app/frontend/src/pages/Visitas.js` ✅
+7. `/app/frontend/src/pages/Contratos.js` ✅ (parcial - download aún usa fetch)
+8. `/app/frontend/src/pages/Parcelas.js` ✅ (parcial - download aún usa fetch)
+9. `/app/frontend/src/pages/Tratamientos.js` ✅
+10. `/app/frontend/src/pages/Tareas.js` ✅ (parcial - download aún usa fetch)
+
+### Correcciones Adicionales:
+- Eliminadas todas las referencias a `API_URL` (variable obsoleta)
+- Actualizado `themeService.js` para usar el import de `BACKEND_URL` desde `api.js`
+- Arreglados errores de "API_URL is not defined" en Layout.js, NotificacionesDropdown.js, ResumenDiario.js, Configuracion.js, Recomendaciones.js
+
+### Archivos Pendientes de Migración (por prioridad):
+1. **Alta**: Recomendaciones.js (16 fetch), Configuracion.js (12 fetch)
+2. **Media**: Fitosanitarios.js (11 fetch), Agentes.js (11 fetch), Evaluaciones.js (10 fetch), Fincas.js (10 fetch)
+3. **Baja**: Resto de archivos con menos de 10 llamadas fetch
+
+### Notas Técnicas:
+- Las descargas de archivos (Excel, PDF) siguen usando `fetch` directamente porque necesitan manejar blobs
+- El servicio `api.js` incluye método `api.download()` para estos casos, pero algunos componentes lo implementan manualmente
+
+### Estado: 🟡 EN PROGRESO (19% completado)
+
 - No más errores "body stream already read"
 
 
