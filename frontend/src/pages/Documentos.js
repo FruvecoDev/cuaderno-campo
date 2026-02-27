@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Upload, FileText } from 'lucide-react';
+import api from '../services/api';
 
 
 const Documentos = () => {
@@ -13,8 +14,7 @@ const Documentos = () => {
   
   const fetchDocumentos = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/documentos`);
-      const data = await res.json();
+      const data = await api.get('/api/documentos');
       setDocumentos(data.documentos || []);
     } catch (err) { console.error(err); }
     setLoading(false);
@@ -31,7 +31,7 @@ const Documentos = () => {
       formData.append('entidad_tipo', 'general');
       formData.append('entidad_id', 'general');
       
-      await fetch(`${BACKEND_URL}/api/documentos/upload`, { method: 'POST', body: formData });
+      await api.upload('/api/documentos/upload', formData);
       fetchDocumentos();
     } catch (err) { console.error(err); }
     setUploading(false);
