@@ -10,7 +10,7 @@ import json
 import tempfile
 from datetime import datetime
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://field-log-hub.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://agri-tracker-25.preview.emergentagent.com')
 
 
 @pytest.fixture(scope="module")

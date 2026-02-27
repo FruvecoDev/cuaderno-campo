@@ -5,7 +5,7 @@
 import { test, expect } from '@playwright/test';
 import { login, dismissToasts, removeEmergentBadge, generateUniqueId } from '../fixtures/helpers';
 
-const BASE_URL = process.env.BASE_URL || 'https://field-log-hub.preview.emergentagent.com';
+const BASE_URL = process.env.BASE_URL || 'https://agri-tracker-25.preview.emergentagent.com';
 
 test.describe('Plantillas - Tab Navigation', () => {
   test.beforeEach(async ({ page }) => {
