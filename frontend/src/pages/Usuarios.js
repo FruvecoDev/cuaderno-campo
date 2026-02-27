@@ -58,10 +58,7 @@ const Usuarios = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/auth/users`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get('/api/auth/users');
       setUsers(data.users || []);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -72,13 +69,8 @@ const Usuarios = () => {
 
   const fetchMenuItems = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/auth/menu-items`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setMenuItems(data.menu_items || []);
-      }
+      const data = await api.get('/api/auth/menu-items');
+      setMenuItems(data.menu_items || []);
     } catch (error) {
       console.error('Error fetching menu items:', error);
     }
@@ -100,23 +92,10 @@ const Usuarios = () => {
     
     setSavingPermissions(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/auth/users/${selectedUserForPermissions._id}/menu-permissions`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ menu_permissions: menuPermissions })
-      });
-      
-      if (response.ok) {
-        setShowPermissionsModal(false);
-        setSelectedUserForPermissions(null);
-        fetchUsers();
-      } else {
-        const error = await response.json();
-        alert(`Error: ${error.detail}`);
-      }
+      await api.put(`/api/auth/users/${selectedUserForPermissions._id}/menu-permissions`, { menu_permissions: menuPermissions });
+      setShowPermissionsModal(false);
+      setSelectedUserForPermissions(null);
+      fetchUsers();
     } catch (error) {
       console.error('Error saving permissions:', error);
       alert('Error guardando permisos');
@@ -167,17 +146,8 @@ const Usuarios = () => {
     
     setSavingPassword(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/auth/users/${selectedUserForPassword._id}/password`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ new_password: newPassword })
-      });
-      
-      if (response.ok) {
-        setShowPasswordModal(false);
+      await api.put(`/api/auth/users/${selectedUserForPassword._id}/password`, { new_password: newPassword });
+      setShowPasswordModal(false);
         setSelectedUserForPassword(null);
         alert('Contraseña actualizada correctamente');
       } else {
