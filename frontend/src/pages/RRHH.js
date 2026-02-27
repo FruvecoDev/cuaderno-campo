@@ -1246,14 +1246,83 @@ const ControlHorario = ({ empleados }) => {
               )}
               
               {metodoFichaje === 'qr' && (
-                <div style={{ textAlign: 'center', padding: '2rem' }}>
-                  <QrCode size={64} style={{ margin: '0 auto', opacity: 0.5 }} />
-                  <p style={{ marginTop: '1rem', color: 'hsl(var(--muted-foreground))' }}>
-                    Escanee el código QR del empleado
-                  </p>
-                  <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
-                    (Funcionalidad disponible en dispositivos con cámara)
-                  </p>
+                <div>
+                  {/* Selector de tipo de fichaje */}
+                  <div className="form-group" style={{ marginBottom: '1rem' }}>
+                    <label>Tipo de Fichaje</label>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button
+                        onClick={() => setTipoFichaje('entrada')}
+                        className={`btn ${tipoFichaje === 'entrada' ? 'btn-primary' : 'btn-secondary'}`}
+                        style={{ flex: 1 }}
+                      >
+                        Entrada
+                      </button>
+                      <button
+                        onClick={() => setTipoFichaje('salida')}
+                        className={`btn ${tipoFichaje === 'salida' ? 'btn-primary' : 'btn-secondary'}`}
+                        style={{ flex: 1 }}
+                      >
+                        Salida
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {!scannerActive && !scanResult && (
+                    <div style={{ textAlign: 'center' }}>
+                      <button
+                        onClick={() => setScannerActive(true)}
+                        className="btn btn-primary"
+                        style={{ padding: '1rem 2rem' }}
+                      >
+                        <QrCode size={24} />
+                        Activar Cámara para Escanear QR
+                      </button>
+                    </div>
+                  )}
+                  
+                  {scannerActive && (
+                    <div style={{ marginTop: '1rem' }}>
+                      <div style={{ 
+                        width: '100%', 
+                        maxWidth: '300px', 
+                        margin: '0 auto',
+                        borderRadius: '0.5rem',
+                        overflow: 'hidden',
+                        border: '2px solid hsl(var(--primary))'
+                      }}>
+                        <QrReader
+                          onResult={handleQRScan}
+                          constraints={{ facingMode: 'environment' }}
+                          scanDelay={500}
+                          style={{ width: '100%' }}
+                        />
+                      </div>
+                      <p style={{ textAlign: 'center', marginTop: '0.5rem', fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
+                        Apunte al código QR del empleado
+                      </p>
+                      <button
+                        onClick={() => setScannerActive(false)}
+                        className="btn btn-secondary"
+                        style={{ width: '100%', marginTop: '1rem' }}
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  )}
+                  
+                  {scanError && (
+                    <div style={{ 
+                      marginTop: '1rem', 
+                      padding: '1rem', 
+                      background: 'hsl(0 84% 60% / 0.1)', 
+                      borderRadius: '0.5rem',
+                      color: 'hsl(0 84% 60%)',
+                      textAlign: 'center'
+                    }}>
+                      {scanError}
+                    </div>
+                  )}
                 </div>
               )}
               
@@ -1264,20 +1333,183 @@ const ControlHorario = ({ empleados }) => {
                     Acerque la tarjeta NFC al lector
                   </p>
                   <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
-                    (Requiere dispositivo con NFC habilitado)
+                    (Requiere dispositivo con NFC habilitado - Chrome en Android)
                   </p>
+                  
+                  {/* Selector de tipo */}
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', maxWidth: '300px', margin: '0 auto' }}>
+                      <button
+                        onClick={() => setTipoFichaje('entrada')}
+                        className={`btn ${tipoFichaje === 'entrada' ? 'btn-primary' : 'btn-secondary'}`}
+                        style={{ flex: 1 }}
+                      >
+                        Entrada
+                      </button>
+                      <button
+                        onClick={() => setTipoFichaje('salida')}
+                        className={`btn ${tipoFichaje === 'salida' ? 'btn-primary' : 'btn-secondary'}`}
+                        style={{ flex: 1 }}
+                      >
+                        Salida
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
               
               {metodoFichaje === 'facial' && (
-                <div style={{ textAlign: 'center', padding: '2rem' }}>
-                  <Camera size={64} style={{ margin: '0 auto', opacity: 0.5 }} />
-                  <p style={{ marginTop: '1rem', color: 'hsl(var(--muted-foreground))' }}>
-                    Reconocimiento facial
-                  </p>
-                  <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
-                    (Funcionalidad disponible en dispositivos con cámara)
-                  </p>
+                <div>
+                  {/* Selector de empleado */}
+                  <div className="form-group">
+                    <label>Empleado</label>
+                    <select
+                      className="form-select"
+                      value={facialEmpleado}
+                      onChange={e => setFacialEmpleado(e.target.value)}
+                    >
+                      <option value="">Seleccionar empleado...</option>
+                      {empleados.filter(e => e.activo).map(emp => (
+                        <option key={emp._id} value={emp._id}>
+                          {emp.codigo} - {emp.nombre} {emp.apellidos}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {/* Selector de tipo */}
+                  <div className="form-group">
+                    <label>Tipo</label>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button
+                        onClick={() => setTipoFichaje('entrada')}
+                        className={`btn ${tipoFichaje === 'entrada' ? 'btn-primary' : 'btn-secondary'}`}
+                        style={{ flex: 1 }}
+                      >
+                        Entrada
+                      </button>
+                      <button
+                        onClick={() => setTipoFichaje('salida')}
+                        className={`btn ${tipoFichaje === 'salida' ? 'btn-primary' : 'btn-secondary'}`}
+                        style={{ flex: 1 }}
+                      >
+                        Salida
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Área de cámara */}
+                  <div style={{ marginTop: '1rem' }}>
+                    {!cameraActive && !capturedPhoto && (
+                      <button
+                        onClick={startCamera}
+                        className="btn btn-primary"
+                        style={{ width: '100%' }}
+                        disabled={!facialEmpleado}
+                      >
+                        <Camera size={18} />
+                        Activar Cámara
+                      </button>
+                    )}
+                    
+                    {cameraActive && (
+                      <div>
+                        <video
+                          ref={videoRef}
+                          autoPlay
+                          playsInline
+                          style={{ 
+                            width: '100%', 
+                            maxWidth: '300px',
+                            margin: '0 auto',
+                            display: 'block',
+                            borderRadius: '0.5rem',
+                            border: '2px solid hsl(var(--primary))'
+                          }}
+                        />
+                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                          <button onClick={stopCamera} className="btn btn-secondary" style={{ flex: 1 }}>
+                            Cancelar
+                          </button>
+                          <button onClick={capturePhoto} className="btn btn-primary" style={{ flex: 1 }}>
+                            <Camera size={18} />
+                            Capturar Foto
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {capturedPhoto && (
+                      <div>
+                        <img 
+                          src={capturedPhoto} 
+                          alt="Foto capturada" 
+                          style={{ 
+                            width: '100%', 
+                            maxWidth: '300px',
+                            margin: '0 auto',
+                            display: 'block',
+                            borderRadius: '0.5rem',
+                            border: '2px solid hsl(142 76% 36%)'
+                          }}
+                        />
+                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                          <button 
+                            onClick={() => { setCapturedPhoto(null); startCamera(); }} 
+                            className="btn btn-secondary" 
+                            style={{ flex: 1 }}
+                          >
+                            Repetir
+                          </button>
+                          <button 
+                            onClick={handleFichaFacial} 
+                            className="btn btn-primary" 
+                            style={{ flex: 1 }}
+                          >
+                            <Check size={18} />
+                            Confirmar Fichaje
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <canvas ref={canvasRef} style={{ display: 'none' }} />
+                  </div>
+                </div>
+              )}
+              
+              {/* Resultado del fichaje */}
+              {fichajeResult && (
+                <div style={{
+                  marginTop: '1.5rem',
+                  padding: '1rem',
+                  borderRadius: '0.5rem',
+                  background: fichajeResult.success ? 'hsl(142 76% 36% / 0.1)' : 'hsl(0 84% 60% / 0.1)',
+                  textAlign: 'center'
+                }}>
+                  {fichajeResult.success ? (
+                    <>
+                      <Check size={32} style={{ color: 'hsl(142 76% 36%)', margin: '0 auto' }} />
+                      <div style={{ marginTop: '0.5rem', fontWeight: '600', color: 'hsl(142 76% 36%)' }}>
+                        ¡Fichaje Registrado!
+                      </div>
+                      {fichajeResult.data && (
+                        <div style={{ fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                          {fichajeResult.data.empleado_nombre} - {fichajeResult.data.tipo}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <X size={32} style={{ color: 'hsl(0 84% 60%)', margin: '0 auto' }} />
+                      <div style={{ marginTop: '0.5rem', fontWeight: '600', color: 'hsl(0 84% 60%)' }}>
+                        Error
+                      </div>
+                      <div style={{ fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                        {fichajeResult.error}
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>
