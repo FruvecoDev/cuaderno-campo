@@ -566,23 +566,11 @@ const Recomendaciones = () => {
     };
     
     try {
-      const url = editingId 
-        ? `${BACKEND_URL}/api/recomendaciones/${editingId}`
-        : `${BACKEND_URL}/api/recomendaciones`;
-      
-      const response = await fetch(url, {
-        method: editingId ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(submitData)
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.detail || 'Error al guardar');
+      let data;
+      if (editingId) {
+        data = await api.put(`/api/recomendaciones/${editingId}`, submitData);
+      } else {
+        data = await api.post('/api/recomendaciones', submitData);
       }
       
       setSuccess(editingId ? 'Recomendación actualizada' : 'Recomendación creada');
@@ -622,16 +610,7 @@ const Recomendaciones = () => {
     if (!window.confirm('¿Está seguro de eliminar esta recomendación?')) return;
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/recomendaciones/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.detail || 'Error al eliminar');
-      }
-      
+      await api.delete(`/api/recomendaciones/${id}`);
       setSuccess('Recomendación eliminada');
       setTimeout(() => setSuccess(null), 3000);
       fetchRecomendaciones();
