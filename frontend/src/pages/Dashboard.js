@@ -445,8 +445,7 @@ const Dashboard = () => {
   
   const fetchDashboardData = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/dashboard/kpis`);
-      const data = await response.json();
+      const data = await api.get('/api/dashboard/kpis');
       setKpis(data);
     } catch (error) {
       console.error('Error fetching dashboard:', error);
@@ -457,10 +456,7 @@ const Dashboard = () => {
   
   const fetchParcelas = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/parcelas`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get('/api/parcelas');
       setParcelas(data.parcelas || []);
     } catch (error) {
       console.error('Error fetching parcelas:', error);
@@ -469,10 +465,7 @@ const Dashboard = () => {
   
   const fetchVisitasPlanificadas = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/visitas/planificadas`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get('/api/visitas/planificadas');
       setVisitasPlanificadas(data.visitas || []);
     } catch (error) {
       console.error('Error fetching visitas planificadas:', error);
@@ -481,10 +474,7 @@ const Dashboard = () => {
   
   const fetchNotificationStatus = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/notifications/status`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.get('/api/notifications/status');
       setNotificationStatus(data);
     } catch (error) {
       console.error('Error fetching notification status:', error);
@@ -495,11 +485,7 @@ const Dashboard = () => {
     setSendingNotification(true);
     setNotificationResult(null);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/notifications/send-visit-reminders?days_ahead=7`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await api.post('/api/notifications/send-visit-reminders?days_ahead=7', {});
       setNotificationResult({
         success: data.success,
         message: data.message,
@@ -529,15 +515,7 @@ const Dashboard = () => {
     setSendingNotification(true);
     setNotificationResult(null);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/notifications/test`, {
-        method: 'POST',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email: user.email })
-      });
-      const data = await response.json();
+      const data = await api.post('/api/notifications/test', { email: user.email });
       setNotificationResult({
         success: data.success !== false,
         message: data.message || 'Email de prueba enviado'
