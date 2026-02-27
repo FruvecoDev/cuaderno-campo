@@ -202,13 +202,8 @@ const Albaranes = () => {
   // Cargar estadísticas
   const fetchStats = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/albaranes/stats/dashboard`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data);
-      }
+      const data = await api.get('/api/albaranes/stats/dashboard');
+      setStats(data);
     } catch (error) {
       console.error('Error fetching stats:', error);
     }
@@ -221,35 +216,29 @@ const Albaranes = () => {
       const params = new URLSearchParams();
       if (filters.tipo) params.append('tipo', filters.tipo);
       
-      const response = await fetch(`${BACKEND_URL}/api/albaranes/export/excel?${params}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const data = await api.get(`/api/albaranes/export/excel?${params}`);
       
-      if (response.ok) {
-        const data = await response.json();
-        
-        // Crear CSV para descarga
-        const headers = data.columns.map(c => c.header).join(',');
-        const rows = data.data.map(row => 
-          data.columns.map(c => {
-            const val = row[c.key];
-            // Escapar comas y comillas
-            if (typeof val === 'string' && (val.includes(',') || val.includes('"'))) {
-              return `"${val.replace(/"/g, '""')}"`;
-            }
-            return val ?? '';
-          }).join(',')
-        ).join('\n');
-        
-        const csvContent = `${headers}\n${rows}`;
-        const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${data.filename}.csv`;
-        link.click();
-        URL.revokeObjectURL(url);
-      }
+      // Crear CSV para descarga
+      const headers = data.columns.map(c => c.header).join(',');
+      const rows = data.data.map(row => 
+        data.columns.map(c => {
+          const val = row[c.key];
+          // Escapar comas y comillas
+          if (typeof val === 'string' && (val.includes(',') || val.includes('"'))) {
+            return `"${val.replace(/"/g, '""')}"`;
+          }
+          return val ?? '';
+        }).join(',')
+      ).join('\n');
+      
+      const csvContent = `${headers}\n${rows}`;
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${data.filename}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error exporting:', error);
       setError('Error al exportar datos');
