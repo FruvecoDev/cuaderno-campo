@@ -113,23 +113,14 @@ const Clientes = () => {
   const fetchClientes = async () => {
     try {
       setLoading(true);
-      let url = `${BACKEND_URL}/api/clientes?limit=200`;
+      let params = new URLSearchParams();
+      params.append('limit', '200');
+      if (searchTerm) params.append('search', searchTerm);
+      if (filterTipo) params.append('tipo', filterTipo);
+      if (filterProvincia) params.append('provincia', filterProvincia);
+      if (filterActivo !== '') params.append('activo', filterActivo);
       
-      if (searchTerm) url += `&search=${encodeURIComponent(searchTerm)}`;
-      if (filterTipo) url += `&tipo=${encodeURIComponent(filterTipo)}`;
-      if (filterProvincia) url += `&provincia=${encodeURIComponent(filterProvincia)}`;
-      if (filterActivo !== '') url += `&activo=${filterActivo}`;
-      
-      const response = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw { status: response.status, message: data.detail };
-      }
-      
+      const data = await api.get(`/api/clientes?${params}`);
       setClientes(data.clientes || []);
     } catch (err) {
       console.error('Error fetching clientes:', err);
@@ -142,13 +133,8 @@ const Clientes = () => {
   
   const fetchTipos = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/clientes/tipos`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setTipos(data.tipos || []);
-      }
+      const data = await api.get('/api/clientes/tipos');
+      setTipos(data.tipos || []);
     } catch (err) {
       console.error('Error fetching tipos:', err);
     }
@@ -156,13 +142,8 @@ const Clientes = () => {
   
   const fetchProvincias = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/clientes/provincias`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setProvincias(data.provincias || []);
-      }
+      const data = await api.get('/api/clientes/provincias');
+      setProvincias(data.provincias || []);
     } catch (err) {
       console.error('Error fetching provincias:', err);
     }
@@ -171,22 +152,12 @@ const Clientes = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const url = editingId
-        ? `${BACKEND_URL}/api/clientes/${editingId}`
-        : `${BACKEND_URL}/api/clientes`;
-      
-      const method = editingId ? 'PUT' : 'POST';
-      
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(formData)
-      });
-      
-      const data = await response.json();
+      let data;
+      if (editingId) {
+        data = await api.put(`/api/clientes/${editingId}`, formData);
+      } else {
+        data = await api.post('/api/clientes', formData);
+      }
       
       if (data.success) {
         setShowForm(false);
