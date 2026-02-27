@@ -72,6 +72,8 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     init_scheduler()
+    # Initialize RRHH routes with database
+    set_rrhh_db(db)
 
 @app.on_event("shutdown")
 async def shutdown_event():
