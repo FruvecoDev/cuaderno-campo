@@ -1805,13 +1805,32 @@ Migrar todas las llamadas `fetch` directas al nuevo servicio centralizado `api.j
 - Top empleados por productividad
 - Registro por tipo de trabajo
 
-**4. Prenómina**
+**4. Documentos con Firma Digital (27/02/2026)** ✅ NUEVO
+- Gestión de documentos por empleado
+- Tipos: Contrato, Anexo, Nómina, Certificado, Formación PRL, Entrega EPI
+- **Firma digital con react-signature-canvas**:
+  - Canvas para dibujar firma
+  - Vista previa antes de guardar
+  - Almacenamiento en base64
+- KPIs: Total documentos, Pendientes de firma, Firmados
+- Estados: Pendiente, Firmado, Sin firma
+- Acciones: Firmar, Ver firma, Eliminar
+
+**5. Prenómina**
 - Cálculo automático basado en fichajes
 - Exportación CSV para software de nóminas
 
-### Archivos Creados:
-- `/app/backend/routes/routes_rrhh.py` - API completa
-- `/app/backend/models.py` - Modelos RRHH añadidos
-- `/app/frontend/src/pages/RRHH.js` - Interfaz con tabs
+### Archivos Creados/Modificados (27/02/2026):
+- `/app/backend/routes/routes_rrhh.py` - API completa con endpoints de documentos y firma
+- `/app/frontend/src/pages/RRHH.js` - Interfaz con 5 tabs (Empleados, Control Horario, Productividad, Documentos, Prenómina)
+
+### Librerías Frontend para RRHH:
+- `react-qr-reader` - Escaneo de códigos QR con cámara
+- `react-webcam` - Captura facial (usa navigator.mediaDevices directamente)
+- `react-signature-canvas` - Firma digital en canvas
+
+### Test Report: `/app/test_reports/iteration_41.json`
+- Backend: 100% (31/31 tests)
+- Frontend: 100% (5/5 tests)
 
 ### Estado: ✅ COMPLETADO Y TESTEADO
