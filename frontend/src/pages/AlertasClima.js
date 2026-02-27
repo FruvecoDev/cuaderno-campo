@@ -141,15 +141,6 @@ const AlertasClima = () => {
       };
       
       const data = await api.post('/api/alertas-clima/clima/manual', dataToSend);
-        let errorMsg = 'Error al registrar datos';
-        try {
-          const errorData = await response.json();
-          errorMsg = errorData.detail || errorMsg;
-        } catch (e) {}
-        throw new Error(errorMsg);
-      }
-      
-      const data = await response.json();
       
       setSuccess(data.message);
       setTimeout(() => setSuccess(null), 4000);
@@ -164,20 +155,7 @@ const AlertasClima = () => {
 
   const handleUpdateAlertaEstado = async (alertaId, nuevoEstado) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/${alertaId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ estado: nuevoEstado })
-      });
-      
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.detail || 'Error al actualizar');
-      }
-      
+      await api.put(`/api/alertas-clima/${alertaId}`, { estado: nuevoEstado });
       fetchAlertas();
       fetchStats();
     } catch (err) {
@@ -187,23 +165,10 @@ const AlertasClima = () => {
 
   const handleToggleRegla = async (regla) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/alertas-clima/reglas/${regla.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ 
-          rule_id: regla.id,
-          activo: !regla.activo 
-        })
+      await api.put(`/api/alertas-clima/reglas/${regla.id}`, { 
+        rule_id: regla.id,
+        activo: !regla.activo 
       });
-      
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.detail || 'Error al actualizar regla');
-      }
-      
       fetchReglas();
     } catch (err) {
       setError(err.message);
