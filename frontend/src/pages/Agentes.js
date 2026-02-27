@@ -200,14 +200,8 @@ const Agentes = () => {
     if (!window.confirm('¿Está seguro de eliminar este agente?')) return;
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/agentes/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        fetchAgentes();
-      }
+      await api.delete(`/api/agentes/${id}`);
+      fetchAgentes();
     } catch (err) {
       setError('Error eliminando agente');
     }
@@ -215,10 +209,7 @@ const Agentes = () => {
 
   const handleToggleActivo = async (id, currentStatus) => {
     try {
-      await fetch(`${BACKEND_URL}/api/agentes/${id}/toggle-activo`, {
-        method: 'PATCH',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      await api.patch(`/api/agentes/${id}/toggle-activo`);
       fetchAgentes();
     } catch (err) {
       console.error('Error toggling status:', err);
