@@ -1856,4 +1856,524 @@ const Prenomina = ({ empleados }) => {
   );
 };
 
+// ============================================================================
+// Sub-componente: Documentos del Empleado con Firma Digital
+// ============================================================================
+const DocumentosEmpleado = ({ empleados }) => {
+  const [documentos, setDocumentos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState('');
+  const [showNuevoDoc, setShowNuevoDoc] = useState(false);
+  const [showFirmaModal, setShowFirmaModal] = useState(false);
+  const [documentoAFirmar, setDocumentoAFirmar] = useState(null);
+  const [nuevoDocData, setNuevoDocData] = useState({
+    nombre: '',
+    tipo: 'contrato',
+    descripcion: '',
+    requiere_firma: true
+  });
+  
+  // Referencia al canvas de firma
+  const sigCanvasRef = useRef(null);
+  const [firmaGuardada, setFirmaGuardada] = useState(null);
+  
+  const tiposDocumento = [
+    { value: 'contrato', label: 'Contrato de Trabajo' },
+    { value: 'anexo', label: 'Anexo Contrato' },
+    { value: 'nomina', label: 'Nómina' },
+    { value: 'certificado', label: 'Certificado' },
+    { value: 'formacion', label: 'Formación PRL' },
+    { value: 'epi', label: 'Entrega EPI' },
+    { value: 'otro', label: 'Otro' }
+  ];
+  
+  useEffect(() => {
+    fetchDocumentos();
+  }, [empleadoSeleccionado]);
+  
+  const fetchDocumentos = async () => {
+    try {
+      let url = '/api/rrhh/documentos';
+      if (empleadoSeleccionado) {
+        url += `?empleado_id=${empleadoSeleccionado}`;
+      }
+      const data = await api.get(url);
+      setDocumentos(data.documentos || []);
+    } catch (err) {
+      console.error('Error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleCrearDocumento = async () => {
+    if (!empleadoSeleccionado || !nuevoDocData.nombre) return;
+    
+    try {
+      await api.post('/api/rrhh/documentos', {
+        empleado_id: empleadoSeleccionado,
+        ...nuevoDocData,
+        fecha_creacion: new Date().toISOString().split('T')[0]
+      });
+      
+      setShowNuevoDoc(false);
+      setNuevoDocData({ nombre: '', tipo: 'contrato', descripcion: '', requiere_firma: true });
+      fetchDocumentos();
+    } catch (err) {
+      console.error('Error:', err);
+    }
+  };
+  
+  const handleAbrirFirma = (doc) => {
+    setDocumentoAFirmar(doc);
+    setFirmaGuardada(null);
+    setShowFirmaModal(true);
+  };
+  
+  const handleLimpiarFirma = () => {
+    if (sigCanvasRef.current) {
+      sigCanvasRef.current.clear();
+    }
+    setFirmaGuardada(null);
+  };
+  
+  const handleCapturarFirma = () => {
+    if (sigCanvasRef.current && !sigCanvasRef.current.isEmpty()) {
+      const firmaDataUrl = sigCanvasRef.current.toDataURL('image/png');
+      setFirmaGuardada(firmaDataUrl);
+    }
+  };
+  
+  const handleGuardarFirma = async () => {
+    if (!firmaGuardada || !documentoAFirmar) return;
+    
+    try {
+      await api.put(`/api/rrhh/documentos/${documentoAFirmar._id}/firmar`, {
+        firma_url: firmaGuardada
+      });
+      
+      setShowFirmaModal(false);
+      setDocumentoAFirmar(null);
+      setFirmaGuardada(null);
+      fetchDocumentos();
+    } catch (err) {
+      console.error('Error:', err);
+    }
+  };
+  
+  const handleEliminarDocumento = async (docId) => {
+    if (!window.confirm('¿Eliminar este documento?')) return;
+    
+    try {
+      await api.delete(`/api/rrhh/documentos/${docId}`);
+      fetchDocumentos();
+    } catch (err) {
+      console.error('Error:', err);
+    }
+  };
+  
+  // Obtener nombre de empleado
+  const getEmpleadoNombre = (empId) => {
+    const emp = empleados.find(e => e._id === empId);
+    return emp ? `${emp.nombre} ${emp.apellidos}` : 'Desconocido';
+  };
+  
+  if (loading) {
+    return <div className="flex items-center justify-center h-32"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>;
+  }
+  
+  const docsPendientesFirma = documentos.filter(d => d.requiere_firma && !d.firmado).length;
+  const docsFirmados = documentos.filter(d => d.firmado).length;
+  
+  return (
+    <div>
+      {/* KPIs de documentos */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div className="card" style={{ padding: '1rem', textAlign: 'center' }}>
+          <div style={{ fontSize: '2rem', fontWeight: '700', color: 'hsl(var(--primary))' }}>
+            {documentos.length}
+          </div>
+          <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Total Documentos</div>
+        </div>
+        <div className="card" style={{ padding: '1rem', textAlign: 'center' }}>
+          <div style={{ fontSize: '2rem', fontWeight: '700', color: 'hsl(38 92% 50%)' }}>
+            {docsPendientesFirma}
+          </div>
+          <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Pendientes de Firma</div>
+        </div>
+        <div className="card" style={{ padding: '1rem', textAlign: 'center' }}>
+          <div style={{ fontSize: '2rem', fontWeight: '700', color: 'hsl(142 76% 36%)' }}>
+            {docsFirmados}
+          </div>
+          <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Firmados</div>
+        </div>
+      </div>
+      
+      {/* Toolbar */}
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <select
+          value={empleadoSeleccionado}
+          onChange={e => setEmpleadoSeleccionado(e.target.value)}
+          className="form-select"
+          style={{ minWidth: '250px' }}
+        >
+          <option value="">Todos los empleados</option>
+          {empleados.filter(e => e.activo).map(emp => (
+            <option key={emp._id} value={emp._id}>
+              {emp.codigo} - {emp.nombre} {emp.apellidos}
+            </option>
+          ))}
+        </select>
+        
+        <button
+          onClick={() => setShowNuevoDoc(true)}
+          className="btn btn-primary"
+          disabled={!empleadoSeleccionado}
+          style={{ marginLeft: 'auto' }}
+        >
+          <Plus size={18} />
+          Nuevo Documento
+        </button>
+      </div>
+      
+      {/* Lista de documentos */}
+      <div className="card">
+        <div className="table-container">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Documento</th>
+                <th>Empleado</th>
+                <th>Tipo</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {documentos.length === 0 ? (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>
+                    {empleadoSeleccionado 
+                      ? 'No hay documentos para este empleado' 
+                      : 'Seleccione un empleado o vea todos los documentos'}
+                  </td>
+                </tr>
+              ) : (
+                documentos.map(doc => (
+                  <tr key={doc._id}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <FileText size={18} style={{ color: 'hsl(var(--primary))' }} />
+                        <div>
+                          <div style={{ fontWeight: '500' }}>{doc.nombre}</div>
+                          {doc.descripcion && (
+                            <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                              {doc.descripcion}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td>{getEmpleadoNombre(doc.empleado_id)}</td>
+                    <td>
+                      <span style={{
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '0.25rem',
+                        fontSize: '0.75rem',
+                        background: 'hsl(var(--muted))'
+                      }}>
+                        {tiposDocumento.find(t => t.value === doc.tipo)?.label || doc.tipo}
+                      </span>
+                    </td>
+                    <td>{doc.fecha_creacion || doc.created_at?.split('T')[0]}</td>
+                    <td>
+                      {doc.firmado ? (
+                        <span style={{
+                          padding: '0.25rem 0.75rem',
+                          borderRadius: '9999px',
+                          fontSize: '0.75rem',
+                          fontWeight: '500',
+                          background: 'hsl(142 76% 36% / 0.1)',
+                          color: 'hsl(142 76% 36%)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem'
+                        }}>
+                          <Check size={14} />
+                          Firmado
+                        </span>
+                      ) : doc.requiere_firma ? (
+                        <span style={{
+                          padding: '0.25rem 0.75rem',
+                          borderRadius: '9999px',
+                          fontSize: '0.75rem',
+                          fontWeight: '500',
+                          background: 'hsl(38 92% 50% / 0.1)',
+                          color: 'hsl(38 92% 50%)'
+                        }}>
+                          Pendiente
+                        </span>
+                      ) : (
+                        <span style={{
+                          padding: '0.25rem 0.75rem',
+                          borderRadius: '9999px',
+                          fontSize: '0.75rem',
+                          background: 'hsl(var(--muted))'
+                        }}>
+                          Sin firma
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '0.25rem' }}>
+                        {doc.requiere_firma && !doc.firmado && (
+                          <button
+                            onClick={() => handleAbrirFirma(doc)}
+                            className="btn btn-ghost btn-sm"
+                            title="Firmar documento"
+                            style={{ color: 'hsl(var(--primary))' }}
+                          >
+                            <PenTool size={16} />
+                          </button>
+                        )}
+                        {doc.firmado && doc.firma_empleado_url && (
+                          <button
+                            onClick={() => {
+                              setDocumentoAFirmar(doc);
+                              setFirmaGuardada(doc.firma_empleado_url);
+                              setShowFirmaModal(true);
+                            }}
+                            className="btn btn-ghost btn-sm"
+                            title="Ver firma"
+                          >
+                            <Eye size={16} />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleEliminarDocumento(doc._id)}
+                          className="btn btn-ghost btn-sm"
+                          title="Eliminar"
+                          style={{ color: 'hsl(0 84% 60%)' }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      {/* Modal Nuevo Documento */}
+      {showNuevoDoc && (
+        <div className="modal-overlay" onClick={() => setShowNuevoDoc(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+            <div className="modal-header">
+              <h2>Nuevo Documento</h2>
+              <button onClick={() => setShowNuevoDoc(false)} className="btn btn-ghost">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div style={{ padding: '1.5rem' }}>
+              <div className="form-group">
+                <label>Nombre del Documento *</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={nuevoDocData.nombre}
+                  onChange={e => setNuevoDocData({...nuevoDocData, nombre: e.target.value})}
+                  placeholder="Ej: Contrato Temporal 2025"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Tipo de Documento</label>
+                <select
+                  className="form-select"
+                  value={nuevoDocData.tipo}
+                  onChange={e => setNuevoDocData({...nuevoDocData, tipo: e.target.value})}
+                >
+                  {tiposDocumento.map(t => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="form-group">
+                <label>Descripción</label>
+                <textarea
+                  className="form-input"
+                  rows="3"
+                  value={nuevoDocData.descripcion}
+                  onChange={e => setNuevoDocData({...nuevoDocData, descripcion: e.target.value})}
+                  placeholder="Descripción opcional del documento..."
+                />
+              </div>
+              
+              <div className="form-group">
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={nuevoDocData.requiere_firma}
+                    onChange={e => setNuevoDocData({...nuevoDocData, requiere_firma: e.target.checked})}
+                    style={{ width: '18px', height: '18px' }}
+                  />
+                  <span>Requiere firma del empleado</span>
+                </label>
+              </div>
+              
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
+                <button onClick={() => setShowNuevoDoc(false)} className="btn btn-secondary">
+                  Cancelar
+                </button>
+                <button 
+                  onClick={handleCrearDocumento} 
+                  className="btn btn-primary"
+                  disabled={!nuevoDocData.nombre}
+                >
+                  Crear Documento
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Modal Firma Digital */}
+      {showFirmaModal && documentoAFirmar && (
+        <div className="modal-overlay" onClick={() => setShowFirmaModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '600px' }}>
+            <div className="modal-header">
+              <h2>{documentoAFirmar.firmado ? 'Ver Firma' : 'Firmar Documento'}</h2>
+              <button onClick={() => setShowFirmaModal(false)} className="btn btn-ghost">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div style={{ padding: '1.5rem' }}>
+              {/* Info del documento */}
+              <div style={{ 
+                padding: '1rem', 
+                background: 'hsl(var(--muted))', 
+                borderRadius: '0.5rem',
+                marginBottom: '1.5rem'
+              }}>
+                <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>{documentoAFirmar.nombre}</div>
+                <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
+                  Empleado: {getEmpleadoNombre(documentoAFirmar.empleado_id)}
+                </div>
+                {documentoAFirmar.fecha_firma && (
+                  <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))', marginTop: '0.25rem' }}>
+                    Firmado el: {documentoAFirmar.fecha_firma}
+                  </div>
+                )}
+              </div>
+              
+              {/* Área de firma */}
+              {documentoAFirmar.firmado && firmaGuardada ? (
+                // Mostrar firma existente
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.5rem' }}>
+                    Firma registrada:
+                  </div>
+                  <img 
+                    src={firmaGuardada} 
+                    alt="Firma" 
+                    style={{ 
+                      maxWidth: '100%', 
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '0.5rem',
+                      background: 'white'
+                    }}
+                  />
+                </div>
+              ) : (
+                // Canvas para firmar
+                <>
+                  <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.5rem' }}>
+                    Firme en el recuadro a continuación:
+                  </div>
+                  
+                  {!firmaGuardada ? (
+                    <div style={{ 
+                      border: '2px dashed hsl(var(--border))',
+                      borderRadius: '0.5rem',
+                      background: 'white',
+                      marginBottom: '1rem'
+                    }}>
+                      <SignatureCanvas
+                        ref={sigCanvasRef}
+                        canvasProps={{
+                          width: 550,
+                          height: 200,
+                          className: 'signature-canvas',
+                          style: { width: '100%', height: '200px' }
+                        }}
+                        backgroundColor="white"
+                        penColor="black"
+                      />
+                    </div>
+                  ) : (
+                    <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+                      <div style={{ fontSize: '0.875rem', color: 'hsl(142 76% 36%)', marginBottom: '0.5rem' }}>
+                        Vista previa de la firma:
+                      </div>
+                      <img 
+                        src={firmaGuardada} 
+                        alt="Firma capturada" 
+                        style={{ 
+                          maxWidth: '100%', 
+                          border: '2px solid hsl(142 76% 36%)',
+                          borderRadius: '0.5rem'
+                        }}
+                      />
+                    </div>
+                  )}
+                  
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      {!firmaGuardada && (
+                        <button onClick={handleLimpiarFirma} className="btn btn-secondary">
+                          Limpiar
+                        </button>
+                      )}
+                      {firmaGuardada && (
+                        <button 
+                          onClick={() => setFirmaGuardada(null)} 
+                          className="btn btn-secondary"
+                        >
+                          Repetir Firma
+                        </button>
+                      )}
+                    </div>
+                    
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      {!firmaGuardada ? (
+                        <button onClick={handleCapturarFirma} className="btn btn-primary">
+                          <Check size={18} />
+                          Capturar Firma
+                        </button>
+                      ) : (
+                        <button onClick={handleGuardarFirma} className="btn btn-primary">
+                          <PenTool size={18} />
+                          Guardar y Firmar
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default RRHH;
