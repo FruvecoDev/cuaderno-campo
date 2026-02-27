@@ -148,12 +148,8 @@ const Usuarios = () => {
     try {
       await api.put(`/api/auth/users/${selectedUserForPassword._id}/password`, { new_password: newPassword });
       setShowPasswordModal(false);
-        setSelectedUserForPassword(null);
-        alert('Contraseña actualizada correctamente');
-      } else {
-        const error = await response.json();
-        setPasswordError(error.detail || 'Error al cambiar contraseña');
-      }
+      setSelectedUserForPassword(null);
+      alert('Contraseña actualizada correctamente');
     } catch (error) {
       console.error('Error changing password:', error);
       setPasswordError('Error al cambiar contraseña');
@@ -189,23 +185,10 @@ const Usuarios = () => {
     
     setSavingEdit(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/auth/users/${selectedUserForEdit._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(editFormData)
-      });
-      
-      if (response.ok) {
-        setShowEditModal(false);
-        setSelectedUserForEdit(null);
-        fetchUsers();
-      } else {
-        const error = await response.json();
-        setEditError(error.detail || 'Error al actualizar usuario');
-      }
+      await api.put(`/api/auth/users/${selectedUserForEdit._id}`, editFormData);
+      setShowEditModal(false);
+      setSelectedUserForEdit(null);
+      fetchUsers();
     } catch (error) {
       console.error('Error updating user:', error);
       setEditError('Error al actualizar usuario');
@@ -217,23 +200,10 @@ const Usuarios = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(formData)
-      });
-      
-      if (response.ok) {
-        setShowForm(false);
-        fetchUsers();
-        setFormData({ email: '', password: '', full_name: '', role: 'Viewer' });
-      } else {
-        const error = await response.json();
-        alert(`Error: ${error.detail}`);
-      }
+      await api.post('/api/auth/register', formData);
+      setShowForm(false);
+      fetchUsers();
+      setFormData({ email: '', password: '', full_name: '', role: 'Viewer' });
     } catch (error) {
       console.error('Error creating user:', error);
       alert(t('messages.errorSaving'));
@@ -242,18 +212,8 @@ const Usuarios = () => {
 
   const handleToggleActive = async (userId, currentStatus) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/auth/users/${userId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ is_active: !currentStatus })
-      });
-      
-      if (response.ok) {
-        fetchUsers();
-      }
+      await api.put(`/api/auth/users/${userId}`, { is_active: !currentStatus });
+      fetchUsers();
     } catch (error) {
       console.error('Error updating user:', error);
     }
