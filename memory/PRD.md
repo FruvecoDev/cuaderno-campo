@@ -1834,3 +1834,52 @@ Migrar todas las llamadas `fetch` directas al nuevo servicio centralizado `api.j
 - Frontend: 100% (5/5 tests)
 
 ### Estado: ✅ COMPLETADO Y TESTEADO
+
+---
+
+## Migración API Service (27/02/2026)
+
+### Objetivo
+Centralizar todas las llamadas `fetch` del frontend en `apiService.js` para:
+- Eliminar el error recurrente "body stream already read"
+- Estandarizar autenticación y manejo de errores
+- Mejorar mantenibilidad del código
+
+### Progreso
+- **Total llamadas fetch iniciales**: 193
+- **Llamadas migradas**: 61
+- **Llamadas pendientes**: 132
+- **Progreso**: ~32%
+
+### Archivos Migrados Completamente:
+- `pages/Recomendaciones.js` (16 llamadas)
+- `pages/Configuracion.js` (12 llamadas)
+- `pages/Fitosanitarios.js` (11 llamadas)
+- `pages/Agentes.js` (10 llamadas)
+- `pages/Albaranes.js` (4 llamadas)
+- `pages/Cultivos.js` (3 llamadas)
+- `pages/Documentos.js` (2 llamadas)
+
+### Archivos Pendientes (Prioritarios):
+- `pages/Cosechas.js` (9 llamadas)
+- `pages/Clientes.js` (8 llamadas)
+- `pages/AlertasClima.js` (7 llamadas)
+- `pages/Evaluaciones.js` (10 llamadas)
+- `components/AdvancedParcelMap.js` (6 llamadas)
+- Y otros ~15 archivos
+
+### Patrón de Migración:
+```javascript
+// ANTES:
+const response = await fetch(`${BACKEND_URL}/api/endpoint`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+  body: JSON.stringify(data)
+});
+const result = await response.json();
+
+// DESPUÉS:
+const result = await api.post('/api/endpoint', data);
+```
+
+### Estado: 🟡 EN PROGRESO
