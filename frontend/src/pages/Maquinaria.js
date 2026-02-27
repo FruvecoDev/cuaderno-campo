@@ -156,16 +156,7 @@ const Maquinaria = () => {
   const fetchMaquinaria = async () => {
     try {
       setError(null);
-      const response = await fetch(`${BACKEND_URL}/api/maquinaria`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
-      }
-      
-      const data = await response.json();
+      const data = await api.get('/api/maquinaria');
       setMaquinaria(data.maquinaria || []);
     } catch (error) {
       console.error('Error fetching maquinaria:', error);
@@ -206,32 +197,18 @@ const Maquinaria = () => {
     
     try {
       setError(null);
-      const url = editingId 
-        ? `${BACKEND_URL}/api/maquinaria/${editingId}`
-        : `${BACKEND_URL}/api/maquinaria`;
-      
-      const method = editingId ? 'PUT' : 'POST';
-      
       const payload = {
         ...formData,
         año_fabricacion: formData.año_fabricacion ? parseInt(formData.año_fabricacion) : null
       };
       
-      const response = await fetch(url, {
-        method: method,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
+      let data;
+      if (editingId) {
+        data = await api.put(`/api/maquinaria/${editingId}`, payload);
+      } else {
+        data = await api.post('/api/maquinaria', payload);
       }
       
-      const data = await response.json();
       console.log('Save maquinaria response:', data);
       if (data.success) {
         // Si hay imagen seleccionada, subirla
