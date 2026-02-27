@@ -353,64 +353,109 @@ const Layout = ({ children }) => {
         </nav>
         
         <div style={{
-          padding: '1rem',
+          padding: isSidebarCollapsed ? '0.5rem' : '1rem',
           borderTop: '1px solid hsl(var(--border))',
           marginTop: 'auto'
         }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            padding: '0.75rem',
-            background: 'hsl(var(--muted))',
-            borderRadius: '0.5rem',
-            marginBottom: '0.5rem'
-          }}>
-            <div style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              background: 'hsl(var(--primary))',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white'
-            }}>
-              <User size={16} />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: '0.875rem', fontWeight: '600' }}>
-                {user?.full_name || 'Usuario'}
+          {isSidebarCollapsed ? (
+            // Vista colapsada: solo iconos
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+              <div 
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '50%',
+                  background: 'hsl(var(--primary))',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  cursor: 'pointer'
+                }}
+                title={user?.full_name || 'Usuario'}
+              >
+                <User size={18} />
               </div>
-              <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
-                {user?.role || 'Viewer'}
-              </div>
+              <button
+                onClick={handleLogout}
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px solid hsl(var(--border))',
+                  background: 'transparent',
+                  borderRadius: '50%',
+                  cursor: 'pointer',
+                  color: 'hsl(var(--foreground))',
+                  transition: 'all 0.2s'
+                }}
+                title={t('auth.logout')}
+                data-testid="logout-button"
+              >
+                <LogOut size={16} />
+              </button>
             </div>
-            <LanguageSelector variant="minimal" />
-          </div>
-          <button
-            onClick={handleLogout}
-            style={{
-              width: '100%',
-              padding: '0.625rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem',
-              border: '1px solid hsl(var(--border))',
-              background: 'transparent',
-              borderRadius: '0.5rem',
-              cursor: 'pointer',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              color: 'hsl(var(--foreground))',
-              transition: 'all 0.2s'
-            }}
-            data-testid="logout-button"
-          >
-            <LogOut size={16} />
-            {t('auth.logout')}
-          </button>
+          ) : (
+            // Vista expandida: completa
+            <>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                padding: '0.75rem',
+                background: 'hsl(var(--muted))',
+                borderRadius: '0.5rem',
+                marginBottom: '0.5rem'
+              }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: 'hsl(var(--primary))',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white'
+                }}>
+                  <User size={16} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '0.875rem', fontWeight: '600' }}>
+                    {user?.full_name || 'Usuario'}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                    {user?.role || 'Viewer'}
+                  </div>
+                </div>
+                <LanguageSelector variant="minimal" />
+              </div>
+              <button
+                onClick={handleLogout}
+                style={{
+                  width: '100%',
+                  padding: '0.625rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  border: '1px solid hsl(var(--border))',
+                  background: 'transparent',
+                  borderRadius: '0.5rem',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: 'hsl(var(--foreground))',
+                  transition: 'all 0.2s'
+                }}
+                data-testid="logout-button"
+              >
+                <LogOut size={16} />
+                {t('auth.logout')}
+              </button>
+            </>
+          )}
         </div>
       </aside>
       
