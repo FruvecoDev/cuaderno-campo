@@ -434,16 +434,7 @@ const Maquinaria = () => {
     
     try {
       setError(null);
-      const response = await fetch(`${BACKEND_URL}/api/maquinaria/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
-      }
-      
+      await api.delete(`/api/maquinaria/${id}`);
       fetchMaquinaria();
     } catch (error) {
       console.error('Error deleting maquinaria:', error);
