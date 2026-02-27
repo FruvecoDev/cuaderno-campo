@@ -14,19 +14,27 @@ test.describe('API Migration - Notificaciones', () => {
   test('Notificaciones dropdown - opens and shows notifications', async ({ page }) => {
     await login(page);
     await removeEmergentBadge(page);
-    await dismissResumenDiarioModal(page);
+    
+    // Dismiss the daily summary modal if present
+    const entendidoBtn = page.getByRole('button', { name: /Entendido/i });
+    if (await entendidoBtn.isVisible({ timeout: 3000 })) {
+      await entendidoBtn.click();
+    }
+    
+    await page.waitForLoadState('domcontentloaded');
     
     // Look for notification bell button
     const bellButton = page.getByTestId('btn-notificaciones');
     
     // If test-id not found, try alternate selectors
-    if (!(await bellButton.isVisible({ timeout: 3000 }))) {
-      const altBellButton = page.locator('button svg[class*="Bell"], button:has(svg), header button').first();
+    if (await bellButton.isVisible({ timeout: 3000 })) {
+      await bellButton.click({ force: true });
+    } else {
+      // Look for any button with bell icon in header
+      const altBellButton = page.locator('header button, nav button').first();
       if (await altBellButton.isVisible({ timeout: 3000 })) {
         await altBellButton.click({ force: true });
       }
-    } else {
-      await bellButton.click({ force: true });
     }
     
     // Wait for dropdown to appear
@@ -38,14 +46,18 @@ test.describe('API Migration - Notificaciones', () => {
   test('Notificaciones - count badge displays', async ({ page }) => {
     await login(page);
     await removeEmergentBadge(page);
-    await dismissResumenDiarioModal(page);
+    
+    // Dismiss the daily summary modal if present
+    const entendidoBtn = page.getByRole('button', { name: /Entendido/i });
+    if (await entendidoBtn.isVisible({ timeout: 3000 })) {
+      await entendidoBtn.click();
+    }
+    
+    await page.waitForLoadState('domcontentloaded');
     
     // The notification icon should be visible in the header/navbar
-    const headerArea = page.locator('header, nav, .navbar, [class*="header"]').first();
+    const headerArea = page.locator('header, nav').first();
     await expect(headerArea).toBeVisible({ timeout: 5000 });
-    
-    // Look for bell icon or notification button
-    const bellIcon = page.locator('[data-testid="btn-notificaciones"], button:has(svg)').first();
     
     await page.screenshot({ path: '/app/tests/e2e/notificaciones-icon.jpeg', quality: 20, fullPage: false });
   });
