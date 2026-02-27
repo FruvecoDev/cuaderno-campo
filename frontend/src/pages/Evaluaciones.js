@@ -509,16 +509,7 @@ const Evaluaciones = () => {
     }
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/evaluaciones/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
-      }
-      
+      await api.delete(`/api/evaluaciones/${id}`);
       fetchEvaluaciones();
     } catch (error) {
       const errorMsg = handlePermissionError(error, 'eliminar la evaluación');
@@ -527,16 +518,16 @@ const Evaluaciones = () => {
     }
   };
   
-  // Descargar PDF
+  // Descargar PDF - mantiene fetch para blob
   const handleDownloadPDF = async (id) => {
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`${BACKEND_URL}/api/evaluaciones/${id}/pdf`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
+        throw new Error('Error al descargar PDF');
       }
       
       // Descargar el archivo
@@ -564,20 +555,7 @@ const Evaluaciones = () => {
     }
     
     try {
-      const response = await fetch(
-        `${BACKEND_URL}/api/evaluaciones/config/preguntas?seccion=${newQuestionSection}&pregunta=${encodeURIComponent(newQuestionText)}&tipo=${newQuestionType}`,
-        {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` }
-        }
-      );
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw { status: response.status, message: errorData.detail };
-      }
-      
-      const result = await response.json();
+      const result = await api.post(`/api/evaluaciones/config/preguntas?seccion=${newQuestionSection}&pregunta=${encodeURIComponent(newQuestionText)}&tipo=${newQuestionType}`);
       
       // Actualizar estado local inmediatamente
       setCustomPreguntas(prev => {
