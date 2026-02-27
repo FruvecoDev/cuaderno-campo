@@ -287,21 +287,16 @@ const Fincas = () => {
         recoleccion_ano: formData.recoleccion_ano ? parseInt(formData.recoleccion_ano) : null
       };
       
-      const res = await fetch(url, {
-        method,
-        headers,
-        body: JSON.stringify(payload)
-      });
-      
-      if (res.ok) {
-        setShowForm(false);
-        resetForm();
-        fetchFincas();
-        fetchStats();
+      if (editingId) {
+        await api.put(`/api/fincas/${editingId}`, payload);
       } else {
-        const error = await res.json();
-        alert(error.detail || 'Error al guardar la finca');
+        await api.post('/api/fincas', payload);
       }
+      
+      setShowForm(false);
+      resetForm();
+      fetchFincas();
+      fetchStats();
     } catch (err) {
       console.error('Error saving finca:', err);
       alert('Error al guardar la finca');
@@ -350,14 +345,9 @@ const Fincas = () => {
     if (!window.confirm('¿Está seguro de eliminar esta finca?')) return;
     
     try {
-      const res = await fetch(`${BACKEND_URL}/api/fincas/${id}`, {
-        method: 'DELETE',
-        headers
-      });
-      if (res.ok) {
-        fetchFincas();
-        fetchStats();
-      }
+      await api.delete(`/api/fincas/${id}`);
+      fetchFincas();
+      fetchStats();
     } catch (err) {
       console.error('Error deleting finca:', err);
     }
@@ -366,20 +356,13 @@ const Fincas = () => {
   // Asignar parcela a finca
   const asignarParcela = async (fincaId, parcelaId) => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/fincas/${fincaId}/parcelas/${parcelaId}`, {
-        method: 'POST',
-        headers
-      });
-      if (res.ok) {
-        fetchFincas();
-        fetchParcelasDisponibles();
-        fetchParcelas();
-      } else {
-        const error = await res.json();
-        alert(error.detail || 'Error al asignar parcela');
-      }
+      await api.post(`/api/fincas/${fincaId}/parcelas/${parcelaId}`);
+      fetchFincas();
+      fetchParcelasDisponibles();
+      fetchParcelas();
     } catch (err) {
       console.error('Error asignando parcela:', err);
+      alert(err.message || 'Error al asignar parcela');
     }
   };
 
@@ -388,15 +371,10 @@ const Fincas = () => {
     if (!window.confirm('¿Desea quitar esta parcela de la finca?')) return;
     
     try {
-      const res = await fetch(`${BACKEND_URL}/api/fincas/${fincaId}/parcelas/${parcelaId}`, {
-        method: 'DELETE',
-        headers
-      });
-      if (res.ok) {
-        fetchFincas();
-        fetchParcelasDisponibles();
-        fetchParcelas();
-      }
+      await api.delete(`/api/fincas/${fincaId}/parcelas/${parcelaId}`);
+      fetchFincas();
+      fetchParcelasDisponibles();
+      fetchParcelas();
     } catch (err) {
       console.error('Error desasignando parcela:', err);
     }
