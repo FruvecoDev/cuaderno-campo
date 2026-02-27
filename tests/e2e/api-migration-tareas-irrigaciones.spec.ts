@@ -15,37 +15,46 @@ test.describe('API Migration - Tareas & Irrigaciones', () => {
   test('Tareas - listing loads with data', async ({ page }) => {
     await login(page);
     await removeEmergentBadge(page);
-    await dismissResumenDiarioModal(page);
     
     // Navigate to Tareas
     await page.goto('/tareas', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('domcontentloaded');
     
-    // Check page content loads
-    const pageContent = page.locator('main, .tareas, [class*="tareas"]').first();
-    await expect(pageContent).toBeVisible({ timeout: 10000 });
+    // Dismiss the daily summary modal if present
+    const entendidoBtn = page.getByRole('button', { name: /Entendido/i });
+    if (await entendidoBtn.isVisible({ timeout: 3000 })) {
+      await entendidoBtn.click();
+    }
     
-    // Wait for API data to load - look for task items or empty state
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
-    // Screenshot to verify
+    // Check page content loads - look for tables or lists
+    const tableOrContent = page.locator('table, [class*="card"], [class*="task"]').first();
+    await expect(tableOrContent).toBeVisible({ timeout: 10000 });
+    
     await page.screenshot({ path: '/app/tests/e2e/tareas-list.jpeg', quality: 20, fullPage: false });
   });
 
   test('Tareas - filters work correctly', async ({ page }) => {
     await login(page);
     await removeEmergentBadge(page);
-    await dismissResumenDiarioModal(page);
     
     await page.goto('/tareas', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('domcontentloaded');
     
+    // Dismiss the daily summary modal if present
+    const entendidoBtn = page.getByRole('button', { name: /Entendido/i });
+    if (await entendidoBtn.isVisible({ timeout: 3000 })) {
+      await entendidoBtn.click();
+    }
+    
+    await page.waitForLoadState('domcontentloaded');
+    
     // Look for filter button
-    const filterButton = page.locator('button:has-text("Filtros"), button:has-text("Filtrar"), [data-testid="filter"], button svg[class*="Filter"]').first();
+    const filterButton = page.locator('button:has-text("Filtros"), button:has-text("Filtrar")').first();
     
     if (await filterButton.isVisible({ timeout: 3000 })) {
       await filterButton.click();
-      // Filters panel should appear
       await page.waitForLoadState('domcontentloaded');
     }
     
@@ -55,17 +64,22 @@ test.describe('API Migration - Tareas & Irrigaciones', () => {
   test('Irrigaciones - listing loads with data', async ({ page }) => {
     await login(page);
     await removeEmergentBadge(page);
-    await dismissResumenDiarioModal(page);
     
     // Navigate to Irrigaciones
     await page.goto('/irrigaciones', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('domcontentloaded');
     
-    // Check page content loads
-    const pageContent = page.locator('main, .irrigaciones, [class*="irrigaciones"]').first();
-    await expect(pageContent).toBeVisible({ timeout: 10000 });
+    // Dismiss the daily summary modal if present
+    const entendidoBtn = page.getByRole('button', { name: /Entendido/i });
+    if (await entendidoBtn.isVisible({ timeout: 3000 })) {
+      await entendidoBtn.click();
+    }
     
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Check page content loads
+    const tableOrContent = page.locator('table, [class*="card"], [class*="irrig"]').first();
+    await expect(tableOrContent).toBeVisible({ timeout: 10000 });
     
     await page.screenshot({ path: '/app/tests/e2e/irrigaciones-list.jpeg', quality: 20, fullPage: false });
   });
@@ -73,9 +87,16 @@ test.describe('API Migration - Tareas & Irrigaciones', () => {
   test('Irrigaciones - filters and stats load', async ({ page }) => {
     await login(page);
     await removeEmergentBadge(page);
-    await dismissResumenDiarioModal(page);
     
     await page.goto('/irrigaciones', { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Dismiss the daily summary modal if present
+    const entendidoBtn = page.getByRole('button', { name: /Entendido/i });
+    if (await entendidoBtn.isVisible({ timeout: 3000 })) {
+      await entendidoBtn.click();
+    }
+    
     await page.waitForLoadState('domcontentloaded');
     
     // Look for filter functionality
