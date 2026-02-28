@@ -40,37 +40,32 @@ async function login(page) {
 
 // Helper to dismiss ResumenDiario modal - robust version
 async function dismissModal(page) {
-  for (let attempt = 0; attempt < 5; attempt++) {
-    try {
-      // Look for the modal and click Entendido
-      const entendidoBtn = page.getByRole('button', { name: /Entendido/i });
-      if (await entendidoBtn.isVisible({ timeout: 2000 })) {
-        await entendidoBtn.click({ force: true });
-        await page.waitForTimeout(500);
-      } else {
-        // Try clicking the close X button
-        const closeBtn = page.locator('.modal-overlay button svg').first();
-        if (await closeBtn.isVisible({ timeout: 500 })) {
-          await closeBtn.click({ force: true });
-          await page.waitForTimeout(500);
-        }
-      }
-    } catch {
-      // Continue
+  // First try to click the Entendido button if visible
+  try {
+    const entendidoBtn = page.getByTestId('btn-entendido');
+    if (await entendidoBtn.isVisible({ timeout: 2000 })) {
+      await entendidoBtn.click({ force: true });
+      await page.waitForTimeout(500);
     }
-    
-    // Check if modal-overlay is gone
-    const overlay = page.locator('.modal-overlay');
-    if (!(await overlay.isVisible({ timeout: 300 }))) {
-      return;
-    }
+  } catch {
+    // Continue
   }
   
-  // Force remove overlay via JS
+  // Then forcefully remove the modal overlay via JS
   await page.evaluate(() => {
     const overlays = document.querySelectorAll('.modal-overlay, [x-file-name="ResumenDiario"]');
     overlays.forEach(o => o.remove());
+    
+    // Also remove any backdrop
+    const backdrops = document.querySelectorAll('[class*="modal-backdrop"], [class*="overlay"]');
+    backdrops.forEach(b => {
+      if (b.tagName !== 'BODY' && b.querySelector('[x-file-name="ResumenDiario"]')) {
+        b.remove();
+      }
+    });
   });
+  
+  await page.waitForTimeout(300);
 }
 
 // Helper to navigate to RRHH > Prenómina (assumes already logged in)
