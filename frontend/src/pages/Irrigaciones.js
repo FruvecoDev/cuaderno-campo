@@ -198,9 +198,9 @@ const Irrigaciones = () => {
   // Opciones únicas para filtros
   const filterOptions = useMemo(() => ({
     sistemas: [...new Set(irrigaciones.map(i => i.sistema).filter(Boolean))],
-    cultivos: [...new Set(irrigaciones.map(i => i.cultivo).filter(Boolean))],
+    cultivos: cultivos.map(c => c.nombre).filter(Boolean),
     parcelas: parcelas.map(p => ({ id: p._id, codigo: p.codigo_plantacion }))
-  }), [irrigaciones, parcelas]);
+  }), [irrigaciones, parcelas, cultivos]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
