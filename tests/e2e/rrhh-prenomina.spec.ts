@@ -126,11 +126,11 @@ test.describe('RRHH Prenómina Module', () => {
     // Wait for page content
     await page.waitForTimeout(500);
     
-    // Verify KPI cards are present - use the data-testids if they exist, otherwise use text
-    await expect(page.locator('text=Prenóminas')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('text=Total Horas')).toBeVisible();
-    await expect(page.locator('text=Importe Bruto')).toBeVisible();
-    await expect(page.locator('text=Importe Neto')).toBeVisible();
+    // Verify KPI cards are present - use partial text matching
+    await expect(page.locator('text=/Prenóminas/i').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=/Total Horas/i').first()).toBeVisible();
+    await expect(page.locator('text=/Importe Bruto/i').first()).toBeVisible();
+    await expect(page.locator('text=/Importe Neto/i').first()).toBeVisible();
   });
   
   test('should change month/year selector', async ({ page }) => {
