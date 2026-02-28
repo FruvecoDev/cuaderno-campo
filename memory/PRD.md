@@ -1786,6 +1786,29 @@ Migrar todas las llamadas `fetch` directas al nuevo servicio centralizado `api.j
 
 
 
+## Notificaciones Push para Portal del Empleado (28/02/2026) - COMPLETADO
+
+Sistema de notificaciones integrado en el Portal del Empleado.
+
+**Notificaciones automáticas:**
+- **Ausencia aprobada/rechazada**: Cuando RRHH aprueba o rechaza una solicitud
+- **Nuevo documento**: Cuando se sube un documento para el empleado (alerta si requiere firma)
+
+**Funcionalidades:**
+- Panel desplegable con lista de notificaciones
+- Badge con contador de no leídas
+- Marcar individual o todas como leídas
+- Iconos por tipo (success verde, warning amarillo, info azul, error rojo)
+- Polling automático cada 30 segundos
+- Fecha/hora de cada notificación
+
+**Endpoints añadidos:**
+- `GET /api/portal-empleado/mis-notificaciones`
+- `PUT /api/portal-empleado/notificaciones/{id}/leer`
+- `PUT /api/portal-empleado/notificaciones/leer-todas`
+
+---
+
 ## Portal del Empleado (28/02/2026) - COMPLETADO
 
 Nueva funcionalidad que permite a los empleados acceder a su información personal desde un portal dedicado.
