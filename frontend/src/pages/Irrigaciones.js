@@ -316,7 +316,8 @@ const Irrigaciones = () => {
       fuente_agua: irrigacion.fuente_agua || '',
       sector: irrigacion.sector || '',
       estado: irrigacion.estado || 'completado',
-      observaciones: irrigacion.observaciones || ''
+      observaciones: irrigacion.observaciones || '',
+      cultivo: parcela?.cultivo || irrigacion.cultivo || ''
     });
     setShowForm(true);
   };
