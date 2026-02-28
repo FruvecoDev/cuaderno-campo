@@ -1180,6 +1180,78 @@ const ControlHorario = ({ empleados }) => {
         </div>
       )}
       
+      {/* Sección Informe Control Horario */}
+      <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+        <h3 style={{ fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <FileText size={20} style={{ color: 'hsl(var(--primary))' }} />
+          Informe de Control Horario
+        </h3>
+        <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))', marginBottom: '1rem' }}>
+          Genera un informe detallado de horas trabajadas por empleado, incluyendo entradas, salidas, ausencias y total de horas.
+        </p>
+        
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div className="form-group" style={{ margin: 0, minWidth: '200px' }}>
+            <label className="form-label">Empleado</label>
+            <select
+              className="form-select"
+              value={informeEmpleadoId}
+              onChange={e => setInformeEmpleadoId(e.target.value)}
+            >
+              <option value="">Seleccionar empleado...</option>
+              {empleados.filter(e => e.activo).map(emp => (
+                <option key={emp._id} value={emp._id}>
+                  {emp.codigo} - {emp.nombre} {emp.apellidos}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="form-group" style={{ margin: 0 }}>
+            <label className="form-label">Fecha Desde</label>
+            <input
+              type="date"
+              className="form-input"
+              value={informeFechaDesde}
+              onChange={e => setInformeFechaDesde(e.target.value)}
+              style={{ width: '150px' }}
+            />
+          </div>
+          
+          <div className="form-group" style={{ margin: 0 }}>
+            <label className="form-label">Fecha Hasta</label>
+            <input
+              type="date"
+              className="form-input"
+              value={informeFechaHasta}
+              onChange={e => setInformeFechaHasta(e.target.value)}
+              style={{ width: '150px' }}
+            />
+          </div>
+          
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button
+              onClick={handleExportInformeExcel}
+              className="btn btn-secondary"
+              disabled={!informeEmpleadoId || !informeFechaDesde || !informeFechaHasta}
+              title="Exportar a Excel"
+            >
+              <FileText size={16} />
+              Excel
+            </button>
+            <button
+              onClick={handleExportInformePdf}
+              className="btn btn-primary"
+              disabled={!informeEmpleadoId || !informeFechaDesde || !informeFechaHasta}
+              title="Generar PDF"
+            >
+              <FileText size={16} />
+              PDF
+            </button>
+          </div>
+        </div>
+      </div>
+      
       {/* Botón Fichar */}
       <div style={{ marginBottom: '1.5rem' }}>
         <button onClick={() => setShowFicharModal(true)} className="btn btn-primary">
