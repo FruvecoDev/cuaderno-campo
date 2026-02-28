@@ -52,14 +52,16 @@ async function dismissModal(page) {
 
 // Helper to navigate to RRHH > Prenómina
 async function navigateToPrenomina(page) {
-  // Navigate directly to RRHH page
+  // First log in
+  await login(page);
+  
+  // Then navigate directly to RRHH page
   await page.goto('/rrhh', { waitUntil: 'domcontentloaded' });
   await page.waitForLoadState('domcontentloaded');
   
   await dismissModal(page);
   
   // Wait for page to load and find Prenómina tab
-  // The tabs are buttons within the RRHH page
   await page.waitForTimeout(1000); // Allow page to render
   
   // Click on Prenómina tab
