@@ -153,6 +153,13 @@ const Usuarios = () => {
     setMenuPermissions(newPerms);
   };
 
+  // Apply a predefined permission profile
+  const applyProfile = (profile) => {
+    if (!profile) return;
+    setSelectedProfile(profile.id);
+    setMenuPermissions({ ...profile.permissions });
+  };
+
   // Password change functions
   const openPasswordModal = (user) => {
     setSelectedUserForPassword(user);
