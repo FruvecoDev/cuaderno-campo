@@ -1111,6 +1111,200 @@ const Usuarios = () => {
           </div>
         </div>
       )}
+
+      {/* Modal de Vincular Empleado */}
+      {showVincularEmpleadoModal && selectedUserForVincular && (
+        <div className="modal-overlay" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div className="modal-content" style={{
+            background: 'hsl(var(--card))',
+            borderRadius: '12px',
+            padding: '1.5rem',
+            width: '90%',
+            maxWidth: '550px',
+            maxHeight: '80vh',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ 
+                  width: '40px', 
+                  height: '40px', 
+                  borderRadius: '10px', 
+                  background: 'hsl(var(--primary) / 0.1)', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center' 
+                }}>
+                  <Users size={20} style={{ color: 'hsl(var(--primary))' }} />
+                </div>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: '1.1rem' }}>Vincular con Empleado</h2>
+                  <p className="text-muted text-sm" style={{ margin: 0 }}>{selectedUserForVincular.full_name}</p>
+                </div>
+              </div>
+              <button 
+                className="btn btn-sm btn-secondary" 
+                onClick={() => setShowVincularEmpleadoModal(false)}
+                style={{ padding: '0.5rem' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <p style={{ fontSize: '0.875rem', marginBottom: '1rem', color: 'hsl(var(--muted-foreground))' }}>
+              Vincula este usuario a un perfil de empleado para que pueda acceder al Portal del Empleado.
+            </p>
+            
+            {/* Buscador */}
+            <div className="form-group" style={{ marginBottom: '1rem' }}>
+              <label className="form-label">Buscar empleado</label>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="Buscar por nombre, código o DNI..."
+                value={busquedaEmpleado}
+                onChange={(e) => setBusquedaEmpleado(e.target.value)}
+              />
+            </div>
+            
+            {/* Lista de empleados */}
+            <div style={{ 
+              flex: 1, 
+              overflowY: 'auto', 
+              border: '1px solid hsl(var(--border))', 
+              borderRadius: '8px',
+              marginBottom: '1rem'
+            }}>
+              {/* Opción para desvincular */}
+              <div
+                onClick={() => setEmpleadoSeleccionado('')}
+                style={{
+                  padding: '0.75rem 1rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  borderBottom: '1px solid hsl(var(--border))',
+                  background: !empleadoSeleccionado ? 'hsl(var(--primary) / 0.1)' : 'transparent'
+                }}
+              >
+                <div style={{
+                  width: '20px',
+                  height: '20px',
+                  borderRadius: '50%',
+                  border: '2px solid',
+                  borderColor: !empleadoSeleccionado ? 'hsl(var(--primary))' : 'hsl(var(--border))',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  {!empleadoSeleccionado && <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'hsl(var(--primary))' }} />}
+                </div>
+                <div>
+                  <div style={{ fontWeight: '500', color: 'hsl(var(--muted-foreground))' }}>Sin vincular</div>
+                  <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                    No asociar a ningún empleado
+                  </div>
+                </div>
+              </div>
+
+              {empleadosFiltrados.length === 0 ? (
+                <div style={{ padding: '2rem', textAlign: 'center', color: 'hsl(var(--muted-foreground))' }}>
+                  No se encontraron empleados
+                </div>
+              ) : (
+                empleadosFiltrados.map(emp => (
+                  <div
+                    key={emp._id}
+                    onClick={() => !emp.vinculado || emp._id === selectedUserForVincular.empleado_id ? setEmpleadoSeleccionado(emp._id) : null}
+                    style={{
+                      padding: '0.75rem 1rem',
+                      cursor: emp.vinculado && emp._id !== selectedUserForVincular.empleado_id ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      borderBottom: '1px solid hsl(var(--border) / 0.5)',
+                      background: empleadoSeleccionado === emp._id ? 'hsl(var(--primary) / 0.1)' : 'transparent',
+                      opacity: emp.vinculado && emp._id !== selectedUserForVincular.empleado_id ? 0.5 : 1
+                    }}
+                  >
+                    <div style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      border: '2px solid',
+                      borderColor: empleadoSeleccionado === emp._id ? 'hsl(var(--primary))' : 'hsl(var(--border))',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      {empleadoSeleccionado === emp._id && <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'hsl(var(--primary))' }} />}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: '500' }}>{emp.nombre} {emp.apellidos}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                        {emp.codigo} - DNI: {emp.dni_nie || 'N/A'} - {emp.puesto || 'Sin puesto'}
+                      </div>
+                    </div>
+                    {emp.vinculado && emp._id !== selectedUserForVincular.empleado_id && (
+                      <span style={{
+                        fontSize: '0.7rem',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        background: 'hsl(var(--muted))',
+                        color: 'hsl(var(--muted-foreground))'
+                      }}>
+                        Ya vinculado
+                      </span>
+                    )}
+                    {emp._id === selectedUserForVincular.empleado_id && (
+                      <span style={{
+                        fontSize: '0.7rem',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        background: 'hsl(142 76% 36% / 0.1)',
+                        color: 'hsl(142 76% 36%)'
+                      }}>
+                        Actual
+                      </span>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+            
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button 
+                className="btn btn-secondary" 
+                onClick={() => setShowVincularEmpleadoModal(false)}
+              >
+                Cancelar
+              </button>
+              <button 
+                className="btn btn-primary" 
+                onClick={handleSaveVinculacion}
+                disabled={savingVinculacion}
+              >
+                {savingVinculacion ? 'Guardando...' : (empleadoSeleccionado ? 'Vincular' : 'Desvincular')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
