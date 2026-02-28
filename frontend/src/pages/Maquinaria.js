@@ -1053,6 +1053,14 @@ const Maquinaria = () => {
                     {(canEdit || canDelete) ? (
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button
+                            className="btn btn-sm btn-secondary"
+                            onClick={() => handleVerHistorial(item)}
+                            title="Ver historial de uso"
+                            data-testid={`historial-maquinaria-${item._id}`}
+                          >
+                            <Eye size={14} />
+                          </button>
                           {canEdit && (
                             <button
                               className="btn btn-sm btn-secondary"
