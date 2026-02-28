@@ -152,6 +152,25 @@ const Clientes = () => {
     }
   };
   
+  const fetchStats = async () => {
+    try {
+      const data = await api.get('/api/clientes/stats/resumen');
+      setStats(data.stats);
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+    }
+  };
+  
+  const handleExportExcel = async () => {
+    try {
+      const params = filterActivo ? `?activo=${filterActivo === 'activos'}` : '';
+      await api.download(`/api/clientes/export/excel${params}`, `clientes_${new Date().toISOString().split('T')[0]}.xlsx`);
+    } catch (err) {
+      console.error('Error exporting:', err);
+      alert('Error al exportar');
+    }
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
