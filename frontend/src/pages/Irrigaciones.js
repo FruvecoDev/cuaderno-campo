@@ -703,12 +703,24 @@ const Irrigaciones = () => {
             <div className="grid-4">
               <div className="form-group">
                 <label className="form-label">Parcela *</label>
-                <select className="form-select" value={formData.parcela_id} onChange={(e) => setFormData({...formData, parcela_id: e.target.value})} required data-testid="select-parcela">
+                <select className="form-select" value={formData.parcela_id} onChange={(e) => handleParcelaChange(e.target.value)} required data-testid="select-parcela">
                   <option value="">Seleccionar...</option>
                   {parcelas.map(p => (
                     <option key={p._id} value={p._id}>{p.codigo_plantacion} - {p.cultivo} ({p.superficie_total} ha)</option>
                   ))}
                 </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Cultivo</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  value={formData.cultivo} 
+                  readOnly 
+                  style={{ backgroundColor: 'hsl(var(--muted) / 0.3)', cursor: 'not-allowed' }}
+                  placeholder="Se rellena automáticamente"
+                  data-testid="input-cultivo"
+                />
               </div>
               <div className="form-group">
                 <label className="form-label">Sistema *</label>
@@ -720,6 +732,9 @@ const Irrigaciones = () => {
                 <label className="form-label">Fecha *</label>
                 <input type="date" className="form-input" value={formData.fecha} onChange={(e) => setFormData({...formData, fecha: e.target.value})} required data-testid="input-fecha" />
               </div>
+            </div>
+            
+            <div className="grid-4">
               <div className="form-group">
                 <label className="form-label">Estado</label>
                 <select className="form-select" value={formData.estado} onChange={(e) => setFormData({...formData, estado: e.target.value})} data-testid="select-estado">
