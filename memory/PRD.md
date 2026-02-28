@@ -92,6 +92,22 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
   - Filtro de Cultivo corregido para buscar en parcela asociada
   - Calculadora: Auto-relleno de Superficie al seleccionar Parcela
 
+#### 10. Módulo de Mapas ✅ (NUEVO)
+- **Visualización**: Mapa interactivo con OpenStreetMap (Leaflet/React-Leaflet)
+- **KPIs**: Parcelas con ubicación, Sin ubicación, Hectáreas totales
+- **Filtros**: Por cultivo y por finca
+- **Funcionalidades**:
+  - Lista lateral de parcelas (toggle)
+  - Marcadores personalizados por tipo de cultivo (colores)
+  - Modal para añadir/editar coordenadas de parcelas
+  - Popup informativo al hacer clic en marcadores
+- **Archivos creados**:
+  - `/app/frontend/src/pages/Mapas.js`
+- **Integrado en**:
+  - Router (`/mapas`)
+  - Menú lateral (Gestión Principal → Mapa de Parcelas)
+  - Sistema de permisos
+
 ---
 
 ### Completadas en sesión anterior:
