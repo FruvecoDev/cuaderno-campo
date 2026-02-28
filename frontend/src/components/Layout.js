@@ -136,6 +136,7 @@ const Layout = ({ children }) => {
       { path: '/contratos', label: t('nav.contracts'), icon: FileText, module: 'contratos' },
       { path: '/parcelas', label: t('nav.parcels'), icon: MapPin, module: 'parcelas' },
       { path: '/fincas', label: t('nav.farms'), icon: Home, module: 'fincas' },
+      { path: '/mapas', label: 'Mapa de Parcelas', icon: Map, module: 'parcelas' },
     ]},
     { section: t('nav.activities'), items: [
       { path: '/visitas', label: t('nav.visits'), icon: Calendar, module: 'visitas' },
