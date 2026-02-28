@@ -830,7 +830,32 @@ const Tratamientos = () => {
     fetchParcelas();
     fetchMaquinaria();
     fetchTecnicosAplicadores();
+    fetchStats();
   }, []);
+  
+  // Función para obtener estadísticas
+  const fetchStats = async () => {
+    try {
+      const data = await api.get('/api/tratamientos/stats/dashboard');
+      setStats(data.stats);
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+    }
+  };
+  
+  // Función para exportar a Excel
+  const handleExportExcel = async () => {
+    setExportLoading(true);
+    try {
+      const params = filters.campana ? `campana=${filters.campana}` : '';
+      await api.download(`/api/tratamientos/export/excel?${params}`, `tratamientos_${new Date().toISOString().split('T')[0]}.xlsx`);
+    } catch (err) {
+      console.error('Error exporting:', err);
+      alert('Error al exportar');
+    } finally {
+      setExportLoading(false);
+    }
+  };
   
   // Extraer opciones únicas cuando cambian los tratamientos
   useEffect(() => {
