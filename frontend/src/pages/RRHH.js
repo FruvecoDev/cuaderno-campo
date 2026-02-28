@@ -804,12 +804,12 @@ const RRHH = () => {
 
       {/* Tab Content: Fichajes */}
       {activeTab === 'fichajes' && (
-        <ControlHorario empleados={empleados} />
+        <ControlHorarioTab empleados={empleados} />
       )}
 
       {/* Tab Content: Productividad */}
       {activeTab === 'productividad' && (
-        <Productividad empleados={empleados} />
+        <ProductividadTab empleados={empleados} />
       )}
 
       {/* Tab Content: Documentos */}
@@ -819,7 +819,7 @@ const RRHH = () => {
 
       {/* Tab Content: Prenómina */}
       {activeTab === 'prenomina' && (
-        <Prenomina empleados={empleados} />
+        <PrenominaTab empleados={empleados} />
       )}
 
 
