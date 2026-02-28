@@ -709,8 +709,13 @@ async def delete_registro_productividad(registro_id: str):
 # ============================================================================
 
 @router.get("/documentos")
-async def get_documentos(empleado_id: Optional[str] = None, tipo: Optional[str] = None):
-    """Obtener documentos de empleados"""
+async def get_documentos(
+    empleado_id: Optional[str] = None, 
+    tipo: Optional[str] = None,
+    fecha_desde: Optional[str] = None,
+    fecha_hasta: Optional[str] = None
+):
+    """Obtener documentos de empleados con filtros de fecha"""
     database = get_db()
     
     query = {}
@@ -719,11 +724,26 @@ async def get_documentos(empleado_id: Optional[str] = None, tipo: Optional[str] 
     if tipo:
         query["tipo"] = tipo
     
+    # Filtros de fecha de registro (created_at)
+    if fecha_desde or fecha_hasta:
+        query["created_at"] = {}
+        if fecha_desde:
+            query["created_at"]["$gte"] = datetime.strptime(fecha_desde, "%Y-%m-%d")
+        if fecha_hasta:
+            # Añadir un día para incluir todo el día hasta
+            fecha_hasta_dt = datetime.strptime(fecha_hasta, "%Y-%m-%d") + timedelta(days=1)
+            query["created_at"]["$lt"] = fecha_hasta_dt
+    
     documentos = []
     cursor = database.documentos_empleados.find(query).sort("created_at", -1)
     
     async for doc in cursor:
         doc["_id"] = str(doc["_id"])
+        # Convertir datetime a string ISO para JSON
+        if doc.get("created_at"):
+            doc["created_at"] = doc["created_at"].isoformat()
+        if doc.get("updated_at"):
+            doc["updated_at"] = doc["updated_at"].isoformat()
         documentos.append(doc)
     
     return {"success": True, "documentos": documentos, "total": len(documentos)}
