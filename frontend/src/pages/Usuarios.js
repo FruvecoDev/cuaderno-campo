@@ -41,7 +41,8 @@ const Usuarios = () => {
     { value: 'Admin', label: t('users.admin'), description: t('users.adminDesc') },
     { value: 'Manager', label: t('users.manager'), description: t('users.managerDesc') },
     { value: 'Technician', label: t('users.technician'), description: t('users.technicianDesc') },
-    { value: 'Viewer', label: t('users.viewer'), description: t('users.viewerDesc') }
+    { value: 'Viewer', label: t('users.viewer'), description: t('users.viewerDesc') },
+    { value: 'Empleado', label: 'Empleado', description: 'Acceso al Portal del Empleado únicamente' }
   ];
   
   const [formData, setFormData] = useState({
