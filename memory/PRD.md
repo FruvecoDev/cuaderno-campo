@@ -1786,6 +1786,29 @@ Migrar todas las llamadas `fetch` directas al nuevo servicio centralizado `api.j
 
 
 
+## Portal del Empleado (28/02/2026) - COMPLETADO
+
+Nueva funcionalidad que permite a los empleados acceder a su información personal desde un portal dedicado.
+
+**Características implementadas:**
+- **Dashboard personalizado**: Muestra perfil del empleado, KPIs (horas del mes, documentos pendientes, solicitudes, última nómina)
+- **Fichajes de hoy**: Lista de entradas/salidas del día actual
+- **Botón "Fichar Ahora"**: Modal para registrar entrada o salida
+- **Tab "Mis Fichajes"**: Historial de fichajes con fecha, tipo, hora y método
+- **Tab "Documentos"**: Lista de documentos con posibilidad de descargar y firmar digitalmente
+- **Tab "Nóminas"**: Historial de prenóminas con desglose de horas e importes
+- **Tab "Ausencias"**: Ver ausencias y solicitar nuevas (vacaciones, permisos, bajas)
+
+**Archivos creados:**
+- `/app/backend/routes/routes_portal_empleado.py` - Endpoints del portal
+- `/app/frontend/src/pages/PortalEmpleado.js` - Interfaz del portal
+
+**Rol "Empleado" añadido:**
+- Los usuarios con rol "Empleado" solo ven el Portal del Empleado en el menú
+- Se vincula por email entre usuario y empleado de RRHH
+
+---
+
 ## Refactorización RRHH (28/02/2026) - COMPLETADO
 
 Se dividió el componente monolítico `RRHH.js` (3886 líneas) en subcomponentes:
