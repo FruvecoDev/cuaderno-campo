@@ -101,6 +101,7 @@ const Irrigaciones = () => {
     fetchParcelas();
     fetchStats();
     fetchSistemas();
+    fetchCultivos();
   }, []);
 
   useEffect(() => {
