@@ -21,7 +21,7 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from database import db
 from routes_auth import get_current_user
 
-router = APIRouter(tags=["Cuaderno de Campo"])
+router = APIRouter(prefix="/api", tags=["Cuaderno de Campo"])
 
 # Collections
 parcelas_collection = db['parcelas']
