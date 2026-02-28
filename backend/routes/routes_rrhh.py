@@ -1712,6 +1712,30 @@ async def upload_documento(
     result = await database.documentos_empleados.insert_one(documento)
     documento["_id"] = str(result.inserted_id)
     
+    # Crear notificación para el empleado
+    empleado = await database.empleados.find_one({"_id": ObjectId(empleado_id)})
+    if empleado and empleado.get("email"):
+        titulo = "Nuevo Documento Disponible"
+        if requiere_firma_bool:
+            mensaje = f"Se ha subido el documento '{nombre}' que requiere tu firma."
+            tipo_notif = "warning"
+        else:
+            mensaje = f"Se ha subido un nuevo documento: '{nombre}'."
+            tipo_notif = "info"
+        
+        notificacion = {
+            "titulo": titulo,
+            "mensaje": mensaje,
+            "tipo": tipo_notif,
+            "enlace": "/portal-empleado",
+            "destinatarios": [empleado.get("email")],
+            "prioridad": "normal" if not requiere_firma_bool else "alta",
+            "datos_extra": {"documento_id": str(result.inserted_id), "tipo": "documento"},
+            "created_at": datetime.now(),
+            "leida_por": []
+        }
+        await database.notificaciones.insert_one(notificacion)
+    
     return {"success": True, "data": documento}
 
 @router.put("/documentos/{documento_id}/firmar")
