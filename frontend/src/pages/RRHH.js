@@ -998,6 +998,18 @@ const ControlHorario = ({ empleados }) => {
   // Estado para feedback
   const [fichajeResult, setFichajeResult] = useState(null);
   
+  // Estado para informe de control horario
+  const [informeEmpleadoId, setInformeEmpleadoId] = useState('');
+  const [informeFechaDesde, setInformeFechaDesde] = useState(() => {
+    // Por defecto, primer día del mes actual
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+  });
+  const [informeFechaHasta, setInformeFechaHasta] = useState(() => {
+    // Por defecto, hoy
+    return new Date().toISOString().split('T')[0];
+  });
+  
   useEffect(() => {
     fetchFichajesHoy();
   }, []);
