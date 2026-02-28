@@ -816,6 +816,11 @@ const RRHH = () => {
         <DocumentosEmpleado empleados={empleados} />
       )}
 
+      {/* Tab Content: Ausencias */}
+      {activeTab === 'ausencias' && (
+        <AusenciasTab empleados={empleados} />
+      )}
+
       {/* Tab Content: Prenómina */}
       {activeTab === 'prenomina' && (
         <PrenominaTab empleados={empleados} />
