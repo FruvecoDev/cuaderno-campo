@@ -196,6 +196,24 @@ const Maquinaria = () => {
     }
   };
   
+  // Función para ver historial de maquinaria
+  const handleVerHistorial = async (item) => {
+    setSelectedMaquinaria(item);
+    setShowHistorial(true);
+    setLoadingHistorial(true);
+    
+    try {
+      const data = await api.get(`/api/maquinaria/${item._id}/historial`);
+      setHistorialData(data.historial);
+    } catch (err) {
+      console.error('Error fetching historial:', err);
+      setError('Error al cargar el historial');
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setLoadingHistorial(false);
+    }
+  };
+  
   // Filtrar maquinaria
   const filteredMaquinaria = maquinaria.filter(m => {
     if (filters.tipo && m.tipo !== filters.tipo) return false;
