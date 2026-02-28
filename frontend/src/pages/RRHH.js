@@ -2039,6 +2039,10 @@ const DocumentosEmpleado = ({ empleados }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
   
+  // Filtros de fecha
+  const [filtroFechaDesde, setFiltroFechaDesde] = useState('');
+  const [filtroFechaHasta, setFiltroFechaHasta] = useState('');
+  
   // Obtener empleado seleccionado
   const empleadoActual = empleados.find(e => e._id === empleadoSeleccionado);
   
@@ -2054,14 +2058,23 @@ const DocumentosEmpleado = ({ empleados }) => {
   
   useEffect(() => {
     fetchDocumentos();
-  }, [empleadoSeleccionado]);
+  }, [empleadoSeleccionado, filtroFechaDesde, filtroFechaHasta]);
   
   const fetchDocumentos = async () => {
     try {
-      let url = '/api/rrhh/documentos';
+      let params = new URLSearchParams();
       if (empleadoSeleccionado) {
-        url += `?empleado_id=${empleadoSeleccionado}`;
+        params.append('empleado_id', empleadoSeleccionado);
       }
+      if (filtroFechaDesde) {
+        params.append('fecha_desde', filtroFechaDesde);
+      }
+      if (filtroFechaHasta) {
+        params.append('fecha_hasta', filtroFechaHasta);
+      }
+      
+      const queryString = params.toString();
+      const url = queryString ? `/api/rrhh/documentos?${queryString}` : '/api/rrhh/documentos';
       const data = await api.get(url);
       setDocumentos(data.documentos || []);
     } catch (err) {
