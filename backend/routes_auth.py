@@ -292,6 +292,99 @@ async def update_tipo_operacion(
     return {"success": True, "user": user_response}
 
 
+@router.get("/empleados-disponibles")
+async def get_empleados_disponibles(current_user: dict = Depends(get_current_user)):
+    """Get list of employees that can be linked to users (Admin only)"""
+    if current_user.get("role") != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Get all active employees
+    empleados_collection = db['empleados']
+    empleados = await empleados_collection.find({"activo": True}).to_list(500)
+    
+    # Get all users that have an empleado_id
+    users_with_empleado = await users_collection.find(
+        {"empleado_id": {"$exists": True, "$ne": None}},
+        {"empleado_id": 1}
+    ).to_list(500)
+    
+    empleados_vinculados = {u["empleado_id"] for u in users_with_empleado}
+    
+    result = []
+    for emp in empleados:
+        emp_id = str(emp["_id"])
+        result.append({
+            "_id": emp_id,
+            "codigo": emp.get("codigo", ""),
+            "nombre": emp.get("nombre", ""),
+            "apellidos": emp.get("apellidos", ""),
+            "dni_nie": emp.get("dni_nie", ""),
+            "email": emp.get("email", ""),
+            "puesto": emp.get("puesto", ""),
+            "vinculado": emp_id in empleados_vinculados
+        })
+    
+    return {"empleados": result}
+
+
+@router.put("/users/{user_id}/vincular-empleado")
+async def vincular_empleado(
+    user_id: str,
+    data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Link a user to an employee (Admin only)"""
+    if current_user.get("role") != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    if not ObjectId.is_valid(user_id):
+        raise HTTPException(status_code=400, detail="Invalid user ID")
+    
+    empleado_id = data.get("empleado_id")
+    
+    # If empleado_id is empty or None, unlink the employee
+    update_data = {"updated_at": datetime.now()}
+    
+    if empleado_id:
+        if not ObjectId.is_valid(empleado_id):
+            raise HTTPException(status_code=400, detail="Invalid employee ID")
+        
+        # Verify employee exists
+        empleados_collection = db['empleados']
+        empleado = await empleados_collection.find_one({"_id": ObjectId(empleado_id)})
+        if not empleado:
+            raise HTTPException(status_code=404, detail="Employee not found")
+        
+        # Check if employee is already linked to another user
+        existing_link = await users_collection.find_one({
+            "empleado_id": empleado_id,
+            "_id": {"$ne": ObjectId(user_id)}
+        })
+        if existing_link:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Este empleado ya está vinculado al usuario {existing_link.get('email')}"
+            )
+        
+        update_data["empleado_id"] = empleado_id
+    else:
+        update_data["empleado_id"] = None
+    
+    result = await users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    updated_user = await users_collection.find_one({"_id": ObjectId(user_id)})
+    user_response = serialize_doc(updated_user)
+    user_response.pop("hashed_password", None)
+    
+    return {"success": True, "user": user_response}
+
+
 @router.post("/init-admin")
 async def initialize_admin():
     """Initialize first admin user - only works if no users exist"""
