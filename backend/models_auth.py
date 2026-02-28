@@ -8,6 +8,7 @@ class UserRole(str, Enum):
     MANAGER = "Manager"
     TECHNICIAN = "Technician"
     VIEWER = "Viewer"
+    EMPLEADO = "Empleado"  # Portal del empleado - acceso limitado
 
 # All available menu items with their paths
 ALL_MENU_ITEMS = [
