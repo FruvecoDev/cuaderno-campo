@@ -164,6 +164,31 @@ const RRHH = () => {
     }
   };
 
+  const handleDeletePermanente = async (id, nombre) => {
+    if (!window.confirm(`¿ELIMINAR PERMANENTEMENTE a "${nombre}"?\n\nEsta acción NO se puede deshacer y eliminará todos los datos asociados (fichajes, documentos, prenóminas, etc.)`)) return;
+    if (!window.confirm('¿Está COMPLETAMENTE SEGURO? Esta acción es IRREVERSIBLE.')) return;
+    try {
+      await api.delete(`/api/rrhh/empleados/${id}/permanente`);
+      fetchEmpleados();
+      fetchStats();
+    } catch (err) {
+      console.error('Error eliminando empleado:', err);
+      setError(api.getErrorMessage(err));
+    }
+  };
+
+  const handleReactivar = async (id) => {
+    if (!window.confirm('¿Reactivar a este empleado?')) return;
+    try {
+      await api.put(`/api/rrhh/empleados/${id}/reactivar`);
+      fetchEmpleados();
+      fetchStats();
+    } catch (err) {
+      console.error('Error reactivando empleado:', err);
+      setError(api.getErrorMessage(err));
+    }
+  };
+
   const handleShowQR = async (empleadoId) => {
     try {
       const data = await api.get(`/api/rrhh/empleados/${empleadoId}/qr`);
