@@ -95,6 +95,12 @@ const Maquinaria = () => {
   // Stats
   const [stats, setStats] = useState(null);
   
+  // Historial
+  const [showHistorial, setShowHistorial] = useState(false);
+  const [selectedMaquinaria, setSelectedMaquinaria] = useState(null);
+  const [historialData, setHistorialData] = useState(null);
+  const [loadingHistorial, setLoadingHistorial] = useState(false);
+  
   // Filtros
   const [filters, setFilters] = useState({
     tipo: '',
