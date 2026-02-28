@@ -194,6 +194,7 @@ const PortalEmpleado = () => {
   const tabs = [
     { id: 'inicio', label: 'Inicio', icon: User },
     { id: 'fichajes', label: 'Mis Fichajes', icon: Clock },
+    { id: 'productividad', label: 'Mi Productividad', icon: TrendingUp },
     { id: 'documentos', label: 'Documentos', icon: FileText },
     { id: 'nominas', label: 'Nóminas', icon: CreditCard },
     { id: 'ausencias', label: 'Ausencias', icon: Calendar }
