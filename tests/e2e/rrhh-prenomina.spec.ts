@@ -233,6 +233,7 @@ test.describe('RRHH Prenómina Module', () => {
   
   test('should display prenominas table with correct columns', async ({ page }) => {
     await navigateToPrenomina(page);
+    await dismissModal(page);
     
     // Set month to February 2026 where we know there's data
     const mesSelect = page.getByTestId('select-mes-prenomina');
@@ -243,6 +244,7 @@ test.describe('RRHH Prenómina Module', () => {
     await anoSelect.selectOption({ value: '2026' });
     
     await page.waitForLoadState('domcontentloaded');
+    await dismissModal(page);
     
     // Wait for table to load
     const table = page.locator('.data-table');
@@ -267,6 +269,7 @@ test.describe('RRHH Prenómina Module', () => {
   
   test('should show prenomina detail modal', async ({ page }) => {
     await navigateToPrenomina(page);
+    await dismissModal(page);
     
     // Set month to February 2026 where we know there's data
     const mesSelect = page.getByTestId('select-mes-prenomina');
@@ -277,6 +280,7 @@ test.describe('RRHH Prenómina Module', () => {
     await anoSelect.selectOption({ value: '2026' });
     
     await page.waitForLoadState('domcontentloaded');
+    await dismissModal(page);
     
     // Wait for prenomina rows to load
     const prenominaRows = page.locator('[data-testid^="prenomina-row-"]');
@@ -292,10 +296,10 @@ test.describe('RRHH Prenómina Module', () => {
     const rowTestId = await firstRow.getAttribute('data-testid');
     const prenominaId = rowTestId?.replace('prenomina-row-', '');
     
-    // Click on detail button
+    // Click on detail button with force
     const detailBtn = page.getByTestId(`btn-ver-detalle-${prenominaId}`);
     await expect(detailBtn).toBeVisible();
-    await detailBtn.click();
+    await detailBtn.click({ force: true });
     
     // Verify modal opens
     const modal = page.locator('div').filter({ hasText: /Detalle de Prenómina/i }).first();
@@ -314,8 +318,8 @@ test.describe('RRHH Prenómina Module', () => {
     
     await page.screenshot({ path: 'prenomina-detail-modal.jpeg', quality: 20 });
     
-    // Close modal by clicking outside or X button
-    const closeBtn = page.locator('button').filter({ has: page.locator('svg') }).filter({ hasText: '' }).first();
+    // Close modal by clicking X button
+    const closeBtn = page.locator('[x-file-name="RRHH"] button svg').first();
     if (await closeBtn.isVisible()) {
       await closeBtn.click({ force: true });
     }
@@ -323,6 +327,7 @@ test.describe('RRHH Prenómina Module', () => {
   
   test('should validate prenomina', async ({ page }) => {
     await navigateToPrenomina(page);
+    await dismissModal(page);
     
     // Set up dialog handler for confirmation
     page.on('dialog', async dialog => {
@@ -338,6 +343,7 @@ test.describe('RRHH Prenómina Module', () => {
     await anoSelect.selectOption({ value: '2026' });
     
     await page.waitForLoadState('domcontentloaded');
+    await dismissModal(page);
     
     // Find a borrador prenomina row with validate button
     const prenominaRows = page.locator('[data-testid^="prenomina-row-"]');
