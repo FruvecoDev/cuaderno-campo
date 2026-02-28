@@ -218,11 +218,18 @@ const Irrigaciones = () => {
   };
 
   // Opciones únicas para filtros
-  const filterOptions = useMemo(() => ({
-    sistemas: [...new Set(irrigaciones.map(i => i.sistema).filter(Boolean))],
-    cultivos: cultivos.map(c => c.nombre).filter(Boolean),
-    parcelas: parcelas.map(p => ({ id: p._id, codigo: p.codigo_plantacion }))
-  }), [irrigaciones, parcelas, cultivos]);
+  const filterOptions = useMemo(() => {
+    // Combinar cultivos del catálogo con los de las parcelas
+    const cultivosCatalogo = cultivos.map(c => c.nombre).filter(Boolean);
+    const cultivosParcelas = parcelas.map(p => p.cultivo).filter(Boolean);
+    const todosCultivos = [...new Set([...cultivosCatalogo, ...cultivosParcelas])].sort();
+    
+    return {
+      sistemas: [...new Set(irrigaciones.map(i => i.sistema).filter(Boolean))],
+      cultivos: todosCultivos,
+      parcelas: parcelas.map(p => ({ id: p._id, codigo: p.codigo_plantacion, cultivo: p.cultivo }))
+    };
+  }, [irrigaciones, parcelas, cultivos]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
