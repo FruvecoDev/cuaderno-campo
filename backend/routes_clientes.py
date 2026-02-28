@@ -133,7 +133,7 @@ async def get_provincias_clientes(
     current_user: dict = Depends(get_current_user)
 ):
     """Obtener lista de provincias con clientes"""
-    provincias = await clientes_collection.distinct("provincia", {"provincia": {"$ne": None, "$ne": ""}})
+    provincias = await clientes_collection.distinct("provincia", {"provincia": {"$nin": [None, ""]}})
     return {"provincias": sorted([p for p in provincias if p])}
 
 
