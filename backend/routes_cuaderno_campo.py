@@ -265,21 +265,22 @@ def create_cosechas_table(cosechas: list, styles) -> list:
     total_importe = 0
     
     for c in cosechas:
-        kg_est = c.get('kg_estimados', 0) or 0
-        kg_real = c.get('kg_reales', 0) or 0
-        importe = c.get('importe_total', 0) or 0
+        kg_est = c.get('kg_estimados') or 0
+        kg_real = c.get('kg_reales') or 0
+        importe = c.get('importe_total') or 0
         total_kg += kg_real
         total_importe += importe
         
         rendimiento = f"{(kg_real/kg_est*100):.1f}%" if kg_est > 0 else "-"
+        estado = c.get('estado') or '-'
         
         data.append([
-            c.get('fecha_inicio', '-'),
+            c.get('fecha_inicio') or '-',
             f"{kg_est:,.0f}",
             f"{kg_real:,.0f}",
             rendimiento,
             f"{importe:,.2f} €",
-            c.get('estado', '-')[:10]
+            estado[:10] if estado else '-'
         ])
     
     table = Table(data, colWidths=[2.5*cm, 2.5*cm, 2.5*cm, 2.5*cm, 2.5*cm, 2.5*cm])
