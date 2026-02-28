@@ -10,8 +10,6 @@ import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
 import SignatureCanvas from 'react-signature-canvas';
 import { ControlHorarioTab, ProductividadTab, PrenominaTab } from './RRHH';
-import { QrReader } from 'react-qr-reader';
-import SignatureCanvas from 'react-signature-canvas';
 import '../App.css';
 
 const RRHH = () => {
