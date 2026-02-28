@@ -30,6 +30,7 @@ const Irrigaciones = () => {
   const [error, setError] = useState(null);
   const [stats, setStats] = useState(null);
   const [sistemas, setSistemas] = useState([]);
+  const [cultivos, setCultivos] = useState([]);
   const [showHistorial, setShowHistorial] = useState(null);
   const [historialData, setHistorialData] = useState(null);
   const [showCalculadora, setShowCalculadora] = useState(false);
