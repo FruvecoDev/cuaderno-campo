@@ -66,6 +66,7 @@ const Usuarios = () => {
     fetchUsers();
     fetchMenuItems();
     fetchEmpleadosDisponibles();
+    fetchPermissionProfiles();
   }, []);
 
   const fetchUsers = async () => {
@@ -85,6 +86,15 @@ const Usuarios = () => {
       setMenuItems(data.menu_items || []);
     } catch (error) {
       console.error('Error fetching menu items:', error);
+    }
+  };
+
+  const fetchPermissionProfiles = async () => {
+    try {
+      const data = await api.get('/api/auth/permission-profiles');
+      setPermissionProfiles(data.profiles || []);
+    } catch (error) {
+      console.error('Error fetching permission profiles:', error);
     }
   };
 
