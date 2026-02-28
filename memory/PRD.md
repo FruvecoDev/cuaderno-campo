@@ -1786,6 +1786,31 @@ Migrar todas las llamadas `fetch` directas al nuevo servicio centralizado `api.j
 
 
 
+## Refactorización RRHH (28/02/2026) - COMPLETADO
+
+Se dividió el componente monolítico `RRHH.js` (3886 líneas) en subcomponentes:
+
+| Archivo | Líneas | Descripción |
+|---------|--------|-------------|
+| RRHH.js | 2421 | Componente principal + Empleados + DocumentosEmpleado |
+| ControlHorarioTab.js | 798 | Tab de control horario y fichajes |
+| ProductividadTab.js | 156 | Tab de productividad en tiempo real |
+| PrenominaTab.js | 506 | Tab de prenóminas |
+| index.js | 4 | Exports de los subcomponentes |
+
+**Estructura de carpetas:**
+```
+/app/frontend/src/pages/
+├── RRHH.js           # Componente principal
+└── RRHH/
+    ├── index.js
+    ├── ControlHorarioTab.js
+    ├── ProductividadTab.js
+    └── PrenominaTab.js
+```
+
+---
+
 ## Módulo RRHH - Recursos Humanos (27/02/2026) - COMPLETADO
 
 ### Funcionalidades Implementadas:
