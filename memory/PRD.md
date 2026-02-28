@@ -26,6 +26,7 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
 - **Estado y función**: `handleVerHistorial` añadido al componente
 - **Botón**: Icono de ojo (Eye) en columna de Acciones
 - **Modal**: Muestra total de usos en tratamientos, mantenimientos, y lista detallada
+- **Gráfico de tendencia**: Área mostrando evolución de uso por mes (aparece cuando hay datos)
 - **Endpoint backend existente**: `GET /api/maquinaria/{id}/historial`
 - **Archivo modificado**: `/app/frontend/src/pages/Maquinaria.js`
 
