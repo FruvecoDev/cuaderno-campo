@@ -42,6 +42,17 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
 - **Ya implementado** en sesión anterior con modal completo
 - **Endpoint**: `GET /api/proveedores/{id}/historial`
 
+#### 5. Permisos de Menú Completos ✅ (NUEVO)
+- **Añadidas** todas las categorías y secciones faltantes en el sistema de permisos
+- **Archivo modificado**: `/app/backend/models_auth.py`
+- **Secciones actualizadas**:
+  - General: 2 elementos (Dashboard, Asistente IA)
+  - Gestión Principal: 3 elementos (Contratos, Parcelas, Fincas)
+  - Actividades: 7 elementos (+Recomendaciones, +Alertas Climáticas)
+  - Administración: 9 elementos (+RRHH, +Portal Empleado, +Informes Ingresos, +Liquidación Comisiones)
+  - Catálogos: 8 elementos (+Clientes)
+  - Configuración: 3 elementos (+Configuración App)
+
 ---
 
 ### Completadas en sesión anterior:
