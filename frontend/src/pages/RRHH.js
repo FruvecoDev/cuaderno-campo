@@ -2163,6 +2163,10 @@ const DocumentosEmpleado = ({ empleados }) => {
     
     setArchivoAdjunto(file);
     
+    // Crear URL de vista previa
+    const previewUrl = URL.createObjectURL(file);
+    setArchivoPreview(previewUrl);
+    
     // Auto-completar nombre si está vacío
     if (!nuevoDocData.nombre) {
       const nombreSinExtension = file.name.replace(/\.[^/.]+$/, '');
@@ -2177,10 +2181,26 @@ const DocumentosEmpleado = ({ empleados }) => {
   };
   
   const removeArchivoAdjunto = () => {
+    // Limpiar URL de preview para liberar memoria
+    if (archivoPreview) {
+      URL.revokeObjectURL(archivoPreview);
+    }
     setArchivoAdjunto(null);
+    setArchivoPreview(null);
+    setShowPreview(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+  };
+  
+  // Determinar si el archivo es imagen
+  const isImageFile = (file) => {
+    return file && file.type.startsWith('image/');
+  };
+  
+  // Determinar si el archivo es PDF
+  const isPdfFile = (file) => {
+    return file && file.type === 'application/pdf';
   };
   
   // Formatear tamaño de archivo
