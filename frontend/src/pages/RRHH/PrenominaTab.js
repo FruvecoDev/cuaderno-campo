@@ -14,6 +14,8 @@ const PrenominaTab = ({ empleados }) => {
   const [prenominaDetalle, setPrenominaDetalle] = useState(null);
   const [empleadoCalculo, setEmpleadoCalculo] = useState('');
   const [calculandoIndividual, setCalculandoIndividual] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [exportando, setExportando] = useState(false);
   
   useEffect(() => {
     fetchPrenominas();
