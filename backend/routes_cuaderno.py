@@ -932,12 +932,7 @@ def generate_html_cuaderno(data: dict, ai_summary: str = "", maquinaria_images: 
     
     return html
 
-
-@router.post("/api/cuaderno-campo/generar")
-async def generar_cuaderno_campo(
-    request: CuadernoCampoRequest,
-    current_user: dict = Depends(get_current_user)
-):
+# NOTE: Cuaderno de Campo routes moved to routes_cuaderno_campo.py
     """
     Generate a comprehensive Field Notebook PDF for a parcel or contract
     """
