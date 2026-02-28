@@ -748,6 +748,286 @@ async def get_documentos(
     
     return {"success": True, "documentos": documentos, "total": len(documentos)}
 
+
+@router.get("/documentos/export/excel")
+async def export_documentos_excel(
+    empleado_id: Optional[str] = None,
+    fecha_desde: Optional[str] = None,
+    fecha_hasta: Optional[str] = None
+):
+    """Exportar documentos a Excel"""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from fastapi.responses import StreamingResponse
+    
+    database = get_db()
+    
+    # Construir query
+    query = {}
+    if empleado_id:
+        query["empleado_id"] = empleado_id
+    if fecha_desde or fecha_hasta:
+        query["created_at"] = {}
+        if fecha_desde:
+            query["created_at"]["$gte"] = datetime.strptime(fecha_desde, "%Y-%m-%d")
+        if fecha_hasta:
+            fecha_hasta_dt = datetime.strptime(fecha_hasta, "%Y-%m-%d") + timedelta(days=1)
+            query["created_at"]["$lt"] = fecha_hasta_dt
+    
+    # Obtener documentos
+    documentos = []
+    cursor = database.documentos_empleados.find(query).sort("created_at", -1)
+    async for doc in cursor:
+        documentos.append(doc)
+    
+    # Obtener empleados para nombres
+    empleados_dict = {}
+    emp_cursor = database.empleados.find({})
+    async for emp in emp_cursor:
+        empleados_dict[str(emp["_id"])] = f"{emp.get('nombre', '')} {emp.get('apellidos', '')}"
+    
+    # Crear workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Documentos"
+    
+    # Estilos
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="2E7D32", end_color="2E7D32", fill_type="solid")
+    header_alignment = Alignment(horizontal="center", vertical="center")
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Headers
+    headers = ["Documento", "Empleado", "Tipo", "Fecha Documento", "Fecha Registro", "Estado", "Archivo Adjunto"]
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_alignment
+        cell.border = thin_border
+    
+    # Tipos de documento
+    tipos_doc = {
+        'contrato': 'Contrato de Trabajo',
+        'anexo': 'Anexo Contrato',
+        'nomina': 'Nómina',
+        'certificado': 'Certificado',
+        'formacion': 'Formación PRL',
+        'epi': 'Entrega EPI',
+        'otro': 'Otro'
+    }
+    
+    # Datos
+    for row, doc in enumerate(documentos, 2):
+        empleado_nombre = empleados_dict.get(doc.get("empleado_id", ""), "Desconocido")
+        tipo_label = tipos_doc.get(doc.get("tipo", "otro"), doc.get("tipo", ""))
+        fecha_doc = doc.get("fecha_creacion", "")
+        fecha_registro = doc.get("created_at").strftime("%d/%m/%Y %H:%M") if doc.get("created_at") else ""
+        estado = "Firmado" if doc.get("firmado") else ("Pendiente" if doc.get("requiere_firma") else "No requiere firma")
+        archivo = "Sí" if doc.get("archivo_url") else "No"
+        
+        ws.cell(row=row, column=1, value=doc.get("nombre", "")).border = thin_border
+        ws.cell(row=row, column=2, value=empleado_nombre).border = thin_border
+        ws.cell(row=row, column=3, value=tipo_label).border = thin_border
+        ws.cell(row=row, column=4, value=fecha_doc).border = thin_border
+        ws.cell(row=row, column=5, value=fecha_registro).border = thin_border
+        ws.cell(row=row, column=6, value=estado).border = thin_border
+        ws.cell(row=row, column=7, value=archivo).border = thin_border
+    
+    # Ajustar anchos
+    ws.column_dimensions['A'].width = 35
+    ws.column_dimensions['B'].width = 25
+    ws.column_dimensions['C'].width = 20
+    ws.column_dimensions['D'].width = 15
+    ws.column_dimensions['E'].width = 18
+    ws.column_dimensions['F'].width = 18
+    ws.column_dimensions['G'].width = 15
+    
+    # Guardar en memoria
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    
+    filename = f"documentos_rrhh_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+
+@router.get("/documentos/export/pdf")
+async def export_documentos_pdf(
+    empleado_id: Optional[str] = None,
+    fecha_desde: Optional[str] = None,
+    fecha_hasta: Optional[str] = None
+):
+    """Generar informe PDF de documentos"""
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import mm
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from fastapi.responses import StreamingResponse
+    
+    database = get_db()
+    
+    # Construir query
+    query = {}
+    if empleado_id:
+        query["empleado_id"] = empleado_id
+    if fecha_desde or fecha_hasta:
+        query["created_at"] = {}
+        if fecha_desde:
+            query["created_at"]["$gte"] = datetime.strptime(fecha_desde, "%Y-%m-%d")
+        if fecha_hasta:
+            fecha_hasta_dt = datetime.strptime(fecha_hasta, "%Y-%m-%d") + timedelta(days=1)
+            query["created_at"]["$lt"] = fecha_hasta_dt
+    
+    # Obtener documentos
+    documentos = []
+    cursor = database.documentos_empleados.find(query).sort("created_at", -1)
+    async for doc in cursor:
+        documentos.append(doc)
+    
+    # Obtener empleados
+    empleados_dict = {}
+    emp_cursor = database.empleados.find({})
+    async for emp in emp_cursor:
+        empleados_dict[str(emp["_id"])] = f"{emp.get('nombre', '')} {emp.get('apellidos', '')}"
+    
+    # Crear PDF
+    output = io.BytesIO()
+    doc = SimpleDocTemplate(output, pagesize=landscape(A4), topMargin=20*mm, bottomMargin=20*mm)
+    
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    # Título
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=18,
+        textColor=colors.HexColor('#2E7D32'),
+        spaceAfter=10*mm,
+        alignment=1  # Center
+    )
+    elements.append(Paragraph("Informe de Documentos - RRHH", title_style))
+    
+    # Subtítulo con filtros
+    subtitle = f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}"
+    if fecha_desde:
+        subtitle += f" | Desde: {fecha_desde}"
+    if fecha_hasta:
+        subtitle += f" | Hasta: {fecha_hasta}"
+    subtitle_style = ParagraphStyle(
+        'Subtitle',
+        parent=styles['Normal'],
+        fontSize=10,
+        textColor=colors.gray,
+        alignment=1
+    )
+    elements.append(Paragraph(subtitle, subtitle_style))
+    elements.append(Spacer(1, 10*mm))
+    
+    # Resumen
+    total_docs = len(documentos)
+    firmados = sum(1 for d in documentos if d.get("firmado"))
+    pendientes = sum(1 for d in documentos if d.get("requiere_firma") and not d.get("firmado"))
+    con_archivo = sum(1 for d in documentos if d.get("archivo_url"))
+    
+    resumen_data = [
+        ["Total Documentos", "Firmados", "Pendientes Firma", "Con Archivo"],
+        [str(total_docs), str(firmados), str(pendientes), str(con_archivo)]
+    ]
+    resumen_table = Table(resumen_data, colWidths=[60*mm, 50*mm, 50*mm, 50*mm])
+    resumen_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2E7D32')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+        ('TOPPADDING', (0, 0), (-1, 0), 8),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#E8F5E9')),
+        ('FONTSIZE', (0, 1), (-1, -1), 12),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 10),
+        ('TOPPADDING', (0, 1), (-1, -1), 10),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#2E7D32'))
+    ]))
+    elements.append(resumen_table)
+    elements.append(Spacer(1, 10*mm))
+    
+    # Tipos de documento
+    tipos_doc = {
+        'contrato': 'Contrato',
+        'anexo': 'Anexo',
+        'nomina': 'Nómina',
+        'certificado': 'Certificado',
+        'formacion': 'Formación',
+        'epi': 'EPI',
+        'otro': 'Otro'
+    }
+    
+    # Tabla de documentos
+    if documentos:
+        table_data = [["Documento", "Empleado", "Tipo", "Fecha Doc.", "Fecha Registro", "Estado"]]
+        
+        for doc in documentos[:50]:  # Limitar a 50 documentos para el PDF
+            empleado_nombre = empleados_dict.get(doc.get("empleado_id", ""), "Desconocido")
+            tipo_label = tipos_doc.get(doc.get("tipo", "otro"), doc.get("tipo", ""))
+            fecha_doc = doc.get("fecha_creacion", "-")
+            fecha_registro = doc.get("created_at").strftime("%d/%m/%Y") if doc.get("created_at") else "-"
+            estado = "Firmado" if doc.get("firmado") else ("Pendiente" if doc.get("requiere_firma") else "OK")
+            
+            # Truncar nombre si es muy largo
+            nombre_doc = doc.get("nombre", "")[:40]
+            empleado_nombre = empleado_nombre[:25]
+            
+            table_data.append([nombre_doc, empleado_nombre, tipo_label, fecha_doc, fecha_registro, estado])
+        
+        doc_table = Table(table_data, colWidths=[70*mm, 55*mm, 35*mm, 30*mm, 35*mm, 25*mm])
+        doc_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2E7D32')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('ALIGN', (3, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 9),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+            ('TOPPADDING', (0, 0), (-1, 0), 6),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
+            ('TOPPADDING', (0, 1), (-1, -1), 4),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.gray),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F5F5F5')])
+        ]))
+        elements.append(doc_table)
+        
+        if len(documentos) > 50:
+            elements.append(Spacer(1, 5*mm))
+            elements.append(Paragraph(f"Mostrando 50 de {len(documentos)} documentos. Exportar a Excel para ver todos.", styles['Normal']))
+    else:
+        elements.append(Paragraph("No hay documentos con los filtros seleccionados.", styles['Normal']))
+    
+    doc.build(elements)
+    output.seek(0)
+    
+    filename = f"informe_documentos_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+    
+    return StreamingResponse(
+        output,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
 @router.post("/documentos")
 async def create_documento(documento: dict):
     """Crear documento de empleado"""
