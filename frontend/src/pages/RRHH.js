@@ -813,7 +813,7 @@ const RRHH = () => {
 
       {/* Tab Content: Documentos */}
       {activeTab === 'documentos' && (
-        <DocumentosEmpleado empleados={empleados} />
+        <DocumentosTab empleados={empleados} />
       )}
 
       {/* Tab Content: Ausencias */}
