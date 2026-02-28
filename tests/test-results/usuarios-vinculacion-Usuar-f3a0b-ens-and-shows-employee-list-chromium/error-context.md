@@ -1,0 +1,580 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - img "Logo" [ref=e8]
+      - button "Colapsar menú" [ref=e9] [cursor=pointer]:
+        - img [ref=e11]
+      - navigation [ref=e14]:
+        - generic [ref=e15]:
+          - generic [ref=e16]:
+            - generic "Colapsar sección" [ref=e18] [cursor=pointer]:
+              - generic [ref=e19]: General
+              - img [ref=e21]
+            - generic [ref=e24]:
+              - link "Dashboard" [ref=e25] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=e26]
+                - text: Dashboard
+              - link "Asistente IA" [ref=e31] [cursor=pointer]:
+                - /url: /asistente-ia
+                - img [ref=e32]
+                - text: Asistente IA
+          - generic [ref=e40]:
+            - generic "Colapsar sección" [ref=e42] [cursor=pointer]:
+              - generic [ref=e43]: Gestión Principal
+              - img [ref=e45]
+            - generic [ref=e48]:
+              - link "Contratos" [ref=e49] [cursor=pointer]:
+                - /url: /contratos
+                - img [ref=e50]
+                - text: Contratos
+              - link "Parcelas" [ref=e53] [cursor=pointer]:
+                - /url: /parcelas
+                - img [ref=e54]
+                - text: Parcelas
+              - link "Fincas" [ref=e57] [cursor=pointer]:
+                - /url: /fincas
+                - img [ref=e58]
+                - text: Fincas
+          - generic [ref=e61]:
+            - generic "Colapsar sección" [ref=e63] [cursor=pointer]:
+              - generic [ref=e64]: Actividades
+              - img [ref=e66]
+            - generic [ref=e69]:
+              - link "Visitas" [ref=e70] [cursor=pointer]:
+                - /url: /visitas
+                - img [ref=e71]
+                - text: Visitas
+              - link "Recomendaciones" [ref=e73] [cursor=pointer]:
+                - /url: /recomendaciones
+                - img [ref=e74]
+                - text: Recomendaciones
+              - link "Alertas Climáticas" [ref=e77] [cursor=pointer]:
+                - /url: /alertas-clima
+                - img [ref=e78]
+                - text: Alertas Climáticas
+              - link "Tareas" [ref=e83] [cursor=pointer]:
+                - /url: /tareas
+                - img [ref=e84]
+                - text: Tareas
+              - link "Tratamientos" [ref=e87] [cursor=pointer]:
+                - /url: /tratamientos
+                - img [ref=e88]
+                - text: Tratamientos
+              - link "Irrigaciones" [ref=e91] [cursor=pointer]:
+                - /url: /irrigaciones
+                - img [ref=e92]
+                - text: Irrigaciones
+              - link "Evaluaciones" [ref=e95] [cursor=pointer]:
+                - /url: /evaluaciones
+                - img [ref=e96]
+                - text: Evaluaciones
+          - generic [ref=e100]:
+            - generic "Colapsar sección" [ref=e102] [cursor=pointer]:
+              - generic [ref=e103]: Administración
+              - img [ref=e105]
+            - generic [ref=e108]:
+              - link "Recetas" [ref=e109] [cursor=pointer]:
+                - /url: /recetas
+                - img [ref=e110]
+                - text: Recetas
+              - link "Albaranes" [ref=e112] [cursor=pointer]:
+                - /url: /albaranes
+                - img [ref=e113]
+                - text: Albaranes
+              - link "Cosechas" [ref=e116] [cursor=pointer]:
+                - /url: /cosechas
+                - img [ref=e117]
+                - text: Cosechas
+              - link "Documentos" [ref=e126] [cursor=pointer]:
+                - /url: /documentos
+                - img [ref=e127]
+                - text: Documentos
+              - link "Recursos Humanos" [ref=e129] [cursor=pointer]:
+                - /url: /rrhh
+                - img [ref=e130]
+                - text: Recursos Humanos
+              - link "Portal Empleado" [ref=e135] [cursor=pointer]:
+                - /url: /portal-empleado
+                - img [ref=e136]
+                - text: Portal Empleado
+              - link "Informes Gastos" [ref=e139] [cursor=pointer]:
+                - /url: /informes-gastos
+                - img [ref=e140]
+                - text: Informes Gastos
+              - link "Informes Ingresos" [ref=e142] [cursor=pointer]:
+                - /url: /informes-ingresos
+                - img [ref=e143]
+                - text: Informes Ingresos
+              - link "Liquidación Comisiones" [ref=e146] [cursor=pointer]:
+                - /url: /liquidacion-comisiones
+                - img [ref=e147]
+                - text: Liquidación Comisiones
+          - generic [ref=e150]:
+            - generic "Colapsar sección" [ref=e152] [cursor=pointer]:
+              - generic [ref=e153]: Catálogos
+              - img [ref=e155]
+            - generic [ref=e158]:
+              - link "Proveedores" [ref=e159] [cursor=pointer]:
+                - /url: /proveedores
+                - img [ref=e160]
+                - text: Proveedores
+              - link "Clientes" [ref=e164] [cursor=pointer]:
+                - /url: /clientes
+                - img [ref=e165]
+                - text: Clientes
+              - link "Cultivos" [ref=e170] [cursor=pointer]:
+                - /url: /cultivos
+                - img [ref=e171]
+                - text: Cultivos
+              - link "Maquinaria" [ref=e174] [cursor=pointer]:
+                - /url: /maquinaria
+                - img [ref=e175]
+                - text: Maquinaria
+              - link "Fitosanitarios" [ref=e186] [cursor=pointer]:
+                - /url: /fitosanitarios
+                - img [ref=e187]
+                - text: Fitosanitarios
+              - link "Técnicos Aplicadores" [ref=e189] [cursor=pointer]:
+                - /url: /tecnicos-aplicadores
+                - img [ref=e190]
+                - text: Técnicos Aplicadores
+              - link "Artículos Explotación" [ref=e194] [cursor=pointer]:
+                - /url: /articulos-explotacion
+                - img [ref=e195]
+                - text: Artículos Explotación
+              - link "Agentes" [ref=e199] [cursor=pointer]:
+                - /url: /agentes
+                - img [ref=e200]
+                - text: Agentes
+          - generic [ref=e205]:
+            - generic "Colapsar sección" [ref=e207] [cursor=pointer]:
+              - generic [ref=e208]: Configuración
+              - img [ref=e210]
+            - generic [ref=e213]:
+              - link "Usuarios" [ref=e214] [cursor=pointer]:
+                - /url: /usuarios
+                - img [ref=e215]
+                - text: Usuarios
+              - link "Traducciones" [ref=e220] [cursor=pointer]:
+                - /url: /traducciones
+                - img [ref=e221]
+                - text: Traducciones
+              - link "Configuración App" [ref=e224] [cursor=pointer]:
+                - /url: /configuracion
+                - img [ref=e225]
+                - text: Configuración App
+      - generic [ref=e229]:
+        - generic [ref=e230]:
+          - img [ref=e232]
+          - generic [ref=e235]:
+            - generic [ref=e236]: Administrador FRUVECO
+            - generic [ref=e237]: Admin
+          - button "ES" [ref=e239] [cursor=pointer]:
+            - img [ref=e240]
+            - generic [ref=e243]: ES
+        - button "Cerrar Sesión" [ref=e244] [cursor=pointer]:
+          - img [ref=e245]
+          - text: Cerrar Sesión
+    - generic [ref=e248]:
+      - generic [ref=e249]:
+        - button [ref=e251] [cursor=pointer]:
+          - img [ref=e252]
+        - button "Conectado" [ref=e256] [cursor=pointer]:
+          - img [ref=e258]
+          - generic [ref=e262]: Conectado
+      - generic [ref=e265]:
+        - generic [ref=e266]:
+          - generic [ref=e267]:
+            - heading "Usuarios" [level=1] [ref=e268]
+            - paragraph [ref=e269]: Gestión de usuarios y permisos
+          - button "Nuevo Usuario" [ref=e270] [cursor=pointer]:
+            - img [ref=e271]
+            - text: Nuevo Usuario
+        - generic [ref=e272]:
+          - heading "Usuarios del Sistema" [level=2] [ref=e273]
+          - table [ref=e276]:
+            - rowgroup [ref=e277]:
+              - row "Nombre Email Rol Empleado Vinculado Tipo Operación Estado Fecha Creación Acciones" [ref=e278]:
+                - columnheader "Nombre" [ref=e279]
+                - columnheader "Email" [ref=e280]
+                - columnheader "Rol" [ref=e281]
+                - columnheader "Empleado Vinculado" [ref=e282]
+                - columnheader "Tipo Operación" [ref=e283]
+                - columnheader "Estado" [ref=e284]
+                - columnheader "Fecha Creación" [ref=e285]
+                - columnheader "Acciones" [ref=e286]
+            - rowgroup [ref=e287]:
+              - generic [ref=e288]:
+                - row "Administrator admin@agrogest.com Admin Sin vincular Compra Activo 2/23/2026" [ref=e289]:
+                  - cell "Administrator" [ref=e290]:
+                    - generic [ref=e291]: Administrator
+                  - cell "admin@agrogest.com" [ref=e292]
+                  - cell "Admin" [ref=e293]:
+                    - generic [ref=e294]: Admin
+                  - cell "Sin vincular" [ref=e295]:
+                    - generic [ref=e296]: Sin vincular
+                  - cell "Compra" [ref=e297]:
+                    - generic "Clic para cambiar" [ref=e298] [cursor=pointer]: Compra
+                  - cell "Activo" [ref=e299]:
+                    - generic [ref=e300]: Activo
+                  - cell "2/23/2026" [ref=e301]
+                  - cell [ref=e302]:
+                    - generic [ref=e304]:
+                      - button "Editar usuario" [ref=e305] [cursor=pointer]:
+                        - img [ref=e306]
+                      - button "Configurar permisos de menú" [ref=e308] [cursor=pointer]:
+                        - img [ref=e309]
+                      - button "Tipo de operación (Compra/Venta)" [ref=e312] [cursor=pointer]:
+                        - img [ref=e313]
+                      - button "Cambiar contraseña" [ref=e316] [cursor=pointer]:
+                        - img [ref=e317]
+                      - button "Vincular con empleado" [active] [ref=e321] [cursor=pointer]:
+                        - img [ref=e323]
+                      - button "Desactivar" [ref=e328] [cursor=pointer]:
+                        - img [ref=e330]
+                - row "Manager Test manager@test.com Manager Sin vincular Ambos Activo 2/23/2026" [ref=e335]:
+                  - cell "Manager Test" [ref=e336]:
+                    - generic [ref=e337]: Manager Test
+                  - cell "manager@test.com" [ref=e338]
+                  - cell "Manager" [ref=e339]:
+                    - generic [ref=e340]: Manager
+                  - cell "Sin vincular" [ref=e341]:
+                    - generic [ref=e342]: Sin vincular
+                  - cell "Ambos" [ref=e343]:
+                    - generic "Clic para cambiar" [ref=e344] [cursor=pointer]: Ambos
+                  - cell "Activo" [ref=e345]:
+                    - generic [ref=e346]: Activo
+                  - cell "2/23/2026" [ref=e347]
+                  - cell [ref=e348]:
+                    - generic [ref=e350]:
+                      - button "Editar usuario" [ref=e351] [cursor=pointer]:
+                        - img [ref=e352]
+                      - button "Configurar permisos de menú" [ref=e354] [cursor=pointer]:
+                        - img [ref=e355]
+                      - button "Tipo de operación (Compra/Venta)" [ref=e358] [cursor=pointer]:
+                        - img [ref=e359]
+                      - button "Cambiar contraseña" [ref=e362] [cursor=pointer]:
+                        - img [ref=e363]
+                      - button "Vincular con empleado" [ref=e367] [cursor=pointer]:
+                        - img [ref=e369]
+                      - button "Desactivar" [ref=e374] [cursor=pointer]:
+                        - img [ref=e376]
+                - row "Tecnico tecnico@fruveco.com Technician Sin vincular Compra Activo 2/23/2026" [ref=e381]:
+                  - cell "Tecnico" [ref=e382]:
+                    - generic [ref=e383]: Tecnico
+                  - cell "tecnico@fruveco.com" [ref=e384]
+                  - cell "Technician" [ref=e385]:
+                    - generic [ref=e386]: Technician
+                  - cell "Sin vincular" [ref=e387]:
+                    - generic [ref=e388]: Sin vincular
+                  - cell "Compra" [ref=e389]:
+                    - generic "Clic para cambiar" [ref=e390] [cursor=pointer]: Compra
+                  - cell "Activo" [ref=e391]:
+                    - generic [ref=e392]: Activo
+                  - cell "2/23/2026" [ref=e393]
+                  - cell [ref=e394]:
+                    - generic [ref=e396]:
+                      - button "Editar usuario" [ref=e397] [cursor=pointer]:
+                        - img [ref=e398]
+                      - button "Configurar permisos de menú" [ref=e400] [cursor=pointer]:
+                        - img [ref=e401]
+                      - button "Tipo de operación (Compra/Venta)" [ref=e404] [cursor=pointer]:
+                        - img [ref=e405]
+                      - button "Cambiar contraseña" [ref=e408] [cursor=pointer]:
+                        - img [ref=e409]
+                      - button "Vincular con empleado" [ref=e413] [cursor=pointer]:
+                        - img [ref=e415]
+                      - button "Desactivar" [ref=e420] [cursor=pointer]:
+                        - img [ref=e422]
+                - row "Viewer Test viewer@test.com Viewer Sin vincular Ambos Activo 2/23/2026" [ref=e427]:
+                  - cell "Viewer Test" [ref=e428]:
+                    - generic [ref=e429]: Viewer Test
+                  - cell "viewer@test.com" [ref=e430]
+                  - cell "Viewer" [ref=e431]:
+                    - generic [ref=e432]: Viewer
+                  - cell "Sin vincular" [ref=e433]:
+                    - generic [ref=e434]: Sin vincular
+                  - cell "Ambos" [ref=e435]:
+                    - generic "Clic para cambiar" [ref=e436] [cursor=pointer]: Ambos
+                  - cell "Activo" [ref=e437]:
+                    - generic [ref=e438]: Activo
+                  - cell "2/23/2026" [ref=e439]
+                  - cell [ref=e440]:
+                    - generic [ref=e442]:
+                      - button "Editar usuario" [ref=e443] [cursor=pointer]:
+                        - img [ref=e444]
+                      - button "Configurar permisos de menú" [ref=e446] [cursor=pointer]:
+                        - img [ref=e447]
+                      - button "Tipo de operación (Compra/Venta)" [ref=e450] [cursor=pointer]:
+                        - img [ref=e451]
+                      - button "Cambiar contraseña" [ref=e454] [cursor=pointer]:
+                        - img [ref=e455]
+                      - button "Vincular con empleado" [ref=e459] [cursor=pointer]:
+                        - img [ref=e461]
+                      - button "Desactivar" [ref=e466] [cursor=pointer]:
+                        - img [ref=e468]
+                - row "testadmin@agrogest.com Admin Sin vincular Ambos Inactivo Invalid Date" [ref=e473]:
+                  - cell [ref=e474]
+                  - cell "testadmin@agrogest.com" [ref=e475]
+                  - cell "Admin" [ref=e476]:
+                    - generic [ref=e477]: Admin
+                  - cell "Sin vincular" [ref=e478]:
+                    - generic [ref=e479]: Sin vincular
+                  - cell "Ambos" [ref=e480]:
+                    - generic "Clic para cambiar" [ref=e481] [cursor=pointer]: Ambos
+                  - cell "Inactivo" [ref=e482]:
+                    - generic [ref=e483]: Inactivo
+                  - cell "Invalid Date" [ref=e484]
+                  - cell [ref=e485]:
+                    - generic [ref=e487]:
+                      - button "Editar usuario" [ref=e488] [cursor=pointer]:
+                        - img [ref=e489]
+                      - button "Configurar permisos de menú" [ref=e491] [cursor=pointer]:
+                        - img [ref=e492]
+                      - button "Tipo de operación (Compra/Venta)" [ref=e495] [cursor=pointer]:
+                        - img [ref=e496]
+                      - button "Cambiar contraseña" [ref=e499] [cursor=pointer]:
+                        - img [ref=e500]
+                      - button "Vincular con empleado" [ref=e504] [cursor=pointer]:
+                        - img [ref=e506]
+                      - button "Activar" [ref=e511] [cursor=pointer]:
+                        - img [ref=e513]
+                - row "Test User test@agrogest.com Admin Sin vincular Ambos Inactivo Invalid Date" [ref=e517]:
+                  - cell "Test User" [ref=e518]:
+                    - generic [ref=e519]: Test User
+                  - cell "test@agrogest.com" [ref=e520]
+                  - cell "Admin" [ref=e521]:
+                    - generic [ref=e522]: Admin
+                  - cell "Sin vincular" [ref=e523]:
+                    - generic [ref=e524]: Sin vincular
+                  - cell "Ambos" [ref=e525]:
+                    - generic "Clic para cambiar" [ref=e526] [cursor=pointer]: Ambos
+                  - cell "Inactivo" [ref=e527]:
+                    - generic [ref=e528]: Inactivo
+                  - cell "Invalid Date" [ref=e529]
+                  - cell [ref=e530]:
+                    - generic [ref=e532]:
+                      - button "Editar usuario" [ref=e533] [cursor=pointer]:
+                        - img [ref=e534]
+                      - button "Configurar permisos de menú" [ref=e536] [cursor=pointer]:
+                        - img [ref=e537]
+                      - button "Tipo de operación (Compra/Venta)" [ref=e540] [cursor=pointer]:
+                        - img [ref=e541]
+                      - button "Cambiar contraseña" [ref=e544] [cursor=pointer]:
+                        - img [ref=e545]
+                      - button "Vincular con empleado" [ref=e549] [cursor=pointer]:
+                        - img [ref=e551]
+                      - button "Activar" [ref=e556] [cursor=pointer]:
+                        - img [ref=e558]
+                - row "Administrador FRUVECO admin@fruveco.com Admin Sin vincular Ambos Inactivo Invalid Date ( Tú )" [ref=e562]:
+                  - cell "Administrador FRUVECO" [ref=e563]:
+                    - generic [ref=e564]: Administrador FRUVECO
+                  - cell "admin@fruveco.com" [ref=e565]
+                  - cell "Admin" [ref=e566]:
+                    - generic [ref=e567]: Admin
+                  - cell "Sin vincular" [ref=e568]:
+                    - generic [ref=e569]: Sin vincular
+                  - cell "Ambos" [ref=e570]:
+                    - generic [ref=e571]: Ambos
+                  - cell "Inactivo" [ref=e572]:
+                    - generic [ref=e573]: Inactivo
+                  - cell "Invalid Date" [ref=e574]
+                  - cell "( Tú )" [ref=e575]:
+                    - generic [ref=e578]: ( Tú )
+                - row "Test Permisos testperm@test.com Viewer Sin vincular Ambos Activo 2/24/2026" [ref=e579]:
+                  - cell "Test Permisos" [ref=e580]:
+                    - generic [ref=e581]: Test Permisos
+                  - cell "testperm@test.com" [ref=e582]
+                  - cell "Viewer" [ref=e583]:
+                    - generic [ref=e584]: Viewer
+                  - cell "Sin vincular" [ref=e585]:
+                    - generic [ref=e586]: Sin vincular
+                  - cell "Ambos" [ref=e587]:
+                    - generic "Clic para cambiar" [ref=e588] [cursor=pointer]: Ambos
+                  - cell "Activo" [ref=e589]:
+                    - generic [ref=e590]: Activo
+                  - cell "2/24/2026" [ref=e591]
+                  - cell [ref=e592]:
+                    - generic [ref=e594]:
+                      - button "Editar usuario" [ref=e595] [cursor=pointer]:
+                        - img [ref=e596]
+                      - button "Configurar permisos de menú" [ref=e598] [cursor=pointer]:
+                        - img [ref=e599]
+                      - button "Tipo de operación (Compra/Venta)" [ref=e602] [cursor=pointer]:
+                        - img [ref=e603]
+                      - button "Cambiar contraseña" [ref=e606] [cursor=pointer]:
+                        - img [ref=e607]
+                      - button "Vincular con empleado" [ref=e611] [cursor=pointer]:
+                        - img [ref=e613]
+                      - button "Desactivar" [ref=e618] [cursor=pointer]:
+                        - img [ref=e620]
+                - row "Test Vinculacion User test_vinc_1772277471@test.com Empleado Juan Ambos Activo 2/28/2026" [ref=e625]:
+                  - cell "Test Vinculacion User" [ref=e626]:
+                    - generic [ref=e627]: Test Vinculacion User
+                  - cell "test_vinc_1772277471@test.com" [ref=e628]
+                  - cell "Empleado" [ref=e629]:
+                    - generic [ref=e630]: Empleado
+                  - cell "Juan" [ref=e631]:
+                    - generic [ref=e633]:
+                      - img [ref=e634]
+                      - generic [ref=e637]: Juan
+                  - cell "Ambos" [ref=e638]:
+                    - generic "Clic para cambiar" [ref=e639] [cursor=pointer]: Ambos
+                  - cell "Activo" [ref=e640]:
+                    - generic [ref=e641]: Activo
+                  - cell "2/28/2026" [ref=e642]
+                  - cell [ref=e643]:
+                    - generic [ref=e645]:
+                      - button "Editar usuario" [ref=e646] [cursor=pointer]:
+                        - img [ref=e647]
+                      - button "Configurar permisos de menú" [ref=e649] [cursor=pointer]:
+                        - img [ref=e650]
+                      - button "Tipo de operación (Compra/Venta)" [ref=e653] [cursor=pointer]:
+                        - img [ref=e654]
+                      - button "Cambiar contraseña" [ref=e657] [cursor=pointer]:
+                        - img [ref=e658]
+                      - button "Vincular con empleado" [ref=e662] [cursor=pointer]:
+                        - img [ref=e664]
+                      - button "Desactivar" [ref=e667] [cursor=pointer]:
+                        - img [ref=e669]
+                - row "Test Vinculacion User test_vinc_1772277472@test.com Empleado Sin vincular Ambos Activo 2/28/2026" [ref=e674]:
+                  - cell "Test Vinculacion User" [ref=e675]:
+                    - generic [ref=e676]: Test Vinculacion User
+                  - cell "test_vinc_1772277472@test.com" [ref=e677]
+                  - cell "Empleado" [ref=e678]:
+                    - generic [ref=e679]: Empleado
+                  - cell "Sin vincular" [ref=e680]:
+                    - generic [ref=e681]: Sin vincular
+                  - cell "Ambos" [ref=e682]:
+                    - generic "Clic para cambiar" [ref=e683] [cursor=pointer]: Ambos
+                  - cell "Activo" [ref=e684]:
+                    - generic [ref=e685]: Activo
+                  - cell "2/28/2026" [ref=e686]
+                  - cell [ref=e687]:
+                    - generic [ref=e689]:
+                      - button "Editar usuario" [ref=e690] [cursor=pointer]:
+                        - img [ref=e691]
+                      - button "Configurar permisos de menú" [ref=e693] [cursor=pointer]:
+                        - img [ref=e694]
+                      - button "Tipo de operación (Compra/Venta)" [ref=e697] [cursor=pointer]:
+                        - img [ref=e698]
+                      - button "Cambiar contraseña" [ref=e701] [cursor=pointer]:
+                        - img [ref=e702]
+                      - button "Vincular con empleado" [ref=e706] [cursor=pointer]:
+                        - img [ref=e708]
+                      - button "Desactivar" [ref=e713] [cursor=pointer]:
+                        - img [ref=e715]
+                - row "Test Vinculacion User test_vinc_1772277473@test.com Empleado Sin vincular Ambos Activo 2/28/2026" [ref=e720]:
+                  - cell "Test Vinculacion User" [ref=e721]:
+                    - generic [ref=e722]: Test Vinculacion User
+                  - cell "test_vinc_1772277473@test.com" [ref=e723]
+                  - cell "Empleado" [ref=e724]:
+                    - generic [ref=e725]: Empleado
+                  - cell "Sin vincular" [ref=e726]:
+                    - generic [ref=e727]: Sin vincular
+                  - cell "Ambos" [ref=e728]:
+                    - generic "Clic para cambiar" [ref=e729] [cursor=pointer]: Ambos
+                  - cell "Activo" [ref=e730]:
+                    - generic [ref=e731]: Activo
+                  - cell "2/28/2026" [ref=e732]
+                  - cell [ref=e733]:
+                    - generic [ref=e735]:
+                      - button "Editar usuario" [ref=e736] [cursor=pointer]:
+                        - img [ref=e737]
+                      - button "Configurar permisos de menú" [ref=e739] [cursor=pointer]:
+                        - img [ref=e740]
+                      - button "Tipo de operación (Compra/Venta)" [ref=e743] [cursor=pointer]:
+                        - img [ref=e744]
+                      - button "Cambiar contraseña" [ref=e747] [cursor=pointer]:
+                        - img [ref=e748]
+                      - button "Vincular con empleado" [ref=e752] [cursor=pointer]:
+                        - img [ref=e754]
+                      - button "Desactivar" [ref=e759] [cursor=pointer]:
+                        - img [ref=e761]
+                - row "Test Empleado Role test_emp_role_1772277474@test.com Empleado Sin vincular Ambos Activo 2/28/2026" [ref=e766]:
+                  - cell "Test Empleado Role" [ref=e767]:
+                    - generic [ref=e768]: Test Empleado Role
+                  - cell "test_emp_role_1772277474@test.com" [ref=e769]
+                  - cell "Empleado" [ref=e770]:
+                    - generic [ref=e771]: Empleado
+                  - cell "Sin vincular" [ref=e772]:
+                    - generic [ref=e773]: Sin vincular
+                  - cell "Ambos" [ref=e774]:
+                    - generic "Clic para cambiar" [ref=e775] [cursor=pointer]: Ambos
+                  - cell "Activo" [ref=e776]:
+                    - generic [ref=e777]: Activo
+                  - cell "2/28/2026" [ref=e778]
+                  - cell [ref=e779]:
+                    - generic [ref=e781]:
+                      - button "Editar usuario" [ref=e782] [cursor=pointer]:
+                        - img [ref=e783]
+                      - button "Configurar permisos de menú" [ref=e785] [cursor=pointer]:
+                        - img [ref=e786]
+                      - button "Tipo de operación (Compra/Venta)" [ref=e789] [cursor=pointer]:
+                        - img [ref=e790]
+                      - button "Cambiar contraseña" [ref=e793] [cursor=pointer]:
+                        - img [ref=e794]
+                      - button "Vincular con empleado" [ref=e798] [cursor=pointer]:
+                        - img [ref=e800]
+                      - button "Desactivar" [ref=e805] [cursor=pointer]:
+                        - img [ref=e807]
+        - generic [ref=e812]:
+          - heading "Descripción de Roles" [level=3] [ref=e813]
+          - generic [ref=e815]:
+            - generic [ref=e816]:
+              - generic [ref=e818]: Administrador
+              - paragraph [ref=e819]: Acceso total + gestión usuarios
+            - generic [ref=e820]:
+              - generic [ref=e822]: Gerente
+              - paragraph [ref=e823]: Crear/Editar/Exportar (no Eliminar)
+            - generic [ref=e824]:
+              - generic [ref=e826]: Técnico
+              - paragraph [ref=e827]: Operaciones de campo (sin contratos)
+            - generic [ref=e828]:
+              - generic [ref=e830]: Visor
+              - paragraph [ref=e831]: Solo lectura + exportar
+            - generic [ref=e832]:
+              - generic [ref=e834]: Empleado
+              - paragraph [ref=e835]: Acceso al Portal del Empleado únicamente
+        - generic [ref=e838]:
+          - generic [ref=e839]:
+            - generic [ref=e840]:
+              - img [ref=e842]
+              - generic [ref=e847]:
+                - heading "Vincular con Empleado" [level=2] [ref=e848]
+                - paragraph [ref=e849]: Administrator
+            - button [ref=e850] [cursor=pointer]:
+              - img [ref=e851]
+          - paragraph [ref=e854]: Vincula este usuario a un perfil de empleado para que pueda acceder al Portal del Empleado.
+          - generic [ref=e855]:
+            - generic [ref=e856]: Buscar empleado
+            - textbox "Buscar por nombre, código o DNI..." [ref=e857]
+          - generic [ref=e858]:
+            - generic [ref=e863] [cursor=pointer]:
+              - generic [ref=e864]: Sin vincular
+              - generic [ref=e865]: No asociar a ningún empleado
+            - generic [ref=e866]:
+              - generic [ref=e867]:
+                - generic [ref=e869]:
+                  - generic [ref=e870]: Juan García López
+                  - generic [ref=e871]: "EMP-0001 - DNI: 12345678A - Operario"
+                - generic [ref=e873]: Ya vinculado
+              - generic [ref=e876] [cursor=pointer]:
+                - generic [ref=e877]: Juan García López
+                - generic [ref=e878]: "EMP-0002 - DNI: 12345678A - Operario"
+              - generic [ref=e881] [cursor=pointer]:
+                - generic [ref=e882]: TEST_20260227154527_Juan García_1265705e
+                - generic [ref=e883]: "EMP-0021 - DNI: TEST1265705e - Operario"
+          - generic [ref=e884]:
+            - button "Cancelar" [ref=e885] [cursor=pointer]
+            - button "Desvincular" [ref=e886] [cursor=pointer]
+    - paragraph [ref=e891]: Cargando resumen del día...
+  - link "Made with Emergent" [ref=e892] [cursor=pointer]:
+    - /url: https://app.emergent.sh/?utm_source=emergent-badge
+    - img [ref=e893]
+    - paragraph [ref=e896]: Made with Emergent
+```
