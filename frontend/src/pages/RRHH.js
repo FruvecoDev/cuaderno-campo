@@ -2911,7 +2911,7 @@ const DocumentosEmpleado = ({ empleados }) => {
               </div>
               
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
-                <button onClick={() => { setShowNuevoDoc(false); setArchivoAdjunto(null); }} className="btn btn-secondary">
+                <button onClick={() => { setShowNuevoDoc(false); removeArchivoAdjunto(); }} className="btn btn-secondary">
                   Cancelar
                 </button>
                 <button 
@@ -2930,6 +2930,101 @@ const DocumentosEmpleado = ({ empleados }) => {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Modal Vista Previa Ampliada */}
+      {showPreview && archivoPreview && (
+        <div 
+          onClick={() => setShowPreview(false)}
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.9)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1100,
+            padding: '2rem'
+          }}
+        >
+          <button 
+            onClick={() => setShowPreview(false)}
+            style={{
+              position: 'absolute',
+              top: '1rem',
+              right: '1rem',
+              background: 'rgba(255,255,255,0.1)',
+              border: 'none',
+              borderRadius: '50%',
+              width: '48px',
+              height: '48px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: 'white'
+            }}
+          >
+            <X size={24} />
+          </button>
+          
+          {isImageFile(archivoAdjunto) && (
+            <img 
+              src={archivoPreview}
+              alt="Vista previa ampliada"
+              onClick={e => e.stopPropagation()}
+              style={{
+                maxWidth: '90%',
+                maxHeight: '90vh',
+                objectFit: 'contain',
+                borderRadius: '8px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+              }}
+            />
+          )}
+          
+          {isPdfFile(archivoAdjunto) && (
+            <div 
+              onClick={e => e.stopPropagation()}
+              style={{
+                width: '90%',
+                height: '90vh',
+                background: 'white',
+                borderRadius: '8px',
+                overflow: 'hidden'
+              }}
+            >
+              <iframe
+                src={archivoPreview}
+                title="Vista previa PDF completa"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  border: 'none'
+                }}
+              />
+            </div>
+          )}
+          
+          {/* Info del archivo en la parte inferior */}
+          <div style={{
+            position: 'absolute',
+            bottom: '1.5rem',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'rgba(0,0,0,0.7)',
+            color: 'white',
+            padding: '0.75rem 1.5rem',
+            borderRadius: '8px',
+            fontSize: '0.875rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem'
+          }}>
+            <span style={{ fontWeight: '500' }}>{archivoAdjunto?.name}</span>
+            <span style={{ opacity: 0.7 }}>{archivoAdjunto && formatFileSize(archivoAdjunto.size)}</span>
           </div>
         </div>
       )}
