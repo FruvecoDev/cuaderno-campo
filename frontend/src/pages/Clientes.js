@@ -334,6 +334,14 @@ const Clientes = () => {
         <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>Clientes</h1>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button
+            className="btn btn-secondary"
+            onClick={handleExportExcel}
+            title="Exportar a Excel"
+          >
+            <Download size={18} />
+            Excel
+          </button>
+          <button
             className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setShowFieldsConfig(!showFieldsConfig)}
             title="Configurar columnas"
