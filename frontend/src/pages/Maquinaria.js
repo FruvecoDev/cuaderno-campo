@@ -145,6 +145,7 @@ const Maquinaria = () => {
   
   useEffect(() => {
     fetchMaquinaria();
+    fetchStats();
   }, []);
   
   // Guardar configuración en localStorage
@@ -167,6 +168,25 @@ const Maquinaria = () => {
       setError(errorMsg);
     } finally {
       setLoading(false);
+    }
+  };
+  
+  const fetchStats = async () => {
+    try {
+      const data = await api.get('/api/maquinaria/stats/resumen');
+      setStats(data.stats);
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+    }
+  };
+  
+  const handleExportExcel = async () => {
+    try {
+      const params = filters.estado ? `?estado=${filters.estado}` : '';
+      await api.download(`/api/maquinaria/export/excel${params}`, `maquinaria_${new Date().toISOString().split('T')[0]}.xlsx`);
+    } catch (err) {
+      console.error('Error exporting:', err);
+      alert('Error al exportar');
     }
   };
   
