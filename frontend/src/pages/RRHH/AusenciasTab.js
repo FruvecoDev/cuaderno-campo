@@ -217,10 +217,34 @@ const AusenciasTab = ({ empleados }) => {
           >
             Limpiar filtros
           </button>
+          
+          {/* Toggle Vista */}
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.25rem', background: 'hsl(var(--muted))', borderRadius: '0.5rem', padding: '0.25rem' }}>
+            <button
+              onClick={() => setVistaCalendario(false)}
+              className={`btn btn-sm ${!vistaCalendario ? 'btn-primary' : 'btn-ghost'}`}
+              title="Vista Lista"
+            >
+              <List size={16} />
+            </button>
+            <button
+              onClick={() => setVistaCalendario(true)}
+              className={`btn btn-sm ${vistaCalendario ? 'btn-primary' : 'btn-ghost'}`}
+              title="Vista Calendario"
+            >
+              <LayoutGrid size={16} />
+            </button>
+          </div>
         </div>
       </div>
       
+      {/* Calendario Visual */}
+      {vistaCalendario && (
+        <CalendarioAusencias ausencias={todasAusencias} empleados={empleados} />
+      )}
+      
       {/* Lista de Ausencias */}
+      {!vistaCalendario && (
       <div className="card">
         <div style={{ padding: '1rem', borderBottom: '1px solid hsl(var(--border))' }}>
           <h3 style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
