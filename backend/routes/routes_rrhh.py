@@ -743,6 +743,69 @@ async def create_documento(documento: dict):
     
     return {"success": True, "data": documento}
 
+@router.post("/documentos/upload")
+async def upload_documento(
+    file: UploadFile = File(...),
+    empleado_id: str = Query(...),
+    nombre: str = Query(...),
+    tipo: str = Query("otro"),
+    descripcion: str = Query(""),
+    requiere_firma: bool = Query(True),
+    fecha_creacion: str = Query(None)
+):
+    """Subir documento con archivo adjunto"""
+    database = get_db()
+    
+    # Validar tipo de archivo
+    allowed_extensions = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.gif']
+    file_ext = os.path.splitext(file.filename)[1].lower()
+    
+    if file_ext not in allowed_extensions:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Tipo de archivo no permitido. Use: {', '.join(allowed_extensions)}"
+        )
+    
+    # Validar tamaño (10MB)
+    content = await file.read()
+    if len(content) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="El archivo es demasiado grande. Máximo 10MB.")
+    
+    # Crear directorio si no existe
+    upload_dir = "/app/uploads/documentos_empleados"
+    os.makedirs(upload_dir, exist_ok=True)
+    
+    # Generar nombre único
+    unique_filename = f"{uuid.uuid4().hex}{file_ext}"
+    file_path = os.path.join(upload_dir, unique_filename)
+    
+    # Guardar archivo
+    with open(file_path, "wb") as f:
+        f.write(content)
+    
+    # Crear documento en base de datos
+    documento = {
+        "empleado_id": empleado_id,
+        "nombre": nombre,
+        "tipo": tipo,
+        "descripcion": descripcion,
+        "requiere_firma": requiere_firma,
+        "fecha_creacion": fecha_creacion or datetime.now().strftime("%Y-%m-%d"),
+        "archivo_url": f"/uploads/documentos_empleados/{unique_filename}",
+        "archivo_nombre_original": file.filename,
+        "archivo_tipo": file.content_type,
+        "archivo_tamano": len(content),
+        "firmado": False,
+        "activo": True,
+        "created_at": datetime.now(),
+        "updated_at": datetime.now()
+    }
+    
+    result = await database.documentos_empleados.insert_one(documento)
+    documento["_id"] = str(result.inserted_id)
+    
+    return {"success": True, "data": documento}
+
 @router.put("/documentos/{documento_id}/firmar")
 async def firmar_documento(documento_id: str, firma_data: dict):
     """Firmar un documento digitalmente"""
