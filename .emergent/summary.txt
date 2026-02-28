@@ -34,212 +34,150 @@ El usuario ha solicitado recientemente la creación de un módulo RRHH para la g
 **User's preferred language**: Español
 
 **what currently exists?**
-Una aplicación full-stack (FastAPI, React, MongoDB) de gestión agrícola. En esta sesión se han completado las funcionalidades avanzadas del módulo de RRHH y se ha avanzado significativamente en una refactorización crítica del frontend.
-1.  **Módulo de RRHH (Fase 1 Completa)**: Se implementó la pestaña Documentos con un flujo completo de firma digital usando . Se verificó que el fichaje por QR y facial funcionaban.
-2.  **Mejoras de UI/UX en RRHH**: Se corrigió el estilo de todos los modales del módulo RRHH (Nuevo Empleado, Fichar, QR, etc.) para que se muestren centrados y con un overlay oscuro, igual que en el resto de la aplicación. Además, se añadió un buscador de empleados por nombre/DNI en la sección de documentos para facilitar la gestión.
-3.  **Refactorización del API Service**: Se ha continuado la migración masiva de llamadas  al wrapper centralizado . Se han migrado aproximadamente un 70% de las llamadas, reduciendo significativamente la deuda técnica y el riesgo de errores .
+Una aplicación full-stack (FastAPI, React, MongoDB) con un módulo de RRHH funcional y una base de código frontend refactorizada. En esta sesión se completaron varias funcionalidades clave solicitadas por el usuario:
+1.  **Refactorización de API Completa:** Se finalizó la migración masiva de todas las llamadas  al servicio centralizado . Esto eliminó el error recurrente  y fue validado con una suite completa de tests de regresión (35/35 pasaron).
+2.  **Módulo RRHH - Mejoras de Documentos:**
+    -   Se implementó la subida de archivos con **drag-and-drop**.
+    -   Se añadió una **vista previa** para imágenes y PDFs antes de la subida.
+    -   Se implementó la **exportación a Excel y PDF** de la lista de documentos.
+    -   Se añadieron **filtros avanzados** por fecha de registro, tipo de documento y estado de la firma.
+    -   Se corrigió un bug que impedía guardar los nuevos documentos.
+3.  **Módulo RRHH - Informe de Horas:** Se creó una nueva funcionalidad para generar un informe de control horario por empleado y rango de fechas, calculando el total de horas trabajadas. El informe se puede exportar a Excel y PDF.
+4.  **Mejora de UX en RRHH:** El formulario de Nuevo Empleado se modificó para mostrarse integrado en la página en lugar de como un modal emergente, según la solicitud del usuario.
+5.  **Módulo RRHH - Prenómina (Backend):** Se crearon los endpoints en el backend para generar y exportar a Excel/PDF el informe de prenómina individual de un empleado.
 
 **Last working item**:
--   **Last item agent was working**: Migrando sistemáticamente las llamadas  restantes en el frontend al nuevo wrapper centralizado . El agente estaba procesando los archivos restantes en lotes para completar esta refactorización crítica.
+-   **Last item agent was working**: Implementando la interfaz de usuario (UI) para el cálculo y la visualización de la **prenómina** en el módulo de RRHH. El trabajo se estaba realizando en el componente  dentro de , después de haber completado la lógica del backend.
 -   **Status**: IN PROGRESS
--   **Agent Testing Done**: Y (El agente verificó la compilación del frontend y la funcionalidad básica de la aplicación después de cada lote de migraciones).
--   **Which testing method agent to use?**: frontend testing agent. Al ser una refactorización que afecta a toda la aplicación, es necesario un test de regresión completo para asegurar que no se ha roto ninguna funcionalidad.
+-   **Agent Testing Done**: N
+-   **Which testing method agent to use?**: both. El backend se puede probar con  para los nuevos endpoints de prenómina. El frontend requerirá el uso de la  o  una vez que la UI esté construida.
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Migración incompleta al servicio de API (P0)**
-    -   **Description**: Tarea crítica de refactorización para eliminar el error recurrente  y estandarizar las llamadas a la API. Se inició con 193 llamadas  y quedan aproximadamente 57 (~30%). La finalización de esta tarea es la máxima prioridad.
-    -   **Attempted fixes**: Se han migrado con éxito ~136 llamadas en más de 20 archivos, incluyendo componentes complejos como , , , , , , ,  y muchos otros.
-    -   **Next debug checklist**:
-        1.  Ejecutar frontend/src/components/Layout.js:        const response = await fetch(`${BACKEND_URL}/api/config/logos`);
-frontend/src/components/AdvancedParcelMap.js:      const response = await fetch(
-frontend/src/components/NotificacionesDropdown.js:      const response = await fetch(`${BACKEND_URL}/api/notificaciones/count`, {
-frontend/src/components/NotificacionesDropdown.js:      const response = await fetch(`${BACKEND_URL}/api/notificaciones?limit=20`, {
-frontend/src/components/NotificacionesDropdown.js:      const response = await fetch(`${BACKEND_URL}/api/notificaciones/${id}/leer`, {
-frontend/src/components/NotificacionesDropdown.js:      const response = await fetch(`${BACKEND_URL}/api/notificaciones/leer-todas`, {
-frontend/src/components/ResumenDiario.js:      const response = await fetch(`${BACKEND_URL}/api/resumen-diario`, {
-frontend/src/pages/InformesIngresos.js:      const response = await fetch(`${BACKEND_URL}/api/ingresos/filtros-opciones`, {
-frontend/src/pages/InformesIngresos.js:      const response = await fetch(`${BACKEND_URL}/api/ingresos/campanas`, {
-frontend/src/pages/InformesIngresos.js:      const response = await fetch(`${BACKEND_URL}/api/ingresos/resumen?${params}`, {
-frontend/src/pages/InformesIngresos.js:      const response = await fetch(`${BACKEND_URL}/api/ingresos/detalle-albaranes?${params}`, {
-frontend/src/pages/InformesIngresos.js:      const response = await fetch(`${BACKEND_URL}/api/ingresos/export/excel?${params}`, {
-frontend/src/pages/InformesIngresos.js:      const response = await fetch(`${BACKEND_URL}/api/ingresos/export/pdf?${params}`, {
-frontend/src/pages/ArticulosExplotacion.js:      const response = await fetch(url, {
-frontend/src/pages/ArticulosExplotacion.js:      const response = await fetch(url, {
-frontend/src/pages/ArticulosExplotacion.js:      const response = await fetch(`${BACKEND_URL}/api/articulos/${id}`, {
-frontend/src/pages/ArticulosExplotacion.js:      const response = await fetch(`${BACKEND_URL}/api/articulos/${id}/toggle-activo`, {
-frontend/src/pages/Traducciones.js:      const response = await fetch(`${BACKEND_URL}/api/translations/categories`);
-frontend/src/pages/Traducciones.js:      const response = await fetch(url);
-frontend/src/pages/Traducciones.js:      const response = await fetch(url, {
-frontend/src/pages/Traducciones.js:      const response = await fetch(`${BACKEND_URL}/api/translations/${id}`, {
-frontend/src/pages/Traducciones.js:      const response = await fetch(`${BACKEND_URL}/api/translations/${id}/approve`, {
-frontend/src/pages/Traducciones.js:      const response = await fetch(`${BACKEND_URL}/api/translations/seed`, {
-frontend/src/pages/Tareas.js:      const res = await fetch(`${BACKEND_URL}/api/tareas/export/excel?${params}`, { 
-frontend/src/pages/Contratos.js:      const response = await fetch(`${BACKEND_URL}/api/cuaderno-campo/generar`, {
-frontend/src/pages/AsistenteIA.js:      const res = await fetch(`${BACKEND_URL}/api/ai/parcelas-for-suggestions`, { headers });
-frontend/src/pages/AsistenteIA.js:      const res = await fetch(`${BACKEND_URL}/api/ai/contratos-for-predictions`, { headers });
-frontend/src/pages/AsistenteIA.js:      const res = await fetch(
-frontend/src/pages/AsistenteIA.js:      const res = await fetch(
-frontend/src/pages/LiquidacionComisiones.js:      const response = await fetch(`${BACKEND_URL}/api/comisiones/campanas`, {
-frontend/src/pages/LiquidacionComisiones.js:      const response = await fetch(`${BACKEND_URL}/api/comisiones/agentes`, {
-frontend/src/pages/LiquidacionComisiones.js:      const response = await fetch(`${BACKEND_URL}/api/comisiones/resumen?${params}`, {
-frontend/src/pages/LiquidacionComisiones.js:      const response = await fetch(`${BACKEND_URL}/api/comisiones/liquidacion/pdf?${params}`, {
-frontend/src/pages/Irrigaciones.js:      const res = await fetch(`${BACKEND_URL}/api/irrigaciones/export/excel?${params}`, { 
-frontend/src/pages/Evaluaciones.js:      const response = await fetch(`${BACKEND_URL}/api/evaluaciones/${id}/pdf`, {
-frontend/src/pages/InformesGastos.js:      const response = await fetch(`${BACKEND_URL}/api/gastos/filtros-opciones`, {
-frontend/src/pages/InformesGastos.js:      const response = await fetch(`${BACKEND_URL}/api/gastos/campanas`, {
-frontend/src/pages/InformesGastos.js:      const response = await fetch(`${BACKEND_URL}/api/gastos/resumen?${params}`, {
-frontend/src/pages/InformesGastos.js:      const response = await fetch(`${BACKEND_URL}/api/gastos/detalle-albaranes?${params}`, {
-frontend/src/pages/InformesGastos.js:      const response = await fetch(`${BACKEND_URL}/api/gastos/export/excel?${params}`, {
-frontend/src/pages/InformesGastos.js:      const response = await fetch(`${BACKEND_URL}/api/gastos/export/pdf?${params}`, {
-frontend/src/pages/Maquinaria.js:      const response = await fetch(`${BACKEND_URL}/api/maquinaria/${maquinariaId}/imagen-placa-ce`, {
-frontend/src/pages/Parcelas.js:      const response = await fetch(`${BACKEND_URL}/api/cuaderno-campo/generar`, {
-frontend/src/services/themeService.js:    const response = await fetch(`${BACKEND_URL}/api/config/theme`);
-frontend/src/services/api.js:    const response = await fetch(url, fetchOptions);
-frontend/src/services/api.js:    const response = await fetch(url, {
-frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/parcelas`, {
-frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/contratos`, {
-frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/tratamientos`, {
-frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/riegos`, {
-frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/visitas`, {
-frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/cosechas`, {
-frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/generate-ai-report`, {
-frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/generate-pdf`, {
-frontend/src/AppPOC.js:      const response = await fetch(`${BACKEND_URL}/api/poc/generate-excel`, { para obtener la lista actualizada de archivos y llamadas restantes.
-        2.  Continuar la migración sistemática de los componentes restantes, como , , etc.
-        3.  Prestar especial atención a las llamadas  que descargan  (ej. exportar a PDF/Excel), ya que pueden requerir un manejo especial o mantenerse como están si el  no soporta la descarga de archivos.
-        4.  Tras completar la migración, ejecutar  en modo  o  para realizar una prueba de regresión completa en el frontend.
-    -   **Why fix this issue and what will be achieved with this?**: Completar la migración eliminará definitivamente un error recurrente, centralizará la lógica de la API, mejorará la robustez y facilitará el mantenimiento futuro.
-    -   **Status**: IN PROGRESS
-    -   **Is recurring issue?**: Y
-    -   **Should Test frontend/backend/both after fix?**: frontend
-    -   **Blocked on other issue**: No.
+-   No hay issues pendientes. La tarea en curso es la implementación de una nueva funcionalidad.
 
 **In progress Task List**:
--   **Task 1: Completar la migración de  a  (P0)**
-    -   **Where to resume**: Continuar con la lista de archivos generada por . Los archivos restantes tienen menos llamadas  y deberían poder migrarse más rápidamente.
-    -   **What will be achieved with this?**: Una base de código frontend más estable, mantenible y libre del error .
+-   **Task 1: Completar UI del Módulo de Prenómina (P0)**
+    -   **Where to resume**: En el frontend, dentro del componente de RRHH, en la pestaña de Prenómina (probablemente en  o una sección dentro de ).
+    -   **What will be achieved with this?**: Permitirá al usuario seleccionar un empleado y un mes, calcular la prenómina utilizando los endpoints del backend ya creados, mostrar los resultados en la interfaz y exportarlos a Excel o PDF.
     -   **Status**: IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?**: frontend
+    -   **Should Test frontend/backend/both after fix?**: both
     -   **Blocked on something**: No.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks**:
-    -   **P1**: Completar el desarrollo del módulo RRHH (seguimiento de productividad, cálculo de prenómina, portal del empleado).
+    -   **P1**: Completar el desarrollo del módulo RRHH (seguimiento de productividad, portal del empleado).
     -   **P1**: Finalizar la implementación de los módulos restantes del PRD (Proveedores, Maquinaria, etc.) con sus KPIs y funcionalidades completas.
-    -   **P2**: Desarrollar la generación de informes en PDF y Excel para todos los módulos.
+    -   **P2**: Generalizar la generación de informes en PDF y Excel para todos los módulos.
     -   **P3**: Finalizar la integración de notificaciones por email (Resend), actualmente bloqueada a la espera de la  del usuario.
 
 -   **Future Tasks**:
     -   Implementar el resto de las integraciones de IA (resúmenes de contratos, predicciones de cosecha).
     -   Implementar la identificación por NFC en el módulo RRHH.
-    -   Mejorar el dashboard para permitir reordenar los widgets con drag-and-drop libremente.
+    -   Mejorar el dashboard para permitir reordenar los widgets con drag-and-drop.
 
 **Completed work in this session**
--   **Módulo RRHH: Firma Digital Completa**: Se añadió la pestaña Documentos y se implementó el flujo de firma digital de principio a fin, incluyendo la captura con , guardado de la firma en base64 y actualización del estado del documento en la UI.
--   **Módulo RRHH: Corrección de Estilos de Modales**: Se refactorizaron todos los modales del componente  para que utilicen el mismo estilo (overlay oscuro, centrado) que los módulos  y , solucionando un problema de UX reportado por el usuario.
--   **Módulo RRHH: Buscador de Empleados**: Se añadió un campo de búsqueda con autocompletado en la sección Documentos para filtrar documentos por empleado (buscando por nombre, DNI o código).
--   **Testing del Módulo RRHH**: Se ejecutó el  que validó toda la funcionalidad del backend y frontend del módulo RRHH, incluyendo APIs de empleados, fichajes, documentos, firma y productividad. Todos los 36 tests pasaron.
--   **Progreso en Migración de API Service**: Se migraron ~136 llamadas  (un ~70% del total) al nuevo , avanzando significativamente en la eliminación de deuda técnica.
+-   **Refactorización Crítica Completada**: Se migraron con éxito todas las llamadas  restantes a , solucionando un problema de estabilidad crónico. Validado con tests de regresión.
+-   **Formulario de Empleado Inline**: Se modificó el formulario de Nuevo Empleado para que no sea un modal, mejorando la UX.
+-   **Funcionalidad Avanzada de Documentos**: Se implementó la subida de archivos con drag-and-drop, vista previa de archivos, filtros por fecha/tipo/estado y exportación a Excel/PDF.
+-   **Bug Crítico Solucionado**: Se arregló el fallo que impedía guardar los documentos nuevos con archivos adjuntos.
+-   **Informe de Control Horario**: Se desarrolló una nueva sección para generar informes de horas trabajadas por empleado, con exportación a Excel/PDF.
+-   **Backend para Prenómina**: Se crearon los endpoints necesarios para el cálculo y la exportación de informes de prenómina.
 
 **Earlier issues found/mentioned but not fixed**
--   El problema  se está abordando activamente con la migración a , que está registrada como la tarea P0 en curso.
+-   Ninguno. El problema principal () fue resuelto en esta sesión.
 
 **Known issue recurrence from previous fork**
--   El error  era un problema recurrente del fork anterior. Su solución () está actualmente en proceso de implementación en toda la aplicación, con un 70% de avance.
+-   **Issue recurrence in previous fork**: Error .
+-   **Recurrence count**: Alto.
+-   **Status**: RESOLVED. La migración completa a  ha solucionado este problema recurrente.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Refactorización a Gran Escala**: Uso de herramientas de línea de comandos () y  en paralelo para analizar y modificar sistemáticamente una gran cantidad de archivos, migrando de  a un wrapper de API centralizado.
--   **Integración de Firma Digital**: Implementación de  para capturar la firma del usuario, convertirla a una imagen base64 y enviarla al backend para su almacenamiento.
--   **Componentes de Búsqueda Dinámica**: Creación de un campo de búsqueda con un dropdown de resultados que se actualiza en tiempo real mientras el usuario escribe, filtrando una lista de empleados.
--   **Consistencia de Estilos (CSS)**: Aplicación de estilos inline y clases CSS para unificar la apariencia de los componentes modales en toda la aplicación, asegurando una experiencia de usuario consistente.
--   **Testing Automatizado**: Uso de  para ejecutar una suite de tests de regresión (backend y frontend) después de completar una funcionalidad mayor (Módulo RRHH).
+-   **Subida de Archivos Full-Stack**: Uso de  en React y  con  en FastAPI para manejar la subida de archivos.
+-   **Generación de Informes Backend**: Creación dinámica de archivos Excel () y PDF () en el servidor.
+-   **Servir Archivos Estáticos**: Configuración de FastAPI para servir archivos subidos desde un directorio persistente.
+-   **Filtrado Avanzado en API**: Modificación de endpoints para aceptar múltiples parámetros de consulta (fechas, enums) para filtrar resultados.
+-   **Refactorización de Componentes React**: Transformación de un componente de modal a un componente renderizado inline para mejorar el flujo de usuario.
+-   **Regresión Automatizada**: Uso del  para validar una refactorización a gran escala, asegurando que no se introdujeron errores.
 
 **key DB schema**
--   **Empleado**: 
--   **Fichaje**: 
--   **DocumentoEmpleado**: 
--   **RegistroProductividad**: 
+-   **DocumentoEmpleado**: Se actualizó implícitamente para manejar una ruta de archivo () y una fecha de subida ().
+    -   
+-   **Fichaje**: Utilizado para el informe de control horario.
+    -   
 
 **changes in tech stack**
--   Ninguno. Se utilizaron las librerías ya existentes en el proyecto.
+-   Se añadió la dependencia de Python  para la generación de PDFs.
 
 **All files of reference**
--   : El wrapper central para las llamadas API.
--   : Componente principal del módulo RRHH, que contiene la lógica de firma digital, los modales corregidos y el nuevo buscador.
--   La salida del comando frontend/src/components/Layout.js
-frontend/src/components/AdvancedParcelMap.js
-frontend/src/components/NotificacionesDropdown.js
-frontend/src/components/ResumenDiario.js
-frontend/src/pages/InformesIngresos.js
-frontend/src/pages/ArticulosExplotacion.js
-frontend/src/pages/Traducciones.js
-frontend/src/pages/Tareas.js
-frontend/src/pages/Contratos.js
-frontend/src/pages/AsistenteIA.js
-frontend/src/pages/LiquidacionComisiones.js
-frontend/src/pages/Irrigaciones.js
-frontend/src/pages/Evaluaciones.js
-frontend/src/pages/InformesGastos.js
-frontend/src/pages/Maquinaria.js
-frontend/src/pages/Parcelas.js
-frontend/src/services/themeService.js
-frontend/src/services/api.js
-frontend/src/AppPOC.js servirá como checklist para la tarea de migración pendiente.
+-   : Componente monolítico que contiene casi toda la nueva funcionalidad del módulo RRHH.
+-   : Archivo de rutas que contiene toda la lógica de backend para las nuevas funcionalidades.
+-   : Wrapper de API al que se migró todo el código.
+-   : Archivo de dependencias del backend.
 
 **Areas that need refactoring**:
--   **Completar la migración de **: La tarea más urgente es finalizar la migración de los ~57 usos restantes de  al nuevo  para estabilizar la aplicación.
--   **Componentes Monolíticos**:  ha crecido considerablemente. Tras finalizar la migración, sería buena idea descomponerlo en subcomponentes más pequeños y manejables (ej. , , ).
+-   **Componente **: Este archivo ha crecido hasta volverse inmanejable. Es **crítico** descomponerlo en subcomponentes más pequeños por cada pestaña (Ej: , , ).
+-   **Rutas **: De manera similar, este archivo de rutas es ahora muy grande. Debería dividirse en varios  por entidad (empleados, documentos, fichajes) para mejorar la organización.
 
 **key api endpoints**
--   : Crea un nuevo documento para un empleado.
--   : Guarda la firma (imagen base64) para un documento específico.
--   : Obtiene la lista de empleados (usado por el nuevo buscador).
+-   : Sube un archivo de documento para un empleado.
+-   : Exporta la lista filtrada de documentos a Excel.
+-   : Exporta la lista filtrada de documentos a PDF.
+-   : Exporta el informe de control horario a Excel.
+-   : Exporta el informe de control horario a PDF.
+-   : Exporta la prenómina de un empleado a Excel.
+-   : Exporta la prenómina de un empleado a PDF.
 
 **Critical Info for New Agent**
-1.  **Prioridad P0 (En curso)**: La tarea principal es **finalizar la migración de  a **. El usuario ha aprobado explícitamente continuar con esta tarea. Es crucial para la estabilidad de la aplicación.
-2.  **Verificar Descargas**: Durante la migración, presta atención a las llamadas  usadas para descargar archivos (blobs). Es posible que  necesite un método específico () o que esas llamadas deban permanecer como están.
-3.  **Testing de Regresión**: Una vez que todas las llamadas  hayan sido migradas, es **mandatorio** ejecutar  para realizar una prueba de regresión completa del frontend y asegurar que ninguna funcionalidad se ha roto.
-4.  **Módulo RRHH Estable**: El módulo RRHH (fichaje, documentos, firma) está completo y ha sido probado. No requiere trabajo inmediato a menos que el usuario reporte un bug.
+1.  **Prioridad P0**: Tu tarea principal es **finalizar la interfaz de usuario del módulo de Prenómina**. El backend ya está listo. El trabajo debe realizarse en el componente de frontend de RRHH.
+2.  **Refactorización Urgente**: El componente  es ahora extremadamente grande. Una vez que la función de prenómina esté completa, la siguiente tarea más importante debería ser dividir este archivo en subcomponentes más pequeños para mejorar la mantenibilidad.
+3.  **Estabilidad de la App**: La refactorización de  a  está completa y ha sido probada. La aplicación es estable y el error  no debería volver a aparecer.
+4.  **Flujo de Trabajo del Usuario**: El usuario está muy centrado en el módulo de RRHH. Espera nuevas funcionalidades y mejoras en esta área.
 
 **documents and test reports created in this job**
--   : Contiene los resultados exitosos de los tests para el módulo RRHH.
--   : Actualizado con los detalles de la implementación del módulo RRHH y el progreso de la migración del API Service.
+-   : Reporte del test de regresión exitoso tras la migración de .
+-   : Actualizado para reflejar las nuevas funcionalidades completadas.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  : Usuario aprueba continuar con la migración de  (la tarea P1 anterior, ahora P0). (Status: IN PROGRESS)
-2.  : Usuario aprueba continuar con la migración de  tras el primer lote. (Status: ADDRESSED)
-3.  : Petición para añadir un buscador en la sección de documentos de RRHH. (Status: COMPLETED)
-4.  : Reporte de un problema de UI/estilo en los modales de RRHH. (Status: COMPLETED)
-5.  : Usuario elige la tarea de migración como la siguiente prioridad. (Status: ADDRESSED)
-6.  : Usuario elige trabajar en las funcionalidades de RRHH. (Status: ADDRESSED & COMPLETED)
+1.  : Aprueba continuar con la implementación de la prenómina. (Status: IN PROGRESS)
+2.  : Pide el informe de control horario. (Status: COMPLETED)
+3.  : Aprueba añadir filtros de tipo/estado a los documentos. (Status: COMPLETED)
+4.  : Pide la exportación de documentos. (Status: COMPLETED)
+5.  : Pide la columna y filtro de fecha de registro. (Status: COMPLETED)
+6.  : Reporta un bug al guardar documentos. (Status: COMPLETED)
+7.  : Aprueba añadir la vista previa de documentos. (Status: COMPLETED)
+8.  : Pide la subida de archivos por drag-and-drop. (Status: COMPLETED)
+9.  : Pide cambiar el formulario de empleado a inline. (Status: COMPLETED)
+10. : Aprueba el plan inicial para completar la migración de . (Status: COMPLETED)
 
 **Project Health Check:**
--   **Broken**: No. La aplicación está estable.
--   **Mocked**: Las integraciones de  (email) y  (clima) siguen preparadas pero inactivas, a la espera de que el usuario proporcione las claves de API.
+-   **Broken**: No. La aplicación está estable y funcional.
+-   **Mocked**:  (email) y  (clima) siguen pendientes de claves de API de usuario.
 
 **3rd Party Integrations**
--   **OpenAI GPT-4o**: Usa Emergent LLM Key (para análisis de imágenes).
+-   **OpenAI GPT-4o**: Usa Emergent LLM Key.
 -   **Resend**: Preparado (Bloqueado, requiere clave de usuario).
 -   **OpenWeatherMap**: Preparado (Bloqueado, requiere clave de usuario).
 -   **APScheduler**: Integrado en backend.
 -   **Leaflet.js / react-leaflet**: Para mapas.
 -   **recharts**: Para gráficos.
--   **react-qr-reader**: Para escanear QR con la cámara.
--   **react-webcam**: Para capturar imágenes con la cámara.
--   **react-signature-canvas**: Para capturar firmas digitales.
+-   **react-qr-reader**: Para escanear QR.
+-   **react-webcam**: Para captura de imágenes.
+-   **react-signature-canvas**: Para firmas digitales.
+-   **openpyxl**: Para generar archivos Excel.
+-   **reportlab**: Para generar archivos PDF.
 
 **Testing status**
--   **Testing agent used after significant changes**: YES. Se utilizó para validar el módulo de RRHH después de su finalización.
--   **Troubleshoot agent used after agent stuck in loop**: NO
--   **Test files created**: Los tests generados por el agente se encuentran en  y . El reporte está en .
+-   **Testing agent used after significant changes**: YES. Se usó después de la migración masiva de  y todos los tests pasaron.
+-   **Troubleshoot agent used after agent stuck in loop**: NO.
+-   **Test files created**: Los archivos de test existentes fueron actualizados por el agente. El reporte se encuentra en .
 -   **Known regressions**: Ninguna.
 
 **Credentials to test flow:**
 -   **Admin**:  / 
 
 **What agent forgot to execute**
--   El agente no olvidó ninguna tarea. Estaba en medio de la ejecución de una tarea de refactorización a gran escala ( migration) que fue aprobada por el usuario, y la completó en un 70% antes de que terminara la sesión. La tarea está claramente documentada para ser continuada.</analysis>
+-   El agente no olvidó ninguna tarea. Siguió metódicamente las solicitudes del usuario y estaba a mitad de la implementación de la siguiente característica solicitada (prenómina) cuando finalizó la sesión.</analysis>
