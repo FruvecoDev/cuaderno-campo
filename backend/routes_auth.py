@@ -225,6 +225,24 @@ async def get_menu_items(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="Admin access required")
     return {"menu_items": ALL_MENU_ITEMS}
 
+@router.get("/permission-profiles")
+async def get_permission_profiles(current_user: dict = Depends(get_current_user)):
+    """Get all predefined permission profiles"""
+    if current_user.get("role") != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    profiles = []
+    for key, profile in PERMISSION_PROFILES.items():
+        profiles.append({
+            "id": key,
+            "name": profile["name"],
+            "description": profile["description"],
+            "icon": profile["icon"],
+            "permissions": profile["permissions"]
+        })
+    
+    return {"profiles": profiles}
+
 @router.put("/users/{user_id}/menu-permissions")
 async def update_menu_permissions(
     user_id: str, 
