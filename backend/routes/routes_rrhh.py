@@ -791,7 +791,7 @@ async def upload_documento(
         "descripcion": descripcion,
         "requiere_firma": requiere_firma,
         "fecha_creacion": fecha_creacion or datetime.now().strftime("%Y-%m-%d"),
-        "archivo_url": f"/uploads/documentos_empleados/{unique_filename}",
+        "archivo_url": f"/api/uploads/documentos_empleados/{unique_filename}",
         "archivo_nombre_original": file.filename,
         "archivo_tipo": file.content_type,
         "archivo_tamano": len(content),
