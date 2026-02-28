@@ -280,6 +280,56 @@ const Usuarios = () => {
     }
   };
 
+  // Vincular empleado functions
+  const openVincularEmpleadoModal = async (user) => {
+    setSelectedUserForVincular(user);
+    setEmpleadoSeleccionado(user.empleado_id || '');
+    setBusquedaEmpleado('');
+    setShowVincularEmpleadoModal(true);
+    
+    try {
+      const data = await api.get('/api/auth/empleados-disponibles');
+      setEmpleadosDisponibles(data.empleados || []);
+    } catch (error) {
+      console.error('Error fetching empleados:', error);
+      setEmpleadosDisponibles([]);
+    }
+  };
+
+  const handleSaveVinculacion = async () => {
+    if (!selectedUserForVincular) return;
+    
+    setSavingVinculacion(true);
+    try {
+      await api.put(`/api/auth/users/${selectedUserForVincular._id}/vincular-empleado`, { 
+        empleado_id: empleadoSeleccionado || null 
+      });
+      setShowVincularEmpleadoModal(false);
+      setSelectedUserForVincular(null);
+      fetchUsers();
+    } catch (error) {
+      console.error('Error vinculando empleado:', error);
+      alert(error.response?.data?.detail || 'Error al vincular empleado');
+    } finally {
+      setSavingVinculacion(false);
+    }
+  };
+
+  const getEmpleadoInfo = (user) => {
+    if (!user.empleado_id) return null;
+    const emp = empleadosDisponibles.find(e => e._id === user.empleado_id);
+    return emp;
+  };
+
+  const empleadosFiltrados = empleadosDisponibles.filter(emp => {
+    if (!busquedaEmpleado) return true;
+    const busqueda = busquedaEmpleado.toLowerCase();
+    const nombreCompleto = `${emp.nombre} ${emp.apellidos}`.toLowerCase();
+    const codigo = (emp.codigo || '').toLowerCase();
+    const dni = (emp.dni_nie || '').toLowerCase();
+    return nombreCompleto.includes(busqueda) || codigo.includes(busqueda) || dni.includes(busqueda);
+  });
+
   if (!currentUser?.can_manage_users) {
     return (
       <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
