@@ -256,6 +256,24 @@ const Clientes = () => {
     }
   };
   
+  // Función para ver historial completo
+  const handleVerHistorial = async (cliente) => {
+    setSelectedCliente(cliente);
+    setShowHistorial(true);
+    setLoadingHistorial(true);
+    
+    try {
+      const data = await api.get(`/api/clientes/${cliente._id}/historial`);
+      setHistorialData(data.historial);
+    } catch (err) {
+      console.error('Error fetching historial:', err);
+      setError('Error al cargar el historial');
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setLoadingHistorial(false);
+    }
+  };
+  
   const handleDelete = async (clienteId) => {
     if (!canDelete) {
       setError('No tienes permiso para eliminar');
