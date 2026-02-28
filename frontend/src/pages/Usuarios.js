@@ -459,6 +459,20 @@ const Usuarios = () => {
                       </span>
                     </td>
                     <td>
+                      {user.empleado_id ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <Link size={14} style={{ color: 'hsl(142 76% 36%)' }} />
+                          <span style={{ fontSize: '0.875rem' }}>
+                            {empleadosDisponibles.find(e => e._id === user.empleado_id)?.nombre || 'Vinculado'}
+                          </span>
+                        </div>
+                      ) : (
+                        <span style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.8rem' }}>
+                          Sin vincular
+                        </span>
+                      )}
+                    </td>
+                    <td>
                       <span 
                         onClick={() => user._id !== currentUser._id && openTipoOperacionModal(user)}
                         style={{
