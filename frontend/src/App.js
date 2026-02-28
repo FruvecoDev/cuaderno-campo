@@ -236,6 +236,12 @@ function App() {
             <Layout><RRHH /></Layout>
           </ProtectedRoute>
         } />
+        
+        <Route path="/portal-empleado" element={
+          <ProtectedRoute>
+            <Layout><PortalEmpleado /></Layout>
+          </ProtectedRoute>
+        } />
       </Routes>
     </AuthProvider>
   );
