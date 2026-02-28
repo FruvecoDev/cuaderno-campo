@@ -311,7 +311,7 @@
                         - img [ref=e399]
                       - button "Exportar PDF" [ref=e402] [cursor=pointer]:
                         - img [ref=e403]
-                - row "Juan García López 12345678A 8.0 16.0 0.0 24.0 1 349.44 € 349.44 € Borrador" [ref=e406]:
+                - row "Juan García López 12345678A 8.0 16.0 0.0 24.0 1 349.44 € 349.44 € Validada" [ref=e406]:
                   - cell "Juan García López" [ref=e407]:
                     - generic [ref=e408]: Juan García López
                   - cell "12345678A" [ref=e409]
@@ -322,117 +322,115 @@
                   - cell "1" [ref=e414]
                   - cell "349.44 €" [ref=e415]
                   - cell "349.44 €" [ref=e416]
-                  - cell "Borrador" [ref=e417]:
-                    - generic [ref=e418]: Borrador
+                  - cell "Validada" [ref=e417]:
+                    - generic [ref=e418]: Validada
                   - cell [ref=e419]:
                     - generic [ref=e420]:
                       - button "Ver detalle" [ref=e421] [cursor=pointer]:
                         - img [ref=e422]
-                      - button "Validar" [ref=e426] [cursor=pointer]:
-                        - img [ref=e427]
-                      - button "Exportar Excel" [ref=e429] [cursor=pointer]:
+                      - button "Exportar Excel" [ref=e425] [cursor=pointer]:
+                        - img [ref=e426]
+                      - button "Exportar PDF" [ref=e429] [cursor=pointer]:
                         - img [ref=e430]
-                      - button "Exportar PDF" [ref=e433] [cursor=pointer]:
-                        - img [ref=e434]
-                - row "Juan García López 12345678A 0.0 0.0 0.0 0.0 0 0.00 € 0.00 € Borrador" [ref=e437]:
-                  - cell "Juan García López" [ref=e438]:
-                    - generic [ref=e439]: Juan García López
-                  - cell "12345678A" [ref=e440]
-                  - cell "0.0" [ref=e441]
-                  - cell "0.0" [ref=e442]
-                  - cell "0.0" [ref=e443]
-                  - cell "0.0" [ref=e444]
-                  - cell "0" [ref=e445]
-                  - cell "0.00 €" [ref=e446]
-                  - cell "0.00 €" [ref=e447]
-                  - cell "Borrador" [ref=e448]:
-                    - generic [ref=e449]: Borrador
-                  - cell [ref=e450]:
-                    - generic [ref=e451]:
-                      - button "Ver detalle" [ref=e452] [cursor=pointer]:
-                        - img [ref=e453]
-                      - button "Validar" [ref=e457] [cursor=pointer]:
-                        - img [ref=e458]
-                      - button "Exportar Excel" [ref=e460] [cursor=pointer]:
+                - row "Juan García López 12345678A 0.0 0.0 0.0 0.0 0 0.00 € 0.00 € Borrador" [ref=e433]:
+                  - cell "Juan García López" [ref=e434]:
+                    - generic [ref=e435]: Juan García López
+                  - cell "12345678A" [ref=e436]
+                  - cell "0.0" [ref=e437]
+                  - cell "0.0" [ref=e438]
+                  - cell "0.0" [ref=e439]
+                  - cell "0.0" [ref=e440]
+                  - cell "0" [ref=e441]
+                  - cell "0.00 €" [ref=e442]
+                  - cell "0.00 €" [ref=e443]
+                  - cell "Borrador" [ref=e444]:
+                    - generic [ref=e445]: Borrador
+                  - cell [ref=e446]:
+                    - generic [ref=e447]:
+                      - button "Ver detalle" [ref=e448] [cursor=pointer]:
+                        - img [ref=e449]
+                      - button "Validar" [ref=e453] [cursor=pointer]:
+                        - img [ref=e454]
+                      - button "Exportar Excel" [ref=e456] [cursor=pointer]:
+                        - img [ref=e457]
+                      - button "Exportar PDF" [ref=e460] [cursor=pointer]:
                         - img [ref=e461]
-                      - button "Exportar PDF" [ref=e464] [cursor=pointer]:
-                        - img [ref=e465]
-                - row "TEST_20260227154527_Juan García_df6c0564 TESTdf6c0564 0.0 0.0 0.0 0.0 0 0.00 € 0.00 € Borrador" [ref=e468]:
-                  - cell "TEST_20260227154527_Juan García_df6c0564" [ref=e469]:
-                    - generic [ref=e470]: TEST_20260227154527_Juan García_df6c0564
-                  - cell "TESTdf6c0564" [ref=e471]
-                  - cell "0.0" [ref=e472]
-                  - cell "0.0" [ref=e473]
-                  - cell "0.0" [ref=e474]
-                  - cell "0.0" [ref=e475]
-                  - cell "0" [ref=e476]
-                  - cell "0.00 €" [ref=e477]
-                  - cell "0.00 €" [ref=e478]
-                  - cell "Borrador" [ref=e479]:
-                    - generic [ref=e480]: Borrador
-                  - cell [ref=e481]:
-                    - generic [ref=e482]:
-                      - button "Ver detalle" [ref=e483] [cursor=pointer]:
-                        - img [ref=e484]
-                      - button "Validar" [ref=e488] [cursor=pointer]:
-                        - img [ref=e489]
-                      - button "Exportar Excel" [ref=e491] [cursor=pointer]:
+                - row "TEST_20260227154527_Juan García_df6c0564 TESTdf6c0564 0.0 0.0 0.0 0.0 0 0.00 € 0.00 € Borrador" [ref=e464]:
+                  - cell "TEST_20260227154527_Juan García_df6c0564" [ref=e465]:
+                    - generic [ref=e466]: TEST_20260227154527_Juan García_df6c0564
+                  - cell "TESTdf6c0564" [ref=e467]
+                  - cell "0.0" [ref=e468]
+                  - cell "0.0" [ref=e469]
+                  - cell "0.0" [ref=e470]
+                  - cell "0.0" [ref=e471]
+                  - cell "0" [ref=e472]
+                  - cell "0.00 €" [ref=e473]
+                  - cell "0.00 €" [ref=e474]
+                  - cell "Borrador" [ref=e475]:
+                    - generic [ref=e476]: Borrador
+                  - cell [ref=e477]:
+                    - generic [ref=e478]:
+                      - button "Ver detalle" [ref=e479] [cursor=pointer]:
+                        - img [ref=e480]
+                      - button "Validar" [ref=e484] [cursor=pointer]:
+                        - img [ref=e485]
+                      - button "Exportar Excel" [ref=e487] [cursor=pointer]:
+                        - img [ref=e488]
+                      - button "Exportar PDF" [ref=e491] [cursor=pointer]:
                         - img [ref=e492]
-                      - button "Exportar PDF" [ref=e495] [cursor=pointer]:
-                        - img [ref=e496]
-          - generic [ref=e501]:
-            - generic [ref=e502]:
-              - heading "Detalle de Prenómina" [level=2] [ref=e503]
-              - button [ref=e504] [cursor=pointer]:
-                - img [ref=e505]
-            - generic [ref=e508]:
-              - generic [ref=e509]:
-                - img [ref=e511]
-                - generic [ref=e514]:
-                  - generic [ref=e515]: TEST_20260227152151_Juan García_b06e8c5d
-                  - generic [ref=e516]: "DNI: TESTb06e8c5d | Código:"
-              - generic [ref=e518]: Febrero 2026
-              - generic [ref=e519]:
-                - heading "Desglose de Horas" [level=4] [ref=e520]
-                - generic [ref=e521]:
-                  - generic [ref=e522]:
-                    - generic [ref=e523]: Horas Normales
-                    - generic [ref=e524]: "0.00"
-                  - generic [ref=e525]:
-                    - generic [ref=e526]: Horas Extra
-                    - generic [ref=e527]: "0.00"
-                  - generic [ref=e528]:
-                    - generic [ref=e529]: Horas Nocturnas
-                    - generic [ref=e530]: "0.00"
-                  - generic [ref=e531]:
-                    - generic [ref=e532]: Horas Festivos
-                    - generic [ref=e533]: "0.00"
-              - generic [ref=e534]:
-                - generic [ref=e535]:
-                  - generic [ref=e536]: "Total Horas:"
-                  - generic [ref=e537]: 0.00 h
-                - generic [ref=e538]:
-                  - generic [ref=e539]: "Días Trabajados:"
-                  - generic [ref=e540]: "0"
-                - generic [ref=e541]:
-                  - generic [ref=e542]:
-                    - generic [ref=e543]: "Importe Bruto:"
-                    - generic [ref=e544]: 0.00 €
-                  - generic [ref=e545]:
-                    - generic [ref=e546]: "Deducciones:"
-                    - generic [ref=e547]: "- 0.00 €"
-                  - generic [ref=e548]:
-                    - generic [ref=e549]: "Importe Neto:"
-                    - generic [ref=e550]: 0.00 €
-              - generic [ref=e551]:
-                - button "Exportar Excel" [ref=e552] [cursor=pointer]:
-                  - img [ref=e553]
+          - generic [ref=e497]:
+            - generic [ref=e498]:
+              - heading "Detalle de Prenómina" [level=2] [ref=e499]
+              - button [ref=e500] [cursor=pointer]:
+                - img [ref=e501]
+            - generic [ref=e504]:
+              - generic [ref=e505]:
+                - img [ref=e507]
+                - generic [ref=e510]:
+                  - generic [ref=e511]: TEST_20260227152151_Juan García_b06e8c5d
+                  - generic [ref=e512]: "DNI: TESTb06e8c5d | Código:"
+              - generic [ref=e514]: Febrero 2026
+              - generic [ref=e515]:
+                - heading "Desglose de Horas" [level=4] [ref=e516]
+                - generic [ref=e517]:
+                  - generic [ref=e518]:
+                    - generic [ref=e519]: Horas Normales
+                    - generic [ref=e520]: "0.00"
+                  - generic [ref=e521]:
+                    - generic [ref=e522]: Horas Extra
+                    - generic [ref=e523]: "0.00"
+                  - generic [ref=e524]:
+                    - generic [ref=e525]: Horas Nocturnas
+                    - generic [ref=e526]: "0.00"
+                  - generic [ref=e527]:
+                    - generic [ref=e528]: Horas Festivos
+                    - generic [ref=e529]: "0.00"
+              - generic [ref=e530]:
+                - generic [ref=e531]:
+                  - generic [ref=e532]: "Total Horas:"
+                  - generic [ref=e533]: 0.00 h
+                - generic [ref=e534]:
+                  - generic [ref=e535]: "Días Trabajados:"
+                  - generic [ref=e536]: "0"
+                - generic [ref=e537]:
+                  - generic [ref=e538]:
+                    - generic [ref=e539]: "Importe Bruto:"
+                    - generic [ref=e540]: 0.00 €
+                  - generic [ref=e541]:
+                    - generic [ref=e542]: "Deducciones:"
+                    - generic [ref=e543]: "- 0.00 €"
+                  - generic [ref=e544]:
+                    - generic [ref=e545]: "Importe Neto:"
+                    - generic [ref=e546]: 0.00 €
+              - generic [ref=e547]:
+                - button "Exportar Excel" [ref=e548] [cursor=pointer]:
+                  - img [ref=e549]
                   - text: Exportar Excel
-                - button "Exportar PDF" [ref=e556] [cursor=pointer]:
-                  - img [ref=e557]
+                - button "Exportar PDF" [ref=e552] [cursor=pointer]:
+                  - img [ref=e553]
                   - text: Exportar PDF
-  - link "Made with Emergent" [ref=e560] [cursor=pointer]:
+  - link "Made with Emergent" [ref=e556] [cursor=pointer]:
     - /url: https://app.emergent.sh/?utm_source=emergent-badge
-    - img [ref=e561]
-    - paragraph [ref=e564]: Made with Emergent
+    - img [ref=e557]
+    - paragraph [ref=e560]: Made with Emergent
 ```
