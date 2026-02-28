@@ -353,3 +353,170 @@ async def delete_cliente(
         raise HTTPException(status_code=404, detail="Cliente no encontrado")
     
     return {"success": True, "message": "Cliente eliminado"}
+
+
+@router.get("/clientes/stats/resumen")
+async def get_clientes_stats(current_user: dict = Depends(get_current_user)):
+    """Obtener estadísticas de clientes"""
+    total = await clientes_collection.count_documents({})
+    activos = await clientes_collection.count_documents({"activo": {"$ne": False}})
+    
+    # Clientes por provincia
+    pipeline = [
+        {"$match": {"activo": {"$ne": False}}},
+        {"$group": {"_id": "$provincia", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 10}
+    ]
+    por_provincia = []
+    async for doc in clientes_collection.aggregate(pipeline):
+        por_provincia.append({"provincia": doc["_id"] or "Sin especificar", "count": doc["count"]})
+    
+    # Clientes con contratos
+    clientes_con_contratos = await contratos_collection.distinct("cliente_id")
+    
+    # Volumen de ventas por cliente
+    pipeline_ventas = [
+        {"$match": {"tipo": "venta"}},
+        {"$group": {"_id": "$cliente_id", "total": {"$sum": "$total"}, "count": {"$sum": 1}}},
+        {"$sort": {"total": -1}},
+        {"$limit": 10}
+    ]
+    top_clientes = []
+    async for doc in albaranes_collection.aggregate(pipeline_ventas):
+        cliente = await clientes_collection.find_one({"_id": ObjectId(doc["_id"])}) if doc["_id"] and ObjectId.is_valid(doc["_id"]) else None
+        top_clientes.append({
+            "cliente_id": doc["_id"],
+            "cliente_nombre": cliente.get("nombre") if cliente else "Desconocido",
+            "total_ventas": round(doc["total"], 2),
+            "num_operaciones": doc["count"]
+        })
+    
+    return {
+        "success": True,
+        "stats": {
+            "total": total,
+            "activos": activos,
+            "inactivos": total - activos,
+            "con_contratos": len(clientes_con_contratos),
+            "por_provincia": por_provincia,
+            "top_clientes_ventas": top_clientes
+        }
+    }
+
+
+@router.get("/clientes/{cliente_id}/historial")
+async def get_cliente_historial(
+    cliente_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener historial de ventas y contratos de un cliente"""
+    if not ObjectId.is_valid(cliente_id):
+        raise HTTPException(status_code=400, detail="ID inválido")
+    
+    cliente = await clientes_collection.find_one({"_id": ObjectId(cliente_id)})
+    if not cliente:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+    
+    # Contratos del cliente
+    contratos = []
+    cursor = contratos_collection.find({"cliente_id": cliente_id}).sort("fecha_inicio", -1).limit(20)
+    async for c in cursor:
+        contratos.append(serialize_doc(c))
+    
+    # Albaranes de venta del cliente
+    albaranes = []
+    cursor = albaranes_collection.find({
+        "$or": [
+            {"cliente_id": cliente_id},
+            {"cliente": cliente.get("nombre")}
+        ],
+        "tipo": "venta"
+    }).sort("fecha", -1).limit(50)
+    async for a in cursor:
+        albaranes.append(serialize_doc(a))
+    
+    # Calcular totales
+    total_ventas = sum(a.get("total", 0) for a in albaranes)
+    
+    return {
+        "success": True,
+        "cliente": serialize_doc(cliente),
+        "historial": {
+            "contratos": contratos,
+            "albaranes": albaranes,
+            "total_ventas": round(total_ventas, 2),
+            "num_contratos": len(contratos),
+            "num_albaranes": len(albaranes)
+        }
+    }
+
+
+@router.get("/clientes/export/excel")
+async def export_clientes_excel(
+    activo: Optional[bool] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Exportar clientes a Excel"""
+    from fastapi.responses import StreamingResponse
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+    import io
+    
+    query = {}
+    if activo is not None:
+        query['activo'] = activo
+    
+    clientes = await clientes_collection.find(query).sort("nombre", 1).to_list(1000)
+    
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Clientes"
+    
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="1976D2", end_color="1976D2", fill_type="solid")
+    thin_border = Border(
+        left=Side(style='thin'), right=Side(style='thin'),
+        top=Side(style='thin'), bottom=Side(style='thin')
+    )
+    
+    headers = ["Código", "Nombre", "CIF/NIF", "Dirección", "Población", "Provincia", "C.P.", "Teléfono", "Email", "Contacto", "Estado"]
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = Alignment(horizontal="center")
+        cell.border = thin_border
+    
+    for row_idx, cli in enumerate(clientes, 2):
+        data = [
+            cli.get("codigo", ""),
+            cli.get("nombre", ""),
+            cli.get("cif_nif", ""),
+            cli.get("direccion", ""),
+            cli.get("poblacion", ""),
+            cli.get("provincia", ""),
+            cli.get("codigo_postal", ""),
+            cli.get("telefono", ""),
+            cli.get("email", ""),
+            cli.get("persona_contacto", ""),
+            "Activo" if cli.get("activo", True) else "Inactivo"
+        ]
+        for col, value in enumerate(data, 1):
+            cell = ws.cell(row=row_idx, column=col, value=value)
+            cell.border = thin_border
+    
+    column_widths = [10, 25, 15, 30, 20, 15, 10, 15, 25, 20, 10]
+    for col, width in enumerate(column_widths, 1):
+        ws.column_dimensions[get_column_letter(col)].width = width
+    
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename=clientes_{datetime.now().strftime('%Y%m%d')}.xlsx"}
+    )
