@@ -11,7 +11,7 @@ export default defineConfig({
     ['json', { outputFile: '/root/.emergent/automation_output/20260228_113058/results.json' }],
   ],
   use: {
-    baseURL: 'https://agri-rrhh-plus.preview.emergentagent.com',
+    baseURL: 'https://agro-docs.preview.emergentagent.com',
     screenshot: 'only-on-failure',
     trace: 'off',
     headless: true,
