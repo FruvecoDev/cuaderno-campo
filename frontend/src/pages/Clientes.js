@@ -67,6 +67,9 @@ const Clientes = () => {
   const [resumenVentas, setResumenVentas] = useState(null);
   const [loadingResumen, setLoadingResumen] = useState(false);
   
+  // Estado para stats
+  const [stats, setStats] = useState(null);
+  
   const { token } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
