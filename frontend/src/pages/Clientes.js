@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, Search, X, Upload, User, Phone, Mail, MapPin, Building, Globe, TrendingUp, FileText, Package, Eye, Settings, Download, Users } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import '../App.css';
 
 
