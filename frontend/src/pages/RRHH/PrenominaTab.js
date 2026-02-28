@@ -278,11 +278,208 @@ const PrenominaTab = ({ empleados }) => {
       
       {/* Acciones sobre listado */}
       {prenominas.length > 0 && (
-        <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem', justifyContent: 'flex-end' }}>
-          <button onClick={handleExportarTodas} className="btn btn-secondary btn-sm" data-testid="btn-exportar-csv">
-            <FileText size={16} />
-            Exportar CSV
-          </button>
+        <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem', justifyContent: 'flex-end', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
+            {prenominas.length} prenóminas
+          </span>
+          
+          {/* Menú de Exportación Masiva */}
+          <div style={{ position: 'relative' }}>
+            <button 
+              onClick={() => setShowExportMenu(!showExportMenu)} 
+              className="btn btn-primary"
+              disabled={exportando}
+              data-testid="btn-exportar-masivo"
+            >
+              {exportando ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                  Exportando...
+                </>
+              ) : (
+                <>
+                  <Download size={16} />
+                  Exportar Todas
+                  <ChevronDown size={16} />
+                </>
+              )}
+            </button>
+            
+            {showExportMenu && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                marginTop: '4px',
+                background: 'hsl(var(--card))',
+                border: '1px solid hsl(var(--border))',
+                borderRadius: '0.5rem',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+                minWidth: '280px',
+                zIndex: 100,
+                overflow: 'hidden'
+              }}>
+                <div style={{ 
+                  padding: '0.75rem 1rem', 
+                  borderBottom: '1px solid hsl(var(--border))',
+                  background: 'hsl(var(--muted) / 0.3)'
+                }}>
+                  <div style={{ fontWeight: '600', fontSize: '0.875rem' }}>Exportar Prenóminas</div>
+                  <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                    {meses[mesSeleccionado - 1]} {anoSeleccionado}
+                  </div>
+                </div>
+                
+                {/* Excel Masivo */}
+                <button
+                  onClick={handleExportarExcelMasivo}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    borderBottom: '1px solid hsl(var(--border) / 0.5)'
+                  }}
+                  onMouseEnter={e => e.target.style.background = 'hsl(var(--muted))'}
+                  onMouseLeave={e => e.target.style.background = 'transparent'}
+                >
+                  <div style={{ 
+                    width: '32px', height: '32px', borderRadius: '0.5rem',
+                    background: 'hsl(142 76% 36% / 0.1)', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                  }}>
+                    <FileText size={16} style={{ color: 'hsl(142 76% 36%)' }} />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: '500' }}>Excel Completo</div>
+                    <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))' }}>
+                      Todas las prenóminas con formato visual
+                    </div>
+                  </div>
+                </button>
+                
+                {/* CSV Estándar */}
+                <button
+                  onClick={() => handleExportarCSV('estandar')}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    borderBottom: '1px solid hsl(var(--border) / 0.5)'
+                  }}
+                  onMouseEnter={e => e.target.style.background = 'hsl(var(--muted))'}
+                  onMouseLeave={e => e.target.style.background = 'transparent'}
+                >
+                  <div style={{ 
+                    width: '32px', height: '32px', borderRadius: '0.5rem',
+                    background: 'hsl(var(--primary) / 0.1)', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                  }}>
+                    <Download size={16} style={{ color: 'hsl(var(--primary))' }} />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: '500' }}>CSV Estándar</div>
+                    <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))' }}>
+                      Formato genérico con todos los campos
+                    </div>
+                  </div>
+                </button>
+                
+                {/* Separador - Formatos específicos */}
+                <div style={{ 
+                  padding: '0.5rem 1rem', 
+                  fontSize: '0.7rem', 
+                  fontWeight: '600',
+                  color: 'hsl(var(--muted-foreground))',
+                  background: 'hsl(var(--muted) / 0.3)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  Software de Nóminas
+                </div>
+                
+                {/* A3NOM */}
+                <button
+                  onClick={() => handleExportarCSV('a3nom')}
+                  style={{
+                    width: '100%',
+                    padding: '0.6rem 1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    textAlign: 'left'
+                  }}
+                  onMouseEnter={e => e.target.style.background = 'hsl(var(--muted))'}
+                  onMouseLeave={e => e.target.style.background = 'transparent'}
+                >
+                  <div style={{ width: '32px' }} />
+                  <div>
+                    <div style={{ fontWeight: '500', fontSize: '0.875rem' }}>A3NOM</div>
+                  </div>
+                </button>
+                
+                {/* SAGE */}
+                <button
+                  onClick={() => handleExportarCSV('sage')}
+                  style={{
+                    width: '100%',
+                    padding: '0.6rem 1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    textAlign: 'left'
+                  }}
+                  onMouseEnter={e => e.target.style.background = 'hsl(var(--muted))'}
+                  onMouseLeave={e => e.target.style.background = 'transparent'}
+                >
+                  <div style={{ width: '32px' }} />
+                  <div>
+                    <div style={{ fontWeight: '500', fontSize: '0.875rem' }}>SAGE</div>
+                  </div>
+                </button>
+                
+                {/* NominaPlus */}
+                <button
+                  onClick={() => handleExportarCSV('nominaplus')}
+                  style={{
+                    width: '100%',
+                    padding: '0.6rem 1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    textAlign: 'left'
+                  }}
+                  onMouseEnter={e => e.target.style.background = 'hsl(var(--muted))'}
+                  onMouseLeave={e => e.target.style.background = 'transparent'}
+                >
+                  <div style={{ width: '32px' }} />
+                  <div>
+                    <div style={{ fontWeight: '500', fontSize: '0.875rem' }}>NominaPlus</div>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
       
