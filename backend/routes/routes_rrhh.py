@@ -1017,7 +1017,7 @@ async def export_documentos_pdf(
     else:
         elements.append(Paragraph("No hay documentos con los filtros seleccionados.", styles['Normal']))
     
-    doc.build(elements)
+    pdf_doc.build(elements)
     output.seek(0)
     
     filename = f"informe_documentos_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
