@@ -129,6 +129,39 @@ const PrenominaTab = ({ empleados }) => {
       console.error('Error:', err);
     }
   };
+
+  // Nuevas funciones de exportación masiva
+  const handleExportarCSV = async (formato) => {
+    setExportando(true);
+    setShowExportMenu(false);
+    try {
+      await api.download(
+        `/api/rrhh/prenominas/export/csv?mes=${mesSeleccionado}&ano=${anoSeleccionado}&formato=${formato}`,
+        `prenominas_${meses[mesSeleccionado - 1]}_${anoSeleccionado}_${formato}.csv`
+      );
+    } catch (err) {
+      console.error('Error:', err);
+      alert('Error al exportar CSV: ' + (err.message || 'Error desconocido'));
+    } finally {
+      setExportando(false);
+    }
+  };
+
+  const handleExportarExcelMasivo = async () => {
+    setExportando(true);
+    setShowExportMenu(false);
+    try {
+      await api.download(
+        `/api/rrhh/prenominas/export/excel-masivo?mes=${mesSeleccionado}&ano=${anoSeleccionado}`,
+        `prenominas_${meses[mesSeleccionado - 1]}_${anoSeleccionado}.xlsx`
+      );
+    } catch (err) {
+      console.error('Error:', err);
+      alert('Error al exportar Excel: ' + (err.message || 'Error desconocido'));
+    } finally {
+      setExportando(false);
+    }
+  };
   
   const handleVerDetalle = (prenomina) => {
     setPrenominaDetalle(prenomina);
