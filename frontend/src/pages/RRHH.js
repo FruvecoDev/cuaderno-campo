@@ -2548,12 +2548,56 @@ const DocumentosEmpleado = ({ empleados }) => {
             <button
               onClick={() => { setFiltroFechaDesde(''); setFiltroFechaHasta(''); }}
               className="btn btn-ghost btn-sm"
-              title="Limpiar filtros"
+              title="Limpiar filtros de fecha"
             >
               <X size={16} />
             </button>
           )}
         </div>
+        
+        {/* Filtro por Tipo */}
+        <select
+          value={filtroTipo}
+          onChange={(e) => setFiltroTipo(e.target.value)}
+          className="form-select"
+          style={{ minWidth: '140px', padding: '0.4rem 0.6rem', fontSize: '0.85rem' }}
+        >
+          <option value="">Todos los tipos</option>
+          {tiposDocumento.map(t => (
+            <option key={t.value} value={t.value}>{t.label}</option>
+          ))}
+        </select>
+        
+        {/* Filtro por Estado */}
+        <select
+          value={filtroEstado}
+          onChange={(e) => setFiltroEstado(e.target.value)}
+          className="form-select"
+          style={{ minWidth: '130px', padding: '0.4rem 0.6rem', fontSize: '0.85rem' }}
+        >
+          <option value="">Todos los estados</option>
+          <option value="firmado">Firmados</option>
+          <option value="pendiente">Pendientes firma</option>
+          <option value="no_requiere">No requiere firma</option>
+        </select>
+        
+        {/* Botón limpiar todos los filtros */}
+        {(filtroTipo || filtroEstado || filtroFechaDesde || filtroFechaHasta) && (
+          <button
+            onClick={() => { 
+              setFiltroFechaDesde(''); 
+              setFiltroFechaHasta(''); 
+              setFiltroTipo('');
+              setFiltroEstado('');
+            }}
+            className="btn btn-ghost btn-sm"
+            title="Limpiar todos los filtros"
+            style={{ color: 'hsl(0 84% 60%)' }}
+          >
+            <X size={16} />
+            Limpiar
+          </button>
+        )}
         
         {/* Botones de exportación */}
         <div style={{ display: 'flex', gap: '0.5rem' }}>
