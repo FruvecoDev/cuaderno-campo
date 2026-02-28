@@ -75,6 +75,7 @@ const Proveedores = () => {
 
   useEffect(() => {
     fetchProveedores();
+    fetchStats();
   }, []);
 
   const fetchProveedores = async () => {
@@ -88,6 +89,36 @@ const Proveedores = () => {
       setError(errorMsg);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const data = await api.get('/api/proveedores/stats/resumen');
+      setStats(data.stats);
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
+
+  const handleVerHistorial = async (proveedor) => {
+    setSelectedProveedor(proveedor);
+    try {
+      const data = await api.get(`/api/proveedores/${proveedor._id}/historial`);
+      setHistorialData(data.historial);
+      setShowHistorial(true);
+    } catch (error) {
+      console.error('Error fetching historial:', error);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      const params = filtroEstado !== 'todos' ? `?activo=${filtroEstado === 'activos'}` : '';
+      await api.download(`/api/proveedores/export/excel${params}`, `proveedores_${new Date().toISOString().split('T')[0]}.xlsx`);
+    } catch (error) {
+      console.error('Error exporting:', error);
+      alert('Error al exportar');
     }
   };
 
