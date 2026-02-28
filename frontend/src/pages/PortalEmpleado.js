@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   User, Clock, FileText, CreditCard, Calendar, CheckCircle,
-  XCircle, AlertCircle, LogIn, LogOut, Download, PenTool, X, Bell
+  XCircle, AlertCircle, LogIn, LogOut, Download, PenTool, X, Bell,
+  TrendingUp, Award, BarChart3, ArrowUp, ArrowDown, Minus
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
@@ -22,6 +23,11 @@ const PortalEmpleado = () => {
   const [notificaciones, setNotificaciones] = useState([]);
   const [notificacionesNoLeidas, setNotificacionesNoLeidas] = useState(0);
   const [showNotificaciones, setShowNotificaciones] = useState(false);
+  
+  // Productividad states
+  const [productividad, setProductividad] = useState(null);
+  const [productividadHoy, setProductividadHoy] = useState(null);
+  const [periodoProductividad, setPeriodoProductividad] = useState('mes');
   
   // Modal states
   const [showFicharModal, setShowFicharModal] = useState(false);
