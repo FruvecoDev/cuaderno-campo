@@ -313,6 +313,7 @@ const RRHH = () => {
           { id: 'fichajes', label: 'Control Horario', icon: Clock },
           { id: 'productividad', label: 'Productividad', icon: TrendingUp },
           { id: 'documentos', label: 'Documentos', icon: FileText },
+          { id: 'ausencias', label: 'Ausencias', icon: Calendar },
           { id: 'prenomina', label: 'Prenómina', icon: CreditCard }
         ].map(tab => {
           const Icon = tab.icon;
