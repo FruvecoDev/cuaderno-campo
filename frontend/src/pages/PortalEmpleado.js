@@ -688,6 +688,232 @@ const PortalEmpleado = () => {
         </div>
       )}
       
+      {/* Tab: Productividad */}
+      {activeTab === 'productividad' && (
+        <div>
+          {/* Productividad de Hoy */}
+          {productividadHoy && (
+            <div className="card" style={{ marginBottom: '1.5rem', background: 'linear-gradient(135deg, hsl(var(--primary) / 0.05), hsl(var(--primary) / 0.1))' }}>
+              <div style={{ padding: '1.25rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <h3 style={{ margin: 0, fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'hsl(142 76% 36%)', animation: 'pulse 2s infinite' }}></span>
+                    Tu Productividad Hoy
+                  </h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    {productividadHoy.tendencia === 'subiendo' && <ArrowUp size={20} style={{ color: 'hsl(142 76% 36%)' }} />}
+                    {productividadHoy.tendencia === 'bajando' && <ArrowDown size={20} style={{ color: 'hsl(0 84% 60%)' }} />}
+                    {productividadHoy.tendencia === 'estable' && <Minus size={20} style={{ color: 'hsl(var(--muted-foreground))' }} />}
+                    <span style={{ 
+                      fontSize: '0.875rem', 
+                      fontWeight: '600',
+                      color: productividadHoy.variacion_porcentaje > 0 ? 'hsl(142 76% 36%)' : 
+                             productividadHoy.variacion_porcentaje < 0 ? 'hsl(0 84% 60%)' : 'inherit'
+                    }}>
+                      {productividadHoy.variacion_porcentaje > 0 ? '+' : ''}{productividadHoy.variacion_porcentaje}% vs ayer
+                    </span>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+                  <div style={{ textAlign: 'center', padding: '1rem', background: 'hsl(var(--card))', borderRadius: '0.75rem' }}>
+                    <div style={{ fontSize: '2.5rem', fontWeight: '700', color: 'hsl(var(--primary))' }}>
+                      {productividadHoy.hoy?.kilos || 0}
+                    </div>
+                    <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Kilos Hoy</div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: '1rem', background: 'hsl(var(--card))', borderRadius: '0.75rem' }}>
+                    <div style={{ fontSize: '2.5rem', fontWeight: '700', color: 'hsl(38 92% 50%)' }}>
+                      {productividadHoy.hoy?.horas || 0}
+                    </div>
+                    <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Horas Hoy</div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: '1rem', background: 'hsl(var(--card))', borderRadius: '0.75rem' }}>
+                    <div style={{ fontSize: '2.5rem', fontWeight: '700', color: 'hsl(142 76% 36%)' }}>
+                      {productividadHoy.hoy?.registros || 0}
+                    </div>
+                    <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Registros</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Selector de Periodo */}
+          <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '0.5rem' }}>
+            {[
+              { value: 'dia', label: 'Hoy' },
+              { value: 'semana', label: 'Semana' },
+              { value: 'mes', label: 'Mes' },
+              { value: 'ano', label: 'Año' }
+            ].map(p => (
+              <button
+                key={p.value}
+                onClick={() => setPeriodoProductividad(p.value)}
+                className={`btn ${periodoProductividad === p.value ? 'btn-primary' : 'btn-secondary'}`}
+                style={{ minWidth: '80px' }}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+          
+          {/* KPIs del Periodo */}
+          {productividad && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+              <div className="card" style={{ padding: '1rem', textAlign: 'center' }}>
+                <BarChart3 size={24} style={{ margin: '0 auto 0.5rem', color: 'hsl(var(--primary))' }} />
+                <div style={{ fontSize: '1.75rem', fontWeight: '700' }}>{productividad.totales?.kilos || 0}</div>
+                <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Kilos Totales</div>
+              </div>
+              <div className="card" style={{ padding: '1rem', textAlign: 'center' }}>
+                <Clock size={24} style={{ margin: '0 auto 0.5rem', color: 'hsl(38 92% 50%)' }} />
+                <div style={{ fontSize: '1.75rem', fontWeight: '700' }}>{productividad.totales?.horas || 0}</div>
+                <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Horas</div>
+              </div>
+              <div className="card" style={{ padding: '1rem', textAlign: 'center' }}>
+                <TrendingUp size={24} style={{ margin: '0 auto 0.5rem', color: 'hsl(142 76% 36%)' }} />
+                <div style={{ fontSize: '1.75rem', fontWeight: '700' }}>{productividad.totales?.productividad_media || 0}</div>
+                <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Kg/Hora</div>
+              </div>
+              <div className="card" style={{ padding: '1rem', textAlign: 'center' }}>
+                <Award size={24} style={{ margin: '0 auto 0.5rem', color: 'hsl(262 83% 58%)' }} />
+                <div style={{ fontSize: '1.75rem', fontWeight: '700' }}>#{productividad.ranking?.posicion || '-'}</div>
+                <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Tu Posición</div>
+              </div>
+            </div>
+          )}
+          
+          {/* Ranking */}
+          {productividad?.ranking && (
+            <div className="card" style={{ marginBottom: '1.5rem' }}>
+              <div style={{ padding: '1rem', borderBottom: '1px solid hsl(var(--border))' }}>
+                <h3 style={{ margin: 0, fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Award size={20} style={{ color: 'hsl(38 92% 50%)' }} />
+                  Tu Posición en el Ranking
+                </h3>
+              </div>
+              <div style={{ padding: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2rem', marginBottom: '1.5rem' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ 
+                      fontSize: '4rem', 
+                      fontWeight: '800', 
+                      color: productividad.ranking.posicion <= 3 ? 'hsl(38 92% 50%)' : 'hsl(var(--primary))',
+                      lineHeight: 1
+                    }}>
+                      #{productividad.ranking.posicion}
+                    </div>
+                    <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
+                      de {productividad.ranking.total_empleados} empleados
+                    </div>
+                  </div>
+                  <div style={{ 
+                    width: '120px', 
+                    height: '120px', 
+                    borderRadius: '50%', 
+                    background: `conic-gradient(hsl(var(--primary)) ${productividad.ranking.percentil}%, hsl(var(--muted)) 0)`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <div style={{ 
+                      width: '100px', 
+                      height: '100px', 
+                      borderRadius: '50%', 
+                      background: 'hsl(var(--card))',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <span style={{ fontSize: '1.5rem', fontWeight: '700' }}>{productividad.ranking.percentil}%</span>
+                      <span style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))' }}>Percentil</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Top 3 */}
+                {productividad.ranking.top_3?.length > 0 && (
+                  <div>
+                    <div style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.75rem', textAlign: 'center' }}>
+                      Top 3 del Periodo
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
+                      {productividad.ranking.top_3.map((emp, idx) => (
+                        <div key={idx} style={{ 
+                          textAlign: 'center', 
+                          padding: '1rem', 
+                          background: 'hsl(var(--muted))', 
+                          borderRadius: '0.75rem',
+                          minWidth: '120px'
+                        }}>
+                          <div style={{ 
+                            width: '32px', 
+                            height: '32px', 
+                            borderRadius: '50%', 
+                            margin: '0 auto 0.5rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: '700',
+                            background: idx === 0 ? 'hsl(38 92% 50%)' : idx === 1 ? '#C0C0C0' : '#CD7F32',
+                            color: 'white'
+                          }}>
+                            {idx + 1}
+                          </div>
+                          <div style={{ fontWeight: '500', fontSize: '0.875rem', marginBottom: '0.25rem' }}>
+                            {emp.nombre?.split(' ')[0]}
+                          </div>
+                          <div style={{ fontSize: '1.25rem', fontWeight: '700', color: 'hsl(var(--primary))' }}>
+                            {emp.kilos} kg
+                          </div>
+                          <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))' }}>
+                            {emp.kilos_hora} kg/h
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {/* Últimos Registros */}
+          {productividad?.registros?.length > 0 && (
+            <div className="card">
+              <div style={{ padding: '1rem', borderBottom: '1px solid hsl(var(--border))' }}>
+                <h3 style={{ margin: 0, fontWeight: '600' }}>Últimos Registros</h3>
+              </div>
+              <div className="table-container">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Tipo</th>
+                      <th>Kilos</th>
+                      <th>Horas</th>
+                      <th>Parcela</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {productividad.registros.map(r => (
+                      <tr key={r._id}>
+                        <td>{r.fecha}</td>
+                        <td style={{ textTransform: 'capitalize' }}>{r.tipo_trabajo || '-'}</td>
+                        <td style={{ fontWeight: '600' }}>{r.kilos || 0}</td>
+                        <td>{r.horas || 0}</td>
+                        <td>{r.parcela || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      
       {/* Tab: Ausencias */}
       {activeTab === 'ausencias' && (
         <div>
