@@ -317,8 +317,8 @@ test.describe('RRHH Prenómina Module', () => {
     await expect(page.locator('text=Detalle de Prenómina')).toBeVisible({ timeout: 5000 });
     await expect(page.locator('text=Desglose de Horas')).toBeVisible();
     await expect(page.locator('text=Horas Normales')).toBeVisible();
-    await expect(page.locator('text=Total Horas')).toBeVisible();
-    await expect(page.locator('text=Importe Bruto')).toBeVisible();
+    await expect(page.locator('text=/Total Horas/i')).toBeVisible();
+    await expect(page.locator('text=/Importe Bruto/i')).toBeVisible();
     
     await page.screenshot({ path: 'prenomina-detail-modal.jpeg', quality: 20 });
     
