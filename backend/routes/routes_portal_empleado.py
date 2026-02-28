@@ -389,3 +389,168 @@ async def marcar_todas_leidas(current_user: dict = Depends(get_current_user)):
     )
     
     return {"success": True}
+
+
+# ============================================================================
+# Productividad del Empleado
+# ============================================================================
+
+@router.get("/mi-productividad")
+async def get_mi_productividad(
+    periodo: Optional[str] = "mes",  # dia, semana, mes, ano
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtiene la productividad del empleado actual"""
+    empleado = await get_empleado_vinculado(current_user)
+    database = get_db()
+    
+    # Calcular fechas según el periodo
+    now = datetime.now()
+    if periodo == "dia":
+        fecha_desde = now.strftime("%Y-%m-%d")
+    elif periodo == "semana":
+        fecha_desde = (now - timedelta(days=7)).strftime("%Y-%m-%d")
+    elif periodo == "mes":
+        fecha_desde = datetime(now.year, now.month, 1).strftime("%Y-%m-%d")
+    else:  # ano
+        fecha_desde = datetime(now.year, 1, 1).strftime("%Y-%m-%d")
+    
+    fecha_hasta = now.strftime("%Y-%m-%d")
+    
+    # Obtener registros de productividad del empleado
+    registros = await database.productividad.find({
+        "empleado_id": empleado["_id"],
+        "fecha": {"$gte": fecha_desde, "$lte": fecha_hasta}
+    }).sort("fecha", -1).to_list(500)
+    
+    # Calcular totales
+    total_kilos = sum(r.get("kilos", 0) for r in registros)
+    total_horas = sum(r.get("horas", 0) for r in registros)
+    total_hectareas = sum(r.get("hectareas", 0) for r in registros)
+    
+    # Calcular productividad media (kg/hora)
+    productividad_media = total_kilos / total_horas if total_horas > 0 else 0
+    
+    # Obtener el ranking del empleado
+    ranking_info = await get_ranking_empleado(database, empleado["_id"], fecha_desde, fecha_hasta)
+    
+    return {
+        "success": True,
+        "periodo": {
+            "tipo": periodo,
+            "desde": fecha_desde,
+            "hasta": fecha_hasta
+        },
+        "totales": {
+            "kilos": round(total_kilos, 2),
+            "horas": round(total_horas, 2),
+            "hectareas": round(total_hectareas, 2),
+            "registros": len(registros),
+            "productividad_media": round(productividad_media, 2)
+        },
+        "ranking": ranking_info,
+        "registros": [serialize_doc(r) for r in registros[:20]]  # Últimos 20 registros
+    }
+
+
+async def get_ranking_empleado(database, empleado_id: str, fecha_desde: str, fecha_hasta: str):
+    """Calcula el ranking del empleado dentro del periodo"""
+    
+    # Agregar productividad de todos los empleados
+    pipeline = [
+        {"$match": {"fecha": {"$gte": fecha_desde, "$lte": fecha_hasta}}},
+        {"$group": {
+            "_id": "$empleado_id",
+            "total_kilos": {"$sum": "$kilos"},
+            "total_horas": {"$sum": "$horas"}
+        }},
+        {"$addFields": {
+            "kilos_hora": {
+                "$cond": [
+                    {"$gt": ["$total_horas", 0]},
+                    {"$divide": ["$total_kilos", "$total_horas"]},
+                    0
+                ]
+            }
+        }},
+        {"$sort": {"total_kilos": -1}}
+    ]
+    
+    resultados = await database.productividad.aggregate(pipeline).to_list(100)
+    
+    # Encontrar posición del empleado
+    posicion = 0
+    total_empleados = len(resultados)
+    empleado_stats = None
+    
+    for idx, r in enumerate(resultados):
+        if r["_id"] == empleado_id:
+            posicion = idx + 1
+            empleado_stats = r
+            break
+    
+    # Obtener top 3
+    top_3 = []
+    for r in resultados[:3]:
+        emp = await database.empleados.find_one({"_id": ObjectId(r["_id"])}) if ObjectId.is_valid(r["_id"]) else None
+        if emp:
+            top_3.append({
+                "nombre": f"{emp.get('nombre', '')} {emp.get('apellidos', '')}".strip(),
+                "kilos": round(r["total_kilos"], 0),
+                "kilos_hora": round(r["kilos_hora"], 1)
+            })
+    
+    return {
+        "posicion": posicion,
+        "total_empleados": total_empleados,
+        "top_3": top_3,
+        "percentil": round((1 - posicion / total_empleados) * 100, 0) if total_empleados > 0 else 0
+    }
+
+
+@router.get("/productividad-hoy")
+async def get_productividad_hoy(current_user: dict = Depends(get_current_user)):
+    """Obtiene la productividad del día actual con comparativa"""
+    empleado = await get_empleado_vinculado(current_user)
+    database = get_db()
+    
+    hoy = datetime.now().strftime("%Y-%m-%d")
+    ayer = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+    
+    # Productividad de hoy
+    registros_hoy = await database.productividad.find({
+        "empleado_id": empleado["_id"],
+        "fecha": hoy
+    }).to_list(100)
+    
+    # Productividad de ayer
+    registros_ayer = await database.productividad.find({
+        "empleado_id": empleado["_id"],
+        "fecha": ayer
+    }).to_list(100)
+    
+    kilos_hoy = sum(r.get("kilos", 0) for r in registros_hoy)
+    kilos_ayer = sum(r.get("kilos", 0) for r in registros_ayer)
+    horas_hoy = sum(r.get("horas", 0) for r in registros_hoy)
+    
+    # Calcular variación
+    variacion = 0
+    if kilos_ayer > 0:
+        variacion = ((kilos_hoy - kilos_ayer) / kilos_ayer) * 100
+    
+    return {
+        "success": True,
+        "hoy": {
+            "fecha": hoy,
+            "kilos": round(kilos_hoy, 0),
+            "horas": round(horas_hoy, 1),
+            "registros": len(registros_hoy)
+        },
+        "ayer": {
+            "fecha": ayer,
+            "kilos": round(kilos_ayer, 0)
+        },
+        "variacion_porcentaje": round(variacion, 1),
+        "tendencia": "subiendo" if variacion > 0 else "bajando" if variacion < 0 else "estable"
+    }
+
