@@ -512,6 +512,13 @@ const Proveedores = () => {
                     {(canEdit || canDelete) && (
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button
+                            className="btn btn-sm btn-secondary"
+                            onClick={() => handleVerHistorial(proveedor)}
+                            title="Ver historial"
+                          >
+                            <Eye size={14} />
+                          </button>
                           {canEdit && (
                             <button
                               className="btn btn-sm btn-secondary"
@@ -540,6 +547,114 @@ const Proveedores = () => {
           </div>
         )}
       </div>
+
+      {/* Modal de Historial */}
+      {showHistorial && selectedProveedor && (
+        <div onClick={() => setShowHistorial(false)} style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '2rem'
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{ 
+            background: 'hsl(var(--card))',
+            borderRadius: '12px',
+            maxWidth: '700px',
+            width: '100%',
+            maxHeight: '80vh', 
+            overflow: 'auto'
+          }}>
+            <div style={{
+              padding: '1.5rem',
+              borderBottom: '1px solid hsl(var(--border))',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <div>
+                <h2 style={{ margin: 0 }}>Historial de {selectedProveedor.nombre}</h2>
+                <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
+                  {selectedProveedor.cif_nif || 'Sin CIF/NIF'}
+                </p>
+              </div>
+              <button onClick={() => setShowHistorial(false)} className="btn btn-ghost">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div style={{ padding: '1.5rem' }}>
+              {historialData && (
+                <>
+                  {/* Resumen */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                    <div className="card" style={{ padding: '1rem', textAlign: 'center', background: 'hsl(var(--muted) / 0.3)' }}>
+                      <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'hsl(var(--primary))' }}>
+                        {historialData.total_compras?.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' }) || '0 €'}
+                      </div>
+                      <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Total Compras</div>
+                    </div>
+                    <div className="card" style={{ padding: '1rem', textAlign: 'center', background: 'hsl(var(--muted) / 0.3)' }}>
+                      <div style={{ fontSize: '1.5rem', fontWeight: '700' }}>{historialData.num_operaciones || 0}</div>
+                      <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Operaciones</div>
+                    </div>
+                  </div>
+
+                  {/* Lista de operaciones */}
+                  {(historialData.gastos?.length > 0 || historialData.albaranes?.length > 0) ? (
+                    <div>
+                      <h4 style={{ marginBottom: '0.75rem' }}>Últimas Operaciones</h4>
+                      <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                        {historialData.gastos?.map(g => (
+                          <div key={g._id} style={{
+                            padding: '0.75rem',
+                            borderBottom: '1px solid hsl(var(--border))',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                          }}>
+                            <div>
+                              <div style={{ fontWeight: '500' }}>{g.concepto || 'Gasto'}</div>
+                              <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>{g.fecha}</div>
+                            </div>
+                            <div style={{ fontWeight: '600', color: 'hsl(var(--primary))' }}>
+                              {g.importe?.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                            </div>
+                          </div>
+                        ))}
+                        {historialData.albaranes?.map(a => (
+                          <div key={a._id} style={{
+                            padding: '0.75rem',
+                            borderBottom: '1px solid hsl(var(--border))',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                          }}>
+                            <div>
+                              <div style={{ fontWeight: '500' }}>Albarán {a.numero || ''}</div>
+                              <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>{a.fecha}</div>
+                            </div>
+                            <div style={{ fontWeight: '600', color: 'hsl(142 76% 36%)' }}>
+                              {a.total?.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' }) || '-'}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p style={{ textAlign: 'center', color: 'hsl(var(--muted-foreground))' }}>
+                      No hay operaciones registradas con este proveedor
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
