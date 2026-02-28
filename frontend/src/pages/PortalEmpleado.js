@@ -58,7 +58,8 @@ const PortalEmpleado = () => {
     if (activeTab === 'documentos') fetchDocumentos();
     if (activeTab === 'nominas') fetchPrenominas();
     if (activeTab === 'ausencias') fetchAusencias();
-  }, [activeTab]);
+    if (activeTab === 'productividad') fetchProductividad();
+  }, [activeTab, periodoProductividad]);
   
   const fetchNotificaciones = async () => {
     try {
