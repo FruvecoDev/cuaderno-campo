@@ -2073,18 +2073,119 @@ const DocumentosEmpleado = ({ empleados }) => {
     if (!empleadoSeleccionado || !nuevoDocData.nombre) return;
     
     try {
-      await api.post('/api/rrhh/documentos', {
-        empleado_id: empleadoSeleccionado,
-        ...nuevoDocData,
-        fecha_creacion: new Date().toISOString().split('T')[0]
-      });
+      setUploading(true);
+      
+      // Si hay archivo adjunto, usamos FormData
+      if (archivoAdjunto) {
+        const formData = new FormData();
+        formData.append('file', archivoAdjunto);
+        formData.append('empleado_id', empleadoSeleccionado);
+        formData.append('nombre', nuevoDocData.nombre);
+        formData.append('tipo', nuevoDocData.tipo);
+        formData.append('descripcion', nuevoDocData.descripcion || '');
+        formData.append('requiere_firma', nuevoDocData.requiere_firma);
+        formData.append('fecha_creacion', new Date().toISOString().split('T')[0]);
+        
+        await api.upload('/api/rrhh/documentos/upload', formData);
+      } else {
+        // Sin archivo, solo crear metadatos
+        await api.post('/api/rrhh/documentos', {
+          empleado_id: empleadoSeleccionado,
+          ...nuevoDocData,
+          fecha_creacion: new Date().toISOString().split('T')[0]
+        });
+      }
       
       setShowNuevoDoc(false);
       setNuevoDocData({ nombre: '', tipo: 'contrato', descripcion: '', requiere_firma: true });
+      setArchivoAdjunto(null);
       fetchDocumentos();
     } catch (err) {
       console.error('Error:', err);
+    } finally {
+      setUploading(false);
+      setUploadProgress(0);
     }
+  };
+  
+  // Funciones para drag & drop
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+  
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+  
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      handleFileSelect(files[0]);
+    }
+  };
+  
+  const handleFileSelect = (file) => {
+    // Validar tipo de archivo
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'image/jpeg',
+      'image/png',
+      'image/gif'
+    ];
+    
+    if (!allowedTypes.includes(file.type)) {
+      alert('Tipo de archivo no permitido. Use PDF, Word o imágenes.');
+      return;
+    }
+    
+    // Validar tamaño (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('El archivo es demasiado grande. Máximo 10MB.');
+      return;
+    }
+    
+    setArchivoAdjunto(file);
+    
+    // Auto-completar nombre si está vacío
+    if (!nuevoDocData.nombre) {
+      const nombreSinExtension = file.name.replace(/\.[^/.]+$/, '');
+      setNuevoDocData(prev => ({ ...prev, nombre: nombreSinExtension }));
+    }
+  };
+  
+  const handleFileInputChange = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handleFileSelect(e.target.files[0]);
+    }
+  };
+  
+  const removeArchivoAdjunto = () => {
+    setArchivoAdjunto(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+  
+  // Formatear tamaño de archivo
+  const formatFileSize = (bytes) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
   
   const handleAbrirFirma = (doc) => {
