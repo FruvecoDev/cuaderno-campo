@@ -82,6 +82,12 @@ function App() {
           </ProtectedRoute>
         } />
         
+        <Route path="/mapas" element={
+          <ProtectedRoute>
+            <Layout><Mapas /></Layout>
+          </ProtectedRoute>
+        } />
+        
         <Route path="/visitas" element={
           <ProtectedRoute>
             <Layout><Visitas /></Layout>
