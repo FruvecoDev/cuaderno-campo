@@ -62,6 +62,7 @@ const Usuarios = () => {
   useEffect(() => {
     fetchUsers();
     fetchMenuItems();
+    fetchEmpleadosDisponibles();
   }, []);
 
   const fetchUsers = async () => {
@@ -81,6 +82,15 @@ const Usuarios = () => {
       setMenuItems(data.menu_items || []);
     } catch (error) {
       console.error('Error fetching menu items:', error);
+    }
+  };
+
+  const fetchEmpleadosDisponibles = async () => {
+    try {
+      const data = await api.get('/api/auth/empleados-disponibles');
+      setEmpleadosDisponibles(data.empleados || []);
+    } catch (error) {
+      console.error('Error fetching empleados:', error);
     }
   };
 
