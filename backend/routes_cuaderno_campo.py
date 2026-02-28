@@ -125,12 +125,12 @@ def create_tratamientos_table(tratamientos: list, styles) -> list:
     
     for t in tratamientos:
         data.append([
-            t.get('fecha_tratamiento', '-'),
-            t.get('tipo_tratamiento', '-')[:15],
-            t.get('producto_fitosanitario_nombre', '-')[:20],
-            f"{t.get('producto_fitosanitario_dosis', '')} {t.get('producto_fitosanitario_unidad', '')}".strip()[:10],
-            f"{t.get('superficie_aplicacion', 0)} ha",
-            t.get('aplicador_nombre', '-')[:15],
+            (t.get('fecha_tratamiento') or '-'),
+            (t.get('tipo_tratamiento') or '-')[:15],
+            (t.get('producto_fitosanitario_nombre') or '-')[:20],
+            f"{t.get('producto_fitosanitario_dosis') or ''} {t.get('producto_fitosanitario_unidad') or ''}".strip()[:10] or '-',
+            f"{t.get('superficie_aplicacion') or 0} ha",
+            (t.get('aplicador_nombre') or '-')[:15],
             '✓' if t.get('realizado') else '○'
         ])
     
