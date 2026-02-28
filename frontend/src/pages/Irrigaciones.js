@@ -517,7 +517,8 @@ const Irrigaciones = () => {
               <select 
                 className="form-select"
                 value={calcData.parcela_id}
-                onChange={(e) => setCalcData({...calcData, parcela_id: e.target.value})}
+                onChange={(e) => handleCalcParcelaChange(e.target.value)}
+                data-testid="calc-select-parcela"
               >
                 <option value="">Seleccionar...</option>
                 {parcelas.map(p => (
@@ -532,11 +533,19 @@ const Irrigaciones = () => {
                 className="form-input"
                 value={calcData.volumen}
                 onChange={(e) => setCalcData({...calcData, volumen: parseFloat(e.target.value) || 0})}
+                data-testid="calc-input-volumen"
               />
             </div>
             <div className="form-group">
               <label className="form-label">Superficie (ha)</label>
-              <input type="text" className="form-input" value={calcData.superficie} readOnly style={{ backgroundColor: '#f3f4f6' }} />
+              <input 
+                type="text" 
+                className="form-input" 
+                value={calcData.superficie} 
+                readOnly 
+                style={{ backgroundColor: '#f3f4f6', fontWeight: '600' }}
+                data-testid="calc-input-superficie"
+              />
             </div>
             <div className="form-group">
               <label className="form-label">Consumo (m³/ha)</label>
@@ -546,6 +555,7 @@ const Irrigaciones = () => {
                 value={calcData.consumo_por_ha} 
                 readOnly 
                 style={{ backgroundColor: '#dcfce7', fontWeight: 'bold', color: '#16a34a' }}
+                data-testid="calc-input-consumo"
               />
             </div>
           </div>
