@@ -136,6 +136,19 @@ const PortalEmpleado = () => {
     }
   };
   
+  const fetchProductividad = async () => {
+    try {
+      const [prodData, hoyData] = await Promise.all([
+        api.get(`/api/portal-empleado/mi-productividad?periodo=${periodoProductividad}`),
+        api.get('/api/portal-empleado/productividad-hoy')
+      ]);
+      setProductividad(prodData);
+      setProductividadHoy(hoyData);
+    } catch (err) {
+      console.error('Error:', err);
+    }
+  };
+  
   const handleFichar = async (tipo) => {
     try {
       await api.post('/api/portal-empleado/fichar', { tipo });
