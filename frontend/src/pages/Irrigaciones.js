@@ -268,6 +268,7 @@ const Irrigaciones = () => {
       volumen: '',
       coste: 0,
       parcela_id: '',
+      cultivo: '',
       es_planificada: false,
       fecha_planificada: '',
       hora_inicio: '',
@@ -281,8 +282,24 @@ const Irrigaciones = () => {
     });
   };
 
+  // Función para manejar el cambio de parcela en el formulario
+  const handleParcelaChange = (parcelaId) => {
+    if (parcelaId) {
+      const parcelaSeleccionada = parcelas.find(p => p._id === parcelaId);
+      setFormData({
+        ...formData, 
+        parcela_id: parcelaId, 
+        cultivo: parcelaSeleccionada?.cultivo || ''
+      });
+    } else {
+      setFormData({...formData, parcela_id: '', cultivo: ''});
+    }
+  };
+
   const handleEdit = (irrigacion) => {
     setEditingId(irrigacion._id);
+    // Buscar el cultivo de la parcela
+    const parcela = parcelas.find(p => p._id === irrigacion.parcela_id);
     setFormData({
       fecha: irrigacion.fecha || '',
       sistema: irrigacion.sistema || 'Goteo',
