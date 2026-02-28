@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, Filter, Settings, X, Cog, Upload, Image, Eye } from 'lucide-react';
+import { Plus, Edit2, Trash2, Filter, Settings, X, Cog, Upload, Image, Eye, Download, TrendingUp, AlertTriangle, CheckCircle, Wrench } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
