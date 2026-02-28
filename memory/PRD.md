@@ -1786,6 +1786,24 @@ Migrar todas las llamadas `fetch` directas al nuevo servicio centralizado `api.j
 
 
 
+## Notificaciones Email para RRHH (28/02/2026) - PREPARADO
+
+Sistema de notificaciones por email integrado con el módulo RRHH.
+
+**Emails automáticos configurados:**
+- **Ausencia aprobada/rechazada**: Email detallado con tipo, fechas, estado y comentario
+- **Nuevo documento**: Email con detalles del documento y alerta si requiere firma
+
+**Templates de email creados:**
+- `send_ausencia_notification()` - Email profesional con tabla de datos
+- `send_documento_notification()` - Email con alerta visual si requiere firma
+
+**Estado**: ⚠️ REQUIERE `RESEND_API_KEY` para funcionar
+- Las notificaciones in-app funcionan sin API key
+- Para activar emails: añadir `RESEND_API_KEY` en `/app/backend/.env`
+
+---
+
 ## Notificaciones Push para Portal del Empleado (28/02/2026) - COMPLETADO
 
 Sistema de notificaciones integrado en el Portal del Empleado.
