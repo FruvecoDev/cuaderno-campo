@@ -2351,17 +2351,52 @@ async def aprobar_ausencia(ausencia_id: str, aprobador: dict):
     
     estado = aprobador.get("estado", "aprobada")  # aprobada o rechazada
     
+    # Obtener la ausencia antes de actualizar para notificar
+    ausencia = await database.ausencias.find_one({"_id": ObjectId(ausencia_id)})
+    if not ausencia:
+        raise HTTPException(status_code=404, detail="Ausencia no encontrada")
+    
     result = await database.ausencias.update_one(
         {"_id": ObjectId(ausencia_id)},
         {"$set": {
             "estado": estado,
             "aprobada_por": aprobador.get("aprobada_por"),
-            "fecha_aprobacion": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "fecha_aprobacion": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "comentario_aprobador": aprobador.get("comentario", "")
         }}
     )
     
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Ausencia no encontrada")
+    # Crear notificación para el empleado
+    empleado = await database.empleados.find_one({"_id": ObjectId(ausencia["empleado_id"])})
+    if empleado and empleado.get("email"):
+        tipo_ausencia = ausencia.get("tipo", "ausencia").replace("_", " ").capitalize()
+        fecha_inicio = ausencia.get("fecha_inicio", "")
+        fecha_fin = ausencia.get("fecha_fin", "")
+        
+        if estado == "aprobada":
+            titulo = f"Solicitud de {tipo_ausencia} Aprobada"
+            mensaje = f"Tu solicitud de {tipo_ausencia} del {fecha_inicio} al {fecha_fin} ha sido aprobada."
+            tipo_notif = "success"
+        else:
+            titulo = f"Solicitud de {tipo_ausencia} Rechazada"
+            mensaje = f"Tu solicitud de {tipo_ausencia} del {fecha_inicio} al {fecha_fin} ha sido rechazada."
+            if aprobador.get("comentario"):
+                mensaje += f" Motivo: {aprobador.get('comentario')}"
+            tipo_notif = "warning"
+        
+        # Insertar notificación
+        notificacion = {
+            "titulo": titulo,
+            "mensaje": mensaje,
+            "tipo": tipo_notif,
+            "enlace": "/portal-empleado",
+            "destinatarios": [empleado.get("email")],
+            "prioridad": "alta",
+            "datos_extra": {"ausencia_id": ausencia_id, "tipo": "ausencia"},
+            "created_at": datetime.now(),
+            "leida_por": []
+        }
+        await database.notificaciones.insert_one(notificacion)
     
     return {"success": True}
 
