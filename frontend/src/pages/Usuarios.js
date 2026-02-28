@@ -35,6 +35,13 @@ const Usuarios = () => {
   const [selectedUserForTipoOp, setSelectedUserForTipoOp] = useState(null);
   const [tipoOperacionValue, setTipoOperacionValue] = useState('ambos');
   const [savingTipoOp, setSavingTipoOp] = useState(false);
+  // Vincular empleado modal
+  const [showVincularEmpleadoModal, setShowVincularEmpleadoModal] = useState(false);
+  const [selectedUserForVincular, setSelectedUserForVincular] = useState(null);
+  const [empleadosDisponibles, setEmpleadosDisponibles] = useState([]);
+  const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState('');
+  const [busquedaEmpleado, setBusquedaEmpleado] = useState('');
+  const [savingVinculacion, setSavingVinculacion] = useState(false);
   const { token, user: currentUser } = useAuth();
   
   const ROLES = [
