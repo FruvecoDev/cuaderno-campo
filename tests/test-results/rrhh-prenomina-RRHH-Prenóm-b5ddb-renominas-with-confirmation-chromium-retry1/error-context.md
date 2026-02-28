@@ -1,0 +1,966 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - img "Logo" [ref=e8]
+      - button "Colapsar menú" [ref=e9] [cursor=pointer]:
+        - img [ref=e11]
+      - navigation [ref=e14]:
+        - generic [ref=e15]:
+          - generic [ref=e16]:
+            - generic "Colapsar sección" [ref=e18] [cursor=pointer]:
+              - generic [ref=e19]: General
+              - img [ref=e21]
+            - generic [ref=e24]:
+              - link "Dashboard" [ref=e25] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=e26]
+                - text: Dashboard
+              - link "Asistente IA" [ref=e31] [cursor=pointer]:
+                - /url: /asistente-ia
+                - img [ref=e32]
+                - text: Asistente IA
+          - generic [ref=e40]:
+            - generic "Colapsar sección" [ref=e42] [cursor=pointer]:
+              - generic [ref=e43]: Gestión Principal
+              - img [ref=e45]
+            - generic [ref=e48]:
+              - link "Contratos" [ref=e49] [cursor=pointer]:
+                - /url: /contratos
+                - img [ref=e50]
+                - text: Contratos
+              - link "Parcelas" [ref=e53] [cursor=pointer]:
+                - /url: /parcelas
+                - img [ref=e54]
+                - text: Parcelas
+              - link "Fincas" [ref=e57] [cursor=pointer]:
+                - /url: /fincas
+                - img [ref=e58]
+                - text: Fincas
+          - generic [ref=e61]:
+            - generic "Colapsar sección" [ref=e63] [cursor=pointer]:
+              - generic [ref=e64]: Actividades
+              - img [ref=e66]
+            - generic [ref=e69]:
+              - link "Visitas" [ref=e70] [cursor=pointer]:
+                - /url: /visitas
+                - img [ref=e71]
+                - text: Visitas
+              - link "Recomendaciones" [ref=e73] [cursor=pointer]:
+                - /url: /recomendaciones
+                - img [ref=e74]
+                - text: Recomendaciones
+              - link "Alertas Climáticas" [ref=e77] [cursor=pointer]:
+                - /url: /alertas-clima
+                - img [ref=e78]
+                - text: Alertas Climáticas
+              - link "Tareas" [ref=e83] [cursor=pointer]:
+                - /url: /tareas
+                - img [ref=e84]
+                - text: Tareas
+              - link "Tratamientos" [ref=e87] [cursor=pointer]:
+                - /url: /tratamientos
+                - img [ref=e88]
+                - text: Tratamientos
+              - link "Irrigaciones" [ref=e91] [cursor=pointer]:
+                - /url: /irrigaciones
+                - img [ref=e92]
+                - text: Irrigaciones
+              - link "Evaluaciones" [ref=e95] [cursor=pointer]:
+                - /url: /evaluaciones
+                - img [ref=e96]
+                - text: Evaluaciones
+          - generic [ref=e100]:
+            - generic "Colapsar sección" [ref=e102] [cursor=pointer]:
+              - generic [ref=e103]: Administración
+              - img [ref=e105]
+            - generic [ref=e108]:
+              - link "Recetas" [ref=e109] [cursor=pointer]:
+                - /url: /recetas
+                - img [ref=e110]
+                - text: Recetas
+              - link "Albaranes" [ref=e112] [cursor=pointer]:
+                - /url: /albaranes
+                - img [ref=e113]
+                - text: Albaranes
+              - link "Cosechas" [ref=e116] [cursor=pointer]:
+                - /url: /cosechas
+                - img [ref=e117]
+                - text: Cosechas
+              - link "Documentos" [ref=e126] [cursor=pointer]:
+                - /url: /documentos
+                - img [ref=e127]
+                - text: Documentos
+              - link "Recursos Humanos" [ref=e129] [cursor=pointer]:
+                - /url: /rrhh
+                - img [ref=e130]
+                - text: Recursos Humanos
+              - link "Informes Gastos" [ref=e135] [cursor=pointer]:
+                - /url: /informes-gastos
+                - img [ref=e136]
+                - text: Informes Gastos
+              - link "Informes Ingresos" [ref=e138] [cursor=pointer]:
+                - /url: /informes-ingresos
+                - img [ref=e139]
+                - text: Informes Ingresos
+              - link "Liquidación Comisiones" [ref=e142] [cursor=pointer]:
+                - /url: /liquidacion-comisiones
+                - img [ref=e143]
+                - text: Liquidación Comisiones
+          - generic [ref=e146]:
+            - generic "Colapsar sección" [ref=e148] [cursor=pointer]:
+              - generic [ref=e149]: Catálogos
+              - img [ref=e151]
+            - generic [ref=e154]:
+              - link "Proveedores" [ref=e155] [cursor=pointer]:
+                - /url: /proveedores
+                - img [ref=e156]
+                - text: Proveedores
+              - link "Clientes" [ref=e160] [cursor=pointer]:
+                - /url: /clientes
+                - img [ref=e161]
+                - text: Clientes
+              - link "Cultivos" [ref=e166] [cursor=pointer]:
+                - /url: /cultivos
+                - img [ref=e167]
+                - text: Cultivos
+              - link "Maquinaria" [ref=e170] [cursor=pointer]:
+                - /url: /maquinaria
+                - img [ref=e171]
+                - text: Maquinaria
+              - link "Fitosanitarios" [ref=e182] [cursor=pointer]:
+                - /url: /fitosanitarios
+                - img [ref=e183]
+                - text: Fitosanitarios
+              - link "Técnicos Aplicadores" [ref=e185] [cursor=pointer]:
+                - /url: /tecnicos-aplicadores
+                - img [ref=e186]
+                - text: Técnicos Aplicadores
+              - link "Artículos Explotación" [ref=e190] [cursor=pointer]:
+                - /url: /articulos-explotacion
+                - img [ref=e191]
+                - text: Artículos Explotación
+              - link "Agentes" [ref=e195] [cursor=pointer]:
+                - /url: /agentes
+                - img [ref=e196]
+                - text: Agentes
+          - generic [ref=e201]:
+            - generic "Colapsar sección" [ref=e203] [cursor=pointer]:
+              - generic [ref=e204]: Configuración
+              - img [ref=e206]
+            - generic [ref=e209]:
+              - link "Usuarios" [ref=e210] [cursor=pointer]:
+                - /url: /usuarios
+                - img [ref=e211]
+                - text: Usuarios
+              - link "Traducciones" [ref=e216] [cursor=pointer]:
+                - /url: /traducciones
+                - img [ref=e217]
+                - text: Traducciones
+              - link "Configuración App" [ref=e220] [cursor=pointer]:
+                - /url: /configuracion
+                - img [ref=e221]
+                - text: Configuración App
+      - generic [ref=e225]:
+        - generic [ref=e226]:
+          - img [ref=e228]
+          - generic [ref=e231]:
+            - generic [ref=e232]: Administrador FRUVECO
+            - generic [ref=e233]: Admin
+          - button "ES" [ref=e235] [cursor=pointer]:
+            - img [ref=e236]
+            - generic [ref=e239]: ES
+        - button "Cerrar Sesión" [ref=e240] [cursor=pointer]:
+          - img [ref=e241]
+          - text: Cerrar Sesión
+    - generic [ref=e244]:
+      - generic [ref=e245]:
+        - button [ref=e247] [cursor=pointer]:
+          - img [ref=e248]
+        - button "Conectado" [ref=e252] [cursor=pointer]:
+          - img [ref=e254]
+          - generic [ref=e258]: Conectado
+      - generic [ref=e261]:
+        - generic [ref=e263]:
+          - heading "Recursos Humanos" [level=1] [ref=e264]
+          - paragraph [ref=e265]: Gestión de personal, fichajes y productividad
+        - generic [ref=e267]:
+          - generic [ref=e269]:
+            - img [ref=e271]
+            - generic [ref=e276]:
+              - generic [ref=e277]: "28"
+              - generic [ref=e278]: Total Empleados
+          - generic [ref=e280]:
+            - img [ref=e282]
+            - generic [ref=e286]:
+              - generic [ref=e287]: "2"
+              - generic [ref=e288]: Activos
+          - generic [ref=e290]:
+            - img [ref=e292]
+            - generic [ref=e297]:
+              - generic [ref=e298]: "26"
+              - generic [ref=e299]: Bajas
+        - generic [ref=e301]:
+          - button "Empleados" [ref=e302] [cursor=pointer]:
+            - img [ref=e303]
+            - text: Empleados
+          - button "Control Horario" [ref=e308] [cursor=pointer]:
+            - img [ref=e309]
+            - text: Control Horario
+          - button "Productividad" [ref=e312] [cursor=pointer]:
+            - img [ref=e313]
+            - text: Productividad
+          - button "Documentos" [ref=e316] [cursor=pointer]:
+            - img [ref=e317]
+            - text: Documentos
+          - button "Prenómina" [ref=e320] [cursor=pointer]:
+            - img [ref=e321]
+            - text: Prenómina
+        - generic [ref=e323]:
+          - generic [ref=e324]:
+            - generic [ref=e325]:
+              - img [ref=e326]
+              - textbox "Buscar por nombre, DNI o código..." [ref=e329]
+            - combobox [ref=e330]:
+              - option "Todos los puestos" [selected]
+              - generic:
+                - option
+                - option
+                - option
+                - option
+                - option
+                - option
+            - combobox [ref=e331]:
+              - option "Todos" [selected]
+              - option "Activos"
+              - option "Bajas"
+            - button "Nuevo Empleado" [ref=e332] [cursor=pointer]:
+              - img [ref=e333]
+              - text: Nuevo Empleado
+          - table [ref=e336]:
+            - rowgroup [ref=e337]:
+              - row "Código Nombre DNI/NIE Puesto Contrato Fecha Alta Estado Acciones" [ref=e338]:
+                - columnheader "Código" [ref=e339]
+                - columnheader "Nombre" [ref=e340]
+                - columnheader "DNI/NIE" [ref=e341]
+                - columnheader "Puesto" [ref=e342]
+                - columnheader "Contrato" [ref=e343]
+                - columnheader "Fecha Alta" [ref=e344]
+                - columnheader "Estado" [ref=e345]
+                - columnheader "Acciones" [ref=e346]
+            - rowgroup [ref=e347]:
+              - generic [ref=e348]:
+                - row "EMP-0001 Juan García López juan.garcia@fruveco.com 12345678A Operario Temporal 2025-01-15 Activo" [ref=e349]:
+                  - cell "EMP-0001" [ref=e350]:
+                    - generic [ref=e351]: EMP-0001
+                  - cell "Juan García López juan.garcia@fruveco.com" [ref=e352]:
+                    - generic [ref=e353]:
+                      - img [ref=e356]
+                      - generic [ref=e359]:
+                        - generic [ref=e360]: Juan García López
+                        - generic [ref=e362]: juan.garcia@fruveco.com
+                  - cell "12345678A" [ref=e363]
+                  - cell "Operario" [ref=e364]
+                  - cell "Temporal" [ref=e365]
+                  - cell "2025-01-15" [ref=e366]
+                  - cell "Activo" [ref=e367]:
+                    - generic [ref=e368]: Activo
+                  - cell [ref=e369]:
+                    - generic [ref=e370]:
+                      - button "Ver detalle" [ref=e371] [cursor=pointer]:
+                        - img [ref=e372]
+                      - button "Ver QR" [ref=e375] [cursor=pointer]:
+                        - img [ref=e376]
+                      - button "Editar" [ref=e382] [cursor=pointer]:
+                        - img [ref=e383]
+                      - button "Dar de baja" [ref=e386] [cursor=pointer]:
+                        - img [ref=e387]
+                - row "EMP-0002 Juan García López juan.garcia@fruveco.com 12345678A Operario Temporal 2025-01-15 Activo" [ref=e390]:
+                  - cell "EMP-0002" [ref=e391]:
+                    - generic [ref=e392]: EMP-0002
+                  - cell "Juan García López juan.garcia@fruveco.com" [ref=e393]:
+                    - generic [ref=e394]:
+                      - img [ref=e397]
+                      - generic [ref=e400]:
+                        - generic [ref=e401]: Juan García López
+                        - generic [ref=e403]: juan.garcia@fruveco.com
+                  - cell "12345678A" [ref=e404]
+                  - cell "Operario" [ref=e405]
+                  - cell "Temporal" [ref=e406]
+                  - cell "2025-01-15" [ref=e407]
+                  - cell "Activo" [ref=e408]:
+                    - generic [ref=e409]: Activo
+                  - cell [ref=e410]:
+                    - generic [ref=e411]:
+                      - button "Ver detalle" [ref=e412] [cursor=pointer]:
+                        - img [ref=e413]
+                      - button "Ver QR" [ref=e416] [cursor=pointer]:
+                        - img [ref=e417]
+                      - button "Editar" [ref=e423] [cursor=pointer]:
+                        - img [ref=e424]
+                      - button "Dar de baja" [ref=e427] [cursor=pointer]:
+                        - img [ref=e428]
+                - row "EMP-0018 TEST_20260227154527_Juan García_0ef61ccf test_0ef61ccf@test.com TEST0ef61ccf Encargado Temporal 2026-02-27 Baja" [ref=e431]:
+                  - cell "EMP-0018" [ref=e432]:
+                    - generic [ref=e433]: EMP-0018
+                  - cell "TEST_20260227154527_Juan García_0ef61ccf test_0ef61ccf@test.com" [ref=e434]:
+                    - generic [ref=e435]:
+                      - img [ref=e438]
+                      - generic [ref=e441]:
+                        - generic [ref=e442]: TEST_20260227154527_Juan García_0ef61ccf
+                        - generic [ref=e444]: test_0ef61ccf@test.com
+                  - cell "TEST0ef61ccf" [ref=e445]
+                  - cell "Encargado" [ref=e446]
+                  - cell "Temporal" [ref=e447]
+                  - cell "2026-02-27" [ref=e448]
+                  - cell "Baja" [ref=e449]:
+                    - generic [ref=e450]: Baja
+                  - cell [ref=e451]:
+                    - generic [ref=e452]:
+                      - button "Ver detalle" [ref=e453] [cursor=pointer]:
+                        - img [ref=e454]
+                      - button "Ver QR" [ref=e457] [cursor=pointer]:
+                        - img [ref=e458]
+                      - button "Editar" [ref=e464] [cursor=pointer]:
+                        - img [ref=e465]
+                - row "EMP-0021 TEST_20260227154527_Juan García_1265705e test_1265705e@test.com TEST1265705e Operario Temporal 2026-02-27 Baja" [ref=e467]:
+                  - cell "EMP-0021" [ref=e468]:
+                    - generic [ref=e469]: EMP-0021
+                  - cell "TEST_20260227154527_Juan García_1265705e test_1265705e@test.com" [ref=e470]:
+                    - generic [ref=e471]:
+                      - img [ref=e474]
+                      - generic [ref=e477]:
+                        - generic [ref=e478]: TEST_20260227154527_Juan García_1265705e
+                        - generic [ref=e480]: test_1265705e@test.com
+                  - cell "TEST1265705e" [ref=e481]
+                  - cell "Operario" [ref=e482]
+                  - cell "Temporal" [ref=e483]
+                  - cell "2026-02-27" [ref=e484]
+                  - cell "Baja" [ref=e485]:
+                    - generic [ref=e486]: Baja
+                  - cell [ref=e487]:
+                    - generic [ref=e488]:
+                      - button "Ver detalle" [ref=e489] [cursor=pointer]:
+                        - img [ref=e490]
+                      - button "Ver QR" [ref=e493] [cursor=pointer]:
+                        - img [ref=e494]
+                      - button "Editar" [ref=e500] [cursor=pointer]:
+                        - img [ref=e501]
+                - row "EMP-0019 TEST_20260227154527_Juan García_1d1c4417 test_1d1c4417@test.com TEST1d1c4417 Operario Temporal 2026-02-27 Baja" [ref=e503]:
+                  - cell "EMP-0019" [ref=e504]:
+                    - generic [ref=e505]: EMP-0019
+                  - cell "TEST_20260227154527_Juan García_1d1c4417 test_1d1c4417@test.com" [ref=e506]:
+                    - generic [ref=e507]:
+                      - img [ref=e510]
+                      - generic [ref=e513]:
+                        - generic [ref=e514]: TEST_20260227154527_Juan García_1d1c4417
+                        - generic [ref=e516]: test_1d1c4417@test.com
+                  - cell "TEST1d1c4417" [ref=e517]
+                  - cell "Operario" [ref=e518]
+                  - cell "Temporal" [ref=e519]
+                  - cell "2026-02-27" [ref=e520]
+                  - cell "Baja" [ref=e521]:
+                    - generic [ref=e522]: Baja
+                  - cell [ref=e523]:
+                    - generic [ref=e524]:
+                      - button "Ver detalle" [ref=e525] [cursor=pointer]:
+                        - img [ref=e526]
+                      - button "Ver QR" [ref=e529] [cursor=pointer]:
+                        - img [ref=e530]
+                      - button "Editar" [ref=e536] [cursor=pointer]:
+                        - img [ref=e537]
+                - row "EMP-0009 TEST_20260227152151_Juan García_299a79e5 test_299a79e5@test.com TEST299a79e5 Operario Temporal 2026-02-27 Baja" [ref=e539]:
+                  - cell "EMP-0009" [ref=e540]:
+                    - generic [ref=e541]: EMP-0009
+                  - cell "TEST_20260227152151_Juan García_299a79e5 test_299a79e5@test.com" [ref=e542]:
+                    - generic [ref=e543]:
+                      - img [ref=e546]
+                      - generic [ref=e549]:
+                        - generic [ref=e550]: TEST_20260227152151_Juan García_299a79e5
+                        - generic [ref=e552]: test_299a79e5@test.com
+                  - cell "TEST299a79e5" [ref=e553]
+                  - cell "Operario" [ref=e554]
+                  - cell "Temporal" [ref=e555]
+                  - cell "2026-02-27" [ref=e556]
+                  - cell "Baja" [ref=e557]:
+                    - generic [ref=e558]: Baja
+                  - cell [ref=e559]:
+                    - generic [ref=e560]:
+                      - button "Ver detalle" [ref=e561] [cursor=pointer]:
+                        - img [ref=e562]
+                      - button "Ver QR" [ref=e565] [cursor=pointer]:
+                        - img [ref=e566]
+                      - button "Editar" [ref=e572] [cursor=pointer]:
+                        - img [ref=e573]
+                - row "EMP-0003 TEST_20260227152151_Juan García_37e04550 test_37e04550@test.com TEST37e04550 Operario Temporal 2026-02-27 Baja" [ref=e575]:
+                  - cell "EMP-0003" [ref=e576]:
+                    - generic [ref=e577]: EMP-0003
+                  - cell "TEST_20260227152151_Juan García_37e04550 test_37e04550@test.com" [ref=e578]:
+                    - generic [ref=e579]:
+                      - img [ref=e582]
+                      - generic [ref=e585]:
+                        - generic [ref=e586]: TEST_20260227152151_Juan García_37e04550
+                        - generic [ref=e588]: test_37e04550@test.com
+                  - cell "TEST37e04550" [ref=e589]
+                  - cell "Operario" [ref=e590]
+                  - cell "Temporal" [ref=e591]
+                  - cell "2026-02-27" [ref=e592]
+                  - cell "Baja" [ref=e593]:
+                    - generic [ref=e594]: Baja
+                  - cell [ref=e595]:
+                    - generic [ref=e596]:
+                      - button "Ver detalle" [ref=e597] [cursor=pointer]:
+                        - img [ref=e598]
+                      - button "Ver QR" [ref=e601] [cursor=pointer]:
+                        - img [ref=e602]
+                      - button "Editar" [ref=e608] [cursor=pointer]:
+                        - img [ref=e609]
+                - row "EMP-0017 TEST_20260227154527_Juan García_444d483d test_444d483d@test.com TEST444d483d Operario Temporal 2026-02-27 Baja" [ref=e611]:
+                  - cell "EMP-0017" [ref=e612]:
+                    - generic [ref=e613]: EMP-0017
+                  - cell "TEST_20260227154527_Juan García_444d483d test_444d483d@test.com" [ref=e614]:
+                    - generic [ref=e615]:
+                      - img [ref=e618]
+                      - generic [ref=e621]:
+                        - generic [ref=e622]: TEST_20260227154527_Juan García_444d483d
+                        - generic [ref=e624]: test_444d483d@test.com
+                  - cell "TEST444d483d" [ref=e625]
+                  - cell "Operario" [ref=e626]
+                  - cell "Temporal" [ref=e627]
+                  - cell "2026-02-27" [ref=e628]
+                  - cell "Baja" [ref=e629]:
+                    - generic [ref=e630]: Baja
+                  - cell [ref=e631]:
+                    - generic [ref=e632]:
+                      - button "Ver detalle" [ref=e633] [cursor=pointer]:
+                        - img [ref=e634]
+                      - button "Ver QR" [ref=e637] [cursor=pointer]:
+                        - img [ref=e638]
+                      - button "Editar" [ref=e644] [cursor=pointer]:
+                        - img [ref=e645]
+                - row "EMP-0010 TEST_20260227152151_Juan García_48b739d1 test_48b739d1@test.com TEST48b739d1 Operario Temporal 2026-02-27 Baja" [ref=e647]:
+                  - cell "EMP-0010" [ref=e648]:
+                    - generic [ref=e649]: EMP-0010
+                  - cell "TEST_20260227152151_Juan García_48b739d1 test_48b739d1@test.com" [ref=e650]:
+                    - generic [ref=e651]:
+                      - img [ref=e654]
+                      - generic [ref=e657]:
+                        - generic [ref=e658]: TEST_20260227152151_Juan García_48b739d1
+                        - generic [ref=e660]: test_48b739d1@test.com
+                  - cell "TEST48b739d1" [ref=e661]
+                  - cell "Operario" [ref=e662]
+                  - cell "Temporal" [ref=e663]
+                  - cell "2026-02-27" [ref=e664]
+                  - cell "Baja" [ref=e665]:
+                    - generic [ref=e666]: Baja
+                  - cell [ref=e667]:
+                    - generic [ref=e668]:
+                      - button "Ver detalle" [ref=e669] [cursor=pointer]:
+                        - img [ref=e670]
+                      - button "Ver QR" [ref=e673] [cursor=pointer]:
+                        - img [ref=e674]
+                      - button "Editar" [ref=e680] [cursor=pointer]:
+                        - img [ref=e681]
+                - row "EMP-0013 TEST_20260227152151_Juan García_4c8d8f20 test_4c8d8f20@test.com TEST4c8d8f20 Operario Temporal 2026-02-27 Baja" [ref=e683]:
+                  - cell "EMP-0013" [ref=e684]:
+                    - generic [ref=e685]: EMP-0013
+                  - cell "TEST_20260227152151_Juan García_4c8d8f20 test_4c8d8f20@test.com" [ref=e686]:
+                    - generic [ref=e687]:
+                      - img [ref=e690]
+                      - generic [ref=e693]:
+                        - generic [ref=e694]: TEST_20260227152151_Juan García_4c8d8f20
+                        - generic [ref=e696]: test_4c8d8f20@test.com
+                  - cell "TEST4c8d8f20" [ref=e697]
+                  - cell "Operario" [ref=e698]
+                  - cell "Temporal" [ref=e699]
+                  - cell "2026-02-27" [ref=e700]
+                  - cell "Baja" [ref=e701]:
+                    - generic [ref=e702]: Baja
+                  - cell [ref=e703]:
+                    - generic [ref=e704]:
+                      - button "Ver detalle" [ref=e705] [cursor=pointer]:
+                        - img [ref=e706]
+                      - button "Ver QR" [ref=e709] [cursor=pointer]:
+                        - img [ref=e710]
+                      - button "Editar" [ref=e716] [cursor=pointer]:
+                        - img [ref=e717]
+                - row "EMP-0023 TEST_20260227154527_Juan García_569b6b1d test_569b6b1d@test.com TEST569b6b1d Operario Temporal 2026-02-27 Baja" [ref=e719]:
+                  - cell "EMP-0023" [ref=e720]:
+                    - generic [ref=e721]: EMP-0023
+                  - cell "TEST_20260227154527_Juan García_569b6b1d test_569b6b1d@test.com" [ref=e722]:
+                    - generic [ref=e723]:
+                      - img [ref=e726]
+                      - generic [ref=e729]:
+                        - generic [ref=e730]: TEST_20260227154527_Juan García_569b6b1d
+                        - generic [ref=e732]: test_569b6b1d@test.com
+                  - cell "TEST569b6b1d" [ref=e733]
+                  - cell "Operario" [ref=e734]
+                  - cell "Temporal" [ref=e735]
+                  - cell "2026-02-27" [ref=e736]
+                  - cell "Baja" [ref=e737]:
+                    - generic [ref=e738]: Baja
+                  - cell [ref=e739]:
+                    - generic [ref=e740]:
+                      - button "Ver detalle" [ref=e741] [cursor=pointer]:
+                        - img [ref=e742]
+                      - button "Ver QR" [ref=e745] [cursor=pointer]:
+                        - img [ref=e746]
+                      - button "Editar" [ref=e752] [cursor=pointer]:
+                        - img [ref=e753]
+                - row "EMP-0008 TEST_20260227152151_Juan García_5e4d2a2a test_5e4d2a2a@test.com TEST5e4d2a2a Operario Temporal 2026-02-27 Baja" [ref=e755]:
+                  - cell "EMP-0008" [ref=e756]:
+                    - generic [ref=e757]: EMP-0008
+                  - cell "TEST_20260227152151_Juan García_5e4d2a2a test_5e4d2a2a@test.com" [ref=e758]:
+                    - generic [ref=e759]:
+                      - img [ref=e762]
+                      - generic [ref=e765]:
+                        - generic [ref=e766]: TEST_20260227152151_Juan García_5e4d2a2a
+                        - generic [ref=e768]: test_5e4d2a2a@test.com
+                  - cell "TEST5e4d2a2a" [ref=e769]
+                  - cell "Operario" [ref=e770]
+                  - cell "Temporal" [ref=e771]
+                  - cell "2026-02-27" [ref=e772]
+                  - cell "Baja" [ref=e773]:
+                    - generic [ref=e774]: Baja
+                  - cell [ref=e775]:
+                    - generic [ref=e776]:
+                      - button "Ver detalle" [ref=e777] [cursor=pointer]:
+                        - img [ref=e778]
+                      - button "Ver QR" [ref=e781] [cursor=pointer]:
+                        - img [ref=e782]
+                      - button "Editar" [ref=e788] [cursor=pointer]:
+                        - img [ref=e789]
+                - row "EMP-0022 TEST_20260227154527_Juan García_60b59bac test_60b59bac@test.com TEST60b59bac Operario Temporal 2026-02-27 Baja" [ref=e791]:
+                  - cell "EMP-0022" [ref=e792]:
+                    - generic [ref=e793]: EMP-0022
+                  - cell "TEST_20260227154527_Juan García_60b59bac test_60b59bac@test.com" [ref=e794]:
+                    - generic [ref=e795]:
+                      - img [ref=e798]
+                      - generic [ref=e801]:
+                        - generic [ref=e802]: TEST_20260227154527_Juan García_60b59bac
+                        - generic [ref=e804]: test_60b59bac@test.com
+                  - cell "TEST60b59bac" [ref=e805]
+                  - cell "Operario" [ref=e806]
+                  - cell "Temporal" [ref=e807]
+                  - cell "2026-02-27" [ref=e808]
+                  - cell "Baja" [ref=e809]:
+                    - generic [ref=e810]: Baja
+                  - cell [ref=e811]:
+                    - generic [ref=e812]:
+                      - button "Ver detalle" [ref=e813] [cursor=pointer]:
+                        - img [ref=e814]
+                      - button "Ver QR" [ref=e817] [cursor=pointer]:
+                        - img [ref=e818]
+                      - button "Editar" [ref=e824] [cursor=pointer]:
+                        - img [ref=e825]
+                - row "EMP-0025 TEST_20260227154527_Juan García_632f6376 test_632f6376@test.com TEST632f6376 Operario Temporal 2026-02-27 Baja" [ref=e827]:
+                  - cell "EMP-0025" [ref=e828]:
+                    - generic [ref=e829]: EMP-0025
+                  - cell "TEST_20260227154527_Juan García_632f6376 test_632f6376@test.com" [ref=e830]:
+                    - generic [ref=e831]:
+                      - img [ref=e834]
+                      - generic [ref=e837]:
+                        - generic [ref=e838]: TEST_20260227154527_Juan García_632f6376
+                        - generic [ref=e840]: test_632f6376@test.com
+                  - cell "TEST632f6376" [ref=e841]
+                  - cell "Operario" [ref=e842]
+                  - cell "Temporal" [ref=e843]
+                  - cell "2026-02-27" [ref=e844]
+                  - cell "Baja" [ref=e845]:
+                    - generic [ref=e846]: Baja
+                  - cell [ref=e847]:
+                    - generic [ref=e848]:
+                      - button "Ver detalle" [ref=e849] [cursor=pointer]:
+                        - img [ref=e850]
+                      - button "Ver QR" [ref=e853] [cursor=pointer]:
+                        - img [ref=e854]
+                      - button "Editar" [ref=e860] [cursor=pointer]:
+                        - img [ref=e861]
+                - row "EMP-0011 TEST_20260227152151_Juan García_674ed4ef test_674ed4ef@test.com TEST674ed4ef Operario Temporal 2026-02-27 Baja" [ref=e863]:
+                  - cell "EMP-0011" [ref=e864]:
+                    - generic [ref=e865]: EMP-0011
+                  - cell "TEST_20260227152151_Juan García_674ed4ef test_674ed4ef@test.com" [ref=e866]:
+                    - generic [ref=e867]:
+                      - img [ref=e870]
+                      - generic [ref=e873]:
+                        - generic [ref=e874]: TEST_20260227152151_Juan García_674ed4ef
+                        - generic [ref=e876]: test_674ed4ef@test.com
+                  - cell "TEST674ed4ef" [ref=e877]
+                  - cell "Operario" [ref=e878]
+                  - cell "Temporal" [ref=e879]
+                  - cell "2026-02-27" [ref=e880]
+                  - cell "Baja" [ref=e881]:
+                    - generic [ref=e882]: Baja
+                  - cell [ref=e883]:
+                    - generic [ref=e884]:
+                      - button "Ver detalle" [ref=e885] [cursor=pointer]:
+                        - img [ref=e886]
+                      - button "Ver QR" [ref=e889] [cursor=pointer]:
+                        - img [ref=e890]
+                      - button "Editar" [ref=e896] [cursor=pointer]:
+                        - img [ref=e897]
+                - row "EMP-0016 TEST_20260227154527_Juan García_6cfa81b5 test_6cfa81b5@test.com TEST6cfa81b5 Operario Temporal 2026-02-27 Baja" [ref=e899]:
+                  - cell "EMP-0016" [ref=e900]:
+                    - generic [ref=e901]: EMP-0016
+                  - cell "TEST_20260227154527_Juan García_6cfa81b5 test_6cfa81b5@test.com" [ref=e902]:
+                    - generic [ref=e903]:
+                      - img [ref=e906]
+                      - generic [ref=e909]:
+                        - generic [ref=e910]: TEST_20260227154527_Juan García_6cfa81b5
+                        - generic [ref=e912]: test_6cfa81b5@test.com
+                  - cell "TEST6cfa81b5" [ref=e913]
+                  - cell "Operario" [ref=e914]
+                  - cell "Temporal" [ref=e915]
+                  - cell "2026-02-27" [ref=e916]
+                  - cell "Baja" [ref=e917]:
+                    - generic [ref=e918]: Baja
+                  - cell [ref=e919]:
+                    - generic [ref=e920]:
+                      - button "Ver detalle" [ref=e921] [cursor=pointer]:
+                        - img [ref=e922]
+                      - button "Ver QR" [ref=e925] [cursor=pointer]:
+                        - img [ref=e926]
+                      - button "Editar" [ref=e932] [cursor=pointer]:
+                        - img [ref=e933]
+                - row "EMP-0026 TEST_20260227154527_Juan García_6f7acf2b test_6f7acf2b@test.com TEST6f7acf2b Operario Temporal 2026-02-27 Baja" [ref=e935]:
+                  - cell "EMP-0026" [ref=e936]:
+                    - generic [ref=e937]: EMP-0026
+                  - cell "TEST_20260227154527_Juan García_6f7acf2b test_6f7acf2b@test.com" [ref=e938]:
+                    - generic [ref=e939]:
+                      - img [ref=e942]
+                      - generic [ref=e945]:
+                        - generic [ref=e946]: TEST_20260227154527_Juan García_6f7acf2b
+                        - generic [ref=e948]: test_6f7acf2b@test.com
+                  - cell "TEST6f7acf2b" [ref=e949]
+                  - cell "Operario" [ref=e950]
+                  - cell "Temporal" [ref=e951]
+                  - cell "2026-02-27" [ref=e952]
+                  - cell "Baja" [ref=e953]:
+                    - generic [ref=e954]: Baja
+                  - cell [ref=e955]:
+                    - generic [ref=e956]:
+                      - button "Ver detalle" [ref=e957] [cursor=pointer]:
+                        - img [ref=e958]
+                      - button "Ver QR" [ref=e961] [cursor=pointer]:
+                        - img [ref=e962]
+                      - button "Editar" [ref=e968] [cursor=pointer]:
+                        - img [ref=e969]
+                - row "EMP-0004 TEST_20260227152151_Juan García_6fe55e96 test_6fe55e96@test.com TEST6fe55e96 Operario Temporal 2026-02-27 Baja" [ref=e971]:
+                  - cell "EMP-0004" [ref=e972]:
+                    - generic [ref=e973]: EMP-0004
+                  - cell "TEST_20260227152151_Juan García_6fe55e96 test_6fe55e96@test.com" [ref=e974]:
+                    - generic [ref=e975]:
+                      - img [ref=e978]
+                      - generic [ref=e981]:
+                        - generic [ref=e982]: TEST_20260227152151_Juan García_6fe55e96
+                        - generic [ref=e984]: test_6fe55e96@test.com
+                  - cell "TEST6fe55e96" [ref=e985]
+                  - cell "Operario" [ref=e986]
+                  - cell "Temporal" [ref=e987]
+                  - cell "2026-02-27" [ref=e988]
+                  - cell "Baja" [ref=e989]:
+                    - generic [ref=e990]: Baja
+                  - cell [ref=e991]:
+                    - generic [ref=e992]:
+                      - button "Ver detalle" [ref=e993] [cursor=pointer]:
+                        - img [ref=e994]
+                      - button "Ver QR" [ref=e997] [cursor=pointer]:
+                        - img [ref=e998]
+                      - button "Editar" [ref=e1004] [cursor=pointer]:
+                        - img [ref=e1005]
+                - row "EMP-0005 TEST_20260227152151_Juan García_782ba8bf test_782ba8bf@test.com TEST782ba8bf Encargado Temporal 2026-02-27 Baja" [ref=e1007]:
+                  - cell "EMP-0005" [ref=e1008]:
+                    - generic [ref=e1009]: EMP-0005
+                  - cell "TEST_20260227152151_Juan García_782ba8bf test_782ba8bf@test.com" [ref=e1010]:
+                    - generic [ref=e1011]:
+                      - img [ref=e1014]
+                      - generic [ref=e1017]:
+                        - generic [ref=e1018]: TEST_20260227152151_Juan García_782ba8bf
+                        - generic [ref=e1020]: test_782ba8bf@test.com
+                  - cell "TEST782ba8bf" [ref=e1021]
+                  - cell "Encargado" [ref=e1022]
+                  - cell "Temporal" [ref=e1023]
+                  - cell "2026-02-27" [ref=e1024]
+                  - cell "Baja" [ref=e1025]:
+                    - generic [ref=e1026]: Baja
+                  - cell [ref=e1027]:
+                    - generic [ref=e1028]:
+                      - button "Ver detalle" [ref=e1029] [cursor=pointer]:
+                        - img [ref=e1030]
+                      - button "Ver QR" [ref=e1033] [cursor=pointer]:
+                        - img [ref=e1034]
+                      - button "Editar" [ref=e1040] [cursor=pointer]:
+                        - img [ref=e1041]
+                - row "EMP-0012 TEST_20260227152151_Juan García_86094d3c test_86094d3c@test.com TEST86094d3c Operario Temporal 2026-02-27 Baja" [ref=e1043]:
+                  - cell "EMP-0012" [ref=e1044]:
+                    - generic [ref=e1045]: EMP-0012
+                  - cell "TEST_20260227152151_Juan García_86094d3c test_86094d3c@test.com" [ref=e1046]:
+                    - generic [ref=e1047]:
+                      - img [ref=e1050]
+                      - generic [ref=e1053]:
+                        - generic [ref=e1054]: TEST_20260227152151_Juan García_86094d3c
+                        - generic [ref=e1056]: test_86094d3c@test.com
+                  - cell "TEST86094d3c" [ref=e1057]
+                  - cell "Operario" [ref=e1058]
+                  - cell "Temporal" [ref=e1059]
+                  - cell "2026-02-27" [ref=e1060]
+                  - cell "Baja" [ref=e1061]:
+                    - generic [ref=e1062]: Baja
+                  - cell [ref=e1063]:
+                    - generic [ref=e1064]:
+                      - button "Ver detalle" [ref=e1065] [cursor=pointer]:
+                        - img [ref=e1066]
+                      - button "Ver QR" [ref=e1069] [cursor=pointer]:
+                        - img [ref=e1070]
+                      - button "Editar" [ref=e1076] [cursor=pointer]:
+                        - img [ref=e1077]
+                - row "EMP-0020 TEST_20260227154527_Juan García_9a87621a test_9a87621a@test.com TEST9a87621a Operario Temporal 2026-02-27 Baja" [ref=e1079]:
+                  - cell "EMP-0020" [ref=e1080]:
+                    - generic [ref=e1081]: EMP-0020
+                  - cell "TEST_20260227154527_Juan García_9a87621a test_9a87621a@test.com" [ref=e1082]:
+                    - generic [ref=e1083]:
+                      - img [ref=e1086]
+                      - generic [ref=e1089]:
+                        - generic [ref=e1090]: TEST_20260227154527_Juan García_9a87621a
+                        - generic [ref=e1092]: test_9a87621a@test.com
+                  - cell "TEST9a87621a" [ref=e1093]
+                  - cell "Operario" [ref=e1094]
+                  - cell "Temporal" [ref=e1095]
+                  - cell "2026-02-27" [ref=e1096]
+                  - cell "Baja" [ref=e1097]:
+                    - generic [ref=e1098]: Baja
+                  - cell [ref=e1099]:
+                    - generic [ref=e1100]:
+                      - button "Ver detalle" [ref=e1101] [cursor=pointer]:
+                        - img [ref=e1102]
+                      - button "Ver QR" [ref=e1105] [cursor=pointer]:
+                        - img [ref=e1106]
+                      - button "Editar" [ref=e1112] [cursor=pointer]:
+                        - img [ref=e1113]
+                - row "EMP-0006 TEST_20260227152151_Juan García_9af4f207 test_9af4f207@test.com TEST9af4f207 Operario Temporal 2026-02-27 Baja" [ref=e1115]:
+                  - cell "EMP-0006" [ref=e1116]:
+                    - generic [ref=e1117]: EMP-0006
+                  - cell "TEST_20260227152151_Juan García_9af4f207 test_9af4f207@test.com" [ref=e1118]:
+                    - generic [ref=e1119]:
+                      - img [ref=e1122]
+                      - generic [ref=e1125]:
+                        - generic [ref=e1126]: TEST_20260227152151_Juan García_9af4f207
+                        - generic [ref=e1128]: test_9af4f207@test.com
+                  - cell "TEST9af4f207" [ref=e1129]
+                  - cell "Operario" [ref=e1130]
+                  - cell "Temporal" [ref=e1131]
+                  - cell "2026-02-27" [ref=e1132]
+                  - cell "Baja" [ref=e1133]:
+                    - generic [ref=e1134]: Baja
+                  - cell [ref=e1135]:
+                    - generic [ref=e1136]:
+                      - button "Ver detalle" [ref=e1137] [cursor=pointer]:
+                        - img [ref=e1138]
+                      - button "Ver QR" [ref=e1141] [cursor=pointer]:
+                        - img [ref=e1142]
+                      - button "Editar" [ref=e1148] [cursor=pointer]:
+                        - img [ref=e1149]
+                - row "EMP-0014 TEST_20260227152151_Juan García_b06e8c5d test_b06e8c5d@test.com TESTb06e8c5d Operario Temporal 2026-02-27 Baja" [ref=e1151]:
+                  - cell "EMP-0014" [ref=e1152]:
+                    - generic [ref=e1153]: EMP-0014
+                  - cell "TEST_20260227152151_Juan García_b06e8c5d test_b06e8c5d@test.com" [ref=e1154]:
+                    - generic [ref=e1155]:
+                      - img [ref=e1158]
+                      - generic [ref=e1161]:
+                        - generic [ref=e1162]: TEST_20260227152151_Juan García_b06e8c5d
+                        - generic [ref=e1164]: test_b06e8c5d@test.com
+                  - cell "TESTb06e8c5d" [ref=e1165]
+                  - cell "Operario" [ref=e1166]
+                  - cell "Temporal" [ref=e1167]
+                  - cell "2026-02-27" [ref=e1168]
+                  - cell "Baja" [ref=e1169]:
+                    - generic [ref=e1170]: Baja
+                  - cell [ref=e1171]:
+                    - generic [ref=e1172]:
+                      - button "Ver detalle" [ref=e1173] [cursor=pointer]:
+                        - img [ref=e1174]
+                      - button "Ver QR" [ref=e1177] [cursor=pointer]:
+                        - img [ref=e1178]
+                      - button "Editar" [ref=e1184] [cursor=pointer]:
+                        - img [ref=e1185]
+                - row "EMP-0015 TEST_20260227152151_Juan García_bb3ff4a8 test_bb3ff4a8@test.com TESTbb3ff4a8 Operario Temporal 2026-02-27 Baja" [ref=e1187]:
+                  - cell "EMP-0015" [ref=e1188]:
+                    - generic [ref=e1189]: EMP-0015
+                  - cell "TEST_20260227152151_Juan García_bb3ff4a8 test_bb3ff4a8@test.com" [ref=e1190]:
+                    - generic [ref=e1191]:
+                      - img [ref=e1194]
+                      - generic [ref=e1197]:
+                        - generic [ref=e1198]: TEST_20260227152151_Juan García_bb3ff4a8
+                        - generic [ref=e1200]: test_bb3ff4a8@test.com
+                  - cell "TESTbb3ff4a8" [ref=e1201]
+                  - cell "Operario" [ref=e1202]
+                  - cell "Temporal" [ref=e1203]
+                  - cell "2026-02-27" [ref=e1204]
+                  - cell "Baja" [ref=e1205]:
+                    - generic [ref=e1206]: Baja
+                  - cell [ref=e1207]:
+                    - generic [ref=e1208]:
+                      - button "Ver detalle" [ref=e1209] [cursor=pointer]:
+                        - img [ref=e1210]
+                      - button "Ver QR" [ref=e1213] [cursor=pointer]:
+                        - img [ref=e1214]
+                      - button "Editar" [ref=e1220] [cursor=pointer]:
+                        - img [ref=e1221]
+                - row "EMP-0007 TEST_20260227152151_Juan García_c33409e5 test_c33409e5@test.com TESTc33409e5 Operario Temporal 2026-02-27 Baja" [ref=e1223]:
+                  - cell "EMP-0007" [ref=e1224]:
+                    - generic [ref=e1225]: EMP-0007
+                  - cell "TEST_20260227152151_Juan García_c33409e5 test_c33409e5@test.com" [ref=e1226]:
+                    - generic [ref=e1227]:
+                      - img [ref=e1230]
+                      - generic [ref=e1233]:
+                        - generic [ref=e1234]: TEST_20260227152151_Juan García_c33409e5
+                        - generic [ref=e1236]: test_c33409e5@test.com
+                  - cell "TESTc33409e5" [ref=e1237]
+                  - cell "Operario" [ref=e1238]
+                  - cell "Temporal" [ref=e1239]
+                  - cell "2026-02-27" [ref=e1240]
+                  - cell "Baja" [ref=e1241]:
+                    - generic [ref=e1242]: Baja
+                  - cell [ref=e1243]:
+                    - generic [ref=e1244]:
+                      - button "Ver detalle" [ref=e1245] [cursor=pointer]:
+                        - img [ref=e1246]
+                      - button "Ver QR" [ref=e1249] [cursor=pointer]:
+                        - img [ref=e1250]
+                      - button "Editar" [ref=e1256] [cursor=pointer]:
+                        - img [ref=e1257]
+                - row "EMP-0028 TEST_20260227154527_Juan García_c4327a54 test_c4327a54@test.com TESTc4327a54 Operario Temporal 2026-02-27 Baja" [ref=e1259]:
+                  - cell "EMP-0028" [ref=e1260]:
+                    - generic [ref=e1261]: EMP-0028
+                  - cell "TEST_20260227154527_Juan García_c4327a54 test_c4327a54@test.com" [ref=e1262]:
+                    - generic [ref=e1263]:
+                      - img [ref=e1266]
+                      - generic [ref=e1269]:
+                        - generic [ref=e1270]: TEST_20260227154527_Juan García_c4327a54
+                        - generic [ref=e1272]: test_c4327a54@test.com
+                  - cell "TESTc4327a54" [ref=e1273]
+                  - cell "Operario" [ref=e1274]
+                  - cell "Temporal" [ref=e1275]
+                  - cell "2026-02-27" [ref=e1276]
+                  - cell "Baja" [ref=e1277]:
+                    - generic [ref=e1278]: Baja
+                  - cell [ref=e1279]:
+                    - generic [ref=e1280]:
+                      - button "Ver detalle" [ref=e1281] [cursor=pointer]:
+                        - img [ref=e1282]
+                      - button "Ver QR" [ref=e1285] [cursor=pointer]:
+                        - img [ref=e1286]
+                      - button "Editar" [ref=e1292] [cursor=pointer]:
+                        - img [ref=e1293]
+                - row "EMP-0024 TEST_20260227154527_Juan García_c541076d test_c541076d@test.com TESTc541076d Operario Temporal 2026-02-27 Baja" [ref=e1295]:
+                  - cell "EMP-0024" [ref=e1296]:
+                    - generic [ref=e1297]: EMP-0024
+                  - cell "TEST_20260227154527_Juan García_c541076d test_c541076d@test.com" [ref=e1298]:
+                    - generic [ref=e1299]:
+                      - img [ref=e1302]
+                      - generic [ref=e1305]:
+                        - generic [ref=e1306]: TEST_20260227154527_Juan García_c541076d
+                        - generic [ref=e1308]: test_c541076d@test.com
+                  - cell "TESTc541076d" [ref=e1309]
+                  - cell "Operario" [ref=e1310]
+                  - cell "Temporal" [ref=e1311]
+                  - cell "2026-02-27" [ref=e1312]
+                  - cell "Baja" [ref=e1313]:
+                    - generic [ref=e1314]: Baja
+                  - cell [ref=e1315]:
+                    - generic [ref=e1316]:
+                      - button "Ver detalle" [ref=e1317] [cursor=pointer]:
+                        - img [ref=e1318]
+                      - button "Ver QR" [ref=e1321] [cursor=pointer]:
+                        - img [ref=e1322]
+                      - button "Editar" [ref=e1328] [cursor=pointer]:
+                        - img [ref=e1329]
+                - row "EMP-0027 TEST_20260227154527_Juan García_df6c0564 test_df6c0564@test.com TESTdf6c0564 Operario Temporal 2026-02-27 Baja" [ref=e1331]:
+                  - cell "EMP-0027" [ref=e1332]:
+                    - generic [ref=e1333]: EMP-0027
+                  - cell "TEST_20260227154527_Juan García_df6c0564 test_df6c0564@test.com" [ref=e1334]:
+                    - generic [ref=e1335]:
+                      - img [ref=e1338]
+                      - generic [ref=e1341]:
+                        - generic [ref=e1342]: TEST_20260227154527_Juan García_df6c0564
+                        - generic [ref=e1344]: test_df6c0564@test.com
+                  - cell "TESTdf6c0564" [ref=e1345]
+                  - cell "Operario" [ref=e1346]
+                  - cell "Temporal" [ref=e1347]
+                  - cell "2026-02-27" [ref=e1348]
+                  - cell "Baja" [ref=e1349]:
+                    - generic [ref=e1350]: Baja
+                  - cell [ref=e1351]:
+                    - generic [ref=e1352]:
+                      - button "Ver detalle" [ref=e1353] [cursor=pointer]:
+                        - img [ref=e1354]
+                      - button "Ver QR" [ref=e1357] [cursor=pointer]:
+                        - img [ref=e1358]
+                      - button "Editar" [ref=e1364] [cursor=pointer]:
+                        - img [ref=e1365]
+    - generic [ref=e1369]:
+      - generic [ref=e1370]:
+        - generic [ref=e1371]:
+          - heading "Buenos días, admin" [level=2] [ref=e1372]:
+            - img [ref=e1373]
+            - text: Buenos días, admin
+          - paragraph [ref=e1376]: sábado, 28 de febrero de 2026
+        - button [ref=e1377] [cursor=pointer]:
+          - img [ref=e1378]
+      - generic [ref=e1381]:
+        - generic [ref=e1383]:
+          - generic [ref=e1384]:
+            - img [ref=e1386]
+            - generic [ref=e1388]:
+              - heading "27 Alertas Climáticas Activas" [level=3] [ref=e1389]
+              - paragraph [ref=e1390]: 13 de alta prioridad
+          - link "Ver alertas" [ref=e1391] [cursor=pointer]:
+            - /url: /alertas-clima
+            - text: Ver alertas
+            - img [ref=e1392]
+        - generic [ref=e1394]:
+          - generic [ref=e1395]:
+            - generic [ref=e1396]:
+              - img [ref=e1397]
+              - heading "Tratamientos Hoy" [level=4] [ref=e1399]
+            - paragraph [ref=e1401]:
+              - img [ref=e1402]
+              - text: Sin tratamientos programados
+          - generic [ref=e1405]:
+            - generic [ref=e1406]:
+              - img [ref=e1407]
+              - heading "Contratos por Vencer" [level=4] [ref=e1410]
+            - paragraph [ref=e1412]:
+              - img [ref=e1413]
+              - text: Sin contratos próximos a vencer
+        - generic [ref=e1417]:
+          - generic [ref=e1418]:
+            - img [ref=e1419]
+            - heading "Resumen General" [level=4] [ref=e1422]
+          - generic [ref=e1423]:
+            - generic [ref=e1424]:
+              - generic [ref=e1425]: "8"
+              - generic [ref=e1426]: Parcelas Activas
+            - generic [ref=e1427]:
+              - generic [ref=e1428]: "13"
+              - generic [ref=e1429]: Recom. Pendientes
+            - generic [ref=e1430]:
+              - generic [ref=e1431]: "11"
+              - generic [ref=e1432]: Visitas Semana
+            - generic [ref=e1433]:
+              - generic [ref=e1434]: "4"
+              - generic [ref=e1435]: Cosechas Mes
+      - generic [ref=e1436]:
+        - generic [ref=e1437] [cursor=pointer]:
+          - checkbox "No mostrar hoy" [ref=e1438]
+          - text: No mostrar hoy
+        - button "Entendido" [ref=e1439] [cursor=pointer]:
+          - img [ref=e1440]
+          - text: Entendido
+  - link "Made with Emergent" [ref=e1443] [cursor=pointer]:
+    - /url: https://app.emergent.sh/?utm_source=emergent-badge
+    - img [ref=e1444]
+    - paragraph [ref=e1447]: Made with Emergent
+```

@@ -1,0 +1,448 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - img "Logo" [ref=e8]
+      - button "Colapsar menú" [ref=e9] [cursor=pointer]:
+        - img [ref=e11]
+      - navigation [ref=e14]:
+        - generic [ref=e15]:
+          - generic [ref=e16]:
+            - generic "Colapsar sección" [ref=e18] [cursor=pointer]:
+              - generic [ref=e19]: General
+              - img [ref=e21]
+            - generic [ref=e24]:
+              - link "Dashboard" [ref=e25] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=e26]
+                - text: Dashboard
+              - link "Asistente IA" [ref=e31] [cursor=pointer]:
+                - /url: /asistente-ia
+                - img [ref=e32]
+                - text: Asistente IA
+          - generic [ref=e40]:
+            - generic "Colapsar sección" [ref=e42] [cursor=pointer]:
+              - generic [ref=e43]: Gestión Principal
+              - img [ref=e45]
+            - generic [ref=e48]:
+              - link "Contratos" [ref=e49] [cursor=pointer]:
+                - /url: /contratos
+                - img [ref=e50]
+                - text: Contratos
+              - link "Parcelas" [ref=e53] [cursor=pointer]:
+                - /url: /parcelas
+                - img [ref=e54]
+                - text: Parcelas
+              - link "Fincas" [ref=e57] [cursor=pointer]:
+                - /url: /fincas
+                - img [ref=e58]
+                - text: Fincas
+          - generic [ref=e61]:
+            - generic "Colapsar sección" [ref=e63] [cursor=pointer]:
+              - generic [ref=e64]: Actividades
+              - img [ref=e66]
+            - generic [ref=e69]:
+              - link "Visitas" [ref=e70] [cursor=pointer]:
+                - /url: /visitas
+                - img [ref=e71]
+                - text: Visitas
+              - link "Recomendaciones" [ref=e73] [cursor=pointer]:
+                - /url: /recomendaciones
+                - img [ref=e74]
+                - text: Recomendaciones
+              - link "Alertas Climáticas" [ref=e77] [cursor=pointer]:
+                - /url: /alertas-clima
+                - img [ref=e78]
+                - text: Alertas Climáticas
+              - link "Tareas" [ref=e83] [cursor=pointer]:
+                - /url: /tareas
+                - img [ref=e84]
+                - text: Tareas
+              - link "Tratamientos" [ref=e87] [cursor=pointer]:
+                - /url: /tratamientos
+                - img [ref=e88]
+                - text: Tratamientos
+              - link "Irrigaciones" [ref=e91] [cursor=pointer]:
+                - /url: /irrigaciones
+                - img [ref=e92]
+                - text: Irrigaciones
+              - link "Evaluaciones" [ref=e95] [cursor=pointer]:
+                - /url: /evaluaciones
+                - img [ref=e96]
+                - text: Evaluaciones
+          - generic [ref=e100]:
+            - generic "Colapsar sección" [ref=e102] [cursor=pointer]:
+              - generic [ref=e103]: Administración
+              - img [ref=e105]
+            - generic [ref=e108]:
+              - link "Recetas" [ref=e109] [cursor=pointer]:
+                - /url: /recetas
+                - img [ref=e110]
+                - text: Recetas
+              - link "Albaranes" [ref=e112] [cursor=pointer]:
+                - /url: /albaranes
+                - img [ref=e113]
+                - text: Albaranes
+              - link "Cosechas" [ref=e116] [cursor=pointer]:
+                - /url: /cosechas
+                - img [ref=e117]
+                - text: Cosechas
+              - link "Documentos" [ref=e126] [cursor=pointer]:
+                - /url: /documentos
+                - img [ref=e127]
+                - text: Documentos
+              - link "Recursos Humanos" [ref=e129] [cursor=pointer]:
+                - /url: /rrhh
+                - img [ref=e130]
+                - text: Recursos Humanos
+              - link "Informes Gastos" [ref=e135] [cursor=pointer]:
+                - /url: /informes-gastos
+                - img [ref=e136]
+                - text: Informes Gastos
+              - link "Informes Ingresos" [ref=e138] [cursor=pointer]:
+                - /url: /informes-ingresos
+                - img [ref=e139]
+                - text: Informes Ingresos
+              - link "Liquidación Comisiones" [ref=e142] [cursor=pointer]:
+                - /url: /liquidacion-comisiones
+                - img [ref=e143]
+                - text: Liquidación Comisiones
+          - generic [ref=e146]:
+            - generic "Colapsar sección" [ref=e148] [cursor=pointer]:
+              - generic [ref=e149]: Catálogos
+              - img [ref=e151]
+            - generic [ref=e154]:
+              - link "Proveedores" [ref=e155] [cursor=pointer]:
+                - /url: /proveedores
+                - img [ref=e156]
+                - text: Proveedores
+              - link "Clientes" [ref=e160] [cursor=pointer]:
+                - /url: /clientes
+                - img [ref=e161]
+                - text: Clientes
+              - link "Cultivos" [ref=e166] [cursor=pointer]:
+                - /url: /cultivos
+                - img [ref=e167]
+                - text: Cultivos
+              - link "Maquinaria" [ref=e170] [cursor=pointer]:
+                - /url: /maquinaria
+                - img [ref=e171]
+                - text: Maquinaria
+              - link "Fitosanitarios" [ref=e182] [cursor=pointer]:
+                - /url: /fitosanitarios
+                - img [ref=e183]
+                - text: Fitosanitarios
+              - link "Técnicos Aplicadores" [ref=e185] [cursor=pointer]:
+                - /url: /tecnicos-aplicadores
+                - img [ref=e186]
+                - text: Técnicos Aplicadores
+              - link "Artículos Explotación" [ref=e190] [cursor=pointer]:
+                - /url: /articulos-explotacion
+                - img [ref=e191]
+                - text: Artículos Explotación
+              - link "Agentes" [ref=e195] [cursor=pointer]:
+                - /url: /agentes
+                - img [ref=e196]
+                - text: Agentes
+          - generic [ref=e201]:
+            - generic "Colapsar sección" [ref=e203] [cursor=pointer]:
+              - generic [ref=e204]: Configuración
+              - img [ref=e206]
+            - generic [ref=e209]:
+              - link "Usuarios" [ref=e210] [cursor=pointer]:
+                - /url: /usuarios
+                - img [ref=e211]
+                - text: Usuarios
+              - link "Traducciones" [ref=e216] [cursor=pointer]:
+                - /url: /traducciones
+                - img [ref=e217]
+                - text: Traducciones
+              - link "Configuración App" [ref=e220] [cursor=pointer]:
+                - /url: /configuracion
+                - img [ref=e221]
+                - text: Configuración App
+      - generic [ref=e225]:
+        - generic [ref=e226]:
+          - img [ref=e228]
+          - generic [ref=e231]:
+            - generic [ref=e232]: Administrador FRUVECO
+            - generic [ref=e233]: Admin
+          - button "ES" [ref=e235] [cursor=pointer]:
+            - img [ref=e236]
+            - generic [ref=e239]: ES
+        - button "Cerrar Sesión" [ref=e240] [cursor=pointer]:
+          - img [ref=e241]
+          - text: Cerrar Sesión
+    - generic [ref=e244]:
+      - generic [ref=e245]:
+        - button [ref=e247] [cursor=pointer]:
+          - img [ref=e248]
+        - button "Conectado" [ref=e252] [cursor=pointer]:
+          - img [ref=e254]
+          - generic [ref=e258]: Conectado
+      - generic [ref=e261]:
+        - generic [ref=e263]:
+          - heading "Recursos Humanos" [level=1] [ref=e264]
+          - paragraph [ref=e265]: Gestión de personal, fichajes y productividad
+        - generic [ref=e267]:
+          - generic [ref=e269]:
+            - img [ref=e271]
+            - generic [ref=e276]:
+              - generic [ref=e277]: "28"
+              - generic [ref=e278]: Total Empleados
+          - generic [ref=e280]:
+            - img [ref=e282]
+            - generic [ref=e286]:
+              - generic [ref=e287]: "2"
+              - generic [ref=e288]: Activos
+          - generic [ref=e290]:
+            - img [ref=e292]
+            - generic [ref=e297]:
+              - generic [ref=e298]: "26"
+              - generic [ref=e299]: Bajas
+        - generic [ref=e301]:
+          - button "Empleados" [ref=e302] [cursor=pointer]:
+            - img [ref=e303]
+            - text: Empleados
+          - button "Control Horario" [ref=e308] [cursor=pointer]:
+            - img [ref=e309]
+            - text: Control Horario
+          - button "Productividad" [ref=e312] [cursor=pointer]:
+            - img [ref=e313]
+            - text: Productividad
+          - button "Documentos" [ref=e316] [cursor=pointer]:
+            - img [ref=e317]
+            - text: Documentos
+          - button "Prenómina" [active] [ref=e320] [cursor=pointer]:
+            - img [ref=e321]
+            - text: Prenómina
+        - generic [ref=e324]:
+          - generic [ref=e325]:
+            - generic [ref=e326]:
+              - generic [ref=e327]: "4"
+              - generic [ref=e328]: Prenóminas
+            - generic [ref=e329]:
+              - generic [ref=e330]: "24.0"
+              - generic [ref=e331]: Total Horas
+            - generic [ref=e332]:
+              - generic [ref=e333]: 349.44 €
+              - generic [ref=e334]: Importe Bruto
+            - generic [ref=e335]:
+              - generic [ref=e336]: 349.44 €
+              - generic [ref=e337]: Importe Neto
+          - generic [ref=e338]:
+            - heading "Generar Prenóminas" [level=3] [ref=e339]:
+              - img [ref=e340]
+              - text: Generar Prenóminas
+            - generic [ref=e342]:
+              - generic [ref=e343]:
+                - generic [ref=e344]: Mes
+                - combobox [ref=e345]:
+                  - generic:
+                    - option
+                    - option [selected]
+                    - option
+                    - option
+                    - option
+                    - option
+                    - option
+                    - option
+                    - option
+                    - option
+                    - option
+                    - option
+              - generic [ref=e346]:
+                - generic [ref=e347]: Año
+                - combobox [ref=e348]:
+                  - generic:
+                    - option
+                    - option
+                    - option [selected]
+                    - option
+              - generic [ref=e349]:
+                - generic [ref=e350]:
+                  - generic [ref=e351]: Empleado Individual
+                  - combobox [ref=e352]:
+                    - option "Seleccionar empleado..."
+                    - generic:
+                      - option "-" [selected]
+                      - option "-"
+                - button "Calcular" [ref=e353] [cursor=pointer]
+              - button "Calcular Todas" [ref=e354] [cursor=pointer]
+          - button "Exportar CSV" [ref=e357] [cursor=pointer]:
+            - img [ref=e358]
+            - text: Exportar CSV
+          - table [ref=e363]:
+            - rowgroup [ref=e364]:
+              - row "Empleado DNI H. Normales H. Extra H. Nocturnas Total Horas Días Importe Bruto Importe Neto Estado Acciones" [ref=e365]:
+                - columnheader "Empleado" [ref=e366]
+                - columnheader "DNI" [ref=e367]
+                - columnheader "H. Normales" [ref=e368]
+                - columnheader "H. Extra" [ref=e369]
+                - columnheader "H. Nocturnas" [ref=e370]
+                - columnheader "Total Horas" [ref=e371]
+                - columnheader "Días" [ref=e372]
+                - columnheader "Importe Bruto" [ref=e373]
+                - columnheader "Importe Neto" [ref=e374]
+                - columnheader "Estado" [ref=e375]
+                - columnheader "Acciones" [ref=e376]
+            - rowgroup [ref=e377]:
+              - generic [ref=e378]:
+                - row "TEST_20260227152151_Juan García_b06e8c5d TESTb06e8c5d 0.0 0.0 0.0 0.0 0 0.00 € 0.00 € Exportada" [ref=e379]:
+                  - cell "TEST_20260227152151_Juan García_b06e8c5d" [ref=e380]:
+                    - generic [ref=e381]: TEST_20260227152151_Juan García_b06e8c5d
+                  - cell "TESTb06e8c5d" [ref=e382]
+                  - cell "0.0" [ref=e383]
+                  - cell "0.0" [ref=e384]
+                  - cell "0.0" [ref=e385]
+                  - cell "0.0" [ref=e386]
+                  - cell "0" [ref=e387]
+                  - cell "0.00 €" [ref=e388]
+                  - cell "0.00 €" [ref=e389]
+                  - cell "Exportada" [ref=e390]:
+                    - generic [ref=e391]: Exportada
+                  - cell [ref=e392]:
+                    - generic [ref=e393]:
+                      - button "Ver detalle" [ref=e394] [cursor=pointer]:
+                        - img [ref=e395]
+                      - button "Validar" [ref=e399] [cursor=pointer]:
+                        - img [ref=e400]
+                      - button "Exportar Excel" [ref=e402] [cursor=pointer]:
+                        - img [ref=e403]
+                      - button "Exportar PDF" [ref=e406] [cursor=pointer]:
+                        - img [ref=e407]
+                - row "Juan García López 12345678A 8.0 16.0 0.0 24.0 1 349.44 € 349.44 € Borrador" [ref=e410]:
+                  - cell "Juan García López" [ref=e411]:
+                    - generic [ref=e412]: Juan García López
+                  - cell "12345678A" [ref=e413]
+                  - cell "8.0" [ref=e414]
+                  - cell "16.0" [ref=e415]
+                  - cell "0.0" [ref=e416]
+                  - cell "24.0" [ref=e417]
+                  - cell "1" [ref=e418]
+                  - cell "349.44 €" [ref=e419]
+                  - cell "349.44 €" [ref=e420]
+                  - cell "Borrador" [ref=e421]:
+                    - generic [ref=e422]: Borrador
+                  - cell [ref=e423]:
+                    - generic [ref=e424]:
+                      - button "Ver detalle" [ref=e425] [cursor=pointer]:
+                        - img [ref=e426]
+                      - button "Validar" [ref=e430] [cursor=pointer]:
+                        - img [ref=e431]
+                      - button "Exportar Excel" [ref=e433] [cursor=pointer]:
+                        - img [ref=e434]
+                      - button "Exportar PDF" [ref=e437] [cursor=pointer]:
+                        - img [ref=e438]
+                - row "Juan García López 12345678A 0.0 0.0 0.0 0.0 0 0.00 € 0.00 € Borrador" [ref=e441]:
+                  - cell "Juan García López" [ref=e442]:
+                    - generic [ref=e443]: Juan García López
+                  - cell "12345678A" [ref=e444]
+                  - cell "0.0" [ref=e445]
+                  - cell "0.0" [ref=e446]
+                  - cell "0.0" [ref=e447]
+                  - cell "0.0" [ref=e448]
+                  - cell "0" [ref=e449]
+                  - cell "0.00 €" [ref=e450]
+                  - cell "0.00 €" [ref=e451]
+                  - cell "Borrador" [ref=e452]:
+                    - generic [ref=e453]: Borrador
+                  - cell [ref=e454]:
+                    - generic [ref=e455]:
+                      - button "Ver detalle" [ref=e456] [cursor=pointer]:
+                        - img [ref=e457]
+                      - button "Validar" [ref=e461] [cursor=pointer]:
+                        - img [ref=e462]
+                      - button "Exportar Excel" [ref=e464] [cursor=pointer]:
+                        - img [ref=e465]
+                      - button "Exportar PDF" [ref=e468] [cursor=pointer]:
+                        - img [ref=e469]
+                - row "TEST_20260227154527_Juan García_df6c0564 TESTdf6c0564 0.0 0.0 0.0 0.0 0 0.00 € 0.00 € Borrador" [ref=e472]:
+                  - cell "TEST_20260227154527_Juan García_df6c0564" [ref=e473]:
+                    - generic [ref=e474]: TEST_20260227154527_Juan García_df6c0564
+                  - cell "TESTdf6c0564" [ref=e475]
+                  - cell "0.0" [ref=e476]
+                  - cell "0.0" [ref=e477]
+                  - cell "0.0" [ref=e478]
+                  - cell "0.0" [ref=e479]
+                  - cell "0" [ref=e480]
+                  - cell "0.00 €" [ref=e481]
+                  - cell "0.00 €" [ref=e482]
+                  - cell "Borrador" [ref=e483]:
+                    - generic [ref=e484]: Borrador
+                  - cell [ref=e485]:
+                    - generic [ref=e486]:
+                      - button "Ver detalle" [ref=e487] [cursor=pointer]:
+                        - img [ref=e488]
+                      - button "Validar" [ref=e492] [cursor=pointer]:
+                        - img [ref=e493]
+                      - button "Exportar Excel" [ref=e495] [cursor=pointer]:
+                        - img [ref=e496]
+                      - button "Exportar PDF" [ref=e499] [cursor=pointer]:
+                        - img [ref=e500]
+    - generic [ref=e505]:
+      - generic [ref=e506]:
+        - generic [ref=e507]:
+          - heading "Buenos días, admin" [level=2] [ref=e508]:
+            - img [ref=e509]
+            - text: Buenos días, admin
+          - paragraph [ref=e512]: sábado, 28 de febrero de 2026
+        - button [ref=e513] [cursor=pointer]:
+          - img [ref=e514]
+      - generic [ref=e517]:
+        - generic [ref=e519]:
+          - generic [ref=e520]:
+            - img [ref=e522]
+            - generic [ref=e524]:
+              - heading "27 Alertas Climáticas Activas" [level=3] [ref=e525]
+              - paragraph [ref=e526]: 13 de alta prioridad
+          - link "Ver alertas" [ref=e527] [cursor=pointer]:
+            - /url: /alertas-clima
+            - text: Ver alertas
+            - img [ref=e528]
+        - generic [ref=e530]:
+          - generic [ref=e531]:
+            - generic [ref=e532]:
+              - img [ref=e533]
+              - heading "Tratamientos Hoy" [level=4] [ref=e535]
+            - paragraph [ref=e537]:
+              - img [ref=e538]
+              - text: Sin tratamientos programados
+          - generic [ref=e541]:
+            - generic [ref=e542]:
+              - img [ref=e543]
+              - heading "Contratos por Vencer" [level=4] [ref=e546]
+            - paragraph [ref=e548]:
+              - img [ref=e549]
+              - text: Sin contratos próximos a vencer
+        - generic [ref=e553]:
+          - generic [ref=e554]:
+            - img [ref=e555]
+            - heading "Resumen General" [level=4] [ref=e558]
+          - generic [ref=e559]:
+            - generic [ref=e560]:
+              - generic [ref=e561]: "8"
+              - generic [ref=e562]: Parcelas Activas
+            - generic [ref=e563]:
+              - generic [ref=e564]: "13"
+              - generic [ref=e565]: Recom. Pendientes
+            - generic [ref=e566]:
+              - generic [ref=e567]: "11"
+              - generic [ref=e568]: Visitas Semana
+            - generic [ref=e569]:
+              - generic [ref=e570]: "4"
+              - generic [ref=e571]: Cosechas Mes
+      - generic [ref=e572]:
+        - generic [ref=e573] [cursor=pointer]:
+          - checkbox "No mostrar hoy" [ref=e574]
+          - text: No mostrar hoy
+        - button "Entendido" [ref=e575] [cursor=pointer]:
+          - img [ref=e576]
+          - text: Entendido
+  - link "Made with Emergent" [ref=e579] [cursor=pointer]:
+    - /url: https://app.emergent.sh/?utm_source=emergent-badge
+    - img [ref=e580]
+    - paragraph [ref=e583]: Made with Emergent
+```
