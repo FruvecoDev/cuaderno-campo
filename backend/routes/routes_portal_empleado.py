@@ -6,10 +6,13 @@ from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime, timedelta
 from bson import ObjectId
 from typing import Optional
-from database import get_db, serialize_doc
+from database import db, serialize_doc
 from routes_auth import get_current_user
 
 router = APIRouter(prefix="/api/portal-empleado", tags=["portal-empleado"])
+
+def get_db():
+    return db
 
 async def get_empleado_vinculado(user: dict):
     """Obtiene el empleado vinculado al usuario actual"""
