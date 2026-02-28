@@ -36,6 +36,7 @@ import Recomendaciones from './pages/Recomendaciones';
 import AlertasClima from './pages/AlertasClima';
 import RRHH from './pages/RRHH';
 import PortalEmpleado from './pages/PortalEmpleado';
+import Mapas from './pages/Mapas';
 
 function App() {
   return (
