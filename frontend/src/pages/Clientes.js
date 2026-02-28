@@ -67,6 +67,11 @@ const Clientes = () => {
   const [resumenVentas, setResumenVentas] = useState(null);
   const [loadingResumen, setLoadingResumen] = useState(false);
   
+  // Estado para historial
+  const [showHistorial, setShowHistorial] = useState(false);
+  const [historialData, setHistorialData] = useState(null);
+  const [loadingHistorial, setLoadingHistorial] = useState(false);
+  
   // Estado para stats
   const [stats, setStats] = useState(null);
   
