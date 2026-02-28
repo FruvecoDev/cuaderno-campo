@@ -1238,6 +1238,30 @@ async def create_registro_productividad(registro: dict):
     result = await database.productividad.insert_one(registro)
     registro["_id"] = str(result.inserted_id)
     
+    # Crear notificación para el empleado
+    empleado_id = registro.get("empleado_id")
+    if empleado_id:
+        empleado = await database.empleados.find_one({"_id": ObjectId(empleado_id)})
+        if empleado and empleado.get("email"):
+            kilos = registro.get("kilos", 0)
+            tipo = registro.get("tipo_trabajo", "trabajo")
+            
+            # Crear notificación de productividad
+            notificacion = {
+                "tipo": "productividad",
+                "titulo": "Nuevo registro de productividad",
+                "mensaje": f"Se ha registrado tu actividad: {kilos} kg en {tipo}",
+                "destinatarios": [empleado["email"]],
+                "leida_por": [],
+                "datos": {
+                    "kilos": kilos,
+                    "tipo_trabajo": tipo,
+                    "fecha": registro.get("fecha", "")
+                },
+                "created_at": datetime.now()
+            }
+            await database.notificaciones.insert_one(notificacion)
+    
     return {"success": True, "data": registro}
 
 @router.put("/productividad/{registro_id}")
