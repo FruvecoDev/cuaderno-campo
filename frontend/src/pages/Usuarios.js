@@ -544,6 +544,19 @@ const Usuarios = () => {
                               <Key size={14} />
                             </button>
                             <button
+                              className="btn btn-sm"
+                              onClick={() => openVincularEmpleadoModal(user)}
+                              title="Vincular con empleado"
+                              data-testid={`btn-vincular-${user._id}`}
+                              style={{ 
+                                backgroundColor: user.empleado_id ? '#10b981' : '#6366f1', 
+                                color: 'white',
+                                border: 'none'
+                              }}
+                            >
+                              {user.empleado_id ? <Link size={14} /> : <Users size={14} />}
+                            </button>
+                            <button
                               className={`btn btn-sm ${user.is_active ? 'btn-error' : 'btn-success'}`}
                               onClick={() => handleToggleActive(user._id, user.is_active)}
                               title={user.is_active ? t('users.deactivate') : t('users.activate')}
