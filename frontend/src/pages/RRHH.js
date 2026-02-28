@@ -1021,18 +1021,7 @@ const RRHH = () => {
   );
 };
 
-// ============================================================================
-// Sub-componente: Documentos del Empleado con Firma Digital
-// ============================================================================
-const DocumentosEmpleado = ({ empleados }) => {
-  const [documentos, setDocumentos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState('');
-  const [busquedaEmpleado, setBusquedaEmpleado] = useState('');
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [showNuevoDoc, setShowNuevoDoc] = useState(false);
-  const [showFirmaModal, setShowFirmaModal] = useState(false);
-  const [documentoAFirmar, setDocumentoAFirmar] = useState(null);
+export default RRHH;
   const [nuevoDocData, setNuevoDocData] = useState({
     nombre: '',
     tipo: 'contrato',
