@@ -2518,6 +2518,18 @@ const DocumentosEmpleado = ({ empleados }) => {
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: '0.25rem' }}>
+                        {doc.archivo_url && (
+                          <a
+                            href={`${BACKEND_URL}${doc.archivo_url}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-ghost btn-sm"
+                            title="Descargar archivo"
+                            style={{ color: 'hsl(142 76% 36%)' }}
+                          >
+                            <Download size={16} />
+                          </a>
+                        )}
                         {doc.requiere_firma && !doc.firmado && (
                           <button
                             onClick={() => handleAbrirFirma(doc)}
