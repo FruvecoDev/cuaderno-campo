@@ -37,6 +37,7 @@ import AlertasClima from './pages/AlertasClima';
 import RRHH from './pages/RRHH';
 import PortalEmpleado from './pages/PortalEmpleado';
 import Mapas from './pages/Mapas';
+import CuadernoCampo from './pages/CuadernoCampo';
 
 function App() {
   return (
