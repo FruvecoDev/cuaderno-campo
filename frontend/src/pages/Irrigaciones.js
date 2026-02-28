@@ -147,6 +147,15 @@ const Irrigaciones = () => {
     }
   };
 
+  const fetchCultivos = async () => {
+    try {
+      const data = await api.get('/api/cultivos');
+      setCultivos(data.cultivos || []);
+    } catch (err) {
+      console.error('Error fetching cultivos:', err);
+    }
+  };
+
   const fetchHistorial = async (parcelaId) => {
     try {
       const data = await api.get(`/api/irrigaciones/historial/${parcelaId}`);
