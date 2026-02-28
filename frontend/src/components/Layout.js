@@ -178,9 +178,17 @@ const Layout = ({ children }) => {
   const filteredNavItems = navItems.map(section => ({
     ...section,
     items: section.items.filter(item => {
+      // Si el usuario es Empleado, solo mostrar items marcados como forEmpleado
+      if (user?.role === 'Empleado') {
+        return item.forEmpleado === true;
+      }
       // Admin always has access to everything
       if (user?.role === 'Admin') {
         return true;
+      }
+      // No mostrar items exclusivos de empleados a otros roles
+      if (item.forEmpleado && user?.role !== 'Empleado') {
+        return false;
       }
       // Check admin requirement
       if (item.requireAdmin) {
