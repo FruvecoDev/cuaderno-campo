@@ -2700,45 +2700,165 @@ const DocumentosEmpleado = ({ empleados }) => {
                   <div style={{
                     border: '1px solid hsl(var(--border))',
                     borderRadius: '0.75rem',
-                    padding: '1rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
+                    overflow: 'hidden',
                     background: 'hsl(var(--muted) / 0.3)'
                   }}>
+                    {/* Vista previa de imagen */}
+                    {isImageFile(archivoAdjunto) && (
+                      <div 
+                        onClick={() => setShowPreview(true)}
+                        style={{
+                          position: 'relative',
+                          cursor: 'pointer',
+                          background: '#f8f9fa',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          maxHeight: '200px',
+                          overflow: 'hidden'
+                        }}
+                      >
+                        <img 
+                          src={archivoPreview} 
+                          alt="Vista previa"
+                          style={{
+                            maxWidth: '100%',
+                            maxHeight: '200px',
+                            objectFit: 'contain'
+                          }}
+                        />
+                        <div style={{
+                          position: 'absolute',
+                          bottom: '8px',
+                          right: '8px',
+                          background: 'rgba(0,0,0,0.6)',
+                          color: 'white',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '0.7rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}>
+                          <Eye size={12} />
+                          Click para ampliar
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Vista previa de PDF */}
+                    {isPdfFile(archivoAdjunto) && (
+                      <div style={{
+                        position: 'relative',
+                        height: '180px',
+                        background: '#525659'
+                      }}>
+                        <iframe
+                          src={`${archivoPreview}#toolbar=0&navpanes=0`}
+                          title="Vista previa PDF"
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            border: 'none'
+                          }}
+                        />
+                        <div 
+                          onClick={() => setShowPreview(true)}
+                          style={{
+                            position: 'absolute',
+                            bottom: '8px',
+                            right: '8px',
+                            background: 'rgba(0,0,0,0.7)',
+                            color: 'white',
+                            padding: '6px 10px',
+                            borderRadius: '4px',
+                            fontSize: '0.75rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <Eye size={14} />
+                          Ver completo
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Icono para Word docs */}
+                    {!isImageFile(archivoAdjunto) && !isPdfFile(archivoAdjunto) && (
+                      <div style={{
+                        padding: '2rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: 'hsl(var(--primary) / 0.05)'
+                      }}>
+                        <FileText size={48} style={{ color: 'hsl(var(--primary))', marginBottom: '0.5rem' }} />
+                        <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                          Documento Word
+                        </span>
+                      </div>
+                    )}
+                    
+                    {/* Info del archivo */}
                     <div style={{
-                      width: '48px',
-                      height: '48px',
-                      borderRadius: '0.5rem',
-                      background: 'hsl(var(--primary) / 0.1)',
+                      padding: '1rem',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center'
+                      gap: '0.75rem',
+                      borderTop: '1px solid hsl(var(--border))'
                     }}>
-                      <FileText size={24} style={{ color: 'hsl(var(--primary))' }} />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ 
-                        fontWeight: '500', 
-                        marginBottom: '0.125rem',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '0.5rem',
+                        background: isImageFile(archivoAdjunto) 
+                          ? 'hsl(262 83% 58% / 0.1)' 
+                          : isPdfFile(archivoAdjunto) 
+                            ? 'hsl(0 84% 60% / 0.1)'
+                            : 'hsl(217 91% 60% / 0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
                       }}>
-                        {archivoAdjunto.name}
-                      </p>
-                      <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
-                        {formatFileSize(archivoAdjunto.size)}
-                      </p>
+                        {isImageFile(archivoAdjunto) ? (
+                          <Camera size={20} style={{ color: 'hsl(262 83% 58%)' }} />
+                        ) : isPdfFile(archivoAdjunto) ? (
+                          <FileText size={20} style={{ color: 'hsl(0 84% 60%)' }} />
+                        ) : (
+                          <FileText size={20} style={{ color: 'hsl(217 91% 60%)' }} />
+                        )}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ 
+                          fontWeight: '500', 
+                          marginBottom: '0.125rem',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          fontSize: '0.9rem'
+                        }}>
+                          {archivoAdjunto.name}
+                        </p>
+                        <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                          {formatFileSize(archivoAdjunto.size)} • {
+                            isImageFile(archivoAdjunto) ? 'Imagen' :
+                            isPdfFile(archivoAdjunto) ? 'PDF' : 'Documento'
+                          }
+                        </p>
+                      </div>
+                      <button
+                        onClick={removeArchivoAdjunto}
+                        className="btn btn-ghost btn-sm"
+                        style={{ color: 'hsl(0 84% 60%)' }}
+                        title="Eliminar archivo"
+                      >
+                        <Trash2 size={18} />
+                      </button>
                     </div>
-                    <button
-                      onClick={removeArchivoAdjunto}
-                      className="btn btn-ghost btn-sm"
-                      style={{ color: 'hsl(0 84% 60%)' }}
-                      title="Eliminar archivo"
-                    >
-                      <Trash2 size={18} />
-                    </button>
                   </div>
                 )}
               </div>
