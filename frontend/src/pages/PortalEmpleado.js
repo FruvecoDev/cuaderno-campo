@@ -207,11 +207,135 @@ const PortalEmpleado = () => {
   return (
     <div className="p-6">
       {/* Header */}
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '1.75rem', fontWeight: '700' }}>Portal del Empleado</h1>
-        <p style={{ color: 'hsl(var(--muted-foreground))' }}>
-          Bienvenido/a, {dashboard?.empleado?.nombre || user?.full_name}
-        </p>
+      <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: '700' }}>Portal del Empleado</h1>
+          <p style={{ color: 'hsl(var(--muted-foreground))' }}>
+            Bienvenido/a, {dashboard?.empleado?.nombre || user?.full_name}
+          </p>
+        </div>
+        
+        {/* Botón de notificaciones */}
+        <div style={{ position: 'relative' }}>
+          <button 
+            onClick={() => setShowNotificaciones(!showNotificaciones)}
+            className="btn btn-ghost"
+            style={{ position: 'relative' }}
+            data-testid="btn-notificaciones"
+          >
+            <Bell size={24} />
+            {notificacionesNoLeidas > 0 && (
+              <span style={{
+                position: 'absolute',
+                top: '-4px',
+                right: '-4px',
+                background: 'hsl(0 84% 60%)',
+                color: 'white',
+                borderRadius: '50%',
+                width: '20px',
+                height: '20px',
+                fontSize: '0.75rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: '600'
+              }}>
+                {notificacionesNoLeidas > 9 ? '9+' : notificacionesNoLeidas}
+              </span>
+            )}
+          </button>
+          
+          {/* Panel de notificaciones */}
+          {showNotificaciones && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              right: 0,
+              marginTop: '0.5rem',
+              width: '350px',
+              maxHeight: '400px',
+              overflow: 'auto',
+              backgroundColor: 'hsl(var(--card))',
+              border: '1px solid hsl(var(--border))',
+              borderRadius: '0.75rem',
+              boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
+              zIndex: 100
+            }}>
+              <div style={{ 
+                padding: '1rem', 
+                borderBottom: '1px solid hsl(var(--border))',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                position: 'sticky',
+                top: 0,
+                backgroundColor: 'hsl(var(--card))'
+              }}>
+                <h3 style={{ fontWeight: '600', margin: 0 }}>Notificaciones</h3>
+                {notificacionesNoLeidas > 0 && (
+                  <button onClick={handleMarcarTodasLeidas} className="btn btn-ghost btn-sm" style={{ fontSize: '0.75rem' }}>
+                    Marcar todas leídas
+                  </button>
+                )}
+              </div>
+              
+              {notificaciones.length === 0 ? (
+                <div style={{ padding: '2rem', textAlign: 'center', color: 'hsl(var(--muted-foreground))' }}>
+                  <Bell size={32} style={{ opacity: 0.3, margin: '0 auto 0.5rem' }} />
+                  <p>No tienes notificaciones</p>
+                </div>
+              ) : (
+                notificaciones.map(notif => (
+                  <div 
+                    key={notif._id}
+                    onClick={() => !notif.leida && handleMarcarLeida(notif._id)}
+                    style={{
+                      padding: '1rem',
+                      borderBottom: '1px solid hsl(var(--border))',
+                      cursor: notif.leida ? 'default' : 'pointer',
+                      backgroundColor: notif.leida ? 'transparent' : 'hsl(var(--primary) / 0.05)',
+                      transition: 'background 0.2s'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        background: notif.tipo === 'success' ? 'hsl(142 76% 36% / 0.1)' :
+                                  notif.tipo === 'warning' ? 'hsl(38 92% 50% / 0.1)' :
+                                  notif.tipo === 'error' ? 'hsl(0 84% 60% / 0.1)' : 'hsl(var(--primary) / 0.1)'
+                      }}>
+                        {notif.tipo === 'success' && <CheckCircle size={16} style={{ color: 'hsl(142 76% 36%)' }} />}
+                        {notif.tipo === 'warning' && <AlertCircle size={16} style={{ color: 'hsl(38 92% 50%)' }} />}
+                        {notif.tipo === 'error' && <XCircle size={16} style={{ color: 'hsl(0 84% 60%)' }} />}
+                        {notif.tipo === 'info' && <Bell size={16} style={{ color: 'hsl(var(--primary))' }} />}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: notif.leida ? '400' : '600', fontSize: '0.875rem' }}>
+                          {notif.titulo}
+                        </div>
+                        <div style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', marginTop: '0.25rem' }}>
+                          {notif.mensaje}
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))', marginTop: '0.5rem' }}>
+                          {new Date(notif.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      </div>
+                      {!notif.leida && (
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'hsl(var(--primary))', flexShrink: 0 }}></div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
       </div>
       
       {/* Tabs */}
