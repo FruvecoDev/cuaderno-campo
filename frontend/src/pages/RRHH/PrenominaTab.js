@@ -21,6 +21,17 @@ const PrenominaTab = ({ empleados }) => {
     fetchPrenominas();
   }, [mesSeleccionado, anoSeleccionado]);
   
+  // Cerrar menú de exportación al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (showExportMenu && !e.target.closest('[data-testid="btn-exportar-masivo"]')) {
+        setShowExportMenu(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showExportMenu]);
+  
   const fetchPrenominas = async () => {
     setLoading(true);
     try {
