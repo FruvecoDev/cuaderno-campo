@@ -1162,6 +1162,47 @@ const ControlHorario = ({ empleados }) => {
     }
   };
   
+  // Funciones para exportar informe de control horario
+  const handleExportInformeExcel = async () => {
+    if (!informeEmpleadoId || !informeFechaDesde || !informeFechaHasta) return;
+    
+    try {
+      const params = new URLSearchParams({
+        empleado_id: informeEmpleadoId,
+        fecha_desde: informeFechaDesde,
+        fecha_hasta: informeFechaHasta
+      });
+      
+      await api.download(
+        `/api/rrhh/fichajes/informe/excel?${params}`,
+        `control_horario_${informeFechaDesde}_${informeFechaHasta}.xlsx`
+      );
+    } catch (err) {
+      console.error('Error exporting:', err);
+      alert('Error al exportar el informe');
+    }
+  };
+  
+  const handleExportInformePdf = async () => {
+    if (!informeEmpleadoId || !informeFechaDesde || !informeFechaHasta) return;
+    
+    try {
+      const params = new URLSearchParams({
+        empleado_id: informeEmpleadoId,
+        fecha_desde: informeFechaDesde,
+        fecha_hasta: informeFechaHasta
+      });
+      
+      await api.download(
+        `/api/rrhh/fichajes/informe/pdf?${params}`,
+        `control_horario_${informeFechaDesde}_${informeFechaHasta}.pdf`
+      );
+    } catch (err) {
+      console.error('Error exporting:', err);
+      alert('Error al generar el informe PDF');
+    }
+  };
+  
   if (loading) {
     return <div className="flex items-center justify-center h-32"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>;
   }
