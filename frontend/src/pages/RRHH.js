@@ -759,15 +759,34 @@ const RRHH = () => {
                             >
                               <Edit2 size={16} />
                             </button>
-                            {emp.activo && (
+                            {emp.activo ? (
                               <button
                                 onClick={() => handleDelete(emp._id)}
                                 className="btn btn-ghost btn-sm"
                                 title="Dar de baja"
-                                style={{ color: 'hsl(0 84% 60%)' }}
+                                style={{ color: 'hsl(38 92% 50%)' }}
                               >
-                                <Trash2 size={16} />
+                                <UserX size={16} />
                               </button>
+                            ) : (
+                              <>
+                                <button
+                                  onClick={() => handleReactivar(emp._id)}
+                                  className="btn btn-ghost btn-sm"
+                                  title="Reactivar empleado"
+                                  style={{ color: 'hsl(142 76% 36%)' }}
+                                >
+                                  <RefreshCw size={16} />
+                                </button>
+                                <button
+                                  onClick={() => handleDeletePermanente(emp._id, `${emp.nombre} ${emp.apellidos}`)}
+                                  className="btn btn-ghost btn-sm"
+                                  title="Eliminar permanentemente"
+                                  style={{ color: 'hsl(0 84% 60%)' }}
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </>
                             )}
                           </div>
                         </td>
