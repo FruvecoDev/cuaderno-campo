@@ -2399,6 +2399,8 @@ async def aprobar_ausencia(ausencia_id: str, aprobador: dict):
         tipo_ausencia = ausencia.get("tipo", "ausencia").replace("_", " ").capitalize()
         fecha_inicio = ausencia.get("fecha_inicio", "")
         fecha_fin = ausencia.get("fecha_fin", "")
+        empleado_nombre = f"{empleado.get('nombre', '')} {empleado.get('apellidos', '')}"
+        comentario = aprobador.get("comentario", "")
         
         if estado == "aprobada":
             titulo = f"Solicitud de {tipo_ausencia} Aprobada"
@@ -2407,11 +2409,11 @@ async def aprobar_ausencia(ausencia_id: str, aprobador: dict):
         else:
             titulo = f"Solicitud de {tipo_ausencia} Rechazada"
             mensaje = f"Tu solicitud de {tipo_ausencia} del {fecha_inicio} al {fecha_fin} ha sido rechazada."
-            if aprobador.get("comentario"):
-                mensaje += f" Motivo: {aprobador.get('comentario')}"
+            if comentario:
+                mensaje += f" Motivo: {comentario}"
             tipo_notif = "warning"
         
-        # Insertar notificación
+        # Insertar notificación en BD
         notificacion = {
             "titulo": titulo,
             "mensaje": mensaje,
@@ -2424,6 +2426,21 @@ async def aprobar_ausencia(ausencia_id: str, aprobador: dict):
             "leida_por": []
         }
         await database.notificaciones.insert_one(notificacion)
+        
+        # Enviar email de notificación
+        try:
+            await send_ausencia_notification(
+                recipient_email=empleado.get("email"),
+                empleado_nombre=empleado_nombre,
+                tipo_ausencia=ausencia.get("tipo", "ausencia"),
+                fecha_inicio=fecha_inicio,
+                fecha_fin=fecha_fin,
+                estado=estado,
+                comentario=comentario
+            )
+        except Exception as e:
+            # Log error but don't fail the request
+            print(f"Error sending ausencia email: {e}")
     
     return {"success": True}
 
