@@ -904,7 +904,7 @@ async def export_documentos_pdf(
     
     # Crear PDF
     output = io.BytesIO()
-    doc = SimpleDocTemplate(output, pagesize=landscape(A4), topMargin=20*mm, bottomMargin=20*mm)
+    pdf_doc = SimpleDocTemplate(output, pagesize=landscape(A4), topMargin=20*mm, bottomMargin=20*mm)
     
     elements = []
     styles = getSampleStyleSheet()
