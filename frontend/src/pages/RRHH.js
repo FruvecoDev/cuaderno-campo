@@ -2060,7 +2060,7 @@ const DocumentosEmpleado = ({ empleados }) => {
   
   useEffect(() => {
     fetchDocumentos();
-  }, [empleadoSeleccionado, filtroFechaDesde, filtroFechaHasta]);
+  }, [empleadoSeleccionado, filtroFechaDesde, filtroFechaHasta, filtroTipo, filtroEstado]);
   
   const fetchDocumentos = async () => {
     try {
@@ -2073,6 +2073,12 @@ const DocumentosEmpleado = ({ empleados }) => {
       }
       if (filtroFechaHasta) {
         params.append('fecha_hasta', filtroFechaHasta);
+      }
+      if (filtroTipo) {
+        params.append('tipo', filtroTipo);
+      }
+      if (filtroEstado) {
+        params.append('estado', filtroEstado);
       }
       
       const queryString = params.toString();
