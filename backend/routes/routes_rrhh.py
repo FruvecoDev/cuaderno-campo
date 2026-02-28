@@ -453,6 +453,525 @@ async def validar_fichaje(fichaje_id: str, validador: dict):
     
     return {"success": True}
 
+
+# ============================================================================
+# INFORME DE CONTROL HORARIO
+# ============================================================================
+
+@router.get("/fichajes/informe")
+async def get_informe_control_horario(
+    empleado_id: str,
+    fecha_desde: str,
+    fecha_hasta: str
+):
+    """Obtener informe de control horario por empleado y rango de fechas"""
+    database = get_db()
+    
+    # Obtener datos del empleado
+    empleado = await database.empleados.find_one({"_id": ObjectId(empleado_id)})
+    if not empleado:
+        raise HTTPException(status_code=404, detail="Empleado no encontrado")
+    
+    # Obtener fichajes del empleado en el rango de fechas
+    query = {
+        "empleado_id": empleado_id,
+        "fecha": {"$gte": fecha_desde, "$lte": fecha_hasta}
+    }
+    
+    fichajes = []
+    cursor = database.fichajes.find(query).sort([("fecha", 1), ("hora", 1)])
+    async for f in cursor:
+        fichajes.append(f)
+    
+    # Agrupar fichajes por día y calcular horas
+    dias_trabajados = {}
+    for fichaje in fichajes:
+        fecha = fichaje["fecha"]
+        if fecha not in dias_trabajados:
+            dias_trabajados[fecha] = {"entradas": [], "salidas": []}
+        
+        if fichaje["tipo"] == "entrada":
+            dias_trabajados[fecha]["entradas"].append(fichaje["hora"])
+        else:
+            dias_trabajados[fecha]["salidas"].append(fichaje["hora"])
+    
+    # Calcular horas por día
+    registros = []
+    total_horas = 0
+    total_minutos = 0
+    dias_completos = 0
+    dias_con_ausencia = 0
+    
+    # Generar lista de todos los días laborables en el rango
+    from datetime import date as date_class
+    fecha_inicio = datetime.strptime(fecha_desde, "%Y-%m-%d").date()
+    fecha_fin = datetime.strptime(fecha_hasta, "%Y-%m-%d").date()
+    
+    current_date = fecha_inicio
+    while current_date <= fecha_fin:
+        # Excluir fines de semana (sábado=5, domingo=6)
+        if current_date.weekday() < 5:  # Día laborable
+            fecha_str = current_date.strftime("%Y-%m-%d")
+            
+            if fecha_str in dias_trabajados:
+                dia_data = dias_trabajados[fecha_str]
+                entrada = dia_data["entradas"][0] if dia_data["entradas"] else None
+                salida = dia_data["salidas"][-1] if dia_data["salidas"] else None
+                
+                horas_dia = 0
+                minutos_dia = 0
+                
+                if entrada and salida:
+                    # Calcular diferencia de tiempo
+                    h_entrada = datetime.strptime(entrada, "%H:%M:%S") if len(entrada) > 5 else datetime.strptime(entrada, "%H:%M")
+                    h_salida = datetime.strptime(salida, "%H:%M:%S") if len(salida) > 5 else datetime.strptime(salida, "%H:%M")
+                    
+                    diff = h_salida - h_entrada
+                    total_segundos = diff.total_seconds()
+                    horas_dia = int(total_segundos // 3600)
+                    minutos_dia = int((total_segundos % 3600) // 60)
+                    
+                    total_horas += horas_dia
+                    total_minutos += minutos_dia
+                    
+                    if horas_dia >= 8:
+                        dias_completos += 1
+                
+                registros.append({
+                    "fecha": fecha_str,
+                    "dia_semana": current_date.strftime("%A"),
+                    "entrada": entrada,
+                    "salida": salida,
+                    "horas": horas_dia,
+                    "minutos": minutos_dia,
+                    "horas_decimal": round(horas_dia + minutos_dia / 60, 2),
+                    "completo": horas_dia >= 8,
+                    "ausencia": False
+                })
+            else:
+                # Día sin fichaje - ausencia
+                dias_con_ausencia += 1
+                registros.append({
+                    "fecha": fecha_str,
+                    "dia_semana": current_date.strftime("%A"),
+                    "entrada": None,
+                    "salida": None,
+                    "horas": 0,
+                    "minutos": 0,
+                    "horas_decimal": 0,
+                    "completo": False,
+                    "ausencia": True
+                })
+        
+        current_date += timedelta(days=1)
+    
+    # Convertir minutos totales a horas
+    total_horas += total_minutos // 60
+    total_minutos = total_minutos % 60
+    
+    return {
+        "success": True,
+        "empleado": {
+            "id": str(empleado["_id"]),
+            "nombre": empleado.get("nombre", ""),
+            "apellidos": empleado.get("apellidos", ""),
+            "dni": empleado.get("dni_nie", ""),
+            "puesto": empleado.get("puesto", "")
+        },
+        "periodo": {
+            "desde": fecha_desde,
+            "hasta": fecha_hasta
+        },
+        "registros": registros,
+        "resumen": {
+            "total_horas": total_horas,
+            "total_minutos": total_minutos,
+            "total_horas_decimal": round(total_horas + total_minutos / 60, 2),
+            "dias_trabajados": len([r for r in registros if not r["ausencia"]]),
+            "dias_completos": dias_completos,
+            "dias_con_ausencia": dias_con_ausencia,
+            "horas_esperadas": len([r for r in registros if not r["ausencia"]]) * 8,
+            "diferencia_horas": round((total_horas + total_minutos / 60) - (len([r for r in registros if not r["ausencia"]]) * 8), 2)
+        }
+    }
+
+
+@router.get("/fichajes/informe/excel")
+async def export_informe_control_horario_excel(
+    empleado_id: str,
+    fecha_desde: str,
+    fecha_hasta: str
+):
+    """Exportar informe de control horario a Excel"""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from fastapi.responses import StreamingResponse
+    
+    # Obtener datos del informe
+    database = get_db()
+    
+    empleado = await database.empleados.find_one({"_id": ObjectId(empleado_id)})
+    if not empleado:
+        raise HTTPException(status_code=404, detail="Empleado no encontrado")
+    
+    # Reutilizar lógica del endpoint principal
+    query = {
+        "empleado_id": empleado_id,
+        "fecha": {"$gte": fecha_desde, "$lte": fecha_hasta}
+    }
+    
+    fichajes = []
+    cursor = database.fichajes.find(query).sort([("fecha", 1), ("hora", 1)])
+    async for f in cursor:
+        fichajes.append(f)
+    
+    # Agrupar por día
+    dias_trabajados = {}
+    for fichaje in fichajes:
+        fecha = fichaje["fecha"]
+        if fecha not in dias_trabajados:
+            dias_trabajados[fecha] = {"entradas": [], "salidas": []}
+        if fichaje["tipo"] == "entrada":
+            dias_trabajados[fecha]["entradas"].append(fichaje["hora"])
+        else:
+            dias_trabajados[fecha]["salidas"].append(fichaje["hora"])
+    
+    # Crear workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Control Horario"
+    
+    # Estilos
+    title_font = Font(bold=True, size=14, color="FFFFFF")
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="2E7D32", end_color="2E7D32", fill_type="solid")
+    warning_fill = PatternFill(start_color="FFEB3B", end_color="FFEB3B", fill_type="solid")
+    error_fill = PatternFill(start_color="FFCDD2", end_color="FFCDD2", fill_type="solid")
+    ok_fill = PatternFill(start_color="C8E6C9", end_color="C8E6C9", fill_type="solid")
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Título
+    ws.merge_cells('A1:G1')
+    ws['A1'] = "INFORME DE CONTROL HORARIO"
+    ws['A1'].font = title_font
+    ws['A1'].fill = header_fill
+    ws['A1'].alignment = Alignment(horizontal="center")
+    
+    # Info empleado
+    ws['A3'] = "Empleado:"
+    ws['B3'] = f"{empleado.get('nombre', '')} {empleado.get('apellidos', '')}"
+    ws['A4'] = "DNI/NIE:"
+    ws['B4'] = empleado.get('dni_nie', '')
+    ws['A5'] = "Puesto:"
+    ws['B5'] = empleado.get('puesto', '')
+    ws['D3'] = "Período:"
+    ws['E3'] = f"{fecha_desde} a {fecha_hasta}"
+    
+    # Headers de tabla
+    headers = ["Fecha", "Día", "Entrada", "Salida", "Horas", "Min", "Total Horas", "Estado"]
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=7, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.border = thin_border
+        cell.alignment = Alignment(horizontal="center")
+    
+    # Datos
+    dias_semana_es = {
+        'Monday': 'Lunes', 'Tuesday': 'Martes', 'Wednesday': 'Miércoles',
+        'Thursday': 'Jueves', 'Friday': 'Viernes', 'Saturday': 'Sábado', 'Sunday': 'Domingo'
+    }
+    
+    row = 8
+    total_horas = 0
+    total_minutos = 0
+    dias_ausencia = 0
+    dias_incompletos = 0
+    
+    fecha_inicio = datetime.strptime(fecha_desde, "%Y-%m-%d").date()
+    fecha_fin = datetime.strptime(fecha_hasta, "%Y-%m-%d").date()
+    current_date = fecha_inicio
+    
+    while current_date <= fecha_fin:
+        if current_date.weekday() < 5:  # Día laborable
+            fecha_str = current_date.strftime("%Y-%m-%d")
+            dia_semana = dias_semana_es.get(current_date.strftime("%A"), current_date.strftime("%A"))
+            
+            if fecha_str in dias_trabajados:
+                dia_data = dias_trabajados[fecha_str]
+                entrada = dia_data["entradas"][0] if dia_data["entradas"] else "-"
+                salida = dia_data["salidas"][-1] if dia_data["salidas"] else "-"
+                
+                horas = 0
+                minutos = 0
+                
+                if entrada != "-" and salida != "-":
+                    h_entrada = datetime.strptime(entrada, "%H:%M:%S") if len(entrada) > 5 else datetime.strptime(entrada, "%H:%M")
+                    h_salida = datetime.strptime(salida, "%H:%M:%S") if len(salida) > 5 else datetime.strptime(salida, "%H:%M")
+                    diff = h_salida - h_entrada
+                    total_segundos = diff.total_seconds()
+                    horas = int(total_segundos // 3600)
+                    minutos = int((total_segundos % 3600) // 60)
+                    total_horas += horas
+                    total_minutos += minutos
+                
+                estado = "OK" if horas >= 8 else "Incompleto"
+                if horas < 8:
+                    dias_incompletos += 1
+                
+                ws.cell(row=row, column=1, value=fecha_str).border = thin_border
+                ws.cell(row=row, column=2, value=dia_semana).border = thin_border
+                ws.cell(row=row, column=3, value=entrada).border = thin_border
+                ws.cell(row=row, column=4, value=salida).border = thin_border
+                ws.cell(row=row, column=5, value=horas).border = thin_border
+                ws.cell(row=row, column=6, value=minutos).border = thin_border
+                ws.cell(row=row, column=7, value=f"{horas}:{minutos:02d}").border = thin_border
+                estado_cell = ws.cell(row=row, column=8, value=estado)
+                estado_cell.border = thin_border
+                if horas >= 8:
+                    estado_cell.fill = ok_fill
+                else:
+                    estado_cell.fill = warning_fill
+            else:
+                # Ausencia
+                dias_ausencia += 1
+                ws.cell(row=row, column=1, value=fecha_str).border = thin_border
+                ws.cell(row=row, column=2, value=dia_semana).border = thin_border
+                ws.cell(row=row, column=3, value="-").border = thin_border
+                ws.cell(row=row, column=4, value="-").border = thin_border
+                ws.cell(row=row, column=5, value=0).border = thin_border
+                ws.cell(row=row, column=6, value=0).border = thin_border
+                ws.cell(row=row, column=7, value="0:00").border = thin_border
+                ausencia_cell = ws.cell(row=row, column=8, value="AUSENCIA")
+                ausencia_cell.border = thin_border
+                ausencia_cell.fill = error_fill
+            
+            row += 1
+        current_date += timedelta(days=1)
+    
+    # Convertir minutos totales
+    total_horas += total_minutos // 60
+    total_minutos = total_minutos % 60
+    
+    # Resumen
+    row += 1
+    ws.merge_cells(f'A{row}:D{row}')
+    ws[f'A{row}'] = "RESUMEN"
+    ws[f'A{row}'].font = header_font
+    ws[f'A{row}'].fill = header_fill
+    ws.cell(row=row, column=5).fill = header_fill
+    ws.cell(row=row, column=6).fill = header_fill
+    ws.cell(row=row, column=7).fill = header_fill
+    ws.cell(row=row, column=8).fill = header_fill
+    
+    row += 1
+    ws[f'A{row}'] = "Total Horas Trabajadas:"
+    ws[f'E{row}'] = total_horas
+    ws[f'F{row}'] = total_minutos
+    ws[f'G{row}'] = f"{total_horas}:{total_minutos:02d}"
+    
+    row += 1
+    ws[f'A{row}'] = "Días con Ausencia:"
+    ws[f'G{row}'] = dias_ausencia
+    
+    row += 1
+    ws[f'A{row}'] = "Días Incompletos (<8h):"
+    ws[f'G{row}'] = dias_incompletos
+    
+    # Ajustar anchos
+    ws.column_dimensions['A'].width = 12
+    ws.column_dimensions['B'].width = 12
+    ws.column_dimensions['C'].width = 10
+    ws.column_dimensions['D'].width = 10
+    ws.column_dimensions['E'].width = 8
+    ws.column_dimensions['F'].width = 6
+    ws.column_dimensions['G'].width = 12
+    ws.column_dimensions['H'].width = 12
+    
+    # Guardar
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    
+    nombre_archivo = f"control_horario_{empleado.get('apellidos', '')}_{fecha_desde}_{fecha_hasta}.xlsx"
+    nombre_archivo = nombre_archivo.replace(" ", "_")
+    
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={nombre_archivo}"}
+    )
+
+
+@router.get("/fichajes/informe/pdf")
+async def export_informe_control_horario_pdf(
+    empleado_id: str,
+    fecha_desde: str,
+    fecha_hasta: str
+):
+    """Exportar informe de control horario a PDF"""
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import mm
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from fastapi.responses import StreamingResponse
+    
+    database = get_db()
+    
+    empleado = await database.empleados.find_one({"_id": ObjectId(empleado_id)})
+    if not empleado:
+        raise HTTPException(status_code=404, detail="Empleado no encontrado")
+    
+    # Obtener fichajes
+    query = {
+        "empleado_id": empleado_id,
+        "fecha": {"$gte": fecha_desde, "$lte": fecha_hasta}
+    }
+    
+    fichajes = []
+    cursor = database.fichajes.find(query).sort([("fecha", 1), ("hora", 1)])
+    async for f in cursor:
+        fichajes.append(f)
+    
+    # Agrupar por día
+    dias_trabajados = {}
+    for fichaje in fichajes:
+        fecha = fichaje["fecha"]
+        if fecha not in dias_trabajados:
+            dias_trabajados[fecha] = {"entradas": [], "salidas": []}
+        if fichaje["tipo"] == "entrada":
+            dias_trabajados[fecha]["entradas"].append(fichaje["hora"])
+        else:
+            dias_trabajados[fecha]["salidas"].append(fichaje["hora"])
+    
+    # Crear PDF
+    output = io.BytesIO()
+    pdf = SimpleDocTemplate(output, pagesize=A4, topMargin=15*mm, bottomMargin=15*mm, leftMargin=15*mm, rightMargin=15*mm)
+    
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    # Título
+    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=16, textColor=colors.HexColor('#2E7D32'), alignment=1, spaceAfter=5*mm)
+    elements.append(Paragraph("INFORME DE CONTROL HORARIO", title_style))
+    
+    # Info empleado
+    info_style = ParagraphStyle('Info', parent=styles['Normal'], fontSize=10, spaceAfter=2*mm)
+    elements.append(Paragraph(f"<b>Empleado:</b> {empleado.get('nombre', '')} {empleado.get('apellidos', '')}", info_style))
+    elements.append(Paragraph(f"<b>DNI/NIE:</b> {empleado.get('dni_nie', '')} | <b>Puesto:</b> {empleado.get('puesto', '')}", info_style))
+    elements.append(Paragraph(f"<b>Período:</b> {fecha_desde} a {fecha_hasta}", info_style))
+    elements.append(Spacer(1, 5*mm))
+    
+    # Tabla de registros
+    dias_semana_es = {
+        'Monday': 'Lun', 'Tuesday': 'Mar', 'Wednesday': 'Mié',
+        'Thursday': 'Jue', 'Friday': 'Vie', 'Saturday': 'Sáb', 'Sunday': 'Dom'
+    }
+    
+    table_data = [["Fecha", "Día", "Entrada", "Salida", "Total", "Estado"]]
+    
+    total_horas = 0
+    total_minutos = 0
+    dias_ausencia = 0
+    
+    fecha_inicio = datetime.strptime(fecha_desde, "%Y-%m-%d").date()
+    fecha_fin = datetime.strptime(fecha_hasta, "%Y-%m-%d").date()
+    current_date = fecha_inicio
+    
+    while current_date <= fecha_fin:
+        if current_date.weekday() < 5:
+            fecha_str = current_date.strftime("%Y-%m-%d")
+            dia_semana = dias_semana_es.get(current_date.strftime("%A"), "")
+            
+            if fecha_str in dias_trabajados:
+                dia_data = dias_trabajados[fecha_str]
+                entrada = dia_data["entradas"][0][:5] if dia_data["entradas"] else "-"
+                salida = dia_data["salidas"][-1][:5] if dia_data["salidas"] else "-"
+                
+                horas = 0
+                minutos = 0
+                
+                if entrada != "-" and salida != "-":
+                    try:
+                        h_entrada = datetime.strptime(dia_data["entradas"][0], "%H:%M:%S") if len(dia_data["entradas"][0]) > 5 else datetime.strptime(dia_data["entradas"][0], "%H:%M")
+                        h_salida = datetime.strptime(dia_data["salidas"][-1], "%H:%M:%S") if len(dia_data["salidas"][-1]) > 5 else datetime.strptime(dia_data["salidas"][-1], "%H:%M")
+                        diff = h_salida - h_entrada
+                        total_segundos = diff.total_seconds()
+                        horas = int(total_segundos // 3600)
+                        minutos = int((total_segundos % 3600) // 60)
+                        total_horas += horas
+                        total_minutos += minutos
+                    except:
+                        pass
+                
+                estado = "OK" if horas >= 8 else "<8h"
+                table_data.append([fecha_str, dia_semana, entrada, salida, f"{horas}:{minutos:02d}", estado])
+            else:
+                dias_ausencia += 1
+                table_data.append([fecha_str, dia_semana, "-", "-", "0:00", "AUSENCIA"])
+        
+        current_date += timedelta(days=1)
+    
+    # Convertir minutos
+    total_horas += total_minutos // 60
+    total_minutos = total_minutos % 60
+    
+    # Crear tabla
+    col_widths = [25*mm, 12*mm, 18*mm, 18*mm, 18*mm, 22*mm]
+    doc_table = Table(table_data, colWidths=col_widths)
+    
+    table_style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2E7D32')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+        ('TOPPADDING', (0, 0), (-1, 0), 6),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 3),
+        ('TOPPADDING', (0, 1), (-1, -1), 3),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.gray),
+    ])
+    
+    # Colorear filas según estado
+    for i, row_data in enumerate(table_data[1:], 1):
+        if row_data[5] == "AUSENCIA":
+            table_style.add('BACKGROUND', (0, i), (-1, i), colors.HexColor('#FFCDD2'))
+        elif row_data[5] == "<8h":
+            table_style.add('BACKGROUND', (0, i), (-1, i), colors.HexColor('#FFF9C4'))
+        else:
+            table_style.add('BACKGROUND', (0, i), (-1, i), colors.HexColor('#E8F5E9'))
+    
+    doc_table.setStyle(table_style)
+    elements.append(doc_table)
+    
+    # Resumen
+    elements.append(Spacer(1, 8*mm))
+    resumen_style = ParagraphStyle('Resumen', parent=styles['Normal'], fontSize=11, spaceAfter=3*mm)
+    elements.append(Paragraph(f"<b>TOTAL HORAS TRABAJADAS: {total_horas}:{total_minutos:02d}</b>", resumen_style))
+    elements.append(Paragraph(f"Días con ausencia: {dias_ausencia}", info_style))
+    elements.append(Paragraph(f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}", info_style))
+    
+    pdf.build(elements)
+    output.seek(0)
+    
+    nombre_archivo = f"control_horario_{empleado.get('apellidos', '')}_{fecha_desde}_{fecha_hasta}.pdf"
+    nombre_archivo = nombre_archivo.replace(" ", "_")
+    
+    return StreamingResponse(
+        output,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={nombre_archivo}"}
+    )
+
+
 # ============================================================================
 # PRODUCTIVIDAD
 # ============================================================================
