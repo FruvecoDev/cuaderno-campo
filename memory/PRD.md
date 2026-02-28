@@ -1786,6 +1786,30 @@ Migrar todas las llamadas `fetch` directas al nuevo servicio centralizado `api.j
 
 
 
+## Calendario Visual de Ausencias (28/02/2026) - COMPLETADO
+
+Calendario mensual integrado en la gestión de ausencias para visualizar el equipo.
+
+**Funcionalidades:**
+- **Vista dual**: Toggle entre Lista y Calendario
+- **Navegación**: Botones < > para cambiar mes + botón "Hoy"
+- **Leyenda de colores** por tipo de ausencia:
+  - Vacaciones (azul)
+  - Permiso (morado)
+  - Baja Médica (rojo)
+  - Asuntos Propios (amarillo)
+  - Otros (gris)
+- **Estados visuales**:
+  - Aprobadas: color sólido
+  - Pendientes: borde punteado
+- **Fin de semana** con fondo destacado
+- **Clic en ausencia** abre modal con detalle
+
+**Archivo creado:**
+- `/app/frontend/src/pages/RRHH/CalendarioAusencias.js` (330 líneas)
+
+---
+
 ## Gestión de Ausencias en RRHH (28/02/2026) - COMPLETADO
 
 Nueva pestaña en el módulo RRHH para gestionar solicitudes de ausencias.
