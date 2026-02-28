@@ -173,6 +173,57 @@ async def delete_empleado(empleado_id: str):
     
     return {"success": True}
 
+@router.delete("/empleados/{empleado_id}/permanente")
+async def delete_empleado_permanente(empleado_id: str):
+    """Eliminar permanentemente un empleado (solo si está en baja)"""
+    database = get_db()
+    
+    # Verificar que el empleado existe y está en baja
+    empleado = await database.empleados.find_one({"_id": ObjectId(empleado_id)})
+    if not empleado:
+        raise HTTPException(status_code=404, detail="Empleado no encontrado")
+    
+    if empleado.get("activo", True):
+        raise HTTPException(status_code=400, detail="Solo se pueden eliminar empleados en baja")
+    
+    # Eliminar permanentemente
+    result = await database.empleados.delete_one({"_id": ObjectId(empleado_id)})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=500, detail="Error al eliminar empleado")
+    
+    # También eliminar datos relacionados
+    await database.fichajes.delete_many({"empleado_id": empleado_id})
+    await database.productividad.delete_many({"empleado_id": empleado_id})
+    await database.documentos_empleado.delete_many({"empleado_id": empleado_id})
+    await database.prenominas.delete_many({"empleado_id": empleado_id})
+    
+    return {"success": True, "message": "Empleado eliminado permanentemente"}
+
+@router.put("/empleados/{empleado_id}/reactivar")
+async def reactivar_empleado(empleado_id: str):
+    """Reactivar un empleado que estaba en baja"""
+    database = get_db()
+    
+    # Verificar que el empleado existe y está en baja
+    empleado = await database.empleados.find_one({"_id": ObjectId(empleado_id)})
+    if not empleado:
+        raise HTTPException(status_code=404, detail="Empleado no encontrado")
+    
+    if empleado.get("activo", True):
+        raise HTTPException(status_code=400, detail="El empleado ya está activo")
+    
+    result = await database.empleados.update_one(
+        {"_id": ObjectId(empleado_id)},
+        {"$set": {
+            "activo": True,
+            "fecha_baja": None,
+            "updated_at": datetime.now()
+        }}
+    )
+    
+    return {"success": True, "message": "Empleado reactivado"}
+
 @router.get("/empleados/{empleado_id}/qr")
 async def get_empleado_qr(empleado_id: str):
     """Generar imagen QR para un empleado"""
