@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, UserX, UserCheck, Shield, Settings, X, Check, Eye, EyeOff, Key, ShoppingBag, Link, Unlink, Users } from 'lucide-react';
+import { Plus, Edit2, UserX, UserCheck, Shield, Settings, X, Check, Eye, EyeOff, Key, ShoppingBag, Link, Unlink, Users, Leaf, FileText, Clipboard } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 
