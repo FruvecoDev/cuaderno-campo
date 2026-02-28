@@ -2466,7 +2466,8 @@ const DocumentosEmpleado = ({ empleados }) => {
                 <th>Documento</th>
                 <th>Empleado</th>
                 <th>Tipo</th>
-                <th>Fecha</th>
+                <th>Fecha Doc.</th>
+                <th>Fecha Registro</th>
                 <th>Estado</th>
                 <th>Acciones</th>
               </tr>
@@ -2474,7 +2475,7 @@ const DocumentosEmpleado = ({ empleados }) => {
             <tbody>
               {documentos.length === 0 ? (
                 <tr>
-                  <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>
+                  <td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>
                     {empleadoSeleccionado 
                       ? 'No hay documentos para este empleado' 
                       : 'Seleccione un empleado o vea todos los documentos'}
@@ -2527,7 +2528,24 @@ const DocumentosEmpleado = ({ empleados }) => {
                         {tiposDocumento.find(t => t.value === doc.tipo)?.label || doc.tipo}
                       </span>
                     </td>
-                    <td>{doc.fecha_creacion || doc.created_at?.split('T')[0]}</td>
+                    <td>{doc.fecha_creacion || '-'}</td>
+                    <td>
+                      <div style={{ fontSize: '0.85rem' }}>
+                        {doc.created_at ? new Date(doc.created_at).toLocaleDateString('es-ES', { 
+                          day: '2-digit', 
+                          month: '2-digit', 
+                          year: 'numeric' 
+                        }) : '-'}
+                      </div>
+                      {doc.created_at && (
+                        <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))' }}>
+                          {new Date(doc.created_at).toLocaleTimeString('es-ES', { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                          })}
+                        </div>
+                      )}
+                    </td>
                     <td>
                       {doc.firmado ? (
                         <span style={{
