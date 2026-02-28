@@ -183,10 +183,14 @@ const Proveedores = () => {
     });
   };
 
-  const filteredProveedores = proveedores.filter(p => 
-    p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (p.cif_nif && p.cif_nif.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredProveedores = proveedores.filter(p => {
+    const matchesSearch = p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.cif_nif && p.cif_nif.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesEstado = filtroEstado === 'todos' || 
+      (filtroEstado === 'activos' && p.activo !== false) ||
+      (filtroEstado === 'inactivos' && p.activo === false);
+    return matchesSearch && matchesEstado;
+  });
 
   useEffect(() => {
     localStorage.setItem('proveedores_fields_config', JSON.stringify(fieldsConfig));
@@ -204,6 +208,14 @@ const Proveedores = () => {
           <p className="text-muted">Gestiona el catálogo de proveedores</p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button
+            className="btn btn-secondary"
+            onClick={handleExportExcel}
+            title="Exportar a Excel"
+          >
+            <Download size={18} />
+            Excel
+          </button>
           <button
             className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setShowFieldsConfig(!showFieldsConfig)}
@@ -226,6 +238,32 @@ const Proveedores = () => {
           </PermissionButton>
         </div>
       </div>
+
+      {/* KPIs */}
+      {stats && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div className="card" style={{ padding: '1rem', textAlign: 'center' }}>
+            <Users size={24} style={{ margin: '0 auto 0.5rem', color: 'hsl(var(--primary))' }} />
+            <div style={{ fontSize: '1.75rem', fontWeight: '700' }}>{stats.total}</div>
+            <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Total Proveedores</div>
+          </div>
+          <div className="card" style={{ padding: '1rem', textAlign: 'center' }}>
+            <TrendingUp size={24} style={{ margin: '0 auto 0.5rem', color: 'hsl(142 76% 36%)' }} />
+            <div style={{ fontSize: '1.75rem', fontWeight: '700' }}>{stats.activos}</div>
+            <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Activos</div>
+          </div>
+          <div className="card" style={{ padding: '1rem', textAlign: 'center' }}>
+            <MapPin size={24} style={{ margin: '0 auto 0.5rem', color: 'hsl(38 92% 50%)' }} />
+            <div style={{ fontSize: '1.75rem', fontWeight: '700' }}>{stats.por_provincia?.length || 0}</div>
+            <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Provincias</div>
+          </div>
+          <div className="card" style={{ padding: '1rem', textAlign: 'center' }}>
+            <FileText size={24} style={{ margin: '0 auto 0.5rem', color: 'hsl(262 83% 58%)' }} />
+            <div style={{ fontSize: '1.75rem', fontWeight: '700' }}>{stats.top_proveedores_compras?.length || 0}</div>
+            <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Con Operaciones</div>
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="card" style={{ backgroundColor: 'hsl(var(--destructive) / 0.1)', border: '1px solid hsl(var(--destructive))', marginBottom: '1.5rem', padding: '1rem' }}>
