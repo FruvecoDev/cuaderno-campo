@@ -857,11 +857,11 @@ const Contratos = () => {
                 ) : (
                   <table style={{ width: '100%', fontSize: '0.85rem', backgroundColor: 'white', borderRadius: '4px' }}>
                     <thead>
-                      <tr style={{ backgroundColor: '#1a5276', color: 'white' }}>
-                        <th style={{ padding: '8px', textAlign: 'center' }}>Tend. Mínima</th>
-                        <th style={{ padding: '8px', textAlign: 'center' }}>Tend. Máxima</th>
-                        <th style={{ padding: '8px', textAlign: 'center' }}>Precio (€/kg)</th>
-                        <th style={{ padding: '8px', textAlign: 'center', width: '60px' }}>Eliminar</th>
+                      <tr style={{ backgroundColor: '#1a5276' }}>
+                        <th style={{ padding: '8px', textAlign: 'center', color: 'white' }}>Tend. Mínima</th>
+                        <th style={{ padding: '8px', textAlign: 'center', color: 'white' }}>Tend. Máxima</th>
+                        <th style={{ padding: '8px', textAlign: 'center', color: 'white' }}>Precio (€/kg)</th>
+                        <th style={{ padding: '8px', textAlign: 'center', width: '60px', color: 'white' }}>Eliminar</th>
                       </tr>
                     </thead>
                     <tbody>
