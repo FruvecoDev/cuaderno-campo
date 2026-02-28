@@ -946,6 +946,14 @@ const Clientes = () => {
                         >
                           <TrendingUp size={14} />
                         </button>
+                        <button
+                          className="btn btn-sm btn-secondary"
+                          onClick={() => handleVerHistorial(cliente)}
+                          title="Ver historial completo"
+                          data-testid={`historial-cliente-${cliente._id}`}
+                        >
+                          <Eye size={14} />
+                        </button>
                         {canEdit ? (
                           <button
                             className="btn btn-sm btn-secondary"
