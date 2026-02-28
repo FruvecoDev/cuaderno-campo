@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Calendar, CheckCircle, XCircle, AlertCircle, Filter, User, Clock, MessageSquare
+  Calendar, CheckCircle, XCircle, AlertCircle, Filter, User, Clock, MessageSquare, LayoutGrid, List
 } from 'lucide-react';
 import api from '../../services/api';
+import CalendarioAusencias from './CalendarioAusencias';
 
 const AusenciasTab = ({ empleados }) => {
   const [ausencias, setAusencias] = useState([]);
+  const [todasAusencias, setTodasAusencias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filtroEstado, setFiltroEstado] = useState('pendiente');
   const [filtroTipo, setFiltroTipo] = useState('');
@@ -13,6 +15,7 @@ const AusenciasTab = ({ empleados }) => {
   const [ausenciaSeleccionada, setAusenciaSeleccionada] = useState(null);
   const [comentarioRechazo, setComentarioRechazo] = useState('');
   const [stats, setStats] = useState({ pendientes: 0, aprobadas: 0, rechazadas: 0 });
+  const [vistaCalendario, setVistaCalendario] = useState(false);
   
   useEffect(() => {
     fetchAusencias();
@@ -28,9 +31,10 @@ const AusenciasTab = ({ empleados }) => {
       const data = await api.get(url);
       setAusencias(data.ausencias || []);
       
-      // Calcular stats
+      // Obtener todas para el calendario y stats
       const allData = await api.get('/api/rrhh/ausencias');
       const all = allData.ausencias || [];
+      setTodasAusencias(all);
       setStats({
         pendientes: all.filter(a => a.estado === 'pendiente').length,
         aprobadas: all.filter(a => a.estado === 'aprobada').length,
