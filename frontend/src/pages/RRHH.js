@@ -2214,6 +2214,51 @@ const DocumentosEmpleado = ({ empleados }) => {
     }
   };
   
+  // Funciones de exportación
+  const handleExportExcel = async () => {
+    try {
+      let params = new URLSearchParams();
+      if (empleadoSeleccionado) {
+        params.append('empleado_id', empleadoSeleccionado);
+      }
+      if (filtroFechaDesde) {
+        params.append('fecha_desde', filtroFechaDesde);
+      }
+      if (filtroFechaHasta) {
+        params.append('fecha_hasta', filtroFechaHasta);
+      }
+      
+      const queryString = params.toString();
+      const url = queryString ? `/api/rrhh/documentos/export/excel?${queryString}` : '/api/rrhh/documentos/export/excel';
+      await api.download(url, `documentos_rrhh_${new Date().toISOString().split('T')[0]}.xlsx`);
+    } catch (err) {
+      console.error('Error exporting Excel:', err);
+      alert('Error al exportar a Excel');
+    }
+  };
+  
+  const handleExportPdf = async () => {
+    try {
+      let params = new URLSearchParams();
+      if (empleadoSeleccionado) {
+        params.append('empleado_id', empleadoSeleccionado);
+      }
+      if (filtroFechaDesde) {
+        params.append('fecha_desde', filtroFechaDesde);
+      }
+      if (filtroFechaHasta) {
+        params.append('fecha_hasta', filtroFechaHasta);
+      }
+      
+      const queryString = params.toString();
+      const url = queryString ? `/api/rrhh/documentos/export/pdf?${queryString}` : '/api/rrhh/documentos/export/pdf';
+      await api.download(url, `informe_documentos_${new Date().toISOString().split('T')[0]}.pdf`);
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+      alert('Error al generar el informe PDF');
+    }
+  };
+  
   // Determinar si el archivo es imagen
   const isImageFile = (file) => {
     return file && file.type.startsWith('image/');
