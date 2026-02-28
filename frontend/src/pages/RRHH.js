@@ -2072,7 +2072,10 @@ const DocumentosEmpleado = ({ empleados }) => {
   };
   
   const handleCrearDocumento = async () => {
-    if (!empleadoSeleccionado || !nuevoDocData.nombre) return;
+    if (!empleadoSeleccionado || !nuevoDocData.nombre) {
+      console.log('Validation failed:', { empleadoSeleccionado, nombre: nuevoDocData.nombre });
+      return;
+    }
     
     try {
       setUploading(true);
@@ -2085,25 +2088,30 @@ const DocumentosEmpleado = ({ empleados }) => {
         formData.append('nombre', nuevoDocData.nombre);
         formData.append('tipo', nuevoDocData.tipo);
         formData.append('descripcion', nuevoDocData.descripcion || '');
-        formData.append('requiere_firma', nuevoDocData.requiere_firma);
+        formData.append('requiere_firma', nuevoDocData.requiere_firma.toString());
         formData.append('fecha_creacion', new Date().toISOString().split('T')[0]);
         
-        await api.upload('/api/rrhh/documentos/upload', formData);
+        console.log('Uploading document with file...');
+        const result = await api.upload('/api/rrhh/documentos/upload', formData);
+        console.log('Upload result:', result);
       } else {
         // Sin archivo, solo crear metadatos
-        await api.post('/api/rrhh/documentos', {
+        console.log('Creating document without file...');
+        const result = await api.post('/api/rrhh/documentos', {
           empleado_id: empleadoSeleccionado,
           ...nuevoDocData,
           fecha_creacion: new Date().toISOString().split('T')[0]
         });
+        console.log('Create result:', result);
       }
       
       setShowNuevoDoc(false);
       setNuevoDocData({ nombre: '', tipo: 'contrato', descripcion: '', requiere_firma: true });
-      setArchivoAdjunto(null);
+      removeArchivoAdjunto();
       fetchDocumentos();
     } catch (err) {
-      console.error('Error:', err);
+      console.error('Error creating document:', err);
+      alert('Error al crear el documento: ' + (err.message || 'Error desconocido'));
     } finally {
       setUploading(false);
       setUploadProgress(0);
