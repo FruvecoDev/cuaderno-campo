@@ -383,6 +383,83 @@ const Cosechas = () => {
           </div>
         </div>
       )}
+      
+      {/* Gráficos */}
+      {stats && (stats.por_cultivo?.length > 0 || stats.por_proveedor?.length > 0) && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+          {/* Gráfico por Cultivo */}
+          {stats.por_cultivo?.length > 0 && (
+            <div className="card" style={{ padding: '1rem' }}>
+              <h3 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Leaf size={18} />
+                Cosechas por Cultivo
+              </h3>
+              <div style={{ height: '200px' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={stats.por_cultivo} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={(v) => `${(v/1000).toFixed(0)}t`} />
+                    <YAxis type="category" dataKey="cultivo" tick={{ fontSize: 10 }} width={80} />
+                    <Tooltip 
+                      formatter={(value, name) => [
+                        `${(value/1000).toFixed(1)}t`,
+                        name === 'kilos_reales' ? 'Real' : 'Estimado'
+                      ]}
+                      contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
+                    />
+                    <Bar dataKey="kilos_estimados" fill="hsl(var(--muted-foreground))" name="kilos_estimados" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="kilos_reales" fill="hsl(var(--primary))" name="kilos_reales" radius={[0, 4, 4, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '0.5rem', fontSize: '0.75rem' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <span style={{ width: '12px', height: '12px', background: 'hsl(var(--muted-foreground))', borderRadius: '2px' }}></span>
+                  Estimado
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <span style={{ width: '12px', height: '12px', background: 'hsl(var(--primary))', borderRadius: '2px' }}></span>
+                  Real
+                </span>
+              </div>
+            </div>
+          )}
+          
+          {/* Gráfico por Proveedor */}
+          {stats.por_proveedor?.filter(p => p.proveedor).length > 0 && (
+            <div className="card" style={{ padding: '1rem' }}>
+              <h3 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <DollarSign size={18} />
+                Importe por Proveedor
+              </h3>
+              <div style={{ height: '200px' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={stats.por_proveedor.filter(p => p.proveedor)}
+                      dataKey="importe"
+                      nameKey="proveedor"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={70}
+                      label={({ proveedor, percent }) => `${proveedor?.substring(0, 10) || ''}${proveedor?.length > 10 ? '...' : ''} ${(percent * 100).toFixed(0)}%`}
+                      labelLine={false}
+                    >
+                      {stats.por_proveedor.filter(p => p.proveedor).map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={['#2ecc71', '#3498db', '#9b59b6', '#f39c12', '#e74c3c'][index % 5]} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value) => [`${value?.toLocaleString('es-ES')}€`, 'Importe']}
+                      contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Formulario Nueva Cosecha */}
       {showForm && (
