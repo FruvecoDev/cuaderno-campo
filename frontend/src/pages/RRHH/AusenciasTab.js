@@ -362,6 +362,7 @@ const AusenciasTab = ({ empleados }) => {
           </table>
         </div>
       </div>
+      )}
       
       {/* Modal Rechazar */}
       {showRechazarModal && ausenciaSeleccionada && (
