@@ -9,7 +9,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
 import SignatureCanvas from 'react-signature-canvas';
-import { ControlHorarioTab, ProductividadTab, PrenominaTab, AusenciasTab } from './RRHH/index';
+import { ControlHorarioTab, ProductividadTab, PrenominaTab, AusenciasTab, DocumentosTab } from './RRHH/index';
 import '../App.css';
 
 const RRHH = () => {
