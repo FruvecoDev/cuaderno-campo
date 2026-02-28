@@ -17,6 +17,9 @@ const Usuarios = () => {
   const [menuItems, setMenuItems] = useState([]);
   const [menuPermissions, setMenuPermissions] = useState({});
   const [savingPermissions, setSavingPermissions] = useState(false);
+  // Permission profiles
+  const [permissionProfiles, setPermissionProfiles] = useState([]);
+  const [selectedProfile, setSelectedProfile] = useState(null);
   // Password change modal
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [selectedUserForPassword, setSelectedUserForPassword] = useState(null);
