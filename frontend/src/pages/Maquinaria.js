@@ -1091,6 +1091,160 @@ const Maquinaria = () => {
           </div>
         )}
       </div>
+      
+      {/* Modal de Historial */}
+      {showHistorial && selectedMaquinaria && (
+        <div 
+          onClick={() => setShowHistorial(false)} 
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '2rem'
+          }}
+        >
+          <div 
+            onClick={e => e.stopPropagation()} 
+            style={{ 
+              background: 'hsl(var(--card))',
+              borderRadius: '12px',
+              maxWidth: '800px',
+              width: '100%',
+              maxHeight: '85vh', 
+              overflow: 'auto'
+            }}
+          >
+            <div style={{
+              padding: '1.5rem',
+              borderBottom: '1px solid hsl(var(--border))',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              position: 'sticky',
+              top: 0,
+              backgroundColor: 'hsl(var(--card))',
+              zIndex: 1
+            }}>
+              <div>
+                <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Cog size={24} />
+                  Historial de {selectedMaquinaria.nombre}
+                </h2>
+                <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
+                  {selectedMaquinaria.tipo} - {selectedMaquinaria.matricula || 'Sin matrícula'}
+                </p>
+              </div>
+              <button onClick={() => setShowHistorial(false)} className="btn btn-ghost">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div style={{ padding: '1.5rem' }}>
+              {loadingHistorial ? (
+                <div style={{ textAlign: 'center', padding: '2rem' }}>
+                  <p>Cargando historial...</p>
+                </div>
+              ) : historialData ? (
+                <>
+                  {/* Resumen */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                    <div className="card" style={{ padding: '1rem', textAlign: 'center', background: 'hsl(var(--muted) / 0.3)' }}>
+                      <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'hsl(var(--primary))' }}>
+                        {historialData.total_usos || 0}
+                      </div>
+                      <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Total Usos en Tratamientos</div>
+                    </div>
+                    <div className="card" style={{ padding: '1rem', textAlign: 'center', background: 'hsl(var(--muted) / 0.3)' }}>
+                      <div style={{ fontSize: '1.5rem', fontWeight: '700' }}>{historialData.mantenimientos?.length || 0}</div>
+                      <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Mantenimientos</div>
+                    </div>
+                  </div>
+
+                  {/* Lista de tratamientos */}
+                  {historialData.tratamientos?.length > 0 ? (
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <h4 style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Wrench size={18} />
+                        Tratamientos Realizados
+                      </h4>
+                      <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                        {historialData.tratamientos.map(t => (
+                          <div key={t._id} style={{
+                            padding: '0.75rem',
+                            borderBottom: '1px solid hsl(var(--border))',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                          }}>
+                            <div>
+                              <div style={{ fontWeight: '500' }}>{t.producto || t.tipo || 'Tratamiento'}</div>
+                              <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                                {t.fecha ? new Date(t.fecha).toLocaleDateString('es-ES') : '-'}
+                                {t.parcela_nombre && ` • ${t.parcela_nombre}`}
+                              </div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <span className={`badge ${t.estado === 'completado' ? 'badge-success' : 'badge-secondary'}`}>
+                                {t.estado || 'Registrado'}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p style={{ textAlign: 'center', color: 'hsl(var(--muted-foreground))', padding: '1rem' }}>
+                      No hay tratamientos registrados con esta maquinaria
+                    </p>
+                  )}
+
+                  {/* Lista de mantenimientos */}
+                  {historialData.mantenimientos?.length > 0 && (
+                    <div>
+                      <h4 style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Settings size={18} />
+                        Mantenimientos
+                      </h4>
+                      <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                        {historialData.mantenimientos.map(m => (
+                          <div key={m._id} style={{
+                            padding: '0.75rem',
+                            borderBottom: '1px solid hsl(var(--border))',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                          }}>
+                            <div>
+                              <div style={{ fontWeight: '500' }}>{m.tipo || 'Mantenimiento'}</div>
+                              <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                                {m.fecha ? new Date(m.fecha).toLocaleDateString('es-ES') : '-'}
+                              </div>
+                            </div>
+                            {m.coste && (
+                              <div style={{ fontWeight: '600', color: 'hsl(var(--primary))' }}>
+                                {m.coste.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '2rem', color: 'hsl(var(--muted-foreground))' }}>
+                  <Cog size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
+                  <p>No hay historial disponible</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
