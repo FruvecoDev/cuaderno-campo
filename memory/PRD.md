@@ -33,6 +33,7 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
 - **Estado y función**: `handleVerHistorial` añadido al componente
 - **Botón**: Icono de ojo (Eye) en columna de Acciones
 - **Modal**: Muestra total ventas, contratos, albaranes, y listas detalladas
+- **Gráfico de tendencia**: Barras mostrando kg vendidos por campaña
 - **Endpoint backend existente**: `GET /api/clientes/{id}/historial`
 - **Archivo modificado**: `/app/frontend/src/pages/Clientes.js`
 
