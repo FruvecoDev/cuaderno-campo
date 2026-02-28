@@ -355,14 +355,297 @@ const RRHH = () => {
             </select>
             
             <button
-              onClick={() => { resetForm(); setEditingId(null); setShowForm(true); }}
+              onClick={() => { resetForm(); setEditingId(null); setShowForm(!showForm); }}
               className="btn btn-primary"
               style={{ marginLeft: 'auto' }}
+              data-testid="btn-nuevo-empleado"
             >
               <Plus size={18} />
-              Nuevo Empleado
+              {showForm && !editingId ? 'Cerrar Formulario' : 'Nuevo Empleado'}
             </button>
           </div>
+
+          {/* Formulario Integrado (igual que Proveedores) */}
+          {showForm && (
+            <div className="card mb-6" data-testid="form-empleado">
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                marginBottom: '1.5rem'
+              }}>
+                <h2 className="card-title" style={{ margin: 0 }}>
+                  {editingId ? 'Editar Empleado' : 'Nuevo Empleado'}
+                </h2>
+                <button 
+                  onClick={() => setShowForm(false)} 
+                  className="btn btn-ghost btn-sm"
+                  title="Cerrar"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <form onSubmit={handleSubmit}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+                  {/* Datos Personales */}
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.75rem', color: 'hsl(var(--primary))' }}>
+                      Datos Personales
+                    </h3>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Nombre *</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={formData.nombre}
+                      onChange={e => setFormData({...formData, nombre: e.target.value})}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Apellidos *</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={formData.apellidos}
+                      onChange={e => setFormData({...formData, apellidos: e.target.value})}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">DNI/NIE *</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={formData.dni_nie}
+                      onChange={e => setFormData({...formData, dni_nie: e.target.value})}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Fecha Nacimiento</label>
+                    <input
+                      type="date"
+                      className="form-input"
+                      value={formData.fecha_nacimiento}
+                      onChange={e => setFormData({...formData, fecha_nacimiento: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Teléfono</label>
+                    <input
+                      type="tel"
+                      className="form-input"
+                      value={formData.telefono}
+                      onChange={e => setFormData({...formData, telefono: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Email</label>
+                    <input
+                      type="email"
+                      className="form-input"
+                      value={formData.email}
+                      onChange={e => setFormData({...formData, email: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                    <label className="form-label">Dirección</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={formData.direccion}
+                      onChange={e => setFormData({...formData, direccion: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Código Postal</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={formData.codigo_postal}
+                      onChange={e => setFormData({...formData, codigo_postal: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Localidad</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={formData.localidad}
+                      onChange={e => setFormData({...formData, localidad: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Provincia</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={formData.provincia}
+                      onChange={e => setFormData({...formData, provincia: e.target.value})}
+                    />
+                  </div>
+                  
+                  {/* Datos Laborales */}
+                  <div style={{ gridColumn: 'span 2', marginTop: '1rem' }}>
+                    <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.75rem', color: 'hsl(var(--primary))' }}>
+                      Datos Laborales
+                    </h3>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Fecha Alta *</label>
+                    <input
+                      type="date"
+                      className="form-input"
+                      value={formData.fecha_alta}
+                      onChange={e => setFormData({...formData, fecha_alta: e.target.value})}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Tipo Contrato</label>
+                    <select
+                      className="form-select"
+                      value={formData.tipo_contrato}
+                      onChange={e => setFormData({...formData, tipo_contrato: e.target.value})}
+                    >
+                      {tiposContrato.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Puesto</label>
+                    <select
+                      className="form-select"
+                      value={formData.puesto}
+                      onChange={e => setFormData({...formData, puesto: e.target.value})}
+                    >
+                      {puestos.map(p => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Departamento</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={formData.departamento}
+                      onChange={e => setFormData({...formData, departamento: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Categoría Profesional</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={formData.categoria_profesional}
+                      onChange={e => setFormData({...formData, categoria_profesional: e.target.value})}
+                    />
+                  </div>
+                  
+                  {/* Datos Económicos */}
+                  <div style={{ gridColumn: 'span 2', marginTop: '1rem' }}>
+                    <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.75rem', color: 'hsl(var(--primary))' }}>
+                      Datos Económicos
+                    </h3>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">IBAN</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={formData.iban}
+                      onChange={e => setFormData({...formData, iban: e.target.value})}
+                      placeholder="ES00 0000 0000 0000 0000 0000"
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Salario/Hora (€)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      className="form-input"
+                      value={formData.salario_hora}
+                      onChange={e => setFormData({...formData, salario_hora: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Salario Hora Extra (€)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      className="form-input"
+                      value={formData.salario_hora_extra}
+                      onChange={e => setFormData({...formData, salario_hora_extra: e.target.value})}
+                      placeholder="Por defecto: salario x 1.25"
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Salario Hora Nocturna (€)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      className="form-input"
+                      value={formData.salario_hora_nocturna}
+                      onChange={e => setFormData({...formData, salario_hora_nocturna: e.target.value})}
+                      placeholder="Por defecto: salario x 1.25"
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Salario Hora Festivo (€)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      className="form-input"
+                      value={formData.salario_hora_festivo}
+                      onChange={e => setFormData({...formData, salario_hora_festivo: e.target.value})}
+                      placeholder="Por defecto: salario x 1.5"
+                    />
+                  </div>
+                  
+                  {/* Notas */}
+                  <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                    <label className="form-label">Notas</label>
+                    <textarea
+                      className="form-input"
+                      rows="3"
+                      value={formData.notas}
+                      onChange={e => setFormData({...formData, notas: e.target.value})}
+                    />
+                  </div>
+                </div>
+                
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
+                  <button type="button" onClick={() => setShowForm(false)} className="btn btn-secondary">
+                    Cancelar
+                  </button>
+                  <button type="submit" className="btn btn-primary">
+                    {editingId ? 'Guardar Cambios' : 'Crear Empleado'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
 
           {/* Table */}
           <div className="card">
