@@ -2490,6 +2490,28 @@ const DocumentosEmpleado = ({ empleados }) => {
           )}
         </div>
         
+        {/* Botones de exportación */}
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button
+            onClick={handleExportExcel}
+            className="btn btn-secondary"
+            disabled={documentos.length === 0}
+            title="Exportar a Excel"
+          >
+            <FileText size={16} />
+            Excel
+          </button>
+          <button
+            onClick={handleExportPdf}
+            className="btn btn-secondary"
+            disabled={documentos.length === 0}
+            title="Generar Informe PDF"
+          >
+            <FileText size={16} />
+            PDF
+          </button>
+        </div>
+        
         <button
           onClick={() => setShowNuevoDoc(true)}
           className="btn btn-primary"
