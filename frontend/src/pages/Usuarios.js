@@ -666,6 +666,51 @@ const Usuarios = () => {
             </div>
             
             <div style={{ overflowY: 'auto', flex: 1, paddingRight: '0.5rem' }}>
+              {/* Perfiles Predefinidos */}
+              {permissionProfiles.length > 0 && (
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
+                    Aplicar Perfil Predefinido
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.5rem' }}>
+                    {permissionProfiles.map(profile => {
+                      const IconComponent = profile.icon === 'Leaf' ? Leaf : 
+                                           profile.icon === 'FileText' ? FileText : 
+                                           profile.icon === 'Users' ? Users : 
+                                           profile.icon === 'Shield' ? Shield : 
+                                           profile.icon === 'Eye' ? Eye : Clipboard;
+                      return (
+                        <button
+                          key={profile.id}
+                          onClick={() => applyProfile(profile)}
+                          className={`btn btn-sm ${selectedProfile === profile.id ? 'btn-primary' : 'btn-secondary'}`}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            padding: '0.75rem',
+                            textAlign: 'left',
+                            height: 'auto',
+                            flexDirection: 'column',
+                            alignItems: 'flex-start'
+                          }}
+                          title={profile.description}
+                          data-testid={`profile-${profile.id}`}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <IconComponent size={16} />
+                            <span style={{ fontWeight: '600', fontSize: '0.8rem' }}>{profile.name}</span>
+                          </div>
+                          <span style={{ fontSize: '0.7rem', opacity: 0.8, lineHeight: 1.3 }}>
+                            {profile.description.slice(0, 50)}...
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              
               {/* Group by section */}
               {[...new Set(menuItems.map(item => item.section))].map(section => {
                 const sectionItems = menuItems.filter(item => item.section === section);
