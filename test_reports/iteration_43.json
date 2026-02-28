@@ -1,0 +1,78 @@
+{
+  "summary": "Tested RRHH Prenómina module - all backend API endpoints and frontend UI features working correctly. Created comprehensive test suite for the Prenómina functionality.",
+  "mode": "generate",
+  "baseline_commit": "691cf57c402e42e09973529f0ca7f1e4eb4bcab6",
+  "head_commit": "f35366b99b1025d9720551672828c6ffc72058d2",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "RRHH - Prenómina tab",
+        "issues": [
+          "ResumenDiario modal appears frequently and can block interactions - consider adding a 'Don't show again today' persistent cookie"
+        ]
+      }
+    ]
+  },
+  "regression_results": {
+    "total_specs": 28,
+    "passed": 28,
+    "failed": 0,
+    "skipped": 0
+  },
+  "specs_created": [
+    "/app/backend/tests/test_prenomina.py",
+    "/app/tests/e2e/rrhh-prenomina.spec.ts"
+  ],
+  "specs_updated": [],
+  "quarantined_tests": [],
+  "test_report_links": [
+    "/app/backend/tests/test_prenomina.py",
+    "/app/tests/e2e/rrhh-prenomina.spec.ts",
+    "/app/test_reports/pytest/pytest_prenomina_results.xml"
+  ],
+  "action_items": [],
+  "updated_files": [
+    "/app/backend/tests/test_prenomina.py",
+    "/app/tests/e2e/rrhh-prenomina.spec.ts"
+  ],
+  "success_rate": {
+    "backend": "100%",
+    "frontend": "100%"
+  },
+  "features_tested": {
+    "backend_apis": [
+      "GET /api/rrhh/prenominas - List prenominas by month/year",
+      "POST /api/rrhh/prenominas/calcular - Calculate individual prenomina",
+      "POST /api/rrhh/prenominas/calcular-todos - Calculate all prenominas (bulk)",
+      "PUT /api/rrhh/prenominas/{id}/validar - Validate prenomina",
+      "GET /api/rrhh/prenominas/{id}/excel - Export to Excel",
+      "GET /api/rrhh/prenominas/{id}/pdf - Export to PDF",
+      "GET /api/rrhh/prenominas/export - Export all for period"
+    ],
+    "frontend_ui": [
+      "Navigate to Prenómina tab",
+      "Display KPI cards (Prenóminas count, Total Horas, Importe Bruto, Importe Neto)",
+      "Select month/year for prenomina period",
+      "Employee selector for individual calculation",
+      "Calculate individual prenomina button",
+      "Calculate all prenominas (bulk) button with confirmation",
+      "Prenominas table with columns: Empleado, DNI, H. Normales, H. Extra, Total Horas, Importe Bruto, Importe Neto, Estado, Acciones",
+      "Detail modal showing: Desglose de Horas, Total Horas, Días Trabajados, Importe Bruto, Importe Neto, Deducciones",
+      "Validate prenomina action",
+      "Export to Excel action",
+      "Export to PDF action",
+      "Export all to CSV action",
+      "Empty state when no prenominas"
+    ]
+  },
+  "seed_data_creation": "No seed data created - existing prenominas in database used for testing",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Prenómina module fully tested. Backend has 15 passing tests in test_prenomina.py covering all CRUD operations and exports. Frontend has 13 passing tests in rrhh-prenomina.spec.ts covering UI navigation, KPIs, calculations, modal, validations, and exports. Note: The ResumenDiario modal requires use of addLocatorHandler or dismissModal helper to handle automatic dismissal."
+}
