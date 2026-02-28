@@ -1841,8 +1841,12 @@ Migrar todas las llamadas `fetch` directas al nuevo servicio centralizado `api.j
   - Total: 28/28 tests pasados
 
 ### Archivos Creados/Modificados (28/02/2026):
-- `/app/backend/routes/routes_rrhh.py` - API completa con endpoints de documentos y firma
-- `/app/frontend/src/pages/RRHH.js` - Interfaz con 5 tabs (Empleados, Control Horario, Productividad, Documentos, Prenómina)
+- `/app/backend/routes/routes_rrhh.py` - API completa con endpoints de prenómina (calcular individual/masivo, validar, exportar Excel/PDF)
+- `/app/frontend/src/pages/RRHH.js` - Componente Prenomina mejorado con UI completa
+- `/app/backend/tests/test_prenomina.py` - 15 tests backend para prenómina
+- `/app/tests/e2e/rrhh-prenomina.spec.ts` - 13 tests frontend para prenómina
+
+### Archivos Creados/Modificados (27/02/2026):
 
 ### Librerías Frontend para RRHH:
 - `react-qr-reader` - Escaneo de códigos QR con cámara
