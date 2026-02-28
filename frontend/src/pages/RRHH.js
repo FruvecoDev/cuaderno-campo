@@ -2002,6 +2002,8 @@ const DocumentosEmpleado = ({ empleados }) => {
   
   // Estado para archivo adjunto
   const [archivoAdjunto, setArchivoAdjunto] = useState(null);
+  const [archivoPreview, setArchivoPreview] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
