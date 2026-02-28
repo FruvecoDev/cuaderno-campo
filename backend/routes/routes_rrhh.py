@@ -1719,6 +1719,8 @@ async def upload_documento(
     empleado = await database.empleados.find_one({"_id": ObjectId(empleado_id)})
     if empleado and empleado.get("email"):
         titulo = "Nuevo Documento Disponible"
+        empleado_nombre = f"{empleado.get('nombre', '')} {empleado.get('apellidos', '')}"
+        
         if requiere_firma_bool:
             mensaje = f"Se ha subido el documento '{nombre}' que requiere tu firma."
             tipo_notif = "warning"
@@ -1738,6 +1740,19 @@ async def upload_documento(
             "leida_por": []
         }
         await database.notificaciones.insert_one(notificacion)
+        
+        # Enviar email de notificación
+        try:
+            await send_documento_notification(
+                recipient_email=empleado.get("email"),
+                empleado_nombre=empleado_nombre,
+                documento_nombre=nombre,
+                tipo_documento=tipo,
+                requiere_firma=requiere_firma_bool
+            )
+        except Exception as e:
+            # Log error but don't fail the request
+            print(f"Error sending documento email: {e}")
     
     return {"success": True, "data": documento}
 
