@@ -468,7 +468,7 @@ async def export_prenomina_pdf(prenomina_id: str):
 
 @router.get("/prenominas/export")
 async def export_prenominas(mes: int, ano: int):
-    """Exportar prenóminas para software de nóminas (formato CSV)"""
+    """Exportar prenóminas para software de nóminas (formato JSON)"""
     database = get_db()
     
     prenominas = []
@@ -498,3 +498,362 @@ async def export_prenominas(mes: int, ano: int):
     )
     
     return {"success": True, "prenominas": prenominas, "total": len(prenominas)}
+
+
+@router.get("/prenominas/export/csv")
+async def export_prenominas_csv(mes: int, ano: int, formato: Optional[str] = "estandar"):
+    """
+    Exportar prenóminas masivas a CSV para importar en software de nóminas.
+    
+    Formatos disponibles:
+    - estandar: Formato genérico compatible con la mayoría de software
+    - a3nom: Formato compatible con A3NOM
+    - sage: Formato compatible con Sage
+    - nominaplus: Formato compatible con NominaPlus
+    """
+    import csv
+    
+    database = get_db()
+    
+    # Obtener todas las prenóminas del periodo (validadas o borradores)
+    prenominas = []
+    cursor = database.prenominas.find({
+        "periodo_mes": mes,
+        "periodo_ano": ano
+    }).sort("empleado_id", 1)
+    
+    async for p in cursor:
+        emp = await database.empleados.find_one({"_id": ObjectId(p["empleado_id"])})
+        if emp:
+            prenominas.append({
+                "prenomina": p,
+                "empleado": emp
+            })
+    
+    if not prenominas:
+        raise HTTPException(status_code=404, detail=f"No hay prenóminas para {mes}/{ano}")
+    
+    output = io.StringIO()
+    
+    if formato == "a3nom":
+        # Formato A3NOM
+        headers = [
+            "CODIGO", "DNI", "APELLIDOS", "NOMBRE", "HORAS_NORM", "HORAS_EXTRA",
+            "HORAS_NOCT", "HORAS_FEST", "TOTAL_HORAS", "DIAS_TRAB", "BRUTO", "NETO"
+        ]
+        writer = csv.DictWriter(output, fieldnames=headers, delimiter=';', quoting=csv.QUOTE_MINIMAL)
+        writer.writeheader()
+        
+        for item in prenominas:
+            emp = item["empleado"]
+            p = item["prenomina"]
+            writer.writerow({
+                "CODIGO": emp.get("codigo", ""),
+                "DNI": emp.get("dni_nie", ""),
+                "APELLIDOS": emp.get("apellidos", ""),
+                "NOMBRE": emp.get("nombre", ""),
+                "HORAS_NORM": f"{p.get('horas_normales', 0):.2f}".replace('.', ','),
+                "HORAS_EXTRA": f"{p.get('horas_extra', 0):.2f}".replace('.', ','),
+                "HORAS_NOCT": f"{p.get('horas_nocturnas', 0):.2f}".replace('.', ','),
+                "HORAS_FEST": f"{p.get('horas_festivos', 0):.2f}".replace('.', ','),
+                "TOTAL_HORAS": f"{p.get('total_horas', 0):.2f}".replace('.', ','),
+                "DIAS_TRAB": p.get("dias_trabajados", 0),
+                "BRUTO": f"{p.get('importe_bruto', 0):.2f}".replace('.', ','),
+                "NETO": f"{p.get('importe_neto', 0):.2f}".replace('.', ',')
+            })
+    
+    elif formato == "sage":
+        # Formato SAGE
+        headers = [
+            "CodEmpleado", "NIF", "Empleado", "HorasOrdinarias", "HorasExtras",
+            "HorasNocturnas", "TotalHoras", "DiasTrabajos", "ImporteBruto", "ImporteNeto"
+        ]
+        writer = csv.DictWriter(output, fieldnames=headers, delimiter=';', quoting=csv.QUOTE_ALL)
+        writer.writeheader()
+        
+        for item in prenominas:
+            emp = item["empleado"]
+            p = item["prenomina"]
+            nombre_completo = f"{emp.get('apellidos', '')}, {emp.get('nombre', '')}"
+            writer.writerow({
+                "CodEmpleado": emp.get("codigo", ""),
+                "NIF": emp.get("dni_nie", ""),
+                "Empleado": nombre_completo,
+                "HorasOrdinarias": p.get("horas_normales", 0),
+                "HorasExtras": p.get("horas_extra", 0),
+                "HorasNocturnas": p.get("horas_nocturnas", 0),
+                "TotalHoras": p.get("total_horas", 0),
+                "DiasTrabajos": p.get("dias_trabajados", 0),
+                "ImporteBruto": p.get("importe_bruto", 0),
+                "ImporteNeto": p.get("importe_neto", 0)
+            })
+    
+    elif formato == "nominaplus":
+        # Formato NominaPlus
+        headers = [
+            "Empresa", "CodTrabajador", "DNI", "Apellido1", "Apellido2", "Nombre",
+            "HorasNormales", "HorasExtra", "DiasLaborables", "Bruto", "Liquido"
+        ]
+        writer = csv.DictWriter(output, fieldnames=headers, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+        writer.writeheader()
+        
+        for item in prenominas:
+            emp = item["empleado"]
+            p = item["prenomina"]
+            apellidos = emp.get("apellidos", "").split(" ", 1)
+            apellido1 = apellidos[0] if len(apellidos) > 0 else ""
+            apellido2 = apellidos[1] if len(apellidos) > 1 else ""
+            writer.writerow({
+                "Empresa": "001",
+                "CodTrabajador": emp.get("codigo", ""),
+                "DNI": emp.get("dni_nie", ""),
+                "Apellido1": apellido1,
+                "Apellido2": apellido2,
+                "Nombre": emp.get("nombre", ""),
+                "HorasNormales": p.get("horas_normales", 0),
+                "HorasExtra": p.get("horas_extra", 0),
+                "DiasLaborables": p.get("dias_trabajados", 0),
+                "Bruto": p.get("importe_bruto", 0),
+                "Liquido": p.get("importe_neto", 0)
+            })
+    
+    else:  # formato == "estandar"
+        # Formato estándar genérico
+        headers = [
+            "Codigo_Empleado", "DNI_NIE", "Apellidos", "Nombre", "Puesto", "Departamento",
+            "Tipo_Contrato", "Fecha_Alta", "Salario_Hora", "Horas_Normales", "Horas_Extra",
+            "Horas_Nocturnas", "Horas_Festivos", "Total_Horas", "Dias_Trabajados",
+            "Kilos_Producidos", "Importe_Bruto", "Deducciones", "Importe_Neto",
+            "Periodo_Mes", "Periodo_Ano", "Estado", "IBAN", "Numero_SS"
+        ]
+        writer = csv.DictWriter(output, fieldnames=headers, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+        writer.writeheader()
+        
+        for item in prenominas:
+            emp = item["empleado"]
+            p = item["prenomina"]
+            writer.writerow({
+                "Codigo_Empleado": emp.get("codigo", ""),
+                "DNI_NIE": emp.get("dni_nie", ""),
+                "Apellidos": emp.get("apellidos", ""),
+                "Nombre": emp.get("nombre", ""),
+                "Puesto": emp.get("puesto", ""),
+                "Departamento": emp.get("departamento", ""),
+                "Tipo_Contrato": emp.get("tipo_contrato", ""),
+                "Fecha_Alta": emp.get("fecha_alta", ""),
+                "Salario_Hora": emp.get("salario_hora", 0),
+                "Horas_Normales": p.get("horas_normales", 0),
+                "Horas_Extra": p.get("horas_extra", 0),
+                "Horas_Nocturnas": p.get("horas_nocturnas", 0),
+                "Horas_Festivos": p.get("horas_festivos", 0),
+                "Total_Horas": p.get("total_horas", 0),
+                "Dias_Trabajados": p.get("dias_trabajados", 0),
+                "Kilos_Producidos": p.get("kilos_totales", 0),
+                "Importe_Bruto": p.get("importe_bruto", 0),
+                "Deducciones": p.get("deducciones", 0),
+                "Importe_Neto": p.get("importe_neto", 0),
+                "Periodo_Mes": mes,
+                "Periodo_Ano": ano,
+                "Estado": p.get("estado", "borrador"),
+                "IBAN": emp.get("iban", ""),
+                "Numero_SS": emp.get("numero_ss", "")
+            })
+    
+    # Marcar como exportadas
+    await database.prenominas.update_many(
+        {"periodo_mes": mes, "periodo_ano": ano, "estado": {"$in": ["validada", "borrador"]}},
+        {"$set": {"estado": "exportada", "fecha_exportacion": datetime.now(), "updated_at": datetime.now()}}
+    )
+    
+    csv_content = output.getvalue()
+    output.close()
+    
+    # Crear respuesta con el archivo CSV
+    response_output = io.BytesIO(csv_content.encode('utf-8-sig'))  # BOM para Excel
+    response_output.seek(0)
+    
+    meses = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
+             "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+    mes_nombre = meses[mes] if 1 <= mes <= 12 else str(mes)
+    filename = f"prenominas_{mes_nombre}_{ano}_{formato}.csv"
+    
+    return StreamingResponse(
+        response_output,
+        media_type="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}",
+            "Content-Type": "text/csv; charset=utf-8"
+        }
+    )
+
+
+@router.get("/prenominas/export/excel-masivo")
+async def export_prenominas_excel_masivo(mes: int, ano: int):
+    """Exportar todas las prenóminas del periodo a un único archivo Excel"""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+    
+    database = get_db()
+    
+    prenominas = []
+    cursor = database.prenominas.find({
+        "periodo_mes": mes,
+        "periodo_ano": ano
+    }).sort("empleado_id", 1)
+    
+    async for p in cursor:
+        emp = await database.empleados.find_one({"_id": ObjectId(p["empleado_id"])})
+        if emp:
+            prenominas.append({
+                "prenomina": p,
+                "empleado": emp
+            })
+    
+    if not prenominas:
+        raise HTTPException(status_code=404, detail=f"No hay prenóminas para {mes}/{ano}")
+    
+    wb = Workbook()
+    ws = wb.active
+    ws.title = f"Prenóminas {mes}-{ano}"
+    
+    # Estilos
+    title_font = Font(bold=True, size=16, color="FFFFFF")
+    header_font = Font(bold=True, size=11, color="FFFFFF")
+    header_fill = PatternFill(start_color="2E7D32", end_color="2E7D32", fill_type="solid")
+    money_fill = PatternFill(start_color="E8F5E9", end_color="E8F5E9", fill_type="solid")
+    alt_fill = PatternFill(start_color="F5F5F5", end_color="F5F5F5", fill_type="solid")
+    thin_border = Border(
+        left=Side(style='thin'), right=Side(style='thin'),
+        top=Side(style='thin'), bottom=Side(style='thin')
+    )
+    
+    # Título
+    meses = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
+             "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+    mes_nombre = meses[mes] if 1 <= mes <= 12 else str(mes)
+    
+    ws.merge_cells('A1:L1')
+    ws['A1'] = f"PRENÓMINAS - {mes_nombre} {ano}"
+    ws['A1'].font = title_font
+    ws['A1'].fill = header_fill
+    ws['A1'].alignment = Alignment(horizontal="center")
+    ws.row_dimensions[1].height = 30
+    
+    # Info resumen
+    ws['A3'] = f"Total empleados: {len(prenominas)}"
+    ws['A3'].font = Font(bold=True)
+    total_bruto = sum(item["prenomina"].get("importe_bruto", 0) for item in prenominas)
+    total_neto = sum(item["prenomina"].get("importe_neto", 0) for item in prenominas)
+    ws['C3'] = f"Total Bruto: {total_bruto:,.2f} €"
+    ws['C3'].font = Font(bold=True, color="2E7D32")
+    ws['F3'] = f"Total Neto: {total_neto:,.2f} €"
+    ws['F3'].font = Font(bold=True, color="2E7D32")
+    ws['I3'] = f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}"
+    
+    # Encabezados
+    headers = [
+        "Código", "DNI/NIE", "Apellidos", "Nombre", "Puesto",
+        "H. Normales", "H. Extra", "H. Nocturnas", "H. Festivos", "Total Horas",
+        "Días Trab.", "Importe Bruto", "Deducciones", "Importe Neto", "Estado"
+    ]
+    
+    row = 5
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=row, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+        cell.border = thin_border
+    ws.row_dimensions[row].height = 25
+    
+    # Datos
+    for idx, item in enumerate(prenominas):
+        row = 6 + idx
+        emp = item["empleado"]
+        p = item["prenomina"]
+        
+        data = [
+            emp.get("codigo", ""),
+            emp.get("dni_nie", ""),
+            emp.get("apellidos", ""),
+            emp.get("nombre", ""),
+            emp.get("puesto", ""),
+            p.get("horas_normales", 0),
+            p.get("horas_extra", 0),
+            p.get("horas_nocturnas", 0),
+            p.get("horas_festivos", 0),
+            p.get("total_horas", 0),
+            p.get("dias_trabajados", 0),
+            p.get("importe_bruto", 0),
+            p.get("deducciones", 0),
+            p.get("importe_neto", 0),
+            p.get("estado", "borrador").upper()
+        ]
+        
+        for col, value in enumerate(data, 1):
+            cell = ws.cell(row=row, column=col, value=value)
+            cell.border = thin_border
+            
+            # Alternar colores de fila
+            if idx % 2 == 1:
+                cell.fill = alt_fill
+            
+            # Formato para columnas de dinero
+            if col in [12, 13, 14]:
+                cell.number_format = '#,##0.00 €'
+                if col == 14:  # Importe Neto
+                    cell.fill = money_fill
+                    cell.font = Font(bold=True)
+            
+            # Formato para horas
+            if col in [6, 7, 8, 9, 10]:
+                cell.number_format = '#,##0.00'
+            
+            # Centrar números
+            if col >= 6:
+                cell.alignment = Alignment(horizontal="center")
+    
+    # Fila de totales
+    total_row = 6 + len(prenominas)
+    ws.merge_cells(f'A{total_row}:E{total_row}')
+    ws[f'A{total_row}'] = "TOTALES"
+    ws[f'A{total_row}'].font = Font(bold=True, size=12)
+    ws[f'A{total_row}'].alignment = Alignment(horizontal="right")
+    
+    # Sumar columnas numéricas
+    for col in range(6, 15):
+        cell = ws.cell(row=total_row, column=col)
+        start_row = 6
+        end_row = total_row - 1
+        col_letter = get_column_letter(col)
+        cell.value = f"=SUM({col_letter}{start_row}:{col_letter}{end_row})"
+        cell.font = Font(bold=True)
+        cell.fill = header_fill
+        cell.font = Font(bold=True, color="FFFFFF")
+        cell.border = thin_border
+        cell.alignment = Alignment(horizontal="center")
+        
+        if col in [12, 13, 14]:
+            cell.number_format = '#,##0.00 €'
+        elif col in [6, 7, 8, 9, 10]:
+            cell.number_format = '#,##0.00'
+    
+    # Ajustar anchos de columna
+    column_widths = [12, 12, 18, 15, 15, 12, 10, 12, 12, 12, 10, 14, 12, 14, 12]
+    for col, width in enumerate(column_widths, 1):
+        ws.column_dimensions[get_column_letter(col)].width = width
+    
+    # Guardar
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    
+    filename = f"prenominas_{mes_nombre}_{ano}.xlsx"
+    
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
