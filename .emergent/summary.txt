@@ -30,154 +30,148 @@ El usuario ha solicitado recientemente la creación de un módulo RRHH para la g
     -   Pre-payroll calculation.
     -   Document management with digital signature.
     -   Employee portal.
+    -   Absence management.
+    -   In-app and email notifications.
 
 **User's preferred language**: Español
 
 **what currently exists?**
-Una aplicación full-stack (FastAPI, React, MongoDB) con un módulo de RRHH funcional y una base de código frontend refactorizada. En esta sesión se completaron varias funcionalidades clave solicitadas por el usuario:
-1.  **Refactorización de API Completa:** Se finalizó la migración masiva de todas las llamadas  al servicio centralizado . Esto eliminó el error recurrente  y fue validado con una suite completa de tests de regresión (35/35 pasaron).
-2.  **Módulo RRHH - Mejoras de Documentos:**
-    -   Se implementó la subida de archivos con **drag-and-drop**.
-    -   Se añadió una **vista previa** para imágenes y PDFs antes de la subida.
-    -   Se implementó la **exportación a Excel y PDF** de la lista de documentos.
-    -   Se añadieron **filtros avanzados** por fecha de registro, tipo de documento y estado de la firma.
-    -   Se corrigió un bug que impedía guardar los nuevos documentos.
-3.  **Módulo RRHH - Informe de Horas:** Se creó una nueva funcionalidad para generar un informe de control horario por empleado y rango de fechas, calculando el total de horas trabajadas. El informe se puede exportar a Excel y PDF.
-4.  **Mejora de UX en RRHH:** El formulario de Nuevo Empleado se modificó para mostrarse integrado en la página en lugar de como un modal emergente, según la solicitud del usuario.
-5.  **Módulo RRHH - Prenómina (Backend):** Se crearon los endpoints en el backend para generar y exportar a Excel/PDF el informe de prenómina individual de un empleado.
+Una aplicación full-stack muy avanzada con un módulo de RRHH casi completo. La sesión se centró en expandir masivamente la funcionalidad de RRHH, completando varias tareas clave:
+1.  **Finalización de la UI de Prenómina**: Se implementó y probó con éxito la interfaz completa para el cálculo, visualización y exportación de prenóminas.
+2.  **Gestión de Empleados Mejorada**: Se añadió la funcionalidad para reactivar empleados dados de baja y para eliminarlos permanentemente de la base de datos.
+3.  **Refactorización de RRHH**: Se refactorizó el componente monolítico  extrayendo las pestañas de Control Horario, Productividad y Prenómina a sus propios archivos, mejorando significativamente la mantenibilidad.
+4.  **Portal del Empleado**: Se creó desde cero un portal completo y funcional para empleados (), con su propia autenticación basada en roles, perfil personalizado, funcionalidad de fichaje, y acceso a documentos, nóminas y ausencias.
+5.  **Sistema de Notificaciones In-App**: Se implementó un panel de notificaciones en tiempo real dentro del portal del empleado para alertar sobre nuevos documentos o cambios de estado en las solicitudes.
+6.  **Gestión de Ausencias (Admin)**: Se añadió una nueva pestaña en el módulo de RRHH para que los administradores puedan gestionar (ver, filtrar, aprobar, rechazar) las solicitudes de ausencia de los empleados.
+7.  **Calendario Visual de Ausencias**: Se implementó una vista de calendario en la gestión de ausencias, que muestra las ausencias de los empleados de forma visual y codificada por colores.
+8.  **Notificaciones por Email (Backend listo)**: Se preparó toda la lógica del backend para enviar notificaciones por email a través de Resend, aunque está pendiente de la clave API del usuario.
+9.  **Corrección de Bug Crítico**: Se solucionó un error  en el módulo de Recetas Fitosanitarias.
 
 **Last working item**:
--   **Last item agent was working**: Implementando la interfaz de usuario (UI) para el cálculo y la visualización de la **prenómina** en el módulo de RRHH. El trabajo se estaba realizando en el componente  dentro de , después de haber completado la lógica del backend.
--   **Status**: IN PROGRESS
--   **Agent Testing Done**: N
--   **Which testing method agent to use?**: both. El backend se puede probar con  para los nuevos endpoints de prenómina. El frontend requerirá el uso de la  o  una vez que la UI esté construida.
+-   **Last item agent was working**: Implementación de un calendario visual para la gestión de ausencias en el módulo de RRHH.
+-   **Status**: USER VERIFICATION PENDING
+-   **Agent Testing Done**: Y
+-   **Which testing method agent to use?**: frontend testing agent. Se recomienda crear tests de regresión para la nueva vista de calendario ( y ) para asegurar que la navegación entre meses y la renderización de eventos funcionen correctamente.
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   No hay issues pendientes. La tarea en curso es la implementación de una nueva funcionalidad.
+-   No hay issues de bugs pendientes.
 
 **In progress Task List**:
--   **Task 1: Completar UI del Módulo de Prenómina (P0)**
-    -   **Where to resume**: En el frontend, dentro del componente de RRHH, en la pestaña de Prenómina (probablemente en  o una sección dentro de ).
-    -   **What will be achieved with this?**: Permitirá al usuario seleccionar un empleado y un mes, calcular la prenómina utilizando los endpoints del backend ya creados, mostrar los resultados en la interfaz y exportarlos a Excel o PDF.
-    -   **Status**: IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?**: both
-    -   **Blocked on something**: No.
+-   No hay tareas en progreso. La última tarea fue completada a la espera de la verificación del usuario.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks**:
-    -   **P1**: Completar el desarrollo del módulo RRHH (seguimiento de productividad, portal del empleado).
-    -   **P1**: Finalizar la implementación de los módulos restantes del PRD (Proveedores, Maquinaria, etc.) con sus KPIs y funcionalidades completas.
-    -   **P2**: Generalizar la generación de informes en PDF y Excel para todos los módulos.
-    -   **P3**: Finalizar la integración de notificaciones por email (Resend), actualmente bloqueada a la espera de la  del usuario.
-
+    -   **P0: Habilitar Notificaciones por Email**: El backend está listo, pero bloqueado. Es crucial solicitar al usuario la  para activar esta funcionalidad.
+    -   **P1: Completar Refactorización de RRHH**: Extraer el componente  del archivo  a su propio archivo () para finalizar la modularización.
+    -   **P1: UI para Gestión de Usuarios y Enlace con Empleados**: Crear una interfaz en el panel de administración para crear/editar usuarios, asignarles el rol EMPLEADO y vincularlos a un perfil de empleado existente. Esto es necesario para que el Portal del Empleado sea usable en producción.
+    -   **P1: Completar Módulo RRHH (Productividad)**: La pestaña de Productividad es actualmente un placeholder. Se debe desarrollar la funcionalidad para el seguimiento de la productividad.
+    -   **P2: Implementar Módulos Principales Restantes**: Empezar a desarrollar los módulos del cuaderno de campo que faltan según el PRD (Proveedores, Maquinaria, Clientes, etc.).
 -   **Future Tasks**:
-    -   Implementar el resto de las integraciones de IA (resúmenes de contratos, predicciones de cosecha).
-    -   Implementar la identificación por NFC en el módulo RRHH.
-    -   Mejorar el dashboard para permitir reordenar los widgets con drag-and-drop.
+    -   Generalizar la generación de informes PDF/Excel para todos los módulos.
+    -   Implementar integraciones de IA (resúmenes de contratos, predicciones).
+    -   Implementar identificación por NFC para el control horario.
 
 **Completed work in this session**
--   **Refactorización Crítica Completada**: Se migraron con éxito todas las llamadas  restantes a , solucionando un problema de estabilidad crónico. Validado con tests de regresión.
--   **Formulario de Empleado Inline**: Se modificó el formulario de Nuevo Empleado para que no sea un modal, mejorando la UX.
--   **Funcionalidad Avanzada de Documentos**: Se implementó la subida de archivos con drag-and-drop, vista previa de archivos, filtros por fecha/tipo/estado y exportación a Excel/PDF.
--   **Bug Crítico Solucionado**: Se arregló el fallo que impedía guardar los documentos nuevos con archivos adjuntos.
--   **Informe de Control Horario**: Se desarrolló una nueva sección para generar informes de horas trabajadas por empleado, con exportación a Excel/PDF.
--   **Backend para Prenómina**: Se crearon los endpoints necesarios para el cálculo y la exportación de informes de prenómina.
+-   **UI de Prenómina (Nómina)**: Completada (KPIs, cálculo, tabla de resultados, exportación).
+-   **Bug  en Recetas**: Resuelto.
+-   **Gestión de Empleados**: Implementada la eliminación permanente y reactivación.
+-   **Refactorización de **: Completada parcialmente, extrayendo 3 de los 4 sub-componentes principales.
+-   **Portal del Empleado**: Creado desde cero con perfil, fichaje y notificaciones.
+-   **Notificaciones In-App**: Implementadas y funcionando en el portal del empleado.
+-   **Gestión de Ausencias para Admins**: Creada con KPIs, filtros y acciones de aprobación/rechazo.
+-   **Calendario Visual de Ausencias**: Implementado y funcionando.
+-   **Backend para Notificaciones por Email**: Preparado, pendiente de API key.
 
 **Earlier issues found/mentioned but not fixed**
--   Ninguno. El problema principal () fue resuelto en esta sesión.
+-   Ninguno.
 
 **Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork**: Error .
--   **Recurrence count**: Alto.
--   **Status**: RESOLVED. La migración completa a  ha solucionado este problema recurrente.
+-   **Issue recurrence in previous fork**: .
+-   **Recurrence count**: Alto en sesiones pasadas.
+-   **Status**: RESOLVED. No ha vuelto a aparecer en esta sesión.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Subida de Archivos Full-Stack**: Uso de  en React y  con  en FastAPI para manejar la subida de archivos.
--   **Generación de Informes Backend**: Creación dinámica de archivos Excel () y PDF () en el servidor.
--   **Servir Archivos Estáticos**: Configuración de FastAPI para servir archivos subidos desde un directorio persistente.
--   **Filtrado Avanzado en API**: Modificación de endpoints para aceptar múltiples parámetros de consulta (fechas, enums) para filtrar resultados.
--   **Refactorización de Componentes React**: Transformación de un componente de modal a un componente renderizado inline para mejorar el flujo de usuario.
--   **Regresión Automatizada**: Uso del  para validar una refactorización a gran escala, asegurando que no se introdujeron errores.
+-   **Refactorización de Componentes React**: Descomposición de un componente monolítico en subcomponentes modulares para mejorar la mantenibilidad.
+-   **RBAC (Role-Based Access Control)**: Creación de un rol de  para restringir el acceso a una sección específica de la aplicación (el portal) y adaptar la UI.
+-   **Sistema de Notificaciones In-App**: Creación de un endpoint y un componente de UI para mostrar notificaciones en tiempo real al usuario.
+-   **UI Condicional y Dinámica**: Creación de un calendario visual personalizado sin dependencias externas, que renderiza datos dinámicamente con diferentes estilos según su estado (aprobado, pendiente).
 
 **key DB schema**
--   **DocumentoEmpleado**: Se actualizó implícitamente para manejar una ruta de archivo () y una fecha de subida ().
-    -   
--   **Fichaje**: Utilizado para el informe de control horario.
-    -   
+-   **User**: Se ha añadido el . Se asume un vínculo con la colección  a través del campo .
+-   **Notificacion**: Nueva colección para almacenar notificaciones internas: .
+-   **Ausencia**: Utilizada intensivamente. Sus estados (, , ) ahora controlan la UI y disparan notificaciones.
 
 **changes in tech stack**
--   Se añadió la dependencia de Python  para la generación de PDFs.
+-   Ninguna dependencia nueva añadida. Se ha implementado la lógica para la integración con , que ya era una dependencia.
 
 **All files of reference**
--   : Componente monolítico que contiene casi toda la nueva funcionalidad del módulo RRHH.
--   : Archivo de rutas que contiene toda la lógica de backend para las nuevas funcionalidades.
--   : Wrapper de API al que se migró todo el código.
--   : Archivo de dependencias del backend.
+-   : Componente principal de RRHH, ahora más ligero tras la refactorización.
+-   : Nueva carpeta con las pestañas extraídas.
+-   : Página del nuevo portal del empleado.
+-   : Lógica principal del backend de RRHH.
+-   : Lógica del backend para el portal.
+-   : Define la navegación principal y la lógica de roles.
 
 **Areas that need refactoring**:
--   **Componente **: Este archivo ha crecido hasta volverse inmanejable. Es **crítico** descomponerlo en subcomponentes más pequeños por cada pestaña (Ej: , , ).
--   **Rutas **: De manera similar, este archivo de rutas es ahora muy grande. Debería dividirse en varios  por entidad (empleados, documentos, fichajes) para mejorar la organización.
+-   **Componente **: Es la única pestaña que queda dentro de . Es un componente grande y complejo que debería ser extraído a su propio archivo () para completar la refactorización.
+-   **Archivo de rutas **: Este archivo sigue creciendo y contiene lógica para múltiples entidades (empleados, fichajes, ausencias, prenómina). Debería dividirse en  más pequeños y específicos por recurso para mejorar la organización.
 
 **key api endpoints**
--   : Sube un archivo de documento para un empleado.
--   : Exporta la lista filtrada de documentos a Excel.
--   : Exporta la lista filtrada de documentos a PDF.
--   : Exporta el informe de control horario a Excel.
--   : Exporta el informe de control horario a PDF.
--   : Exporta la prenómina de un empleado a Excel.
--   : Exporta la prenómina de un empleado a PDF.
+-   : Elimina un empleado de forma permanente.
+-   : Reactiva un empleado dado de baja.
+-   : Aprueba una solicitud de ausencia.
+-   : Lista todas las solicitudes de ausencia con filtros.
+-   : Obtiene los datos del perfil del empleado logueado.
+-   : Obtiene las notificaciones del empleado logueado.
+-   : Marca todas las notificaciones como leídas.
 
 **Critical Info for New Agent**
-1.  **Prioridad P0**: Tu tarea principal es **finalizar la interfaz de usuario del módulo de Prenómina**. El backend ya está listo. El trabajo debe realizarse en el componente de frontend de RRHH.
-2.  **Refactorización Urgente**: El componente  es ahora extremadamente grande. Una vez que la función de prenómina esté completa, la siguiente tarea más importante debería ser dividir este archivo en subcomponentes más pequeños para mejorar la mantenibilidad.
-3.  **Estabilidad de la App**: La refactorización de  a  está completa y ha sido probada. La aplicación es estable y el error  no debería volver a aparecer.
-4.  **Flujo de Trabajo del Usuario**: El usuario está muy centrado en el módulo de RRHH. Espera nuevas funcionalidades y mejoras en esta área.
+1.  **Prioridad de Usuario**: El usuario está muy enfocado en el módulo de RRHH y aprueba las tareas de forma secuencial según el plan. Continúa proponiendo un plan claro y priorizado.
+2.  **Notificaciones por Email BLOQUEADAS**: La funcionalidad de email está lista en el código pero no funcionará hasta que el usuario proporcione la . Debes informar al usuario de esto y pedírsela como una de las primeras acciones.
+3.  **Refactorización Incompleta**: La refactorización de  está casi terminada. El último paso es extraer el componente de . Prioriza esto para mejorar la salud del código.
+4.  **Flujo Crítico Faltante**: No existe una UI para que un administrador cree un  y lo vincule a un . Sin esto, el Portal del Empleado no puede ser utilizado por nuevos empleados. Esta es una tarea de alta prioridad.
 
 **documents and test reports created in this job**
--   : Reporte del test de regresión exitoso tras la migración de .
--   : Actualizado para reflejar las nuevas funcionalidades completadas.
+-   : Reporte de testing de la funcionalidad de Prenómina.
+-   : Actualizado para reflejar las nuevas funcionalidades completadas en el módulo RRHH.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  : Aprueba continuar con la implementación de la prenómina. (Status: IN PROGRESS)
-2.  : Pide el informe de control horario. (Status: COMPLETED)
-3.  : Aprueba añadir filtros de tipo/estado a los documentos. (Status: COMPLETED)
-4.  : Pide la exportación de documentos. (Status: COMPLETED)
-5.  : Pide la columna y filtro de fecha de registro. (Status: COMPLETED)
-6.  : Reporta un bug al guardar documentos. (Status: COMPLETED)
-7.  : Aprueba añadir la vista previa de documentos. (Status: COMPLETED)
-8.  : Pide la subida de archivos por drag-and-drop. (Status: COMPLETED)
-9.  : Pide cambiar el formulario de empleado a inline. (Status: COMPLETED)
-10. : Aprueba el plan inicial para completar la migración de . (Status: COMPLETED)
+1.  : Aprueba la implementación del calendario visual de ausencias. (Status: COMPLETED, pending user verification)
+2.  , : Aprueba el plan de refactorizar RRHH.js. (Status: COMPLETED)
+3.  : Aprueba el plan de implementar la eliminación de empleados. (Status: COMPLETED)
+4.  : Solicita la funcionalidad de eliminación permanente de empleados. (Status: COMPLETED)
+5.  : Reporta un bug de . (Status: COMPLETED)
+6.  : Aprueba la implementación del Portal del Empleado. (Status: COMPLETED)
+7.  : Aprueba la implementación de notificaciones in-app. (Status: COMPLETED)
+8.  : Aprueba la implementación de notificaciones por email. (Status: COMPLETED, blocked on key)
+9.  : Aprueba la implementación de la gestión de ausencias en RRHH. (Status: COMPLETED)
+10. : (Repetido) Aprueba la implementación de la gestión de ausencias en RRHH. (Status: COMPLETED)
 
 **Project Health Check:**
--   **Broken**: No. La aplicación está estable y funcional.
--   **Mocked**:  (email) y  (clima) siguen pendientes de claves de API de usuario.
+-   **Broken**: No. La aplicación es estable y las funcionalidades implementadas han sido probadas.
+-   **Mocked**:  (email) y  (clima) están implementados en el código pero bloqueados a la espera de las claves API del usuario.
 
 **3rd Party Integrations**
 -   **OpenAI GPT-4o**: Usa Emergent LLM Key.
--   **Resend**: Preparado (Bloqueado, requiere clave de usuario).
--   **OpenWeatherMap**: Preparado (Bloqueado, requiere clave de usuario).
--   **APScheduler**: Integrado en backend.
--   **Leaflet.js / react-leaflet**: Para mapas.
--   **recharts**: Para gráficos.
--   **react-qr-reader**: Para escanear QR.
--   **react-webcam**: Para captura de imágenes.
--   **react-signature-canvas**: Para firmas digitales.
--   **openpyxl**: Para generar archivos Excel.
--   **reportlab**: Para generar archivos PDF.
+-   **Resend**: Integrado en el backend, **bloqueado** a la espera de la  del usuario.
+-   **OpenWeatherMap**: Preparado, **bloqueado** a la espera de la API key del usuario.
+-   **Otras**: APScheduler, Leaflet.js, recharts, react-qr-reader, react-webcam, react-signature-canvas, openpyxl, reportlab.
 
 **Testing status**
--   **Testing agent used after significant changes**: YES. Se usó después de la migración masiva de  y todos los tests pasaron.
+-   **Testing agent used after significant changes**: YES. Se utilizó para la funcionalidad de Prenómina.
 -   **Troubleshoot agent used after agent stuck in loop**: NO.
--   **Test files created**: Los archivos de test existentes fueron actualizados por el agente. El reporte se encuentra en .
+-   **Test files created**:
+    -   
+    -   
 -   **Known regressions**: Ninguna.
 
 **Credentials to test flow:**
 -   **Admin**:  / 
 
 **What agent forgot to execute**
--   El agente no olvidó ninguna tarea. Siguió metódicamente las solicitudes del usuario y estaba a mitad de la implementación de la siguiente característica solicitada (prenómina) cuando finalizó la sesión.</analysis>
+-   El agente no extrajo deliberadamente el componente  durante la refactorización de  debido a su complejidad y para ahorrar contexto. Sigue siendo una tarea de refactorización pendiente.
+-   El agente no implementó una interfaz de usuario para crear cuentas de usuario y vincularlas a perfiles de empleado. Este es un paso crítico que falta para que el Portal del Empleado sea plenamente funcional en un entorno de producción, ya que actualmente el enlace debe hacerse manualmente en la base de datos para las pruebas.</analysis>

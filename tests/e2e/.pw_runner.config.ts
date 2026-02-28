@@ -11,7 +11,7 @@ export default defineConfig({
     ['json', { outputFile: '/root/.emergent/automation_output/20260228_084316/results.json' }],
   ],
   use: {
-    baseURL: 'https://campo-inteligente.preview.emergentagent.com',
+    baseURL: 'https://agro-dashboard-dev.preview.emergentagent.com',
     screenshot: 'only-on-failure',
     trace: 'off',
     headless: true,

@@ -12,7 +12,7 @@
 import { test, expect } from '@playwright/test';
 import { login, removeEmergentBadge, waitForAppReady, dismissToasts } from '../fixtures/helpers';
 
-const PAGE_URL = 'https://campo-inteligente.preview.emergentagent.com';
+const PAGE_URL = 'https://agro-dashboard-dev.preview.emergentagent.com';
 
 test.describe('Parcelas Page - General Map View', () => {
   test.beforeEach(async ({ page }) => {
