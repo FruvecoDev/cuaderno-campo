@@ -152,6 +152,7 @@ const Layout = ({ children }) => {
       { path: '/cosechas', label: t('nav.harvests'), icon: Wheat, module: 'cosechas' },
       { path: '/documentos', label: t('nav.documents'), icon: FolderOpen, module: 'documentos' },
       { path: '/rrhh', label: 'Recursos Humanos', icon: Users, module: 'rrhh' },
+      { path: '/portal-empleado', label: 'Portal Empleado', icon: User, module: 'portal_empleado', forEmpleado: true },
       { path: '/informes-gastos', label: t('nav.expenseReports'), icon: BarChart3, module: 'albaranes', operacion: 'compra' },
       { path: '/informes-ingresos', label: 'Informes Ingresos', icon: TrendingUp, module: 'albaranes', operacion: 'venta' },
       { path: '/liquidacion-comisiones', label: 'Liquidación Comisiones', icon: TrendingUp, module: 'contratos' },
