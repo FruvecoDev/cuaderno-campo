@@ -61,6 +61,14 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
   - `/app/backend/routes/routes_rrhh.py` - Notificaciones al crear productividad
   - `/app/frontend/src/pages/PortalEmpleado.js` - Nueva pestaña de productividad
 
+#### 5. Refactorización Backend routes_rrhh.py ✅
+- **Módulos extraídos**:
+  - `/app/backend/routes/rrhh_ausencias.py` - Gestión de ausencias y vacaciones (~160 líneas)
+  - `/app/backend/routes/rrhh_prenominas.py` - Cálculo y exportación de prenóminas (~400 líneas)
+- **Resultado**: routes_rrhh.py reducido de **2588 a 1905 líneas** (-26%)
+- **Server.py actualizado** para importar y registrar los nuevos sub-routers
+- **Todos los endpoints verificados y funcionando**
+
 ---
 
 ## Data Model (User Clarified - IMPLEMENTED)
