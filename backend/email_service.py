@@ -281,3 +281,171 @@ async def send_test_email(recipient_email: str) -> dict:
         "✅ Prueba de Notificaciones - FRUVECO",
         html
     )
+
+
+# ============================================================
+# RRHH Email Notifications
+# ============================================================
+
+async def send_ausencia_notification(
+    recipient_email: str,
+    empleado_nombre: str,
+    tipo_ausencia: str,
+    fecha_inicio: str,
+    fecha_fin: str,
+    estado: str,
+    comentario: str = ""
+) -> dict:
+    """Envía notificación por email cuando una ausencia es aprobada/rechazada"""
+    
+    tipo_formatted = tipo_ausencia.replace("_", " ").capitalize()
+    
+    if estado == "aprobada":
+        icon = "✅"
+        color = "#10b981"
+        titulo = f"Solicitud de {tipo_formatted} Aprobada"
+        mensaje_estado = "ha sido <strong style='color: #10b981;'>APROBADA</strong>"
+    else:
+        icon = "❌"
+        color = "#ef4444"
+        titulo = f"Solicitud de {tipo_formatted} Rechazada"
+        mensaje_estado = "ha sido <strong style='color: #ef4444;'>RECHAZADA</strong>"
+    
+    content = f"""
+    <p>Hola <strong>{empleado_nombre}</strong>,</p>
+    
+    <p>Tu solicitud de <strong>{tipo_formatted}</strong> {mensaje_estado}.</p>
+    
+    <table style="width: 100%; border-collapse: collapse; margin: 20px 0; background: #f8f9fa; border-radius: 8px;">
+        <tr>
+            <td style="padding: 15px; border-bottom: 1px solid #e9ecef;">
+                <strong>Tipo de Ausencia:</strong>
+            </td>
+            <td style="padding: 15px; border-bottom: 1px solid #e9ecef;">
+                {tipo_formatted}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 15px; border-bottom: 1px solid #e9ecef;">
+                <strong>Fecha Inicio:</strong>
+            </td>
+            <td style="padding: 15px; border-bottom: 1px solid #e9ecef;">
+                {fecha_inicio}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 15px; border-bottom: 1px solid #e9ecef;">
+                <strong>Fecha Fin:</strong>
+            </td>
+            <td style="padding: 15px; border-bottom: 1px solid #e9ecef;">
+                {fecha_fin}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 15px;">
+                <strong>Estado:</strong>
+            </td>
+            <td style="padding: 15px;">
+                <span style="background: {color}20; color: {color}; padding: 5px 12px; border-radius: 20px; font-weight: bold;">
+                    {estado.upper()}
+                </span>
+            </td>
+        </tr>
+    </table>
+    
+    {"<p><strong>Comentario:</strong> " + comentario + "</p>" if comentario else ""}
+    
+    <p style="margin-top: 20px;">
+        Puedes ver más detalles en tu <a href="#" style="color: #2d5a27; text-decoration: none; font-weight: bold;">Portal del Empleado</a>.
+    </p>
+    """
+    
+    html = get_email_template(
+        title=titulo,
+        content=content,
+        footer_text="Este mensaje fue enviado desde el Portal del Empleado de FRUVECO"
+    )
+    
+    return await send_email(
+        recipient_email,
+        f"{icon} {titulo} - FRUVECO",
+        html
+    )
+
+
+async def send_documento_notification(
+    recipient_email: str,
+    empleado_nombre: str,
+    documento_nombre: str,
+    tipo_documento: str,
+    requiere_firma: bool
+) -> dict:
+    """Envía notificación por email cuando se sube un nuevo documento"""
+    
+    if requiere_firma:
+        icon = "📝"
+        titulo = "Nuevo Documento Pendiente de Firma"
+        mensaje_accion = """
+        <p style="background: #fef3c7; padding: 15px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            ⚠️ <strong>Este documento requiere tu firma.</strong> Por favor, accede al Portal del Empleado para firmarlo.
+        </p>
+        """
+    else:
+        icon = "📄"
+        titulo = "Nuevo Documento Disponible"
+        mensaje_accion = ""
+    
+    content = f"""
+    <p>Hola <strong>{empleado_nombre}</strong>,</p>
+    
+    <p>Se ha subido un nuevo documento a tu expediente:</p>
+    
+    <table style="width: 100%; border-collapse: collapse; margin: 20px 0; background: #f8f9fa; border-radius: 8px;">
+        <tr>
+            <td style="padding: 15px; border-bottom: 1px solid #e9ecef;">
+                <strong>Documento:</strong>
+            </td>
+            <td style="padding: 15px; border-bottom: 1px solid #e9ecef;">
+                {documento_nombre}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 15px; border-bottom: 1px solid #e9ecef;">
+                <strong>Tipo:</strong>
+            </td>
+            <td style="padding: 15px; border-bottom: 1px solid #e9ecef;">
+                {tipo_documento}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 15px;">
+                <strong>Requiere Firma:</strong>
+            </td>
+            <td style="padding: 15px;">
+                <span style="background: {'#fef3c7' if requiere_firma else '#d1fae5'}; color: {'#92400e' if requiere_firma else '#065f46'}; padding: 5px 12px; border-radius: 20px; font-weight: bold;">
+                    {'SÍ' if requiere_firma else 'NO'}
+                </span>
+            </td>
+        </tr>
+    </table>
+    
+    {mensaje_accion}
+    
+    <p style="margin-top: 20px;">
+        Puedes ver y descargar el documento desde tu <a href="#" style="color: #2d5a27; text-decoration: none; font-weight: bold;">Portal del Empleado</a>.
+    </p>
+    """
+    
+    html = get_email_template(
+        title=titulo,
+        content=content,
+        footer_text="Este mensaje fue enviado desde el Portal del Empleado de FRUVECO"
+    )
+    
+    subject = f"{icon} {titulo}" + (" ⚠️" if requiere_firma else "") + " - FRUVECO"
+    
+    return await send_email(
+        recipient_email,
+        subject,
+        html
+    )
