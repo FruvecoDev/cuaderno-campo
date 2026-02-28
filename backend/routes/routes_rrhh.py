@@ -8,7 +8,7 @@ Rutas para el módulo de Recursos Humanos (RRHH)
 - Ausencias
 """
 
-from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Query
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Query, Form
 from typing import List, Optional
 from datetime import datetime, timedelta
 from bson import ObjectId
