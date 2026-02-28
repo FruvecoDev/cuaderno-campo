@@ -89,6 +89,12 @@ function App() {
           </ProtectedRoute>
         } />
         
+        <Route path="/cuaderno-campo" element={
+          <ProtectedRoute>
+            <Layout><CuadernoCampo /></Layout>
+          </ProtectedRoute>
+        } />
+        
         <Route path="/visitas" element={
           <ProtectedRoute>
             <Layout><Visitas /></Layout>
