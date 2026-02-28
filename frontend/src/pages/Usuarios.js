@@ -243,6 +243,7 @@ const Usuarios = () => {
       case 'Manager': return 'badge-warning';
       case 'Technician': return 'badge-info';
       case 'Viewer': return 'badge-secondary';
+      case 'Empleado': return 'badge-success';
       default: return 'badge-secondary';
     }
   };
