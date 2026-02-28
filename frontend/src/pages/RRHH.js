@@ -2000,6 +2000,13 @@ const DocumentosEmpleado = ({ empleados }) => {
     requiere_firma: true
   });
   
+  // Estado para archivo adjunto
+  const [archivoAdjunto, setArchivoAdjunto] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
+  
   // Referencia al canvas de firma
   const sigCanvasRef = useRef(null);
   const [firmaGuardada, setFirmaGuardada] = useState(null);
