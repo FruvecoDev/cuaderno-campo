@@ -1,0 +1,493 @@
+/**
+ * E2E Tests for RRHH Prenómina Module
+ * 
+ * Tests the following features:
+ * - Navigate to Prenómina tab
+ * - Select month/year for prenomina period
+ * - Calculate individual prenomina
+ * - Calculate all prenominas (bulk)
+ * - View prenomina details modal
+ * - Validate prenomina
+ * - Export to Excel
+ * - Export to PDF
+ * - KPI display
+ */
+
+import { test, expect } from '@playwright/test';
+
+const BASE_URL = process.env.BASE_URL || 'https://campo-inteligente.preview.emergentagent.com';
+
+// Helper function to login
+async function login(page) {
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  
+  // Check if already logged in
+  if (page.url().includes('/dashboard')) {
+    return;
+  }
+  
+  // Fill login form
+  await page.locator('input[type="email"], input[placeholder*="email"], input[placeholder*="usuario"]').first().fill('admin@fruveco.com');
+  await page.locator('input[type="password"]').first().fill('admin123');
+  
+  // Click login button
+  const loginBtn = page.locator('button:has-text("Iniciar"), button[type="submit"]').first();
+  await loginBtn.click();
+  
+  // Wait for redirect
+  await page.waitForURL(/dashboard/, { timeout: 15000 });
+}
+
+// Helper to dismiss ResumenDiario modal
+async function dismissModal(page) {
+  try {
+    const entendidoBtn = page.getByRole('button', { name: /Entendido/i });
+    if (await entendidoBtn.isVisible({ timeout: 3000 })) {
+      await entendidoBtn.click();
+    }
+  } catch {
+    // Modal not present
+  }
+}
+
+// Helper to navigate to RRHH > Prenómina
+async function navigateToPrenomina(page) {
+  // Navigate to RRHH
+  const rrhhLink = page.locator('nav a, aside a, .sidebar a').filter({ hasText: /RRHH|Recursos Humanos/i }).first();
+  if (await rrhhLink.isVisible({ timeout: 5000 })) {
+    await rrhhLink.click();
+    await page.waitForLoadState('domcontentloaded');
+  }
+  
+  await dismissModal(page);
+  
+  // Click on Prenómina tab
+  const prenominaTab = page.locator('button').filter({ hasText: /Prenómina/i }).first();
+  await expect(prenominaTab).toBeVisible({ timeout: 10000 });
+  await prenominaTab.click();
+  
+  // Wait for content to load
+  await page.waitForLoadState('domcontentloaded');
+}
+
+test.describe('RRHH Prenómina Module', () => {
+  
+  test.beforeEach(async ({ page }) => {
+    await login(page);
+    await dismissModal(page);
+  });
+  
+  test('should navigate to Prenómina tab', async ({ page }) => {
+    await navigateToPrenomina(page);
+    
+    // Verify Prenómina tab is active
+    const prenominaTab = page.locator('button').filter({ hasText: /Prenómina/i }).first();
+    await expect(prenominaTab).toBeVisible();
+    
+    // Verify key UI elements are visible
+    await expect(page.getByTestId('select-mes-prenomina')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('select-ano-prenomina')).toBeVisible();
+    await expect(page.getByTestId('btn-calcular-todas')).toBeVisible();
+    
+    await page.screenshot({ path: 'prenomina-tab-loaded.jpeg', quality: 20 });
+  });
+  
+  test('should display KPI cards', async ({ page }) => {
+    await navigateToPrenomina(page);
+    
+    // Verify KPI cards are present - look for the stats section
+    const prenominasKPI = page.locator('.card').filter({ hasText: /Prenóminas/i }).first();
+    const horasKPI = page.locator('.card').filter({ hasText: /Total Horas/i }).first();
+    const brutoKPI = page.locator('.card').filter({ hasText: /Importe Bruto/i }).first();
+    const netoKPI = page.locator('.card').filter({ hasText: /Importe Neto/i }).first();
+    
+    await expect(prenominasKPI).toBeVisible({ timeout: 10000 });
+    await expect(horasKPI).toBeVisible();
+    await expect(brutoKPI).toBeVisible();
+    await expect(netoKPI).toBeVisible();
+  });
+  
+  test('should change month/year selector', async ({ page }) => {
+    await navigateToPrenomina(page);
+    
+    // Change month
+    const mesSelect = page.getByTestId('select-mes-prenomina');
+    await expect(mesSelect).toBeVisible({ timeout: 10000 });
+    await mesSelect.selectOption({ value: '3' }); // Marzo
+    
+    // Change year
+    const anoSelect = page.getByTestId('select-ano-prenomina');
+    await anoSelect.selectOption({ value: '2026' });
+    
+    // Wait for reload
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Verify selectors have correct values
+    await expect(mesSelect).toHaveValue('3');
+    await expect(anoSelect).toHaveValue('2026');
+  });
+  
+  test('should show employee selector for individual calculation', async ({ page }) => {
+    await navigateToPrenomina(page);
+    
+    // Verify employee selector is visible
+    const empleadoSelect = page.getByTestId('select-empleado-calculo');
+    await expect(empleadoSelect).toBeVisible({ timeout: 10000 });
+    
+    // Verify calculate individual button is disabled when no employee selected
+    const calcularBtn = page.getByTestId('btn-calcular-individual');
+    await expect(calcularBtn).toBeVisible();
+    await expect(calcularBtn).toBeDisabled();
+    
+    // Select an employee from dropdown
+    const options = await empleadoSelect.locator('option').allTextContents();
+    // Find first non-empty option
+    if (options.length > 1) {
+      await empleadoSelect.selectOption({ index: 1 }); // First employee
+      
+      // Now button should be enabled
+      await expect(calcularBtn).toBeEnabled();
+    }
+  });
+  
+  test('should calculate individual prenomina', async ({ page }) => {
+    await navigateToPrenomina(page);
+    
+    // Select an employee
+    const empleadoSelect = page.getByTestId('select-empleado-calculo');
+    await expect(empleadoSelect).toBeVisible({ timeout: 10000 });
+    
+    // Get options count
+    const options = await empleadoSelect.locator('option').count();
+    if (options <= 1) {
+      test.skip(true, 'No employees available for testing');
+      return;
+    }
+    
+    await empleadoSelect.selectOption({ index: 1 });
+    
+    // Click calculate
+    const calcularBtn = page.getByTestId('btn-calcular-individual');
+    await expect(calcularBtn).toBeEnabled();
+    await calcularBtn.click();
+    
+    // Wait for calculation to complete
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Verify table has at least one row (or message changes)
+    await page.waitForTimeout(1000); // Allow for recalculation
+    
+    await page.screenshot({ path: 'prenomina-individual-calculated.jpeg', quality: 20 });
+  });
+  
+  test('should calculate all prenominas with confirmation', async ({ page }) => {
+    await navigateToPrenomina(page);
+    
+    // Set up dialog handler for confirmation
+    page.on('dialog', async dialog => {
+      await dialog.accept();
+    });
+    
+    // Change to a different month to avoid test data conflicts
+    const mesSelect = page.getByTestId('select-mes-prenomina');
+    await expect(mesSelect).toBeVisible({ timeout: 10000 });
+    await mesSelect.selectOption({ value: '4' }); // Abril
+    
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Click calculate all button
+    const calcularTodasBtn = page.getByTestId('btn-calcular-todas');
+    await expect(calcularTodasBtn).toBeVisible();
+    await calcularTodasBtn.click();
+    
+    // Wait for calculation to complete (button text changes during calculation)
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Button should return to normal state
+    await expect(calcularTodasBtn).toContainText(/Calcular Todas/i, { timeout: 30000 });
+    
+    await page.screenshot({ path: 'prenomina-todas-calculated.jpeg', quality: 20 });
+  });
+  
+  test('should display prenominas table with correct columns', async ({ page }) => {
+    await navigateToPrenomina(page);
+    
+    // Set month to February 2026 where we know there's data
+    const mesSelect = page.getByTestId('select-mes-prenomina');
+    await expect(mesSelect).toBeVisible({ timeout: 10000 });
+    await mesSelect.selectOption({ value: '2' });
+    
+    const anoSelect = page.getByTestId('select-ano-prenomina');
+    await anoSelect.selectOption({ value: '2026' });
+    
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Wait for table to load
+    const table = page.locator('.data-table');
+    await expect(table).toBeVisible({ timeout: 10000 });
+    
+    // Verify table headers
+    const headers = table.locator('thead th');
+    const headerTexts = await headers.allTextContents();
+    
+    expect(headerTexts.some(h => h.includes('Empleado'))).toBeTruthy();
+    expect(headerTexts.some(h => h.includes('DNI'))).toBeTruthy();
+    expect(headerTexts.some(h => h.includes('Normales'))).toBeTruthy();
+    expect(headerTexts.some(h => h.includes('Extra'))).toBeTruthy();
+    expect(headerTexts.some(h => h.includes('Total') || h.includes('Horas'))).toBeTruthy();
+    expect(headerTexts.some(h => h.includes('Bruto'))).toBeTruthy();
+    expect(headerTexts.some(h => h.includes('Neto'))).toBeTruthy();
+    expect(headerTexts.some(h => h.includes('Estado'))).toBeTruthy();
+    expect(headerTexts.some(h => h.includes('Acciones'))).toBeTruthy();
+    
+    await page.screenshot({ path: 'prenomina-table-headers.jpeg', quality: 20 });
+  });
+  
+  test('should show prenomina detail modal', async ({ page }) => {
+    await navigateToPrenomina(page);
+    
+    // Set month to February 2026 where we know there's data
+    const mesSelect = page.getByTestId('select-mes-prenomina');
+    await expect(mesSelect).toBeVisible({ timeout: 10000 });
+    await mesSelect.selectOption({ value: '2' });
+    
+    const anoSelect = page.getByTestId('select-ano-prenomina');
+    await anoSelect.selectOption({ value: '2026' });
+    
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Wait for prenomina rows to load
+    const prenominaRows = page.locator('[data-testid^="prenomina-row-"]');
+    const rowCount = await prenominaRows.count();
+    
+    if (rowCount === 0) {
+      test.skip(true, 'No prenominas available for testing detail modal');
+      return;
+    }
+    
+    // Get the first prenomina row ID
+    const firstRow = prenominaRows.first();
+    const rowTestId = await firstRow.getAttribute('data-testid');
+    const prenominaId = rowTestId?.replace('prenomina-row-', '');
+    
+    // Click on detail button
+    const detailBtn = page.getByTestId(`btn-ver-detalle-${prenominaId}`);
+    await expect(detailBtn).toBeVisible();
+    await detailBtn.click();
+    
+    // Verify modal opens
+    const modal = page.locator('div').filter({ hasText: /Detalle de Prenómina/i }).first();
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    
+    // Verify modal contains expected sections
+    await expect(page.locator('text=Desglose de Horas')).toBeVisible();
+    await expect(page.locator('text=Horas Normales')).toBeVisible();
+    await expect(page.locator('text=Total Horas')).toBeVisible();
+    await expect(page.locator('text=Importe Bruto')).toBeVisible();
+    await expect(page.locator('text=Importe Neto')).toBeVisible();
+    
+    // Verify export buttons in modal
+    await expect(page.locator('button').filter({ hasText: /Exportar Excel/i })).toBeVisible();
+    await expect(page.locator('button').filter({ hasText: /Exportar PDF/i })).toBeVisible();
+    
+    await page.screenshot({ path: 'prenomina-detail-modal.jpeg', quality: 20 });
+    
+    // Close modal by clicking outside or X button
+    const closeBtn = page.locator('button').filter({ has: page.locator('svg') }).filter({ hasText: '' }).first();
+    if (await closeBtn.isVisible()) {
+      await closeBtn.click({ force: true });
+    }
+  });
+  
+  test('should validate prenomina', async ({ page }) => {
+    await navigateToPrenomina(page);
+    
+    // Set up dialog handler for confirmation
+    page.on('dialog', async dialog => {
+      await dialog.accept();
+    });
+    
+    // Set month where we know there's data
+    const mesSelect = page.getByTestId('select-mes-prenomina');
+    await expect(mesSelect).toBeVisible({ timeout: 10000 });
+    await mesSelect.selectOption({ value: '2' });
+    
+    const anoSelect = page.getByTestId('select-ano-prenomina');
+    await anoSelect.selectOption({ value: '2026' });
+    
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Find a borrador prenomina row with validate button
+    const prenominaRows = page.locator('[data-testid^="prenomina-row-"]');
+    const rowCount = await prenominaRows.count();
+    
+    let validatedSomething = false;
+    
+    for (let i = 0; i < Math.min(rowCount, 3); i++) {
+      const row = prenominaRows.nth(i);
+      const rowTestId = await row.getAttribute('data-testid');
+      const prenominaId = rowTestId?.replace('prenomina-row-', '');
+      
+      const validateBtn = page.getByTestId(`btn-validar-${prenominaId}`);
+      
+      if (await validateBtn.isVisible({ timeout: 1000 })) {
+        await validateBtn.click();
+        
+        // Wait for response
+        await page.waitForLoadState('domcontentloaded');
+        validatedSomething = true;
+        break;
+      }
+    }
+    
+    if (!validatedSomething) {
+      // All prenominas might already be validated
+      console.log('No borrador prenominas found to validate');
+    }
+    
+    await page.screenshot({ path: 'prenomina-validated.jpeg', quality: 20 });
+  });
+  
+  test('should export prenomina to Excel', async ({ page }) => {
+    await navigateToPrenomina(page);
+    
+    // Set month where we know there's data
+    const mesSelect = page.getByTestId('select-mes-prenomina');
+    await expect(mesSelect).toBeVisible({ timeout: 10000 });
+    await mesSelect.selectOption({ value: '2' });
+    
+    const anoSelect = page.getByTestId('select-ano-prenomina');
+    await anoSelect.selectOption({ value: '2026' });
+    
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Find a prenomina row
+    const prenominaRows = page.locator('[data-testid^="prenomina-row-"]');
+    const rowCount = await prenominaRows.count();
+    
+    if (rowCount === 0) {
+      test.skip(true, 'No prenominas available for export test');
+      return;
+    }
+    
+    // Get the first prenomina row ID
+    const firstRow = prenominaRows.first();
+    const rowTestId = await firstRow.getAttribute('data-testid');
+    const prenominaId = rowTestId?.replace('prenomina-row-', '');
+    
+    // Set up download handler
+    const downloadPromise = page.waitForEvent('download', { timeout: 30000 });
+    
+    // Click Excel export button
+    const excelBtn = page.getByTestId(`btn-excel-${prenominaId}`);
+    await expect(excelBtn).toBeVisible();
+    await excelBtn.click();
+    
+    // Wait for download
+    const download = await downloadPromise;
+    
+    // Verify download filename
+    const filename = download.suggestedFilename();
+    expect(filename.toLowerCase()).toContain('prenomina');
+    expect(filename.toLowerCase()).toContain('.xlsx');
+  });
+  
+  test('should export prenomina to PDF', async ({ page }) => {
+    await navigateToPrenomina(page);
+    
+    // Set month where we know there's data
+    const mesSelect = page.getByTestId('select-mes-prenomina');
+    await expect(mesSelect).toBeVisible({ timeout: 10000 });
+    await mesSelect.selectOption({ value: '2' });
+    
+    const anoSelect = page.getByTestId('select-ano-prenomina');
+    await anoSelect.selectOption({ value: '2026' });
+    
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Find a prenomina row
+    const prenominaRows = page.locator('[data-testid^="prenomina-row-"]');
+    const rowCount = await prenominaRows.count();
+    
+    if (rowCount === 0) {
+      test.skip(true, 'No prenominas available for export test');
+      return;
+    }
+    
+    // Get the first prenomina row ID
+    const firstRow = prenominaRows.first();
+    const rowTestId = await firstRow.getAttribute('data-testid');
+    const prenominaId = rowTestId?.replace('prenomina-row-', '');
+    
+    // Set up download handler
+    const downloadPromise = page.waitForEvent('download', { timeout: 30000 });
+    
+    // Click PDF export button
+    const pdfBtn = page.getByTestId(`btn-pdf-${prenominaId}`);
+    await expect(pdfBtn).toBeVisible();
+    await pdfBtn.click();
+    
+    // Wait for download
+    const download = await downloadPromise;
+    
+    // Verify download filename
+    const filename = download.suggestedFilename();
+    expect(filename.toLowerCase()).toContain('prenomina');
+    expect(filename.toLowerCase()).toContain('.pdf');
+  });
+  
+  test('should export all prenominas to CSV', async ({ page }) => {
+    await navigateToPrenomina(page);
+    
+    // Set month where we know there's data
+    const mesSelect = page.getByTestId('select-mes-prenomina');
+    await expect(mesSelect).toBeVisible({ timeout: 10000 });
+    await mesSelect.selectOption({ value: '2' });
+    
+    const anoSelect = page.getByTestId('select-ano-prenomina');
+    await anoSelect.selectOption({ value: '2026' });
+    
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Check if CSV export button is visible (only shown when prenominas exist)
+    const exportCsvBtn = page.getByTestId('btn-exportar-csv');
+    
+    if (await exportCsvBtn.isVisible({ timeout: 3000 })) {
+      // Set up download handler
+      const downloadPromise = page.waitForEvent('download', { timeout: 30000 });
+      
+      await exportCsvBtn.click();
+      
+      // Wait for download
+      const download = await downloadPromise;
+      
+      // Verify download filename
+      const filename = download.suggestedFilename();
+      expect(filename.toLowerCase()).toContain('prenominas');
+      expect(filename.toLowerCase()).toContain('.csv');
+    } else {
+      console.log('No prenominas to export - CSV button not visible');
+    }
+  });
+  
+  test('should show empty state when no prenominas', async ({ page }) => {
+    await navigateToPrenomina(page);
+    
+    // Set to a month with no prenominas
+    const mesSelect = page.getByTestId('select-mes-prenomina');
+    await expect(mesSelect).toBeVisible({ timeout: 10000 });
+    await mesSelect.selectOption({ value: '12' }); // Diciembre
+    
+    const anoSelect = page.getByTestId('select-ano-prenomina');
+    await anoSelect.selectOption({ value: '2024' }); // Past year
+    
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Should show empty state message
+    const emptyMessage = page.locator('text=No hay prenóminas');
+    await expect(emptyMessage).toBeVisible({ timeout: 10000 });
+    
+    await page.screenshot({ path: 'prenomina-empty-state.jpeg', quality: 20 });
+  });
+  
+});
