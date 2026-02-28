@@ -322,3 +322,70 @@ async def firmar_documento(
         "success": True,
         "message": "Documento firmado correctamente"
     }
+
+
+
+@router.get("/mis-notificaciones")
+async def get_mis_notificaciones(current_user: dict = Depends(get_current_user)):
+    """Obtiene las notificaciones del empleado actual"""
+    empleado = await get_empleado_vinculado(current_user)
+    database = get_db()
+    
+    email = current_user.get("email")
+    
+    # Buscar notificaciones para este empleado o para todos
+    notificaciones = await database.notificaciones.find({
+        "$or": [
+            {"destinatarios": email},
+            {"destinatarios": None}
+        ]
+    }).sort("created_at", -1).limit(50).to_list(50)
+    
+    # Marcar cuáles han sido leídas por este usuario
+    for n in notificaciones:
+        n["_id"] = str(n["_id"])
+        n["leida"] = email in n.get("leida_por", [])
+        n.pop("leida_por", None)  # No exponer esta info
+        if n.get("created_at"):
+            n["created_at"] = n["created_at"].isoformat()
+    
+    # Contar no leídas
+    no_leidas = sum(1 for n in notificaciones if not n.get("leida"))
+    
+    return {
+        "success": True,
+        "notificaciones": notificaciones,
+        "no_leidas": no_leidas
+    }
+
+@router.put("/notificaciones/{notificacion_id}/leer")
+async def marcar_notificacion_leida(
+    notificacion_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Marcar una notificación como leída"""
+    database = get_db()
+    email = current_user.get("email")
+    
+    await database.notificaciones.update_one(
+        {"_id": ObjectId(notificacion_id)},
+        {"$addToSet": {"leida_por": email}}
+    )
+    
+    return {"success": True}
+
+@router.put("/notificaciones/leer-todas")
+async def marcar_todas_leidas(current_user: dict = Depends(get_current_user)):
+    """Marcar todas las notificaciones como leídas"""
+    database = get_db()
+    email = current_user.get("email")
+    
+    await database.notificaciones.update_many(
+        {"$or": [
+            {"destinatarios": email},
+            {"destinatarios": None}
+        ]},
+        {"$addToSet": {"leida_por": email}}
+    )
+    
+    return {"success": True}
