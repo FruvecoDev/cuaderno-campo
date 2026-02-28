@@ -1283,6 +1283,44 @@ const Clientes = () => {
                     </div>
                   </div>
 
+                  {/* Gráfico de Tendencia - Contratos por Campaña */}
+                  {historialData.contratos?.length > 0 && (
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <h4 style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <TrendingUp size={18} />
+                        Evolución de Ventas
+                      </h4>
+                      <div style={{ height: '180px', background: 'hsl(var(--muted) / 0.2)', borderRadius: '8px', padding: '0.5rem' }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={
+                            // Agrupar contratos por campaña
+                            Object.entries(
+                              historialData.contratos.reduce((acc, c) => {
+                                const campana = c.campana || 'Sin campaña';
+                                if (!acc[campana]) acc[campana] = { campana, kg: 0, importe: 0 };
+                                acc[campana].kg += c.cantidad || 0;
+                                acc[campana].importe += (c.cantidad || 0) * (c.precio || 0);
+                                return acc;
+                              }, {})
+                            ).map(([_, v]) => v).sort((a, b) => a.campana.localeCompare(b.campana))
+                          }>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                            <XAxis dataKey="campana" tick={{ fontSize: 11 }} />
+                            <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
+                            <Tooltip 
+                              formatter={(value, name) => [
+                                name === 'kg' ? `${value.toLocaleString()} kg` : `€${value.toLocaleString()}`,
+                                name === 'kg' ? 'Cantidad' : 'Importe'
+                              ]}
+                              contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
+                            />
+                            <Bar dataKey="kg" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="kg" />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Lista de contratos */}
                   {historialData.contratos?.length > 0 ? (
                     <div style={{ marginBottom: '1.5rem' }}>
