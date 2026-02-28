@@ -195,6 +195,28 @@ const Irrigaciones = () => {
     });
   };
 
+  // Función para manejar el cambio de parcela en el filtro
+  const handleParcelaFilterChange = (parcelaId) => {
+    if (parcelaId) {
+      // Buscar la parcela seleccionada
+      const parcelaSeleccionada = parcelas.find(p => p._id === parcelaId);
+      if (parcelaSeleccionada && parcelaSeleccionada.cultivo) {
+        // Actualizar ambos filtros: parcela y cultivo
+        setFilters({
+          ...filters, 
+          parcela_id: parcelaId, 
+          cultivo: parcelaSeleccionada.cultivo
+        });
+      } else {
+        // Solo actualizar parcela
+        setFilters({...filters, parcela_id: parcelaId});
+      }
+    } else {
+      // Si se selecciona "Todas", limpiar ambos filtros
+      setFilters({...filters, parcela_id: '', cultivo: ''});
+    }
+  };
+
   // Opciones únicas para filtros
   const filterOptions = useMemo(() => ({
     sistemas: [...new Set(irrigaciones.map(i => i.sistema).filter(Boolean))],
