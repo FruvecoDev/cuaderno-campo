@@ -2235,6 +2235,12 @@ const DocumentosEmpleado = ({ empleados }) => {
       if (filtroFechaHasta) {
         params.append('fecha_hasta', filtroFechaHasta);
       }
+      if (filtroTipo) {
+        params.append('tipo', filtroTipo);
+      }
+      if (filtroEstado) {
+        params.append('estado', filtroEstado);
+      }
       
       const queryString = params.toString();
       const url = queryString ? `/api/rrhh/documentos/export/excel?${queryString}` : '/api/rrhh/documentos/export/excel';
@@ -2256,6 +2262,12 @@ const DocumentosEmpleado = ({ empleados }) => {
       }
       if (filtroFechaHasta) {
         params.append('fecha_hasta', filtroFechaHasta);
+      }
+      if (filtroTipo) {
+        params.append('tipo', filtroTipo);
+      }
+      if (filtroEstado) {
+        params.append('estado', filtroEstado);
       }
       
       const queryString = params.toString();
