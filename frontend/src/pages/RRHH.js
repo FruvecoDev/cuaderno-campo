@@ -2574,7 +2574,7 @@ const DocumentosEmpleado = ({ empleados }) => {
           <div onClick={e => e.stopPropagation()} style={{ 
             background: 'hsl(var(--card))',
             borderRadius: '12px',
-            maxWidth: '500px',
+            maxWidth: '550px',
             width: '100%',
             maxHeight: '85vh', 
             overflow: 'auto'
@@ -2593,6 +2593,102 @@ const DocumentosEmpleado = ({ empleados }) => {
             </div>
             
             <div style={{ padding: '1.5rem' }}>
+              {/* Zona de arrastre de archivo */}
+              <div className="form-group">
+                <label>Archivo Adjunto</label>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileInputChange}
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
+                  style={{ display: 'none' }}
+                />
+                
+                {!archivoAdjunto ? (
+                  <div
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{
+                      border: `2px dashed ${isDragging ? 'hsl(var(--primary))' : 'hsl(var(--border))'}`,
+                      borderRadius: '0.75rem',
+                      padding: '2rem',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      background: isDragging ? 'hsl(var(--primary) / 0.05)' : 'hsl(var(--muted) / 0.3)',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <Upload 
+                      size={40} 
+                      style={{ 
+                        margin: '0 auto 0.75rem', 
+                        color: isDragging ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))'
+                      }} 
+                    />
+                    <p style={{ 
+                      fontWeight: '500', 
+                      marginBottom: '0.25rem',
+                      color: isDragging ? 'hsl(var(--primary))' : 'inherit'
+                    }}>
+                      {isDragging ? 'Suelta el archivo aquí' : 'Arrastra un archivo aquí'}
+                    </p>
+                    <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
+                      o haz clic para seleccionar
+                    </p>
+                    <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginTop: '0.5rem' }}>
+                      PDF, Word, Imágenes • Máx. 10MB
+                    </p>
+                  </div>
+                ) : (
+                  <div style={{
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '0.75rem',
+                    padding: '1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    background: 'hsl(var(--muted) / 0.3)'
+                  }}>
+                    <div style={{
+                      width: '48px',
+                      height: '48px',
+                      borderRadius: '0.5rem',
+                      background: 'hsl(var(--primary) / 0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <FileText size={24} style={{ color: 'hsl(var(--primary))' }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ 
+                        fontWeight: '500', 
+                        marginBottom: '0.125rem',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {archivoAdjunto.name}
+                      </p>
+                      <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                        {formatFileSize(archivoAdjunto.size)}
+                      </p>
+                    </div>
+                    <button
+                      onClick={removeArchivoAdjunto}
+                      className="btn btn-ghost btn-sm"
+                      style={{ color: 'hsl(0 84% 60%)' }}
+                      title="Eliminar archivo"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                )}
+              </div>
+              
               <div className="form-group">
                 <label>Nombre del Documento *</label>
                 <input
@@ -2641,15 +2737,22 @@ const DocumentosEmpleado = ({ empleados }) => {
               </div>
               
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
-                <button onClick={() => setShowNuevoDoc(false)} className="btn btn-secondary">
+                <button onClick={() => { setShowNuevoDoc(false); setArchivoAdjunto(null); }} className="btn btn-secondary">
                   Cancelar
                 </button>
                 <button 
                   onClick={handleCrearDocumento} 
                   className="btn btn-primary"
-                  disabled={!nuevoDocData.nombre}
+                  disabled={!nuevoDocData.nombre || uploading}
                 >
-                  Crear Documento
+                  {uploading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" style={{ marginRight: '0.5rem' }}></div>
+                      Subiendo...
+                    </>
+                  ) : (
+                    'Crear Documento'
+                  )}
                 </button>
               </div>
             </div>
