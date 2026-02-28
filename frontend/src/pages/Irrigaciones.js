@@ -71,6 +71,7 @@ const Irrigaciones = () => {
     volumen: '',
     coste: 0,
     parcela_id: '',
+    cultivo: '',
     es_planificada: false,
     fecha_planificada: '',
     hora_inicio: '',
