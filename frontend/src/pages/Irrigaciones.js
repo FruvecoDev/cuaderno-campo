@@ -611,7 +611,7 @@ const Irrigaciones = () => {
               </div>
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label" style={{ fontSize: '12px' }}>Parcela</label>
-                <select className="form-select" value={filters.parcela_id} onChange={(e) => setFilters({...filters, parcela_id: e.target.value})} data-testid="select-filtro-parcela">
+                <select className="form-select" value={filters.parcela_id} onChange={(e) => handleParcelaFilterChange(e.target.value)} data-testid="select-filtro-parcela">
                   <option value="">Todas</option>
                   {filterOptions.parcelas.map(p => <option key={p.id} value={p.id}>{p.codigo}</option>)}
                 </select>
