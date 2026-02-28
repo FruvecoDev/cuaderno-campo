@@ -52,14 +52,15 @@ async function dismissModal(page) {
 
 // Helper to navigate to RRHH > Prenómina
 async function navigateToPrenomina(page) {
-  // Navigate to RRHH
-  const rrhhLink = page.locator('nav a, aside a, .sidebar a').filter({ hasText: /RRHH|Recursos Humanos/i }).first();
-  if (await rrhhLink.isVisible({ timeout: 5000 })) {
-    await rrhhLink.click();
-    await page.waitForLoadState('domcontentloaded');
-  }
+  // Navigate directly to RRHH page
+  await page.goto('/rrhh', { waitUntil: 'domcontentloaded' });
+  await page.waitForLoadState('domcontentloaded');
   
   await dismissModal(page);
+  
+  // Wait for page to load and find Prenómina tab
+  // The tabs are buttons within the RRHH page
+  await page.waitForTimeout(1000); // Allow page to render
   
   // Click on Prenómina tab
   const prenominaTab = page.locator('button').filter({ hasText: /Prenómina/i }).first();
