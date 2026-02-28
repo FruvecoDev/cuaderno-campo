@@ -169,18 +169,19 @@ def create_irrigaciones_table(irrigaciones: list, styles) -> list:
     total_coste = 0
     
     for i in irrigaciones:
-        volumen = i.get('volumen', 0) or 0
-        coste = i.get('coste', 0) or 0
+        volumen = i.get('volumen') or 0
+        coste = i.get('coste') or 0
         total_volumen += volumen
         total_coste += coste
         
+        estado = i.get('estado') or '-'
         data.append([
-            i.get('fecha', '-'),
-            i.get('sistema', '-'),
-            str(i.get('duracion', '-')),
+            i.get('fecha') or '-',
+            i.get('sistema') or '-',
+            str(i.get('duracion') or '-'),
             str(volumen),
             f"{coste:.2f}",
-            i.get('estado', '-')[:10]
+            estado[:10] if estado else '-'
         ])
     
     table = Table(data, colWidths=[2.5*cm, 2.5*cm, 2.5*cm, 2.5*cm, 2.5*cm, 2.5*cm])
