@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, Filter, Settings, X, FileText, Beaker, Calculator, ChevronDown, ChevronUp, CheckCircle, XCircle, AlertTriangle, Package } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
+import api from '../services/api';
 import '../App.css';
 
 
