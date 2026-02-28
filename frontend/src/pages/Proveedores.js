@@ -48,6 +48,11 @@ const Proveedores = () => {
     const saved = localStorage.getItem('proveedores_fields_config');
     return saved ? JSON.parse(saved) : DEFAULT_FIELDS_CONFIG;
   });
+  const [stats, setStats] = useState(null);
+  const [showHistorial, setShowHistorial] = useState(false);
+  const [historialData, setHistorialData] = useState(null);
+  const [selectedProveedor, setSelectedProveedor] = useState(null);
+  const [filtroEstado, setFiltroEstado] = useState('todos');
   const { t } = useTranslation();
   
   const { token } = useAuth();
