@@ -712,10 +712,11 @@ async def delete_registro_productividad(registro_id: str):
 async def get_documentos(
     empleado_id: Optional[str] = None, 
     tipo: Optional[str] = None,
+    estado: Optional[str] = None,
     fecha_desde: Optional[str] = None,
     fecha_hasta: Optional[str] = None
 ):
-    """Obtener documentos de empleados con filtros de fecha"""
+    """Obtener documentos de empleados con filtros de fecha, tipo y estado"""
     database = get_db()
     
     query = {}
@@ -723,6 +724,16 @@ async def get_documentos(
         query["empleado_id"] = empleado_id
     if tipo:
         query["tipo"] = tipo
+    
+    # Filtro por estado de firma
+    if estado:
+        if estado == "firmado":
+            query["firmado"] = True
+        elif estado == "pendiente":
+            query["requiere_firma"] = True
+            query["firmado"] = False
+        elif estado == "no_requiere":
+            query["requiere_firma"] = False
     
     # Filtros de fecha de registro (created_at)
     if fecha_desde or fecha_hasta:
