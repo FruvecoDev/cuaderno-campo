@@ -794,6 +794,13 @@ const Tratamientos = () => {
   // Técnicos Aplicadores para selector
   const [tecnicosAplicadores, setTecnicosAplicadores] = useState([]);
   
+  // Stats y exportación
+  const [stats, setStats] = useState(null);
+  const [exportLoading, setExportLoading] = useState(false);
+  
+  // Colores para gráficos
+  const CHART_COLORS = ['#2ecc71', '#3498db', '#9b59b6', '#f39c12', '#e74c3c', '#1abc9c'];
+
   // Form data SIMPLIFICADO
   const [formData, setFormData] = useState({
     tipo_tratamiento: 'FITOSANITARIOS',
