@@ -1165,6 +1165,47 @@ const Maquinaria = () => {
                     </div>
                   </div>
 
+                  {/* Gráfico de Tendencia - Uso por Mes */}
+                  {historialData.tratamientos?.length > 0 && (
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <h4 style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <TrendingUp size={18} />
+                        Evolución de Uso
+                      </h4>
+                      <div style={{ height: '160px', background: 'hsl(var(--muted) / 0.2)', borderRadius: '8px', padding: '0.5rem' }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={
+                            // Agrupar tratamientos por mes
+                            Object.entries(
+                              historialData.tratamientos.reduce((acc, t) => {
+                                const fecha = t.fecha ? new Date(t.fecha) : new Date();
+                                const mes = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+                                if (!acc[mes]) acc[mes] = { mes, usos: 0 };
+                                acc[mes].usos += 1;
+                                return acc;
+                              }, {})
+                            ).map(([_, v]) => v).sort((a, b) => a.mes.localeCompare(b.mes)).slice(-6)
+                          }>
+                            <defs>
+                              <linearGradient id="colorUsos" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                            <XAxis dataKey="mes" tick={{ fontSize: 10 }} />
+                            <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                            <Tooltip 
+                              formatter={(value) => [`${value} usos`, 'Tratamientos']}
+                              contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
+                            />
+                            <Area type="monotone" dataKey="usos" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorUsos)" />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Lista de tratamientos */}
                   {historialData.tratamientos?.length > 0 ? (
                     <div style={{ marginBottom: '1.5rem' }}>
