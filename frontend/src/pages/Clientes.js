@@ -111,6 +111,7 @@ const Clientes = () => {
     fetchClientes();
     fetchTipos();
     fetchProvincias();
+    fetchStats();
   }, [searchTerm, filterTipo, filterProvincia, filterActivo]);
   
   const fetchClientes = async () => {
