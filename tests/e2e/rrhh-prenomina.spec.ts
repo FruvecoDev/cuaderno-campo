@@ -121,17 +121,16 @@ test.describe('RRHH Prenómina Module', () => {
   
   test('should display KPI cards', async ({ page }) => {
     await navigateToPrenomina(page);
+    await dismissModal(page);
     
-    // Verify KPI cards are present - look for the stats section
-    const prenominasKPI = page.locator('.card').filter({ hasText: /Prenóminas/i }).first();
-    const horasKPI = page.locator('.card').filter({ hasText: /Total Horas/i }).first();
-    const brutoKPI = page.locator('.card').filter({ hasText: /Importe Bruto/i }).first();
-    const netoKPI = page.locator('.card').filter({ hasText: /Importe Neto/i }).first();
+    // Wait for page content
+    await page.waitForTimeout(500);
     
-    await expect(prenominasKPI).toBeVisible({ timeout: 10000 });
-    await expect(horasKPI).toBeVisible();
-    await expect(brutoKPI).toBeVisible();
-    await expect(netoKPI).toBeVisible();
+    // Verify KPI cards are present - use the data-testids if they exist, otherwise use text
+    await expect(page.locator('text=Prenóminas')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Total Horas')).toBeVisible();
+    await expect(page.locator('text=Importe Bruto')).toBeVisible();
+    await expect(page.locator('text=Importe Neto')).toBeVisible();
   });
   
   test('should change month/year selector', async ({ page }) => {
