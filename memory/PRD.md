@@ -66,6 +66,14 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
   - `/app/backend/routes_auth.py` (endpoint `/api/auth/permission-profiles`)
   - `/app/frontend/src/pages/Usuarios.js` (UI de selección)
 
+#### 7. Mejora del Módulo Tratamientos ✅ (NUEVO)
+- **KPIs añadidos**: Total, Realizados, Pendientes, Hectáreas Tratadas
+- **Gráficos**: Tratamientos por mes (barras), Por tipo de tratamiento (pie)
+- **Exportación Excel**: Botón y endpoint funcional
+- **Archivos modificados**:
+  - `/app/backend/routes_tratamientos.py` (endpoints stats y export)
+  - `/app/frontend/src/pages/Tratamientos.js` (UI con recharts)
+
 ---
 
 ### Completadas en sesión anterior:
