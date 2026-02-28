@@ -170,10 +170,14 @@ const Irrigaciones = () => {
   // Filtrar irrigaciones
   const filteredIrrigaciones = useMemo(() => {
     return irrigaciones.filter(i => {
+      // Obtener el cultivo de la parcela asociada
+      const parcelaInfo = parcelas.find(p => p._id === i.parcela_id);
+      const cultivoIrrigacion = parcelaInfo?.cultivo || i.cultivo || '';
+      
       if (filters.search) {
         const search = filters.search.toLowerCase();
         if (!i.parcela_codigo?.toLowerCase().includes(search) &&
-            !i.cultivo?.toLowerCase().includes(search) &&
+            !cultivoIrrigacion?.toLowerCase().includes(search) &&
             !i.observaciones?.toLowerCase().includes(search)) return false;
       }
       if (filters.sistema && i.sistema !== filters.sistema) return false;
@@ -181,10 +185,10 @@ const Irrigaciones = () => {
       if (filters.estado && i.estado !== filters.estado) return false;
       if (filters.fecha_desde && i.fecha < filters.fecha_desde) return false;
       if (filters.fecha_hasta && i.fecha > filters.fecha_hasta) return false;
-      if (filters.cultivo && i.cultivo !== filters.cultivo) return false;
+      if (filters.cultivo && cultivoIrrigacion !== filters.cultivo) return false;
       return true;
     });
-  }, [irrigaciones, filters]);
+  }, [irrigaciones, filters, parcelas]);
 
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
   const activeFiltersCount = Object.values(filters).filter(v => v !== '').length;
