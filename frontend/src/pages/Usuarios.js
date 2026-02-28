@@ -437,6 +437,7 @@ const Usuarios = () => {
                   <th>{t('users.userName')}</th>
                   <th>{t('auth.email')}</th>
                   <th>{t('users.role')}</th>
+                  <th>Empleado Vinculado</th>
                   <th>Tipo Operación</th>
                   <th>{t('common.status')}</th>
                   <th>{t('users.createdAt')}</th>
