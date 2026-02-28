@@ -437,16 +437,28 @@ const Proveedores = () => {
       <div className="card">
         <div className="flex justify-between items-center mb-4">
           <h2 className="card-title">Lista de Proveedores</h2>
-          <div style={{ position: 'relative', width: '300px' }}>
-            <Search size={18} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--muted-foreground))' }} />
-            <input
-              type="text"
-              className="form-input"
-              placeholder="Buscar proveedores..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ paddingLeft: '2.5rem' }}
-            />
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <select
+              className="form-select"
+              value={filtroEstado}
+              onChange={(e) => setFiltroEstado(e.target.value)}
+              style={{ minWidth: '130px' }}
+            >
+              <option value="todos">Todos</option>
+              <option value="activos">Activos</option>
+              <option value="inactivos">Inactivos</option>
+            </select>
+            <div style={{ position: 'relative', width: '300px' }}>
+              <Search size={18} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--muted-foreground))' }} />
+              <input
+                type="text"
+                className="form-input"
+                placeholder="Buscar proveedores..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ paddingLeft: '2.5rem' }}
+              />
+            </div>
           </div>
         </div>
 
