@@ -1786,6 +1786,30 @@ Migrar todas las llamadas `fetch` directas al nuevo servicio centralizado `api.j
 
 
 
+## Gestión de Ausencias en RRHH (28/02/2026) - COMPLETADO
+
+Nueva pestaña en el módulo RRHH para gestionar solicitudes de ausencias.
+
+**Funcionalidades:**
+- **KPIs interactivos**: Pendientes, Aprobadas, Rechazadas (clic para filtrar)
+- **Filtros**: Por estado y tipo de ausencia
+- **Tabla de solicitudes** con: Empleado, Tipo, Fechas, Días, Motivo, Estado, Acciones
+- **Aprobar ausencia**: Un clic con confirmación
+- **Rechazar ausencia**: Modal con campo para comentario/motivo
+- **Notificaciones automáticas**: Push in-app + Email al empleado
+
+**Archivo creado:**
+- `/app/frontend/src/pages/RRHH/AusenciasTab.js` - Componente de gestión
+
+**Tipos de ausencia soportados:**
+- Vacaciones
+- Permiso Personal
+- Baja Médica
+- Asuntos Propios
+- Otros
+
+---
+
 ## Notificaciones Email para RRHH (28/02/2026) - PREPARADO
 
 Sistema de notificaciones por email integrado con el módulo RRHH.
