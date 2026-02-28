@@ -1951,6 +1951,259 @@ async def validar_prenomina(prenomina_id: str, validador: dict):
     
     return {"success": True}
 
+
+@router.get("/prenominas/{prenomina_id}/excel")
+async def export_prenomina_excel(prenomina_id: str):
+    """Exportar prenómina individual a Excel"""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from fastapi.responses import StreamingResponse
+    
+    database = get_db()
+    
+    prenomina = await database.prenominas.find_one({"_id": ObjectId(prenomina_id)})
+    if not prenomina:
+        raise HTTPException(status_code=404, detail="Prenómina no encontrada")
+    
+    empleado = await database.empleados.find_one({"_id": ObjectId(prenomina["empleado_id"])})
+    
+    # Crear workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Prenómina"
+    
+    # Estilos
+    title_font = Font(bold=True, size=14, color="FFFFFF")
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="2E7D32", end_color="2E7D32", fill_type="solid")
+    money_fill = PatternFill(start_color="E8F5E9", end_color="E8F5E9", fill_type="solid")
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Título
+    ws.merge_cells('A1:E1')
+    ws['A1'] = "PRENÓMINA"
+    ws['A1'].font = title_font
+    ws['A1'].fill = header_fill
+    ws['A1'].alignment = Alignment(horizontal="center")
+    
+    # Info empleado
+    ws['A3'] = "Empleado:"
+    ws['B3'] = f"{empleado.get('nombre', '')} {empleado.get('apellidos', '')}" if empleado else "N/A"
+    ws['A4'] = "DNI/NIE:"
+    ws['B4'] = empleado.get('dni_nie', '') if empleado else "N/A"
+    ws['A5'] = "Puesto:"
+    ws['B5'] = empleado.get('puesto', '') if empleado else "N/A"
+    ws['D3'] = "Período:"
+    ws['E3'] = f"{prenomina.get('periodo_mes', '')}/{prenomina.get('periodo_ano', '')}"
+    ws['D4'] = "Estado:"
+    ws['E4'] = prenomina.get('estado', 'borrador').upper()
+    
+    # Resumen de horas
+    ws.merge_cells('A7:E7')
+    ws['A7'] = "RESUMEN DE HORAS"
+    ws['A7'].font = header_font
+    ws['A7'].fill = header_fill
+    ws['A7'].alignment = Alignment(horizontal="center")
+    
+    horas_data = [
+        ["Concepto", "Horas", "€/Hora", "Importe"],
+        ["Horas Normales", prenomina.get('horas_normales', 0), empleado.get('salario_hora', 0) if empleado else 0, ""],
+        ["Horas Extra", prenomina.get('horas_extra', 0), (empleado.get('salario_hora_extra') or (empleado.get('salario_hora', 0) * 1.25)) if empleado else 0, ""],
+        ["Horas Nocturnas", prenomina.get('horas_nocturnas', 0), (empleado.get('salario_hora_nocturna') or (empleado.get('salario_hora', 0) * 1.25)) if empleado else 0, ""],
+        ["Horas Festivos", prenomina.get('horas_festivos', 0), (empleado.get('salario_hora_festivo') or (empleado.get('salario_hora', 0) * 1.5)) if empleado else 0, ""]
+    ]
+    
+    for row_idx, row_data in enumerate(horas_data, 8):
+        for col_idx, value in enumerate(row_data, 1):
+            cell = ws.cell(row=row_idx, column=col_idx, value=value)
+            cell.border = thin_border
+            if row_idx == 8:
+                cell.font = header_font
+                cell.fill = header_fill
+            if col_idx == 4 and row_idx > 8:
+                # Calcular importe
+                horas = ws.cell(row=row_idx, column=2).value or 0
+                precio = ws.cell(row=row_idx, column=3).value or 0
+                cell.value = round(horas * precio, 2)
+                cell.number_format = '#,##0.00 €'
+    
+    # Totales
+    row = 13
+    ws.merge_cells(f'A{row}:C{row}')
+    ws[f'A{row}'] = "TOTAL HORAS:"
+    ws[f'A{row}'].font = Font(bold=True)
+    ws[f'D{row}'] = prenomina.get('total_horas', 0)
+    ws[f'D{row}'].font = Font(bold=True)
+    
+    row += 1
+    ws.merge_cells(f'A{row}:C{row}')
+    ws[f'A{row}'] = "DÍAS TRABAJADOS:"
+    ws[f'D{row}'] = prenomina.get('dias_trabajados', 0)
+    
+    row += 2
+    ws.merge_cells(f'A{row}:C{row}')
+    ws[f'A{row}'] = "IMPORTE BRUTO:"
+    ws[f'A{row}'].font = Font(bold=True, size=12)
+    ws[f'D{row}'] = prenomina.get('importe_bruto', 0)
+    ws[f'D{row}'].font = Font(bold=True, size=12)
+    ws[f'D{row}'].fill = money_fill
+    ws[f'D{row}'].number_format = '#,##0.00 €'
+    
+    row += 1
+    ws.merge_cells(f'A{row}:C{row}')
+    ws[f'A{row}'] = "DEDUCCIONES:"
+    ws[f'D{row}'] = prenomina.get('deducciones', 0)
+    ws[f'D{row}'].number_format = '#,##0.00 €'
+    
+    row += 1
+    ws.merge_cells(f'A{row}:C{row}')
+    ws[f'A{row}'] = "IMPORTE NETO:"
+    ws[f'A{row}'].font = Font(bold=True, size=14, color="2E7D32")
+    ws[f'D{row}'] = prenomina.get('importe_neto', 0)
+    ws[f'D{row}'].font = Font(bold=True, size=14, color="2E7D32")
+    ws[f'D{row}'].fill = money_fill
+    ws[f'D{row}'].number_format = '#,##0.00 €'
+    
+    # Ajustar anchos
+    ws.column_dimensions['A'].width = 20
+    ws.column_dimensions['B'].width = 25
+    ws.column_dimensions['C'].width = 12
+    ws.column_dimensions['D'].width = 12
+    ws.column_dimensions['E'].width = 15
+    
+    # Guardar
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    
+    apellidos = empleado.get('apellidos', 'empleado').replace(' ', '_') if empleado else 'empleado'
+    filename = f"prenomina_{apellidos}_{prenomina.get('periodo_mes', '')}_{prenomina.get('periodo_ano', '')}.xlsx"
+    
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+
+@router.get("/prenominas/{prenomina_id}/pdf")
+async def export_prenomina_pdf(prenomina_id: str):
+    """Exportar prenómina individual a PDF"""
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import mm
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from fastapi.responses import StreamingResponse
+    
+    database = get_db()
+    
+    prenomina = await database.prenominas.find_one({"_id": ObjectId(prenomina_id)})
+    if not prenomina:
+        raise HTTPException(status_code=404, detail="Prenómina no encontrada")
+    
+    empleado = await database.empleados.find_one({"_id": ObjectId(prenomina["empleado_id"])})
+    
+    # Crear PDF
+    output = io.BytesIO()
+    pdf = SimpleDocTemplate(output, pagesize=A4, topMargin=20*mm, bottomMargin=20*mm, leftMargin=20*mm, rightMargin=20*mm)
+    
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    # Título
+    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=18, textColor=colors.HexColor('#2E7D32'), alignment=1, spaceAfter=5*mm)
+    elements.append(Paragraph("PRENÓMINA", title_style))
+    
+    # Info empleado
+    info_style = ParagraphStyle('Info', parent=styles['Normal'], fontSize=10, spaceAfter=2*mm)
+    emp_nombre = f"{empleado.get('nombre', '')} {empleado.get('apellidos', '')}" if empleado else "N/A"
+    elements.append(Paragraph(f"<b>Empleado:</b> {emp_nombre}", info_style))
+    elements.append(Paragraph(f"<b>DNI/NIE:</b> {empleado.get('dni_nie', '') if empleado else 'N/A'} | <b>Puesto:</b> {empleado.get('puesto', '') if empleado else 'N/A'}", info_style))
+    elements.append(Paragraph(f"<b>Período:</b> {prenomina.get('periodo_mes', '')}/{prenomina.get('periodo_ano', '')} | <b>Estado:</b> {prenomina.get('estado', 'borrador').upper()}", info_style))
+    elements.append(Spacer(1, 8*mm))
+    
+    # Tabla de horas
+    salario_hora = empleado.get('salario_hora', 0) if empleado else 0
+    salario_extra = (empleado.get('salario_hora_extra') or salario_hora * 1.25) if empleado else 0
+    salario_nocturna = (empleado.get('salario_hora_nocturna') or salario_hora * 1.25) if empleado else 0
+    salario_festivo = (empleado.get('salario_hora_festivo') or salario_hora * 1.5) if empleado else 0
+    
+    table_data = [
+        ["Concepto", "Horas", "€/Hora", "Importe"],
+        ["Horas Normales", f"{prenomina.get('horas_normales', 0):.2f}", f"{salario_hora:.2f} €", f"{prenomina.get('horas_normales', 0) * salario_hora:.2f} €"],
+        ["Horas Extra", f"{prenomina.get('horas_extra', 0):.2f}", f"{salario_extra:.2f} €", f"{prenomina.get('horas_extra', 0) * salario_extra:.2f} €"],
+        ["Horas Nocturnas", f"{prenomina.get('horas_nocturnas', 0):.2f}", f"{salario_nocturna:.2f} €", f"{prenomina.get('horas_nocturnas', 0) * salario_nocturna:.2f} €"],
+        ["Horas Festivos", f"{prenomina.get('horas_festivos', 0):.2f}", f"{salario_festivo:.2f} €", f"{prenomina.get('horas_festivos', 0) * salario_festivo:.2f} €"],
+    ]
+    
+    col_widths = [50*mm, 30*mm, 35*mm, 40*mm]
+    horas_table = Table(table_data, colWidths=col_widths)
+    horas_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2E7D32')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('ALIGN', (0, 1), (0, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+        ('TOPPADDING', (0, 0), (-1, 0), 8),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+        ('TOPPADDING', (0, 1), (-1, -1), 6),
+        ('GRID', (0, 0), (-1, -1), 1, colors.gray),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F5F5F5')])
+    ]))
+    elements.append(horas_table)
+    elements.append(Spacer(1, 8*mm))
+    
+    # Resumen
+    resumen_data = [
+        ["Total Horas:", f"{prenomina.get('total_horas', 0):.2f}"],
+        ["Días Trabajados:", f"{prenomina.get('dias_trabajados', 0)}"],
+        ["", ""],
+        ["IMPORTE BRUTO:", f"{prenomina.get('importe_bruto', 0):.2f} €"],
+        ["Deducciones:", f"{prenomina.get('deducciones', 0):.2f} €"],
+        ["IMPORTE NETO:", f"{prenomina.get('importe_neto', 0):.2f} €"],
+    ]
+    
+    resumen_table = Table(resumen_data, colWidths=[80*mm, 50*mm])
+    resumen_table.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
+        ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 0), (-1, -1), 11),
+        ('FONTNAME', (0, 3), (-1, 3), 'Helvetica-Bold'),
+        ('FONTNAME', (0, 5), (-1, 5), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 5), (-1, 5), 14),
+        ('TEXTCOLOR', (0, 5), (-1, 5), colors.HexColor('#2E7D32')),
+        ('BACKGROUND', (0, 5), (-1, 5), colors.HexColor('#E8F5E9')),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+    ]))
+    elements.append(resumen_table)
+    
+    # Fecha generación
+    elements.append(Spacer(1, 15*mm))
+    elements.append(Paragraph(f"<i>Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}</i>", ParagraphStyle('Small', fontSize=8, textColor=colors.gray)))
+    
+    pdf.build(elements)
+    output.seek(0)
+    
+    apellidos = empleado.get('apellidos', 'empleado').replace(' ', '_') if empleado else 'empleado'
+    filename = f"prenomina_{apellidos}_{prenomina.get('periodo_mes', '')}_{prenomina.get('periodo_ano', '')}.pdf"
+    
+    return StreamingResponse(
+        output,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+
 @router.get("/prenominas/export")
 async def export_prenominas(mes: int, ano: int):
     """Exportar prenóminas para software de nóminas (formato CSV)"""
