@@ -842,6 +842,7 @@ const Irrigaciones = () => {
                   <tr>
                     {fieldsConfig.fecha && <th>Fecha</th>}
                     {fieldsConfig.parcela_id && <th>Parcela</th>}
+                    <th>Cultivo</th>
                     {fieldsConfig.sistema && <th>Sistema</th>}
                     {fieldsConfig.duracion && <th>Duración (h)</th>}
                     {fieldsConfig.volumen && <th>Volumen (m³)</th>}
@@ -852,15 +853,20 @@ const Irrigaciones = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredIrrigaciones.map(irrig => (
+                  {filteredIrrigaciones.map(irrig => {
+                    // Obtener el cultivo de la parcela
+                    const parcelaInfo = parcelas.find(p => p._id === irrig.parcela_id);
+                    const cultivoNombre = parcelaInfo?.cultivo || irrig.cultivo || '-';
+                    
+                    return (
                     <tr key={irrig._id}>
                       {fieldsConfig.fecha && <td>{irrig.fecha}</td>}
                       {fieldsConfig.parcela_id && (
                         <td>
                           <div style={{ fontWeight: '500' }}>{irrig.parcela_codigo || '-'}</div>
-                          <div style={{ fontSize: '12px', color: '#6b7280' }}>{irrig.cultivo || ''}</div>
                         </td>
                       )}
+                      <td style={{ color: 'hsl(var(--primary))', fontWeight: '500' }}>{cultivoNombre}</td>
                       {fieldsConfig.sistema && <td>{irrig.sistema}</td>}
                       {fieldsConfig.duracion && <td>{irrig.duracion}</td>}
                       {fieldsConfig.volumen && <td>{irrig.volumen}</td>}
