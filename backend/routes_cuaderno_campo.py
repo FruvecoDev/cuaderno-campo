@@ -218,13 +218,13 @@ def create_visitas_table(visitas: list, styles) -> list:
     data = [['Fecha', 'Tipo', 'Técnico', 'Observaciones']]
     
     for v in visitas:
-        obs = v.get('observaciones', '-')
+        obs = v.get('observaciones') or '-'
         if len(obs) > 50:
             obs = obs[:47] + '...'
         data.append([
-            v.get('fecha', '-'),
-            v.get('tipo_visita', '-')[:15],
-            v.get('tecnico_nombre', '-')[:20],
+            v.get('fecha') or '-',
+            (v.get('tipo_visita') or '-')[:15],
+            (v.get('tecnico_nombre') or '-')[:20],
             obs
         ])
     
