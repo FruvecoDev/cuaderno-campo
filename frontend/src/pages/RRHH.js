@@ -2459,6 +2459,37 @@ const DocumentosEmpleado = ({ empleados }) => {
           )}
         </div>
         
+        {/* Filtros de fecha */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Clock size={16} style={{ color: 'hsl(var(--muted-foreground))' }} />
+          <input
+            type="date"
+            value={filtroFechaDesde}
+            onChange={(e) => setFiltroFechaDesde(e.target.value)}
+            className="form-input"
+            style={{ width: '140px', padding: '0.4rem 0.6rem', fontSize: '0.85rem' }}
+            title="Fecha desde"
+          />
+          <span style={{ color: 'hsl(var(--muted-foreground))' }}>-</span>
+          <input
+            type="date"
+            value={filtroFechaHasta}
+            onChange={(e) => setFiltroFechaHasta(e.target.value)}
+            className="form-input"
+            style={{ width: '140px', padding: '0.4rem 0.6rem', fontSize: '0.85rem' }}
+            title="Fecha hasta"
+          />
+          {(filtroFechaDesde || filtroFechaHasta) && (
+            <button
+              onClick={() => { setFiltroFechaDesde(''); setFiltroFechaHasta(''); }}
+              className="btn btn-ghost btn-sm"
+              title="Limpiar filtros"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
+        
         <button
           onClick={() => setShowNuevoDoc(true)}
           className="btn btn-primary"
