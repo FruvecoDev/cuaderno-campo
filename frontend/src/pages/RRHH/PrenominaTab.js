@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  X, User, CreditCard, FileText, Download, Eye, Check
+  X, User, CreditCard, FileText, Download, Eye, Check, ChevronDown
 } from 'lucide-react';
 import api from '../../services/api';
 
