@@ -8,6 +8,43 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
 - Panel de configuración de usuarios y permisos (RBAC)
 - Autenticación con usuario y contraseña
 - Integraciones con IA
+- **RRHH**: Gestión de personal, fichajes, productividad, documentos, ausencias, prenómina
+
+---
+
+## Última Actualización: 28 Febrero 2026
+
+### Completadas en esta sesión:
+
+#### 1. Refactorización Componente RRHH.js ✅
+- **Archivo extraído**: `DocumentosTab.js` - Gestión de documentos de empleados con firma digital
+- **Ubicación**: `/app/frontend/src/pages/RRHH/DocumentosTab.js`
+- **Resultado**: RRHH.js reducido de ~2400 a ~1024 líneas
+- **Componentes modulares**: ControlHorarioTab, ProductividadTab, PrenominaTab, AusenciasTab, DocumentosTab
+
+#### 2. UI para Gestión de Usuarios y Vinculación con Empleados ✅
+- **Nuevo rol**: "Empleado" - Acceso limitado al Portal del Empleado
+- **Nueva columna**: "Empleado Vinculado" en tabla de usuarios
+- **Nuevo botón**: Vincular/Desvincular empleado con icono de enlace
+- **Nuevos endpoints backend**:
+  - `GET /api/auth/empleados-disponibles` - Lista empleados activos con estado de vinculación
+  - `PUT /api/auth/users/{user_id}/vincular-empleado` - Vincular/Desvincular usuario a empleado
+- **Archivos modificados**:
+  - `/app/backend/routes_auth.py` - Nuevos endpoints
+  - `/app/frontend/src/pages/Usuarios.js` - Nueva UI y funcionalidad
+
+#### 3. Funcionalidad Completa de Productividad ✅
+- **KPIs en Tiempo Real**: Kilos hoy, Horas hoy, Kg/Hora promedio
+- **KPIs Generales**: Kilos totales, Hectáreas, Horas trabajadas, Registros
+- **CRUD de registros de productividad**: Crear, editar, eliminar
+- **Formulario completo**: Empleado, fecha, tipo trabajo, kilos, hectáreas, horas, parcela, cultivo
+- **Filtros avanzados**: Por empleado, rango de fechas
+- **Top 10 Empleados**: Ranking con medallas visuales
+- **Tipos de trabajo**: Recolección, poda, tratamiento, riego, plantación, mantenimiento
+- **Archivos modificados**:
+  - `/app/frontend/src/pages/RRHH/ProductividadTab.js` - Expandido completamente
+
+---
 
 ## Data Model (User Clarified - IMPLEMENTED)
 ```
