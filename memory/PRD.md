@@ -12,9 +12,37 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
 
 ---
 
-## Última Actualización: 28 Febrero 2026
+## Última Actualización: 28 Febrero 2026 (Sesión 2)
 
 ### Completadas en esta sesión:
+
+#### 1. Verificación Bug UI Tenderometría ✅
+- **Problema**: Encabezados de tabla con texto negro sobre fondo azul oscuro (ilegibles)
+- **Solución**: Texto cambiado a blanco en los `<th>` de la tabla de precios por tenderometría
+- **Archivo**: `/app/frontend/src/pages/Contratos.js` (líneas 861-864)
+- **Verificado visualmente**: Encabezados ahora legibles
+
+#### 2. Funcionalidad "Ver Historial" para Maquinaria ✅ (NUEVO)
+- **Estado y función**: `handleVerHistorial` añadido al componente
+- **Botón**: Icono de ojo (Eye) en columna de Acciones
+- **Modal**: Muestra total de usos en tratamientos, mantenimientos, y lista detallada
+- **Endpoint backend existente**: `GET /api/maquinaria/{id}/historial`
+- **Archivo modificado**: `/app/frontend/src/pages/Maquinaria.js`
+
+#### 3. Funcionalidad "Ver Historial" para Clientes ✅ (NUEVO)
+- **Estado y función**: `handleVerHistorial` añadido al componente
+- **Botón**: Icono de ojo (Eye) en columna de Acciones
+- **Modal**: Muestra total ventas, contratos, albaranes, y listas detalladas
+- **Endpoint backend existente**: `GET /api/clientes/{id}/historial`
+- **Archivo modificado**: `/app/frontend/src/pages/Clientes.js`
+
+#### 4. Funcionalidad "Ver Historial" para Proveedores ✅ (Ya existente)
+- **Ya implementado** en sesión anterior con modal completo
+- **Endpoint**: `GET /api/proveedores/{id}/historial`
+
+---
+
+### Completadas en sesión anterior:
 
 #### 1. Refactorización Componente RRHH.js ✅
 - **Archivo extraído**: `DocumentosTab.js` - Gestión de documentos de empleados con firma digital
