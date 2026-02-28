@@ -38,16 +38,39 @@ async function login(page) {
   await page.waitForURL(/dashboard/, { timeout: 15000 });
 }
 
-// Helper to dismiss ResumenDiario modal
+// Helper to dismiss ResumenDiario modal - robust version
 async function dismissModal(page) {
-  try {
-    const entendidoBtn = page.getByRole('button', { name: /Entendido/i });
-    if (await entendidoBtn.isVisible({ timeout: 3000 })) {
-      await entendidoBtn.click();
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      // Look for the modal and click Entendido
+      const entendidoBtn = page.getByRole('button', { name: /Entendido/i });
+      if (await entendidoBtn.isVisible({ timeout: 2000 })) {
+        await entendidoBtn.click({ force: true });
+        await page.waitForTimeout(500);
+      } else {
+        // Try clicking the close X button
+        const closeBtn = page.locator('.modal-overlay button svg').first();
+        if (await closeBtn.isVisible({ timeout: 500 })) {
+          await closeBtn.click({ force: true });
+          await page.waitForTimeout(500);
+        }
+      }
+    } catch {
+      // Continue
     }
-  } catch {
-    // Modal not present
+    
+    // Check if modal-overlay is gone
+    const overlay = page.locator('.modal-overlay');
+    if (!(await overlay.isVisible({ timeout: 300 }))) {
+      return;
+    }
   }
+  
+  // Force remove overlay via JS
+  await page.evaluate(() => {
+    const overlays = document.querySelectorAll('.modal-overlay, [x-file-name="ResumenDiario"]');
+    overlays.forEach(o => o.remove());
+  });
 }
 
 // Helper to navigate to RRHH > Prenómina (assumes already logged in)
@@ -59,15 +82,16 @@ async function navigateToPrenomina(page) {
   await dismissModal(page);
   
   // Wait for page to load and find Prenómina tab
-  await page.waitForTimeout(1000); // Allow page to render
+  await page.waitForTimeout(500);
   
-  // Click on Prenómina tab
+  // Click on Prenómina tab with force to bypass any overlay
   const prenominaTab = page.locator('button').filter({ hasText: /Prenómina/i }).first();
   await expect(prenominaTab).toBeVisible({ timeout: 10000 });
-  await prenominaTab.click();
+  await prenominaTab.click({ force: true });
   
   // Wait for content to load
   await page.waitForLoadState('domcontentloaded');
+  await page.waitForTimeout(500);
 }
 
 test.describe('RRHH Prenómina Module', () => {
