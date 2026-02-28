@@ -284,3 +284,169 @@ async def get_resumen_tratamientos_campana(
         "productos": list(productos_resumen.values()),
         "tratamientos": [serialize_doc(t) for t in tratamientos]
     }
+
+
+@router.get("/tratamientos/stats/dashboard")
+async def get_tratamientos_stats(
+    campana: Optional[str] = None,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireTratamientosAccess)
+):
+    """
+    Estadísticas del dashboard de tratamientos.
+    """
+    query = {}
+    if campana:
+        query["campana"] = campana
+    
+    # Total tratamientos
+    total = await tratamientos_collection.count_documents(query)
+    
+    # Tratamientos realizados vs pendientes
+    realizados = await tratamientos_collection.count_documents({**query, "realizado": True})
+    pendientes = total - realizados
+    
+    # Superficie total tratada
+    pipeline_superficie = [
+        {"$match": query},
+        {"$group": {"_id": None, "total": {"$sum": {"$ifNull": ["$superficie_aplicacion", 0]}}}}
+    ]
+    superficie_result = await tratamientos_collection.aggregate(pipeline_superficie).to_list(1)
+    superficie_total = superficie_result[0]["total"] if superficie_result else 0
+    
+    # Tratamientos por tipo
+    pipeline_tipo = [
+        {"$match": query},
+        {"$group": {"_id": "$tipo_tratamiento", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}}
+    ]
+    tipos = await tratamientos_collection.aggregate(pipeline_tipo).to_list(10)
+    
+    # Tratamientos por mes (últimos 6 meses)
+    pipeline_mes = [
+        {"$match": query},
+        {"$addFields": {
+            "mes": {"$substr": ["$fecha_tratamiento", 0, 7]}
+        }},
+        {"$group": {"_id": "$mes", "count": {"$sum": 1}}},
+        {"$sort": {"_id": -1}},
+        {"$limit": 6}
+    ]
+    por_mes = await tratamientos_collection.aggregate(pipeline_mes).to_list(6)
+    
+    # Productos más usados
+    pipeline_productos = [
+        {"$match": {**query, "producto_fitosanitario_nombre": {"$ne": None}}},
+        {"$group": {"_id": "$producto_fitosanitario_nombre", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 5}
+    ]
+    productos = await tratamientos_collection.aggregate(pipeline_productos).to_list(5)
+    
+    return {
+        "success": True,
+        "stats": {
+            "total": total,
+            "realizados": realizados,
+            "pendientes": pendientes,
+            "superficie_total": round(superficie_total, 2),
+            "por_tipo": [{"tipo": t["_id"] or "Sin tipo", "count": t["count"]} for t in tipos],
+            "por_mes": [{"mes": m["_id"] or "Sin fecha", "count": m["count"]} for m in reversed(por_mes)],
+            "productos_top": [{"producto": p["_id"], "count": p["count"]} for p in productos]
+        }
+    }
+
+
+@router.get("/tratamientos/export/excel")
+async def export_tratamientos_excel(
+    campana: Optional[str] = None,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireTratamientosAccess)
+):
+    """
+    Exportar tratamientos a Excel.
+    """
+    from io import BytesIO
+    from fastapi.responses import StreamingResponse
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    
+    query = {}
+    if campana:
+        query["campana"] = campana
+    
+    tratamientos = await tratamientos_collection.find(query).sort("fecha_tratamiento", -1).to_list(1000)
+    
+    # Create workbook
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Tratamientos"
+    
+    # Styles
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="1a5276", end_color="1a5276", fill_type="solid")
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Headers
+    headers = ["Fecha", "Tipo", "Subtipo", "Parcelas", "Cultivo", "Campaña", 
+               "Producto", "Dosis", "Superficie (ha)", "Aplicador", "Realizado"]
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = Alignment(horizontal='center')
+        cell.border = thin_border
+    
+    # Data rows
+    for row, t in enumerate(tratamientos, 2):
+        parcelas = ", ".join(t.get("parcelas_ids", [])[:3])
+        if len(t.get("parcelas_ids", [])) > 3:
+            parcelas += "..."
+        
+        data = [
+            t.get("fecha_tratamiento", ""),
+            t.get("tipo_tratamiento", ""),
+            t.get("subtipo", ""),
+            parcelas,
+            t.get("cultivo", ""),
+            t.get("campana", ""),
+            t.get("producto_fitosanitario_nombre", ""),
+            f"{t.get('producto_fitosanitario_dosis', '')} {t.get('producto_fitosanitario_unidad', '')}".strip(),
+            t.get("superficie_aplicacion", 0),
+            t.get("aplicador_nombre", ""),
+            "Sí" if t.get("realizado") else "No"
+        ]
+        for col, value in enumerate(data, 1):
+            cell = ws.cell(row=row, column=col, value=value)
+            cell.border = thin_border
+            cell.alignment = Alignment(horizontal='left')
+    
+    # Adjust column widths
+    for col in ws.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        ws.column_dimensions[column].width = min(max_length + 2, 40)
+    
+    # Save to buffer
+    buffer = BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+    
+    filename = f"tratamientos_{campana or 'todos'}_{datetime.now().strftime('%Y%m%d')}.xlsx"
+    
+    return StreamingResponse(
+        buffer,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
