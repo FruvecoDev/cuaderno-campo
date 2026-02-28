@@ -4,12 +4,12 @@ import {
   Plus, Edit2, Trash2, Search, Filter, X, User, QrCode, 
   CreditCard, Camera, Download, Upload, FileText, Clock,
   TrendingUp, Users, UserCheck, UserX, ChevronDown, Eye,
-  Smartphone, Fingerprint, Check, PenTool, RefreshCw
+  Smartphone, Fingerprint, Check, PenTool, RefreshCw, Calendar
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
 import SignatureCanvas from 'react-signature-canvas';
-import { ControlHorarioTab, ProductividadTab, PrenominaTab } from './RRHH/index';
+import { ControlHorarioTab, ProductividadTab, PrenominaTab, AusenciasTab } from './RRHH/index';
 import '../App.css';
 
 const RRHH = () => {
