@@ -19,6 +19,7 @@ ALL_MENU_ITEMS = [
     {"path": "/contratos", "label": "Contratos", "section": "Gestión Principal"},
     {"path": "/parcelas", "label": "Parcelas", "section": "Gestión Principal"},
     {"path": "/fincas", "label": "Fincas", "section": "Gestión Principal"},
+    {"path": "/mapas", "label": "Mapa de Parcelas", "section": "Gestión Principal"},
     # Actividades
     {"path": "/visitas", "label": "Visitas", "section": "Actividades"},
     {"path": "/recomendaciones", "label": "Recomendaciones", "section": "Actividades"},
