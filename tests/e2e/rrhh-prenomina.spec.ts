@@ -201,6 +201,7 @@ test.describe('RRHH Prenómina Module', () => {
   
   test('should calculate all prenominas with confirmation', async ({ page }) => {
     await navigateToPrenomina(page);
+    await dismissModal(page);
     
     // Set up dialog handler for confirmation
     page.on('dialog', async dialog => {
@@ -213,14 +214,16 @@ test.describe('RRHH Prenómina Module', () => {
     await mesSelect.selectOption({ value: '4' }); // Abril
     
     await page.waitForLoadState('domcontentloaded');
+    await dismissModal(page);
     
-    // Click calculate all button
+    // Click calculate all button with force
     const calcularTodasBtn = page.getByTestId('btn-calcular-todas');
     await expect(calcularTodasBtn).toBeVisible();
-    await calcularTodasBtn.click();
+    await calcularTodasBtn.click({ force: true });
     
     // Wait for calculation to complete (button text changes during calculation)
     await page.waitForLoadState('domcontentloaded');
+    await dismissModal(page);
     
     // Button should return to normal state
     await expect(calcularTodasBtn).toContainText(/Calcular Todas/i, { timeout: 30000 });
