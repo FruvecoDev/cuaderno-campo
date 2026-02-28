@@ -2042,6 +2042,8 @@ const DocumentosEmpleado = ({ empleados }) => {
   // Filtros de fecha
   const [filtroFechaDesde, setFiltroFechaDesde] = useState('');
   const [filtroFechaHasta, setFiltroFechaHasta] = useState('');
+  const [filtroTipo, setFiltroTipo] = useState('');
+  const [filtroEstado, setFiltroEstado] = useState('');
   
   // Obtener empleado seleccionado
   const empleadoActual = empleados.find(e => e._id === empleadoSeleccionado);
