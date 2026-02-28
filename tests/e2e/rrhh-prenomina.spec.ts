@@ -92,8 +92,16 @@ async function navigateToPrenomina(page) {
 test.describe('RRHH Prenómina Module', () => {
   
   test.beforeEach(async ({ page }) => {
+    // Set up automatic modal dismissal
+    await page.addLocatorHandler(
+      page.getByTestId('btn-entendido'),
+      async () => {
+        await page.getByTestId('btn-entendido').click({ force: true }).catch(() => {});
+      },
+      { times: 20, noWaitAfter: true }
+    );
+    
     await login(page);
-    await dismissModal(page);
   });
   
   test('should navigate to Prenómina tab', async ({ page }) => {
