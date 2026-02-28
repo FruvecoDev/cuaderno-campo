@@ -53,6 +53,19 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
   - Catálogos: 8 elementos (+Clientes)
   - Configuración: 3 elementos (+Configuración App)
 
+#### 6. Perfiles Predefinidos de Permisos ✅ (NUEVO)
+- **5 perfiles predefinidos** para facilitar la asignación de permisos:
+  - **Técnico de Campo** (19/32): Parcelas, visitas, tratamientos, evaluaciones
+  - **Gestor Administrativo** (16/32): Contratos, albaranes, informes, documentos
+  - **Responsable RRHH** (3/32): RRHH, documentos
+  - **Supervisor Completo** (28/32): Todas las áreas operativas sin configuración
+  - **Solo Consulta** (7/32): Dashboard e informes básicos
+- **UI mejorada**: Selector de perfiles en modal de permisos
+- **Archivos modificados**: 
+  - `/app/backend/models_auth.py` (definición de perfiles)
+  - `/app/backend/routes_auth.py` (endpoint `/api/auth/permission-profiles`)
+  - `/app/frontend/src/pages/Usuarios.js` (UI de selección)
+
 ---
 
 ### Completadas en sesión anterior:
