@@ -69,6 +69,27 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
 - **Server.py actualizado** para importar y registrar los nuevos sub-routers
 - **Todos los endpoints verificados y funcionando**
 
+#### 6. Exportación Masiva de Prenóminas ✅
+- **Formatos CSV**: Estándar, A3NOM, SAGE, NominaPlus
+- **Excel masivo** con formato visual y totales
+- **UI mejorada** con menú desplegable en pestaña Prenómina
+
+#### 7. Mejoras Módulos Proveedores, Clientes y Maquinaria ✅
+- **KPIs y Estadísticas** para cada módulo:
+  - Proveedores: Total, activos, provincias, top compras
+  - Clientes: Total, activos, con contratos, top ventas
+  - Maquinaria: Total, activa, en mantenimiento, ITV vencida
+- **Exportación a Excel** con formato profesional
+- **Historial de operaciones** por proveedor/cliente
+- **Filtros mejorados** por estado (activo/inactivo)
+- **Archivos modificados**:
+  - `/app/backend/routes_catalogos.py` - Stats y export proveedores
+  - `/app/backend/routes_clientes.py` - Stats, historial y export clientes
+  - `/app/backend/routes_maquinaria.py` - Stats, historial y export maquinaria
+  - `/app/frontend/src/pages/Proveedores.js` - KPIs, filtros, historial
+  - `/app/frontend/src/pages/Clientes.js` - Botón export Excel
+  - `/app/frontend/src/pages/Maquinaria.js` - KPIs y botón export
+
 ---
 
 ## Data Model (User Clarified - IMPLEMENTED)
