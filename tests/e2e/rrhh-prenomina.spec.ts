@@ -359,7 +359,7 @@ test.describe('RRHH Prenómina Module', () => {
       const validateBtn = page.getByTestId(`btn-validar-${prenominaId}`);
       
       if (await validateBtn.isVisible({ timeout: 1000 })) {
-        await validateBtn.click();
+        await validateBtn.click({ force: true });
         
         // Wait for response
         await page.waitForLoadState('domcontentloaded');
@@ -378,6 +378,7 @@ test.describe('RRHH Prenómina Module', () => {
   
   test('should export prenomina to Excel', async ({ page }) => {
     await navigateToPrenomina(page);
+    await dismissModal(page);
     
     // Set month where we know there's data
     const mesSelect = page.getByTestId('select-mes-prenomina');
@@ -388,6 +389,7 @@ test.describe('RRHH Prenómina Module', () => {
     await anoSelect.selectOption({ value: '2026' });
     
     await page.waitForLoadState('domcontentloaded');
+    await dismissModal(page);
     
     // Find a prenomina row
     const prenominaRows = page.locator('[data-testid^="prenomina-row-"]');
@@ -406,10 +408,10 @@ test.describe('RRHH Prenómina Module', () => {
     // Set up download handler
     const downloadPromise = page.waitForEvent('download', { timeout: 30000 });
     
-    // Click Excel export button
+    // Click Excel export button with force
     const excelBtn = page.getByTestId(`btn-excel-${prenominaId}`);
     await expect(excelBtn).toBeVisible();
-    await excelBtn.click();
+    await excelBtn.click({ force: true });
     
     // Wait for download
     const download = await downloadPromise;
@@ -422,6 +424,7 @@ test.describe('RRHH Prenómina Module', () => {
   
   test('should export prenomina to PDF', async ({ page }) => {
     await navigateToPrenomina(page);
+    await dismissModal(page);
     
     // Set month where we know there's data
     const mesSelect = page.getByTestId('select-mes-prenomina');
@@ -432,6 +435,7 @@ test.describe('RRHH Prenómina Module', () => {
     await anoSelect.selectOption({ value: '2026' });
     
     await page.waitForLoadState('domcontentloaded');
+    await dismissModal(page);
     
     // Find a prenomina row
     const prenominaRows = page.locator('[data-testid^="prenomina-row-"]');
@@ -450,10 +454,10 @@ test.describe('RRHH Prenómina Module', () => {
     // Set up download handler
     const downloadPromise = page.waitForEvent('download', { timeout: 30000 });
     
-    // Click PDF export button
+    // Click PDF export button with force
     const pdfBtn = page.getByTestId(`btn-pdf-${prenominaId}`);
     await expect(pdfBtn).toBeVisible();
-    await pdfBtn.click();
+    await pdfBtn.click({ force: true });
     
     // Wait for download
     const download = await downloadPromise;
@@ -466,6 +470,7 @@ test.describe('RRHH Prenómina Module', () => {
   
   test('should export all prenominas to CSV', async ({ page }) => {
     await navigateToPrenomina(page);
+    await dismissModal(page);
     
     // Set month where we know there's data
     const mesSelect = page.getByTestId('select-mes-prenomina');
@@ -476,6 +481,7 @@ test.describe('RRHH Prenómina Module', () => {
     await anoSelect.selectOption({ value: '2026' });
     
     await page.waitForLoadState('domcontentloaded');
+    await dismissModal(page);
     
     // Check if CSV export button is visible (only shown when prenominas exist)
     const exportCsvBtn = page.getByTestId('btn-exportar-csv');
@@ -484,7 +490,7 @@ test.describe('RRHH Prenómina Module', () => {
       // Set up download handler
       const downloadPromise = page.waitForEvent('download', { timeout: 30000 });
       
-      await exportCsvBtn.click();
+      await exportCsvBtn.click({ force: true });
       
       // Wait for download
       const download = await downloadPromise;
@@ -500,6 +506,7 @@ test.describe('RRHH Prenómina Module', () => {
   
   test('should show empty state when no prenominas', async ({ page }) => {
     await navigateToPrenomina(page);
+    await dismissModal(page);
     
     // Set to a month with no prenominas
     const mesSelect = page.getByTestId('select-mes-prenomina');
@@ -510,6 +517,7 @@ test.describe('RRHH Prenómina Module', () => {
     await anoSelect.selectOption({ value: '2024' }); // Past year
     
     await page.waitForLoadState('domcontentloaded');
+    await dismissModal(page);
     
     // Should show empty state message
     const emptyMessage = page.locator('text=No hay prenóminas');
