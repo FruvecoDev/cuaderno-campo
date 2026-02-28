@@ -18,6 +18,9 @@ import qrcode
 import io
 import base64
 
+# Import email service for notifications
+from email_service import send_ausencia_notification, send_documento_notification
+
 router = APIRouter(prefix="/api/rrhh", tags=["RRHH"])
 
 # Database will be injected
