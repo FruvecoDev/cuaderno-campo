@@ -109,6 +109,7 @@ const Usuarios = () => {
 
   const openPermissionsModal = (user) => {
     setSelectedUserForPermissions(user);
+    setSelectedProfile(null); // Reset profile selection
     // Initialize permissions from user or default to all true
     const defaultPerms = {};
     menuItems.forEach(item => {
