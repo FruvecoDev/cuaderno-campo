@@ -215,7 +215,7 @@
           - button "Documentos" [ref=e316] [cursor=pointer]:
             - img [ref=e317]
             - text: Documentos
-          - button "Prenómina" [active] [ref=e320] [cursor=pointer]:
+          - button "Prenómina" [ref=e320] [cursor=pointer]:
             - img [ref=e321]
             - text: Prenómina
         - generic [ref=e324]:
@@ -305,7 +305,7 @@
                     - generic [ref=e391]: Exportada
                   - cell [ref=e392]:
                     - generic [ref=e393]:
-                      - button "Ver detalle" [ref=e394] [cursor=pointer]:
+                      - button "Ver detalle" [active] [ref=e394] [cursor=pointer]:
                         - img [ref=e395]
                       - button "Validar" [ref=e399] [cursor=pointer]:
                         - img [ref=e400]
@@ -382,8 +382,59 @@
                         - img [ref=e496]
                       - button "Exportar PDF" [ref=e499] [cursor=pointer]:
                         - img [ref=e500]
-  - link "Made with Emergent" [ref=e503] [cursor=pointer]:
+          - generic [ref=e505]:
+            - generic [ref=e506]:
+              - heading "Detalle de Prenómina" [level=2] [ref=e507]
+              - button [ref=e508] [cursor=pointer]:
+                - img [ref=e509]
+            - generic [ref=e512]:
+              - generic [ref=e513]:
+                - img [ref=e515]
+                - generic [ref=e518]:
+                  - generic [ref=e519]: TEST_20260227152151_Juan García_b06e8c5d
+                  - generic [ref=e520]: "DNI: TESTb06e8c5d | Código:"
+              - generic [ref=e522]: Febrero 2026
+              - generic [ref=e523]:
+                - heading "Desglose de Horas" [level=4] [ref=e524]
+                - generic [ref=e525]:
+                  - generic [ref=e526]:
+                    - generic [ref=e527]: Horas Normales
+                    - generic [ref=e528]: "0.00"
+                  - generic [ref=e529]:
+                    - generic [ref=e530]: Horas Extra
+                    - generic [ref=e531]: "0.00"
+                  - generic [ref=e532]:
+                    - generic [ref=e533]: Horas Nocturnas
+                    - generic [ref=e534]: "0.00"
+                  - generic [ref=e535]:
+                    - generic [ref=e536]: Horas Festivos
+                    - generic [ref=e537]: "0.00"
+              - generic [ref=e538]:
+                - generic [ref=e539]:
+                  - generic [ref=e540]: "Total Horas:"
+                  - generic [ref=e541]: 0.00 h
+                - generic [ref=e542]:
+                  - generic [ref=e543]: "Días Trabajados:"
+                  - generic [ref=e544]: "0"
+                - generic [ref=e545]:
+                  - generic [ref=e546]:
+                    - generic [ref=e547]: "Importe Bruto:"
+                    - generic [ref=e548]: 0.00 €
+                  - generic [ref=e549]:
+                    - generic [ref=e550]: "Deducciones:"
+                    - generic [ref=e551]: "- 0.00 €"
+                  - generic [ref=e552]:
+                    - generic [ref=e553]: "Importe Neto:"
+                    - generic [ref=e554]: 0.00 €
+              - generic [ref=e555]:
+                - button "Exportar Excel" [ref=e556] [cursor=pointer]:
+                  - img [ref=e557]
+                  - text: Exportar Excel
+                - button "Exportar PDF" [ref=e560] [cursor=pointer]:
+                  - img [ref=e561]
+                  - text: Exportar PDF
+  - link "Made with Emergent" [ref=e564] [cursor=pointer]:
     - /url: https://app.emergent.sh/?utm_source=emergent-badge
-    - img [ref=e504]
-    - paragraph [ref=e507]: Made with Emergent
+    - img [ref=e565]
+    - paragraph [ref=e568]: Made with Emergent
 ```

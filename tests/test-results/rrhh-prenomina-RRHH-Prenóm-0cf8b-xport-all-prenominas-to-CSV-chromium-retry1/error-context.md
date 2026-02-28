@@ -215,7 +215,7 @@
           - button "Documentos" [ref=e316] [cursor=pointer]:
             - img [ref=e317]
             - text: Documentos
-          - button "Prenómina" [active] [ref=e320] [cursor=pointer]:
+          - button "Prenómina" [ref=e320] [cursor=pointer]:
             - img [ref=e321]
             - text: Prenómina
         - generic [ref=e324]:
@@ -290,7 +290,7 @@
                 - columnheader "Acciones" [ref=e376]
             - rowgroup [ref=e377]:
               - generic [ref=e378]:
-                - row "TEST_20260227152151_Juan García_b06e8c5d TESTb06e8c5d 0.0 0.0 0.0 0.0 0 0.00 € 0.00 € Exportada" [ref=e379]:
+                - row "TEST_20260227152151_Juan García_b06e8c5d TESTb06e8c5d 0.0 0.0 0.0 0.0 0 0.00 € 0.00 € Validada" [ref=e379]:
                   - cell "TEST_20260227152151_Juan García_b06e8c5d" [ref=e380]:
                     - generic [ref=e381]: TEST_20260227152151_Juan García_b06e8c5d
                   - cell "TESTb06e8c5d" [ref=e382]
@@ -301,89 +301,87 @@
                   - cell "0" [ref=e387]
                   - cell "0.00 €" [ref=e388]
                   - cell "0.00 €" [ref=e389]
-                  - cell "Exportada" [ref=e390]:
-                    - generic [ref=e391]: Exportada
+                  - cell "Validada" [ref=e390]:
+                    - generic [ref=e391]: Validada
                   - cell [ref=e392]:
                     - generic [ref=e393]:
                       - button "Ver detalle" [ref=e394] [cursor=pointer]:
                         - img [ref=e395]
-                      - button "Validar" [ref=e399] [cursor=pointer]:
-                        - img [ref=e400]
-                      - button "Exportar Excel" [ref=e402] [cursor=pointer]:
+                      - button "Exportar Excel" [ref=e398] [cursor=pointer]:
+                        - img [ref=e399]
+                      - button "Exportar PDF" [ref=e402] [cursor=pointer]:
                         - img [ref=e403]
-                      - button "Exportar PDF" [ref=e406] [cursor=pointer]:
-                        - img [ref=e407]
-                - row "Juan García López 12345678A 8.0 16.0 0.0 24.0 1 349.44 € 349.44 € Borrador" [ref=e410]:
-                  - cell "Juan García López" [ref=e411]:
-                    - generic [ref=e412]: Juan García López
-                  - cell "12345678A" [ref=e413]
-                  - cell "8.0" [ref=e414]
-                  - cell "16.0" [ref=e415]
-                  - cell "0.0" [ref=e416]
-                  - cell "24.0" [ref=e417]
-                  - cell "1" [ref=e418]
-                  - cell "349.44 €" [ref=e419]
-                  - cell "349.44 €" [ref=e420]
-                  - cell "Borrador" [ref=e421]:
-                    - generic [ref=e422]: Borrador
-                  - cell [ref=e423]:
-                    - generic [ref=e424]:
-                      - button "Ver detalle" [ref=e425] [cursor=pointer]:
-                        - img [ref=e426]
-                      - button "Validar" [ref=e430] [cursor=pointer]:
-                        - img [ref=e431]
-                      - button "Exportar Excel" [ref=e433] [cursor=pointer]:
+                - row "Juan García López 12345678A 8.0 16.0 0.0 24.0 1 349.44 € 349.44 € Borrador" [ref=e406]:
+                  - cell "Juan García López" [ref=e407]:
+                    - generic [ref=e408]: Juan García López
+                  - cell "12345678A" [ref=e409]
+                  - cell "8.0" [ref=e410]
+                  - cell "16.0" [ref=e411]
+                  - cell "0.0" [ref=e412]
+                  - cell "24.0" [ref=e413]
+                  - cell "1" [ref=e414]
+                  - cell "349.44 €" [ref=e415]
+                  - cell "349.44 €" [ref=e416]
+                  - cell "Borrador" [ref=e417]:
+                    - generic [ref=e418]: Borrador
+                  - cell [ref=e419]:
+                    - generic [ref=e420]:
+                      - button "Ver detalle" [ref=e421] [cursor=pointer]:
+                        - img [ref=e422]
+                      - button "Validar" [ref=e426] [cursor=pointer]:
+                        - img [ref=e427]
+                      - button "Exportar Excel" [ref=e429] [cursor=pointer]:
+                        - img [ref=e430]
+                      - button "Exportar PDF" [ref=e433] [cursor=pointer]:
                         - img [ref=e434]
-                      - button "Exportar PDF" [ref=e437] [cursor=pointer]:
-                        - img [ref=e438]
-                - row "Juan García López 12345678A 0.0 0.0 0.0 0.0 0 0.00 € 0.00 € Borrador" [ref=e441]:
-                  - cell "Juan García López" [ref=e442]:
-                    - generic [ref=e443]: Juan García López
-                  - cell "12345678A" [ref=e444]
-                  - cell "0.0" [ref=e445]
-                  - cell "0.0" [ref=e446]
-                  - cell "0.0" [ref=e447]
-                  - cell "0.0" [ref=e448]
-                  - cell "0" [ref=e449]
-                  - cell "0.00 €" [ref=e450]
-                  - cell "0.00 €" [ref=e451]
-                  - cell "Borrador" [ref=e452]:
-                    - generic [ref=e453]: Borrador
-                  - cell [ref=e454]:
-                    - generic [ref=e455]:
-                      - button "Ver detalle" [ref=e456] [cursor=pointer]:
-                        - img [ref=e457]
-                      - button "Validar" [ref=e461] [cursor=pointer]:
-                        - img [ref=e462]
-                      - button "Exportar Excel" [ref=e464] [cursor=pointer]:
+                - row "Juan García López 12345678A 0.0 0.0 0.0 0.0 0 0.00 € 0.00 € Borrador" [ref=e437]:
+                  - cell "Juan García López" [ref=e438]:
+                    - generic [ref=e439]: Juan García López
+                  - cell "12345678A" [ref=e440]
+                  - cell "0.0" [ref=e441]
+                  - cell "0.0" [ref=e442]
+                  - cell "0.0" [ref=e443]
+                  - cell "0.0" [ref=e444]
+                  - cell "0" [ref=e445]
+                  - cell "0.00 €" [ref=e446]
+                  - cell "0.00 €" [ref=e447]
+                  - cell "Borrador" [ref=e448]:
+                    - generic [ref=e449]: Borrador
+                  - cell [ref=e450]:
+                    - generic [ref=e451]:
+                      - button "Ver detalle" [ref=e452] [cursor=pointer]:
+                        - img [ref=e453]
+                      - button "Validar" [ref=e457] [cursor=pointer]:
+                        - img [ref=e458]
+                      - button "Exportar Excel" [ref=e460] [cursor=pointer]:
+                        - img [ref=e461]
+                      - button "Exportar PDF" [ref=e464] [cursor=pointer]:
                         - img [ref=e465]
-                      - button "Exportar PDF" [ref=e468] [cursor=pointer]:
-                        - img [ref=e469]
-                - row "TEST_20260227154527_Juan García_df6c0564 TESTdf6c0564 0.0 0.0 0.0 0.0 0 0.00 € 0.00 € Borrador" [ref=e472]:
-                  - cell "TEST_20260227154527_Juan García_df6c0564" [ref=e473]:
-                    - generic [ref=e474]: TEST_20260227154527_Juan García_df6c0564
-                  - cell "TESTdf6c0564" [ref=e475]
-                  - cell "0.0" [ref=e476]
-                  - cell "0.0" [ref=e477]
-                  - cell "0.0" [ref=e478]
-                  - cell "0.0" [ref=e479]
-                  - cell "0" [ref=e480]
-                  - cell "0.00 €" [ref=e481]
-                  - cell "0.00 €" [ref=e482]
-                  - cell "Borrador" [ref=e483]:
-                    - generic [ref=e484]: Borrador
-                  - cell [ref=e485]:
-                    - generic [ref=e486]:
-                      - button "Ver detalle" [ref=e487] [cursor=pointer]:
-                        - img [ref=e488]
-                      - button "Validar" [ref=e492] [cursor=pointer]:
-                        - img [ref=e493]
-                      - button "Exportar Excel" [ref=e495] [cursor=pointer]:
+                - row "TEST_20260227154527_Juan García_df6c0564 TESTdf6c0564 0.0 0.0 0.0 0.0 0 0.00 € 0.00 € Borrador" [ref=e468]:
+                  - cell "TEST_20260227154527_Juan García_df6c0564" [ref=e469]:
+                    - generic [ref=e470]: TEST_20260227154527_Juan García_df6c0564
+                  - cell "TESTdf6c0564" [ref=e471]
+                  - cell "0.0" [ref=e472]
+                  - cell "0.0" [ref=e473]
+                  - cell "0.0" [ref=e474]
+                  - cell "0.0" [ref=e475]
+                  - cell "0" [ref=e476]
+                  - cell "0.00 €" [ref=e477]
+                  - cell "0.00 €" [ref=e478]
+                  - cell "Borrador" [ref=e479]:
+                    - generic [ref=e480]: Borrador
+                  - cell [ref=e481]:
+                    - generic [ref=e482]:
+                      - button "Ver detalle" [ref=e483] [cursor=pointer]:
+                        - img [ref=e484]
+                      - button "Validar" [ref=e488] [cursor=pointer]:
+                        - img [ref=e489]
+                      - button "Exportar Excel" [ref=e491] [cursor=pointer]:
+                        - img [ref=e492]
+                      - button "Exportar PDF" [ref=e495] [cursor=pointer]:
                         - img [ref=e496]
-                      - button "Exportar PDF" [ref=e499] [cursor=pointer]:
-                        - img [ref=e500]
-  - link "Made with Emergent" [ref=e503] [cursor=pointer]:
+  - link "Made with Emergent" [active] [ref=e499] [cursor=pointer]:
     - /url: https://app.emergent.sh/?utm_source=emergent-badge
-    - img [ref=e504]
-    - paragraph [ref=e507]: Made with Emergent
+    - img [ref=e500]
+    - paragraph [ref=e503]: Made with Emergent
 ```
