@@ -1205,6 +1205,167 @@ const Clientes = () => {
           </div>
         </div>
       )}
+      
+      {/* Modal de Historial Completo */}
+      {showHistorial && selectedCliente && (
+        <div 
+          onClick={() => setShowHistorial(false)} 
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '2rem'
+          }}
+        >
+          <div 
+            onClick={e => e.stopPropagation()} 
+            style={{ 
+              background: 'hsl(var(--card))',
+              borderRadius: '12px',
+              maxWidth: '800px',
+              width: '100%',
+              maxHeight: '85vh', 
+              overflow: 'auto'
+            }}
+          >
+            <div style={{
+              padding: '1.5rem',
+              borderBottom: '1px solid hsl(var(--border))',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              position: 'sticky',
+              top: 0,
+              backgroundColor: 'hsl(var(--card))',
+              zIndex: 1
+            }}>
+              <div>
+                <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Users size={24} />
+                  Historial de {selectedCliente.nombre}
+                </h2>
+                <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
+                  {selectedCliente.nif || 'Sin NIF'} - {selectedCliente.poblacion || 'Sin ubicación'}
+                </p>
+              </div>
+              <button onClick={() => setShowHistorial(false)} className="btn btn-ghost">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div style={{ padding: '1.5rem' }}>
+              {loadingHistorial ? (
+                <div style={{ textAlign: 'center', padding: '2rem' }}>
+                  <p>Cargando historial...</p>
+                </div>
+              ) : historialData ? (
+                <>
+                  {/* Resumen */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                    <div className="card" style={{ padding: '1rem', textAlign: 'center', background: 'hsl(var(--muted) / 0.3)' }}>
+                      <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'hsl(var(--primary))' }}>
+                        {historialData.total_ventas?.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' }) || '0 €'}
+                      </div>
+                      <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Total Ventas</div>
+                    </div>
+                    <div className="card" style={{ padding: '1rem', textAlign: 'center', background: 'hsl(var(--muted) / 0.3)' }}>
+                      <div style={{ fontSize: '1.5rem', fontWeight: '700' }}>{historialData.num_contratos || 0}</div>
+                      <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Contratos</div>
+                    </div>
+                    <div className="card" style={{ padding: '1rem', textAlign: 'center', background: 'hsl(var(--muted) / 0.3)' }}>
+                      <div style={{ fontSize: '1.5rem', fontWeight: '700' }}>{historialData.num_albaranes || 0}</div>
+                      <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Albaranes</div>
+                    </div>
+                  </div>
+
+                  {/* Lista de contratos */}
+                  {historialData.contratos?.length > 0 ? (
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <h4 style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <FileText size={18} />
+                        Contratos
+                      </h4>
+                      <div style={{ maxHeight: '250px', overflowY: 'auto' }}>
+                        {historialData.contratos.map(c => (
+                          <div key={c._id} style={{
+                            padding: '0.75rem',
+                            borderBottom: '1px solid hsl(var(--border))',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                          }}>
+                            <div>
+                              <div style={{ fontWeight: '500' }}>
+                                {c.serie || 'MP'}-{c.año}-{String(c.numero || 0).padStart(3, '0')}
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                                {c.fecha_inicio ? new Date(c.fecha_inicio).toLocaleDateString('es-ES') : '-'}
+                                {c.cultivo && ` • ${c.cultivo}`}
+                              </div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontWeight: '600', color: 'hsl(var(--primary))' }}>
+                                {c.cantidad?.toLocaleString()} kg
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                                €{c.precio}/kg
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p style={{ textAlign: 'center', color: 'hsl(var(--muted-foreground))', padding: '1rem' }}>
+                      No hay contratos registrados con este cliente
+                    </p>
+                  )}
+
+                  {/* Lista de albaranes */}
+                  {historialData.albaranes?.length > 0 && (
+                    <div>
+                      <h4 style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Package size={18} />
+                        Albaranes de Venta
+                      </h4>
+                      <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                        {historialData.albaranes.map(a => (
+                          <div key={a._id} style={{
+                            padding: '0.75rem',
+                            borderBottom: '1px solid hsl(var(--border))',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                          }}>
+                            <div>
+                              <div style={{ fontWeight: '500' }}>Albarán {a.numero || ''}</div>
+                              <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                                {a.fecha ? new Date(a.fecha).toLocaleDateString('es-ES') : '-'}
+                              </div>
+                            </div>
+                            <div style={{ fontWeight: '600', color: 'hsl(142 76% 36%)' }}>
+                              {a.total?.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' }) || '-'}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '2rem', color: 'hsl(var(--muted-foreground))' }}>
+                  <Users size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
+                  <p>No hay historial disponible</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
