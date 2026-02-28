@@ -1816,11 +1816,31 @@ Migrar todas las llamadas `fetch` directas al nuevo servicio centralizado `api.j
 - Estados: Pendiente, Firmado, Sin firma
 - Acciones: Firmar, Ver firma, Eliminar
 
-**5. Prenómina**
-- Cálculo automático basado en fichajes
-- Exportación CSV para software de nóminas
+**5. Prenómina (28/02/2026)** ✅ UI COMPLETADA
+- **Interfaz completa** con selectores de mes/año y empleado
+- **KPIs visuales**: Prenóminas totales, Total horas, Importe bruto, Importe neto
+- **Cálculo individual**: Seleccionar empleado y calcular prenómina individual
+- **Cálculo masivo**: Generar prenóminas de todos los empleados activos con un clic
+- **Tabla de prenóminas** con columnas: Empleado, DNI, H. Normales, H. Extra (resaltadas en amarillo), H. Nocturnas, Total Horas, Días, Importe Bruto, Importe Neto, Estado, Acciones
+- **Estados**: Borrador (amarillo), Validada (verde), Exportada (azul)
+- **Acciones por prenómina**:
+  - Ver detalle (modal completo con desglose)
+  - Validar prenómina
+  - Exportar a Excel
+  - Exportar a PDF
+- **Modal de detalle** con:
+  - Información del empleado
+  - Periodo (mes/año)
+  - Desglose de horas: Normales, Extra, Nocturnas, Festivos
+  - Resumen financiero: Total horas, Días trabajados, Importe bruto, Deducciones, Importe neto
+  - Botones de exportación Excel/PDF
+- **Exportación CSV masiva** de todas las prenóminas del periodo
+- **Test Report**: `/app/test_reports/iteration_43.json`
+  - Backend: 100% (15/15 tests)
+  - Frontend: 100% (13/13 tests)
+  - Total: 28/28 tests pasados
 
-### Archivos Creados/Modificados (27/02/2026):
+### Archivos Creados/Modificados (28/02/2026):
 - `/app/backend/routes/routes_rrhh.py` - API completa con endpoints de documentos y firma
 - `/app/frontend/src/pages/RRHH.js` - Interfaz con 5 tabs (Empleados, Control Horario, Productividad, Documentos, Prenómina)
 
