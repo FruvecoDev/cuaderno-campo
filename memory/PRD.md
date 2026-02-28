@@ -44,6 +44,23 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
 - **Archivos modificados**:
   - `/app/frontend/src/pages/RRHH/ProductividadTab.js` - Expandido completamente
 
+#### 4. Notificaciones de Productividad para Portal del Empleado ✅
+- **Notificaciones automáticas**: Cuando un admin registra productividad de un empleado, se genera notificación automática
+- **Nueva pestaña "Mi Productividad"** en Portal del Empleado:
+  - KPIs en tiempo real (kilos hoy, horas, registros)
+  - Comparativa vs día anterior con tendencia (subiendo/bajando/estable)
+  - Selector de periodo (día, semana, mes, año)
+  - KPIs del periodo seleccionado
+  - Ranking personal con posición, percentil y Top 3
+  - Lista de últimos registros
+- **Nuevos endpoints backend**:
+  - `GET /api/portal-empleado/mi-productividad` - Productividad del empleado por periodo
+  - `GET /api/portal-empleado/productividad-hoy` - Productividad del día con comparativa
+- **Archivos modificados**:
+  - `/app/backend/routes/routes_portal_empleado.py` - Nuevos endpoints
+  - `/app/backend/routes/routes_rrhh.py` - Notificaciones al crear productividad
+  - `/app/frontend/src/pages/PortalEmpleado.js` - Nueva pestaña de productividad
+
 ---
 
 ## Data Model (User Clarified - IMPLEMENTED)
