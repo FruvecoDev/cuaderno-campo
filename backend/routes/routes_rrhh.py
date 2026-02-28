@@ -889,7 +889,9 @@ async def export_documentos_excel(
 async def export_documentos_pdf(
     empleado_id: Optional[str] = None,
     fecha_desde: Optional[str] = None,
-    fecha_hasta: Optional[str] = None
+    fecha_hasta: Optional[str] = None,
+    tipo: Optional[str] = None,
+    estado: Optional[str] = None
 ):
     """Generar informe PDF de documentos"""
     from reportlab.lib import colors
@@ -905,6 +907,16 @@ async def export_documentos_pdf(
     query = {}
     if empleado_id:
         query["empleado_id"] = empleado_id
+    if tipo:
+        query["tipo"] = tipo
+    if estado:
+        if estado == "firmado":
+            query["firmado"] = True
+        elif estado == "pendiente":
+            query["requiere_firma"] = True
+            query["firmado"] = False
+        elif estado == "no_requiere":
+            query["requiere_firma"] = False
     if fecha_desde or fecha_hasta:
         query["created_at"] = {}
         if fecha_desde:
