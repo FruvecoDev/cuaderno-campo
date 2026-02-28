@@ -473,6 +473,14 @@ const Maquinaria = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>Maquinaria</h1>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button
+            className="btn btn-secondary"
+            onClick={handleExportExcel}
+            title="Exportar a Excel"
+          >
+            <Download size={18} />
+            Excel
+          </button>
           <button 
             className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setShowFieldsConfig(!showFieldsConfig)}
@@ -492,6 +500,32 @@ const Maquinaria = () => {
           </PermissionButton>
         </div>
       </div>
+
+      {/* KPIs de Maquinaria */}
+      {stats && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div className="card" style={{ padding: '1rem', textAlign: 'center' }}>
+            <Cog size={24} style={{ margin: '0 auto 0.5rem', color: 'hsl(var(--primary))' }} />
+            <div style={{ fontSize: '1.75rem', fontWeight: '700' }}>{stats.total}</div>
+            <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Total Maquinaria</div>
+          </div>
+          <div className="card" style={{ padding: '1rem', textAlign: 'center' }}>
+            <CheckCircle size={24} style={{ margin: '0 auto 0.5rem', color: 'hsl(142 76% 36%)' }} />
+            <div style={{ fontSize: '1.75rem', fontWeight: '700' }}>{stats.activa}</div>
+            <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Activa</div>
+          </div>
+          <div className="card" style={{ padding: '1rem', textAlign: 'center' }}>
+            <Wrench size={24} style={{ margin: '0 auto 0.5rem', color: 'hsl(38 92% 50%)' }} />
+            <div style={{ fontSize: '1.75rem', fontWeight: '700' }}>{stats.en_mantenimiento}</div>
+            <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>En Mantenimiento</div>
+          </div>
+          <div className="card" style={{ padding: '1rem', textAlign: 'center' }}>
+            <AlertTriangle size={24} style={{ margin: '0 auto 0.5rem', color: 'hsl(0 84% 60%)' }} />
+            <div style={{ fontSize: '1.75rem', fontWeight: '700' }}>{stats.con_itv_vencida || 0}</div>
+            <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>ITV Vencida</div>
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="card" style={{ backgroundColor: 'hsl(var(--destructive) / 0.1)', border: '1px solid hsl(var(--destructive))', marginBottom: '1.5rem', padding: '1rem' }}>
