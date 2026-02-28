@@ -764,7 +764,9 @@ async def get_documentos(
 async def export_documentos_excel(
     empleado_id: Optional[str] = None,
     fecha_desde: Optional[str] = None,
-    fecha_hasta: Optional[str] = None
+    fecha_hasta: Optional[str] = None,
+    tipo: Optional[str] = None,
+    estado: Optional[str] = None
 ):
     """Exportar documentos a Excel"""
     from openpyxl import Workbook
@@ -777,6 +779,16 @@ async def export_documentos_excel(
     query = {}
     if empleado_id:
         query["empleado_id"] = empleado_id
+    if tipo:
+        query["tipo"] = tipo
+    if estado:
+        if estado == "firmado":
+            query["firmado"] = True
+        elif estado == "pendiente":
+            query["requiere_firma"] = True
+            query["firmado"] = False
+        elif estado == "no_requiere":
+            query["requiere_firma"] = False
     if fecha_desde or fecha_hasta:
         query["created_at"] = {}
         if fecha_desde:
