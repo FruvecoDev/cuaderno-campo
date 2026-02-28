@@ -4,8 +4,10 @@ Rutas para el módulo de Recursos Humanos (RRHH)
 - Control horario (fichajes)
 - Productividad
 - Documentos
-- Prenómina
-- Ausencias
+
+Módulos extraídos a archivos separados:
+- Prenóminas: rrhh_prenominas.py
+- Ausencias: rrhh_ausencias.py
 """
 
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Query, Form
@@ -21,6 +23,10 @@ import base64
 # Import email service for notifications
 from email_service import send_ausencia_notification, send_documento_notification
 
+# Import sub-routers
+from routes.rrhh_ausencias import router as ausencias_router, set_database as set_ausencias_db, set_email_service as set_ausencias_email
+from routes.rrhh_prenominas import router as prenominas_router, set_database as set_prenominas_db
+
 router = APIRouter(prefix="/api/rrhh", tags=["RRHH"])
 
 # Database will be injected
@@ -29,6 +35,11 @@ db = None
 def set_database(database):
     global db
     db = database
+    # Also set database for sub-routers
+    set_ausencias_db(database)
+    set_prenominas_db(database)
+    # Set email service for ausencias
+    set_ausencias_email(send_ausencia_notification)
 
 def get_db():
     if db is None:
