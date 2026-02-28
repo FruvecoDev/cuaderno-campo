@@ -249,3 +249,183 @@ async def get_imagen_placa_ce(
         raise HTTPException(status_code=404, detail="No hay imagen de placa CE")
     
     return FileResponse(file_path)
+
+
+# ============================================================================
+# ESTADÍSTICAS Y EXPORTACIÓN
+# ============================================================================
+
+@router.get("/maquinaria/stats/resumen")
+async def get_maquinaria_stats(current_user: dict = Depends(get_current_user)):
+    """Obtener estadísticas de maquinaria"""
+    from database import db
+    
+    total = await maquinaria_collection.count_documents({})
+    activa = await maquinaria_collection.count_documents({"estado": "activa"})
+    en_mantenimiento = await maquinaria_collection.count_documents({"estado": "en_mantenimiento"})
+    baja = await maquinaria_collection.count_documents({"estado": "baja"})
+    
+    # Por tipo
+    pipeline = [
+        {"$group": {"_id": "$tipo", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}}
+    ]
+    por_tipo = []
+    async for doc in maquinaria_collection.aggregate(pipeline):
+        por_tipo.append({"tipo": doc["_id"] or "Sin especificar", "count": doc["count"]})
+    
+    # Próximas revisiones (ITV, mantenimiento)
+    hoy = datetime.now().strftime("%Y-%m-%d")
+    proximas_itv = await maquinaria_collection.find({
+        "fecha_proxima_itv": {"$exists": True, "$ne": None, "$lte": hoy}
+    }).to_list(10)
+    
+    # Uso en tratamientos
+    tratamientos_collection = db.get_collection('tratamientos')
+    uso_maquinaria = []
+    try:
+        pipeline_uso = [
+            {"$match": {"maquinaria_id": {"$exists": True, "$ne": None}}},
+            {"$group": {"_id": "$maquinaria_id", "count": {"$sum": 1}}},
+            {"$sort": {"count": -1}},
+            {"$limit": 10}
+        ]
+        async for doc in tratamientos_collection.aggregate(pipeline_uso):
+            maq = await maquinaria_collection.find_one({"_id": ObjectId(doc["_id"])}) if ObjectId.is_valid(doc["_id"]) else None
+            uso_maquinaria.append({
+                "maquinaria_id": doc["_id"],
+                "nombre": maq.get("nombre") if maq else "Desconocida",
+                "usos": doc["count"]
+            })
+    except Exception:
+        pass
+    
+    return {
+        "success": True,
+        "stats": {
+            "total": total,
+            "activa": activa,
+            "en_mantenimiento": en_mantenimiento,
+            "baja": baja,
+            "por_tipo": por_tipo,
+            "con_itv_vencida": len(proximas_itv),
+            "top_uso": uso_maquinaria
+        }
+    }
+
+
+@router.get("/maquinaria/{maquinaria_id}/historial")
+async def get_maquinaria_historial(
+    maquinaria_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtener historial de uso de una maquinaria"""
+    from database import db
+    
+    if not ObjectId.is_valid(maquinaria_id):
+        raise HTTPException(status_code=400, detail="ID inválido")
+    
+    maquinaria = await maquinaria_collection.find_one({"_id": ObjectId(maquinaria_id)})
+    if not maquinaria:
+        raise HTTPException(status_code=404, detail="Maquinaria no encontrada")
+    
+    # Tratamientos donde se usó
+    tratamientos_collection = db.get_collection('tratamientos')
+    tratamientos = []
+    try:
+        cursor = tratamientos_collection.find({"maquinaria_id": maquinaria_id}).sort("fecha", -1).limit(50)
+        async for t in cursor:
+            tratamientos.append(serialize_doc(t))
+    except Exception:
+        pass
+    
+    # Mantenimientos registrados (si existe colección)
+    mantenimientos = []
+    try:
+        mantenimientos_collection = db.get_collection('mantenimientos_maquinaria')
+        cursor = mantenimientos_collection.find({"maquinaria_id": maquinaria_id}).sort("fecha", -1).limit(20)
+        async for m in cursor:
+            mantenimientos.append(serialize_doc(m))
+    except Exception:
+        pass
+    
+    return {
+        "success": True,
+        "maquinaria": serialize_doc(maquinaria),
+        "historial": {
+            "tratamientos": tratamientos,
+            "mantenimientos": mantenimientos,
+            "total_usos": len(tratamientos)
+        }
+    }
+
+
+@router.get("/maquinaria/export/excel")
+async def export_maquinaria_excel(
+    estado: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Exportar maquinaria a Excel"""
+    from fastapi.responses import StreamingResponse
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+    import io
+    
+    query = {}
+    if estado:
+        query['estado'] = estado
+    
+    maquinaria = await maquinaria_collection.find(query).sort("nombre", 1).to_list(1000)
+    
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Maquinaria"
+    
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="FF5722", end_color="FF5722", fill_type="solid")
+    thin_border = Border(
+        left=Side(style='thin'), right=Side(style='thin'),
+        top=Side(style='thin'), bottom=Side(style='thin')
+    )
+    
+    headers = ["Nombre", "Tipo", "Marca", "Modelo", "Matrícula", "Nº Serie", "Año", "Potencia", "Capacidad", "Estado", "ITV", "Seguro"]
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = Alignment(horizontal="center")
+        cell.border = thin_border
+    
+    for row_idx, maq in enumerate(maquinaria, 2):
+        data = [
+            maq.get("nombre", ""),
+            maq.get("tipo", ""),
+            maq.get("marca", ""),
+            maq.get("modelo", ""),
+            maq.get("matricula", ""),
+            maq.get("numero_serie", ""),
+            maq.get("ano_fabricacion", ""),
+            maq.get("potencia_cv", ""),
+            maq.get("capacidad", ""),
+            maq.get("estado", "activa").replace("_", " ").title(),
+            maq.get("fecha_proxima_itv", "-"),
+            maq.get("fecha_vencimiento_seguro", "-")
+        ]
+        for col, value in enumerate(data, 1):
+            cell = ws.cell(row=row_idx, column=col, value=value)
+            cell.border = thin_border
+    
+    column_widths = [25, 15, 15, 15, 12, 18, 8, 10, 12, 15, 12, 12]
+    for col, width in enumerate(column_widths, 1):
+        ws.column_dimensions[get_column_letter(col)].width = width
+    
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename=maquinaria_{datetime.now().strftime('%Y%m%d')}.xlsx"}
+    )
