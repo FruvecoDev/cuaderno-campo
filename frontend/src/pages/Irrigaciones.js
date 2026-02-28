@@ -92,6 +92,20 @@ const Irrigaciones = () => {
     consumo_por_ha: 0
   });
 
+  // Función para manejar cambio de parcela en calculadora
+  const handleCalcParcelaChange = (parcelaId) => {
+    if (parcelaId) {
+      const parcela = parcelas.find(p => p._id === parcelaId);
+      setCalcData({
+        ...calcData,
+        parcela_id: parcelaId,
+        superficie: parcela?.superficie_total || 0
+      });
+    } else {
+      setCalcData({...calcData, parcela_id: '', superficie: 0});
+    }
+  };
+
   const headers = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${token}`
