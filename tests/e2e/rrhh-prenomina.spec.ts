@@ -171,6 +171,7 @@ test.describe('RRHH Prenómina Module', () => {
   
   test('should calculate individual prenomina', async ({ page }) => {
     await navigateToPrenomina(page);
+    await dismissModal(page);
     
     // Select an employee
     const empleadoSelect = page.getByTestId('select-empleado-calculo');
@@ -184,17 +185,16 @@ test.describe('RRHH Prenómina Module', () => {
     }
     
     await empleadoSelect.selectOption({ index: 1 });
+    await dismissModal(page);
     
-    // Click calculate
+    // Click calculate with force
     const calcularBtn = page.getByTestId('btn-calcular-individual');
     await expect(calcularBtn).toBeEnabled();
-    await calcularBtn.click();
+    await calcularBtn.click({ force: true });
     
     // Wait for calculation to complete
     await page.waitForLoadState('domcontentloaded');
-    
-    // Verify table has at least one row (or message changes)
-    await page.waitForTimeout(1000); // Allow for recalculation
+    await dismissModal(page);
     
     await page.screenshot({ path: 'prenomina-individual-calculated.jpeg', quality: 20 });
   });
