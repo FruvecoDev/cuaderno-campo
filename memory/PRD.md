@@ -81,10 +81,16 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
   - Importe por Proveedor (pie chart)
 - **Archivo modificado**: `/app/frontend/src/pages/Cosechas.js`
 
-#### 9. Módulo Irrigaciones ✅ (Ya completo)
+#### 9. Módulo Irrigaciones ✅ (Mejorado en esta sesión)
 - **KPIs**: Total Riegos, Completados, Planificados, Volumen, Horas, Coste
 - **Gráficos**: Distribución por Sistema (pie), Volumen por Mes (barras)
 - **Funcionalidades**: Lista, Estadísticas, Calculadora, Excel
+- **Mejoras de esta sesión**:
+  - Filtro de Cultivo: Muestra cultivos del catálogo + parcelas
+  - Auto-relleno de Cultivo al seleccionar Parcela (en filtros y formulario)
+  - Columna Cultivo añadida a la tabla de Registros de Riego
+  - Filtro de Cultivo corregido para buscar en parcela asociada
+  - Calculadora: Auto-relleno de Superficie al seleccionar Parcela
 
 ---
 
