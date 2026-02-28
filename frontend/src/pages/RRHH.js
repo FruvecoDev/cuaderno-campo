@@ -2455,10 +2455,30 @@ const DocumentosEmpleado = ({ empleados }) => {
                   <tr key={doc._id}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <FileText size={18} style={{ color: 'hsl(var(--primary))' }} />
+                        <div style={{ position: 'relative' }}>
+                          <FileText size={18} style={{ color: 'hsl(var(--primary))' }} />
+                          {doc.archivo_url && (
+                            <div style={{
+                              position: 'absolute',
+                              bottom: '-2px',
+                              right: '-2px',
+                              width: '10px',
+                              height: '10px',
+                              borderRadius: '50%',
+                              background: 'hsl(142 76% 36%)',
+                              border: '2px solid hsl(var(--card))'
+                            }} title="Con archivo adjunto" />
+                          )}
+                        </div>
                         <div>
                           <div style={{ fontWeight: '500' }}>{doc.nombre}</div>
-                          {doc.descripcion && (
+                          {doc.archivo_nombre_original && (
+                            <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                              <Download size={10} />
+                              {doc.archivo_nombre_original}
+                            </div>
+                          )}
+                          {doc.descripcion && !doc.archivo_nombre_original && (
                             <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
                               {doc.descripcion}
                             </div>
