@@ -907,7 +907,7 @@ async def export_informe_control_horario_pdf(
                         minutos = int((total_segundos % 3600) // 60)
                         total_horas += horas
                         total_minutos += minutos
-                    except:
+                    except Exception:
                         pass
                 
                 estado = "OK" if horas >= 8 else "<8h"
