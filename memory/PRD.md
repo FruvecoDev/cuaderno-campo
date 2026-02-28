@@ -12,9 +12,29 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
 
 ---
 
-## Última Actualización: 28 Febrero 2026 (Sesión 2)
+## Última Actualización: 28 Febrero 2026 (Sesión 3)
 
 ### Completadas en esta sesión:
+
+#### 1. Módulo Cuaderno de Campo PDF ✅ (COMPLETADO)
+- **Problema resuelto**: El endpoint `/api/cuaderno-campo/filters` no funcionaba debido a conflicto de rutas y falta de prefijo `/api`
+- **Correcciones aplicadas**:
+  - Añadido `prefix="/api"` al router en `routes_cuaderno_campo.py`
+  - Eliminadas rutas duplicadas de `routes_cuaderno.py` que causaban conflictos
+  - Corregidos errores de `NoneType` en funciones de creación de tablas PDF (uso de `or` para valores nulos)
+- **Funcionalidades verificadas**:
+  - `GET /api/cuaderno-campo/parcelas` - Lista de parcelas disponibles ✅
+  - `GET /api/cuaderno-campo/preview/{id}` - Vista previa con estadísticas ✅
+  - `GET /api/cuaderno-campo/generar/{id}` - Generación de PDF ✅
+- **UI Frontend**: Selector de parcelas, filtros, vista previa con KPIs, botón de descarga
+- **Contenido del PDF**: Tratamientos fitosanitarios, Riegos, Visitas, Cosechas, Resumen general
+- **Archivos modificados**:
+  - `/app/backend/routes_cuaderno_campo.py` (prefijo y corrección de errores)
+  - `/app/backend/routes_cuaderno.py` (eliminadas rutas duplicadas)
+
+---
+
+### Completadas en sesión anterior (Sesión 2):
 
 #### 1. Verificación Bug UI Tenderometría ✅
 - **Problema**: Encabezados de tabla con texto negro sobre fondo azul oscuro (ilegibles)
