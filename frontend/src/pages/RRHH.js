@@ -4,7 +4,7 @@ import {
   Plus, Edit2, Trash2, Search, Filter, X, User, QrCode, 
   CreditCard, Camera, Download, Upload, FileText, Clock,
   TrendingUp, Users, UserCheck, UserX, ChevronDown, Eye,
-  Smartphone, Fingerprint, Check, PenTool
+  Smartphone, Fingerprint, Check, PenTool, RefreshCw
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
