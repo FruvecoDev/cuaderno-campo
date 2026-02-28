@@ -92,6 +92,9 @@ const Maquinaria = () => {
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   
+  // Stats
+  const [stats, setStats] = useState(null);
+  
   // Filtros
   const [filters, setFilters] = useState({
     tipo: '',
