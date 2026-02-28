@@ -50,12 +50,9 @@ async function dismissModal(page) {
   }
 }
 
-// Helper to navigate to RRHH > Prenómina
+// Helper to navigate to RRHH > Prenómina (assumes already logged in)
 async function navigateToPrenomina(page) {
-  // First log in
-  await login(page);
-  
-  // Then navigate directly to RRHH page
+  // Navigate directly to RRHH page
   await page.goto('/rrhh', { waitUntil: 'domcontentloaded' });
   await page.waitForLoadState('domcontentloaded');
   
