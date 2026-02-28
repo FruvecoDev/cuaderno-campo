@@ -74,6 +74,18 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
   - `/app/backend/routes_tratamientos.py` (endpoints stats y export)
   - `/app/frontend/src/pages/Tratamientos.js` (UI con recharts)
 
+#### 8. Mejora del Módulo Cosechas ✅ (NUEVO)
+- **KPIs**: Total, En Proceso, Completadas, Kg Reales, Rendimiento, Importe Total (ya existían)
+- **Gráficos añadidos**:
+  - Cosechas por Cultivo (barras horizontales): Estimado vs Real
+  - Importe por Proveedor (pie chart)
+- **Archivo modificado**: `/app/frontend/src/pages/Cosechas.js`
+
+#### 9. Módulo Irrigaciones ✅ (Ya completo)
+- **KPIs**: Total Riegos, Completados, Planificados, Volumen, Horas, Coste
+- **Gráficos**: Distribución por Sistema (pie), Volumen por Mes (barras)
+- **Funcionalidades**: Lista, Estadísticas, Calculadora, Excel
+
 ---
 
 ### Completadas en sesión anterior:
