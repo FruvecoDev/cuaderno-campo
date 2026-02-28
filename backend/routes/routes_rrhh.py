@@ -746,15 +746,18 @@ async def create_documento(documento: dict):
 @router.post("/documentos/upload")
 async def upload_documento(
     file: UploadFile = File(...),
-    empleado_id: str = Query(...),
-    nombre: str = Query(...),
-    tipo: str = Query("otro"),
-    descripcion: str = Query(""),
-    requiere_firma: bool = Query(True),
-    fecha_creacion: str = Query(None)
+    empleado_id: str = Form(...),
+    nombre: str = Form(...),
+    tipo: str = Form("otro"),
+    descripcion: str = Form(""),
+    requiere_firma: str = Form("true"),
+    fecha_creacion: str = Form(None)
 ):
     """Subir documento con archivo adjunto"""
     database = get_db()
+    
+    # Convertir requiere_firma a boolean
+    requiere_firma_bool = requiere_firma.lower() in ('true', '1', 'yes')
     
     # Validar tipo de archivo
     allowed_extensions = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.gif']
@@ -789,7 +792,7 @@ async def upload_documento(
         "nombre": nombre,
         "tipo": tipo,
         "descripcion": descripcion,
-        "requiere_firma": requiere_firma,
+        "requiere_firma": requiere_firma_bool,
         "fecha_creacion": fecha_creacion or datetime.now().strftime("%Y-%m-%d"),
         "archivo_url": f"/api/uploads/documentos_empleados/{unique_filename}",
         "archivo_nombre_original": file.filename,
