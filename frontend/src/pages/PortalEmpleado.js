@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   User, Clock, FileText, CreditCard, Calendar, CheckCircle,
-  XCircle, AlertCircle, LogIn, LogOut, Download, PenTool, X
+  XCircle, AlertCircle, LogIn, LogOut, Download, PenTool, X, Bell
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
@@ -19,6 +19,9 @@ const PortalEmpleado = () => {
   const [documentos, setDocumentos] = useState([]);
   const [prenominas, setPrenominas] = useState([]);
   const [ausencias, setAusencias] = useState([]);
+  const [notificaciones, setNotificaciones] = useState([]);
+  const [notificacionesNoLeidas, setNotificacionesNoLeidas] = useState(0);
+  const [showNotificaciones, setShowNotificaciones] = useState(false);
   
   // Modal states
   const [showFicharModal, setShowFicharModal] = useState(false);
@@ -38,6 +41,10 @@ const PortalEmpleado = () => {
   
   useEffect(() => {
     fetchDashboard();
+    fetchNotificaciones();
+    // Poll notifications every 30 seconds
+    const interval = setInterval(fetchNotificaciones, 30000);
+    return () => clearInterval(interval);
   }, []);
   
   useEffect(() => {
@@ -46,6 +53,34 @@ const PortalEmpleado = () => {
     if (activeTab === 'nominas') fetchPrenominas();
     if (activeTab === 'ausencias') fetchAusencias();
   }, [activeTab]);
+  
+  const fetchNotificaciones = async () => {
+    try {
+      const data = await api.get('/api/portal-empleado/mis-notificaciones');
+      setNotificaciones(data.notificaciones || []);
+      setNotificacionesNoLeidas(data.no_leidas || 0);
+    } catch (err) {
+      console.error('Error fetching notifications:', err);
+    }
+  };
+  
+  const handleMarcarLeida = async (notifId) => {
+    try {
+      await api.put(`/api/portal-empleado/notificaciones/${notifId}/leer`);
+      fetchNotificaciones();
+    } catch (err) {
+      console.error('Error:', err);
+    }
+  };
+  
+  const handleMarcarTodasLeidas = async () => {
+    try {
+      await api.put('/api/portal-empleado/notificaciones/leer-todas');
+      fetchNotificaciones();
+    } catch (err) {
+      console.error('Error:', err);
+    }
+  };
   
   const fetchDashboard = async () => {
     try {
