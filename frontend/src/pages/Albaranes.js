@@ -288,9 +288,20 @@ const Albaranes = () => {
       const esVenta = tipoContrato === 'Venta';
       const proveedorContrato = contrato.proveedor || '';
       const clienteContrato = contrato.cliente || '';
+      const cultivoContrato = contrato.cultivo || '';
+      const precioContrato = contrato.precio || 0;
       
       // El tipo de albarán se ajusta según el tipo de contrato
       const tipoAlbaran = esVenta ? 'Albarán de venta' : 'Albarán de compra';
+      
+      // Crear línea inicial con el cultivo del contrato como descripción
+      const lineaInicial = {
+        descripcion: cultivoContrato,
+        cantidad: '',
+        unidad: 'kg',
+        precio_unitario: precioContrato || '',
+        total: 0
+      };
       
       setFormData(prev => ({
         ...prev,
@@ -302,10 +313,12 @@ const Albaranes = () => {
         proveedor: esVenta ? '' : proveedorContrato,  // Solo para compras
         cliente: esVenta ? clienteContrato : '',       // Solo para ventas
         usar_otro_proveedor: false,
-        cultivo: contrato.cultivo || '',
+        cultivo: cultivoContrato,
         parcela_codigo: contrato.parcela_codigo || contrato.parcela || '',
         parcela_id: contrato.parcela_id || '',
-        campana: contrato.campana || ''
+        campana: contrato.campana || '',
+        // Actualizar la primera línea con el cultivo y precio del contrato
+        items: [lineaInicial]
       }));
     } else {
       setFormData(prev => ({
@@ -320,7 +333,8 @@ const Albaranes = () => {
         cultivo: '',
         parcela_codigo: '',
         parcela_id: '',
-        campana: ''
+        campana: '',
+        items: [{ descripcion: '', cantidad: '', unidad: 'kg', precio_unitario: '', total: 0 }]
       }));
     }
   };
