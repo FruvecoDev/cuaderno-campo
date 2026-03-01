@@ -724,12 +724,11 @@ const Contratos = () => {
               {/* Mostrar Proveedor para Compra o Cliente para Venta */}
               {formData.tipo === 'Compra' ? (
                 <div className="form-group">
-                  <label className="form-label">{t('contracts.provider')} *</label>
+                  <label className="form-label">{t('contracts.provider')}</label>
                   <select
                     className="form-select"
                     value={formData.proveedor_id}
                     onChange={(e) => setFormData({...formData, proveedor_id: e.target.value, cliente_id: ''})}
-                    required
                     data-testid="select-proveedor"
                   >
                     <option value="">{t('common.selectOption')}...</option>
@@ -742,12 +741,11 @@ const Contratos = () => {
                 </div>
               ) : (
                 <div className="form-group">
-                  <label className="form-label">Cliente *</label>
+                  <label className="form-label">Cliente</label>
                   <select
                     className="form-select"
                     value={formData.cliente_id}
                     onChange={(e) => setFormData({...formData, cliente_id: e.target.value, proveedor_id: ''})}
-                    required
                     data-testid="select-cliente"
                   >
                     <option value="">{t('common.selectOption')}...</option>
