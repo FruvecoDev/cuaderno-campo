@@ -528,6 +528,7 @@ const ComisionesGeneradas = () => {
               <thead>
                 <tr>
                   <th>Agente</th>
+                  <th>Nº Albarán</th>
                   <th>Fecha</th>
                   <th>Campaña</th>
                   <th>Proveedor/Cliente</th>
@@ -544,7 +545,7 @@ const ComisionesGeneradas = () => {
               <tbody>
                 {filteredComisiones.length === 0 ? (
                   <tr>
-                    <td colSpan="12" style={{ textAlign: 'center', padding: '2rem' }}>
+                    <td colSpan="13" style={{ textAlign: 'center', padding: '2rem' }}>
                       No hay comisiones para mostrar
                     </td>
                   </tr>
@@ -564,6 +565,7 @@ const ComisionesGeneradas = () => {
                             </span>
                           </div>
                         </td>
+                        <td style={{ fontWeight: '500' }}>{c.numero_albaran || c.albaran_id?.slice(-6) || '-'}</td>
                         <td>{c.fecha_albaran}</td>
                         <td>{c.campana || '-'}</td>
                         <td>{c.proveedor || c.cliente || '-'}</td>
