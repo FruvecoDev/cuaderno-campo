@@ -917,6 +917,11 @@ const Contratos = () => {
               />
             </div>
             
+            {/* Historial de Auditoría - Solo en modo edición */}
+            {editingId && (
+              <AuditHistory collection="contratos" documentId={editingId} />
+            )}
+            
             <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', justifyContent: 'flex-end' }}>
               <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>
                 Cancelar
