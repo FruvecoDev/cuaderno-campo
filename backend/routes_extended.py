@@ -528,14 +528,16 @@ async def update_albaran(
             # Añadir línea de destare a los items
             update_data["items"].append(linea_destare)
             
-            # Calcular total del albarán teniendo en cuenta el descuento de las líneas:
-            descuento_linea = float(update_data.get("items", [{}])[0].get("descuento", 0) or 0)
-            kilos_netos = kilos_brutos - kilos_destare
-            subtotal_sin_dto = kilos_netos * precio_unitario
-            if descuento_linea > 0:
-                update_data["total_albaran"] = round(subtotal_sin_dto * (1 - descuento_linea / 100), 2)
+            # Calcular total del albarán:
+            # El importe de la línea YA tiene el descuento aplicado
+            # Solo hay que restar el destare proporcionalmente
+            importe_linea = float(update_data.get("items", [{}])[0].get("total", 0) or 0)
+            
+            if kilos_brutos > 0:
+                importe_destare = importe_linea * (kilos_destare / kilos_brutos)
+                update_data["total_albaran"] = round(importe_linea - importe_destare, 2)
             else:
-                update_data["total_albaran"] = round(subtotal_sin_dto, 2)
+                update_data["total_albaran"] = round(importe_linea, 2)
     
     # Calcular kilos netos si no hay destare
     if kilos_netos == 0:
