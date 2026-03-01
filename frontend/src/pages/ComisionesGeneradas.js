@@ -270,7 +270,30 @@ const ComisionesGeneradas = () => {
             Comisiones calculadas automáticamente desde albaranes
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <button
+            className="btn btn-secondary"
+            onClick={handleExportPDF}
+            disabled={exportLoading}
+            title="Imprimir listado PDF"
+            data-testid="btn-export-pdf"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <Printer size={16} />
+            PDF
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={handleExportExcel}
+            disabled={exportLoading}
+            title="Exportar a Excel"
+            data-testid="btn-export-excel"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <Download size={16} />
+            Excel
+          </button>
+          <div style={{ width: '1px', height: '24px', backgroundColor: 'hsl(var(--border))', margin: '0 0.5rem' }} />
           <button
             className={`btn ${vista === 'agrupado' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setVista('agrupado')}
