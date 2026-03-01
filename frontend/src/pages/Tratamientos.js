@@ -1777,6 +1777,11 @@ const Tratamientos = () => {
                     required
                     data-testid="input-superficie-aplicacion"
                   />
+                  {selectedParcelas.length > 0 && !editingId && (
+                    <small style={{ color: 'hsl(var(--muted-foreground))' }}>
+                      Autocompletado desde parcelas ({selectedParcelas.length} seleccionadas) - Puedes modificarlo si no tratas toda la superficie
+                    </small>
+                  )}
                 </div>
               )}
               
