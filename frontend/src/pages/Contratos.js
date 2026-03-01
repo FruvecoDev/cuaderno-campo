@@ -460,7 +460,7 @@ const Contratos = () => {
               Volver a la lista
             </button>
             <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>
-              {editingId ? t('contracts.editContract') : t('contracts.newContract')}
+              {editingId ? 'Editar Contrato' : 'Nuevo Contrato'}
             </h1>
           </div>
         </div>
