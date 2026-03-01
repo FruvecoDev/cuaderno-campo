@@ -1610,6 +1610,35 @@ const Albaranes = () => {
                           )}
                         </td>
                         <td>
+                          {/* Columna Dto % - descuento por línea */}
+                          {item.es_destare ? (
+                            <input
+                              type="text"
+                              className="form-input"
+                              value="-"
+                              disabled
+                              style={{ 
+                                textAlign: 'center',
+                                backgroundColor: '#fef2f2',
+                                color: '#9ca3af'
+                              }}
+                            />
+                          ) : (
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              max="100"
+                              className="form-input"
+                              value={item.descuento || ''}
+                              onChange={(e) => updateItemTotal(index, 'descuento', parseFloat(e.target.value) || 0)}
+                              placeholder="0"
+                              style={{ textAlign: 'center' }}
+                              data-testid={`item-dto-${index}`}
+                            />
+                          )}
+                        </td>
+                        <td>
                           {item.es_destare ? (
                             <input
                               type="text"
