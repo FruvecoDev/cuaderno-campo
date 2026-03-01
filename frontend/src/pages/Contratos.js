@@ -84,14 +84,18 @@ const Contratos = () => {
     moneda: 'EUR',
     observaciones: '',
     precios_calidad: [],
+    // Agente y comisiones
     agente_compra: '',
     agente_venta: '',
-    // Comisión del agente de COMPRA
-    comision_compra_tipo: 'porcentaje',
+    comision_compra_tipo: 'porcentaje',  // 'porcentaje' o 'euro_kilo'
     comision_compra_valor: '',
-    // Comisión del agente de VENTA
-    comision_venta_tipo: 'porcentaje',
-    comision_venta_valor: ''
+    comision_venta_tipo: 'porcentaje',   // 'porcentaje' o 'euro_kilo'
+    comision_venta_valor: '',
+    // Forma de pago/cobro
+    forma_pago: '',      // Para contratos de compra
+    forma_cobro: '',     // Para contratos de venta
+    // Descuento destare (solo compras)
+    descuento_destare: '' // Porcentaje que se aplica a los kilos
   });
   
   // Generar número de contrato automático
