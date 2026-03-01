@@ -327,20 +327,20 @@ async def get_dashboard_kpis():
             })
     
     # Estadísticas de contratos
-    contratos_compra = [c for c in contratos_activos if c["tipo"] == "Compra"]
-    contratos_venta = [c for c in contratos_activos if c["tipo"] == "Venta"]
+    contratos_compra_list = [c for c in contratos_activos if c["tipo"] == "Compra"]
+    contratos_venta_list = [c for c in contratos_activos if c["tipo"] == "Venta"]
     
     contratos_stats = {
         "total_activos": len(contratos_activos),
         "compra": {
-            "count": len(contratos_compra),
-            "cantidad_total": sum(c["cantidad"] for c in contratos_compra),
-            "valor_total": sum(c["valor_total"] for c in contratos_compra)
+            "count": len(contratos_compra_list),
+            "cantidad_total": sum(c["cantidad"] for c in contratos_compra_list),
+            "valor_total": sum(c["valor_total"] for c in contratos_compra_list)
         },
         "venta": {
-            "count": len(contratos_venta),
-            "cantidad_total": sum(c["cantidad"] for c in contratos_venta),
-            "valor_total": sum(c["valor_total"] for c in contratos_venta)
+            "count": len(contratos_venta_list),
+            "cantidad_total": sum(c["cantidad"] for c in contratos_venta_list),
+            "valor_total": sum(c["valor_total"] for c in contratos_venta_list)
         },
         "por_cultivo": {}
     }
