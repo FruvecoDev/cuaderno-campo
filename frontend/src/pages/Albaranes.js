@@ -50,6 +50,35 @@ const Albaranes = () => {
   // Stats
   const [stats, setStats] = useState(null);
   const [exportLoading, setExportLoading] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(null); // ID del albarán que está cargando
+  
+  // Función para descargar PDF con autenticación
+  const downloadPdf = async (albaranId) => {
+    setPdfLoading(albaranId);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/albaranes/${albaranId}/pdf`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Error al generar PDF');
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      // Limpiar URL después de un momento
+      setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      setError('Error al generar el PDF del albarán');
+    } finally {
+      setPdfLoading(null);
+    }
+  };
   
   // Permisos de operación
   const puedeCompra = canDoOperacion('compra');
