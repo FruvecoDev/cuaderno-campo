@@ -734,6 +734,11 @@ const TABLE_LABELS = {
 
 const Tratamientos = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { id: urlId, action } = useParams();
+  const location = useLocation();
+  const formRef = useRef(null);
+  
   const [tratamientos, setTratamientos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -742,6 +747,9 @@ const Tratamientos = () => {
   const { token } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
+  
+  // Determinar si estamos en modo formulario por la URL
+  const isFormMode = location.pathname.includes('/nuevo') || location.pathname.includes('/editar/');
   
   // Solo necesitamos parcelas para el selector
   const [parcelas, setParcelas] = useState([]);
