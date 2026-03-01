@@ -1312,29 +1312,45 @@ const Albaranes = () => {
                   </div>
                   <div>
                     <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Parcela</span>
-                    <select
-                      className="form-select"
-                      value={formData.parcela_codigo}
-                      onChange={(e) => {
-                        const parcela = parcelas.find(p => (p.codigo_plantacion || p.finca || p._id) === e.target.value);
-                        setFormData({
-                          ...formData,
-                          parcela_codigo: e.target.value,
-                          parcela_id: parcela?._id || ''
-                        });
-                      }}
-                      style={{ marginTop: '0.25rem' }}
-                      data-testid="select-parcela"
-                    >
-                      <option value="">-- Seleccionar parcela --</option>
-                      {parcelas.map(p => (
-                        <option key={p._id} value={p.codigo_plantacion || p.finca || p._id}>
-                          {p.codigo_plantacion || p.finca || `Parcela ${p._id?.slice(-6)}`} 
-                          {p.cultivo ? ` - ${p.cultivo}` : ''}
-                          {p.proveedor ? ` (${p.proveedor})` : ''}
-                        </option>
-                      ))}
-                    </select>
+                    {(() => {
+                      // Obtener parcelas vinculadas al contrato seleccionado
+                      const parcelasDelContrato = formData.contrato_id 
+                        ? parcelas.filter(p => p.contrato_id === formData.contrato_id)
+                        : [];
+                      
+                      if (parcelasDelContrato.length > 1) {
+                        // Mostrar selector si hay varias parcelas
+                        return (
+                          <select
+                            className="form-select"
+                            value={formData.parcela_codigo}
+                            onChange={(e) => {
+                              const parcela = parcelasDelContrato.find(p => (p.codigo_plantacion || p.finca || p._id) === e.target.value);
+                              setFormData({
+                                ...formData,
+                                parcela_codigo: e.target.value,
+                                parcela_id: parcela?._id || ''
+                              });
+                            }}
+                            style={{ marginTop: '0.25rem' }}
+                            data-testid="select-parcela"
+                          >
+                            <option value="">-- Seleccionar parcela --</option>
+                            {parcelasDelContrato.map(p => (
+                              <option key={p._id} value={p.codigo_plantacion || p.finca || p._id}>
+                                {p.codigo_plantacion || p.finca || `Parcela ${p._id?.slice(-6)}`}
+                                {p.cultivo ? ` - ${p.cultivo}` : ''}
+                              </option>
+                            ))}
+                          </select>
+                        );
+                      } else {
+                        // Mostrar texto si hay una o ninguna parcela
+                        return (
+                          <p style={{ fontWeight: '500' }}>{formData.parcela_codigo || '-'}</p>
+                        );
+                      }
+                    })()}
                   </div>
                   <div>
                     <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Campaña</span>
