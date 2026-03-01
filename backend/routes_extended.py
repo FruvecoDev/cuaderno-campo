@@ -983,7 +983,6 @@ async def generate_albaran_pdf(
     
     # Separar líneas normales de la línea de destare
     lineas_normales = [item for item in items if not item.get("es_destare")]
-    linea_destare = next((item for item in items if item.get("es_destare")), None)
     
     # Calcular precio unitario (de las líneas normales)
     precio_unitario = 0
