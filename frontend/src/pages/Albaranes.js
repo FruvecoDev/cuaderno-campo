@@ -1603,6 +1603,14 @@ const Albaranes = () => {
                     )}
                     <td>
                       <div style={{ display: 'flex', gap: '0.25rem' }}>
+                        <button
+                          onClick={() => window.open(`${BACKEND_URL}/api/albaranes/${albaran._id}/pdf`, '_blank')}
+                          className="btn btn-sm btn-outline"
+                          title="Imprimir PDF"
+                          style={{ padding: '0.25rem 0.5rem' }}
+                        >
+                          <Printer size={14} />
+                        </button>
                         <PermissionButton
                           permission="edit"
                           onClick={() => handleEdit(albaran)}
