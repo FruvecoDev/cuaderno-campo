@@ -1696,7 +1696,7 @@ const Albaranes = () => {
                   <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.875rem', color: '#166534', fontWeight: '600' }}>
                     Resumen de Cálculo
                   </h4>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '0.75rem' }}>
                     <div>
                       <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>Kilos Brutos</span>
                       <p style={{ fontWeight: '600', margin: '0.25rem 0 0 0', fontSize: '1rem' }}>
@@ -1711,17 +1711,41 @@ const Albaranes = () => {
                     </div>
                     <div>
                       <span style={{ fontSize: '0.75rem', color: '#166534' }}>Kilos Netos</span>
-                      <p style={{ fontWeight: '700', margin: '0.25rem 0 0 0', fontSize: '1.1rem', color: '#166534' }}>
+                      <p style={{ fontWeight: '700', margin: '0.25rem 0 0 0', fontSize: '1rem', color: '#166534' }}>
                         {formatNumberES(formData.kilos_netos)} kg
                       </p>
                     </div>
-                    <div style={{ borderLeft: '2px solid #86efac', paddingLeft: '1rem' }}>
+                    <div>
+                      <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>Precio</span>
+                      <p style={{ fontWeight: '600', margin: '0.25rem 0 0 0', fontSize: '1rem' }}>
+                        {(() => {
+                          const itemsSinDestare = formData.items.filter(item => !item.es_destare);
+                          const precioPromedio = itemsSinDestare.length > 0 
+                            ? itemsSinDestare.reduce((sum, item) => sum + (parseFloat(item.precio_unitario) || 0), 0) / itemsSinDestare.length
+                            : 0;
+                          return `${precioPromedio.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €/kg`;
+                        })()}
+                      </p>
+                    </div>
+                    <div>
+                      <span style={{ fontSize: '0.75rem', color: '#f59e0b' }}>Dto %</span>
+                      <p style={{ fontWeight: '600', margin: '0.25rem 0 0 0', fontSize: '1rem', color: '#f59e0b' }}>
+                        {(() => {
+                          const itemsSinDestare = formData.items.filter(item => !item.es_destare);
+                          const descuentoPromedio = itemsSinDestare.length > 0 
+                            ? itemsSinDestare.reduce((sum, item) => sum + (parseFloat(item.descuento) || 0), 0) / itemsSinDestare.length
+                            : 0;
+                          return descuentoPromedio > 0 ? `${descuentoPromedio.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} %` : '0 %';
+                        })()}
+                      </p>
+                    </div>
+                    <div style={{ borderLeft: '2px solid #86efac', paddingLeft: '0.75rem' }}>
                       <span style={{ fontSize: '0.75rem', color: '#166534' }}>Total Albarán</span>
                       <p style={{ fontWeight: '700', margin: '0.25rem 0 0 0', fontSize: '1.1rem', color: '#166534' }}>
                         {calculateGrandTotal().toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
                       </p>
-                      <span style={{ fontSize: '0.7rem', color: '#6b7280' }}>
-                        ({formatNumberES(formData.kilos_netos)} kg × precio)
+                      <span style={{ fontSize: '0.65rem', color: '#6b7280' }}>
+                        (Netos × Precio × (1-Dto%))
                       </span>
                     </div>
                   </div>
