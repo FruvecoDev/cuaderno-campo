@@ -759,12 +759,11 @@ const Contratos = () => {
               )}
               
               <div className="form-group">
-                <label className="form-label">{t('contracts.crop')} *</label>
+                <label className="form-label">{t('contracts.crop')}</label>
                 <select
                   className="form-select"
                   value={formData.cultivo_id}
                   onChange={(e) => setFormData({...formData, cultivo_id: e.target.value})}
-                  required
                 >
                   <option value="">{t('common.selectOption')}...</option>
                   {cultivos.map(c => (
