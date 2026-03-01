@@ -5,7 +5,7 @@ import {
   LayoutDashboard, FileText, MapPin, Home, Calendar, ListTodo,
   Sprout, Droplets, BookOpen, FileBarChart, Wheat, FolderOpen,
   LogOut, User, Users, Package, Leaf, Cog, ClipboardCheck, Beaker, BarChart3, Globe, Brain, UserCheck,
-  ChevronDown, ChevronRight, TrendingUp, Menu, X, Settings, CloudSun, ChevronsLeft, ChevronsRight, Map
+  ChevronDown, ChevronRight, TrendingUp, Menu, X, Settings, CloudSun, ChevronsLeft, ChevronsRight, Map, DollarSign
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
