@@ -1407,7 +1407,7 @@ const Albaranes = () => {
             )}
             
             {/* Datos del Albarán */}
-            <div className="grid-3 mb-4">
+            <div className="grid-4 mb-4">
               <div className="form-group">
                 <label className="form-label">Tipo *</label>
                 <select 
