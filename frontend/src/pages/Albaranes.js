@@ -143,6 +143,9 @@ const Albaranes = () => {
   // Lista de proveedores para selector alternativo
   const [proveedores, setProveedores] = useState([]);
   
+  // Lista de parcelas para selector
+  const [parcelas, setParcelas] = useState([]);
+  
   // Catálogo de artículos de explotación
   const [articulosCatalogo, setArticulosCatalogo] = useState([]);
   
