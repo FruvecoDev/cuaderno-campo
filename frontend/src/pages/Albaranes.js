@@ -1407,7 +1407,7 @@ const Albaranes = () => {
             )}
             
             {/* Datos del Albarán */}
-            <div className="grid-4 mb-4">
+            <div className="grid-3 mb-4">
               <div className="form-group">
                 <label className="form-label">Tipo *</label>
                 <select 
@@ -1430,20 +1430,6 @@ const Albaranes = () => {
                   onChange={(e) => setFormData({...formData, fecha: e.target.value})} 
                   required 
                   data-testid="input-fecha" 
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Dto %</label>
-                <input 
-                  type="number" 
-                  className="form-input" 
-                  value={formData.descuento_porcentaje || ''} 
-                  onChange={(e) => setFormData({...formData, descuento_porcentaje: parseFloat(e.target.value) || 0})}
-                  placeholder="0"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  data-testid="input-descuento"
                 />
               </div>
               <div className="form-group">
