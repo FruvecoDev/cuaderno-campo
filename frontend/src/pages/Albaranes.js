@@ -1630,23 +1630,22 @@ const Albaranes = () => {
                 {editingId ? 'Actualizar Albarán' : 'Guardar Albarán'}
               </button>
               
-              {/* Botón Imprimir - Solo visible en modo edición */}
-              {editingId && (
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => downloadPdf(editingId)}
-                  disabled={pdfLoading === editingId}
-                  data-testid="btn-imprimir"
-                >
-                  {pdfLoading === editingId ? (
-                    <Download size={16} className="animate-spin" style={{ marginRight: '0.5rem' }} />
-                  ) : (
-                    <Printer size={16} style={{ marginRight: '0.5rem' }} />
-                  )}
-                  {pdfLoading === editingId ? 'Generando...' : 'Imprimir'}
-                </button>
-              )}
+              {/* Botón Imprimir - Visible siempre pero deshabilitado si no hay ID */}
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => editingId && downloadPdf(editingId)}
+                disabled={!editingId || pdfLoading === editingId}
+                data-testid="btn-imprimir"
+                title={!editingId ? 'Guarde el albarán primero para poder imprimirlo' : 'Imprimir PDF'}
+              >
+                {pdfLoading === editingId ? (
+                  <Download size={16} className="animate-spin" style={{ marginRight: '0.5rem' }} />
+                ) : (
+                  <Printer size={16} style={{ marginRight: '0.5rem' }} />
+                )}
+                {pdfLoading === editingId ? 'Generando...' : 'Imprimir'}
+              </button>
               
               <button
                 type="button"
