@@ -1282,7 +1282,11 @@ async def generate_albaran_pdf(
                 <span>Precio/kg:</span>
                 <span>{format_number_spanish(precio_unitario, 4)} €</span>
             </div>
-            {f'<div class="totales-row destare"><span>Dto. línea ({format_number_spanish(descuento_linea, 2)}%):</span><span>aplicado</span></div>' if descuento_linea > 0 else ''}
+            <div class="totales-row">
+                <span>Importe:</span>
+                <span>{format_number_spanish(kilos_netos * precio_unitario, 2)} €</span>
+            </div>
+            {f'<div class="totales-row destare"><span>Dto. ({format_number_spanish(descuento_linea, 2)}%):</span><span>- {format_number_spanish((kilos_netos * precio_unitario) * descuento_linea / 100, 2)} €</span></div>' if descuento_linea > 0 else ''}
             <div class="totales-row total">
                 <span>TOTAL:</span>
                 <span>{format_number_spanish(total_albaran, 2)} €</span>
