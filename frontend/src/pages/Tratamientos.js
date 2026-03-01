@@ -700,7 +700,7 @@ const FIELD_LABELS = {
   fecha_tratamiento: 'Fecha Tratamiento',
   fecha_aplicacion: 'Fecha Aplicación',
   aplicador_nombre: 'Aplicador',
-  maquina_id: 'Máquina'
+  maquina_nombre: 'Máquina'
 };
 
 // Table columns config
