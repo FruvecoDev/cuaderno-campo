@@ -1411,6 +1411,7 @@ const Dashboard = () => {
           )}
         </div>
       )}
+      */}
       
       {/* Widget de Próximas Visitas */}
       {isWidgetVisible('proximas_visitas') && kpis.visitas_stats && (
