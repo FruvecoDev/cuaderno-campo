@@ -1390,14 +1390,34 @@ const Albaranes = () => {
             
             <div className="flex gap-2">
               <button type="submit" className="btn btn-primary" data-testid="btn-guardar">
+                <Check size={16} style={{ marginRight: '0.5rem' }} />
                 {editingId ? 'Actualizar Albarán' : 'Guardar Albarán'}
               </button>
+              
+              {/* Botón Imprimir - Solo visible en modo edición */}
+              {editingId && (
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    // Abrir PDF del albarán en nueva pestaña
+                    window.open(`${BACKEND_URL}/api/albaranes/${editingId}/pdf`, '_blank');
+                  }}
+                  data-testid="btn-imprimir"
+                >
+                  <Printer size={16} style={{ marginRight: '0.5rem' }} />
+                  Imprimir
+                </button>
+              )}
+              
               <button
                 type="button"
-                className="btn btn-secondary"
-                onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }}
+                className="btn btn-outline"
+                onClick={() => { setShowForm(false); setEditingId(null); resetForm(); setSuccessMessage(null); }}
+                data-testid="btn-salir"
               >
-                Cancelar
+                <LogOut size={16} style={{ marginRight: '0.5rem' }} />
+                Salir
               </button>
             </div>
           </form>
