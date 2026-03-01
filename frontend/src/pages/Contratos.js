@@ -237,25 +237,9 @@ const Contratos = () => {
         setShowForm(false);
         setEditingId(null);
         fetchContratos();
-        setFormData({
-          tipo: 'Compra',
-          campana: '2025/26',
-          procedencia: 'Campo',
-          fecha_contrato: new Date().toISOString().split('T')[0],
-          proveedor_id: '',
-          cultivo_id: '',
-          cantidad: '',
-          precio: '',
-          periodo_desde: '',
-          periodo_hasta: '',
-          moneda: 'EUR',
-          observaciones: '',
-          precios_calidad: [],
-          agente_compra: '',
-          agente_venta: '',
-          comision_tipo: 'porcentaje',
-          comision_valor: ''
-        });
+        resetForm();
+        // Navegar de vuelta a la lista
+        navigate('/contratos');
       }
     } catch (error) {
       console.error('Error saving contrato:', error);
