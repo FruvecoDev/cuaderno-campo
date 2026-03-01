@@ -24,6 +24,7 @@ documentos_collection = db['documentos']
 maquinaria_collection = db['maquinaria']
 users_collection = db['users']
 evaluaciones_collection = db['evaluaciones']
+audit_logs_collection = db['audit_logs']
 
 # Helper function to serialize MongoDB documents
 def serialize_doc(doc):
