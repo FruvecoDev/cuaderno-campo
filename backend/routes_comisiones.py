@@ -20,6 +20,27 @@ agentes_collection = db['agentes']
 albaranes_collection = db['albaranes']
 
 
+def format_number_es(value: float, decimals: int = 2) -> str:
+    """
+    Formatea un número al estilo español:
+    - Punto (.) para separador de miles
+    - Coma (,) para decimales
+    Ejemplo: 12850.50 -> "12.850,50"
+    """
+    if value is None:
+        return "0"
+    
+    # Format with the required decimals
+    if decimals == 0:
+        formatted = f"{value:,.0f}"
+    else:
+        formatted = f"{value:,.{decimals}f}"
+    
+    # Replace: comma -> temp, dot -> comma, temp -> dot
+    formatted = formatted.replace(",", "X").replace(".", ",").replace("X", ".")
+    return formatted
+
+
 def calcular_comision(tipo: str, valor: float, cantidad_kg: float, precio_kg: float) -> float:
     """
     Calcula el importe de la comisión según el tipo
