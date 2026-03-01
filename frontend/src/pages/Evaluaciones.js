@@ -1301,7 +1301,42 @@ const Evaluaciones = () => {
                       </td>
                       {(canEdit || canDelete) && (
                         <td>
-                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            {/* Botones de estado */}
+                            {canEdit && evaluacion.estado !== 'completada' && (
+                              <button
+                                className="btn btn-sm"
+                                style={{ backgroundColor: 'hsl(142 76% 36%)', color: 'white', border: 'none' }}
+                                onClick={() => handleChangeEstado(evaluacion._id, 'completada')}
+                                title="Marcar como Finalizada"
+                                data-testid={`complete-evaluacion-${evaluacion._id}`}
+                              >
+                                <CheckCircle size={14} />
+                              </button>
+                            )}
+                            {canEdit && evaluacion.estado === 'completada' && (
+                              <button
+                                className="btn btn-sm"
+                                style={{ backgroundColor: 'hsl(38 92% 50%)', color: 'white', border: 'none' }}
+                                onClick={() => handleChangeEstado(evaluacion._id, 'borrador')}
+                                title="Volver a Borrador"
+                                data-testid={`draft-evaluacion-${evaluacion._id}`}
+                              >
+                                <Clock size={14} />
+                              </button>
+                            )}
+                            {canEdit && evaluacion.estado !== 'archivada' && (
+                              <button
+                                className="btn btn-sm"
+                                style={{ backgroundColor: 'hsl(var(--muted-foreground))', color: 'white', border: 'none' }}
+                                onClick={() => handleChangeEstado(evaluacion._id, 'archivada')}
+                                title="Archivar"
+                                data-testid={`archive-evaluacion-${evaluacion._id}`}
+                              >
+                                <Archive size={14} />
+                              </button>
+                            )}
+                            {/* Botones existentes */}
                             <button
                               className="btn btn-sm btn-primary"
                               onClick={() => handleDownloadPDF(evaluacion._id)}
