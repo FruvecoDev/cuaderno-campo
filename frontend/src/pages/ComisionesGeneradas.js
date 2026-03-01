@@ -469,6 +469,26 @@ const ComisionesGeneradas = () => {
                 <option value="anulada">Anulada</option>
               </select>
             </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" style={{ fontSize: '0.8rem' }}>Fecha Desde</label>
+              <input
+                type="date"
+                className="form-input"
+                value={filters.fecha_desde}
+                onChange={(e) => setFilters({...filters, fecha_desde: e.target.value})}
+                data-testid="filter-fecha-desde"
+              />
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" style={{ fontSize: '0.8rem' }}>Fecha Hasta</label>
+              <input
+                type="date"
+                className="form-input"
+                value={filters.fecha_hasta}
+                onChange={(e) => setFilters({...filters, fecha_hasta: e.target.value})}
+                data-testid="filter-fecha-hasta"
+              />
+            </div>
           </div>
         )}
       </div>
