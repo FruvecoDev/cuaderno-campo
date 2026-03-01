@@ -450,10 +450,14 @@ const Albaranes = () => {
     const newItems = [...formData.items];
     newItems[index][field] = value;
     
-    if (field === 'cantidad' || field === 'precio_unitario') {
+    // Recalcular total cuando cambia cantidad, precio o descuento
+    if (field === 'cantidad' || field === 'precio_unitario' || field === 'descuento') {
       const cantidad = parseFloat(newItems[index].cantidad) || 0;
       const precio = parseFloat(newItems[index].precio_unitario) || 0;
-      newItems[index].total = cantidad * precio;
+      const descuento = parseFloat(newItems[index].descuento) || 0;
+      const subtotal = cantidad * precio;
+      // Aplicar descuento: total = subtotal - (subtotal * descuento / 100)
+      newItems[index].total = subtotal - (subtotal * descuento / 100);
     }
     
     setFormData({ ...formData, items: newItems });
