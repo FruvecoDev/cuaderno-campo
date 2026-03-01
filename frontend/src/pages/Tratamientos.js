@@ -1146,30 +1146,9 @@ const Tratamientos = () => {
         setShowForm(false);
         setEditingId(null);
         fetchTratamientos();
-        setFormData({
-          tipo_tratamiento: 'FITOSANITARIOS',
-          subtipo: 'Insecticida',
-          aplicacion_numero: 1,
-          metodo_aplicacion: 'Pulverización',
-          superficie_aplicacion: '',
-          caldo_superficie: '',
-          parcelas_ids: [],
-          fecha_tratamiento: new Date().toISOString().split('T')[0],
-          fecha_aplicacion: '',
-          aplicador_nombre: '',
-          tecnico_aplicador_id: '',
-          maquina_id: '',
-          maquina_nombre: '',
-          producto_fitosanitario_id: '',
-          producto_fitosanitario_nombre: '',
-          producto_fitosanitario_dosis: '',
-          producto_fitosanitario_unidad: '',
-          producto_materia_activa: '',
-          producto_plazo_seguridad: ''
-        });
-        setSelectedParcelas([]);
-        setSelectedParcelasInfo(null);
-        setParcelaSearch({ proveedor: '', cultivo: '', campana: '' });
+        resetForm();
+        // Navegar de vuelta a la lista después de guardar
+        navigate('/tratamientos');
       }
     } catch (error) {
       console.error('Error saving tratamiento:', error);
