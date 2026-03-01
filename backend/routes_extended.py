@@ -253,7 +253,9 @@ async def create_albaran(
         contrato = await contratos_collection.find_one({"_id": ObjectId(albaran.contrato_id)})
     
     # Aplicar descuento destare si corresponde (solo para compras/entradas)
-    if contrato and albaran.tipo == "Entrada" and contrato.get("tipo") == "Compra":
+    # Aceptar tanto "Entrada" como "Albarán de compra"
+    es_compra = albaran.tipo in ["Entrada", "Albarán de compra", "entrada", "compra"]
+    if contrato and es_compra and contrato.get("tipo") == "Compra":
         descuento_porcentaje = float(contrato.get("descuento_destare", 0) or 0)
         
         if descuento_porcentaje > 0 and kilos_brutos > 0:
