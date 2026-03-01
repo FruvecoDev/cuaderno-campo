@@ -545,12 +545,18 @@ const Parcelas = () => {
       
       const payload = {
         ...formData,
-        superficie_total: parseFloat(formData.superficie_total),
-        num_plantas: parseInt(formData.num_plantas)
+        superficie_total: parseFloat(formData.superficie_total) || 0,
+        num_plantas: parseInt(formData.num_plantas) || 0
       };
       
-      if (!editingId || polygon.length >= 3) {
+      // Añadir recintos si hay polígono dibujado
+      if (polygon && polygon.length >= 3) {
+        console.log('Adding polygon to payload:', polygon);
         payload.recintos = [{ geometria: polygon }];
+      } else if (!editingId) {
+        console.log('No polygon drawn, polygon:', polygon);
+        // Para nuevas parcelas sin polígono, enviar recintos vacío
+        payload.recintos = [];
       }
       
       const data = editingId 
