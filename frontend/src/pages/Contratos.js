@@ -266,6 +266,11 @@ const Contratos = () => {
         })) : []
       };
       
+      // En edición, no enviar el numero_contrato (es inmutable)
+      if (editingId) {
+        delete submitData.numero_contrato;
+      }
+      
       console.log('Submitting contrato:', submitData);
       
       const data = editingId 
