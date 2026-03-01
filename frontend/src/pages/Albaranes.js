@@ -1664,7 +1664,7 @@ const Albaranes = () => {
                           <input
                             type="text"
                             className="form-input"
-                            value={`${(item.total || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`}
+                            value={`${calculateItemTotalWithDestare(item).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`}
                             disabled
                             style={{ 
                               minWidth: '120px', 
