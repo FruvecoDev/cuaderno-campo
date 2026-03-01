@@ -1316,12 +1316,18 @@ const Albaranes = () => {
                             className="form-input"
                             value={`${(item.total || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`}
                             disabled
-                            style={{ minWidth: '120px', textAlign: 'right', fontWeight: '500' }}
-                            style={{ backgroundColor: '#f5f5f5', textAlign: 'right' }}
+                            style={{ 
+                              minWidth: '120px', 
+                              textAlign: 'right', 
+                              fontWeight: '500',
+                              backgroundColor: item.es_destare ? '#fef2f2' : '#f5f5f5',
+                              color: item.es_destare ? '#dc2626' : 'inherit'
+                            }}
                           />
                         </td>
                         <td>
-                          {formData.items.length > 1 && (
+                          {/* No mostrar botón eliminar para líneas de destare */}
+                          {!item.es_destare && formData.items.length > 1 && (
                             <button
                               type="button"
                               className="btn btn-sm btn-error"
