@@ -25,6 +25,22 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
   - `/app/frontend/src/pages/Parcelas.js` (líneas 65-73) - mismo fix aplicado al componente duplicado
 - **Verificado**: Testing agent confirmó que 27/27 tests pasan al 100%
 
+#### 2. Mejoras en Formulario de Parcelas ✅
+- **Código Plantación Auto-generado**:
+  - Formato: `[PROV]-[CULT]-[AÑO]-[SEC]` (ej: "TES-TES-25-001")
+  - Se genera automáticamente al seleccionar contrato
+  - Campo de solo lectura para nuevas parcelas (editable en modo edición)
+- **Finca como Selector**:
+  - Desplegable con fincas existentes
+  - Campo opcional (puede dejarse vacío)
+  - Muestra nombre de finca y provincia
+- **Variedad como Selector**:
+  - Desplegable con variedades del cultivo seleccionado
+  - Campo opcional (puede dejarse vacío)
+  - Se filtran automáticamente según el cultivo del contrato
+- **Archivos modificados**:
+  - `/app/frontend/src/pages/Parcelas.js` - Añadidas funciones `fetchFincas`, `fetchCultivos`, `generarCodigoPlantacion`, `getVariedadesParaCultivo` y actualizado el formulario
+
 ---
 
 ### Sesión 4:
