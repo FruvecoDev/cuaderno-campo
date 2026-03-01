@@ -453,18 +453,114 @@ const Albaranes = () => {
   };
   
   const calculateGrandTotal = () => {
-    // Si hay kilos_netos del servidor (indica que hay destare), usar ese cálculo
-    if (formData.kilos_netos && formData.kilos_destare > 0) {
-      // Obtener precio de la primera línea que no sea destare
-      const primeraLinea = formData.items.find(item => !item.es_destare);
+    // Calcular kilos brutos (solo líneas que no sean destare)
+    const itemsSinDestare = formData.items.filter(item => !item.es_destare);
+    const kilosBrutos = itemsSinDestare.reduce((sum, item) => {
+      if ((item.unidad || 'kg').toLowerCase() === 'kg') {
+        return sum + (parseFloat(item.cantidad) || 0);
+      }
+      return sum;
+    }, 0);
+    
+    // Si hay contrato con destare, calcular con kilos netos
+    if (selectedContrato && selectedContrato.descuento_destare > 0) {
+      const descuentoPorcentaje = parseFloat(selectedContrato.descuento_destare) || 0;
+      const kilosDestare = kilosBrutos * (descuentoPorcentaje / 100);
+      const kilosNetos = kilosBrutos - kilosDestare;
+      const primeraLinea = itemsSinDestare[0];
       const precio = parseFloat(primeraLinea?.precio_unitario) || 0;
-      return formData.kilos_netos * precio;
+      return kilosNetos * precio;
     }
-    // Si no hay destare, sumar los totales de las líneas (excluyendo destare)
-    return formData.items
-      .filter(item => !item.es_destare)
-      .reduce((sum, item) => sum + (parseFloat(item.total) || 0), 0);
+    
+    // Si no hay destare, sumar los totales de las líneas
+    return itemsSinDestare.reduce((sum, item) => sum + (parseFloat(item.total) || 0), 0);
   };
+  
+  // Calcular y mostrar línea de destare automáticamente
+  useEffect(() => {
+    // Solo calcular si:
+    // 1. Hay un contrato seleccionado con descuento_destare
+    // 2. Es un albarán de compra
+    // 3. No estamos en modo edición con datos del servidor
+    const esCompra = formData.tipo === 'Albarán de compra';
+    const tieneDestare = selectedContrato && parseFloat(selectedContrato.descuento_destare) > 0;
+    const tieneContratoCompra = selectedContrato && (selectedContrato.tipo === 'Compra' || !selectedContrato.tipo);
+    
+    if (!esCompra || !tieneDestare || !tieneContratoCompra) {
+      // Si no aplica destare, eliminar línea de destare si existe
+      const itemsSinDestare = formData.items.filter(item => !item.es_destare);
+      if (itemsSinDestare.length !== formData.items.length) {
+        setFormData(prev => ({
+          ...prev,
+          items: itemsSinDestare,
+          kilos_brutos: 0,
+          kilos_destare: 0,
+          kilos_netos: 0
+        }));
+      }
+      return;
+    }
+    
+    // Calcular kilos brutos de las líneas (excluyendo destare existente)
+    const itemsSinDestare = formData.items.filter(item => !item.es_destare);
+    const kilosBrutos = itemsSinDestare.reduce((sum, item) => {
+      if ((item.unidad || 'kg').toLowerCase() === 'kg') {
+        return sum + (parseFloat(item.cantidad) || 0);
+      }
+      return sum;
+    }, 0);
+    
+    // Si no hay kilos, no mostrar línea de destare
+    if (kilosBrutos <= 0) {
+      if (formData.items.some(item => item.es_destare)) {
+        setFormData(prev => ({
+          ...prev,
+          items: itemsSinDestare,
+          kilos_brutos: 0,
+          kilos_destare: 0,
+          kilos_netos: 0
+        }));
+      }
+      return;
+    }
+    
+    // Calcular destare
+    const descuentoPorcentaje = parseFloat(selectedContrato.descuento_destare) || 0;
+    const kilosDestare = Math.round(kilosBrutos * (descuentoPorcentaje / 100) * 100) / 100;
+    const kilosNetos = Math.round((kilosBrutos - kilosDestare) * 100) / 100;
+    
+    // Crear o actualizar línea de destare
+    const lineaDestare = {
+      descripcion: `Descuento Destare (${descuentoPorcentaje}%)`,
+      producto: 'DESTARE',
+      cantidad: kilosDestare,
+      unidad: 'kg',
+      precio_unitario: 0,
+      total: 0,
+      es_destare: true
+    };
+    
+    // Verificar si ya existe una línea de destare
+    const existeDestare = formData.items.some(item => item.es_destare);
+    const destareActual = formData.items.find(item => item.es_destare);
+    
+    // Solo actualizar si los valores cambiaron
+    if (existeDestare && destareActual?.cantidad === kilosDestare) {
+      return;
+    }
+    
+    // Actualizar items con la línea de destare
+    const nuevosItems = [...itemsSinDestare, lineaDestare];
+    
+    setFormData(prev => ({
+      ...prev,
+      items: nuevosItems,
+      kilos_brutos: kilosBrutos,
+      kilos_destare: kilosDestare,
+      kilos_netos: kilosNetos
+    }));
+    
+  }, [formData.items.filter(i => !i.es_destare).map(i => `${i.cantidad}-${i.unidad}`).join(','), selectedContrato?.descuento_destare, formData.tipo]);
   
   const handleSubmit = async (e) => {
     e.preventDefault();
