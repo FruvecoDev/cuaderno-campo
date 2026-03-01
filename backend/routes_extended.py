@@ -1254,10 +1254,14 @@ async def export_comisiones_excel(
         
         # Obtener nombre del proveedor/cliente si no existe
         if not c.get("proveedor_nombre") and c.get("proveedor"):
-            try:
-                proveedor_doc = await proveedores_collection.find_one({"_id": ObjectId(c["proveedor"])})
-                c["proveedor_nombre"] = proveedor_doc.get("nombre", "Sin nombre") if proveedor_doc else "Sin nombre"
-            except:
+            proveedor_val = c["proveedor"]
+            if ObjectId.is_valid(proveedor_val):
+                try:
+                    proveedor_doc = await proveedores_collection.find_one({"_id": ObjectId(proveedor_val)})
+                    c["proveedor_nombre"] = proveedor_doc.get("nombre", proveedor_val) if proveedor_doc else proveedor_val
+                except:
+                    c["proveedor_nombre"] = proveedor_val
+            else:
                 c["proveedor_nombre"] = proveedor_val
         
         if not c.get("cliente_nombre") and c.get("cliente"):
