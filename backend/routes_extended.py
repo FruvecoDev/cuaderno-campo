@@ -206,6 +206,27 @@ async def calcular_dosis_receta(
 # ALBARANES
 # ============================================================================
 
+# Collection for commission records
+comisiones_collection = db['comisiones_generadas']
+agentes_collection = db['agentes']
+
+
+def calcular_comision_agente(tipo_comision: str, valor_comision: float, kilos_netos: float, precio_kg: float) -> float:
+    """
+    Calcula el importe de la comisión según el tipo
+    - porcentaje: (kilos_netos * precio * valor / 100)
+    - euro_kilo: (kilos_netos * valor)
+    """
+    if not valor_comision or valor_comision <= 0:
+        return 0.0
+    
+    if tipo_comision == 'porcentaje':
+        return round(kilos_netos * precio_kg * (valor_comision / 100), 2)
+    elif tipo_comision == 'euro_kilo':
+        return round(kilos_netos * valor_comision, 2)
+    return 0.0
+
+
 @router.post("/albaranes", response_model=dict)
 async def create_albaran(
     albaran: AlbaranCreate,
@@ -214,64 +235,164 @@ async def create_albaran(
 ):
     albaran_dict = albaran.dict()
     
-    # Si el albarán tiene contrato_id, buscar descuento_destare
+    # Variables para el cálculo
+    kilos_brutos = 0
+    kilos_destare = 0
+    kilos_netos = 0
     descuento_aplicado = None
-    if albaran.contrato_id and albaran.tipo == "Entrada":
+    comision_generada = None
+    contrato = None
+    
+    # Calcular kilos brutos de las líneas existentes (solo items con kg)
+    for item in albaran_dict.get("items", []):
+        if item.get("unidad", "kg").lower() in ["kg", "kilos", "kilogramos"]:
+            kilos_brutos += item.get("cantidad", 0)
+    
+    # Si el albarán tiene contrato_id, buscar datos del contrato
+    if albaran.contrato_id:
         contrato = await contratos_collection.find_one({"_id": ObjectId(albaran.contrato_id)})
-        if contrato and contrato.get("descuento_destare") and contrato.get("tipo") == "Compra":
-            descuento_porcentaje = float(contrato.get("descuento_destare", 0))
+    
+    # Aplicar descuento destare si corresponde (solo para compras/entradas)
+    if contrato and albaran.tipo == "Entrada" and contrato.get("tipo") == "Compra":
+        descuento_porcentaje = float(contrato.get("descuento_destare", 0) or 0)
+        
+        if descuento_porcentaje > 0 and kilos_brutos > 0:
+            # Calcular kilos de descuento
+            kilos_destare = round(kilos_brutos * (descuento_porcentaje / 100), 2)
             
-            if descuento_porcentaje > 0:
-                # Calcular total de kilos de las líneas existentes
-                total_kilos = sum(item.get("cantidad", 0) for item in albaran_dict.get("items", []) 
-                                  if item.get("unidad", "kg").lower() in ["kg", "kilos", "kilogramos"])
-                
-                if total_kilos > 0:
-                    # Calcular kilos de descuento
-                    kilos_destare = round(total_kilos * (descuento_porcentaje / 100), 2)
-                    
-                    # Obtener el precio de la primera línea (o del contrato)
-                    precio_unitario = albaran_dict.get("items", [{}])[0].get("precio_unitario", 0)
-                    if not precio_unitario and contrato.get("precio"):
-                        precio_unitario = float(contrato.get("precio", 0))
-                    
-                    # Crear línea de descuento destare
-                    linea_destare = {
-                        "descripcion": f"Descuento Destare ({descuento_porcentaje}%)",
-                        "producto": "DESTARE",
-                        "lote": "",
-                        "cantidad": -kilos_destare,  # Negativo porque es descuento
-                        "unidad": "kg",
-                        "precio_unitario": precio_unitario,
-                        "total": round(-kilos_destare * precio_unitario, 2),
-                        "es_destare": True  # Marcador para identificar línea de destare
-                    }
-                    
-                    # Añadir línea de destare a los items
-                    albaran_dict["items"].append(linea_destare)
-                    
-                    # Recalcular total del albarán
-                    albaran_dict["total_albaran"] = round(
-                        sum(item.get("total", 0) for item in albaran_dict["items"]), 2
-                    )
-                    
-                    descuento_aplicado = {
-                        "porcentaje": descuento_porcentaje,
-                        "kilos_descontados": kilos_destare,
-                        "importe_descontado": round(kilos_destare * precio_unitario, 2)
-                    }
+            # Obtener el precio de la primera línea (o del contrato)
+            precio_unitario = albaran_dict.get("items", [{}])[0].get("precio_unitario", 0)
+            if not precio_unitario and contrato.get("precio"):
+                precio_unitario = float(contrato.get("precio", 0))
+            
+            # Crear línea de descuento destare
+            linea_destare = {
+                "descripcion": f"Descuento Destare ({descuento_porcentaje}%)",
+                "producto": "DESTARE",
+                "lote": "",
+                "cantidad": -kilos_destare,  # Negativo porque es descuento
+                "unidad": "kg",
+                "precio_unitario": precio_unitario,
+                "total": round(-kilos_destare * precio_unitario, 2),
+                "es_destare": True  # Marcador para identificar línea de destare
+            }
+            
+            # Añadir línea de destare a los items
+            albaran_dict["items"].append(linea_destare)
+            
+            # Recalcular total del albarán
+            albaran_dict["total_albaran"] = round(
+                sum(item.get("total", 0) for item in albaran_dict["items"]), 2
+            )
+            
+            descuento_aplicado = {
+                "porcentaje": descuento_porcentaje,
+                "kilos_descontados": kilos_destare,
+                "importe_descontado": round(kilos_destare * precio_unitario, 2)
+            }
+    
+    # Calcular kilos netos
+    kilos_netos = round(kilos_brutos - kilos_destare, 2)
+    
+    # Guardar datos de kilos en el albarán
+    albaran_dict["kilos_brutos"] = kilos_brutos
+    albaran_dict["kilos_destare"] = kilos_destare
+    albaran_dict["kilos_netos"] = kilos_netos
     
     albaran_dict.update({
         "created_at": datetime.now(),
         "updated_at": datetime.now()
     })
     
+    # Insertar albarán
     result = await albaranes_collection.insert_one(albaran_dict)
+    albaran_id = str(result.inserted_id)
+    
+    # Generar registro de comisión si el contrato tiene agente
+    if contrato and kilos_netos > 0:
+        agente_id = None
+        tipo_comision = None
+        valor_comision = 0
+        tipo_agente = None
+        
+        if albaran.tipo == "Entrada" and contrato.get("agente_compra"):
+            # Albarán de compra -> comisión de compra
+            agente_id = contrato.get("agente_compra")
+            tipo_comision = contrato.get("comision_compra_tipo") or contrato.get("comision_tipo")
+            valor_comision = contrato.get("comision_compra_valor") or contrato.get("comision_valor") or 0
+            tipo_agente = "compra"
+        elif albaran.tipo == "Salida" and contrato.get("agente_venta"):
+            # Albarán de venta -> comisión de venta
+            agente_id = contrato.get("agente_venta")
+            tipo_comision = contrato.get("comision_venta_tipo")
+            valor_comision = contrato.get("comision_venta_valor") or 0
+            tipo_agente = "venta"
+        
+        if agente_id and valor_comision > 0:
+            # Obtener precio promedio del albarán para calcular comisión
+            precio_kg = albaran_dict.get("total_albaran", 0) / kilos_netos if kilos_netos > 0 else 0
+            # Ajustar precio si hay destare (usar precio sin destare)
+            if kilos_destare > 0:
+                total_sin_destare = sum(
+                    item.get("total", 0) for item in albaran_dict["items"] 
+                    if not item.get("es_destare")
+                )
+                precio_kg = total_sin_destare / kilos_brutos if kilos_brutos > 0 else 0
+            
+            # Calcular importe de comisión basado en kilos netos
+            importe_comision = calcular_comision_agente(tipo_comision, valor_comision, kilos_netos, precio_kg)
+            
+            if importe_comision > 0:
+                # Obtener datos del agente
+                agente_doc = await agentes_collection.find_one({"_id": ObjectId(agente_id)})
+                agente_nombre = agente_doc.get("nombre", "Agente") if agente_doc else "Agente"
+                
+                # Crear registro de comisión
+                comision_record = {
+                    "albaran_id": albaran_id,
+                    "contrato_id": albaran.contrato_id,
+                    "agente_id": agente_id,
+                    "agente_nombre": agente_nombre,
+                    "tipo_agente": tipo_agente,
+                    "fecha_albaran": albaran.fecha,
+                    "campana": albaran.campana or contrato.get("campana"),
+                    "proveedor": albaran.proveedor if tipo_agente == "compra" else None,
+                    "cliente": albaran.cliente if tipo_agente == "venta" else None,
+                    "cultivo": albaran.cultivo or contrato.get("cultivo"),
+                    # Kilos
+                    "kilos_brutos": kilos_brutos,
+                    "kilos_destare": kilos_destare,
+                    "kilos_netos": kilos_netos,
+                    "precio_kg": round(precio_kg, 4),
+                    # Comisión
+                    "comision_tipo": tipo_comision,
+                    "comision_valor": valor_comision,
+                    "comision_importe": importe_comision,
+                    # Metadata
+                    "estado": "pendiente",  # pendiente, pagada, anulada
+                    "created_at": datetime.now(),
+                    "created_by": current_user.get("email", "unknown")
+                }
+                
+                comision_result = await comisiones_collection.insert_one(comision_record)
+                
+                comision_generada = {
+                    "comision_id": str(comision_result.inserted_id),
+                    "agente": agente_nombre,
+                    "tipo_agente": tipo_agente,
+                    "kilos_netos": kilos_netos,
+                    "comision_tipo": tipo_comision,
+                    "comision_valor": valor_comision,
+                    "importe": importe_comision
+                }
+    
     created = await albaranes_collection.find_one({"_id": result.inserted_id})
     
     response = {"success": True, "data": serialize_doc(created)}
     if descuento_aplicado:
         response["descuento_destare_aplicado"] = descuento_aplicado
+    if comision_generada:
+        response["comision_generada"] = comision_generada
     
     return response
 
