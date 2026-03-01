@@ -61,7 +61,7 @@ def get_current_user(token: str = None):
     """Placeholder for auth dependency"""
     pass
 
-from rbac_guards import get_current_user
+from rbac_guards import get_current_user  # noqa: F811
 
 
 @router.get("/comisiones/resumen")
@@ -90,7 +90,7 @@ async def get_resumen_comisiones(
         albaran_query["campana"] = campana
     
     # Get all albaranes with contrato_id
-    albaran_query["contrato_id"] = {"$exists": True, "$ne": None, "$ne": ""}
+    albaran_query["contrato_id"] = {"$exists": True, "$nin": [None, ""]}
     albaranes = await albaranes_collection.find(albaran_query).to_list(1000)
     
     # Get all contracts for commission info
