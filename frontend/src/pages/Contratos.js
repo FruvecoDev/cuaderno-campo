@@ -50,6 +50,7 @@ const Contratos = () => {
   const [showFilters, setShowFilters] = useState(false);
   
   const [formData, setFormData] = useState({
+    numero_contrato: '',
     tipo: puedeCompra ? 'Compra' : 'Venta',  // Compra o Venta según permiso
     campana: '2025/26',
     procedencia: 'Campo',
@@ -73,6 +74,18 @@ const Contratos = () => {
     comision_venta_tipo: 'porcentaje',
     comision_venta_valor: ''
   });
+  
+  // Generar número de contrato automático
+  const generarNumeroContrato = () => {
+    const year = new Date().getFullYear();
+    // Contar contratos existentes para generar número secuencial
+    const contratosDelAno = contratos.filter(c => {
+      const num = c.numero_contrato || '';
+      return num.includes(`MP-${year}`);
+    });
+    const siguiente = contratosDelAno.length + 1;
+    return `MP-${year}-${String(siguiente).padStart(6, '0')}`;
+  };
   
   // Estado para agentes
   const [agentesCompra, setAgentesCompra] = useState([]);
