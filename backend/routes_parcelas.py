@@ -8,7 +8,7 @@ from typing import Optional
 from bson import ObjectId
 from datetime import datetime
 
-from models import ParcelaCreate
+from models import ParcelaCreate, ParcelaUpdate
 from database import parcelas_collection, serialize_doc, serialize_docs
 from rbac_guards import (
     RequireCreate, RequireEdit, RequireDelete,
