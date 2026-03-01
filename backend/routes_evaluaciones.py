@@ -459,8 +459,8 @@ async def generate_evaluacion_pdf(
     for trat in tratamientos:
         trat_data = dict(trat)
         
-        # Obtener datos del aplicador
-        aplicador_id = trat.get("aplicador_id")
+        # Obtener datos del aplicador (el campo es tecnico_aplicador_id)
+        aplicador_id = trat.get("tecnico_aplicador_id") or trat.get("aplicador_id")
         if aplicador_id and ObjectId.is_valid(aplicador_id):
             aplicador = await tecnicos_aplicadores_collection.find_one({"_id": ObjectId(aplicador_id)})
             if aplicador:
