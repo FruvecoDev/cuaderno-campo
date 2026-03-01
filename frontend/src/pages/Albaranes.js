@@ -168,6 +168,9 @@ const Albaranes = () => {
     usar_otro_proveedor: false,  // Flag para indicar si usa otro proveedor/cliente
     // Líneas del albarán
     items: [{ descripcion: '', cantidad: '', unidad: 'kg', precio_unitario: '', total: 0 }],
+    // Descuento sobre el importe
+    descuento_porcentaje: 0,
+    descuento_importe: 0,
     observaciones: ''
   });
   
