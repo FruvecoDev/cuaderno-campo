@@ -842,6 +842,42 @@ const Tratamientos = () => {
     fetchStats();
   }, []);
   
+  // Manejar rutas de nuevo/editar
+  useEffect(() => {
+    if (location.pathname.includes('/nuevo')) {
+      setShowForm(true);
+      setEditingId(null);
+      resetForm();
+    } else if (location.pathname.includes('/editar/') && urlId) {
+      // Cargar tratamiento para edición
+      loadTratamientoForEdit(urlId);
+    } else {
+      // En la lista principal, cerrar formulario
+      if (showForm && !editingId) {
+        setShowForm(false);
+      }
+    }
+  }, [location.pathname, urlId]);
+  
+  // Cargar tratamiento para edición
+  const loadTratamientoForEdit = async (id) => {
+    try {
+      const tratamiento = tratamientos.find(t => t._id === id);
+      if (tratamiento) {
+        handleEdit(tratamiento, true); // true = no navegar
+      } else {
+        // Si no está en la lista, cargarlo del servidor
+        const data = await api.get(`/api/tratamientos/${id}`);
+        if (data.tratamiento) {
+          handleEdit(data.tratamiento, true);
+        }
+      }
+    } catch (err) {
+      console.error('Error loading tratamiento:', err);
+      setError('Error al cargar el tratamiento');
+    }
+  };
+  
   // Función para obtener estadísticas
   const fetchStats = async () => {
     try {
