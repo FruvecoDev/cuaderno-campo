@@ -1565,6 +1565,13 @@ const Parcelas = () => {
           </div>
         </div>
       )}
+
+      {/* Modal de importación KML/GeoJSON */}
+      <GeoImportModal
+        isOpen={showGeoImport}
+        onClose={() => setShowGeoImport(false)}
+        onImportComplete={() => fetchParcelas()}
+      />
     </div>
   );
 };
