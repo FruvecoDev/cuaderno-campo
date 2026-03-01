@@ -454,6 +454,8 @@ async def generate_evaluacion_pdf(
     if parcela_id:
         tratamientos = await tratamientos_collection.find({"parcelas_ids": parcela_id}).sort("fecha_tratamiento", -1).to_list(100)
     
+    print(f"PDF Gen: parcela_id={parcela_id}, tratamientos encontrados={len(tratamientos)}")
+    
     # Para cada tratamiento, obtener los datos completos del aplicador y la máquina
     tratamientos_enriquecidos = []
     for trat in tratamientos:
@@ -461,10 +463,14 @@ async def generate_evaluacion_pdf(
         
         # Obtener datos del aplicador (el campo es tecnico_aplicador_id)
         aplicador_id = trat.get("tecnico_aplicador_id") or trat.get("aplicador_id")
+        print(f"PDF Gen: Tratamiento {trat.get('_id')} - tecnico_aplicador_id={aplicador_id}")
+        
         if aplicador_id and ObjectId.is_valid(aplicador_id):
             aplicador = await tecnicos_aplicadores_collection.find_one({"_id": ObjectId(aplicador_id)})
+            print(f"PDF Gen: Aplicador encontrado: {aplicador.get('nombre') if aplicador else 'NO'}")
             if aplicador:
                 trat_data["aplicador_completo"] = serialize_doc(aplicador)
+                print(f"PDF Gen: aplicador_completo añadido al trat_data")
         
         # Obtener datos de la máquina
         maquina_id = trat.get("maquina_id")
