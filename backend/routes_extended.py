@@ -267,25 +267,27 @@ async def create_albaran(
             if not precio_unitario and contrato.get("precio"):
                 precio_unitario = float(contrato.get("precio", 0))
             
-            # Crear línea de descuento destare
+            # Crear línea de descuento destare con precio=0 e importe=0
+            # La línea solo muestra los kilos descontados, pero el cálculo real 
+            # se hace en el total del albarán: (kilos_brutos - kilos_destare) * precio
             linea_destare = {
                 "descripcion": f"Descuento Destare ({descuento_porcentaje}%)",
                 "producto": "DESTARE",
                 "lote": "",
-                "cantidad": -kilos_destare,  # Negativo porque es descuento
+                "cantidad": kilos_destare,  # Positivo para mostrar los kilos descontados
                 "unidad": "kg",
-                "precio_unitario": precio_unitario,
-                "total": round(-kilos_destare * precio_unitario, 2),
+                "precio_unitario": 0,  # Precio cero
+                "total": 0,  # Importe cero
                 "es_destare": True  # Marcador para identificar línea de destare
             }
             
             # Añadir línea de destare a los items
             albaran_dict["items"].append(linea_destare)
             
-            # Recalcular total del albarán
-            albaran_dict["total_albaran"] = round(
-                sum(item.get("total", 0) for item in albaran_dict["items"]), 2
-            )
+            # Calcular total del albarán: (kilos_brutos - kilos_destare) * precio
+            # El total NO se calcula sumando las líneas, sino con la fórmula de kilos netos
+            kilos_netos = kilos_brutos - kilos_destare
+            albaran_dict["total_albaran"] = round(kilos_netos * precio_unitario, 2)
             
             descuento_aplicado = {
                 "porcentaje": descuento_porcentaje,
