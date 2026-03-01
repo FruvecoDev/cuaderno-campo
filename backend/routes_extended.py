@@ -850,3 +850,354 @@ async def delete_comision_generada(
     
     await comisiones_collection.delete_one({"_id": ObjectId(comision_id)})
     return {"success": True, "message": "Comisión eliminada"}
+
+
+# ============================================================================
+# ALBARANES PDF
+# ============================================================================
+
+def format_number_spanish(value, decimals=2):
+    """Formatea un número al estilo español (. miles, , decimales)"""
+    if value is None:
+        return "0"
+    try:
+        num = float(value)
+        if decimals == 0:
+            formatted = f"{num:,.0f}"
+        else:
+            formatted = f"{num:,.{decimals}f}"
+        # Convertir formato americano a español
+        formatted = formatted.replace(",", "X").replace(".", ",").replace("X", ".")
+        return formatted
+    except:
+        return str(value)
+
+
+@router.get("/albaranes/{albaran_id}/pdf")
+async def generate_albaran_pdf(
+    albaran_id: str,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireAlbaranesAccess)
+):
+    """
+    Genera un PDF del albarán con el detalle de líneas y totales.
+    La línea de destare muestra los kilos pero con precio e importe = 0.
+    El total se calcula como: (kilos_brutos - kilos_destare) * precio
+    """
+    from fastapi.responses import Response
+    from weasyprint import HTML
+    from io import BytesIO
+    
+    if not ObjectId.is_valid(albaran_id):
+        raise HTTPException(status_code=400, detail="ID inválido")
+    
+    albaran = await albaranes_collection.find_one({"_id": ObjectId(albaran_id)})
+    if not albaran:
+        raise HTTPException(status_code=404, detail="Albarán no encontrado")
+    
+    # Obtener contrato si existe
+    contrato = None
+    if albaran.get("contrato_id"):
+        contrato = await contratos_collection.find_one({"_id": ObjectId(albaran["contrato_id"])})
+    
+    # Preparar datos
+    tipo = albaran.get("tipo", "Albarán")
+    fecha = albaran.get("fecha", "")
+    proveedor = albaran.get("proveedor", "-")
+    cliente = albaran.get("cliente", "-")
+    cultivo = albaran.get("cultivo", "-")
+    parcela = albaran.get("parcela_codigo", "-")
+    campana = albaran.get("campana", "-")
+    observaciones = albaran.get("observaciones", "")
+    
+    # Contrato info
+    numero_contrato = "-"
+    if contrato:
+        numero_contrato = contrato.get("numero_contrato", f"CON-{str(contrato['_id'])[-6:]}")
+    
+    # Kilos info
+    kilos_brutos = albaran.get("kilos_brutos", 0)
+    kilos_destare = albaran.get("kilos_destare", 0)
+    kilos_netos = albaran.get("kilos_netos", kilos_brutos - kilos_destare)
+    
+    # Items
+    items = albaran.get("items", [])
+    
+    # Separar líneas normales de la línea de destare
+    lineas_normales = [item for item in items if not item.get("es_destare")]
+    linea_destare = next((item for item in items if item.get("es_destare")), None)
+    
+    # Calcular precio unitario (de las líneas normales)
+    precio_unitario = 0
+    if lineas_normales:
+        precio_unitario = lineas_normales[0].get("precio_unitario", 0)
+    
+    # Total del albarán
+    total_albaran = albaran.get("total_albaran", 0)
+    
+    # Generar filas de la tabla
+    rows_html = ""
+    for idx, item in enumerate(items, 1):
+        es_destare = item.get("es_destare", False)
+        descripcion = item.get("descripcion", item.get("producto", "-"))
+        cantidad = item.get("cantidad", 0)
+        unidad = item.get("unidad", "kg")
+        precio = item.get("precio_unitario", 0)
+        total = item.get("total", 0)
+        
+        row_style = 'background-color: #fef2f2; color: #dc2626;' if es_destare else ''
+        
+        rows_html += f"""
+        <tr style="{row_style}">
+            <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: center;">{idx}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{descripcion}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: right;">{format_number_spanish(cantidad, 2)}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: center;">{unidad}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: right;">{format_number_spanish(precio, 4)} €</td>
+            <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 500;">{format_number_spanish(total, 2)} €</td>
+        </tr>
+        """
+    
+    # Determinar si es compra o venta para mostrar proveedor o cliente
+    es_venta = "venta" in tipo.lower()
+    entidad_label = "Cliente" if es_venta else "Proveedor"
+    entidad_valor = cliente if es_venta else proveedor
+    
+    # Generar HTML del PDF
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            @page {{
+                size: A4;
+                margin: 15mm;
+            }}
+            body {{
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 10pt;
+                color: #1f2937;
+                line-height: 1.4;
+            }}
+            .header {{
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+                border-bottom: 2px solid #3b82f6;
+            }}
+            .logo {{
+                font-size: 20pt;
+                font-weight: bold;
+                color: #1e40af;
+            }}
+            .albaran-info {{
+                text-align: right;
+            }}
+            .albaran-numero {{
+                font-size: 16pt;
+                font-weight: bold;
+                color: #1e40af;
+            }}
+            .albaran-tipo {{
+                display: inline-block;
+                padding: 4px 12px;
+                border-radius: 4px;
+                font-size: 9pt;
+                font-weight: 600;
+                background-color: {'#dcfce7' if not es_venta else '#fee2e2'};
+                color: {'#166534' if not es_venta else '#991b1b'};
+                margin-top: 5px;
+            }}
+            .datos-grid {{
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+                margin-bottom: 20px;
+            }}
+            .datos-box {{
+                background-color: #f8fafc;
+                padding: 12px;
+                border-radius: 6px;
+                border: 1px solid #e2e8f0;
+            }}
+            .datos-box h3 {{
+                margin: 0 0 8px 0;
+                font-size: 10pt;
+                color: #64748b;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }}
+            .datos-box p {{
+                margin: 4px 0;
+                font-size: 10pt;
+            }}
+            .datos-box .valor {{
+                font-weight: 600;
+                color: #1e293b;
+            }}
+            .table-container {{
+                margin-top: 20px;
+            }}
+            table {{
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 20px;
+            }}
+            th {{
+                background-color: #1e40af;
+                color: white;
+                padding: 10px 8px;
+                text-align: left;
+                font-size: 9pt;
+                font-weight: 600;
+            }}
+            th:nth-child(3), th:nth-child(5), th:nth-child(6) {{
+                text-align: right;
+            }}
+            th:nth-child(4) {{
+                text-align: center;
+            }}
+            .totales-box {{
+                margin-top: 20px;
+                margin-left: auto;
+                width: 300px;
+                background-color: #f0fdf4;
+                border: 2px solid #86efac;
+                border-radius: 8px;
+                padding: 15px;
+            }}
+            .totales-row {{
+                display: flex;
+                justify-content: space-between;
+                padding: 6px 0;
+                font-size: 10pt;
+            }}
+            .totales-row.destare {{
+                color: #dc2626;
+            }}
+            .totales-row.total {{
+                border-top: 2px solid #16a34a;
+                margin-top: 8px;
+                padding-top: 10px;
+                font-size: 14pt;
+                font-weight: bold;
+                color: #166534;
+            }}
+            .observaciones {{
+                margin-top: 20px;
+                padding: 12px;
+                background-color: #fffbeb;
+                border: 1px solid #fcd34d;
+                border-radius: 6px;
+            }}
+            .observaciones h4 {{
+                margin: 0 0 5px 0;
+                font-size: 9pt;
+                color: #92400e;
+            }}
+            .footer {{
+                margin-top: 40px;
+                padding-top: 15px;
+                border-top: 1px solid #e5e7eb;
+                font-size: 8pt;
+                color: #6b7280;
+                text-align: center;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <div class="logo">FRUVECO</div>
+            <div class="albaran-info">
+                <div class="albaran-numero">ALB-{str(albaran['_id'])[-6:].upper()}</div>
+                <div class="albaran-tipo">{tipo}</div>
+                <div style="margin-top: 8px; font-size: 10pt;">Fecha: <strong>{fecha}</strong></div>
+            </div>
+        </div>
+        
+        <div class="datos-grid">
+            <div class="datos-box">
+                <h3>{entidad_label}</h3>
+                <p class="valor">{entidad_valor}</p>
+            </div>
+            <div class="datos-box">
+                <h3>Contrato</h3>
+                <p class="valor">{numero_contrato}</p>
+            </div>
+        </div>
+        
+        <div class="datos-grid">
+            <div class="datos-box">
+                <h3>Cultivo</h3>
+                <p class="valor">{cultivo}</p>
+            </div>
+            <div class="datos-box">
+                <h3>Parcela / Campaña</h3>
+                <p><span class="valor">{parcela}</span> / {campana}</p>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 40px;">#</th>
+                        <th>Descripción</th>
+                        <th style="width: 100px;">Cantidad</th>
+                        <th style="width: 60px;">Ud.</th>
+                        <th style="width: 100px;">Precio</th>
+                        <th style="width: 100px;">Importe</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {rows_html}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="totales-box">
+            <div class="totales-row">
+                <span>Kilos Brutos:</span>
+                <span>{format_number_spanish(kilos_brutos, 2)} kg</span>
+            </div>
+            {'<div class="totales-row destare"><span>Kilos Destare:</span><span>- ' + format_number_spanish(kilos_destare, 2) + ' kg</span></div>' if kilos_destare > 0 else ''}
+            <div class="totales-row" style="font-weight: 600;">
+                <span>Kilos Netos:</span>
+                <span>{format_number_spanish(kilos_netos, 2)} kg</span>
+            </div>
+            <div class="totales-row">
+                <span>Precio/kg:</span>
+                <span>{format_number_spanish(precio_unitario, 4)} €</span>
+            </div>
+            <div class="totales-row total">
+                <span>TOTAL:</span>
+                <span>{format_number_spanish(total_albaran, 2)} €</span>
+            </div>
+        </div>
+        
+        {f'<div class="observaciones"><h4>Observaciones</h4><p>{observaciones}</p></div>' if observaciones else ''}
+        
+        <div class="footer">
+            Documento generado el {datetime.now().strftime("%d/%m/%Y %H:%M")} · FRUVECO - Sistema de Gestión Agrícola
+        </div>
+    </body>
+    </html>
+    """
+    
+    # Generar PDF
+    pdf_buffer = BytesIO()
+    HTML(string=html_content).write_pdf(pdf_buffer)
+    pdf_buffer.seek(0)
+    
+    filename = f"albaran_{str(albaran['_id'])[-6:]}_{fecha.replace('-', '')}.pdf"
+    
+    return Response(
+        content=pdf_buffer.read(),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"inline; filename={filename}"
+        }
+    )
