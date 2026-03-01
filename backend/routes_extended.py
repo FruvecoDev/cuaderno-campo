@@ -965,6 +965,358 @@ async def delete_comision_generada(
 
 
 # ============================================================================
+# COMISIONES - EXPORTACIÓN PDF Y EXCEL
+# ============================================================================
+
+@router.get("/comisiones-generadas/pdf")
+async def export_comisiones_pdf(
+    agente_id: Optional[str] = None,
+    tipo_agente: Optional[str] = None,
+    campana: Optional[str] = None,
+    estado: Optional[str] = None,
+    fecha_desde: Optional[str] = None,
+    fecha_hasta: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Genera un PDF con el listado de comisiones filtrado.
+    """
+    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.units import mm
+    import io
+    
+    # Construir query
+    query = {}
+    if agente_id:
+        query["agente_id"] = agente_id
+    if tipo_agente:
+        query["tipo_agente"] = tipo_agente
+    if campana:
+        query["campana"] = campana
+    if estado:
+        query["estado"] = estado
+    if fecha_desde or fecha_hasta:
+        fecha_query = {}
+        if fecha_desde:
+            fecha_query["$gte"] = fecha_desde
+        if fecha_hasta:
+            fecha_query["$lte"] = fecha_hasta
+        if fecha_query:
+            query["fecha_albaran"] = fecha_query
+    
+    comisiones = await comisiones_collection.find(query).sort([("agente_nombre", 1), ("fecha_albaran", 1)]).to_list(1000)
+    
+    # Generar numero_albaran para registros antiguos
+    for c in comisiones:
+        if not c.get("numero_albaran") and c.get("albaran_id"):
+            c["numero_albaran"] = f"ALB-{c['albaran_id'][-6:].upper()}"
+    
+    # Agrupar por agente
+    comisiones_por_agente = {}
+    for c in comisiones:
+        agente = c.get("agente_nombre", "Sin Agente")
+        if agente not in comisiones_por_agente:
+            comisiones_por_agente[agente] = []
+        comisiones_por_agente[agente].append(c)
+    
+    # Crear PDF
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), 
+                           leftMargin=15*mm, rightMargin=15*mm, 
+                           topMargin=15*mm, bottomMargin=15*mm)
+    
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle('CustomTitle', parent=styles['Heading1'], fontSize=16, spaceAfter=10)
+    subtitle_style = ParagraphStyle('CustomSubtitle', parent=styles['Normal'], fontSize=10, textColor=colors.grey)
+    agente_style = ParagraphStyle('AgenteTitle', parent=styles['Heading2'], fontSize=12, spaceBefore=15, spaceAfter=5, textColor=colors.HexColor('#1976d2'))
+    
+    elements = []
+    
+    # Título
+    elements.append(Paragraph("LISTADO DE COMISIONES", title_style))
+    
+    # Subtítulo con filtros
+    filtros_text = []
+    if fecha_desde:
+        filtros_text.append(f"Desde: {fecha_desde}")
+    if fecha_hasta:
+        filtros_text.append(f"Hasta: {fecha_hasta}")
+    if estado:
+        filtros_text.append(f"Estado: {estado.capitalize()}")
+    if tipo_agente:
+        filtros_text.append(f"Tipo: {tipo_agente.capitalize()}")
+    
+    if filtros_text:
+        elements.append(Paragraph(" | ".join(filtros_text), subtitle_style))
+    else:
+        elements.append(Paragraph("Todos los registros", subtitle_style))
+    
+    elements.append(Spacer(1, 10*mm))
+    
+    # Función para formatear números
+    def fmt_num(num, decimals=2):
+        return f"{(num or 0):,.{decimals}f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    
+    # Crear tabla por cada agente
+    for agente_nombre, comisiones_agente in comisiones_por_agente.items():
+        elements.append(Paragraph(f"Agente: {agente_nombre}", agente_style))
+        
+        # Datos de la tabla
+        data = [['Nº Albarán', 'Fecha', 'Proveedor/Cliente', 'Cultivo', 'Kg Netos', 'Comisión', 'Importe', 'Estado']]
+        
+        total_kilos = 0
+        total_importe = 0
+        
+        for c in comisiones_agente:
+            data.append([
+                c.get("numero_albaran", "-"),
+                c.get("fecha_albaran", "-"),
+                c.get("proveedor_nombre", "-")[:25],
+                c.get("cultivo", "-")[:15],
+                fmt_num(c.get("kilos_netos", 0), 0),
+                f"{c.get('comision_tipo', '')} {fmt_num(c.get('comision_valor', 0))}",
+                f"{fmt_num(c.get('comision_importe', 0))} €",
+                c.get("estado", "-").capitalize()
+            ])
+            total_kilos += c.get("kilos_netos", 0)
+            total_importe += c.get("comision_importe", 0)
+        
+        # Fila de totales
+        data.append(['', '', '', 'TOTAL:', fmt_num(total_kilos, 0), '', f"{fmt_num(total_importe)} €", ''])
+        
+        # Crear tabla
+        col_widths = [55, 55, 100, 70, 55, 70, 60, 55]
+        table = Table(data, colWidths=col_widths)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1976d2')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 8),
+            ('FONTSIZE', (0, 1), (-1, -1), 7),
+            ('ALIGN', (4, 0), (4, -1), 'RIGHT'),
+            ('ALIGN', (6, 0), (6, -1), 'RIGHT'),
+            ('ALIGN', (7, 0), (7, -1), 'CENTER'),
+            ('GRID', (0, 0), (-1, -2), 0.5, colors.grey),
+            ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#e3f2fd')),
+            ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+            ('TOPPADDING', (0, 0), (-1, -1), 3),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+        ]))
+        
+        elements.append(table)
+        elements.append(Spacer(1, 8*mm))
+    
+    # Gran total
+    gran_total_kilos = sum(c.get("kilos_netos", 0) for c in comisiones)
+    gran_total_importe = sum(c.get("comision_importe", 0) for c in comisiones)
+    
+    elements.append(Spacer(1, 5*mm))
+    total_data = [
+        ['RESUMEN TOTAL', '', f'{fmt_num(gran_total_kilos, 0)} kg', f'{fmt_num(gran_total_importe)} €']
+    ]
+    total_table = Table(total_data, colWidths=[200, 100, 100, 100])
+    total_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#1976d2')),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.white),
+        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('ALIGN', (2, 0), (-1, -1), 'RIGHT'),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+    ]))
+    elements.append(total_table)
+    
+    doc.build(elements)
+    buffer.seek(0)
+    
+    return StreamingResponse(
+        buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"inline; filename=comisiones_{fecha_desde or 'all'}_{fecha_hasta or 'all'}.pdf"}
+    )
+
+
+@router.get("/comisiones-generadas/excel")
+async def export_comisiones_excel(
+    agente_id: Optional[str] = None,
+    tipo_agente: Optional[str] = None,
+    campana: Optional[str] = None,
+    estado: Optional[str] = None,
+    fecha_desde: Optional[str] = None,
+    fecha_hasta: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Genera un Excel con el listado de comisiones filtrado.
+    """
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+    from openpyxl.utils import get_column_letter
+    import io
+    
+    # Construir query
+    query = {}
+    if agente_id:
+        query["agente_id"] = agente_id
+    if tipo_agente:
+        query["tipo_agente"] = tipo_agente
+    if campana:
+        query["campana"] = campana
+    if estado:
+        query["estado"] = estado
+    if fecha_desde or fecha_hasta:
+        fecha_query = {}
+        if fecha_desde:
+            fecha_query["$gte"] = fecha_desde
+        if fecha_hasta:
+            fecha_query["$lte"] = fecha_hasta
+        if fecha_query:
+            query["fecha_albaran"] = fecha_query
+    
+    comisiones = await comisiones_collection.find(query).sort([("agente_nombre", 1), ("fecha_albaran", 1)]).to_list(1000)
+    
+    # Generar numero_albaran para registros antiguos
+    for c in comisiones:
+        if not c.get("numero_albaran") and c.get("albaran_id"):
+            c["numero_albaran"] = f"ALB-{c['albaran_id'][-6:].upper()}"
+    
+    # Crear workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Comisiones"
+    
+    # Estilos
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="1976D2", end_color="1976D2", fill_type="solid")
+    total_fill = PatternFill(start_color="E3F2FD", end_color="E3F2FD", fill_type="solid")
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Título
+    ws.merge_cells('A1:I1')
+    ws['A1'] = f"LISTADO DE COMISIONES"
+    ws['A1'].font = Font(bold=True, size=14)
+    ws['A1'].alignment = Alignment(horizontal='center')
+    
+    # Subtítulo con filtros
+    filtros = []
+    if fecha_desde:
+        filtros.append(f"Desde: {fecha_desde}")
+    if fecha_hasta:
+        filtros.append(f"Hasta: {fecha_hasta}")
+    ws.merge_cells('A2:I2')
+    ws['A2'] = " | ".join(filtros) if filtros else "Todos los registros"
+    ws['A2'].alignment = Alignment(horizontal='center')
+    
+    # Headers
+    headers = ['Agente', 'Nº Albarán', 'Fecha', 'Proveedor/Cliente', 'Cultivo', 'Kg Netos', 'Comisión', 'Importe', 'Estado']
+    row = 4
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=row, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = Alignment(horizontal='center')
+        cell.border = thin_border
+    
+    # Datos
+    row = 5
+    current_agente = None
+    agente_start_row = row
+    agente_totals = {"kilos": 0, "importe": 0}
+    
+    for c in comisiones:
+        agente = c.get("agente_nombre", "Sin Agente")
+        
+        # Si cambia el agente, agregar subtotal del anterior
+        if current_agente and agente != current_agente:
+            ws.cell(row=row, column=1).value = ""
+            ws.cell(row=row, column=5).value = f"Subtotal {current_agente}:"
+            ws.cell(row=row, column=5).font = Font(bold=True)
+            ws.cell(row=row, column=6).value = agente_totals["kilos"]
+            ws.cell(row=row, column=6).number_format = '#,##0'
+            ws.cell(row=row, column=8).value = agente_totals["importe"]
+            ws.cell(row=row, column=8).number_format = '#,##0.00 €'
+            for col in range(1, 10):
+                ws.cell(row=row, column=col).fill = total_fill
+            row += 1
+            agente_totals = {"kilos": 0, "importe": 0}
+        
+        current_agente = agente
+        
+        ws.cell(row=row, column=1, value=agente)
+        ws.cell(row=row, column=2, value=c.get("numero_albaran", "-"))
+        ws.cell(row=row, column=3, value=c.get("fecha_albaran", "-"))
+        ws.cell(row=row, column=4, value=c.get("proveedor_nombre", "-"))
+        ws.cell(row=row, column=5, value=c.get("cultivo", "-"))
+        ws.cell(row=row, column=6, value=c.get("kilos_netos", 0))
+        ws.cell(row=row, column=6).number_format = '#,##0'
+        ws.cell(row=row, column=7, value=f"{c.get('comision_tipo', '')} {c.get('comision_valor', 0)}")
+        ws.cell(row=row, column=8, value=c.get("comision_importe", 0))
+        ws.cell(row=row, column=8).number_format = '#,##0.00 €'
+        ws.cell(row=row, column=9, value=c.get("estado", "-").capitalize())
+        
+        for col in range(1, 10):
+            ws.cell(row=row, column=col).border = thin_border
+        
+        agente_totals["kilos"] += c.get("kilos_netos", 0)
+        agente_totals["importe"] += c.get("comision_importe", 0)
+        row += 1
+    
+    # Último subtotal de agente
+    if current_agente:
+        ws.cell(row=row, column=5).value = f"Subtotal {current_agente}:"
+        ws.cell(row=row, column=5).font = Font(bold=True)
+        ws.cell(row=row, column=6).value = agente_totals["kilos"]
+        ws.cell(row=row, column=6).number_format = '#,##0'
+        ws.cell(row=row, column=8).value = agente_totals["importe"]
+        ws.cell(row=row, column=8).number_format = '#,##0.00 €'
+        for col in range(1, 10):
+            ws.cell(row=row, column=col).fill = total_fill
+        row += 2
+    
+    # Gran total
+    gran_total_kilos = sum(c.get("kilos_netos", 0) for c in comisiones)
+    gran_total_importe = sum(c.get("comision_importe", 0) for c in comisiones)
+    
+    ws.cell(row=row, column=5).value = "TOTAL GENERAL:"
+    ws.cell(row=row, column=5).font = Font(bold=True, color="FFFFFF")
+    ws.cell(row=row, column=5).fill = header_fill
+    ws.cell(row=row, column=6).value = gran_total_kilos
+    ws.cell(row=row, column=6).number_format = '#,##0'
+    ws.cell(row=row, column=6).font = Font(bold=True, color="FFFFFF")
+    ws.cell(row=row, column=6).fill = header_fill
+    ws.cell(row=row, column=8).value = gran_total_importe
+    ws.cell(row=row, column=8).number_format = '#,##0.00 €'
+    ws.cell(row=row, column=8).font = Font(bold=True, color="FFFFFF")
+    ws.cell(row=row, column=8).fill = header_fill
+    
+    # Ajustar ancho de columnas
+    column_widths = [20, 12, 12, 25, 15, 12, 15, 12, 12]
+    for i, width in enumerate(column_widths, 1):
+        ws.column_dimensions[get_column_letter(i)].width = width
+    
+    # Guardar en buffer
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+    
+    filename = f"comisiones_{fecha_desde or 'all'}_{fecha_hasta or 'all'}.xlsx"
+    
+    return StreamingResponse(
+        buffer,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+
+# ============================================================================
 # ALBARANES PDF
 # ============================================================================
 
