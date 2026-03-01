@@ -1011,6 +1011,11 @@ async def generate_albaran_pdf(
     if lineas_normales:
         precio_unitario = lineas_normales[0].get("precio_unitario", 0)
     
+    # Descuento sobre importe
+    descuento_pct = albaran.get("descuento_porcentaje", 0) or 0
+    descuento_importe = albaran.get("descuento_importe", 0) or 0
+    subtotal = albaran.get("subtotal", 0) or 0
+    
     # Total del albarán
     total_albaran = albaran.get("total_albaran", 0)
     
