@@ -269,7 +269,7 @@ async def create_albaran(
             
             # Crear línea de descuento destare con precio=0 e importe=0
             # La línea solo muestra los kilos descontados, pero el cálculo real 
-            # se hace en el total del albarán: (kilos_brutos - kilos_destare) * precio
+            # se hace en el total del albarán
             linea_destare = {
                 "descripcion": f"Descuento Destare ({descuento_porcentaje}%)",
                 "producto": "DESTARE",
@@ -277,6 +277,7 @@ async def create_albaran(
                 "cantidad": kilos_destare,  # Positivo para mostrar los kilos descontados
                 "unidad": "kg",
                 "precio_unitario": 0,  # Precio cero
+                "descuento": 0,
                 "total": 0,  # Importe cero
                 "es_destare": True  # Marcador para identificar línea de destare
             }
@@ -284,10 +285,17 @@ async def create_albaran(
             # Añadir línea de destare a los items
             albaran_dict["items"].append(linea_destare)
             
-            # Calcular total del albarán: (kilos_brutos - kilos_destare) * precio
-            # El total NO se calcula sumando las líneas, sino con la fórmula de kilos netos
+            # Calcular total del albarán teniendo en cuenta el descuento de las líneas:
+            # 1. Obtener el descuento de la primera línea (todas deberían tener el mismo)
+            descuento_linea = float(albaran_dict.get("items", [{}])[0].get("descuento", 0) or 0)
+            
+            # 2. Calcular: kilos_netos × precio × (1 - descuento_linea/100)
             kilos_netos = kilos_brutos - kilos_destare
-            albaran_dict["total_albaran"] = round(kilos_netos * precio_unitario, 2)
+            subtotal_sin_dto = kilos_netos * precio_unitario
+            if descuento_linea > 0:
+                albaran_dict["total_albaran"] = round(subtotal_sin_dto * (1 - descuento_linea / 100), 2)
+            else:
+                albaran_dict["total_albaran"] = round(subtotal_sin_dto, 2)
             
             descuento_aplicado = {
                 "porcentaje": descuento_porcentaje,
