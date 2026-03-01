@@ -268,8 +268,7 @@ async def create_albaran(
                 precio_unitario = float(contrato.get("precio", 0))
             
             # Crear línea de descuento destare con precio=0 e importe=0
-            # La línea solo muestra los kilos descontados, pero el cálculo real 
-            # se hace en el total del albarán
+            # La línea solo muestra los kilos descontados
             linea_destare = {
                 "descripcion": f"Descuento Destare ({descuento_porcentaje}%)",
                 "producto": "DESTARE",
@@ -285,17 +284,18 @@ async def create_albaran(
             # Añadir línea de destare a los items
             albaran_dict["items"].append(linea_destare)
             
-            # Calcular total del albarán teniendo en cuenta el descuento de las líneas:
-            # 1. Obtener el descuento de la primera línea (todas deberían tener el mismo)
-            descuento_linea = float(albaran_dict.get("items", [{}])[0].get("descuento", 0) or 0)
+            # Calcular total del albarán:
+            # El importe de la línea YA tiene el descuento aplicado
+            # Solo hay que restar el destare proporcionalmente
+            importe_linea = float(albaran_dict.get("items", [{}])[0].get("total", 0) or 0)
             
-            # 2. Calcular: kilos_netos × precio × (1 - descuento_linea/100)
-            kilos_netos = kilos_brutos - kilos_destare
-            subtotal_sin_dto = kilos_netos * precio_unitario
-            if descuento_linea > 0:
-                albaran_dict["total_albaran"] = round(subtotal_sin_dto * (1 - descuento_linea / 100), 2)
+            # El destare se calcula proporcionalmente sobre el importe
+            # importe_destare = importe_linea × (kilos_destare / kilos_brutos)
+            if kilos_brutos > 0:
+                importe_destare = importe_linea * (kilos_destare / kilos_brutos)
+                albaran_dict["total_albaran"] = round(importe_linea - importe_destare, 2)
             else:
-                albaran_dict["total_albaran"] = round(subtotal_sin_dto, 2)
+                albaran_dict["total_albaran"] = round(importe_linea, 2)
             
             descuento_aplicado = {
                 "porcentaje": descuento_porcentaje,
