@@ -471,25 +471,40 @@ const Contratos = () => {
         {/* Formulario */}
         <div className="card" style={{ marginBottom: '1.5rem' }}>
           <div className="card-header">
-            <h3 className="card-title">{editingId ? t('contracts.editContract') : t('contracts.newContract')}</h3>
+            <h3 className="card-title">{editingId ? 'Editar Contrato' : 'Nuevo Contrato'}</h3>
           </div>
           <form onSubmit={handleSubmit} style={{ padding: '1rem' }}>
+            {/* Primera fila: Número de Contrato */}
+            <div className="form-group" style={{ marginBottom: '1.5rem', maxWidth: '300px' }}>
+              <label className="form-label">Número de Contrato *</label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={formData.numero_contrato} 
+                readOnly={!editingId}
+                onChange={(e) => editingId && setFormData({...formData, numero_contrato: e.target.value})}
+                style={!editingId ? { backgroundColor: 'hsl(var(--muted))', cursor: 'not-allowed', fontWeight: '600' } : { fontWeight: '600' }}
+                data-testid="input-numero-contrato"
+              />
+              {!editingId && <small style={{ color: 'hsl(var(--muted-foreground))' }}>Se genera automáticamente</small>}
+            </div>
+            
             <div className="grid-3">
               <div className="form-group">
-                <label className="form-label">{t('contracts.type')} *</label>
+                <label className="form-label">Tipo *</label>
                 <select 
                   className="form-select" 
                   value={formData.tipo} 
                   onChange={(e) => setFormData({...formData, tipo: e.target.value})}
                   data-testid="select-tipo"
                 >
-                  {puedeCompra && <option value="Compra">{t('contracts.buy')}</option>}
-                  {puedeVenta && <option value="Venta">{t('contracts.sell')}</option>}
+                  {puedeCompra && <option value="Compra">Compra</option>}
+                  {puedeVenta && <option value="Venta">Venta</option>}
                 </select>
               </div>
               
               <div className="form-group">
-                <label className="form-label">{t('contracts.campaign')} *</label>
+                <label className="form-label">Campaña *</label>
                 <select 
                   className="form-select" 
                   value={formData.campana} 
@@ -503,7 +518,7 @@ const Contratos = () => {
               </div>
               
               <div className="form-group">
-                <label className="form-label">{t('contracts.date')} *</label>
+                <label className="form-label">Fecha Contrato *</label>
                 <input 
                   type="date" 
                   className="form-input" 
@@ -515,7 +530,7 @@ const Contratos = () => {
               </div>
               
               <div className="form-group">
-                <label className="form-label">{t('contracts.origin')}</label>
+                <label className="form-label">Procedencia</label>
                 <select 
                   className="form-select" 
                   value={formData.procedencia} 
@@ -530,7 +545,7 @@ const Contratos = () => {
               {/* Proveedor - solo para compras */}
               {formData.tipo === 'Compra' && (
                 <div className="form-group">
-                  <label className="form-label">{t('contracts.supplier')}</label>
+                  <label className="form-label">Proveedor</label>
                   <select 
                     className="form-select" 
                     value={formData.proveedor_id} 
@@ -544,7 +559,7 @@ const Contratos = () => {
                     }}
                     data-testid="select-proveedor"
                   >
-                    <option value="">-- {t('common.select')} --</option>
+                    <option value="">-- Seleccionar --</option>
                     {proveedores.map(p => (
                       <option key={p._id} value={p._id}>{p.nombre}</option>
                     ))}
@@ -555,7 +570,7 @@ const Contratos = () => {
               {/* Cliente - solo para ventas */}
               {formData.tipo === 'Venta' && (
                 <div className="form-group">
-                  <label className="form-label">{t('contracts.client')}</label>
+                  <label className="form-label">Cliente</label>
                   <select 
                     className="form-select" 
                     value={formData.cliente_id} 
@@ -569,7 +584,7 @@ const Contratos = () => {
                     }}
                     data-testid="select-cliente"
                   >
-                    <option value="">-- {t('common.select')} --</option>
+                    <option value="">-- Seleccionar --</option>
                     {clientes.map(c => (
                       <option key={c._id} value={c._id}>{c.nombre}</option>
                     ))}
