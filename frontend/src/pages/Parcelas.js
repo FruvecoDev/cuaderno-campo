@@ -1334,8 +1334,16 @@ const Parcelas = () => {
               
               {fieldsConfig.codigo_plantacion && (
                 <div className="form-group">
-                  <label className="form-label">Código Plantación *</label>
-                  <input type="text" className="form-input" value={formData.codigo_plantacion} onChange={(e) => setFormData({...formData, codigo_plantacion: e.target.value})} required />
+                  <label className="form-label">Código Plantación {!editingId && '(Auto)'}</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    value={formData.codigo_plantacion} 
+                    onChange={(e) => setFormData({...formData, codigo_plantacion: e.target.value})} 
+                    readOnly={!editingId}
+                    style={!editingId ? { backgroundColor: 'hsl(var(--muted))', cursor: 'not-allowed' } : {}}
+                  />
+                  {!editingId && <small style={{ color: 'hsl(var(--muted-foreground))' }}>Se genera automáticamente al seleccionar contrato</small>}
                 </div>
               )}
               
@@ -1356,8 +1364,24 @@ const Parcelas = () => {
               
               {fieldsConfig.finca && (
                 <div className="form-group">
-                  <label className="form-label">Finca *</label>
-                  <input type="text" className="form-input" value={formData.finca} onChange={(e) => setFormData({...formData, finca: e.target.value})} required />
+                  <label className="form-label">Finca</label>
+                  <select
+                    className="form-select"
+                    value={formData.finca}
+                    onChange={(e) => setFormData({...formData, finca: e.target.value})}
+                    data-testid="select-finca"
+                  >
+                    <option value="">-- Sin finca asignada --</option>
+                    {fincas
+                      .filter(f => f.denominacion) // Solo fincas con nombre
+                      .map(f => (
+                        <option key={f._id} value={f.denominacion}>
+                          {f.denominacion} {f.provincia ? `(${f.provincia})` : ''}
+                        </option>
+                      ))
+                    }
+                  </select>
+                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>Opcional - Selecciona una finca existente</small>
                 </div>
               )}
               
@@ -1378,8 +1402,23 @@ const Parcelas = () => {
               
               {fieldsConfig.variedad && (
                 <div className="form-group">
-                  <label className="form-label">Variedad *</label>
-                  <input type="text" className="form-input" value={formData.variedad} onChange={(e) => setFormData({...formData, variedad: e.target.value})} required />
+                  <label className="form-label">Variedad</label>
+                  <select
+                    className="form-select"
+                    value={formData.variedad}
+                    onChange={(e) => setFormData({...formData, variedad: e.target.value})}
+                    data-testid="select-variedad"
+                  >
+                    <option value="">-- Sin variedad --</option>
+                    {getVariedadesParaCultivo().map(v => (
+                      <option key={v} value={v}>{v}</option>
+                    ))}
+                  </select>
+                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
+                    {formData.cultivo 
+                      ? `Variedades disponibles para ${formData.cultivo}` 
+                      : 'Selecciona un cultivo primero'}
+                  </small>
                 </div>
               )}
               
