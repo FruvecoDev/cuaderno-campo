@@ -1170,8 +1170,22 @@ const Albaranes = () => {
                   </thead>
                   <tbody>
                     {formData.items.map((item, index) => (
-                      <tr key={index}>
+                      <tr key={index} style={item.es_destare ? { backgroundColor: '#fef2f2' } : {}}>
                         <td>
+                          {/* Línea de destare - solo lectura */}
+                          {item.es_destare ? (
+                            <div style={{ 
+                              padding: '0.5rem', 
+                              color: '#dc2626', 
+                              fontWeight: '500',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem'
+                            }}>
+                              <span style={{ fontSize: '1.1rem' }}>⚠️</span>
+                              {item.descripcion}
+                            </div>
+                          ) : (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                             {/* Si hay descripción autocompletada del contrato, mostrar primero el input */}
                             {item.descripcion && !item.articulo_id ? (
