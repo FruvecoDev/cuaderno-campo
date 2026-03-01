@@ -1257,6 +1257,16 @@ const Tratamientos = () => {
   
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
   
+  // Filtrar parcelas según los criterios de búsqueda
+  const filteredParcelas = useMemo(() => {
+    return parcelas.filter(p => {
+      if (parcelaSearch.proveedor && p.proveedor !== parcelaSearch.proveedor) return false;
+      if (parcelaSearch.cultivo && p.cultivo !== parcelaSearch.cultivo) return false;
+      if (parcelaSearch.campana && p.campana !== parcelaSearch.campana) return false;
+      return true;
+    });
+  }, [parcelas, parcelaSearch]);
+  
   // Si estamos en modo formulario (página de nuevo/editar), mostrar solo el formulario
   if (isFormMode) {
     return (
