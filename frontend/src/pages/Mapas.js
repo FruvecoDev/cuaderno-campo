@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polygon, useMap, FeatureGroup } from 'react-leaflet';
-import { EditControl } from 'react-leaflet-draw';
+import React, { useState, useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Polygon, useMap } from 'react-leaflet';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { Map, Layers, MapPin, Edit2, Save, X, Maximize2, List, Filter, Leaf, Ruler, Pentagon, Trash2, Check } from 'lucide-react';
+import { Map, Layers, MapPin, Edit2, Save, X, Maximize2, List, Filter, Leaf, Ruler } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import 'leaflet/dist/leaflet.css';
-import 'leaflet-draw/dist/leaflet.draw.css';
 import L from 'leaflet';
 import '../App.css';
 
@@ -44,56 +42,19 @@ const CROP_COLORS = {
   'default': '#6b7280'
 };
 
-// Component to fit bounds to markers/polygons
+// Component to fit bounds to markers
 const FitBounds = ({ parcelas }) => {
   const map = useMap();
   
   useEffect(() => {
-    const bounds = [];
-    
-    parcelas.forEach(p => {
-      // Add polygon bounds if available
-      if (p.recintos?.[0]?.geometria?.length > 0) {
-        p.recintos[0].geometria.forEach(coord => {
-          if (coord.lat && coord.lng) {
-            bounds.push([coord.lat, coord.lng]);
-          }
-        });
-      }
-      // Add marker position
-      if (p.latitud && p.longitud) {
-        bounds.push([p.latitud, p.longitud]);
-      }
-    });
-    
-    if (bounds.length > 0) {
+    const validParcelas = parcelas.filter(p => p.latitud && p.longitud);
+    if (validParcelas.length > 0) {
+      const bounds = validParcelas.map(p => [p.latitud, p.longitud]);
       map.fitBounds(bounds, { padding: [50, 50] });
     }
   }, [parcelas, map]);
   
   return null;
-};
-
-// Calculate polygon area in hectares
-const calculatePolygonArea = (coordinates) => {
-  if (!coordinates || coordinates.length < 3) return 0;
-  
-  // Shoelace formula for area calculation
-  const earthRadius = 6371000; // meters
-  let area = 0;
-  
-  for (let i = 0; i < coordinates.length; i++) {
-    const j = (i + 1) % coordinates.length;
-    const lat1 = coordinates[i].lat * Math.PI / 180;
-    const lat2 = coordinates[j].lat * Math.PI / 180;
-    const lng1 = coordinates[i].lng * Math.PI / 180;
-    const lng2 = coordinates[j].lng * Math.PI / 180;
-    
-    area += (lng2 - lng1) * (2 + Math.sin(lat1) + Math.sin(lat2));
-  }
-  
-  area = Math.abs(area * earthRadius * earthRadius / 2);
-  return area / 10000; // Convert m² to hectares
 };
 
 const Mapas = () => {
@@ -104,15 +65,11 @@ const Mapas = () => {
   const [loading, setLoading] = useState(true);
   const [selectedParcela, setSelectedParcela] = useState(null);
   const [editMode, setEditMode] = useState(false);
-  const [drawMode, setDrawMode] = useState(false);
   const [editCoords, setEditCoords] = useState({ latitud: '', longitud: '' });
-  const [drawnPolygon, setDrawnPolygon] = useState(null);
   const [filters, setFilters] = useState({ cultivo: '', finca: '' });
   const [showList, setShowList] = useState(false);
   const [mapCenter, setMapCenter] = useState([40.4168, -3.7038]); // Madrid default
   const [mapZoom, setMapZoom] = useState(6);
-  const [saving, setSaving] = useState(false);
-  const featureGroupRef = useRef(null);
 
   useEffect(() => {
     fetchParcelas();
@@ -124,21 +81,10 @@ const Mapas = () => {
       const data = await api.get('/api/parcelas');
       setParcelas(data.parcelas || []);
       
-      // Set center to first parcela with coords or polygon
-      const withLocation = (data.parcelas || []).filter(p => 
-        (p.latitud && p.longitud) || 
-        (p.recintos?.[0]?.geometria?.length > 0)
-      );
-      if (withLocation.length > 0) {
-        const p = withLocation[0];
-        if (p.recintos?.[0]?.geometria?.length > 0) {
-          const geo = p.recintos[0].geometria;
-          const centerLat = geo.reduce((sum, c) => sum + c.lat, 0) / geo.length;
-          const centerLng = geo.reduce((sum, c) => sum + c.lng, 0) / geo.length;
-          setMapCenter([centerLat, centerLng]);
-        } else {
-          setMapCenter([p.latitud, p.longitud]);
-        }
+      // Set center to first parcela with coords or default
+      const withCoords = (data.parcelas || []).filter(p => p.latitud && p.longitud);
+      if (withCoords.length > 0) {
+        setMapCenter([withCoords[0].latitud, withCoords[0].longitud]);
         setMapZoom(12);
       }
     } catch (err) {
@@ -160,7 +106,6 @@ const Mapas = () => {
   const handleSaveCoords = async () => {
     if (!selectedParcela) return;
     
-    setSaving(true);
     try {
       await api.put(`/api/parcelas/${selectedParcela._id}`, {
         ...selectedParcela,
@@ -180,73 +125,6 @@ const Mapas = () => {
     } catch (err) {
       console.error('Error saving coords:', err);
       alert('Error al guardar coordenadas');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSavePolygon = async () => {
-    if (!selectedParcela || !drawnPolygon) return;
-    
-    setSaving(true);
-    try {
-      // Calculate center of polygon for marker
-      const centerLat = drawnPolygon.reduce((sum, c) => sum + c.lat, 0) / drawnPolygon.length;
-      const centerLng = drawnPolygon.reduce((sum, c) => sum + c.lng, 0) / drawnPolygon.length;
-      
-      // Calculate area
-      const calculatedArea = calculatePolygonArea(drawnPolygon);
-      
-      const updatedParcela = {
-        ...selectedParcela,
-        latitud: centerLat,
-        longitud: centerLng,
-        recintos: [{
-          geometria: drawnPolygon,
-          superficie_recinto: calculatedArea
-        }]
-      };
-      
-      await api.put(`/api/parcelas/${selectedParcela._id}`, updatedParcela);
-      
-      // Update local state
-      setParcelas(parcelas.map(p => 
-        p._id === selectedParcela._id ? { ...p, ...updatedParcela } : p
-      ));
-      
-      setDrawMode(false);
-      setSelectedParcela(null);
-      setDrawnPolygon(null);
-      
-      // Clear drawn layers
-      if (featureGroupRef.current) {
-        featureGroupRef.current.clearLayers();
-      }
-    } catch (err) {
-      console.error('Error saving polygon:', err);
-      alert('Error al guardar el polígono');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleDeletePolygon = async (parcela) => {
-    if (!confirm('¿Eliminar el polígono de esta parcela?')) return;
-    
-    try {
-      const updatedParcela = {
-        ...parcela,
-        recintos: []
-      };
-      
-      await api.put(`/api/parcelas/${parcela._id}`, updatedParcela);
-      
-      setParcelas(parcelas.map(p => 
-        p._id === parcela._id ? { ...p, recintos: [] } : p
-      ));
-    } catch (err) {
-      console.error('Error deleting polygon:', err);
-      alert('Error al eliminar el polígono');
     }
   };
 
@@ -257,32 +135,6 @@ const Mapas = () => {
       longitud: parcela.longitud || ''
     });
     setEditMode(true);
-    setDrawMode(false);
-  };
-
-  const openDrawMode = (parcela) => {
-    setSelectedParcela(parcela);
-    setDrawMode(true);
-    setEditMode(false);
-    setDrawnPolygon(null);
-    
-    // Clear any existing drawings
-    if (featureGroupRef.current) {
-      featureGroupRef.current.clearLayers();
-    }
-  };
-
-  const handleDrawCreated = (e) => {
-    const { layer } = e;
-    const coords = layer.getLatLngs()[0].map(latlng => ({
-      lat: latlng.lat,
-      lng: latlng.lng
-    }));
-    setDrawnPolygon(coords);
-  };
-
-  const handleDrawDeleted = () => {
-    setDrawnPolygon(null);
   };
 
   // Filter parcelas
@@ -292,13 +144,8 @@ const Mapas = () => {
     return true;
   });
 
-  const parcelasConUbicacion = filteredParcelas.filter(p => 
-    (p.latitud && p.longitud) || (p.recintos?.[0]?.geometria?.length > 0)
-  );
-  const parcelasSinUbicacion = filteredParcelas.filter(p => 
-    !p.latitud && !p.longitud && !p.recintos?.[0]?.geometria?.length
-  );
-  const parcelasConPoligono = filteredParcelas.filter(p => p.recintos?.[0]?.geometria?.length > 0);
+  const parcelasConCoords = filteredParcelas.filter(p => p.latitud && p.longitud);
+  const parcelasSinCoords = filteredParcelas.filter(p => !p.latitud || !p.longitud);
 
   // Get unique cultivos for filter
   const cultivosUnicos = [...new Set(parcelas.map(p => p.cultivo).filter(Boolean))];
@@ -332,20 +179,15 @@ const Mapas = () => {
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
         <div className="card" style={{ padding: '0.75rem', textAlign: 'center', background: 'linear-gradient(135deg, hsl(var(--primary) / 0.1), hsl(var(--primary) / 0.05))' }}>
           <MapPin size={20} style={{ margin: '0 auto', color: 'hsl(var(--primary))' }} />
-          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'hsl(var(--primary))' }}>{parcelasConUbicacion.length}</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'hsl(var(--primary))' }}>{parcelasConCoords.length}</div>
           <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))' }}>Con ubicación</div>
-        </div>
-        <div className="card" style={{ padding: '0.75rem', textAlign: 'center', background: 'linear-gradient(135deg, hsl(142 76% 36% / 0.1), hsl(142 76% 36% / 0.05))' }}>
-          <Pentagon size={20} style={{ margin: '0 auto', color: 'hsl(142 76% 36%)' }} />
-          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'hsl(142 76% 36%)' }}>{parcelasConPoligono.length}</div>
-          <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))' }}>Con polígono</div>
         </div>
         <div className="card" style={{ padding: '0.75rem', textAlign: 'center', background: 'linear-gradient(135deg, hsl(38 92% 50% / 0.1), hsl(38 92% 50% / 0.05))' }}>
           <MapPin size={20} style={{ margin: '0 auto', color: 'hsl(38 92% 50%)' }} />
-          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'hsl(38 92% 50%)' }}>{parcelasSinUbicacion.length}</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'hsl(38 92% 50%)' }}>{parcelasSinCoords.length}</div>
           <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))' }}>Sin ubicación</div>
         </div>
         <div className="card" style={{ padding: '0.75rem', textAlign: 'center' }}>
@@ -396,55 +238,8 @@ const Mapas = () => {
         </div>
       </div>
 
-      {/* Draw Mode Banner */}
-      {drawMode && selectedParcela && (
-        <div className="card mb-4" style={{ 
-          padding: '0.75rem', 
-          background: 'linear-gradient(135deg, hsl(210 100% 50% / 0.1), hsl(210 100% 50% / 0.05))',
-          border: '2px solid hsl(210 100% 50%)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Pentagon size={20} style={{ color: 'hsl(210 100% 50%)' }} />
-              <span style={{ fontWeight: '600' }}>
-                Dibujando polígono para: <strong>{selectedParcela.codigo_plantacion}</strong>
-              </span>
-              {drawnPolygon && (
-                <span style={{ 
-                  background: 'hsl(142 76% 36% / 0.2)', 
-                  padding: '0.25rem 0.5rem', 
-                  borderRadius: '4px',
-                  fontSize: '0.85rem',
-                  color: 'hsl(142 76% 36%)'
-                }}>
-                  Área: {calculatePolygonArea(drawnPolygon).toFixed(2)} ha
-                </span>
-              )}
-            </div>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button 
-                className="btn btn-secondary btn-sm"
-                onClick={() => { setDrawMode(false); setSelectedParcela(null); setDrawnPolygon(null); }}
-              >
-                <X size={16} /> Cancelar
-              </button>
-              <button 
-                className="btn btn-primary btn-sm"
-                onClick={handleSavePolygon}
-                disabled={!drawnPolygon || saving}
-              >
-                <Save size={16} /> {saving ? 'Guardando...' : 'Guardar Polígono'}
-              </button>
-            </div>
-          </div>
-          <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
-            Usa las herramientas de dibujo en el mapa para crear el polígono de la parcela. Haz clic en los vértices para definir el área.
-          </p>
-        </div>
-      )}
-
       {/* Main content */}
-      <div style={{ display: 'grid', gridTemplateColumns: showList ? '1fr 350px' : '1fr', gap: '1rem', height: drawMode ? 'calc(100% - 280px)' : 'calc(100% - 200px)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: showList ? '1fr 350px' : '1fr', gap: '1rem', height: 'calc(100% - 200px)' }}>
         {/* Map */}
         <div className="card" style={{ padding: 0, overflow: 'hidden', borderRadius: '12px', minHeight: '400px' }}>
           <MapContainer
@@ -458,100 +253,9 @@ const Mapas = () => {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             
-            <FitBounds parcelas={parcelasConUbicacion} />
+            <FitBounds parcelas={parcelasConCoords} />
             
-            {/* Drawing controls - only show in draw mode */}
-            {drawMode && (
-              <FeatureGroup ref={featureGroupRef}>
-                <EditControl
-                  position="topright"
-                  onCreated={handleDrawCreated}
-                  onDeleted={handleDrawDeleted}
-                  draw={{
-                    rectangle: false,
-                    circle: false,
-                    circlemarker: false,
-                    marker: false,
-                    polyline: false,
-                    polygon: {
-                      allowIntersection: false,
-                      drawError: {
-                        color: '#e1e4e8',
-                        message: 'Los bordes no pueden cruzarse'
-                      },
-                      shapeOptions: {
-                        color: CROP_COLORS[selectedParcela?.cultivo] || CROP_COLORS.default,
-                        fillOpacity: 0.3
-                      }
-                    }
-                  }}
-                  edit={{
-                    edit: true,
-                    remove: true
-                  }}
-                />
-              </FeatureGroup>
-            )}
-            
-            {/* Render existing polygons */}
-            {filteredParcelas.map(parcela => {
-              const hasPolygon = parcela.recintos?.[0]?.geometria?.length > 0;
-              if (!hasPolygon) return null;
-              
-              const polygonCoords = parcela.recintos[0].geometria.map(c => [c.lat, c.lng]);
-              const color = CROP_COLORS[parcela.cultivo] || CROP_COLORS.default;
-              
-              return (
-                <Polygon
-                  key={`polygon-${parcela._id}`}
-                  positions={polygonCoords}
-                  pathOptions={{
-                    color: color,
-                    fillColor: color,
-                    fillOpacity: 0.3,
-                    weight: 2
-                  }}
-                >
-                  <Popup>
-                    <div style={{ minWidth: '220px' }}>
-                      <h3 style={{ margin: '0 0 0.5rem', fontWeight: '600', fontSize: '1rem' }}>
-                        {parcela.codigo_plantacion}
-                      </h3>
-                      <div style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginBottom: '0.25rem' }}>
-                          <Leaf size={14} style={{ color }} />
-                          <strong>{parcela.cultivo || 'Sin cultivo'}</strong>
-                        </div>
-                        <div>Superficie: <strong>{parcela.superficie_total} ha</strong></div>
-                        {parcela.recintos[0].superficie_recinto && (
-                          <div>Área polígono: <strong>{parcela.recintos[0].superficie_recinto.toFixed(2)} ha</strong></div>
-                        )}
-                        {parcela.variedad && <div>Variedad: {parcela.variedad}</div>}
-                      </div>
-                      <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
-                        <button 
-                          className="btn btn-sm btn-secondary"
-                          onClick={() => openDrawMode(parcela)}
-                          style={{ flex: 1 }}
-                        >
-                          <Edit2 size={14} /> Redibujar
-                        </button>
-                        <button 
-                          className="btn btn-sm"
-                          onClick={() => handleDeletePolygon(parcela)}
-                          style={{ flex: 1, background: 'hsl(0 84% 60%)', color: 'white' }}
-                        >
-                          <Trash2 size={14} /> Eliminar
-                        </button>
-                      </div>
-                    </div>
-                  </Popup>
-                </Polygon>
-              );
-            })}
-            
-            {/* Markers for parcelas without polygons */}
-            {filteredParcelas.filter(p => p.latitud && p.longitud && !p.recintos?.[0]?.geometria?.length).map(parcela => (
+            {parcelasConCoords.map(parcela => (
               <Marker
                 key={parcela._id}
                 position={[parcela.latitud, parcela.longitud]}
@@ -570,22 +274,13 @@ const Mapas = () => {
                       <div>Superficie: <strong>{parcela.superficie_total} ha</strong></div>
                       {parcela.variedad && <div>Variedad: {parcela.variedad}</div>}
                     </div>
-                    <div style={{ display: 'flex', gap: '0.25rem' }}>
-                      <button 
-                        className="btn btn-sm btn-secondary"
-                        onClick={() => openEditMode(parcela)}
-                        style={{ flex: 1 }}
-                      >
-                        <MapPin size={14} /> Coordenadas
-                      </button>
-                      <button 
-                        className="btn btn-sm btn-primary"
-                        onClick={() => openDrawMode(parcela)}
-                        style={{ flex: 1 }}
-                      >
-                        <Pentagon size={14} /> Polígono
-                      </button>
-                    </div>
+                    <button 
+                      className="btn btn-sm btn-secondary"
+                      onClick={() => openEditMode(parcela)}
+                      style={{ width: '100%' }}
+                    >
+                      <Edit2 size={14} /> Editar ubicación
+                    </button>
                   </div>
                 </Popup>
               </Marker>
@@ -600,12 +295,12 @@ const Mapas = () => {
               Parcelas ({filteredParcelas.length})
             </h3>
             
-            {parcelasSinUbicacion.length > 0 && (
+            {parcelasSinCoords.length > 0 && (
               <div style={{ marginBottom: '1rem' }}>
                 <h4 style={{ fontSize: '0.8rem', color: 'hsl(38 92% 50%)', marginBottom: '0.5rem' }}>
-                  Sin ubicación ({parcelasSinUbicacion.length})
+                  Sin ubicación ({parcelasSinCoords.length})
                 </h4>
-                {parcelasSinUbicacion.map(p => (
+                {parcelasSinCoords.map(p => (
                   <div 
                     key={p._id}
                     style={{
@@ -614,27 +309,16 @@ const Mapas = () => {
                       borderRadius: '8px',
                       background: 'hsl(38 92% 50% / 0.1)',
                       border: '1px solid hsl(38 92% 50% / 0.3)',
+                      cursor: 'pointer'
                     }}
+                    onClick={() => openEditMode(p)}
                   >
                     <div style={{ fontWeight: '500', fontSize: '0.85rem' }}>{p.codigo_plantacion}</div>
                     <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
                       {p.cultivo || 'Sin cultivo'} • {p.superficie_total} ha
                     </div>
-                    <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.5rem' }}>
-                      <button 
-                        className="btn btn-xs btn-secondary"
-                        onClick={() => openEditMode(p)}
-                        style={{ flex: 1, padding: '0.25rem 0.5rem', fontSize: '0.7rem' }}
-                      >
-                        <MapPin size={12} /> Punto
-                      </button>
-                      <button 
-                        className="btn btn-xs btn-primary"
-                        onClick={() => openDrawMode(p)}
-                        style={{ flex: 1, padding: '0.25rem 0.5rem', fontSize: '0.7rem' }}
-                      >
-                        <Pentagon size={12} /> Polígono
-                      </button>
+                    <div style={{ fontSize: '0.7rem', color: 'hsl(38 92% 50%)', marginTop: '0.25rem' }}>
+                      Clic para añadir ubicación
                     </div>
                   </div>
                 ))}
@@ -642,62 +326,42 @@ const Mapas = () => {
             )}
             
             <h4 style={{ fontSize: '0.8rem', color: 'hsl(var(--primary))', marginBottom: '0.5rem' }}>
-              Con ubicación ({parcelasConUbicacion.length})
+              Con ubicación ({parcelasConCoords.length})
             </h4>
-            {parcelasConUbicacion.map(p => {
-              const hasPolygon = p.recintos?.[0]?.geometria?.length > 0;
-              return (
-                <div 
-                  key={p._id}
-                  style={{
-                    padding: '0.5rem',
-                    marginBottom: '0.5rem',
-                    borderRadius: '8px',
-                    background: hasPolygon ? 'hsl(142 76% 36% / 0.1)' : 'hsl(var(--muted) / 0.3)',
-                    border: hasPolygon ? '1px solid hsl(142 76% 36% / 0.3)' : '1px solid hsl(var(--border))',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div 
-                      style={{
-                        width: '12px',
-                        height: '12px',
-                        borderRadius: hasPolygon ? '2px' : '50%',
-                        background: CROP_COLORS[p.cultivo] || CROP_COLORS.default
-                      }}
-                    />
-                    <div style={{ fontWeight: '500', fontSize: '0.85rem', flex: 1 }}>{p.codigo_plantacion}</div>
-                    {hasPolygon && (
-                      <Pentagon size={14} style={{ color: 'hsl(142 76% 36%)' }} />
-                    )}
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginLeft: '1.25rem' }}>
-                    {p.cultivo || 'Sin cultivo'} • {p.superficie_total} ha
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.5rem' }}>
-                    <button 
-                      className="btn btn-xs btn-secondary"
-                      onClick={() => openEditMode(p)}
-                      style={{ flex: 1, padding: '0.25rem 0.5rem', fontSize: '0.7rem' }}
-                    >
-                      <MapPin size={12} /> Punto
-                    </button>
-                    <button 
-                      className="btn btn-xs btn-primary"
-                      onClick={() => openDrawMode(p)}
-                      style={{ flex: 1, padding: '0.25rem 0.5rem', fontSize: '0.7rem' }}
-                    >
-                      <Pentagon size={12} /> {hasPolygon ? 'Redibujar' : 'Polígono'}
-                    </button>
-                  </div>
+            {parcelasConCoords.map(p => (
+              <div 
+                key={p._id}
+                style={{
+                  padding: '0.5rem',
+                  marginBottom: '0.5rem',
+                  borderRadius: '8px',
+                  background: 'hsl(var(--muted) / 0.3)',
+                  border: '1px solid hsl(var(--border))',
+                  cursor: 'pointer'
+                }}
+                onClick={() => openEditMode(p)}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div 
+                    style={{
+                      width: '12px',
+                      height: '12px',
+                      borderRadius: '50%',
+                      background: CROP_COLORS[p.cultivo] || CROP_COLORS.default
+                    }}
+                  />
+                  <div style={{ fontWeight: '500', fontSize: '0.85rem' }}>{p.codigo_plantacion}</div>
                 </div>
-              );
-            })}
+                <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginLeft: '1.25rem' }}>
+                  {p.cultivo || 'Sin cultivo'} • {p.superficie_total} ha
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
 
-      {/* Edit Coordinates Modal */}
+      {/* Edit Modal */}
       {editMode && selectedParcela && (
         <div 
           onClick={() => { setEditMode(false); setSelectedParcela(null); }}
@@ -759,7 +423,7 @@ const Mapas = () => {
             </div>
             
             <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginBottom: '1rem' }}>
-              Tip: Puedes obtener las coordenadas desde Google Maps haciendo clic derecho sobre el punto deseado.
+              💡 Tip: Puedes obtener las coordenadas desde Google Maps haciendo clic derecho sobre el punto deseado.
             </p>
             
             <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -773,11 +437,11 @@ const Mapas = () => {
               <button 
                 className="btn btn-primary"
                 onClick={handleSaveCoords}
-                disabled={!editCoords.latitud || !editCoords.longitud || saving}
+                disabled={!editCoords.latitud || !editCoords.longitud}
                 style={{ flex: 1 }}
                 data-testid="btn-save-coords"
               >
-                <Save size={16} /> {saving ? 'Guardando...' : 'Guardar'}
+                <Save size={16} /> Guardar
               </button>
             </div>
           </div>
