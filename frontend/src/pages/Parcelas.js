@@ -712,6 +712,13 @@ const Parcelas = () => {
           >
             <Settings size={18} />
           </button>
+          <button 
+            className="btn btn-secondary"
+            onClick={() => setShowGeoImport(true)}
+            data-testid="btn-import-geo"
+          >
+            <Upload size={18} /> Importar KML/GeoJSON
+          </button>
           <button className="btn btn-primary" onClick={() => setShowForm(!showForm)} data-testid="btn-nueva-parcela">
             <Plus size={18} /> Nueva Parcela
           </button>
