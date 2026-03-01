@@ -1196,8 +1196,12 @@ async def generate_albaran_pdf(
                 <p class="valor">{cultivo}</p>
             </div>
             <div class="datos-box">
-                <h3>Parcela / Campaña</h3>
-                <p><span class="valor">{parcela}</span> / {campana}</p>
+                <h3>Parcela</h3>
+                <p class="valor">{parcela}</p>
+            </div>
+            <div class="datos-box">
+                <h3>Campaña</h3>
+                <p class="valor">{campana}</p>
             </div>
         </div>
         
