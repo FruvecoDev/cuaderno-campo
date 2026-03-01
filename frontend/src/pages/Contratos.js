@@ -256,6 +256,7 @@ const Contratos = () => {
         precio: parseFloat(parseFormattedNumber(formData.precio)) || 0,
         comision_compra_valor: formData.comision_compra_valor ? parseFloat(parseFormattedNumber(formData.comision_compra_valor)) : null,
         comision_venta_valor: formData.comision_venta_valor ? parseFloat(parseFormattedNumber(formData.comision_venta_valor)) : null,
+        descuento_destare: formData.descuento_destare ? parseFloat(parseFormattedNumber(formData.descuento_destare)) : null,
         precios_calidad: isGuisante ? (formData.precios_calidad || []).map(pc => ({
           ...pc,
           min_tenderometria: parseFloat(pc.min_tenderometria),
