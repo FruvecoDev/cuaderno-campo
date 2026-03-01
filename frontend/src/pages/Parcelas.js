@@ -515,12 +515,34 @@ const Parcelas = () => {
   }, [formData.contrato_id, contratos]);
 
   const handlePolygonCreated = useCallback((coords) => {
-    console.log('Polygon created:', coords);
+    console.log('🗺️ Polygon created with coords:', coords);
+    console.log('🗺️ Coords length:', coords ? coords.length : 0);
     setPolygon(coords);
     if (coords && coords.length > 0) {
-      alert(`Polígono dibujado con ${coords.length} puntos`);
+      // Show success notification
+      const area = calculatePolygonArea(coords);
+      console.log('🗺️ Calculated area:', area, 'ha');
+      alert(`✅ Polígono dibujado con ${coords.length} puntos\nÁrea aproximada: ${area.toFixed(2)} ha`);
     }
   }, []);
+
+  // Helper function to calculate polygon area
+  const calculatePolygonArea = (coordinates) => {
+    if (!coordinates || coordinates.length < 3) return 0;
+    const earthRadius = 6371000;
+    let area = 0;
+    const n = coordinates.length;
+    for (let i = 0; i < n; i++) {
+      const j = (i + 1) % n;
+      const lat1 = coordinates[i].lat * Math.PI / 180;
+      const lat2 = coordinates[j].lat * Math.PI / 180;
+      const lng1 = coordinates[i].lng * Math.PI / 180;
+      const lng2 = coordinates[j].lng * Math.PI / 180;
+      area += (lng2 - lng1) * (2 + Math.sin(lat1) + Math.sin(lat2));
+    }
+    area = Math.abs(area * earthRadius * earthRadius / 2);
+    return area / 10000;
+  };
   
   const handleSubmit = async (e) => {
     e.preventDefault();
