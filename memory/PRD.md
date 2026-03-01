@@ -69,6 +69,22 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
   - Destare: 150 kg → **Kilos netos: 4850 kg**
   - **Comisión generada: 4850 × 0.05 = 242.50 EUR**
 
+#### 4. Página de Comisiones Generadas (Frontend) ✅ (P1)
+- Nueva página `/comisiones-generadas` con:
+  - KPIs: Kilos netos, Pendiente, Pagadas, Total
+  - Vista agrupada por agente (expandible) o lista detallada
+  - Filtros: agente, tipo, campaña, estado
+  - Acciones: marcar como pagada, anular, reactivar
+  - Detalle de cada comisión: kilos brutos, destare, netos, tipo/valor comisión, importe
+- Añadido al menú lateral como "Comisiones Auto"
+
+#### 5. Formato Español en PDF de Liquidación ✅ (Fix)
+- Corregido formato de números en `routes_comisiones.py`:
+  - Punto (.) para separador de miles
+  - Coma (,) para decimales
+  - Ejemplo: 12850.50 → "12.850,50"
+- Función `format_number_es()` aplicada a todas las cifras del PDF
+
 ---
 
 ### Sesión 5:
