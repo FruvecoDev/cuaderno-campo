@@ -1078,6 +1078,12 @@ async def generate_albaran_pdf(
                 gap: 20px;
                 margin-bottom: 20px;
             }}
+            .datos-grid-3 {{
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 20px;
+                margin-bottom: 20px;
+            }}
             .datos-box {{
                 background-color: #f8fafc;
                 padding: 12px;
