@@ -5,6 +5,7 @@ Refactored: Irrigaciones and Tareas moved to dedicated router files.
 """
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
+from fastapi.responses import StreamingResponse
 from typing import Optional
 from bson import ObjectId
 from datetime import datetime
