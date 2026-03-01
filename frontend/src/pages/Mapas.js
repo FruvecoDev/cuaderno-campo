@@ -113,6 +113,7 @@ const Mapas = () => {
   const [mapCenter, setMapCenter] = useState([40.4168, -3.7038]); // Madrid default
   const [mapZoom, setMapZoom] = useState(6);
   const [saving, setSaving] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const featureGroupRef = useRef(null);
 
   useEffect(() => {
