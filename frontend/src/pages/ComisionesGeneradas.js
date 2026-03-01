@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
   DollarSign, User, Filter, Search, X, Check, Ban, 
-  FileText, TrendingUp, Package, Calendar, ChevronDown, ChevronUp
+  FileText, TrendingUp, Package, Calendar, ChevronDown, ChevronUp,
+  Printer, Download
 } from 'lucide-react';
 import api from '../services/api';
 import '../App.css';
@@ -20,9 +21,14 @@ const ComisionesGeneradas = () => {
     agente_id: '',
     tipo_agente: '',
     campana: '',
-    estado: ''
+    estado: '',
+    fecha_desde: '',
+    fecha_hasta: ''
   });
   const [showFilters, setShowFilters] = useState(false);
+  
+  // Estados para exportación
+  const [exportLoading, setExportLoading] = useState(false);
   
   // Estados para datos auxiliares
   const [agentes, setAgentes] = useState([]);
