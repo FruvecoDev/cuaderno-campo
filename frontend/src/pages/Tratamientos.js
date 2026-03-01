@@ -895,15 +895,36 @@ const Tratamientos = () => {
     localStorage.setItem('tratamientos_table_config', JSON.stringify(tableConfig));
   }, [tableConfig]);
   
-  // Cuando se seleccionan parcelas, mostrar info heredada de la primera
+  // Cuando se seleccionan parcelas, mostrar info heredada de la primera y calcular superficie total
   useEffect(() => {
     if (selectedParcelas.length > 0) {
       const firstParcela = parcelas.find(p => p._id === selectedParcelas[0]);
       setSelectedParcelasInfo(firstParcela || null);
+      
+      // Calcular superficie total de todas las parcelas seleccionadas
+      const superficieTotal = selectedParcelas.reduce((total, parcelaId) => {
+        const parcela = parcelas.find(p => p._id === parcelaId);
+        return total + (parseFloat(parcela?.superficie_total) || 0);
+      }, 0);
+      
+      // Autocompletar superficie_aplicacion si está vacío o es la primera selección
+      if (!editingId) {
+        setFormData(prev => ({
+          ...prev,
+          superficie_aplicacion: superficieTotal.toFixed(2)
+        }));
+      }
     } else {
       setSelectedParcelasInfo(null);
+      // Limpiar superficie si no hay parcelas seleccionadas
+      if (!editingId) {
+        setFormData(prev => ({
+          ...prev,
+          superficie_aplicacion: ''
+        }));
+      }
     }
-  }, [selectedParcelas, parcelas]);
+  }, [selectedParcelas, parcelas, editingId]);
   
   const fetchParcelas = async () => {
     try {
