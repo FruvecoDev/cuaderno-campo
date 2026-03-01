@@ -1,0 +1,57 @@
+{
+  "summary": "Bug fix verified: React runtime error 'Objects are not valid as a React child' was caused by backend returning arrays instead of integers for totales.contratos_compra and totales.contratos_venta in /api/dashboard/kpis. Fixed by renaming variable collision in routes_dashboard.py.",
+  "mode": "update",
+  "baseline_commit": "f35366b99b1025d9720551672828c6ffc72058d2",
+  "head_commit": "b9c88ebaaefb0ef4dc30c310fd04cb61b2a078ef",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "regression_results": {
+    "total_specs": 2,
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0
+  },
+  "specs_created": [],
+  "specs_updated": [],
+  "quarantined_tests": [],
+  "test_report_links": [],
+  "action_items": [],
+  "updated_files": [
+    "/app/backend/routes_dashboard.py"
+  ],
+  "success_rate": {
+    "backend": "100%",
+    "frontend": "100%"
+  },
+  "bug_fix_details": {
+    "bug_description": "React runtime error: Objects are not valid as a React child (found: object with keys {id, numero, tipo, proveedor, cliente, cultivo, cantidad, precio, valor_total, periodo_desde, periodo_hasta, campana}). This error appeared immediately after login and blocked the entire application.",
+    "root_cause": "In routes_dashboard.py, variables contratos_compra and contratos_venta were initially set to count integers (lines 109-110), but later in the function they were reassigned to arrays of contrato objects (lines 330-331). The totales object in the response was returning these arrays instead of the original count integers.",
+    "fix_applied": "Renamed the array variables from contratos_compra/contratos_venta to contratos_compra_list/contratos_venta_list to avoid variable name collision, preserving the original integer counts for the API response.",
+    "file_changed": "/app/backend/routes_dashboard.py",
+    "lines_changed": "330-346"
+  },
+  "verification_tests": [
+    {
+      "name": "Dashboard loads without Objects are not valid as React child error",
+      "status": "passed",
+      "description": "Verified dashboard loads without the React rendering error"
+    },
+    {
+      "name": "API returns integers for contratos_compra and contratos_venta",
+      "status": "passed",
+      "description": "Verified /api/dashboard/kpis returns number types for totales.contratos_compra and totales.contratos_venta"
+    }
+  ],
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Bug fix verified. The React object rendering error in Dashboard was caused by backend variable name collision in routes_dashboard.py. Fix applied and tested - dashboard now loads correctly with contratos counts showing as numbers (13 and 1) instead of object arrays.",
+  "rca_of_issue": "Variable collision bug in Python backend. The variables contratos_compra and contratos_venta were set to count_documents() integers early in the get_dashboard_kpis function, but later in the same function they were reassigned to list comprehension arrays for calculating contratos_stats. The totales dictionary returned these array values instead of the original integers, causing React to fail when trying to render objects as text children in the Dashboard KPI cards."
+}
