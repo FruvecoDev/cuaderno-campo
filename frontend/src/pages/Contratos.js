@@ -206,9 +206,10 @@ const Contratos = () => {
       // Preparar datos incluyendo precios_calidad si es guisante
       const submitData = {
         ...formData,
-        cantidad: parseFloat(formData.cantidad),
-        precio: parseFloat(formData.precio),
-        comision_valor: formData.comision_valor ? parseFloat(formData.comision_valor) : null,
+        cantidad: parseFloat(formData.cantidad) || 0,
+        precio: parseFloat(formData.precio) || 0,
+        comision_compra_valor: formData.comision_compra_valor ? parseFloat(formData.comision_compra_valor) : null,
+        comision_venta_valor: formData.comision_venta_valor ? parseFloat(formData.comision_venta_valor) : null,
         precios_calidad: isGuisante ? (formData.precios_calidad || []).map(pc => ({
           ...pc,
           min_tenderometria: parseFloat(pc.min_tenderometria),
@@ -216,6 +217,8 @@ const Contratos = () => {
           precio: parseFloat(pc.precio)
         })) : []
       };
+      
+      console.log('Submitting contrato:', submitData);
       
       const data = editingId 
         ? await api.put(url, submitData)
