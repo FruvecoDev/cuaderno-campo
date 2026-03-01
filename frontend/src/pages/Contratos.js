@@ -519,12 +519,13 @@ const Contratos = () => {
                 type="text" 
                 className="form-input" 
                 value={formData.numero_contrato} 
-                readOnly={!editingId}
-                onChange={(e) => editingId && setFormData({...formData, numero_contrato: e.target.value})}
-                style={!editingId ? { backgroundColor: 'hsl(var(--muted))', cursor: 'not-allowed', fontWeight: '600' } : { fontWeight: '600' }}
+                readOnly
+                style={{ backgroundColor: 'hsl(var(--muted))', cursor: 'not-allowed', fontWeight: '600' }}
                 data-testid="input-numero-contrato"
               />
-              {!editingId && <small style={{ color: 'hsl(var(--muted-foreground))' }}>Se genera automáticamente</small>}
+              <small style={{ color: 'hsl(var(--muted-foreground))' }}>
+                {editingId ? 'Este campo no se puede modificar' : 'Se genera automáticamente'}
+              </small>
             </div>
             
             <div className="grid-3">
