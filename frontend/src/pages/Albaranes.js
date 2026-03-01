@@ -1429,6 +1429,44 @@ const Albaranes = () => {
                   data-testid="input-fecha" 
                 />
               </div>
+            </div>
+            
+            {/* Descuento y Total */}
+            <div className="grid-4 mb-4">
+              <div className="form-group">
+                <label className="form-label">Subtotal</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  value={`${calculateSubtotal().toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`} 
+                  disabled
+                  style={{ backgroundColor: '#f5f5f5' }}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Descuento (%)</label>
+                <input 
+                  type="number" 
+                  className="form-input" 
+                  value={formData.descuento_porcentaje || ''} 
+                  onChange={(e) => setFormData({...formData, descuento_porcentaje: parseFloat(e.target.value) || 0})}
+                  placeholder="0"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  data-testid="input-descuento"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Importe Dto.</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  value={`- ${calculateDescuentoImporte().toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`} 
+                  disabled
+                  style={{ backgroundColor: '#fef2f2', color: '#dc2626' }}
+                />
+              </div>
               <div className="form-group">
                 <label className="form-label">Total Albarán</label>
                 <input 
