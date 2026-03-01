@@ -376,6 +376,7 @@ const Contratos = () => {
   const handleEditFromUrl = (contrato) => {
     setEditingId(contrato._id);
     setFormData({
+      numero_contrato: contrato.numero_contrato || '',
       tipo: contrato.tipo || 'Compra',
       campana: contrato.campana || '2025/26',
       procedencia: contrato.procedencia || 'Campo',
