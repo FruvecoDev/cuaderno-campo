@@ -66,8 +66,8 @@ function DrawControl({ onPolygonCreated, onPolygonEdited, editablePolygon, isEdi
     drawnItemsRef.current = drawnItems;
     map.addLayer(drawnItems);
     
-    // Si hay un polígono editable, añadirlo al grupo
-    if (editablePolygon && editablePolygon.length > 0 && isEditing) {
+    // Si hay un polígono editable, añadirlo al grupo (tanto en edición como en creación)
+    if (editablePolygon && editablePolygon.length > 0) {
       const latlngs = editablePolygon.map(p => [p.lat, p.lng]);
       const polygon = L.polygon(latlngs, { color: '#2d5a27', fillColor: '#4CAF50', fillOpacity: 0.3 });
       drawnItems.addLayer(polygon);
