@@ -1266,6 +1266,8 @@ async def generate_albaran_pdf(
                 <span>Precio/kg:</span>
                 <span>{format_number_spanish(precio_unitario, 4)} €</span>
             </div>
+            {f'<div class="totales-row"><span>Subtotal:</span><span>{format_number_spanish(subtotal, 2)} €</span></div>' if descuento_pct > 0 else ''}
+            {f'<div class="totales-row destare"><span>Descuento ({format_number_spanish(descuento_pct, 2)}%):</span><span>- {format_number_spanish(descuento_importe, 2)} €</span></div>' if descuento_pct > 0 else ''}
             <div class="totales-row total">
                 <span>TOTAL:</span>
                 <span>{format_number_spanish(total_albaran, 2)} €</span>
