@@ -41,6 +41,7 @@ const Albaranes = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
   const { token, canDoOperacion } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
