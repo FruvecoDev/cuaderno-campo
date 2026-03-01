@@ -219,6 +219,24 @@ class ParcelaCreate(BaseModel):
     recintos: List[ParcelaRecinto]
     contrato_id: Optional[str] = None  # Referencia al contrato asociado
 
+class ParcelaUpdate(BaseModel):
+    """Model for partial updates - all fields optional"""
+    proveedor: Optional[str] = None
+    cultivo: Optional[str] = None
+    campana: Optional[str] = None
+    variedad: Optional[str] = None
+    superficie_total: Optional[float] = None
+    codigo_plantacion: Optional[str] = None
+    num_plantas: Optional[int] = None
+    finca: Optional[str] = None
+    finca_id: Optional[str] = None
+    recintos: Optional[List[ParcelaRecinto]] = None
+    contrato_id: Optional[str] = None
+    latitud: Optional[float] = None
+    longitud: Optional[float] = None
+    estado: Optional[str] = None
+    observaciones: Optional[str] = None
+
 class ParcelaInDB(ParcelaBase):
     id: str = Field(alias="_id")
     
