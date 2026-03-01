@@ -131,6 +131,7 @@ app.include_router(rrhh_router)
 app.include_router(ausencias_router)
 app.include_router(prenominas_router)
 app.include_router(portal_empleado_router)
+app.include_router(audit_router)
 
 # Mount static files for uploaded images
 uploads_dir = "/app/uploads"
