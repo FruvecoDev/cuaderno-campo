@@ -1299,7 +1299,29 @@ const Albaranes = () => {
                   </div>
                   <div>
                     <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Parcela</span>
-                    <p style={{ fontWeight: '500' }}>{formData.parcela_codigo || '-'}</p>
+                    <select
+                      className="form-select"
+                      value={formData.parcela_codigo}
+                      onChange={(e) => {
+                        const parcela = parcelas.find(p => (p.codigo_plantacion || p.finca || p._id) === e.target.value);
+                        setFormData({
+                          ...formData,
+                          parcela_codigo: e.target.value,
+                          parcela_id: parcela?._id || ''
+                        });
+                      }}
+                      style={{ marginTop: '0.25rem' }}
+                      data-testid="select-parcela"
+                    >
+                      <option value="">-- Seleccionar parcela --</option>
+                      {parcelas.map(p => (
+                        <option key={p._id} value={p.codigo_plantacion || p.finca || p._id}>
+                          {p.codigo_plantacion || p.finca || `Parcela ${p._id?.slice(-6)}`} 
+                          {p.cultivo ? ` - ${p.cultivo}` : ''}
+                          {p.proveedor ? ` (${p.proveedor})` : ''}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Campaña</span>
