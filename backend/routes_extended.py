@@ -699,3 +699,146 @@ async def delete_documento(
         raise HTTPException(status_code=404, detail="Documento not found")
     
     return {"success": True, "message": "Documento deleted"}
+
+
+
+# ============================================================================
+# COMISIONES GENERADAS (Auto-generadas desde albaranes)
+# ============================================================================
+
+@router.get("/comisiones-generadas")
+async def get_comisiones_generadas(
+    agente_id: Optional[str] = None,
+    tipo_agente: Optional[str] = None,
+    campana: Optional[str] = None,
+    estado: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 100,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Obtiene las comisiones generadas automáticamente desde albaranes.
+    """
+    query = {}
+    if agente_id:
+        query["agente_id"] = agente_id
+    if tipo_agente:
+        query["tipo_agente"] = tipo_agente
+    if campana:
+        query["campana"] = campana
+    if estado:
+        query["estado"] = estado
+    
+    comisiones = await comisiones_collection.find(query).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    total = await comisiones_collection.count_documents(query)
+    
+    # Calcular totales
+    totales = {
+        "total_kilos_netos": sum(c.get("kilos_netos", 0) for c in comisiones),
+        "total_comision": sum(c.get("comision_importe", 0) for c in comisiones),
+        "count_pendientes": sum(1 for c in comisiones if c.get("estado") == "pendiente"),
+        "count_pagadas": sum(1 for c in comisiones if c.get("estado") == "pagada")
+    }
+    
+    return {
+        "success": True,
+        "comisiones": serialize_docs(comisiones),
+        "total": total,
+        "totales": totales
+    }
+
+
+@router.get("/comisiones-generadas/resumen-agente/{agente_id}")
+async def get_resumen_comisiones_agente(
+    agente_id: str,
+    campana: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Resumen de comisiones para un agente específico.
+    """
+    query = {"agente_id": agente_id}
+    if campana:
+        query["campana"] = campana
+    
+    comisiones = await comisiones_collection.find(query).to_list(1000)
+    
+    # Obtener info del agente
+    agente = await agentes_collection.find_one({"_id": ObjectId(agente_id)})
+    
+    pendientes = [c for c in comisiones if c.get("estado") == "pendiente"]
+    pagadas = [c for c in comisiones if c.get("estado") == "pagada"]
+    
+    return {
+        "success": True,
+        "agente": {
+            "id": agente_id,
+            "nombre": agente.get("nombre") if agente else "Desconocido",
+            "nif": agente.get("nif") if agente else None
+        },
+        "resumen": {
+            "total_albaranes": len(comisiones),
+            "total_kilos_netos": sum(c.get("kilos_netos", 0) for c in comisiones),
+            "total_kilos_destare": sum(c.get("kilos_destare", 0) for c in comisiones),
+            "comision_pendiente": round(sum(c.get("comision_importe", 0) for c in pendientes), 2),
+            "comision_pagada": round(sum(c.get("comision_importe", 0) for c in pagadas), 2),
+            "comision_total": round(sum(c.get("comision_importe", 0) for c in comisiones), 2)
+        },
+        "detalle": serialize_docs(comisiones)
+    }
+
+
+@router.patch("/comisiones-generadas/{comision_id}/estado")
+async def update_comision_estado(
+    comision_id: str,
+    estado: str,  # "pendiente", "pagada", "anulada"
+    current_user: dict = Depends(RequireEdit)
+):
+    """
+    Actualiza el estado de una comisión (marcar como pagada, anular, etc.)
+    """
+    if not ObjectId.is_valid(comision_id):
+        raise HTTPException(status_code=400, detail="ID inválido")
+    
+    if estado not in ["pendiente", "pagada", "anulada"]:
+        raise HTTPException(status_code=400, detail="Estado inválido. Use: pendiente, pagada, anulada")
+    
+    result = await comisiones_collection.update_one(
+        {"_id": ObjectId(comision_id)},
+        {
+            "$set": {
+                "estado": estado,
+                "updated_at": datetime.now(),
+                "updated_by": current_user.get("email", "unknown")
+            }
+        }
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Comisión no encontrada")
+    
+    updated = await comisiones_collection.find_one({"_id": ObjectId(comision_id)})
+    return {"success": True, "data": serialize_doc(updated)}
+
+
+@router.delete("/comisiones-generadas/{comision_id}")
+async def delete_comision_generada(
+    comision_id: str,
+    current_user: dict = Depends(RequireDelete)
+):
+    """
+    Elimina una comisión generada (solo si está anulada o es admin).
+    """
+    if not ObjectId.is_valid(comision_id):
+        raise HTTPException(status_code=400, detail="ID inválido")
+    
+    comision = await comisiones_collection.find_one({"_id": ObjectId(comision_id)})
+    if not comision:
+        raise HTTPException(status_code=404, detail="Comisión no encontrada")
+    
+    # Solo permitir eliminar si está anulada o el usuario es admin
+    if comision.get("estado") != "anulada" and current_user.get("role") != "Admin":
+        raise HTTPException(status_code=400, detail="Solo se pueden eliminar comisiones anuladas")
+    
+    result = await comisiones_collection.delete_one({"_id": ObjectId(comision_id)})
+    return {"success": True, "message": "Comisión eliminada"}
