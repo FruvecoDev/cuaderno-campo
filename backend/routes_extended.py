@@ -12,7 +12,7 @@ from datetime import datetime
 from models_tratamientos import RecetaCreate, AlbaranCreate
 from database import (
     recetas_collection, albaranes_collection,
-    documentos_collection, serialize_doc, serialize_docs
+    documentos_collection, serialize_doc, serialize_docs, db
 )
 from rbac_guards import (
     RequireCreate, RequireEdit, RequireDelete,
@@ -21,6 +21,9 @@ from rbac_guards import (
 )
 
 router = APIRouter(prefix="/api", tags=["extended"])
+
+# Collection for contracts (to get descuento_destare)
+contratos_collection = db['contratos']
 
 
 # ============================================================================
