@@ -593,7 +593,7 @@ const Contratos = () => {
               )}
               
               <div className="form-group">
-                <label className="form-label">{t('contracts.crop')}</label>
+                <label className="form-label">Cultivo</label>
                 <select 
                   className="form-select" 
                   value={formData.cultivo_id} 
@@ -607,7 +607,7 @@ const Contratos = () => {
                   }}
                   data-testid="select-cultivo"
                 >
-                  <option value="">-- {t('common.select')} --</option>
+                  <option value="">-- Seleccionar --</option>
                   {cultivos.map(c => (
                     <option key={c._id} value={c._id}>{c.nombre} {c.variedad ? `(${c.variedad})` : ''}</option>
                   ))}
@@ -615,7 +615,7 @@ const Contratos = () => {
               </div>
               
               <div className="form-group">
-                <label className="form-label">{t('contracts.quantity')} (kg) *</label>
+                <label className="form-label">Cantidad (kg) *</label>
                 <input 
                   type="number" 
                   className="form-input" 
@@ -627,7 +627,7 @@ const Contratos = () => {
               </div>
               
               <div className="form-group">
-                <label className="form-label">{t('contracts.price')} (€/kg) *</label>
+                <label className="form-label">Precio (€/kg) *</label>
                 <input 
                   type="number" 
                   step="0.01" 
@@ -640,7 +640,7 @@ const Contratos = () => {
               </div>
               
               <div className="form-group">
-                <label className="form-label">{t('contracts.periodFrom')}</label>
+                <label className="form-label">Periodo Desde</label>
                 <input 
                   type="date" 
                   className="form-input" 
@@ -651,7 +651,7 @@ const Contratos = () => {
               </div>
               
               <div className="form-group">
-                <label className="form-label">{t('contracts.periodTo')}</label>
+                <label className="form-label">Periodo Hasta</label>
                 <input 
                   type="date" 
                   className="form-input" 
