@@ -358,6 +358,9 @@ class AlbaranCreate(BaseModel):
     # Líneas
     items: List[AlbaranItem] = []
     total_albaran: Optional[float] = 0.0
+    # Descuento sobre importe
+    descuento_porcentaje: Optional[float] = 0.0
+    descuento_importe: Optional[float] = 0.0
     observaciones: Optional[str] = None
 
 class AlbaranInDB(AlbaranBase):
