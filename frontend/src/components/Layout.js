@@ -158,6 +158,7 @@ const Layout = ({ children }) => {
       { path: '/informes-gastos', label: t('nav.expenseReports'), icon: BarChart3, module: 'albaranes', operacion: 'compra' },
       { path: '/informes-ingresos', label: 'Informes Ingresos', icon: TrendingUp, module: 'albaranes', operacion: 'venta' },
       { path: '/liquidacion-comisiones', label: 'Liquidación Comisiones', icon: TrendingUp, module: 'contratos' },
+      { path: '/comisiones-generadas', label: 'Comisiones Auto', icon: DollarSign, module: 'contratos' },
     ]},
     { section: t('nav.catalogs'), items: [
       { path: '/proveedores', label: t('nav.providers'), icon: Package, operacion: 'compra' },
