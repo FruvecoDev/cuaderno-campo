@@ -71,6 +71,18 @@ function App() {
           </ProtectedRoute>
         } />
         
+        <Route path="/contratos/nuevo" element={
+          <ProtectedRoute>
+            <Layout><Contratos /></Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/contratos/editar/:id" element={
+          <ProtectedRoute>
+            <Layout><Contratos /></Layout>
+          </ProtectedRoute>
+        } />
+        
         <Route path="/parcelas" element={
           <ProtectedRoute>
             <Layout><Parcelas /></Layout>
