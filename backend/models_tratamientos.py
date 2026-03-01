@@ -317,7 +317,9 @@ class AlbaranItem(BaseModel):
     cantidad: float = 0
     unidad: Optional[str] = "kg"
     precio_unitario: float = 0
+    descuento: Optional[float] = 0  # Descuento en porcentaje por línea
     total: float = 0
+    es_destare: Optional[bool] = False  # Marca si es línea de destare
 
 class AlbaranBase(BaseModel):
     tipo: str  # Entrada / Salida
