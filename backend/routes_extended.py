@@ -317,13 +317,17 @@ async def create_albaran(
         valor_comision = 0
         tipo_agente = None
         
-        if albaran.tipo == "Entrada" and contrato.get("agente_compra"):
+        # Aceptar tanto "Entrada" como "Albarán de compra"
+        es_compra = albaran.tipo in ["Entrada", "Albarán de compra", "entrada", "compra"]
+        es_venta = albaran.tipo in ["Salida", "Albarán de venta", "salida", "venta"]
+        
+        if es_compra and contrato.get("agente_compra"):
             # Albarán de compra -> comisión de compra
             agente_id = contrato.get("agente_compra")
             tipo_comision = contrato.get("comision_compra_tipo") or contrato.get("comision_tipo")
             valor_comision = contrato.get("comision_compra_valor") or contrato.get("comision_valor") or 0
             tipo_agente = "compra"
-        elif albaran.tipo == "Salida" and contrato.get("agente_venta"):
+        elif es_venta and contrato.get("agente_venta"):
             # Albarán de venta -> comisión de venta
             agente_id = contrato.get("agente_venta")
             tipo_comision = contrato.get("comision_venta_tipo")
