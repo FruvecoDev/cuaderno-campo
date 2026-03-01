@@ -31,9 +31,27 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
 - **Fórmula explicativa**: `(Netos × Precio × (1-Dto%))`
 - Grid expandido de 4 a 6 columnas para mejor visualización
 
-**Verificación con ejemplo:**
-- Línea: 100.000 kg × 2,75 €/kg × (1-10%) = **247.500 €** (sin destare)
-- Total: 95.000 kg × 2,75 €/kg × (1-10%) = **235.125 €** (con destare)
+#### 3. Columna "Nº Albarán" en Comisiones Generadas ✅ (P1)
+- Añadida columna "Nº Albarán" antes de "Fecha" en ambas vistas (agrupada y lista)
+- Formato: `ALB-XXXXXX` (últimos 6 caracteres del ID)
+- Backend genera `numero_albaran` para comisiones nuevas y existentes
+
+#### 4. Exportación de Comisiones a PDF y Excel ✅ (P1 - Nueva funcionalidad)
+- **Filtros de fecha añadidos**: "Fecha Desde" y "Fecha Hasta" para filtrar comisiones por periodo
+- **Botón PDF**: Genera listado de comisiones agrupado por agente con:
+  - Tabla por cada agente con detalle de comisiones
+  - Subtotales por agente
+  - Total general con kilos netos y euros
+  - Filtros aplicados mostrados en cabecera
+- **Botón Excel**: Genera archivo .xlsx con:
+  - Todos los datos de comisiones
+  - Subtotales por agente
+  - Total general
+  - Formato profesional con estilos
+- **Backend endpoints**:
+  - `GET /api/comisiones-generadas/pdf?fecha_desde=X&fecha_hasta=Y`
+  - `GET /api/comisiones-generadas/excel?fecha_desde=X&fecha_hasta=Y`
+- **Uso**: Perfecto para calcular el importe a pagar a un agente en un periodo (ej: comisiones del mes)
 
 ---
 
