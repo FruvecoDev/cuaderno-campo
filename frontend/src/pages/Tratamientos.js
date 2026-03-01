@@ -1179,7 +1179,7 @@ const Tratamientos = () => {
     }
   };
   
-  const handleEdit = (tratamiento) => {
+  const handleEdit = (tratamiento, skipNavigation = false) => {
     setEditingId(tratamiento._id);
     setFormData({
       tipo_tratamiento: tratamiento.tipo_tratamiento || 'FITOSANITARIOS',
@@ -1204,14 +1204,21 @@ const Tratamientos = () => {
     });
     setSelectedParcelas(tratamiento.parcelas_ids || []);
     setShowForm(true);
+    
+    // Navegar a la ruta de edición si no se está saltando la navegación
+    if (!skipNavigation) {
+      navigate(`/tratamientos/editar/${tratamiento._id}`);
+    }
   };
   
-  const handleCancelEdit = () => {
-    setEditingId(null);
-    setShowForm(false);
-    setSelectedParcelas([]);
-    setSelectedParcelasInfo(null);
-    setParcelaSearch({ proveedor: '', cultivo: '', campana: '' });
+  // Función para abrir nuevo tratamiento
+  const handleNewTratamiento = () => {
+    resetForm();
+    setShowForm(true);
+    navigate('/tratamientos/nuevo');
+  };
+  
+  const resetForm = () => {
     setFormData({
       tipo_tratamiento: 'FITOSANITARIOS',
       subtipo: 'Insecticida',
@@ -1229,10 +1236,21 @@ const Tratamientos = () => {
       producto_fitosanitario_id: '',
       producto_fitosanitario_nombre: '',
       producto_fitosanitario_dosis: '',
-      producto_fitosanitario_unidad: '',
+      producto_fitosanitario_unidad: 'L/ha',
       producto_materia_activa: '',
       producto_plazo_seguridad: ''
     });
+    setSelectedParcelas([]);
+    setSelectedParcelasInfo(null);
+    setParcelaSearch({ proveedor: '', cultivo: '', campana: '' });
+  };
+  
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setShowForm(false);
+    resetForm();
+    // Volver a la lista
+    navigate('/tratamientos');
   };
   
   const handleDelete = async (tratamientoId) => {
