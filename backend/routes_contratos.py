@@ -223,3 +223,53 @@ async def delete_contrato(
     )
     
     return {"success": True, "message": "Contrato deleted"}
+
+
+
+@router.post("/contratos/regenerar-numeros")
+async def regenerar_numeros_contratos(
+    current_user: dict = Depends(RequireEdit)
+):
+    """
+    Regenera el campo numero_contrato para todos los contratos existentes
+    basándose en serie, año y numero.
+    Formato: MP-{año}-{numero_6_digitos}
+    """
+    # Solo admin puede ejecutar esta operación
+    if current_user.get('role') != 'Admin':
+        raise HTTPException(status_code=403, detail="Solo administradores pueden regenerar números")
+    
+    # Obtener todos los contratos
+    contratos = await contratos_collection.find({}).to_list(10000)
+    
+    actualizados = 0
+    errores = []
+    
+    for contrato in contratos:
+        try:
+            serie = contrato.get("serie", "MP")
+            año = contrato.get("año", datetime.now().year)
+            numero = contrato.get("numero", 0)
+            
+            # Generar numero_contrato formateado
+            numero_contrato = f"{serie}-{año}-{str(numero).zfill(6)}"
+            
+            # Actualizar el documento
+            await contratos_collection.update_one(
+                {"_id": contrato["_id"]},
+                {"$set": {"numero_contrato": numero_contrato}}
+            )
+            actualizados += 1
+        except Exception as e:
+            errores.append({
+                "id": str(contrato.get("_id")),
+                "error": str(e)
+            })
+    
+    return {
+        "success": True,
+        "message": f"Regenerados {actualizados} números de contrato",
+        "actualizados": actualizados,
+        "errores": errores,
+        "total_contratos": len(contratos)
+    }
