@@ -114,7 +114,7 @@ def create_header_table(parcela: dict, campana: str) -> Table:
 
 
 def create_tratamientos_table(tratamientos: list, styles) -> list:
-    """Create tratamientos section"""
+    """Create tratamientos section with applicator details"""
     elements = []
     elements.append(Paragraph('TRATAMIENTOS FITOSANITARIOS', styles['SectionTitle']))
     
@@ -151,6 +151,54 @@ def create_tratamientos_table(tratamientos: list, styles) -> list:
     
     elements.append(table)
     elements.append(Paragraph(f'Total tratamientos: {len(tratamientos)}', styles['SmallText']))
+    
+    # Añadir sección de datos de técnicos aplicadores
+    tratamientos_con_tecnico = [t for t in tratamientos if t.get('tecnico_data')]
+    
+    if tratamientos_con_tecnico:
+        elements.append(Spacer(1, 0.3*cm))
+        elements.append(Paragraph('DATOS DE TÉCNICOS APLICADORES', styles['SubSection']))
+        
+        # Obtener técnicos únicos
+        tecnicos_unicos = {}
+        for t in tratamientos_con_tecnico:
+            tecnico = t.get('tecnico_data')
+            tecnico_id = str(tecnico.get('_id', ''))
+            if tecnico_id and tecnico_id not in tecnicos_unicos:
+                tecnicos_unicos[tecnico_id] = tecnico
+        
+        # Crear tabla con datos de aplicadores
+        aplicadores_data = [['Nombre Completo', 'DNI', 'Nº Carnet', 'Nivel Capacitación', 'Validez']]
+        
+        for tecnico in tecnicos_unicos.values():
+            nombre_completo = f"{tecnico.get('nombre', '')} {tecnico.get('apellidos', '')}".strip()
+            aplicadores_data.append([
+                nombre_completo[:25] or '-',
+                tecnico.get('dni', '-'),
+                tecnico.get('num_carnet', '-'),
+                tecnico.get('nivel_capacitacion', '-'),
+                tecnico.get('fecha_validez', '-')
+            ])
+        
+        aplicadores_table = Table(aplicadores_data, colWidths=[4.5*cm, 2.5*cm, 2.5*cm, 3*cm, 2.5*cm])
+        aplicadores_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#27ae60')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 8),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#dee2e6')),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('PADDING', (0, 0), (-1, -1), 4),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#e8f8f5')]),
+        ]))
+        
+        elements.append(aplicadores_table)
+        elements.append(Paragraph(
+            'Los técnicos aplicadores deben disponer del carnet de aplicador de productos fitosanitarios vigente.',
+            styles['SmallText']
+        ))
     
     return elements
 
