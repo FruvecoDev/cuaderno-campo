@@ -1336,6 +1336,10 @@ async def generate_evaluacion_pdf(
         # PÁGINA DE FICHA DEL APLICADOR
         # ====================================================================
         aplicador = tratamiento.get("aplicador_completo")
+        print(f"PDF Gen HTML: Tratamiento {idx} - aplicador_completo existe: {'SI' if aplicador else 'NO'}")
+        if aplicador:
+            print(f"PDF Gen HTML: Aplicador nombre: {aplicador.get('nombre')}")
+        
         page_num_aplicador = 1 + len(visitas) + (idx * 3) - 1
         
         html_content += f"""
