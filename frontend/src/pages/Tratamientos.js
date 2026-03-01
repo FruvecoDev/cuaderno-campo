@@ -2544,8 +2544,14 @@ const Tratamientos = () => {
                     {tableConfig.maquina ? <td>{tratamiento.maquina_nombre || '—'}</td> : null}
                     {tableConfig.estado ? (
                       <td>
-                        <span className={`badge ${tratamiento.realizado ? 'badge-success' : 'badge-default'}`}>
-                          {tratamiento.realizado ? 'Realizado' : 'Pendiente'}
+                        <span className={`badge ${
+                          tratamiento.realizado ? 'badge-success' : 
+                          tratamiento.cancelado ? 'badge-error' : 
+                          'badge-default'
+                        }`}>
+                          {tratamiento.realizado ? 'Realizado' : 
+                           tratamiento.cancelado ? 'Cancelado' : 
+                           'Pendiente'}
                         </span>
                       </td>
                     ) : null}
