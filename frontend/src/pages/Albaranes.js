@@ -448,9 +448,12 @@ const Albaranes = () => {
       
       const method = editingId ? 'PUT' : 'POST';
       
+      // Filtrar líneas de destare antes de enviar (el backend las recalcula)
+      const itemsSinDestare = formData.items.filter(item => !item.es_destare);
+      
       const payload = {
         ...formData,
-        items: formData.items.map(item => ({
+        items: itemsSinDestare.map(item => ({
           ...item,
           cantidad: parseFloat(item.cantidad) || 0,
           precio_unitario: parseFloat(item.precio_unitario) || 0,
@@ -465,15 +468,33 @@ const Albaranes = () => {
       delete payload.cliente_contrato;
       delete payload.tipo_contrato;
       
+      let response;
       if (editingId) {
-        await api.put(`/api/albaranes/${editingId}`, payload);
+        response = await api.put(`/api/albaranes/${editingId}`, payload);
+        // Recargar los datos del albarán para mostrar líneas actualizadas (incluyendo destare)
+        const updatedAlbaran = await api.get(`/api/albaranes/${editingId}`);
+        if (updatedAlbaran) {
+          // Actualizar formData con los items del servidor (incluyendo destare)
+          setFormData(prev => ({
+            ...prev,
+            items: updatedAlbaran.items || prev.items,
+            total_albaran: updatedAlbaran.total_albaran || prev.total_albaran,
+            kilos_brutos: updatedAlbaran.kilos_brutos,
+            kilos_destare: updatedAlbaran.kilos_destare,
+            kilos_netos: updatedAlbaran.kilos_netos
+          }));
+        }
+        // Mantener el formulario abierto en modo edición
+        setSuccessMessage('Albarán actualizado correctamente');
+        setTimeout(() => setSuccessMessage(null), 3000);
       } else {
-        await api.post('/api/albaranes', payload);
+        response = await api.post('/api/albaranes', payload);
+        // En modo creación, cerrar el formulario
+        setShowForm(false);
+        setEditingId(null);
+        resetForm();
       }
       
-      setShowForm(false);
-      setEditingId(null);
-      resetForm();
       reloadAlbaranes();
     } catch (error) {
       console.error('Error saving albaran:', error);
