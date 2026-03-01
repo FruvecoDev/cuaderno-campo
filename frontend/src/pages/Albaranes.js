@@ -626,7 +626,8 @@ const Albaranes = () => {
       } else {
         response = await api.post('/api/albaranes', payload);
         // Obtener el ID del nuevo albarán y mantener el formulario abierto
-        const nuevoAlbaranId = response.data?._id;
+        // La respuesta de api.post ya es el objeto data directamente
+        const nuevoAlbaranId = response?.data?._id || response?._id;
         if (nuevoAlbaranId) {
           // Cambiar a modo edición con el nuevo ID
           setEditingId(nuevoAlbaranId);
