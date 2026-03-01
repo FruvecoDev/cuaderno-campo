@@ -1242,8 +1242,18 @@ const Albaranes = () => {
                               </>
                             )}
                           </div>
+                          )}
                         </td>
                         <td>
+                          {item.es_destare ? (
+                            <input
+                              type="text"
+                              className="form-input"
+                              value={formatNumberES(item.cantidad)}
+                              readOnly
+                              style={{ minWidth: '120px', textAlign: 'right', backgroundColor: '#fef2f2', color: '#dc2626', fontWeight: '500' }}
+                            />
+                          ) : (
                           <input
                             type="text"
                             className="form-input"
@@ -1257,8 +1267,12 @@ const Albaranes = () => {
                             style={{ minWidth: '120px', textAlign: 'right' }}
                             data-testid={`item-cantidad-${index}`}
                           />
+                          )}
                         </td>
                         <td>
+                          {item.es_destare ? (
+                            <span style={{ color: '#dc2626' }}>{item.unidad || 'kg'}</span>
+                          ) : (
                           <select
                             className="form-select"
                             value={item.unidad || 'kg'}
@@ -1272,8 +1286,18 @@ const Albaranes = () => {
                             <option value="cajas">cajas</option>
                             <option value="pallets">pallets</option>
                           </select>
+                          )}
                         </td>
                         <td>
+                          {item.es_destare ? (
+                            <input
+                              type="text"
+                              className="form-input"
+                              value={item.precio_unitario}
+                              readOnly
+                              style={{ backgroundColor: '#fef2f2', color: '#dc2626' }}
+                            />
+                          ) : (
                           <input
                             type="number"
                             step="0.01"
@@ -1284,6 +1308,7 @@ const Albaranes = () => {
                             placeholder="0.00"
                             data-testid={`item-precio-${index}`}
                           />
+                          )}
                         </td>
                         <td>
                           <input
