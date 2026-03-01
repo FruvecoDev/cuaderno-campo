@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login, removeEmergentBadge, dismissToasts } from '../fixtures/helpers';
 
-const BASE_URL = process.env.BASE_URL || 'https://agri-rrhh-suite.preview.emergentagent.com';
+const BASE_URL = process.env.BASE_URL || 'https://agri-operations-hub.preview.emergentagent.com';
 
 test.describe('Alertas Climáticas - Climate Alerts', () => {
   

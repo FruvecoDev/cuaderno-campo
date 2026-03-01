@@ -15,7 +15,7 @@
 
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = process.env.BASE_URL || 'https://agri-rrhh-suite.preview.emergentagent.com';
+const BASE_URL = process.env.BASE_URL || 'https://agri-operations-hub.preview.emergentagent.com';
 
 // Helper function to login
 async function login(page) {

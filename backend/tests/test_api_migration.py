@@ -8,7 +8,7 @@ to verify backend APIs are still working correctly.
 import pytest
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://agri-rrhh-suite.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://agri-operations-hub.preview.emergentagent.com').rstrip('/')
 
 
 class TestAuthAPI:

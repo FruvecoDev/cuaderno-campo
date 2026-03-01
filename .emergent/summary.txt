@@ -5,7 +5,9 @@ Un contrato siempre estará asignado a una parcela y un cultivo. Sobre una parce
 
 Cada sección puede ser configurable pudiendo habilitar o deshabilitar secciones por usuario. También los campos de cada sección son configurables.
 
-El usuario ha solicitado recientemente la creación de un módulo RRHH para la gestión de personas, control horario (con QR, NFC y reconocimiento facial), control de productividad, gestión documental, firma digital y un portal del empleado.
+El usuario ha solicitado recientemente la creación de un módulo RRHH para la gestión de personas, control horario, control de productividad, gestión documental, y un portal del empleado.
+
+En las últimas interacciones, el usuario ha solicitado la adición de campos específicos a los contratos, incluyendo formas de pago/cobro y un descuento por destare, y ha pedido mejoras en la interfaz de usuario, como la apertura de formularios en páginas dedicadas y el formato automático de números.
 
 **PRODUCT REQUIREMENTS:**
 -   **Modules:** Contracts, Parcels, Maps, Farms, Visits, Tasks, Harvests, Treatments, Irrigations, Recipes, Delivery Notes, Suppliers, Crops, Machinery, Evaluation Sheets, Applicator Technicians, Farm Articles, Purchase/Sale Agents, Clients, **Human Resources (RRHH)**.
@@ -36,44 +38,50 @@ El usuario ha solicitado recientemente la creación de un módulo RRHH para la g
 **User's preferred language**: Español
 
 **what currently exists?**
-Una aplicación full-stack muy avanzada para la gestión agrícola. En esta sesión se han realizado avances cruciales:
-1.  **Módulo Cuaderno de Campo Completado**: Se solucionaron los bloqueos del backend (rutas conflictivas, errores de autenticación) y se corrigió la generación de PDF (manejo de valores ), dejando el módulo completamente funcional.
-2.  **Funcionalidad de Mapas Mejorada**: Se implementó la capacidad de dibujar y editar polígonos de parcelas directamente en el mapa utilizando .
-3.  **Importación de Polígonos**: Se añadió una nueva funcionalidad para importar archivos KML y GeoJSON, que crea automáticamente nuevas parcelas con sus geometrías. Esta opción está disponible en los módulos de Mapas y Parcelas.
-4.  **Corrección de Bugs Críticos**:
-    *   Se solucionó un bug preexistente que bloqueaba toda la aplicación (Objects are not valid as a React child) causado por una colisión de variables en el backend del dashboard.
-    *   Se corrigió un bug que impedía crear nuevos contratos debido a una validación incorrecta en el frontend.
-    *   Se solucionó un problema que impedía guardar polígonos en parcelas existentes debido a un modelo de Pydantic incorrecto en el backend.
+Una aplicación full-stack de gestión agrícola (React, FastAPI, MongoDB) con varios módulos funcionales, incluyendo Contratos, Parcelas, Mapas, Tratamientos y Cuaderno de Campo. Las características clave implementadas son la generación de PDF, mapas interactivos con dibujo de polígonos, importación de KML/GeoJSON y autenticación de usuarios.
+
+En esta sesión se han realizado numerosas mejoras de usabilidad y funcionalidad basadas en las peticiones del usuario:
+-   Los formularios de creación/edición de **Tratamientos** y **Contratos** ahora se abren en páginas dedicadas para una mejor experiencia de usuario.
+-   Se han añadido funcionalidades de autocompletado y generación automática de códigos en los formularios de **Parcelas** y **Contratos**.
+-   Se ha implementado la gestión de estados (p. ej., pendiente, completado, cancelado) para **Tratamientos** y **Hojas de Evaluación**.
+-   Se han corregido bugs importantes, como la desaparición de polígonos dibujados en el mapa y la falta de datos del técnico aplicador en los PDF generados.
+-   Se ha mejorado la visualización de datos en los formularios, añadiendo formato de separadores de miles para campos numéricos.
 
 **Last working item**:
--   **Last item agent was working**: Corregir un bug en la UI del formulario Crear Nueva Parcela. Después de que el usuario dibuja un polígono y aparece el mensaje de confirmación, el polígono desaparece visualmente del mapa, aunque sus datos sí se registran en el estado. El agente identificó que el problema es que la capa de dibujo () no se añade de forma persistente a la capa de visualización () en el mapa.
+-   **Last item agent was working**: Implementar nuevos campos en el módulo de **Contratos** según la última petición del usuario. Los campos solicitados son: **agente**, **tipo de comisión**, **valor de comisión**, **forma de pago/cobro**, y **descuento destare**. El agente había verificado que los campos de agente y comisión ya existían y estaba a punto de añadir los nuevos campos al modelo de datos y al formulario.
 -   **Status**: IN PROGRESS
 -   **Agent Testing Done**: N
--   **Which testing method agent to use?**: screenshot tool. El objetivo es verificar que después de dibujar un polígono en el formulario Crear Parcela, el polígono permanece visible en el mapa.
+-   **Which testing method agent to use?**: screenshot tool. Se debe verificar que los nuevos campos (/ y ) aparecen condicionalmente en el formulario de Contratos según el tipo de contrato (compra/venta).
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: El polígono dibujado desaparece visualmente en el formulario de Crear Parcela (Prioridad: P0)**
-    -   **Description**: En la página de Parcelas, al hacer clic en Nueva Parcela y dibujar un polígono en el mapa, aparece un  de confirmación. Al cerrarlo, el polígono desaparece visualmente del mapa. Esto confunde al usuario, haciéndole creer que el dibujo no se guardó, aunque los datos sí están en el estado del componente.
-    -   **Attempted fixes**: El agente añadió logging y verificó que el estado se actualiza correctamente. Identificó que el problema es visual.
+-   **Issue 1: Implementar lógica y campos restantes en el módulo de Contratos (Prioridad: P0)**
+    -   **Description**: Finalizar la implementación de los nuevos campos solicitados por el usuario en el formulario y modelo de Contratos. Esto incluye  (para compras),  (para ventas) y  (% sobre kilos, solo para compras).
+    -   **Attempted fixes**: El agente analizó el archivo  y confirmó que algunos campos ya existían.
     -   **Next debug checklist**:
-        1.  Revisar el componente .
-        2.  En el manejador de eventos  (alrededor de la línea 225), asegurarse de que la  creada no solo se usa para extraer coordenadas, sino que también se añade a una  que esté permanentemente en el mapa ( o una capa similar).
-        3.  El problema probablemente se deba a que la referencia a  se pierde en un re-render o que el  no se añade correctamente. La solución es asegurar que la capa de dibujo se mantenga en el mapa.
-    -   **Why fix this issue and what will be achieved with the fix?**: Solucionar este bug de usabilidad es crucial para que la funcionalidad de creación de parcelas con polígonos sea intuitiva y funcional para el usuario.
+        1.  Modificar el modelo Pydantic en  para añadir los campos , , y .
+        2.  Actualizar la ruta  y  de contratos en  para manejar los nuevos campos.
+        3.  En , añadir los nuevos campos al formulario, mostrando  y  solo si , y  si .
+        4.  Asegurar que los nuevos campos se inicializan correctamente en el estado  y se envían en el .
+    -   **Why fix this issue and what will be achieved with the fix?**: Cumplir con un requisito explícito del usuario para una gestión de contratos más detallada.
     -   **Status**: IN PROGRESS
     -   **Is recurring issue?**: N
-    -   **Should Test frontend/backend/both after fix?**: Frontend.
+    -   **Should Test frontend/backend/both after fix?**: Both.
     -   **Blocked on other issue**: No.
 
 **In progress Task List**:
--   Ninguno.
+-   **Task 1: Añadir nuevos campos al formulario de Contratos.**
+    -   **Where to resume**: En el backend, modificar el archivo  para añadir los nuevos campos al modelo del contrato.
+    -   **What will be achieved with this?**: El formulario de contratos contendrá todos los campos requeridos por el usuario, con la lógica condicional necesaria.
+    -   **Status**: IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?**: Both.
+    -   **Blocked on something**: No.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks**:
-    -   **P0: Habilitar Notificaciones por Email**: La funcionalidad de backend está lista pero bloqueada. Es crucial solicitar al usuario la  para activar esta característica.
-    -   **P1: Completar Refactorización de **: El archivo sigue manejando múltiples responsabilidades (Empleados, Fichajes, Productividad). Extraerlas a sus propios archivos mejorará la mantenibilidad.
-    -   **P2: Implementar Dibujo de Polígonos en el Mapa (Edición avanzada)**: Mejorar la edición de polígonos, permitiendo por ejemplo dividir o unir geometrías.
+    -   **P0: Implementar lógica de **: Una vez añadido el campo, se debe implementar la lógica para que, al crear albaranes de compra, se aplique este descuento automáticamente, generando una línea de destare que reduzca los kilos totales y afecte al cálculo de la comisión del agente.
+    -   **P1: Habilitar Notificaciones por Email**: La funcionalidad de backend está lista pero bloqueada. Es crucial solicitar al usuario la  para activar esta característica.
+    -   **P2: Completar Refactorización de **: El archivo sigue manejando múltiples responsabilidades (Empleados, Fichajes, Productividad). Se debe dividir en archivos separados para mejorar la mantenibilidad.
 -   **Future Tasks**:
     -   Implementar los módulos principales restantes del cuaderno de campo (p. ej., Recetas, Tareas).
     -   Implementar las integraciones de IA planificadas (resúmenes de contratos, predicciones de cosecha).
@@ -81,163 +89,83 @@ Una aplicación full-stack muy avanzada para la gestión agrícola. En esta sesi
     -   Generalizar la generación de informes PDF/Excel para todos los módulos.
 
 **Completed work in this session**
--   Módulo Cuaderno de Campo PDF implementado y funcional.
--   Funcionalidad de importación de polígonos KML/GeoJSON desde cero.
--   Funcionalidad para dibujar y guardar polígonos en el módulo de Mapas.
--   Corregido un bug crítico que bloqueaba toda la aplicación en el Dashboard.
--   Corregido el formulario de Nuevo Contrato que no permitía guardar.
--   Corregido el guardado de polígonos para parcelas existentes.
--   Mejorado el feedback al usuario en el formulario de creación de parcelas con s más descriptivos.
+-   **UI/UX**: Los formularios de **Tratamientos** y **Contratos** ahora se abren en páginas dedicadas para evitar problemas de scroll y mejorar la usabilidad.
+-   **Formularios Mejorados**:
+    -   **Parcelas**:  auto-generado;  y  son selectores opcionales.
+    -   **Tratamientos**:  se autocompleta desde las parcelas seleccionadas pero sigue siendo editable.
+    -   **Contratos**:  se genera automáticamente; se corrigieron todas las etiquetas al español y se añadió formato de miles a los campos numéricos.
+-   **Gestión de Estado**:
+    -   Se añadieron botones y lógica para marcar **Tratamientos** como Completado o Cancelado.
+    -   Se añadieron botones y lógica para marcar **Hojas de Evaluación** como Finalizada o Archivada.
+-   **Bug Fixes**:
+    -   Corregido un bug crítico donde los datos del **técnico aplicador** no aparecían en el PDF de la hoja de evaluación. El problema se rastreó hasta un nombre de campo incorrecto ( en lugar de ).
+    -   Solucionado un problema donde el campo **Maquinaria** no era visible en el formulario de tratamiento debido a una configuración antigua en .
+    -   Resuelto un bug visual donde un **polígono dibujado** en el mapa desaparecía después de la confirmación en el formulario de creación de parcelas.
 
 **Earlier issues found/mentioned but not fixed**
--   **Issue 1: Código muerto en **
-    -   **Debug checklist**: En el archivo , existe una función  que hace referencia a otras funciones no definidas. Este código parece ser un remanente de una implementación anterior.
-    -   **Why to solve this issue and what will be achieved with this?**: Eliminar este código muerto mejorará la limpieza y mantenibilidad del componente del Dashboard.
-    -   **Should Test frontend/backend/both after fix?**: Frontend (solo verificar que el dashboard sigue funcionando).
-    -   **Is recurring issue?**: N
+-   Ninguno. El código muerto en  mencionado en el handoff anterior ya había sido eliminado.
 
 **Known issue recurrence from previous fork**
--   Ninguno relevante. El problema de  no ha reaparecido.
+-   Ninguno.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Generación de PDF (Backend)**: Uso de  para crear tablas y formatear documentos, con un manejo robusto de datos .
--   **Mapas Interactivos y Dibujo**: Integración de  para permitir a los usuarios dibujar, editar y guardar geometrías de polígonos.
--   **Procesamiento de Archivos GIS**: Uso de  y  en el backend para parsear archivos de polígonos subidos por el usuario.
--   **Validación de Modelos Pydantic**: Creación de modelos específicos para creación () y actualización () para manejar correctamente los campos opcionales en las operaciones .
--   **Depuración de Bugs Complejos**: Uso del  para identificar y resolver un bug de backend difícil de rastrear (colisión de variables).
+-   **Refactorización de UI con React Router**: Se utilizó ,  y  para dividir componentes grandes (listas y formularios) en vistas separadas (p. ej.,  para la lista,  para el formulario), mejorando la experiencia de usuario y la mantenibilidad.
+-   **Gestión de Estado Condicional**: Implementación de lógica para mostrar/ocultar campos de formulario (, ) basándose en otros valores del estado ( de contrato).
+-   **Manejo de **: Se implementó una estrategia robusta para fusionar la configuración de campos por defecto con la configuración guardada por el usuario en , evitando que campos nuevos no aparezcan.
+-   **Extensión de API (FastAPI)**: Se añadió un nuevo endpoint  para actualizar parcialmente un recurso, siguiendo las mejores prácticas REST.
+-   **Depuración de Backend a Frontend**: Se diagnosticó y resolvió un problema complejo en la generación de PDF () rastreando el flujo de datos desde la consulta a la base de datos en el backend hasta su renderizado final, identificando un nombre de campo incorrecto como la causa raíz.
+-   **Formateo de Entradas (Frontend)**: Se crearon funciones de utilidad para formatear números en tiempo real mientras el usuario escribe en los campos de entrada, añadiendo separadores de miles y manejando la conversión de vuelta a número para el envío al backend.
 
 **key DB schema**
--   **parcelas**: El campo  (un array de geometrías) se utiliza ahora de forma intensiva para crear y actualizar parcelas a través del dibujo en el mapa y la importación de archivos.
--   **contratos**: No hubo cambios, pero se confirmó que  y  son opcionales.
+-   **contratos**: A punto de añadir  (string),  (string) y  (float).
+-   **tratamientos**: Se añadió un campo  (string: 'pendiente', 'completado', 'cancelado').
+-   **evaluaciones**: Se utiliza el campo existente  (string: 'borrador', 'completada', 'archivada').
 
 **changes in tech stack**
--   **Nuevas dependencias de backend**: ,  (instaladas vía 
-Usage:   
-  pip <command> [options]
-
-Commands:
-  install                     Install packages.
-  lock                        Generate a lock file.
-  download                    Download packages.
-  uninstall                   Uninstall packages.
-  freeze                      Output installed packages in requirements format.
-  inspect                     Inspect the python environment.
-  list                        List installed packages.
-  show                        Show information about installed packages.
-  check                       Verify installed packages have compatible 
-dependencies.
-  config                      Manage local and global configuration.
-  search                      Search PyPI for packages.
-  cache                       Inspect and manage pip's wheel cache.
-  index                       Inspect information available from package 
-indexes.
-  wheel                       Build wheels from your requirements.
-  hash                        Compute hashes of package archives.
-  completion                  A helper command used for command completion.
-  debug                       Show information useful for debugging.
-  help                        Show help for commands.
-
-General Options:
-  -h, --help                  Show help.
-  --debug                     Let unhandled exceptions propagate outside the
-                              main subroutine, instead of logging them to
-                              stderr.
-  --isolated                  Run pip in an isolated mode, ignoring
-                              environment variables and user configuration.
-  --require-virtualenv        Allow pip to only run in a virtual environment;
-                              exit with an error otherwise.
-  --python <python>           Run pip with the specified Python interpreter.
-  -v, --verbose               Give more output. Option is additive, and can be
-                              used up to 3 times.
-  -V, --version               Show version and exit.
-  -q, --quiet                 Give less output. Option is additive, and can be
-                              used up to 3 times (corresponding to WARNING,
-                              ERROR, and CRITICAL logging levels).
-  --log <path>                Path to a verbose appending log.
-  --no-input                  Disable prompting for input.
-  --keyring-provider <keyring_provider>
-                              Enable the credential lookup via the keyring
-                              library if user input is allowed. Specify which
-                              mechanism to use [auto, disabled, import,
-                              subprocess]. (default: auto)
-  --proxy <proxy>             Specify a proxy in the form
-                              scheme://[user:passwd@]proxy.server:port.
-  --retries <retries>         Maximum attempts to establish a new HTTP
-                              connection. (default: 5)
-  --timeout <sec>             Set the socket timeout (default 15 seconds).
-  --exists-action <action>    Default action when a path already exists:
-                              (s)witch, (i)gnore, (w)ipe, (b)ackup, (a)bort.
-  --trusted-host <hostname>   Mark this host or host:port pair as trusted,
-                              even though it does not have valid or any HTTPS.
-  --cert <path>               Path to PEM-encoded CA certificate bundle. If
-                              provided, overrides the default. See 'SSL
-                              Certificate Verification' in pip documentation
-                              for more information.
-  --client-cert <path>        Path to SSL client certificate, a single file
-                              containing the private key and the certificate
-                              in PEM format.
-  --cache-dir <dir>           Store the cache data in <dir>.
-  --no-cache-dir              Disable the cache.
-  --disable-pip-version-check
-                              Don't periodically check PyPI to determine
-                              whether a new version of pip is available for
-                              download. Implied with --no-
-                              index.
-  --no-color                  Suppress colored output.
-  --use-feature <feature>     Enable new functionality, that may be backward
-                              incompatible.
-  --use-deprecated <feature>  Enable deprecated functionality, that will be
-                              removed in the future.
-  --resume-retries <resume_retries>
-                              Maximum attempts to resume or restart an
-                              incomplete download. (default: 5)).
+-   Ninguna.
 
 **All files of reference**
--   : Archivo clave para depurar el bug actual.
--   : Contiene la lógica del formulario de creación de parcelas.
--   : Contiene la lógica final y funcional del Cuaderno de Campo.
--   : Nueva ruta para la importación de polígonos.
--   : Contiene el fix del bug que bloqueaba la aplicación.
--   : Contiene el fix del bug de creación de contratos.
--   : Contiene el nuevo modelo .
+-   : Archivo principal para la tarea actual.
+-   : Archivo de backend a modificar a continuación.
+-   : Referencia para el patrón de formulario en página separada.
+-   : Contiene la corrección del bug del PDF.
 
 **Areas that need refactoring**:
--   ****: Sigue siendo un archivo grande que maneja múltiples responsabilidades. Su refactorización sigue pendiente.
--   ****: Contiene código muerto (función ) que debería ser eliminado.
+-   : Sigue siendo un archivo monolítico que debería dividirse por funcionalidad.
 
 **key api endpoints**
--   : **(NUEVO)** Endpoint para subir y procesar archivos KML/GeoJSON.
--   : **(MODIFICADO)** Ahora usa el modelo  y funciona correctamente para actualizaciones parciales (como solo guardar un polígono).
--   : **(CORREGIDO)** Devuelve los datos correctamente.
--   : **(CORREGIDO)** Genera el PDF sin errores.
--   : **(CORREGIDO)** El bug estaba en el frontend, pero el endpoint ahora recibe correctamente payloads sin  o .
+-   : **(NUEVO)** Actualiza el estado de un tratamiento a 'pendiente', 'completado' o 'cancelado'.
+-   : **(NUEVO)** Obtiene el siguiente número de contrato disponible para la generación automática.
+-   : **(CORREGIDO)** La generación del PDF ahora incluye correctamente los datos del técnico aplicador asociado.
 
 **Critical Info for New Agent**
-1.  **Prioridad Máxima**: Tu primera tarea es resolver el bug visual en el formulario de Crear Parcela. El polígono dibujado desaparece del mapa después de la confirmación. La lógica del backend y del estado es correcta; el problema está en la visualización. Concéntrate en  para asegurar que la capa de dibujo se añade de forma persistente al mapa.
-2.  **El Testing Agent es tu Aliado**: El agente anterior se quedó atascado en un bug que bloqueaba toda la app. La llamada al  fue lo que lo resolvió. Si te encuentras con un problema similarmente bloqueante y difícil de rastrear, no dudes en usarlo.
-3.  **Notificaciones por Email Bloqueadas**: Recuerda al usuario que se necesita su  para activar las notificaciones por email. Es una funcionalidad ya implementada y una victoria fácil.
-4.  **No Confíes en la Navegación del Screenshot Tool**: La herramienta de captura de pantalla a menudo redirige al Dashboard, lo que puede dificultar la depuración de flujos en páginas específicas. Si esto ocurre, usa  para probar el backend y confía en el análisis del código del frontend para los bugs de UI.
+1.  **Prioridad Inmediata**: Tu primera tarea es completar la implementación de los nuevos campos en el módulo de **Contratos**. Esto requiere modificar el modelo en , las rutas, y luego el componente de React  para añadir los campos condicionales.
+2.  **Patrón de UI**: El usuario prefiere que los formularios de creación/edición se abran en páginas dedicadas. Sigue el patrón ya implementado en  y  (usando  para mostrar condicionalmente el formulario o la lista) si se solicita una refactorización similar en otros módulos.
+3.  **Problemas de **: Ten en cuenta que los usuarios pueden tener configuraciones de UI guardadas en su . Si un nuevo campo de formulario no aparece, es probable que la configuración local esté desactualizada. La solución es fusionar la configuración por defecto con la local, como se hizo en .
+4.  **Lógica de Negocio Pendiente**: La implementación del  no termina al añadir el campo. El siguiente paso será implementar la lógica en el backend para que afecte a los albaranes. Ten esto en mente para la planificación futura.
 
 **documents and test reports created in this job**
--    fue actualizado para reflejar la finalización del Cuaderno de Campo y la implementación del dibujo de polígonos y la importación.
--   : Generado por el  que solucionó el bug del dashboard.
+-   
+-    (actualizado)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **cuando sale el mensaje de parcela dibujada le doy a aceptar y desaparece el dibujo de la parcela, no se guarda el dibujo.**: Reporte del bug actual. El polígono desaparece visualmente. (Estado: **EN PROGRESO**)
-2.  **en crear nueva parcela no guarda el dibujo de la parcela**: Reporte inicial del bug de creación de parcela con polígono. (Estado: **EN PROGRESO**)
-3.  **no guarda la parcela dibujada**: Reporte del bug de guardado de polígonos en parcelas existentes. (Estado: **COMPLETADO**)
-4.  **no funciona guardar contrato nuevo**: Reporte del bug de creación de contratos. (Estado: **COMPLETADO**)
-5.  **1.c 2.a 3.c**: Elección del usuario para implementar la importación de KML/GeoJSON. (Estado: **COMPLETADO**)
-6.  **si**: Confirmación para proceder. (Estado: **COMPLETADO**)
-7.  **P2**: Elección del usuario para implementar el dibujo de polígonos. (Estado: **COMPLETADO**)
-8.  **User approved Cuaderno de Campo implementation**: Aprobación para iniciar la tarea del Cuaderno de Campo. (Estado: **COMPLETADO**)
+1.  **en el contrato hay que añadir el campo agente, tipo de comisión...**: Solicitud para añadir nuevos campos al contrato. (Estado: **EN PROGRESO**)
+2.  **los campos cantidad, kilos... que sean númericos al escribirlos que reconozca...**: Solicitud de formateo de números con separadores de miles. (Estado: **COMPLETADO**)
+3.  **el primer campo siempre será número de contrato... corregir los nombres de los campos...**: Solicitud para auto-generar el número de contrato y corregir etiquetas. (Estado: **COMPLETADO**)
+4.  **en contratos cuando pulse nuevo contrato o editar contrato que se abra en una nueva pantalla**: Solicitud para que el formulario de contratos se abra en una página dedicada. (Estado: **COMPLETADO**)
+5.  **poder poner las hojas de evaluación como finalizadas**: Solicitud para añadir un estado finalizado a las evaluaciones. (Estado: **COMPLETADO**)
+6.  **el archivo pdf hoja de evaluación sigue sin coger los datos del aplicador**: Segundo reporte del bug de datos del aplicador en el PDF. (Estado: **COMPLETADO**)
+7.  **sigue sin verse el campo maquina en nuevo tratamiento**: Segundo reporte del campo de maquinaria desaparecido. (Estado: **COMPLETADO**)
+8.  **en nuevo tratamiento falta el campo maquina... y hace falta tambien un boton para decir que el tratamiento se ha completado y otro de cancelado**: Solicitud para añadir campo y botones de estado en tratamientos. (Estado: **COMPLETADO**)
+9.  **en nuevo tratamiento o editar uno existente que se abra en una pagina nueva**: Solicitud para que el formulario de tratamiento se abra en una página dedicada. (Estado: **COMPLETADO**)
+10. **cuando un tratamiento lleva asociado un tecnico aplicador en la hoja de evaluacion... tienen que salir los datos del aplicador**: Reporte inicial del bug de datos del aplicador en el PDF. (Estado: **COMPLETADO**)
 
 **Project Health Check:**
--   **Broken**: No. La aplicación es estable y la mayoría de las funcionalidades son robustas. El único problema conocido es el bug visual en el formulario de creación de parcelas.
--   **Mocked**: La integración con **Resend** (emails) y **OpenWeatherMap** sigue implementada pero inactiva, a la espera de las claves API del usuario.
+-   **Broken**: No. La aplicación es estable y las funcionalidades principales operan correctamente.
+-   **Mocked**: La integración con **Resend** (emails) y **OpenWeatherMap** sigue bloqueada, a la espera de que el usuario proporcione las claves API.
 
 **3rd Party Integrations**
 -   **OpenAI GPT-4o**: Usa Emergent LLM Key.
@@ -247,10 +175,9 @@ General Options:
 -   **react-leaflet-draw**: Usado para la funcionalidad de dibujo de polígonos.
 -   **Recharts**: Usado para gráficos.
 -   **Reportlab**: Usado para la generación de PDFs.
--   **kml2geojson & pygeoj**: **(NUEVO)** Usadas para la importación de archivos de polígonos.
 
 **Testing status**
--   **Testing agent used after significant changes**: YES. Se usó con éxito para encontrar y corregir un bug crítico que bloqueaba toda la aplicación.
+-   **Testing agent used after significant changes**: YES, se utilizó para verificar la corrección del bug del polígono que desaparecía.
 -   **Troubleshoot agent used after agent stuck in loop**: NO.
 -   **Test files created**: .
 -   **Known regressions**: Ninguna.
@@ -259,4 +186,4 @@ General Options:
 -   **Admin**:  / 
 
 **What agent forgot to execute**
--   El agente identificó código muerto (la función ) en  mientras depuraba un problema mayor, pero no volvió para eliminarlo después de que el problema principal fuera resuelto por el .</analysis>
+-   El agente ha seguido las peticiones del usuario de forma diligente. La tarea recurrente de refactorizar  sigue pendiente, pero esto se debe a la priorización de las solicitudes directas y más urgentes del usuario.</analysis>
