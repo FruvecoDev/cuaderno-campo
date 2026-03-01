@@ -252,8 +252,8 @@ async def get_agentes_con_comisiones(
     
     contratos = await contratos_collection.find({
         "$or": [
-            {"agente_compra": {"$exists": True, "$ne": "", "$ne": None}},
-            {"agente_venta": {"$exists": True, "$ne": "", "$ne": None}}
+            {"agente_compra": {"$exists": True, "$nin": ["", None]}},
+            {"agente_venta": {"$exists": True, "$nin": ["", None]}}
         ]
     }).to_list(1000)
     
