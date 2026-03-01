@@ -424,7 +424,17 @@ const Albaranes = () => {
   };
   
   const calculateGrandTotal = () => {
-    return formData.items.reduce((sum, item) => sum + (item.total || 0), 0);
+    // Si hay kilos_netos del servidor (indica que hay destare), usar ese cálculo
+    if (formData.kilos_netos && formData.kilos_destare > 0) {
+      // Obtener precio de la primera línea que no sea destare
+      const primeraLinea = formData.items.find(item => !item.es_destare);
+      const precio = parseFloat(primeraLinea?.precio_unitario) || 0;
+      return formData.kilos_netos * precio;
+    }
+    // Si no hay destare, sumar los totales de las líneas (excluyendo destare)
+    return formData.items
+      .filter(item => !item.es_destare)
+      .reduce((sum, item) => sum + (parseFloat(item.total) || 0), 0);
   };
   
   const handleSubmit = async (e) => {
