@@ -19,10 +19,14 @@ test.describe('Parcelas Page - General Map View', () => {
     await login(page);
     await dismissToasts(page);
     await removeEmergentBadge(page);
+    await dismissResumenDiarioModal(page);
     
     // Navigate to Parcelas page
     await page.goto('/parcelas', { waitUntil: 'domcontentloaded' });
     await expect(page.getByTestId('parcelas-page')).toBeVisible({ timeout: 10000 });
+    
+    // Dismiss ResumenDiario modal if it appears on parcelas page
+    await dismissResumenDiarioModal(page);
   });
 
   test('should load parcelas page with basic elements', async ({ page }) => {
