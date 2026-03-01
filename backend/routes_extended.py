@@ -468,6 +468,64 @@ async def update_albaran(
         raise HTTPException(status_code=400, detail="Invalid ID")
     
     update_data = albaran.dict()
+    
+    # Variables para el cálculo (similar a create)
+    kilos_brutos = 0
+    kilos_destare = 0
+    kilos_netos = 0
+    contrato = None
+    
+    # Calcular kilos brutos de las líneas existentes (solo items con kg)
+    for item in update_data.get("items", []):
+        if item.get("unidad", "kg").lower() in ["kg", "kilos", "kilogramos"]:
+            kilos_brutos += item.get("cantidad", 0)
+    
+    # Si el albarán tiene contrato_id, buscar datos del contrato
+    if albaran.contrato_id:
+        contrato = await contratos_collection.find_one({"_id": ObjectId(albaran.contrato_id)})
+    
+    # Aplicar descuento destare si corresponde (solo para compras/entradas)
+    es_compra = albaran.tipo in ["Entrada", "Albarán de compra", "entrada", "compra"]
+    if contrato and es_compra and contrato.get("tipo") == "Compra":
+        descuento_porcentaje = float(contrato.get("descuento_destare", 0) or 0)
+        
+        if descuento_porcentaje > 0 and kilos_brutos > 0:
+            # Calcular kilos de descuento
+            kilos_destare = round(kilos_brutos * (descuento_porcentaje / 100), 2)
+            
+            # Obtener el precio de la primera línea (o del contrato)
+            precio_unitario = update_data.get("items", [{}])[0].get("precio_unitario", 0)
+            if not precio_unitario and contrato.get("precio"):
+                precio_unitario = float(contrato.get("precio", 0))
+            
+            # Crear línea de descuento destare con precio=0 e importe=0
+            linea_destare = {
+                "descripcion": f"Descuento Destare ({descuento_porcentaje}%)",
+                "producto": "DESTARE",
+                "lote": "",
+                "cantidad": kilos_destare,  # Positivo para mostrar los kilos descontados
+                "unidad": "kg",
+                "precio_unitario": 0,
+                "total": 0,
+                "es_destare": True
+            }
+            
+            # Añadir línea de destare a los items
+            update_data["items"].append(linea_destare)
+            
+            # Calcular total del albarán: (kilos_brutos - kilos_destare) * precio
+            kilos_netos = kilos_brutos - kilos_destare
+            update_data["total_albaran"] = round(kilos_netos * precio_unitario, 2)
+    
+    # Calcular kilos netos si no hay destare
+    if kilos_netos == 0:
+        kilos_netos = kilos_brutos
+    
+    # Guardar datos de kilos en el albarán
+    update_data["kilos_brutos"] = kilos_brutos
+    update_data["kilos_destare"] = kilos_destare
+    update_data["kilos_netos"] = kilos_netos
+    
     update_data["updated_at"] = datetime.now()
     
     result = await albaranes_collection.update_one(
