@@ -2,7 +2,7 @@ import { test, expect, Page } from '@playwright/test';
 import { login, waitForAppReady, dismissToasts, removeEmergentBadge } from '../fixtures/helpers';
 
 test.describe('Contratos Advanced Filters', () => {
-  const BASE_URL = process.env.BASE_URL || 'https://agri-operations-hub.preview.emergentagent.com';
+  const BASE_URL = process.env.BASE_URL || 'https://agro-field-1.preview.emergentagent.com';
 
   // Helper to close the daily summary modal if present
   async function closeResumenDiarioModal(page: Page) {

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = process.env.BASE_URL || 'https://agri-operations-hub.preview.emergentagent.com';
+const BASE_URL = process.env.BASE_URL || 'https://agro-field-1.preview.emergentagent.com';
 
 test.describe('RRHH - ProductividadTab', () => {
   

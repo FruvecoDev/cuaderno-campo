@@ -12,7 +12,7 @@ import * as path from 'path';
  * - Photo deletion
  */
 
-const BASE_URL = 'https://agri-operations-hub.preview.emergentagent.com';
+const BASE_URL = 'https://agro-field-1.preview.emergentagent.com';
 
 // Helper to create a minimal valid PNG image
 function createTestPNG(): Buffer {

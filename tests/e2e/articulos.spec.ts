@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { login, navigateToPage, generateUniqueId, removeEmergentBadge } from '../fixtures/helpers';
 
 test.describe('Artículos de Explotación - CRUD', () => {
-  const baseUrl = 'https://agri-operations-hub.preview.emergentagent.com';
+  const baseUrl = 'https://agro-field-1.preview.emergentagent.com';
   
   test.beforeEach(async ({ page }) => {
     // Login manually with correct flow

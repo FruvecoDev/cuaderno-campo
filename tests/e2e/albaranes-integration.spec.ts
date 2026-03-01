@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { login, generateUniqueId, removeEmergentBadge } from '../fixtures/helpers';
 
 test.describe('Albaranes - Artículos Integration', () => {
-  const baseUrl = 'https://agri-operations-hub.preview.emergentagent.com';
+  const baseUrl = 'https://agro-field-1.preview.emergentagent.com';
   
   test.beforeEach(async ({ page }) => {
     // Login manually with correct flow

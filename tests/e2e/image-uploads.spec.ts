@@ -6,7 +6,7 @@ import * as fs from 'fs';
  * Tests the bug fix for image storage (now using /api/uploads/ instead of /tmp/)
  */
 
-const BASE_URL = 'https://agri-operations-hub.preview.emergentagent.com';
+const BASE_URL = 'https://agro-field-1.preview.emergentagent.com';
 
 // Helper to create a test PNG image
 function createTestPNG(): Buffer {
