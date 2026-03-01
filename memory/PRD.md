@@ -30,6 +30,35 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
 - **Funciones actualizadas**: `handleSubmit`, `handleEdit`, `handleEditFromUrl`, `resetForm`
 - **Verificado**: API acepta y devuelve correctamente los nuevos campos
 
+#### 2. Sistema de Auditoría para Contratos ✅ (Mejora)
+- **Backend**: 
+  - Nuevo servicio `services/audit_service.py` con funciones `create_audit_log`, `calculate_changes`, `get_audit_history`
+  - Nueva colección MongoDB `audit_logs`
+  - Nuevo router `routes_audit.py` con endpoints:
+    - `GET /api/audit/history/{collection}/{document_id}` - Obtener historial de un documento
+    - `GET /api/audit/recent` - Actividad reciente (solo admin)
+  - Modificadas rutas de contratos para registrar CREATE/UPDATE/DELETE automáticamente
+- **Frontend**:
+  - Nuevo componente `AuditHistory.js` con:
+    - Vista colapsable del historial
+    - Diferenciación visual por tipo de acción (crear/modificar/eliminar)
+    - Detalle de campos modificados con valores anterior/nuevo
+    - Usuario y timestamp de cada cambio
+  - Integrado en formulario de edición de contratos
+
+#### 3. Lógica de Descuento Destare en Albaranes ✅ (P0)
+- **Backend** (`routes_extended.py`):
+  - Al crear un albarán de tipo "Entrada" vinculado a un contrato de compra con `descuento_destare`:
+    - Se calcula automáticamente el % de descuento sobre los kilos totales
+    - Se añade una línea negativa "Descuento Destare (X%)" al albarán
+    - Se recalcula el total del albarán
+    - Se devuelve información del descuento aplicado en la respuesta
+- **Ejemplo verificado**:
+  - Contrato con 2.5% descuento destare
+  - Albarán de 1000 kg a 1.85 EUR/kg
+  - Línea destare: -25 kg x 1.85 = -46.25 EUR
+  - Total: 1850 - 46.25 = 1803.75 EUR
+
 ---
 
 ### Sesión 5:
