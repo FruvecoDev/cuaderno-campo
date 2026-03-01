@@ -1698,6 +1698,18 @@ const Tratamientos = () => {
                   <div><strong>Cultivo:</strong> {selectedParcelasInfo.cultivo}</div>
                   <div><strong>Campaña:</strong> {selectedParcelasInfo.campana}</div>
                   <div><strong>Finca:</strong> {selectedParcelasInfo.finca}</div>
+                  <div style={{ gridColumn: 'span 2', marginTop: '0.5rem', padding: '0.5rem', backgroundColor: 'hsl(var(--background))', borderRadius: '4px' }}>
+                    <strong>Superficie Total Seleccionada:</strong>{' '}
+                    <span style={{ color: 'hsl(var(--primary))', fontWeight: '600' }}>
+                      {selectedParcelas.reduce((total, parcelaId) => {
+                        const parcela = parcelas.find(p => p._id === parcelaId);
+                        return total + (parseFloat(parcela?.superficie_total) || 0);
+                      }, 0).toFixed(2)} ha
+                    </span>
+                    <span style={{ color: 'hsl(var(--muted-foreground))', marginLeft: '0.5rem' }}>
+                      ({selectedParcelas.length} parcela{selectedParcelas.length > 1 ? 's' : ''})
+                    </span>
+                  </div>
                 </div>
               </div>
             )}
