@@ -484,7 +484,7 @@ async def generate_liquidacion_pdf(
     """
     
     for linea in lineas:
-        com_valor_display = f"{linea['comision_valor']}%" if linea['comision_tipo'] == 'porcentaje' else f"{linea['comision_valor']} €/kg"
+        com_valor_display = f"{format_number_es(linea['comision_valor'], 2)}%" if linea['comision_tipo'] == 'porcentaje' else f"{format_number_es(linea['comision_valor'], 2)} €/kg"
         html_content += f"""
                 <tr>
                     <td>{linea['albaran_numero']}</td>
@@ -493,12 +493,12 @@ async def generate_liquidacion_pdf(
                     <td>{linea['campana']}</td>
                     <td>{linea['proveedor_cliente'] or '-'}</td>
                     <td>{linea['cultivo']}</td>
-                    <td class="text-right">{linea['cantidad']:,.0f}</td>
-                    <td class="text-right">{linea['precio']:.4f}</td>
-                    <td class="text-right">{linea['importe']:,.2f}</td>
+                    <td class="text-right">{format_number_es(linea['cantidad'], 0)}</td>
+                    <td class="text-right">{format_number_es(linea['precio'], 4)}</td>
+                    <td class="text-right">{format_number_es(linea['importe'], 2)}</td>
                     <td>{linea['comision_tipo']}</td>
                     <td class="text-right">{com_valor_display if linea['comision_valor'] else '-'}</td>
-                    <td class="text-right"><strong>{linea['comision_importe']:,.2f}</strong></td>
+                    <td class="text-right"><strong>{format_number_es(linea['comision_importe'], 2)}</strong></td>
                 </tr>
         """
     
