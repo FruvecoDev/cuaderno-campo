@@ -686,7 +686,7 @@ const DEFAULT_FIELDS_CONFIG = {
   fecha_tratamiento: true,
   fecha_aplicacion: true,
   aplicador_nombre: true,
-  maquina_id: true
+  maquina_nombre: true
 };
 
 const FIELD_LABELS = {
