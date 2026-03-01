@@ -835,6 +835,11 @@ async def get_comisiones_generadas(
     comisiones = await comisiones_collection.find(query).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
     total = await comisiones_collection.count_documents(query)
     
+    # Generar numero_albaran para registros antiguos que no lo tengan
+    for c in comisiones:
+        if not c.get("numero_albaran") and c.get("albaran_id"):
+            c["numero_albaran"] = f"ALB-{c['albaran_id'][-6:].upper()}"
+    
     # Calcular totales
     totales = {
         "total_kilos_netos": sum(c.get("kilos_netos", 0) for c in comisiones),
