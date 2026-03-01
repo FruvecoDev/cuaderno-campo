@@ -514,10 +514,13 @@ const Parcelas = () => {
     }
   }, [formData.contrato_id, contratos]);
 
-  const handlePolygonCreated = (coords) => {
+  const handlePolygonCreated = useCallback((coords) => {
+    console.log('Polygon created:', coords);
     setPolygon(coords);
-    alert(`Polígono dibujado con ${coords.length} puntos`);
-  };
+    if (coords && coords.length > 0) {
+      alert(`Polígono dibujado con ${coords.length} puntos`);
+    }
+  }, []);
   
   const handleSubmit = async (e) => {
     e.preventDefault();
