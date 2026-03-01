@@ -1567,7 +1567,8 @@ const Albaranes = () => {
                               style={{ 
                                 textAlign: 'center',
                                 backgroundColor: '#fef2f2',
-                                color: '#9ca3af'
+                                color: '#9ca3af',
+                                minWidth: '70px'
                               }}
                             />
                           ) : (
@@ -1580,7 +1581,7 @@ const Albaranes = () => {
                               value={item.descuento || ''}
                               onChange={(e) => updateItemTotal(index, 'descuento', parseFloat(e.target.value) || 0)}
                               placeholder="0"
-                              style={{ textAlign: 'center' }}
+                              style={{ textAlign: 'center', minWidth: '70px' }}
                               data-testid={`item-dto-${index}`}
                             />
                           )}
