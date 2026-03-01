@@ -1258,14 +1258,18 @@ async def export_comisiones_excel(
                 proveedor_doc = await proveedores_collection.find_one({"_id": ObjectId(c["proveedor"])})
                 c["proveedor_nombre"] = proveedor_doc.get("nombre", "Sin nombre") if proveedor_doc else "Sin nombre"
             except:
-                c["proveedor_nombre"] = "Sin nombre"
+                c["proveedor_nombre"] = proveedor_val
         
         if not c.get("cliente_nombre") and c.get("cliente"):
-            try:
-                cliente_doc = await clientes_collection.find_one({"_id": ObjectId(c["cliente"])})
-                c["cliente_nombre"] = cliente_doc.get("nombre", "Sin nombre") if cliente_doc else "Sin nombre"
-            except:
-                c["cliente_nombre"] = "Sin nombre"
+            cliente_val = c["cliente"]
+            if ObjectId.is_valid(cliente_val):
+                try:
+                    cliente_doc = await clientes_collection.find_one({"_id": ObjectId(cliente_val)})
+                    c["cliente_nombre"] = cliente_doc.get("nombre", cliente_val) if cliente_doc else cliente_val
+                except:
+                    c["cliente_nombre"] = cliente_val
+            else:
+                c["cliente_nombre"] = cliente_val
     
     # Crear workbook
     wb = Workbook()
