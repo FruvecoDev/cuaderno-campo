@@ -380,7 +380,7 @@ async def get_albaranes_stats(
     
     # Por proveedor (top 5)
     pipeline_proveedor = [
-        {"$match": {"proveedor": {"$ne": None, "$ne": ""}}},
+        {"$match": {"proveedor": {"$nin": [None, ""]}}},
         {"$group": {"_id": "$proveedor", "count": {"$sum": 1}, "total": {"$sum": "$total_albaran"}}},
         {"$sort": {"total": -1}},
         {"$limit": 5}
@@ -389,7 +389,7 @@ async def get_albaranes_stats(
     
     # Por cultivo (top 5)
     pipeline_cultivo = [
-        {"$match": {"cultivo": {"$ne": None, "$ne": ""}}},
+        {"$match": {"cultivo": {"$nin": [None, ""]}}},
         {"$group": {"_id": "$cultivo", "count": {"$sum": 1}, "total": {"$sum": "$total_albaran"}}},
         {"$sort": {"total": -1}},
         {"$limit": 5}
