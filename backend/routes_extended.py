@@ -871,19 +871,32 @@ async def get_comisiones_generadas(
             c["numero_albaran"] = f"ALB-{c['albaran_id'][-6:].upper()}"
         
         # Obtener nombre del proveedor/cliente si no existe
+        # Algunos registros antiguos guardan el nombre directamente en "proveedor" o "cliente"
         if not c.get("proveedor_nombre") and c.get("proveedor"):
-            try:
-                proveedor_doc = await proveedores_collection.find_one({"_id": ObjectId(c["proveedor"])})
-                c["proveedor_nombre"] = proveedor_doc.get("nombre", "Sin nombre") if proveedor_doc else "Sin nombre"
-            except:
-                c["proveedor_nombre"] = "Sin nombre"
+            proveedor_val = c["proveedor"]
+            # Si parece un ObjectId, buscar el nombre
+            if ObjectId.is_valid(proveedor_val):
+                try:
+                    proveedor_doc = await proveedores_collection.find_one({"_id": ObjectId(proveedor_val)})
+                    c["proveedor_nombre"] = proveedor_doc.get("nombre", proveedor_val) if proveedor_doc else proveedor_val
+                except:
+                    c["proveedor_nombre"] = proveedor_val
+            else:
+                # Es el nombre directamente
+                c["proveedor_nombre"] = proveedor_val
         
         if not c.get("cliente_nombre") and c.get("cliente"):
-            try:
-                cliente_doc = await clientes_collection.find_one({"_id": ObjectId(c["cliente"])})
-                c["cliente_nombre"] = cliente_doc.get("nombre", "Sin nombre") if cliente_doc else "Sin nombre"
-            except:
-                c["cliente_nombre"] = "Sin nombre"
+            cliente_val = c["cliente"]
+            # Si parece un ObjectId, buscar el nombre
+            if ObjectId.is_valid(cliente_val):
+                try:
+                    cliente_doc = await clientes_collection.find_one({"_id": ObjectId(cliente_val)})
+                    c["cliente_nombre"] = cliente_doc.get("nombre", cliente_val) if cliente_doc else cliente_val
+                except:
+                    c["cliente_nombre"] = cliente_val
+            else:
+                # Es el nombre directamente
+                c["cliente_nombre"] = cliente_val
     
     # Calcular totales
     totales = {
