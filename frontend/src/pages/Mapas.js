@@ -287,6 +287,11 @@ const Mapas = () => {
     setDrawnPolygon(null);
   };
 
+  const handleImportComplete = (result) => {
+    // Reload parcelas after import
+    fetchParcelas();
+  };
+
   // Filter parcelas
   const filteredParcelas = parcelas.filter(p => {
     if (filters.cultivo && p.cultivo !== filters.cultivo) return false;
