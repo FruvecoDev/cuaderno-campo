@@ -5,6 +5,7 @@ import { Plus, Download, FileText, Edit2, Trash2, BookOpen, Loader2, Search, X, 
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
+import AuditHistory from '../components/AuditHistory';
 import '../App.css';
 
 // Función para formatear números con separadores de miles (formato español)
