@@ -211,12 +211,13 @@ const Albaranes = () => {
       setIsInitialized(true);
       
       try {
-        const [albaranes, contratos, proveedoresRes, clientesRes, articulosRes] = await Promise.all([
+        const [albaranes, contratos, proveedoresRes, clientesRes, articulosRes, parcelasRes] = await Promise.all([
           xhrFetch(`${BACKEND_URL}/api/albaranes`),
           xhrFetch(`${BACKEND_URL}/api/contratos`),
           xhrFetch(`${BACKEND_URL}/api/proveedores?limit=500`),
           xhrFetch(`${BACKEND_URL}/api/clientes/activos`),
-          xhrFetch(`${BACKEND_URL}/api/articulos/activos`)
+          xhrFetch(`${BACKEND_URL}/api/articulos/activos`),
+          xhrFetch(`${BACKEND_URL}/api/parcelas`)
         ]);
         
         if (albaranes.ok) setAlbaranes(albaranes.data?.albaranes || []);
@@ -224,6 +225,7 @@ const Albaranes = () => {
         if (proveedoresRes.ok) setProveedores(proveedoresRes.data?.proveedores || []);
         if (clientesRes.ok) setClientes(clientesRes.data?.clientes || []);
         if (articulosRes.ok) setArticulosCatalogo(articulosRes.data?.articulos || []);
+        if (parcelasRes.ok) setParcelas(parcelasRes.data?.parcelas || parcelasRes.data || []);
         
       } catch (error) {
         console.error('Error loading data:', error);
