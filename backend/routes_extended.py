@@ -840,5 +840,5 @@ async def delete_comision_generada(
     if comision.get("estado") != "anulada" and current_user.get("role") != "Admin":
         raise HTTPException(status_code=400, detail="Solo se pueden eliminar comisiones anuladas")
     
-    result = await comisiones_collection.delete_one({"_id": ObjectId(comision_id)})
+    await comisiones_collection.delete_one({"_id": ObjectId(comision_id)})
     return {"success": True, "message": "Comisión eliminada"}
