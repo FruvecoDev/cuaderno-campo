@@ -202,9 +202,24 @@ async def delete_contrato(
     if not ObjectId.is_valid(contrato_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
+    # Obtener documento antes de eliminar para auditoría
+    old_doc = await contratos_collection.find_one({"_id": ObjectId(contrato_id)})
+    if not old_doc:
+        raise HTTPException(status_code=404, detail="Contrato not found")
+    
     result = await contratos_collection.delete_one({"_id": ObjectId(contrato_id)})
     
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Contrato not found")
+    
+    # Registrar eliminación en auditoría
+    await create_audit_log(
+        collection_name="contratos",
+        document_id=contrato_id,
+        action="delete",
+        user_email=current_user.get("email", "unknown"),
+        user_name=current_user.get("full_name", current_user.get("username", "Usuario")),
+        previous_data=serialize_doc(old_doc.copy())
+    )
     
     return {"success": True, "message": "Contrato deleted"}
