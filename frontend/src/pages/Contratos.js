@@ -248,15 +248,15 @@ const Contratos = () => {
       // Preparar datos incluyendo precios_calidad si es guisante
       const submitData = {
         ...formData,
-        cantidad: parseFloat(formData.cantidad) || 0,
-        precio: parseFloat(formData.precio) || 0,
-        comision_compra_valor: formData.comision_compra_valor ? parseFloat(formData.comision_compra_valor) : null,
-        comision_venta_valor: formData.comision_venta_valor ? parseFloat(formData.comision_venta_valor) : null,
+        cantidad: parseFloat(parseFormattedNumber(formData.cantidad)) || 0,
+        precio: parseFloat(parseFormattedNumber(formData.precio)) || 0,
+        comision_compra_valor: formData.comision_compra_valor ? parseFloat(parseFormattedNumber(formData.comision_compra_valor)) : null,
+        comision_venta_valor: formData.comision_venta_valor ? parseFloat(parseFormattedNumber(formData.comision_venta_valor)) : null,
         precios_calidad: isGuisante ? (formData.precios_calidad || []).map(pc => ({
           ...pc,
           min_tenderometria: parseFloat(pc.min_tenderometria),
           max_tenderometria: parseFloat(pc.max_tenderometria),
-          precio: parseFloat(pc.precio)
+          precio: parseFloat(parseFormattedNumber(pc.precio))
         })) : []
       };
       
