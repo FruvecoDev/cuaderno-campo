@@ -12,9 +12,46 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
 
 ---
 
-## Última Actualización: 1 Marzo 2026 (Sesión 6)
+## Última Actualización: 1 Marzo 2026 (Sesión 7)
 
 ### Completadas en esta sesión:
+
+#### 1. Modificación de la lógica de Destare en Albaranes ✅ (P0)
+- **Cambio solicitado por usuario**: La línea de destare debe mostrar:
+  - Kilos de destare como valor **positivo informativo**
+  - Precio unitario = **0,00 €**
+  - Total línea = **0,00 €**
+- **Cálculo del total del albarán**:
+  - Fórmula: `(kilos_brutos - kilos_destare) × precio = importe_real`
+  - Ejemplo: 1000 kg brutos - 50 kg destare (5%) = 950 kg netos × 2,75 €/kg = 2.612,50 €
+- **Backend modificado** (`routes_extended.py`):
+  - Endpoint POST `/api/albaranes`: Línea de destare con precio=0, total=0
+  - Endpoint PUT `/api/albaranes/{id}`: Misma lógica de recálculo en actualización
+- **Frontend modificado** (`Albaranes.js`):
+  - Línea de destare muestra "0,00 €" en columnas precio y total
+  - Función `calculateGrandTotal()` usa kilos_netos × precio cuando hay destare
+  - Función `handleEdit()` carga kilos_brutos, kilos_destare, kilos_netos del servidor
+  - Nuevo **Resumen de Cálculo** visible cuando hay destare:
+    - Kilos Brutos | Kilos Destare (rojo) | Kilos Netos | Total Albarán
+- **Verificado**: Cálculo correcto confirmado con múltiples pruebas
+
+#### 2. Generación de PDF de Albarán ✅ (P0)
+- **Nuevo endpoint** `GET /api/albaranes/{albaran_id}/pdf`:
+  - Genera PDF profesional del albarán
+  - Incluye: cabecera con logo/tipo, datos del contrato vinculado, tabla de líneas, resumen de kilos y total
+  - Línea de destare destacada visualmente en rojo
+  - Formato numérico español (. miles, , decimales)
+  - Totalizador con desglose: kilos brutos, destare, netos, precio/kg, TOTAL
+- **Frontend**: Botón "Imprimir" en formulario de edición abre PDF en nueva pestaña
+
+#### 3. Correcciones de UI en formulario de Albaranes ✅ (Minor)
+- Campo "Total Albarán" muestra valor correcto calculado con kilos netos
+- Línea de destare solo lectura con estilo diferenciado (fondo rosa claro, texto gris)
+- Resumen de cálculo verde con desglose de kilos y fórmula
+
+---
+
+## Sesión 6:
 
 #### 1. Nuevos campos en Módulo de Contratos ✅ (P0)
 - **Campos añadidos al modelo Pydantic** (`backend/models.py`):
