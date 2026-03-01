@@ -747,7 +747,10 @@ const Albaranes = () => {
       kilos_brutos: albaran.kilos_brutos || 0,
       kilos_destare: albaran.kilos_destare || 0,
       kilos_netos: albaran.kilos_netos || 0,
-      total_albaran: albaran.total_albaran || 0
+      total_albaran: albaran.total_albaran || 0,
+      // Descuento sobre importe
+      descuento_porcentaje: albaran.descuento_porcentaje || 0,
+      descuento_importe: albaran.descuento_importe || 0
     });
     setShowForm(true);
   };
