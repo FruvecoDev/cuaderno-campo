@@ -16,16 +16,24 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
 
 ### Completadas en esta sesión:
 
-#### 1. Corrección del "Resumen de Cálculo" en Albaranes ✅ (P0 - BUG FIX)
-- **Problema reportado**: El resumen mostraba importe calculado con kilos brutos en lugar de kilos netos
+#### 1. Ajuste del cálculo de totales en Albaranes ✅ (P0 - Ajuste de negocio)
+- **Cambio solicitado**: El total de cada LÍNEA NO debe considerar el destare (solo cantidad × precio × (1-Dto%))
+- **El destare solo se aplica en el TOTAL FINAL del albarán**
 - **Solución implementada** (`Albaranes.js`):
-  - Nueva función `calculateItemTotalWithDestare(item)` para calcular total de línea individual
-  - Función `calculateGrandTotal()` refactorizada para considerar destare
-  - Columna "Total" de cada línea ahora muestra el valor correcto con kilos netos
-  - Todos los totales son consistentes: columna Total, Total Albarán (header) y Resumen de Cálculo
-- **Fórmula correcta verificada**: `Total = (Kilos Brutos - Kilos Destare) × Precio × (1 - Descuento % / 100)`
-- **Ejemplo verificado**: 1000 kg brutos - 50 kg destare (5%) = 950 kg netos × 2,75 €/kg = **2.612,50 €**
-- **Verificado con screenshot**: UI muestra 2612,50 € consistentemente
+  - Nueva función `calculateItemTotal(item)` para total de línea SIN destare
+  - `calculateGrandTotal()` aplica destare solo para el total final
+  - Columna "Total" de cada línea muestra: `Cantidad × Precio × (1 - Dto%)`
+  - Total Albarán muestra: `Kilos Netos × Precio × (1 - Dto%)`
+
+#### 2. Añadidos campos al "Resumen de Cálculo" ✅ (P0 - Mejora UI)
+- **Precio**: Muestra el precio promedio de las líneas
+- **Dto %**: Muestra el descuento promedio aplicado (en naranja)
+- **Fórmula explicativa**: `(Netos × Precio × (1-Dto%))`
+- Grid expandido de 4 a 6 columnas para mejor visualización
+
+**Verificación con ejemplo:**
+- Línea: 100.000 kg × 2,75 €/kg × (1-10%) = **247.500 €** (sin destare)
+- Total: 95.000 kg × 2,75 €/kg × (1-10%) = **235.125 €** (con destare)
 
 ---
 
