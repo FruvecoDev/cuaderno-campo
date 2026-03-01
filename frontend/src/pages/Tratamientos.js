@@ -1255,6 +1255,37 @@ const Tratamientos = () => {
     }
   };
   
+  // Cambiar estado del tratamiento (completado/cancelado/pendiente)
+  const handleChangeEstado = async (tratamientoId, nuevoEstado) => {
+    if (!canEdit) {
+      setError('No tienes permisos para modificar tratamientos');
+      setTimeout(() => setError(null), 5000);
+      return;
+    }
+    
+    const mensajes = {
+      completado: '¿Marcar este tratamiento como COMPLETADO?',
+      cancelado: '¿Marcar este tratamiento como CANCELADO?',
+      pendiente: '¿Volver a poner este tratamiento como PENDIENTE?'
+    };
+    
+    if (!window.confirm(mensajes[nuevoEstado])) {
+      return;
+    }
+    
+    try {
+      setError(null);
+      await api.patch(`/api/tratamientos/${tratamientoId}/estado?estado=${nuevoEstado}`);
+      fetchTratamientos();
+      fetchStats();
+    } catch (error) {
+      console.error('Error changing estado:', error);
+      const errorMsg = handlePermissionError(error, 'cambiar el estado del tratamiento');
+      setError(errorMsg);
+      setTimeout(() => setError(null), 5000);
+    }
+  };
+  
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
   
   // Filtrar parcelas según los criterios de búsqueda
