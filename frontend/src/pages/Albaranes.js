@@ -1633,12 +1633,17 @@ const Albaranes = () => {
                     <td>
                       <div style={{ display: 'flex', gap: '0.25rem' }}>
                         <button
-                          onClick={() => window.open(`${BACKEND_URL}/api/albaranes/${albaran._id}/pdf`, '_blank')}
+                          onClick={() => downloadPdf(albaran._id)}
                           className="btn btn-sm btn-outline"
                           title="Imprimir PDF"
                           style={{ padding: '0.25rem 0.5rem' }}
+                          disabled={pdfLoading === albaran._id}
                         >
-                          <Printer size={14} />
+                          {pdfLoading === albaran._id ? (
+                            <Download size={14} className="animate-spin" />
+                          ) : (
+                            <Printer size={14} />
+                          )}
                         </button>
                         <PermissionButton
                           permission="edit"
