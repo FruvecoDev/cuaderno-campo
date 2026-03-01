@@ -1239,7 +1239,7 @@ const Dashboard = () => {
       </div>
       )}
       
-      {/* Widget de Contratos Activos */}
+      {/* Widget de Contratos Activos - Temporalmente deshabilitado
       {isWidgetVisible('contratos_activos') && kpis.contratos_stats && (
         <div className="card mb-6" data-testid="contratos-activos" style={{ order: getWidgetOrder('contratos_activos') }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
