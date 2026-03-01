@@ -41,7 +41,25 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
 - **Persistencia**: Guardado en campo `recintos` de la parcela con coordenadas
 - **Archivo modificado**: `/app/frontend/src/pages/Mapas.js` (reimplementado completo)
 
-#### 3. Módulo Cuaderno de Campo PDF ✅ (de sesión anterior)
+#### 3. Importación de Polígonos KML/GeoJSON ✅ (NUEVO)
+- **Backend endpoints**:
+  - `POST /api/geo-import/parse` - Parsea archivos KML/GeoJSON y devuelve preview
+  - `POST /api/geo-import/create-parcelas` - Crea parcelas desde polígonos importados
+  - `POST /api/parcelas/{id}/import-polygon` - Importa polígono a parcela existente
+- **Frontend**:
+  - Componente reutilizable `GeoImportModal.js` con wizard de 4 pasos
+  - Drag & drop para subir archivos
+  - Preview de polígonos con selección múltiple
+  - Configuración de valores por defecto (cultivo, campaña)
+  - Resultado con lista de parcelas creadas
+- **Disponible en**: Módulo de Mapas y página de Parcelas
+- **Formatos soportados**: KML (Google Earth, SIGPAC), GeoJSON
+- **Dependencias añadidas**: `fastkml`, `lxml`, `shapely`
+- **Archivos nuevos**:
+  - `/app/backend/routes_geo_import.py`
+  - `/app/frontend/src/components/GeoImportModal.js`
+
+#### 4. Módulo Cuaderno de Campo PDF ✅ (de sesión anterior)
 - Endpoint `/api/cuaderno-campo/parcelas` funcionando
 - Generación de PDF operativa
 - Vista previa con estadísticas
