@@ -1350,6 +1350,22 @@ const Albaranes = () => {
                           )}
                         </td>
                         <td>
+                          {item.es_destare ? (
+                            <input
+                              type="text"
+                              className="form-input"
+                              value="0,00 €"
+                              disabled
+                              style={{ 
+                                minWidth: '120px', 
+                                textAlign: 'right', 
+                                fontWeight: '500',
+                                backgroundColor: '#fef2f2',
+                                color: '#9ca3af',
+                                fontStyle: 'italic'
+                              }}
+                            />
+                          ) : (
                           <input
                             type="text"
                             className="form-input"
@@ -1359,10 +1375,10 @@ const Albaranes = () => {
                               minWidth: '120px', 
                               textAlign: 'right', 
                               fontWeight: '500',
-                              backgroundColor: item.es_destare ? '#fef2f2' : '#f5f5f5',
-                              color: item.es_destare ? '#dc2626' : 'inherit'
+                              backgroundColor: '#f5f5f5'
                             }}
                           />
+                          )}
                         </td>
                         <td>
                           {/* No mostrar botón eliminar para líneas de destare */}
