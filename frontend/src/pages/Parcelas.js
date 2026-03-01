@@ -300,10 +300,16 @@ const Parcelas = () => {
   const [provincias, setProvincias] = useState([]);
   const [showGeoImport, setShowGeoImport] = useState(false);
   
+  // Estado para fincas y cultivos (variedades)
+  const [fincas, setFincas] = useState([]);
+  const [cultivos, setCultivos] = useState([]);
+  
   useEffect(() => {
     fetchParcelas();
     fetchContratos();
     fetchProvincias();
+    fetchFincas();
+    fetchCultivos();
   }, []);
   
   // Fetch provincias SIGPAC
