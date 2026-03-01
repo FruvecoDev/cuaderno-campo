@@ -815,8 +815,10 @@ async def get_comisiones_generadas(
     tipo_agente: Optional[str] = None,
     campana: Optional[str] = None,
     estado: Optional[str] = None,
+    fecha_desde: Optional[str] = None,
+    fecha_hasta: Optional[str] = None,
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 500,
     current_user: dict = Depends(get_current_user)
 ):
     """
@@ -831,6 +833,16 @@ async def get_comisiones_generadas(
         query["campana"] = campana
     if estado:
         query["estado"] = estado
+    
+    # Filtros de fecha
+    if fecha_desde or fecha_hasta:
+        fecha_query = {}
+        if fecha_desde:
+            fecha_query["$gte"] = fecha_desde
+        if fecha_hasta:
+            fecha_query["$lte"] = fecha_hasta
+        if fecha_query:
+            query["fecha_albaran"] = fecha_query
     
     comisiones = await comisiones_collection.find(query).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
     total = await comisiones_collection.count_documents(query)
