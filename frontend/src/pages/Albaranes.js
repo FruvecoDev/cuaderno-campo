@@ -477,26 +477,15 @@ const Albaranes = () => {
     }
   };
   
-  // Función para calcular el total de una línea individual considerando destare
-  const calculateItemTotalWithDestare = (item) => {
-    const kilosBrutos = formData.kilos_brutos || 0;
-    const kilosDestare = formData.kilos_destare || 0;
-    const hayDestare = kilosBrutos > 0 && kilosDestare > 0;
-    
+  // Función para calcular el total de una línea individual SIN considerar destare
+  // El destare solo se aplica en el resumen final, no en cada línea
+  const calculateItemTotal = (item) => {
     const cantidad = parseFloat(item.cantidad) || 0;
     const precio = parseFloat(item.precio_unitario) || 0;
     const descuento = parseFloat(item.descuento) || 0;
-    const unidad = (item.unidad || 'kg').toLowerCase();
     
-    if (hayDestare && unidad === 'kg') {
-      // Aplicar factor neto a items en kg
-      const factorNeto = (kilosBrutos - kilosDestare) / kilosBrutos;
-      const kilosNetosLinea = cantidad * factorNeto;
-      const subtotal = kilosNetosLinea * precio;
-      return subtotal * (1 - descuento / 100);
-    }
-    
-    // Sin destare o unidad diferente: cálculo normal
+    // Total línea = cantidad × precio × (1 - descuento/100)
+    // SIN aplicar factor de destare
     const subtotal = cantidad * precio;
     return subtotal * (1 - descuento / 100);
   };
