@@ -1303,7 +1303,7 @@ const Tratamientos = () => {
           </button>
           <PermissionButton
             permission="create"
-            onClick={() => setShowForm(!showForm)}
+            onClick={handleNewTratamiento}
             className="btn btn-primary"
             data-testid="btn-nuevo-tratamiento"
           >
