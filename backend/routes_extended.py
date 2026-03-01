@@ -1196,7 +1196,7 @@ async def generate_albaran_pdf(
             </div>
         </div>
         
-        <div class="datos-grid">
+        <div class="datos-grid-3">
             <div class="datos-box">
                 <h3>Cultivo</h3>
                 <p class="valor">{cultivo}</p>
