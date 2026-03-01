@@ -119,6 +119,18 @@ function App() {
           </ProtectedRoute>
         } />
         
+        <Route path="/tratamientos/nuevo" element={
+          <ProtectedRoute>
+            <Layout><Tratamientos /></Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/tratamientos/editar/:id" element={
+          <ProtectedRoute>
+            <Layout><Tratamientos /></Layout>
+          </ProtectedRoute>
+        } />
+        
         <Route path="/irrigaciones" element={
           <ProtectedRoute>
             <Layout><Irrigaciones /></Layout>
