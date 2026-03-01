@@ -1394,7 +1394,7 @@ const Albaranes = () => {
                     {fieldsConfig.items && <td>{albaran.items?.length || 0} líneas</td>}
                     {fieldsConfig.total && (
                       <td style={{ fontWeight: '600', color: '#166534' }}>
-                        {(albaran.total_albaran || 0).toFixed(2)} €
+                        {(albaran.total_albaran || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
                       </td>
                     )}
                     {fieldsConfig.observaciones && (
