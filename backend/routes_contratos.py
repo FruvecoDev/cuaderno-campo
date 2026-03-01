@@ -132,6 +132,11 @@ async def update_contrato(
     if not ObjectId.is_valid(contrato_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
+    # Obtener documento anterior para auditoría
+    old_doc = await contratos_collection.find_one({"_id": ObjectId(contrato_id)})
+    if not old_doc:
+        raise HTTPException(status_code=404, detail="Contrato not found")
+    
     # Lookup proveedor name (para contratos de Compra)
     proveedor_name = contrato.proveedor or ""
     if contrato.proveedor_id:
@@ -172,6 +177,19 @@ async def update_contrato(
         raise HTTPException(status_code=404, detail="Contrato not found")
     
     updated = await contratos_collection.find_one({"_id": ObjectId(contrato_id)})
+    
+    # Calcular cambios y registrar en auditoría
+    changes = calculate_changes(serialize_doc(old_doc.copy()), serialize_doc(updated.copy()))
+    if changes:  # Solo registrar si hay cambios reales
+        await create_audit_log(
+            collection_name="contratos",
+            document_id=contrato_id,
+            action="update",
+            user_email=current_user.get("email", "unknown"),
+            user_name=current_user.get("full_name", current_user.get("username", "Usuario")),
+            changes=changes
+        )
+    
     return {"success": True, "data": serialize_doc(updated)}
 
 
