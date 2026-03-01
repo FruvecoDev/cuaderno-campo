@@ -517,9 +517,10 @@ async def update_albaran(
                 "descripcion": f"Descuento Destare ({descuento_porcentaje}%)",
                 "producto": "DESTARE",
                 "lote": "",
-                "cantidad": kilos_destare,  # Positivo para mostrar los kilos descontados
+                "cantidad": kilos_destare,
                 "unidad": "kg",
                 "precio_unitario": 0,
+                "descuento": 0,
                 "total": 0,
                 "es_destare": True
             }
@@ -527,9 +528,14 @@ async def update_albaran(
             # Añadir línea de destare a los items
             update_data["items"].append(linea_destare)
             
-            # Calcular total del albarán: (kilos_brutos - kilos_destare) * precio
+            # Calcular total del albarán teniendo en cuenta el descuento de las líneas:
+            descuento_linea = float(update_data.get("items", [{}])[0].get("descuento", 0) or 0)
             kilos_netos = kilos_brutos - kilos_destare
-            update_data["total_albaran"] = round(kilos_netos * precio_unitario, 2)
+            subtotal_sin_dto = kilos_netos * precio_unitario
+            if descuento_linea > 0:
+                update_data["total_albaran"] = round(subtotal_sin_dto * (1 - descuento_linea / 100), 2)
+            else:
+                update_data["total_albaran"] = round(subtotal_sin_dto, 2)
     
     # Calcular kilos netos si no hay destare
     if kilos_netos == 0:
@@ -540,14 +546,10 @@ async def update_albaran(
     update_data["kilos_destare"] = kilos_destare
     update_data["kilos_netos"] = kilos_netos
     
-    # Aplicar descuento sobre el importe si existe
-    descuento_pct = float(update_data.get("descuento_porcentaje", 0) or 0)
-    if descuento_pct > 0:
-        subtotal = float(update_data.get("total_albaran", 0) or 0)
-        descuento_importe = round(subtotal * (descuento_pct / 100), 2)
-        update_data["descuento_importe"] = descuento_importe
-        update_data["subtotal"] = subtotal
-        update_data["total_albaran"] = round(subtotal - descuento_importe, 2)
+    # Si no hay destare aplicado, calcular total sumando los totales de las líneas
+    if kilos_destare == 0:
+        items_sin_destare = [item for item in update_data.get("items", []) if not item.get("es_destare")]
+        update_data["total_albaran"] = round(sum(item.get("total", 0) for item in items_sin_destare), 2)
     
     update_data["updated_at"] = datetime.now()
     
