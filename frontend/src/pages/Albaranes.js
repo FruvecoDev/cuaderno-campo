@@ -625,10 +625,26 @@ const Albaranes = () => {
         setTimeout(() => setSuccessMessage(null), 3000);
       } else {
         response = await api.post('/api/albaranes', payload);
-        // En modo creación, cerrar el formulario
-        setShowForm(false);
-        setEditingId(null);
-        resetForm();
+        // Obtener el ID del nuevo albarán y mantener el formulario abierto
+        const nuevoAlbaranId = response.data?._id;
+        if (nuevoAlbaranId) {
+          // Cambiar a modo edición con el nuevo ID
+          setEditingId(nuevoAlbaranId);
+          // Recargar los datos del albarán para mostrar líneas actualizadas (incluyendo destare)
+          const nuevoAlbaran = await api.get(`/api/albaranes/${nuevoAlbaranId}`);
+          if (nuevoAlbaran) {
+            setFormData(prev => ({
+              ...prev,
+              items: nuevoAlbaran.items || prev.items,
+              total_albaran: nuevoAlbaran.total_albaran || prev.total_albaran,
+              kilos_brutos: nuevoAlbaran.kilos_brutos,
+              kilos_destare: nuevoAlbaran.kilos_destare,
+              kilos_netos: nuevoAlbaran.kilos_netos
+            }));
+          }
+          setSuccessMessage('Albarán creado correctamente. Puede imprimirlo o salir.');
+          setTimeout(() => setSuccessMessage(null), 5000);
+        }
       }
       
       reloadAlbaranes();
