@@ -427,13 +427,250 @@ const Contratos = () => {
     }
   };
   
+  // Si estamos en modo formulario (página de nuevo/editar), mostrar solo el formulario
+  if (isFormMode) {
+    return (
+      <div data-testid="contratos-form-page">
+        {/* Header con botón de volver */}
+        <div className="flex justify-between items-center mb-6">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <button 
+              className="btn btn-secondary"
+              onClick={handleCancelEdit}
+              data-testid="btn-volver-lista"
+            >
+              <ArrowLeft size={18} />
+              Volver a la lista
+            </button>
+            <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>
+              {editingId ? t('contracts.editContract') : t('contracts.newContract')}
+            </h1>
+          </div>
+        </div>
+        
+        {error && (
+          <div className="alert alert-error" style={{ marginBottom: '1rem' }}>
+            {error}
+          </div>
+        )}
+        
+        {/* Formulario */}
+        <div className="card" style={{ marginBottom: '1.5rem' }}>
+          <div className="card-header">
+            <h3 className="card-title">{editingId ? t('contracts.editContract') : t('contracts.newContract')}</h3>
+          </div>
+          <form onSubmit={handleSubmit} style={{ padding: '1rem' }}>
+            <div className="grid-3">
+              <div className="form-group">
+                <label className="form-label">{t('contracts.type')} *</label>
+                <select 
+                  className="form-select" 
+                  value={formData.tipo} 
+                  onChange={(e) => setFormData({...formData, tipo: e.target.value})}
+                  data-testid="select-tipo"
+                >
+                  {puedeCompra && <option value="Compra">{t('contracts.buy')}</option>}
+                  {puedeVenta && <option value="Venta">{t('contracts.sell')}</option>}
+                </select>
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">{t('contracts.campaign')} *</label>
+                <select 
+                  className="form-select" 
+                  value={formData.campana} 
+                  onChange={(e) => setFormData({...formData, campana: e.target.value})}
+                  data-testid="select-campana"
+                >
+                  <option value="2025/26">2025/26</option>
+                  <option value="2024/25">2024/25</option>
+                  <option value="2026/27">2026/27</option>
+                </select>
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">{t('contracts.date')} *</label>
+                <input 
+                  type="date" 
+                  className="form-input" 
+                  value={formData.fecha_contrato} 
+                  onChange={(e) => setFormData({...formData, fecha_contrato: e.target.value})} 
+                  required 
+                  data-testid="input-fecha"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">{t('contracts.origin')}</label>
+                <select 
+                  className="form-select" 
+                  value={formData.procedencia} 
+                  onChange={(e) => setFormData({...formData, procedencia: e.target.value})}
+                  data-testid="select-procedencia"
+                >
+                  <option value="Campo">Campo</option>
+                  <option value="Importación">Importación</option>
+                </select>
+              </div>
+              
+              {/* Proveedor - solo para compras */}
+              {formData.tipo === 'Compra' && (
+                <div className="form-group">
+                  <label className="form-label">{t('contracts.supplier')}</label>
+                  <select 
+                    className="form-select" 
+                    value={formData.proveedor_id} 
+                    onChange={(e) => {
+                      const selectedProv = proveedores.find(p => p._id === e.target.value);
+                      setFormData({
+                        ...formData, 
+                        proveedor_id: e.target.value,
+                        proveedor: selectedProv?.nombre || ''
+                      });
+                    }}
+                    data-testid="select-proveedor"
+                  >
+                    <option value="">-- {t('common.select')} --</option>
+                    {proveedores.map(p => (
+                      <option key={p._id} value={p._id}>{p.nombre}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              
+              {/* Cliente - solo para ventas */}
+              {formData.tipo === 'Venta' && (
+                <div className="form-group">
+                  <label className="form-label">{t('contracts.client')}</label>
+                  <select 
+                    className="form-select" 
+                    value={formData.cliente_id} 
+                    onChange={(e) => {
+                      const selectedClient = clientes.find(c => c._id === e.target.value);
+                      setFormData({
+                        ...formData, 
+                        cliente_id: e.target.value,
+                        cliente: selectedClient?.nombre || ''
+                      });
+                    }}
+                    data-testid="select-cliente"
+                  >
+                    <option value="">-- {t('common.select')} --</option>
+                    {clientes.map(c => (
+                      <option key={c._id} value={c._id}>{c.nombre}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              
+              <div className="form-group">
+                <label className="form-label">{t('contracts.crop')}</label>
+                <select 
+                  className="form-select" 
+                  value={formData.cultivo_id} 
+                  onChange={(e) => {
+                    const selectedCultivo = cultivos.find(c => c._id === e.target.value);
+                    setFormData({
+                      ...formData, 
+                      cultivo_id: e.target.value,
+                      cultivo: selectedCultivo?.nombre || ''
+                    });
+                  }}
+                  data-testid="select-cultivo"
+                >
+                  <option value="">-- {t('common.select')} --</option>
+                  {cultivos.map(c => (
+                    <option key={c._id} value={c._id}>{c.nombre} {c.variedad ? `(${c.variedad})` : ''}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">{t('contracts.quantity')} (kg) *</label>
+                <input 
+                  type="number" 
+                  className="form-input" 
+                  value={formData.cantidad} 
+                  onChange={(e) => setFormData({...formData, cantidad: e.target.value})} 
+                  required
+                  data-testid="input-cantidad"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">{t('contracts.price')} (€/kg) *</label>
+                <input 
+                  type="number" 
+                  step="0.01" 
+                  className="form-input" 
+                  value={formData.precio} 
+                  onChange={(e) => setFormData({...formData, precio: e.target.value})} 
+                  required
+                  data-testid="input-precio"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">{t('contracts.periodFrom')}</label>
+                <input 
+                  type="date" 
+                  className="form-input" 
+                  value={formData.periodo_desde} 
+                  onChange={(e) => setFormData({...formData, periodo_desde: e.target.value})}
+                  data-testid="input-periodo-desde"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">{t('contracts.periodTo')}</label>
+                <input 
+                  type="date" 
+                  className="form-input" 
+                  value={formData.periodo_hasta} 
+                  onChange={(e) => setFormData({...formData, periodo_hasta: e.target.value})}
+                  data-testid="input-periodo-hasta"
+                />
+              </div>
+            </div>
+            
+            <div className="form-group" style={{ marginTop: '1rem' }}>
+              <label className="form-label">{t('contracts.observations')}</label>
+              <textarea 
+                className="form-input" 
+                value={formData.observaciones} 
+                onChange={(e) => setFormData({...formData, observaciones: e.target.value})}
+                rows={3}
+                data-testid="textarea-observaciones"
+              />
+            </div>
+            
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', justifyContent: 'flex-end' }}>
+              <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>
+                {t('common.cancel')}
+              </button>
+              <PermissionButton 
+                type="submit" 
+                permission={editingId ? 'edit' : 'create'} 
+                className="btn btn-primary"
+                data-testid="btn-submit-contrato"
+              >
+                {editingId ? t('common.update') : t('common.create')} {t('contracts.contract')}
+              </PermissionButton>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  }
+  
+  // Vista de lista
   return (
     <div data-testid="contratos-page">
       <div className="flex justify-between items-center mb-6">
         <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>{t('contracts.title')}</h1>
         <PermissionButton
           permission="create"
-          onClick={() => setShowForm(!showForm)}
+          onClick={handleNewContrato}
           className="btn btn-primary"
           data-testid="btn-nuevo-contrato"
         >
