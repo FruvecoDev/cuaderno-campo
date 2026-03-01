@@ -1042,10 +1042,25 @@ async def export_comisiones_pdf(
     
     comisiones = await comisiones_collection.find(query).sort([("agente_nombre", 1), ("fecha_albaran", 1)]).to_list(1000)
     
-    # Generar numero_albaran para registros antiguos
+    # Enriquecer registros antiguos
     for c in comisiones:
         if not c.get("numero_albaran") and c.get("albaran_id"):
             c["numero_albaran"] = f"ALB-{c['albaran_id'][-6:].upper()}"
+        
+        # Obtener nombre del proveedor/cliente si no existe
+        if not c.get("proveedor_nombre") and c.get("proveedor"):
+            try:
+                proveedor_doc = await proveedores_collection.find_one({"_id": ObjectId(c["proveedor"])})
+                c["proveedor_nombre"] = proveedor_doc.get("nombre", "Sin nombre") if proveedor_doc else "Sin nombre"
+            except:
+                c["proveedor_nombre"] = "Sin nombre"
+        
+        if not c.get("cliente_nombre") and c.get("cliente"):
+            try:
+                cliente_doc = await clientes_collection.find_one({"_id": ObjectId(c["cliente"])})
+                c["cliente_nombre"] = cliente_doc.get("nombre", "Sin nombre") if cliente_doc else "Sin nombre"
+            except:
+                c["cliente_nombre"] = "Sin nombre"
     
     # Agrupar por agente
     comisiones_por_agente = {}
