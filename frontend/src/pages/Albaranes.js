@@ -342,6 +342,19 @@ const Albaranes = () => {
       const cultivoContrato = contrato.cultivo || '';
       const precioContrato = contrato.precio || 0;
       
+      // Buscar parcelas vinculadas a este contrato
+      const parcelasDelContrato = parcelas.filter(p => p.contrato_id === contratoId);
+      let parcelaCodigo = '';
+      let parcelaId = '';
+      
+      if (parcelasDelContrato.length === 1) {
+        // Si hay una sola parcela, asignarla automáticamente
+        const parcela = parcelasDelContrato[0];
+        parcelaCodigo = parcela.codigo_plantacion || parcela.finca || `Parcela ${parcela._id?.slice(-6)}`;
+        parcelaId = parcela._id;
+      }
+      // Si hay varias o ninguna, se dejará el selector para elegir
+      
       // El tipo de albarán se ajusta según el tipo de contrato
       const tipoAlbaran = esVenta ? 'Albarán de venta' : 'Albarán de compra';
       
@@ -365,8 +378,8 @@ const Albaranes = () => {
         cliente: esVenta ? clienteContrato : '',       // Solo para ventas
         usar_otro_proveedor: false,
         cultivo: cultivoContrato,
-        parcela_codigo: contrato.parcela_codigo || contrato.parcela || '',
-        parcela_id: contrato.parcela_id || '',
+        parcela_codigo: parcelaCodigo,
+        parcela_id: parcelaId,
         campana: contrato.campana || '',
         // Actualizar la primera línea con el cultivo y precio del contrato
         items: [lineaInicial]
