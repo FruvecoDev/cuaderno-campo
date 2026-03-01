@@ -371,9 +371,13 @@ async def create_albaran(
                 agente_doc = await agentes_collection.find_one({"_id": ObjectId(agente_id)})
                 agente_nombre = agente_doc.get("nombre", "Agente") if agente_doc else "Agente"
                 
+                # Generar número de albarán
+                numero_albaran = f"ALB-{albaran_id[-6:].upper()}"
+                
                 # Crear registro de comisión
                 comision_record = {
                     "albaran_id": albaran_id,
+                    "numero_albaran": numero_albaran,
                     "contrato_id": albaran.contrato_id,
                     "agente_id": agente_id,
                     "agente_nombre": agente_nombre,
