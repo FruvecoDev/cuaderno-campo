@@ -461,8 +461,10 @@ async def generate_evaluacion_pdf(
         
         # Obtener datos del aplicador (el campo es tecnico_aplicador_id)
         aplicador_id = trat.get("tecnico_aplicador_id") or trat.get("aplicador_id")
+        print(f"DEBUG: Tratamiento {trat.get('_id')} - aplicador_id: {aplicador_id}")
         if aplicador_id and ObjectId.is_valid(aplicador_id):
             aplicador = await tecnicos_aplicadores_collection.find_one({"_id": ObjectId(aplicador_id)})
+            print(f"DEBUG: Aplicador encontrado: {aplicador.get('nombre') if aplicador else 'NO'}")
             if aplicador:
                 trat_data["aplicador_completo"] = serialize_doc(aplicador)
         
