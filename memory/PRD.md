@@ -46,18 +46,28 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
     - Usuario y timestamp de cada cambio
   - Integrado en formulario de edición de contratos
 
-#### 3. Lógica de Descuento Destare en Albaranes ✅ (P0)
+#### 3. Lógica de Descuento Destare y Comisiones Automáticas ✅ (P0)
 - **Backend** (`routes_extended.py`):
   - Al crear un albarán de tipo "Entrada" vinculado a un contrato de compra con `descuento_destare`:
     - Se calcula automáticamente el % de descuento sobre los kilos totales
     - Se añade una línea negativa "Descuento Destare (X%)" al albarán
     - Se recalcula el total del albarán
-    - Se devuelve información del descuento aplicado en la respuesta
+    - Se guardan `kilos_brutos`, `kilos_destare`, `kilos_netos` en el albarán
+  - **Generación automática de registro de comisión**:
+    - Si el contrato tiene agente con comisión configurada
+    - Se crea automáticamente un registro en colección `comisiones_generadas`
+    - La comisión se calcula sobre los **kilos netos** (brutos - destare)
+    - Soporta comisión por porcentaje o €/kg
+- **Nuevos endpoints**:
+  - `GET /api/comisiones-generadas` - Listar comisiones generadas
+  - `GET /api/comisiones-generadas/resumen-agente/{id}` - Resumen por agente
+  - `PATCH /api/comisiones-generadas/{id}/estado` - Cambiar estado (pendiente/pagada/anulada)
+  - `DELETE /api/comisiones-generadas/{id}` - Eliminar comisión
 - **Ejemplo verificado**:
-  - Contrato con 2.5% descuento destare
-  - Albarán de 1000 kg a 1.85 EUR/kg
-  - Línea destare: -25 kg x 1.85 = -46.25 EUR
-  - Total: 1850 - 46.25 = 1803.75 EUR
+  - Contrato: 3% destare, comisión 0.05 €/kg
+  - Albarán: 5000 kg brutos a 2.00 EUR/kg
+  - Destare: 150 kg → **Kilos netos: 4850 kg**
+  - **Comisión generada: 4850 × 0.05 = 242.50 EUR**
 
 ---
 
