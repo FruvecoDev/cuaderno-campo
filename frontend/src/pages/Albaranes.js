@@ -1231,14 +1231,16 @@ const Albaranes = () => {
                         </td>
                         <td>
                           <input
-                            type="number"
-                            step="0.01"
-                            min="0"
+                            type="text"
                             className="form-input"
-                            value={item.cantidad}
-                            onChange={(e) => updateItemTotal(index, 'cantidad', e.target.value)}
+                            value={formatNumberES(item.cantidad)}
+                            onChange={(e) => {
+                              // Permitir solo números, puntos y comas
+                              const rawValue = e.target.value.replace(/[^\d.,]/g, '');
+                              updateItemTotal(index, 'cantidad', parseNumberES(rawValue));
+                            }}
                             placeholder="0"
-                            style={{ minWidth: '120px' }}
+                            style={{ minWidth: '120px', textAlign: 'right' }}
                             data-testid={`item-cantidad-${index}`}
                           />
                         </td>
