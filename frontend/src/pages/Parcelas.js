@@ -6,9 +6,10 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
-import { Plus, Map as MapIcon, Edit2, Trash2, Filter, Settings, X, ClipboardCheck, Layers, Satellite, History, Beaker, Calendar, FileText, ChevronDown, ChevronUp, BookOpen, Loader2, Eye, Search, ExternalLink, CheckCircle, AlertCircle } from 'lucide-react';
+import { Plus, Map as MapIcon, Edit2, Trash2, Filter, Settings, X, ClipboardCheck, Layers, Satellite, History, Beaker, Calendar, FileText, ChevronDown, ChevronUp, BookOpen, Loader2, Eye, Search, ExternalLink, CheckCircle, AlertCircle, Upload } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import AdvancedParcelMap from '../components/AdvancedParcelMap';
+import GeoImportModal from '../components/GeoImportModal';
 import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
 
