@@ -12,29 +12,43 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
 
 ---
 
-## Última Actualización: 28 Febrero 2026 (Sesión 3)
+## Última Actualización: 1 Marzo 2026 (Sesión 4)
 
 ### Completadas en esta sesión:
 
-#### 1. Módulo Cuaderno de Campo PDF ✅ (COMPLETADO)
-- **Problema resuelto**: El endpoint `/api/cuaderno-campo/filters` no funcionaba debido a conflicto de rutas y falta de prefijo `/api`
-- **Correcciones aplicadas**:
-  - Añadido `prefix="/api"` al router en `routes_cuaderno_campo.py`
-  - Eliminadas rutas duplicadas de `routes_cuaderno.py` que causaban conflictos
-  - Corregidos errores de `NoneType` en funciones de creación de tablas PDF (uso de `or` para valores nulos)
-- **Funcionalidades verificadas**:
-  - `GET /api/cuaderno-campo/parcelas` - Lista de parcelas disponibles ✅
-  - `GET /api/cuaderno-campo/preview/{id}` - Vista previa con estadísticas ✅
-  - `GET /api/cuaderno-campo/generar/{id}` - Generación de PDF ✅
-- **UI Frontend**: Selector de parcelas, filtros, vista previa con KPIs, botón de descarga
-- **Contenido del PDF**: Tratamientos fitosanitarios, Riegos, Visitas, Cosechas, Resumen general
-- **Archivos modificados**:
-  - `/app/backend/routes_cuaderno_campo.py` (prefijo y corrección de errores)
-  - `/app/backend/routes_cuaderno.py` (eliminadas rutas duplicadas)
+#### 1. Bug Crítico Corregido ✅ - "Objects are not valid as a React child"
+- **Problema**: Error de React que bloqueaba toda la aplicación después del login
+- **Causa raíz**: Colisión de nombres de variables en `routes_dashboard.py`
+  - Variables `contratos_compra` y `contratos_venta` inicializadas como integers (conteos)
+  - Posteriormente reasignadas a arrays de objetos, sobrescribiendo los valores originales
+  - El endpoint `/api/dashboard/kpis` devolvía arrays en lugar de integers
+- **Solución**: Renombrar variables de arrays a `contratos_compra_list` y `contratos_venta_list`
+- **Archivo modificado**: `/app/backend/routes_dashboard.py` (líneas 330-346)
+- **Verificado**: Dashboard carga correctamente con "Contratos Compra: 13" y "Contratos Venta: 1"
+
+#### 2. Módulo de Mapas con Polígonos ✅ (P2 COMPLETADO)
+- **Funcionalidad nueva**: Dibujo y edición de polígonos para delimitar parcelas
+- **Herramientas de Leaflet-Draw integradas**:
+  - Dibujo de polígonos interactivo
+  - Edición de vértices
+  - Eliminación de polígonos
+- **Cálculo automático de área** en hectáreas usando fórmula del shoelace
+- **UI mejorada**:
+  - Banner informativo durante modo dibujo
+  - KPI nuevo "Con polígono" (8 parcelas con geometría)
+  - Panel lateral con lista de parcelas
+  - Botones "Punto" y "Polígono" para cada parcela
+- **Persistencia**: Guardado en campo `recintos` de la parcela con coordenadas
+- **Archivo modificado**: `/app/frontend/src/pages/Mapas.js` (reimplementado completo)
+
+#### 3. Módulo Cuaderno de Campo PDF ✅ (de sesión anterior)
+- Endpoint `/api/cuaderno-campo/parcelas` funcionando
+- Generación de PDF operativa
+- Vista previa con estadísticas
 
 ---
 
-### Completadas en sesión anterior (Sesión 2):
+### Sesión anterior (Sesión 3):
 
 #### 1. Verificación Bug UI Tenderometría ✅
 - **Problema**: Encabezados de tabla con texto negro sobre fondo azul oscuro (ilegibles)
