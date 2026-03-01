@@ -466,7 +466,7 @@ const Albaranes = () => {
   const addItem = () => {
     setFormData({
       ...formData,
-      items: [...formData.items, { descripcion: '', cantidad: '', unidad: 'kg', precio_unitario: '', total: 0, articulo_id: null }]
+      items: [...formData.items, { descripcion: '', cantidad: '', unidad: 'kg', precio_unitario: '', descuento: 0, total: 0, articulo_id: null }]
     });
   };
   
