@@ -1332,9 +1332,9 @@ const Albaranes = () => {
                             <input
                               type="text"
                               className="form-input"
-                              value={item.precio_unitario}
+                              value="0,00 €"
                               readOnly
-                              style={{ backgroundColor: '#fef2f2', color: '#dc2626' }}
+                              style={{ backgroundColor: '#fef2f2', color: '#9ca3af', fontStyle: 'italic' }}
                             />
                           ) : (
                           <input
