@@ -187,6 +187,52 @@ async def delete_tratamiento(
     return {"success": True, "message": "Tratamiento deleted"}
 
 
+@router.patch("/tratamientos/{tratamiento_id}/estado")
+async def update_tratamiento_estado(
+    tratamiento_id: str,
+    estado: str,
+    current_user: dict = Depends(RequireEdit),
+    _access: dict = Depends(RequireTratamientosAccess)
+):
+    """
+    Actualiza el estado de un tratamiento.
+    Estados válidos: 'completado', 'cancelado', 'pendiente'
+    """
+    if not ObjectId.is_valid(tratamiento_id):
+        raise HTTPException(status_code=400, detail="Invalid ID")
+    
+    estados_validos = ['completado', 'cancelado', 'pendiente']
+    if estado not in estados_validos:
+        raise HTTPException(status_code=400, detail=f"Estado inválido. Opciones: {estados_validos}")
+    
+    update_data = {
+        "updated_at": datetime.now()
+    }
+    
+    if estado == 'completado':
+        update_data["realizado"] = True
+        update_data["cancelado"] = False
+        update_data["fecha_completado"] = datetime.now().strftime("%Y-%m-%d")
+    elif estado == 'cancelado':
+        update_data["realizado"] = False
+        update_data["cancelado"] = True
+        update_data["fecha_cancelado"] = datetime.now().strftime("%Y-%m-%d")
+    else:  # pendiente
+        update_data["realizado"] = False
+        update_data["cancelado"] = False
+    
+    result = await tratamientos_collection.update_one(
+        {"_id": ObjectId(tratamiento_id)},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Tratamiento not found")
+    
+    updated = await tratamientos_collection.find_one({"_id": ObjectId(tratamiento_id)})
+    return {"success": True, "data": serialize_doc(updated)}
+
+
 @router.get("/tratamientos/parcela/{parcela_id}/historial")
 async def get_historial_tratamientos_parcela(
     parcela_id: str,
