@@ -663,7 +663,7 @@ const Contratos = () => {
             </div>
             
             <div className="form-group" style={{ marginTop: '1rem' }}>
-              <label className="form-label">{t('contracts.observations')}</label>
+              <label className="form-label">Observaciones</label>
               <textarea 
                 className="form-input" 
                 value={formData.observaciones} 
@@ -675,7 +675,7 @@ const Contratos = () => {
             
             <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', justifyContent: 'flex-end' }}>
               <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>
-                {t('common.cancel')}
+                Cancelar
               </button>
               <PermissionButton 
                 type="submit" 
@@ -683,7 +683,7 @@ const Contratos = () => {
                 className="btn btn-primary"
                 data-testid="btn-submit-contrato"
               >
-                {editingId ? t('common.update') : t('common.create')} {t('contracts.contract')}
+                {editingId ? 'Actualizar Contrato' : 'Guardar Contrato'}
               </PermissionButton>
             </div>
           </form>
