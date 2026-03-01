@@ -218,6 +218,15 @@ const api = {
     apiFetch(endpoint, { ...options, method: 'POST', body: formData, isFormData: true }),
 
   /**
+   * POST with FormData (alias for upload)
+   * @param {string} endpoint - API endpoint
+   * @param {FormData} formData - FormData
+   * @param {object} options - Additional options
+   */
+  postFormData: (endpoint, formData, options = {}) =>
+    apiFetch(endpoint, { ...options, method: 'POST', body: formData, isFormData: true }),
+
+  /**
    * Download file
    * @param {string} endpoint - API endpoint
    * @param {string} filename - Suggested filename for download
