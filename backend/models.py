@@ -136,6 +136,13 @@ class ContratoCreate(BaseModel):
     comision_tipo: Optional[str] = None
     comision_valor: Optional[float] = None
     
+    # Forma de pago/cobro según tipo de contrato
+    forma_pago: Optional[str] = None   # Solo para contratos de Compra
+    forma_cobro: Optional[str] = None  # Solo para contratos de Venta
+    
+    # Descuento destare (% sobre kilos, solo para contratos de Compra)
+    descuento_destare: Optional[float] = None
+    
     # Tabla de precios por calidad/tenderometría (para guisante)
     precios_calidad: List[ContratoPrecios] = []
 
