@@ -1243,9 +1243,10 @@ async def generate_albaran_pdf(
                     <tr>
                         <th style="width: 40px;">#</th>
                         <th>Descripción</th>
-                        <th style="width: 100px;">Cantidad</th>
-                        <th style="width: 60px;">Ud.</th>
-                        <th style="width: 100px;">Precio</th>
+                        <th style="width: 90px;">Cantidad</th>
+                        <th style="width: 50px;">Ud.</th>
+                        <th style="width: 90px;">Precio</th>
+                        <th style="width: 70px;">Dto %</th>
                         <th style="width: 100px;">Importe</th>
                     </tr>
                 </thead>
