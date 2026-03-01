@@ -547,16 +547,17 @@ const Parcelas = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    console.log('Submit - polygon:', polygon);
-    console.log('Submit - polygon.length:', polygon.length);
+    console.log('📤 Submit - polygon state:', polygon);
+    console.log('📤 Submit - polygon.length:', polygon ? polygon.length : 0);
     
     if (!formData.contrato_id) {
-      alert('Debes seleccionar un contrato. Toda parcela debe estar asociada a un contrato.');
+      alert('⚠️ Debes seleccionar un contrato. Toda parcela debe estar asociada a un contrato.');
       return;
     }
     
-    if (!editingId && polygon.length < 3) {
-      alert('Dibuja un polígono en el mapa primero. Puntos actuales: ' + polygon.length);
+    if (!editingId && (!polygon || polygon.length < 3)) {
+      console.log('❌ Polygon validation failed:', polygon);
+      alert(`⚠️ Dibuja un polígono en el mapa primero.\n\nPuntos actuales: ${polygon ? polygon.length : 0}\nNecesitas al menos 3 puntos.`);
       return;
     }
     
