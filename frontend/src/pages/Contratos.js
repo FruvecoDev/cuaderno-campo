@@ -700,6 +700,200 @@ const Contratos = () => {
               </div>
             </div>
             
+            {/* Sección de Agente y Comisión */}
+            <div style={{ 
+              background: 'hsl(var(--muted))', 
+              padding: '1rem', 
+              borderRadius: '8px', 
+              marginTop: '1rem',
+              marginBottom: '1rem' 
+            }}>
+              <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.9rem', fontWeight: '600' }}>
+                Agente {formData.tipo === 'Compra' ? 'de Compra' : 'de Venta'} y Comisión
+              </h4>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '1rem' }}>
+                {formData.tipo === 'Compra' ? (
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Agente de Compra</label>
+                    <select
+                      className="form-select"
+                      value={formData.agente_compra}
+                      onChange={(e) => setFormData({...formData, agente_compra: e.target.value})}
+                      data-testid="select-agente-compra-page"
+                    >
+                      <option value="">Sin agente</option>
+                      {agentesCompra.map(a => (
+                        <option key={a._id} value={a._id}>
+                          {a.codigo} - {a.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Agente de Venta</label>
+                    <select
+                      className="form-select"
+                      value={formData.agente_venta}
+                      onChange={(e) => setFormData({...formData, agente_venta: e.target.value})}
+                      data-testid="select-agente-venta-page"
+                    >
+                      <option value="">Sin agente</option>
+                      {agentesVenta.map(a => (
+                        <option key={a._id} value={a._id}>
+                          {a.codigo} - {a.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                
+                {/* Comisión para Compra */}
+                {formData.tipo === 'Compra' && formData.agente_compra && (
+                  <>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label">Tipo Comisión</label>
+                      <select
+                        className="form-select"
+                        value={formData.comision_compra_tipo}
+                        onChange={(e) => setFormData({...formData, comision_compra_tipo: e.target.value})}
+                        data-testid="select-comision-compra-tipo-page"
+                      >
+                        <option value="porcentaje">Porcentaje (%)</option>
+                        <option value="euro_kilo">€ por Kilo</option>
+                      </select>
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label">
+                        Comisión {formData.comision_compra_tipo === 'porcentaje' ? '(%)' : '(€/kg)'}
+                      </label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={formatNumber(formData.comision_compra_valor)}
+                        onChange={(e) => {
+                          const rawValue = e.target.value.replace(/\./g, '');
+                          if (/^\d*,?\d*$/.test(rawValue)) {
+                            setFormData({...formData, comision_compra_valor: rawValue});
+                          }
+                        }}
+                        placeholder={formData.comision_compra_tipo === 'porcentaje' ? 'Ej: 2,5' : 'Ej: 0,05'}
+                        data-testid="input-comision-compra-valor-page"
+                      />
+                    </div>
+                  </>
+                )}
+                
+                {/* Comisión para Venta */}
+                {formData.tipo === 'Venta' && formData.agente_venta && (
+                  <>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label">Tipo Comisión</label>
+                      <select
+                        className="form-select"
+                        value={formData.comision_venta_tipo}
+                        onChange={(e) => setFormData({...formData, comision_venta_tipo: e.target.value})}
+                        data-testid="select-comision-venta-tipo-page"
+                      >
+                        <option value="porcentaje">Porcentaje (%)</option>
+                        <option value="euro_kilo">€ por Kilo</option>
+                      </select>
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label">
+                        Comisión {formData.comision_venta_tipo === 'porcentaje' ? '(%)' : '(€/kg)'}
+                      </label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={formatNumber(formData.comision_venta_valor)}
+                        onChange={(e) => {
+                          const rawValue = e.target.value.replace(/\./g, '');
+                          if (/^\d*,?\d*$/.test(rawValue)) {
+                            setFormData({...formData, comision_venta_valor: rawValue});
+                          }
+                        }}
+                        placeholder={formData.comision_venta_tipo === 'porcentaje' ? 'Ej: 2,5' : 'Ej: 0,05'}
+                        data-testid="input-comision-venta-valor-page"
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+            
+            {/* Sección de Forma de Pago/Cobro y Descuento Destare */}
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: formData.tipo === 'Compra' ? '1fr 1fr' : '1fr', 
+              gap: '1rem',
+              marginBottom: '1rem'
+            }}>
+              {/* Forma de Pago - Solo para Compras */}
+              {formData.tipo === 'Compra' && (
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Forma de Pago</label>
+                  <select
+                    className="form-select"
+                    value={formData.forma_pago}
+                    onChange={(e) => setFormData({...formData, forma_pago: e.target.value})}
+                    data-testid="select-forma-pago"
+                  >
+                    <option value="">-- Seleccionar --</option>
+                    <option value="Transferencia">Transferencia bancaria</option>
+                    <option value="Cheque">Cheque</option>
+                    <option value="Pagaré">Pagaré</option>
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Compensación">Compensación</option>
+                  </select>
+                </div>
+              )}
+              
+              {/* Forma de Cobro - Solo para Ventas */}
+              {formData.tipo === 'Venta' && (
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Forma de Cobro</label>
+                  <select
+                    className="form-select"
+                    value={formData.forma_cobro}
+                    onChange={(e) => setFormData({...formData, forma_cobro: e.target.value})}
+                    data-testid="select-forma-cobro"
+                  >
+                    <option value="">-- Seleccionar --</option>
+                    <option value="Transferencia">Transferencia bancaria</option>
+                    <option value="Cheque">Cheque</option>
+                    <option value="Pagaré">Pagaré</option>
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Letra">Letra de cambio</option>
+                    <option value="Confirming">Confirming</option>
+                  </select>
+                </div>
+              )}
+              
+              {/* Descuento Destare - Solo para Compras */}
+              {formData.tipo === 'Compra' && (
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Descuento Destare (%)</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={formatNumber(formData.descuento_destare)}
+                    onChange={(e) => {
+                      const rawValue = e.target.value.replace(/\./g, '');
+                      if (/^\d*,?\d*$/.test(rawValue)) {
+                        setFormData({...formData, descuento_destare: rawValue});
+                      }
+                    }}
+                    placeholder="Ej: 2,5"
+                    data-testid="input-descuento-destare"
+                  />
+                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
+                    Porcentaje que se descuenta de los kilos en albaranes
+                  </small>
+                </div>
+              )}
+            </div>
+            
             <div className="form-group" style={{ marginTop: '1rem' }}>
               <label className="form-label">Observaciones</label>
               <textarea 
