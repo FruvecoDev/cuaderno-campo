@@ -539,7 +539,12 @@ const Albaranes = () => {
       items: albaran.items?.length > 0 
         ? albaran.items 
         : [{ descripcion: '', cantidad: '', unidad: 'kg', precio_unitario: '', total: 0 }],
-      observaciones: albaran.observaciones || ''
+      observaciones: albaran.observaciones || '',
+      // Datos de kilos (para el cálculo del destare)
+      kilos_brutos: albaran.kilos_brutos || 0,
+      kilos_destare: albaran.kilos_destare || 0,
+      kilos_netos: albaran.kilos_netos || 0,
+      total_albaran: albaran.total_albaran || 0
     });
     setShowForm(true);
   };
