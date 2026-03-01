@@ -1027,9 +1027,11 @@ async def generate_albaran_pdf(
         cantidad = item.get("cantidad", 0)
         unidad = item.get("unidad", "kg")
         precio = item.get("precio_unitario", 0)
+        descuento = item.get("descuento", 0) or 0
         total = item.get("total", 0)
         
         row_style = 'background-color: #fef2f2; color: #dc2626;' if es_destare else ''
+        dto_display = "-" if es_destare else f"{format_number_spanish(descuento, 2)} %"
         
         rows_html += f"""
         <tr style="{row_style}">
@@ -1038,6 +1040,7 @@ async def generate_albaran_pdf(
             <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: right;">{format_number_spanish(cantidad, 2)}</td>
             <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: center;">{unidad}</td>
             <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: right;">{format_number_spanish(precio, 4)} €</td>
+            <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: center;">{dto_display}</td>
             <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 500;">{format_number_spanish(total, 2)} €</td>
         </tr>
         """
