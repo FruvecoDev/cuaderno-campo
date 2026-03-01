@@ -183,7 +183,8 @@ test.describe('Parcelas Page - New Parcela Form with Advanced Map', () => {
       
       // Search panel should appear with input field
       await expect(page.locator('input[placeholder*="Buscar dirección"]')).toBeVisible({ timeout: 5000 });
-      await expect(page.locator('button:has-text("Buscar")')).toBeVisible();
+      // Use the specific "Buscar" button next to the address input (not the SIGPAC one)
+      await expect(page.locator('.btn-primary:has-text("Buscar")').first()).toBeVisible();
     }
   });
 
