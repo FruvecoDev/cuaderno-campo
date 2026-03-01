@@ -228,6 +228,12 @@ function App() {
           </ProtectedRoute>
         } />
         
+        <Route path="/comisiones-generadas" element={
+          <ProtectedRoute>
+            <Layout><ComisionesGeneradas /></Layout>
+          </ProtectedRoute>
+        } />
+        
         <Route path="/evaluaciones" element={
           <ProtectedRoute>
             <Layout><Evaluaciones /></Layout>
