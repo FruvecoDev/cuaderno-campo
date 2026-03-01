@@ -320,7 +320,10 @@ const Contratos = () => {
   };
   
   const resetForm = () => {
+    // Generar número de contrato automático
+    const nuevoNumero = generarNumeroContrato();
     setFormData({
+      numero_contrato: nuevoNumero,
       tipo: 'Compra',
       campana: '2025/26',
       procedencia: 'Campo',
