@@ -213,6 +213,54 @@ async def create_albaran(
     _access: dict = Depends(RequireAlbaranesAccess)
 ):
     albaran_dict = albaran.dict()
+    
+    # Si el albarán tiene contrato_id, buscar descuento_destare
+    descuento_aplicado = None
+    if albaran.contrato_id and albaran.tipo == "Entrada":
+        contrato = await contratos_collection.find_one({"_id": ObjectId(albaran.contrato_id)})
+        if contrato and contrato.get("descuento_destare") and contrato.get("tipo") == "Compra":
+            descuento_porcentaje = float(contrato.get("descuento_destare", 0))
+            
+            if descuento_porcentaje > 0:
+                # Calcular total de kilos de las líneas existentes
+                total_kilos = sum(item.get("cantidad", 0) for item in albaran_dict.get("items", []) 
+                                  if item.get("unidad", "kg").lower() in ["kg", "kilos", "kilogramos"])
+                
+                if total_kilos > 0:
+                    # Calcular kilos de descuento
+                    kilos_destare = round(total_kilos * (descuento_porcentaje / 100), 2)
+                    
+                    # Obtener el precio de la primera línea (o del contrato)
+                    precio_unitario = albaran_dict.get("items", [{}])[0].get("precio_unitario", 0)
+                    if not precio_unitario and contrato.get("precio"):
+                        precio_unitario = float(contrato.get("precio", 0))
+                    
+                    # Crear línea de descuento destare
+                    linea_destare = {
+                        "descripcion": f"Descuento Destare ({descuento_porcentaje}%)",
+                        "producto": "DESTARE",
+                        "lote": "",
+                        "cantidad": -kilos_destare,  # Negativo porque es descuento
+                        "unidad": "kg",
+                        "precio_unitario": precio_unitario,
+                        "total": round(-kilos_destare * precio_unitario, 2),
+                        "es_destare": True  # Marcador para identificar línea de destare
+                    }
+                    
+                    # Añadir línea de destare a los items
+                    albaran_dict["items"].append(linea_destare)
+                    
+                    # Recalcular total del albarán
+                    albaran_dict["total_albaran"] = round(
+                        sum(item.get("total", 0) for item in albaran_dict["items"]), 2
+                    )
+                    
+                    descuento_aplicado = {
+                        "porcentaje": descuento_porcentaje,
+                        "kilos_descontados": kilos_destare,
+                        "importe_descontado": round(kilos_destare * precio_unitario, 2)
+                    }
+    
     albaran_dict.update({
         "created_at": datetime.now(),
         "updated_at": datetime.now()
@@ -221,7 +269,11 @@ async def create_albaran(
     result = await albaranes_collection.insert_one(albaran_dict)
     created = await albaranes_collection.find_one({"_id": result.inserted_id})
     
-    return {"success": True, "data": serialize_doc(created)}
+    response = {"success": True, "data": serialize_doc(created)}
+    if descuento_aplicado:
+        response["descuento_destare_aplicado"] = descuento_aplicado
+    
+    return response
 
 
 @router.get("/albaranes")
