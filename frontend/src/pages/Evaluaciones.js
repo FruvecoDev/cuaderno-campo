@@ -662,6 +662,35 @@ const Evaluaciones = () => {
     }
   };
   
+  // Cambiar estado de la evaluación
+  const handleChangeEstado = async (evaluacionId, nuevoEstado) => {
+    if (!canEdit) {
+      setError('No tienes permisos para modificar evaluaciones');
+      setTimeout(() => setError(null), 5000);
+      return;
+    }
+    
+    const mensajes = {
+      completada: '¿Marcar esta evaluación como COMPLETADA/FINALIZADA?',
+      archivada: '¿Archivar esta evaluación?',
+      borrador: '¿Volver a poner esta evaluación como BORRADOR?'
+    };
+    
+    if (!window.confirm(mensajes[nuevoEstado])) {
+      return;
+    }
+    
+    try {
+      setError(null);
+      await api.patch(`/api/evaluaciones/${evaluacionId}/estado?estado=${nuevoEstado}`);
+      fetchEvaluaciones();
+    } catch (error) {
+      console.error('Error changing estado:', error);
+      setError('Error al cambiar el estado de la evaluación');
+      setTimeout(() => setError(null), 5000);
+    }
+  };
+  
   // Renderizar campo de respuesta según tipo
   const renderCampoRespuesta = (pregunta) => {
     const valor = respuestas[pregunta.id];
