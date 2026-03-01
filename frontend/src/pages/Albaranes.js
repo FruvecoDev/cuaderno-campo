@@ -1635,16 +1635,16 @@ const Albaranes = () => {
                 type="button"
                 className="btn btn-secondary"
                 onClick={() => editingId && downloadPdf(editingId)}
-                disabled={!editingId || pdfLoading === editingId}
+                disabled={!editingId || (pdfLoading && pdfLoading === editingId)}
                 data-testid="btn-imprimir"
                 title={!editingId ? 'Guarde el albarán primero para poder imprimirlo' : 'Imprimir PDF'}
               >
-                {pdfLoading === editingId ? (
+                {pdfLoading && pdfLoading === editingId ? (
                   <Download size={16} className="animate-spin" style={{ marginRight: '0.5rem' }} />
                 ) : (
                   <Printer size={16} style={{ marginRight: '0.5rem' }} />
                 )}
-                {pdfLoading === editingId ? 'Generando...' : 'Imprimir'}
+                {pdfLoading && pdfLoading === editingId ? 'Generando...' : 'Imprimir'}
               </button>
               
               <button
