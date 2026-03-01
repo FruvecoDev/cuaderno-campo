@@ -79,14 +79,15 @@ async def get_parcela(
 @router.put("/parcelas/{parcela_id}")
 async def update_parcela(
     parcela_id: str,
-    parcela: ParcelaCreate,
+    parcela: ParcelaUpdate,
     current_user: dict = Depends(RequireEdit),
     _access: dict = Depends(RequireParcelasAccess)
 ):
     if not ObjectId.is_valid(parcela_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
     
-    update_data = parcela.dict()
+    # Only include fields that were actually provided
+    update_data = {k: v for k, v in parcela.dict().items() if v is not None}
     update_data["updated_at"] = datetime.now()
     
     result = await parcelas_collection.update_one(
