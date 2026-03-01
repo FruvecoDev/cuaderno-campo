@@ -783,7 +783,8 @@ const Tratamientos = () => {
   const [showFieldsConfig, setShowFieldsConfig] = useState(false);
   const [fieldsConfig, setFieldsConfig] = useState(() => {
     const saved = localStorage.getItem('tratamientos_fields_config');
-    return saved ? JSON.parse(saved) : DEFAULT_FIELDS_CONFIG;
+    // Merge saved config with defaults to ensure new fields are always included
+    return saved ? { ...DEFAULT_FIELDS_CONFIG, ...JSON.parse(saved) } : DEFAULT_FIELDS_CONFIG;
   });
   
   // Configuración de columnas de la tabla
