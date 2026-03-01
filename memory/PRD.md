@@ -12,9 +12,22 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
 
 ---
 
-## Última Actualización: 1 Marzo 2026 (Sesión 4)
+## Última Actualización: 1 Marzo 2026 (Sesión 5)
 
 ### Completadas en esta sesión:
+
+#### 1. Bug Fix: Polígono Visual en Formulario "Crear Parcela" ✅ (P0)
+- **Problema**: Al dibujar un polígono en el formulario de nueva parcela, después del alert de confirmación el polígono desaparecía visualmente del mapa, aunque los datos estaban guardados en el estado.
+- **Causa raíz**: En `AdvancedDrawControl` (dentro de `AdvancedParcelMap.js`), el useEffect que añadía el polígono a `drawnItems` tenía una condición `isEditing=true` que impedía que el polígono se mostrara durante la creación de nuevas parcelas.
+- **Solución**: Eliminar la condición `isEditing` en las líneas 143-148 de `AdvancedParcelMap.js`, permitiendo que el polígono se renderice siempre que tenga coordenadas válidas.
+- **Archivos modificados**: 
+  - `/app/frontend/src/components/AdvancedParcelMap.js` (líneas 143-148)
+  - `/app/frontend/src/pages/Parcelas.js` (líneas 65-73) - mismo fix aplicado al componente duplicado
+- **Verificado**: Testing agent confirmó que 27/27 tests pasan al 100%
+
+---
+
+### Sesión 4:
 
 #### 1. Bug Crítico Corregido ✅ - "Objects are not valid as a React child"
 - **Problema**: Error de React que bloqueaba toda la aplicación después del login
