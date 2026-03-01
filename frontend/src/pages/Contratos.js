@@ -7,6 +7,25 @@ import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
 
+// Función para formatear números con separadores de miles (formato español)
+const formatNumber = (value) => {
+  if (!value && value !== 0) return '';
+  // Eliminar caracteres no numéricos excepto coma decimal
+  const cleanValue = String(value).replace(/[^\d,]/g, '');
+  // Separar parte entera y decimal
+  const parts = cleanValue.split(',');
+  // Formatear parte entera con puntos de miles
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return parts.join(',');
+};
+
+// Función para parsear número formateado a número real
+const parseFormattedNumber = (value) => {
+  if (!value && value !== 0) return '';
+  // Quitar puntos de miles y cambiar coma por punto para decimales
+  return String(value).replace(/\./g, '').replace(',', '.');
+};
+
 const Contratos = () => {
   const navigate = useNavigate();
   const { id: urlId } = useParams();
