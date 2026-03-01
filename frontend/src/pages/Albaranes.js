@@ -1222,6 +1222,7 @@ const Albaranes = () => {
                             value={item.cantidad}
                             onChange={(e) => updateItemTotal(index, 'cantidad', e.target.value)}
                             placeholder="0"
+                            style={{ minWidth: '120px' }}
                             data-testid={`item-cantidad-${index}`}
                           />
                         </td>
@@ -1256,8 +1257,9 @@ const Albaranes = () => {
                           <input
                             type="text"
                             className="form-input"
-                            value={`${(item.total || 0).toFixed(2)} €`}
+                            value={`${(item.total || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`}
                             disabled
+                            style={{ minWidth: '120px', textAlign: 'right', fontWeight: '500' }}
                             style={{ backgroundColor: '#f5f5f5', textAlign: 'right' }}
                           />
                         </td>
