@@ -14,6 +14,7 @@ from rbac_guards import (
     RequireCreate, RequireEdit, RequireDelete,
     RequireContratosAccess, get_current_user
 )
+from services.audit_service import create_audit_log, calculate_changes
 
 router = APIRouter(prefix="/api", tags=["contratos"])
 
@@ -72,6 +73,16 @@ async def create_contrato(
     
     result = await contratos_collection.insert_one(contrato_dict)
     created = await contratos_collection.find_one({"_id": result.inserted_id})
+    
+    # Registrar en auditoría
+    await create_audit_log(
+        collection_name="contratos",
+        document_id=str(result.inserted_id),
+        action="create",
+        user_email=current_user.get("email", "unknown"),
+        user_name=current_user.get("full_name", current_user.get("username", "Usuario")),
+        new_data=serialize_doc(created.copy())
+    )
     
     return {"success": True, "data": serialize_doc(created)}
 
