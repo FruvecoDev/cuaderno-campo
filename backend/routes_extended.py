@@ -303,6 +303,15 @@ async def create_albaran(
     albaran_dict["kilos_destare"] = kilos_destare
     albaran_dict["kilos_netos"] = kilos_netos
     
+    # Aplicar descuento sobre el importe si existe
+    descuento_pct = float(albaran_dict.get("descuento_porcentaje", 0) or 0)
+    if descuento_pct > 0:
+        subtotal = float(albaran_dict.get("total_albaran", 0) or 0)
+        descuento_importe = round(subtotal * (descuento_pct / 100), 2)
+        albaran_dict["descuento_importe"] = descuento_importe
+        albaran_dict["subtotal"] = subtotal
+        albaran_dict["total_albaran"] = round(subtotal - descuento_importe, 2)
+    
     albaran_dict.update({
         "created_at": datetime.now(),
         "updated_at": datetime.now()
