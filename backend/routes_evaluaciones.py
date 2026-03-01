@@ -1219,11 +1219,6 @@ async def generate_evaluacion_pdf(
     # PÁGINAS DE TRATAMIENTOS - Una página por cada tratamiento
     # ========================================================================
     for idx, tratamiento in enumerate(tratamientos, 1):
-        # DEBUG para verificar datos del aplicador
-        print(f"DEBUG HTML Gen: Tratamiento {idx} - aplicador_completo: {'SI' if tratamiento.get('aplicador_completo') else 'NO'}")
-        if tratamiento.get('aplicador_completo'):
-            print(f"DEBUG HTML Gen: Aplicador nombre: {tratamiento['aplicador_completo'].get('nombre')}")
-        
         page_num = 1 + len(visitas) + idx
         html_content += f"""
         <div class="page-break"></div>
