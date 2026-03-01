@@ -54,6 +54,8 @@ const ComisionesGeneradas = () => {
       if (filters.tipo_agente) params.append('tipo_agente', filters.tipo_agente);
       if (filters.campana) params.append('campana', filters.campana);
       if (filters.estado) params.append('estado', filters.estado);
+      if (filters.fecha_desde) params.append('fecha_desde', filters.fecha_desde);
+      if (filters.fecha_hasta) params.append('fecha_hasta', filters.fecha_hasta);
       
       const response = await api.get(`/api/comisiones-generadas?${params.toString()}`);
       setComisiones(response.comisiones || []);
