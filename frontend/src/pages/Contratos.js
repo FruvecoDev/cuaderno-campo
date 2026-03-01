@@ -639,10 +639,16 @@ const Contratos = () => {
               <div className="form-group">
                 <label className="form-label">Cantidad (kg) *</label>
                 <input 
-                  type="number" 
+                  type="text" 
                   className="form-input" 
-                  value={formData.cantidad} 
-                  onChange={(e) => setFormData({...formData, cantidad: e.target.value})} 
+                  value={formatNumber(formData.cantidad)} 
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/\./g, '');
+                    if (/^\d*$/.test(rawValue)) {
+                      setFormData({...formData, cantidad: rawValue});
+                    }
+                  }}
+                  placeholder="Ej: 1.000"
                   required
                   data-testid="input-cantidad"
                 />
@@ -651,11 +657,17 @@ const Contratos = () => {
               <div className="form-group">
                 <label className="form-label">Precio (€/kg) *</label>
                 <input 
-                  type="number" 
-                  step="0.01" 
+                  type="text" 
                   className="form-input" 
-                  value={formData.precio} 
-                  onChange={(e) => setFormData({...formData, precio: e.target.value})} 
+                  value={formatNumber(formData.precio)} 
+                  onChange={(e) => {
+                    // Permitir números y una coma para decimales
+                    const rawValue = e.target.value.replace(/\./g, '');
+                    if (/^\d*,?\d*$/.test(rawValue)) {
+                      setFormData({...formData, precio: rawValue});
+                    }
+                  }}
+                  placeholder="Ej: 1,50"
                   required
                   data-testid="input-precio"
                 />
