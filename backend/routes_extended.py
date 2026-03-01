@@ -865,10 +865,25 @@ async def get_comisiones_generadas(
     comisiones = await comisiones_collection.find(query).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
     total = await comisiones_collection.count_documents(query)
     
-    # Generar numero_albaran para registros antiguos que no lo tengan
+    # Enriquecer registros antiguos que no tengan numero_albaran o proveedor_nombre
     for c in comisiones:
         if not c.get("numero_albaran") and c.get("albaran_id"):
             c["numero_albaran"] = f"ALB-{c['albaran_id'][-6:].upper()}"
+        
+        # Obtener nombre del proveedor/cliente si no existe
+        if not c.get("proveedor_nombre") and c.get("proveedor"):
+            try:
+                proveedor_doc = await proveedores_collection.find_one({"_id": ObjectId(c["proveedor"])})
+                c["proveedor_nombre"] = proveedor_doc.get("nombre", "Sin nombre") if proveedor_doc else "Sin nombre"
+            except:
+                c["proveedor_nombre"] = "Sin nombre"
+        
+        if not c.get("cliente_nombre") and c.get("cliente"):
+            try:
+                cliente_doc = await clientes_collection.find_one({"_id": ObjectId(c["cliente"])})
+                c["cliente_nombre"] = cliente_doc.get("nombre", "Sin nombre") if cliente_doc else "Sin nombre"
+            except:
+                c["cliente_nombre"] = "Sin nombre"
     
     # Calcular totales
     totales = {
