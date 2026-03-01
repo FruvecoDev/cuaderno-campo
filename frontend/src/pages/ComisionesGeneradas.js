@@ -432,6 +432,7 @@ const ComisionesGeneradas = () => {
                     <table style={{ width: '100%', fontSize: '0.85rem' }}>
                       <thead>
                         <tr style={{ borderBottom: '2px solid hsl(var(--border))' }}>
+                          <th style={{ padding: '0.5rem', textAlign: 'left' }}>Nº Albarán</th>
                           <th style={{ padding: '0.5rem', textAlign: 'left' }}>Fecha</th>
                           <th style={{ padding: '0.5rem', textAlign: 'left' }}>Proveedor/Cliente</th>
                           <th style={{ padding: '0.5rem', textAlign: 'left' }}>Cultivo</th>
@@ -449,6 +450,7 @@ const ComisionesGeneradas = () => {
                           const estadoBadge = getEstadoBadge(c.estado);
                           return (
                             <tr key={c._id} style={{ borderBottom: '1px solid hsl(var(--border))' }}>
+                              <td style={{ padding: '0.5rem', fontWeight: '500' }}>{c.numero_albaran || c.albaran_id?.slice(-6) || '-'}</td>
                               <td style={{ padding: '0.5rem' }}>{c.fecha_albaran}</td>
                               <td style={{ padding: '0.5rem' }}>{c.proveedor || c.cliente || '-'}</td>
                               <td style={{ padding: '0.5rem' }}>{c.cultivo || '-'}</td>
