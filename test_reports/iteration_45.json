@@ -1,0 +1,77 @@
+{
+  "summary": "Bug fix verified: Visual bug where polygon disappeared after alert in 'Crear Nueva Parcela' form has been fixed. The fix in AdvancedParcelMap.js (lines 143-148) removes the 'isEditing' condition so the polygon re-renders whenever it has valid coordinates. All 27 tests pass including new polygon visibility tests.",
+  "mode": "generate",
+  "baseline_commit": "b9c88ebaaefb0ef4dc30c310fd04cb61b2a078ef",
+  "head_commit": "cd1607b235ad01456527b80dbb65b085d595ce4e",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "regression_results": {
+    "total_specs": 27,
+    "passed": 27,
+    "failed": 0,
+    "skipped": 0
+  },
+  "specs_created": [],
+  "specs_updated": ["/app/tests/e2e/advanced-parcel-map.spec.ts"],
+  "quarantined_tests": [],
+  "test_report_links": ["/app/tests/e2e/advanced-parcel-map.spec.ts"],
+  "action_items": [],
+  "updated_files": ["/app/tests/e2e/advanced-parcel-map.spec.ts"],
+  "success_rate": {
+    "backend": "100%",
+    "frontend": "100%"
+  },
+  "bug_fix_details": {
+    "bug_description": "Visual bug where the polygon drawn on the map disappeared after the confirmation alert was closed in the 'Crear Nueva Parcela' form. The polygon data was correctly saved in state, but not rendered visually.",
+    "root_cause": "In AdvancedParcelMap.js, the useEffect in AdvancedDrawControl had a condition 'isEditing' that prevented polygon rendering during new parcela creation (when isEditing=false).",
+    "fix_applied": "Removed the 'isEditing' condition from the polygon rendering logic (lines 143-148) so the polygon displays whenever editablePolygon has valid coordinates, regardless of editing mode.",
+    "file_changed": "/app/frontend/src/components/AdvancedParcelMap.js",
+    "lines_changed": "143-148"
+  },
+  "verification_tests": [
+    {
+      "name": "Parcelas page loads with basic elements",
+      "status": "passed"
+    },
+    {
+      "name": "General map view toggle works",
+      "status": "passed"
+    },
+    {
+      "name": "New parcela form shows advanced map",
+      "status": "passed"
+    },
+    {
+      "name": "Map layer selector buttons work",
+      "status": "passed"
+    },
+    {
+      "name": "Drawing tools toolbar is visible",
+      "status": "passed"
+    },
+    {
+      "name": "Leaflet draw control is present",
+      "status": "passed"
+    },
+    {
+      "name": "Polygon editing tools exist",
+      "status": "passed"
+    },
+    {
+      "name": "Form state maintained after map interactions",
+      "status": "passed"
+    }
+  ],
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Bug fix verified and all 27 tests pass. The polygon visibility bug in the 'Crear Nueva Parcela' form has been fixed. Test suite includes comprehensive tests for the advanced parcel map functionality including map layers, drawing tools, import/export, filters, and polygon visualization. The ResumenDiario modal needs to be dismissed in beforeEach to avoid blocking interactions.",
+  "rca_of_issue": "The polygon disappearing bug was caused by a conditional rendering issue in AdvancedDrawControl component. The useEffect that added the polygon to drawnItems was originally dependent on isEditing, meaning it would only render polygons when editing an existing parcela (isEditing=true), not when creating a new one (isEditing=false). The fix removed this unnecessary condition."
+}
