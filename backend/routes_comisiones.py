@@ -298,7 +298,7 @@ async def get_campanas_con_comisiones(
     """
     # Get albaranes with contrato_id
     pipeline = [
-        {"$match": {"contrato_id": {"$exists": True, "$ne": None, "$ne": ""}}},
+        {"$match": {"contrato_id": {"$exists": True, "$nin": [None, ""]}}},
         {"$group": {"_id": "$campana"}},
         {"$sort": {"_id": -1}}
     ]
