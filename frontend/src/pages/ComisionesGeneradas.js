@@ -143,8 +143,8 @@ const ComisionesGeneradas = () => {
     const searchLower = filters.search.toLowerCase();
     return comisiones.filter(c => 
       c.agente_nombre?.toLowerCase().includes(searchLower) ||
-      c.proveedor?.toLowerCase().includes(searchLower) ||
-      c.cliente?.toLowerCase().includes(searchLower) ||
+      c.proveedor_nombre?.toLowerCase().includes(searchLower) ||
+      c.cliente_nombre?.toLowerCase().includes(searchLower) ||
       c.cultivo?.toLowerCase().includes(searchLower)
     );
   }, [comisiones, filters.search]);
