@@ -692,7 +692,7 @@ const ComisionesGeneradas = () => {
                         <td style={{ fontWeight: '500' }}>{c.numero_albaran || c.albaran_id?.slice(-6) || '-'}</td>
                         <td>{c.fecha_albaran}</td>
                         <td>{c.campana || '-'}</td>
-                        <td>{c.proveedor || c.cliente || '-'}</td>
+                        <td>{c.proveedor_nombre || c.cliente_nombre || '-'}</td>
                         <td>{c.cultivo || '-'}</td>
                         <td style={{ textAlign: 'right' }}>{formatKilos(c.kilos_brutos)}</td>
                         <td style={{ textAlign: 'right', color: '#dc2626' }}>-{formatKilos(c.kilos_destare)}</td>
