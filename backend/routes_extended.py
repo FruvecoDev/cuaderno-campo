@@ -1147,10 +1147,10 @@ async def generate_albaran_pdf(
                 font-size: 9pt;
                 font-weight: 600;
             }}
-            th:nth-child(3), th:nth-child(5), th:nth-child(6) {{
+            th:nth-child(3), th:nth-child(5), th:nth-child(7) {{
                 text-align: right;
             }}
-            th:nth-child(4) {{
+            th:nth-child(4), th:nth-child(6) {{
                 text-align: center;
             }}
             .totales-box {{
