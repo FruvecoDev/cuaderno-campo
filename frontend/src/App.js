@@ -31,6 +31,7 @@ import ArticulosExplotacion from './pages/ArticulosExplotacion';
 import Agentes from './pages/Agentes';
 import Clientes from './pages/Clientes';
 import LiquidacionComisiones from './pages/LiquidacionComisiones';
+import ComisionesGeneradas from './pages/ComisionesGeneradas';
 import Configuracion from './pages/Configuracion';
 import Recomendaciones from './pages/Recomendaciones';
 import AlertasClima from './pages/AlertasClima';
