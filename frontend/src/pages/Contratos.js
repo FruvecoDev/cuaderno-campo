@@ -425,7 +425,10 @@ const Contratos = () => {
       comision_compra_tipo: contrato.comision_compra_tipo || contrato.comision_tipo || 'porcentaje',
       comision_compra_valor: contrato.comision_compra_valor || contrato.comision_valor || '',
       comision_venta_tipo: contrato.comision_venta_tipo || 'porcentaje',
-      comision_venta_valor: contrato.comision_venta_valor || ''
+      comision_venta_valor: contrato.comision_venta_valor || '',
+      forma_pago: contrato.forma_pago || '',
+      forma_cobro: contrato.forma_cobro || '',
+      descuento_destare: contrato.descuento_destare || ''
     });
     setShowForm(true);
   };
