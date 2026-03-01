@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = process.env.BASE_URL || 'https://agro-docs.preview.emergentagent.com';
+const BASE_URL = process.env.BASE_URL || 'https://agri-rrhh-suite.preview.emergentagent.com';
 
 test.describe('Usuarios - Gestión y Vinculación', () => {
   

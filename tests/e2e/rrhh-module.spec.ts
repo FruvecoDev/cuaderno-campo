@@ -1,6 +1,6 @@
 import { test, expect, Page } from '@playwright/test';
 
-const BASE_URL = process.env.REACT_APP_BACKEND_URL || 'https://agro-docs.preview.emergentagent.com';
+const BASE_URL = process.env.REACT_APP_BACKEND_URL || 'https://agri-rrhh-suite.preview.emergentagent.com';
 
 // Helper functions
 async function login(page: Page) {
