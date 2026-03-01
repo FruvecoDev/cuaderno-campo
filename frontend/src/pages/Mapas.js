@@ -798,6 +798,13 @@ const Mapas = () => {
           </div>
         </div>
       )}
+
+      {/* Geo Import Modal */}
+      <GeoImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImportComplete={handleImportComplete}
+      />
     </div>
   );
 };
