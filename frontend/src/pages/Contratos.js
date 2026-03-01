@@ -311,11 +311,18 @@ const Contratos = () => {
       comision_venta_valor: contrato.comision_venta_valor || ''
     });
     setShowForm(true);
+    // Navegar a la ruta de edición
+    navigate(`/contratos/editar/${contrato._id}`);
   };
   
-  const handleCancelEdit = () => {
-    setEditingId(null);
-    setShowForm(false);
+  // Función para abrir nuevo contrato
+  const handleNewContrato = () => {
+    resetForm();
+    setShowForm(true);
+    navigate('/contratos/nuevo');
+  };
+  
+  const resetForm = () => {
     setFormData({
       tipo: 'Compra',
       campana: '2025/26',
@@ -338,6 +345,61 @@ const Contratos = () => {
       comision_venta_tipo: 'porcentaje',
       comision_venta_valor: ''
     });
+  };
+  
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setShowForm(false);
+    resetForm();
+    // Volver a la lista
+    navigate('/contratos');
+  };
+  
+  // Manejar rutas de nuevo/editar
+  useEffect(() => {
+    if (location.pathname.includes('/nuevo')) {
+      setShowForm(true);
+      setEditingId(null);
+      resetForm();
+    } else if (location.pathname.includes('/editar/') && urlId) {
+      // Cargar contrato para edición
+      const contrato = contratos.find(c => c._id === urlId);
+      if (contrato) {
+        handleEditFromUrl(contrato);
+      }
+    } else {
+      // En la lista principal
+      if (showForm && !editingId) {
+        setShowForm(false);
+      }
+    }
+  }, [location.pathname, urlId, contratos]);
+  
+  // Cargar contrato para edición sin navegar (usado por useEffect)
+  const handleEditFromUrl = (contrato) => {
+    setEditingId(contrato._id);
+    setFormData({
+      tipo: contrato.tipo || 'Compra',
+      campana: contrato.campana || '2025/26',
+      procedencia: contrato.procedencia || 'Campo',
+      fecha_contrato: contrato.fecha_contrato || new Date().toISOString().split('T')[0],
+      proveedor_id: contrato.proveedor_id || '',
+      cliente_id: contrato.cliente_id || '',
+      cultivo_id: contrato.cultivo_id || '',
+      cantidad: contrato.cantidad || '',
+      precio: contrato.precio || '',
+      periodo_desde: contrato.periodo_desde || '',
+      periodo_hasta: contrato.periodo_hasta || '',
+      moneda: contrato.moneda || 'EUR',
+      observaciones: contrato.observaciones || '',
+      agente_compra: contrato.agente_compra || '',
+      agente_venta: contrato.agente_venta || '',
+      comision_compra_tipo: contrato.comision_compra_tipo || contrato.comision_tipo || 'porcentaje',
+      comision_compra_valor: contrato.comision_compra_valor || contrato.comision_valor || '',
+      comision_venta_tipo: contrato.comision_venta_tipo || 'porcentaje',
+      comision_venta_valor: contrato.comision_venta_valor || ''
+    });
+    setShowForm(true);
   };
   
   const handleDelete = async (contratoId) => {
