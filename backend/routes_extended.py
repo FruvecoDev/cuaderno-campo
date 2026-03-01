@@ -535,6 +535,15 @@ async def update_albaran(
     update_data["kilos_destare"] = kilos_destare
     update_data["kilos_netos"] = kilos_netos
     
+    # Aplicar descuento sobre el importe si existe
+    descuento_pct = float(update_data.get("descuento_porcentaje", 0) or 0)
+    if descuento_pct > 0:
+        subtotal = float(update_data.get("total_albaran", 0) or 0)
+        descuento_importe = round(subtotal * (descuento_pct / 100), 2)
+        update_data["descuento_importe"] = descuento_importe
+        update_data["subtotal"] = subtotal
+        update_data["total_albaran"] = round(subtotal - descuento_importe, 2)
+    
     update_data["updated_at"] = datetime.now()
     
     result = await albaranes_collection.update_one(
