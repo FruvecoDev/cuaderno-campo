@@ -829,6 +829,23 @@ const Albaranes = () => {
         <div className="card mb-6" data-testid="albaran-form">
           <h2 className="card-title">{editingId ? 'Editar Albarán' : 'Nuevo Albarán'}</h2>
           
+          {/* Mensaje de éxito */}
+          {successMessage && (
+            <div style={{
+              backgroundColor: '#d1fae5',
+              color: '#065f46',
+              padding: '0.75rem 1rem',
+              borderRadius: '8px',
+              marginBottom: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <Check size={18} />
+              {successMessage}
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit}>
             {/* Paso 1: Tipo de Albarán */}
             <div style={{ 
