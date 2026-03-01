@@ -324,6 +324,73 @@ const Parcelas = () => {
     }
   };
   
+  // Fetch fincas
+  const fetchFincas = async () => {
+    try {
+      const data = await api.get('/api/fincas');
+      setFincas(data.fincas || []);
+    } catch (err) {
+      console.error('Error fetching fincas:', err);
+    }
+  };
+  
+  // Fetch cultivos (para variedades)
+  const fetchCultivos = async () => {
+    try {
+      const data = await api.get('/api/cultivos');
+      setCultivos(data.cultivos || []);
+    } catch (err) {
+      console.error('Error fetching cultivos:', err);
+    }
+  };
+  
+  // Generar código de plantación automático
+  const generarCodigoPlantacion = useCallback(() => {
+    const proveedor = formData.proveedor || 'PRV';
+    const cultivo = formData.cultivo || 'CUL';
+    const campana = formData.campana || '2025/26';
+    
+    // Extraer iniciales del proveedor (primeras 3 letras)
+    const proveedorCode = proveedor.substring(0, 3).toUpperCase().replace(/\s/g, '');
+    
+    // Extraer iniciales del cultivo (primeras 3 letras)
+    const cultivoCode = cultivo.substring(0, 3).toUpperCase().replace(/\s/g, '');
+    
+    // Extraer año de la campaña (ej: 2025/26 -> 25)
+    const yearCode = campana.split('/')[0].slice(-2);
+    
+    // Contar parcelas existentes con el mismo prefijo para generar número secuencial
+    const prefix = `${proveedorCode}-${cultivoCode}-${yearCode}`;
+    const existingCount = parcelas.filter(p => 
+      p.codigo_plantacion && p.codigo_plantacion.startsWith(prefix)
+    ).length;
+    
+    const secuencial = String(existingCount + 1).padStart(3, '0');
+    
+    return `${prefix}-${secuencial}`;
+  }, [formData.proveedor, formData.cultivo, formData.campana, parcelas]);
+  
+  // Obtener variedades disponibles para el cultivo seleccionado
+  const getVariedadesParaCultivo = useCallback(() => {
+    if (!formData.cultivo) return [];
+    
+    // Filtrar cultivos que coincidan con el nombre del cultivo seleccionado
+    const cultivosDelTipo = cultivos.filter(c => 
+      c.nombre && c.nombre.toLowerCase() === formData.cultivo.toLowerCase()
+    );
+    
+    // Extraer variedades únicas
+    const variedades = [...new Set(cultivosDelTipo.map(c => c.variedad).filter(Boolean))];
+    
+    // Si no hay variedades específicas, buscar variedades de todos los cultivos del mismo tipo
+    if (variedades.length === 0) {
+      // Devolver todas las variedades únicas de todos los cultivos como alternativa
+      return [...new Set(cultivos.map(c => c.variedad).filter(Boolean))];
+    }
+    
+    return variedades;
+  }, [formData.cultivo, cultivos]);
+  
   // Búsqueda en SIGPAC
   const buscarEnSigpac = async () => {
     const { provincia, municipio, poligono, parcela, cod_agregado, zona, recinto } = formData.sigpac;
