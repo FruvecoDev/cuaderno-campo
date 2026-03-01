@@ -328,6 +328,14 @@ const Mapas = () => {
         </h1>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button 
+            className="btn btn-primary"
+            onClick={() => setShowImportModal(true)}
+            data-testid="btn-import-geo"
+          >
+            <Upload size={18} />
+            Importar KML/GeoJSON
+          </button>
+          <button 
             className={`btn ${showList ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setShowList(!showList)}
             data-testid="btn-toggle-list"
