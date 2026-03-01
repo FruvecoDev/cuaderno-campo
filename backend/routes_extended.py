@@ -1015,15 +1015,12 @@ async def generate_albaran_pdf(
     
     # Calcular precio unitario (de las líneas normales)
     precio_unitario = 0
+    descuento_linea = 0
     if lineas_normales:
         precio_unitario = lineas_normales[0].get("precio_unitario", 0)
+        descuento_linea = lineas_normales[0].get("descuento", 0) or 0
     
-    # Descuento sobre importe
-    descuento_pct = albaran.get("descuento_porcentaje", 0) or 0
-    descuento_importe = albaran.get("descuento_importe", 0) or 0
-    subtotal = albaran.get("subtotal", 0) or 0
-    
-    # Total del albarán
+    # Total del albarán (ya viene calculado con el descuento)
     total_albaran = albaran.get("total_albaran", 0)
     
     # Generar filas de la tabla
