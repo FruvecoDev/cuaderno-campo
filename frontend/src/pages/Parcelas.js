@@ -587,6 +587,9 @@ const Parcelas = () => {
         : await api.post(url, payload);
       
       if (data.success) {
+        console.log('✅ Parcela saved successfully:', data);
+        const hadPolygon = payload.recintos && payload.recintos.length > 0 && payload.recintos[0].geometria && payload.recintos[0].geometria.length >= 3;
+        alert(`✅ Parcela ${editingId ? 'actualizada' : 'creada'} correctamente${hadPolygon ? '\n🗺️ Polígono guardado con ' + payload.recintos[0].geometria.length + ' puntos' : ''}`);
         setShowForm(false);
         setEditingId(null);
         fetchParcelas();
