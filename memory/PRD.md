@@ -12,9 +12,26 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
 
 ---
 
-## Última Actualización: 1 Marzo 2026 (Sesión 7)
+## Última Actualización: 1 Marzo 2026 (Sesión 8)
 
 ### Completadas en esta sesión:
+
+#### 1. Corrección del "Resumen de Cálculo" en Albaranes ✅ (P0 - BUG FIX)
+- **Problema reportado**: El resumen mostraba importe calculado con kilos brutos en lugar de kilos netos
+- **Solución implementada** (`Albaranes.js`):
+  - Nueva función `calculateItemTotalWithDestare(item)` para calcular total de línea individual
+  - Función `calculateGrandTotal()` refactorizada para considerar destare
+  - Columna "Total" de cada línea ahora muestra el valor correcto con kilos netos
+  - Todos los totales son consistentes: columna Total, Total Albarán (header) y Resumen de Cálculo
+- **Fórmula correcta verificada**: `Total = (Kilos Brutos - Kilos Destare) × Precio × (1 - Descuento % / 100)`
+- **Ejemplo verificado**: 1000 kg brutos - 50 kg destare (5%) = 950 kg netos × 2,75 €/kg = **2.612,50 €**
+- **Verificado con screenshot**: UI muestra 2612,50 € consistentemente
+
+---
+
+## Sesión 7:
+
+### Completadas en sesión anterior:
 
 #### 1. Modificación de la lógica de Destare en Albaranes ✅ (P0)
 - **Cambio solicitado por usuario**: La línea de destare debe mostrar:
