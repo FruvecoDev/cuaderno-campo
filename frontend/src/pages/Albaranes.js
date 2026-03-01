@@ -478,67 +478,10 @@ const Albaranes = () => {
   };
   
   const calculateGrandTotal = () => {
-    // Calcular kilos brutos (solo líneas que no sean destare)
+    // Sumar todos los totales de las líneas (ya incluyen descuento por línea)
+    // El total de cada línea ya tiene aplicado su descuento individual
     const itemsSinDestare = formData.items.filter(item => !item.es_destare);
-    const kilosBrutos = itemsSinDestare.reduce((sum, item) => {
-      if ((item.unidad || 'kg').toLowerCase() === 'kg') {
-        return sum + (parseFloat(item.cantidad) || 0);
-      }
-      return sum;
-    }, 0);
-    
-    let subtotal = 0;
-    
-    // Si hay contrato con destare, calcular con kilos netos
-    if (selectedContrato && selectedContrato.descuento_destare > 0) {
-      const descuentoPorcentaje = parseFloat(selectedContrato.descuento_destare) || 0;
-      const kilosDestare = kilosBrutos * (descuentoPorcentaje / 100);
-      const kilosNetos = kilosBrutos - kilosDestare;
-      const primeraLinea = itemsSinDestare[0];
-      const precio = parseFloat(primeraLinea?.precio_unitario) || 0;
-      subtotal = kilosNetos * precio;
-    } else {
-      // Si no hay destare, sumar los totales de las líneas
-      subtotal = itemsSinDestare.reduce((sum, item) => sum + (parseFloat(item.total) || 0), 0);
-    }
-    
-    // Aplicar descuento sobre el importe si existe
-    const descuentoPct = parseFloat(formData.descuento_porcentaje) || 0;
-    if (descuentoPct > 0) {
-      const importeDescuento = subtotal * (descuentoPct / 100);
-      return subtotal - importeDescuento;
-    }
-    
-    return subtotal;
-  };
-  
-  // Calcular subtotal (antes de descuento)
-  const calculateSubtotal = () => {
-    const itemsSinDestare = formData.items.filter(item => !item.es_destare);
-    const kilosBrutos = itemsSinDestare.reduce((sum, item) => {
-      if ((item.unidad || 'kg').toLowerCase() === 'kg') {
-        return sum + (parseFloat(item.cantidad) || 0);
-      }
-      return sum;
-    }, 0);
-    
-    if (selectedContrato && selectedContrato.descuento_destare > 0) {
-      const descuentoPorcentaje = parseFloat(selectedContrato.descuento_destare) || 0;
-      const kilosDestare = kilosBrutos * (descuentoPorcentaje / 100);
-      const kilosNetos = kilosBrutos - kilosDestare;
-      const primeraLinea = itemsSinDestare[0];
-      const precio = parseFloat(primeraLinea?.precio_unitario) || 0;
-      return kilosNetos * precio;
-    }
-    
     return itemsSinDestare.reduce((sum, item) => sum + (parseFloat(item.total) || 0), 0);
-  };
-  
-  // Calcular importe del descuento
-  const calculateDescuentoImporte = () => {
-    const subtotal = calculateSubtotal();
-    const descuentoPct = parseFloat(formData.descuento_porcentaje) || 0;
-    return subtotal * (descuentoPct / 100);
   };
   
   // Calcular y mostrar línea de destare automáticamente
