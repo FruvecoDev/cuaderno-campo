@@ -482,6 +482,9 @@ async def generate_evaluacion_pdf(
         tratamientos_enriquecidos.append(trat_data)
     
     tratamientos = tratamientos_enriquecidos
+    print(f"PDF Gen: tratamientos_enriquecidos tiene {len(tratamientos)} items")
+    for t in tratamientos:
+        print(f"PDF Gen: Tratamiento en lista final - aplicador_completo: {'SI' if t.get('aplicador_completo') else 'NO'}")
     
     # Obtener irrigaciones de la parcela
     irrigaciones = []
