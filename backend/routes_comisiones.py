@@ -331,7 +331,7 @@ async def generate_liquidacion_pdf(
         raise HTTPException(status_code=404, detail="Agente no encontrado")
     
     # Build query for albaranes
-    albaran_query = {"contrato_id": {"$exists": True, "$ne": None, "$ne": ""}}
+    albaran_query = {"contrato_id": {"$exists": True, "$nin": [None, ""]}}
     if campana:
         albaran_query["campana"] = campana
     if fecha_desde or fecha_hasta:
