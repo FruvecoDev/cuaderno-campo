@@ -386,6 +386,22 @@ async def generar_cuaderno_campo(
         "campana": campana_filtro
     }).sort("fecha_tratamiento", 1).to_list(length=500)
     
+    # Obtener datos completos de los técnicos aplicadores
+    tecnicos_ids = [t.get('tecnico_aplicador_id') for t in tratamientos if t.get('tecnico_aplicador_id')]
+    tecnicos_ids = [ObjectId(tid) for tid in tecnicos_ids if tid]
+    
+    tecnicos_dict = {}
+    if tecnicos_ids:
+        tecnicos_cursor = tecnicos_aplicadores_collection.find({"_id": {"$in": tecnicos_ids}})
+        async for tecnico in tecnicos_cursor:
+            tecnicos_dict[str(tecnico['_id'])] = tecnico
+    
+    # Enriquecer tratamientos con datos del técnico
+    for t in tratamientos:
+        tecnico_id = t.get('tecnico_aplicador_id')
+        if tecnico_id and tecnico_id in tecnicos_dict:
+            t['tecnico_data'] = tecnicos_dict[tecnico_id]
+    
     irrigaciones = await irrigaciones_collection.find({
         "parcela_id": parcela_id
     }).sort("fecha", 1).to_list(length=500)
