@@ -515,15 +515,15 @@ async def generate_liquidacion_pdf(
                 </div>
                 <div class="total-item">
                     <div class="label">Total Kg</div>
-                    <div class="value">{total_kg:,.0f}</div>
+                    <div class="value">{format_number_es(total_kg, 0)}</div>
                 </div>
                 <div class="total-item">
                     <div class="label">Importe Albaranes</div>
-                    <div class="value">€{total_importe:,.2f}</div>
+                    <div class="value">€{format_number_es(total_importe, 2)}</div>
                 </div>
                 <div class="total-item">
                     <div class="label">TOTAL COMISIÓN</div>
-                    <div class="value" style="color: #1565c0;">€{total_comision:,.2f}</div>
+                    <div class="value" style="color: #1565c0;">€{format_number_es(total_comision, 2)}</div>
                 </div>
             </div>
         </div>
