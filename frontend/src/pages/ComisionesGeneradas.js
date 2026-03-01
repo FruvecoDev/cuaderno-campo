@@ -155,17 +155,90 @@ const ComisionesGeneradas = () => {
       agente_id: '',
       tipo_agente: '',
       campana: '',
-      estado: ''
+      estado: '',
+      fecha_desde: '',
+      fecha_hasta: ''
     });
   };
 
-  const hasActiveFilters = filters.agente_id || filters.tipo_agente || filters.campana || filters.estado;
+  const hasActiveFilters = filters.agente_id || filters.tipo_agente || filters.campana || filters.estado || filters.fecha_desde || filters.fecha_hasta;
 
   useEffect(() => {
     if (hasActiveFilters || filters.search === '') {
       fetchComisiones();
     }
-  }, [filters.agente_id, filters.tipo_agente, filters.campana, filters.estado]);
+  }, [filters.agente_id, filters.tipo_agente, filters.campana, filters.estado, filters.fecha_desde, filters.fecha_hasta]);
+
+  // Funciones de exportación
+  const handleExportPDF = async () => {
+    setExportLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (filters.agente_id) params.append('agente_id', filters.agente_id);
+      if (filters.tipo_agente) params.append('tipo_agente', filters.tipo_agente);
+      if (filters.campana) params.append('campana', filters.campana);
+      if (filters.estado) params.append('estado', filters.estado);
+      if (filters.fecha_desde) params.append('fecha_desde', filters.fecha_desde);
+      if (filters.fecha_hasta) params.append('fecha_hasta', filters.fecha_hasta);
+      
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/comisiones-generadas/pdf?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) throw new Error('Error al generar PDF');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    } catch (err) {
+      console.error('Error exporting PDF:', err);
+      setError('Error al generar el PDF');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    setExportLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (filters.agente_id) params.append('agente_id', filters.agente_id);
+      if (filters.tipo_agente) params.append('tipo_agente', filters.tipo_agente);
+      if (filters.campana) params.append('campana', filters.campana);
+      if (filters.estado) params.append('estado', filters.estado);
+      if (filters.fecha_desde) params.append('fecha_desde', filters.fecha_desde);
+      if (filters.fecha_hasta) params.append('fecha_hasta', filters.fecha_hasta);
+      
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/comisiones-generadas/excel?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) throw new Error('Error al generar Excel');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `comisiones_${filters.fecha_desde || 'all'}_${filters.fecha_hasta || 'all'}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error exporting Excel:', err);
+      setError('Error al generar el Excel');
+    } finally {
+      setExportLoading(false);
+    }
+  };
 
   const formatNumber = (num) => {
     return (num || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
