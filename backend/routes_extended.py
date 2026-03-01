@@ -26,6 +26,10 @@ router = APIRouter(prefix="/api", tags=["extended"])
 # Collection for contracts (to get descuento_destare)
 contratos_collection = db['contratos']
 
+# Collections for proveedores and clientes (to get names)
+proveedores_collection = db['proveedores']
+clientes_collection = db['clientes']
+
 
 # ============================================================================
 # RECETAS
