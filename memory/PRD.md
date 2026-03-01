@@ -12,9 +12,27 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
 
 ---
 
-## Última Actualización: 1 Marzo 2026 (Sesión 5)
+## Última Actualización: 1 Marzo 2026 (Sesión 6)
 
 ### Completadas en esta sesión:
+
+#### 1. Nuevos campos en Módulo de Contratos ✅ (P0)
+- **Campos añadidos al modelo Pydantic** (`backend/models.py`):
+  - `forma_pago: Optional[str]` - Solo para contratos de Compra
+  - `forma_cobro: Optional[str]` - Solo para contratos de Venta
+  - `descuento_destare: Optional[float]` - Porcentaje sobre kilos, solo para Compra
+- **Formulario actualizado** (`frontend/src/pages/Contratos.js`):
+  - Sección "Agente de Compra/Venta y Comisión" añadida al formulario de página dedicada
+  - Campo "Forma de Pago" con opciones: Transferencia, Cheque, Pagaré, Efectivo, Compensación
+  - Campo "Forma de Cobro" con opciones: Transferencia, Cheque, Pagaré, Efectivo, Letra, Confirming
+  - Campo "Descuento Destare (%)" con texto explicativo
+  - Lógica condicional: campos de compra solo aparecen para tipo="Compra", cobro para tipo="Venta"
+- **Funciones actualizadas**: `handleSubmit`, `handleEdit`, `handleEditFromUrl`, `resetForm`
+- **Verificado**: API acepta y devuelve correctamente los nuevos campos
+
+---
+
+### Sesión 5:
 
 #### 1. Bug Fix: Polígono Visual en Formulario "Crear Parcela" ✅ (P0)
 - **Problema**: Al dibujar un polígono en el formulario de nueva parcela, después del alert de confirmación el polígono desaparecía visualmente del mapa, aunque los datos estaban guardados en el estado.
