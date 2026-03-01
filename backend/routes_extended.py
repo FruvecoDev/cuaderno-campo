@@ -964,10 +964,11 @@ async def generate_albaran_pdf(
     proveedor = albaran.get("proveedor", "-")
     cliente = albaran.get("cliente", "-")
     cultivo = albaran.get("cultivo", "-")
-    # Obtener parcela del albarán o del contrato
-    parcela = albaran.get("parcela_codigo") or albaran.get("parcela") or "-"
-    if parcela == "-" and contrato:
-        parcela = contrato.get("parcela_codigo") or contrato.get("parcela") or "-"
+    # Obtener parcela del albarán o del contrato (manejar strings vacíos)
+    parcela = albaran.get("parcela_codigo") or albaran.get("parcela") or ""
+    if not parcela and contrato:
+        parcela = contrato.get("parcela_codigo") or contrato.get("parcela") or ""
+    parcela = parcela if parcela else "-"
     campana = albaran.get("campana", "-")
     observaciones = albaran.get("observaciones", "")
     
