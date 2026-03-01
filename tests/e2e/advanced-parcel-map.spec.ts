@@ -10,7 +10,7 @@
  * - Geolocation button
  */
 import { test, expect } from '@playwright/test';
-import { login, removeEmergentBadge, waitForAppReady, dismissToasts } from '../fixtures/helpers';
+import { login, removeEmergentBadge, waitForAppReady, dismissToasts, dismissResumenDiarioModal } from '../fixtures/helpers';
 
 const PAGE_URL = 'https://agri-rrhh-suite.preview.emergentagent.com';
 
