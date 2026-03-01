@@ -376,6 +376,17 @@ async def create_albaran(
                 agente_doc = await agentes_collection.find_one({"_id": ObjectId(agente_id)})
                 agente_nombre = agente_doc.get("nombre", "Agente") if agente_doc else "Agente"
                 
+                # Obtener nombre del proveedor o cliente
+                proveedor_nombre = None
+                cliente_nombre = None
+                
+                if tipo_agente == "compra" and albaran.proveedor:
+                    proveedor_doc = await proveedores_collection.find_one({"_id": ObjectId(albaran.proveedor)})
+                    proveedor_nombre = proveedor_doc.get("nombre", "Sin nombre") if proveedor_doc else "Sin nombre"
+                elif tipo_agente == "venta" and albaran.cliente:
+                    cliente_doc = await clientes_collection.find_one({"_id": ObjectId(albaran.cliente)})
+                    cliente_nombre = cliente_doc.get("nombre", "Sin nombre") if cliente_doc else "Sin nombre"
+                
                 # Generar número de albarán
                 numero_albaran = f"ALB-{albaran_id[-6:].upper()}"
                 
@@ -390,7 +401,9 @@ async def create_albaran(
                     "fecha_albaran": albaran.fecha,
                     "campana": albaran.campana or contrato.get("campana"),
                     "proveedor": albaran.proveedor if tipo_agente == "compra" else None,
+                    "proveedor_nombre": proveedor_nombre,
                     "cliente": albaran.cliente if tipo_agente == "venta" else None,
+                    "cliente_nombre": cliente_nombre,
                     "cultivo": albaran.cultivo or contrato.get("cultivo"),
                     # Kilos
                     "kilos_brutos": kilos_brutos,
