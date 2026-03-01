@@ -1398,6 +1398,52 @@ const Albaranes = () => {
                   </tbody>
                 </table>
               </div>
+              
+              {/* Resumen de Kilos y Cálculo (solo si hay destare) */}
+              {formData.kilos_destare > 0 && (
+                <div style={{
+                  backgroundColor: '#f0fdf4',
+                  border: '1px solid #86efac',
+                  borderRadius: '8px',
+                  padding: '1rem',
+                  marginTop: '1rem',
+                  marginBottom: '1rem'
+                }}>
+                  <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.875rem', color: '#166534', fontWeight: '600' }}>
+                    Resumen de Cálculo
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+                    <div>
+                      <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>Kilos Brutos</span>
+                      <p style={{ fontWeight: '600', margin: '0.25rem 0 0 0', fontSize: '1rem' }}>
+                        {formatNumberES(formData.kilos_brutos)} kg
+                      </p>
+                    </div>
+                    <div>
+                      <span style={{ fontSize: '0.75rem', color: '#dc2626' }}>Kilos Destare</span>
+                      <p style={{ fontWeight: '600', margin: '0.25rem 0 0 0', fontSize: '1rem', color: '#dc2626' }}>
+                        - {formatNumberES(formData.kilos_destare)} kg
+                      </p>
+                    </div>
+                    <div>
+                      <span style={{ fontSize: '0.75rem', color: '#166534' }}>Kilos Netos</span>
+                      <p style={{ fontWeight: '700', margin: '0.25rem 0 0 0', fontSize: '1.1rem', color: '#166534' }}>
+                        {formatNumberES(formData.kilos_netos)} kg
+                      </p>
+                    </div>
+                    <div style={{ borderLeft: '2px solid #86efac', paddingLeft: '1rem' }}>
+                      <span style={{ fontSize: '0.75rem', color: '#166534' }}>Total Albarán</span>
+                      <p style={{ fontWeight: '700', margin: '0.25rem 0 0 0', fontSize: '1.1rem', color: '#166534' }}>
+                        {calculateGrandTotal().toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                      </p>
+                      <span style={{ fontSize: '0.7rem', color: '#6b7280' }}>
+                        ({formatNumberES(formData.kilos_netos)} kg × precio)
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <button
                 type="button"
                 className="btn btn-sm btn-secondary"
