@@ -31,6 +31,7 @@ visitas_collection = db['visitas']
 cosechas_collection = db['cosechas']
 evaluaciones_collection = db['evaluaciones']
 contratos_collection = db['contratos']
+tecnicos_aplicadores_collection = db['tecnicos_aplicadores']
 
 
 def get_styles():
