@@ -298,6 +298,7 @@ const Parcelas = () => {
   const [sigpacResult, setSigpacResult] = useState(null);
   const [sigpacError, setSigpacError] = useState(null);
   const [provincias, setProvincias] = useState([]);
+  const [showGeoImport, setShowGeoImport] = useState(false);
   
   useEffect(() => {
     fetchParcelas();
