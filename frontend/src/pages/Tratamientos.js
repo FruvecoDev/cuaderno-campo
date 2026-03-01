@@ -2551,7 +2551,42 @@ const Tratamientos = () => {
                     ) : null}
                     {(canEdit || canDelete) ? (
                       <td>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          {/* Botones de estado */}
+                          {canEdit && !tratamiento.realizado && !tratamiento.cancelado && (
+                            <button
+                              className="btn btn-sm"
+                              style={{ backgroundColor: 'hsl(142 76% 36%)', color: 'white', border: 'none' }}
+                              onClick={() => handleChangeEstado(tratamiento._id, 'completado')}
+                              title="Marcar como completado"
+                              data-testid={`complete-tratamiento-${tratamiento._id}`}
+                            >
+                              <CheckCircle size={14} />
+                            </button>
+                          )}
+                          {canEdit && !tratamiento.realizado && !tratamiento.cancelado && (
+                            <button
+                              className="btn btn-sm"
+                              style={{ backgroundColor: 'hsl(0 84% 60%)', color: 'white', border: 'none' }}
+                              onClick={() => handleChangeEstado(tratamiento._id, 'cancelado')}
+                              title="Marcar como cancelado"
+                              data-testid={`cancel-tratamiento-${tratamiento._id}`}
+                            >
+                              <XCircle size={14} />
+                            </button>
+                          )}
+                          {canEdit && (tratamiento.realizado || tratamiento.cancelado) && (
+                            <button
+                              className="btn btn-sm"
+                              style={{ backgroundColor: 'hsl(38 92% 50%)', color: 'white', border: 'none' }}
+                              onClick={() => handleChangeEstado(tratamiento._id, 'pendiente')}
+                              title="Volver a pendiente"
+                              data-testid={`pending-tratamiento-${tratamiento._id}`}
+                            >
+                              <PlayCircle size={14} />
+                            </button>
+                          )}
+                          {/* Botones de editar y eliminar */}
                           {canEdit && (
                             <button
                               className="btn btn-sm btn-secondary"
