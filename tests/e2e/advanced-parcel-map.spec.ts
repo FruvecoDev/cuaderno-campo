@@ -421,7 +421,7 @@ test.describe('Parcelas Page - Polygon Visual Bug Fix Verification', () => {
     await expect(polygonInfo).not.toBeVisible();
     
     // The map has drawing tools available (Leaflet-draw)
-    const leafletDrawToolbar = page.locator('.leaflet-draw-toolbar');
+    const leafletDrawToolbar = page.locator('.leaflet-draw-toolbar').first();
     await expect(leafletDrawToolbar).toBeVisible({ timeout: 5000 });
   });
 
