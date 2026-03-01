@@ -1522,14 +1522,16 @@ const Albaranes = () => {
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  onClick={() => {
-                    // Abrir PDF del albarán en nueva pestaña
-                    window.open(`${BACKEND_URL}/api/albaranes/${editingId}/pdf`, '_blank');
-                  }}
+                  onClick={() => downloadPdf(editingId)}
+                  disabled={pdfLoading === editingId}
                   data-testid="btn-imprimir"
                 >
-                  <Printer size={16} style={{ marginRight: '0.5rem' }} />
-                  Imprimir
+                  {pdfLoading === editingId ? (
+                    <Download size={16} className="animate-spin" style={{ marginRight: '0.5rem' }} />
+                  ) : (
+                    <Printer size={16} style={{ marginRight: '0.5rem' }} />
+                  )}
+                  {pdfLoading === editingId ? 'Generando...' : 'Imprimir'}
                 </button>
               )}
               
