@@ -601,6 +601,7 @@ const Albaranes = () => {
           ...item,
           cantidad: parseFloat(item.cantidad) || 0,
           precio_unitario: parseFloat(item.precio_unitario) || 0,
+          descuento: parseFloat(item.descuento) || 0,
           total: parseFloat(item.total) || 0
         })),
         total_albaran: calculateGrandTotal()
