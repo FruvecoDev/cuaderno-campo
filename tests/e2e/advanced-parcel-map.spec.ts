@@ -113,10 +113,14 @@ test.describe('Parcelas Page - New Parcela Form with Advanced Map', () => {
     await login(page);
     await dismissToasts(page);
     await removeEmergentBadge(page);
+    await dismissResumenDiarioModal(page);
     
     // Navigate to Parcelas page
     await page.goto('/parcelas', { waitUntil: 'domcontentloaded' });
     await expect(page.getByTestId('parcelas-page')).toBeVisible({ timeout: 10000 });
+    
+    // Dismiss ResumenDiario modal if it appears
+    await dismissResumenDiarioModal(page);
     
     // Open new parcela form
     await page.getByTestId('btn-nueva-parcela').click();
