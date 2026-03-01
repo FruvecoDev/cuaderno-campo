@@ -586,6 +586,18 @@ const Parcelas = () => {
       }
     }
   }, [formData.contrato_id, contratos]);
+  
+  // Generar código de plantación automáticamente cuando cambian proveedor, cultivo o campaña
+  useEffect(() => {
+    // Solo generar código para nuevas parcelas (no en edición)
+    if (!editingId && formData.proveedor && formData.cultivo) {
+      const nuevoCodigo = generarCodigoPlantacion();
+      setFormData(prev => ({
+        ...prev,
+        codigo_plantacion: nuevoCodigo
+      }));
+    }
+  }, [formData.proveedor, formData.cultivo, formData.campana, editingId, generarCodigoPlantacion]);
 
   const handlePolygonCreated = useCallback((coords) => {
     console.log('🗺️ Polygon created with coords:', coords);
