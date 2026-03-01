@@ -927,7 +927,7 @@ def format_number_spanish(value, decimals=2):
         # Convertir formato americano a español
         formatted = formatted.replace(",", "X").replace(".", ",").replace("X", ".")
         return formatted
-    except:
+    except (ValueError, TypeError):
         return str(value)
 
 
