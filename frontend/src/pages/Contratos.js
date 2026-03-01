@@ -1,12 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Download, FileText, Edit2, Trash2, BookOpen, Loader2, Search, X, Filter } from 'lucide-react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { Plus, Download, FileText, Edit2, Trash2, BookOpen, Loader2, Search, X, Filter, ArrowLeft } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
 
 const Contratos = () => {
+  const navigate = useNavigate();
+  const { id: urlId } = useParams();
+  const location = useLocation();
+  
   const [contratos, setContratos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -17,6 +22,11 @@ const Contratos = () => {
   const { canCreate, canEdit, canDelete, canExport } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   const { t } = useTranslation();
+  
+  // Determinar si estamos en modo formulario por la URL
+  const isFormMode = location.pathname.includes('/nuevo') || location.pathname.includes('/editar/');
+  
+  // Permisos de operación
   
   // Permisos de operación
   const puedeCompra = canDoOperacion('compra');
