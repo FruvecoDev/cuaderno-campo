@@ -276,9 +276,13 @@ test.describe('Parcelas Page - Parcelas Table', () => {
     await login(page);
     await dismissToasts(page);
     await removeEmergentBadge(page);
+    await dismissResumenDiarioModal(page);
     
     await page.goto('/parcelas', { waitUntil: 'domcontentloaded' });
     await expect(page.getByTestId('parcelas-page')).toBeVisible({ timeout: 10000 });
+    
+    // Dismiss ResumenDiario modal if it appears
+    await dismissResumenDiarioModal(page);
   });
 
   test('should display parcelas table', async ({ page }) => {
