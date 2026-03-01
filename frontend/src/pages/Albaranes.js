@@ -54,6 +54,22 @@ const Albaranes = () => {
   const puedeCompra = canDoOperacion('compra');
   const puedeVenta = canDoOperacion('venta');
   
+  // Funciones de formateo para números (formato español)
+  const formatNumberES = (value) => {
+    if (value === '' || value === null || value === undefined) return '';
+    const num = parseFloat(String(value).replace(/\./g, '').replace(',', '.'));
+    if (isNaN(num)) return value;
+    return num.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  };
+  
+  const parseNumberES = (value) => {
+    if (value === '' || value === null || value === undefined) return '';
+    // Eliminar puntos de miles y convertir coma decimal a punto
+    const cleaned = String(value).replace(/\./g, '').replace(',', '.');
+    const num = parseFloat(cleaned);
+    return isNaN(num) ? 0 : num;
+  };
+  
   // Contrato seleccionado y datos heredados
   const [selectedContrato, setSelectedContrato] = useState(null);
   
