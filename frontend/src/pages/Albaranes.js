@@ -583,14 +583,22 @@ const Albaranes = () => {
     const kilosDestare = Math.round(kilosBrutos * (descuentoPorcentaje / 100) * 100) / 100;
     const kilosNetos = Math.round((kilosBrutos - kilosDestare) * 100) / 100;
     
-    // Crear o actualizar línea de destare
+    // Obtener el precio unitario de la primera línea (o del contrato)
+    const primeraLinea = itemsSinDestare.find(item => (item.unidad || 'kg').toLowerCase() === 'kg');
+    const precioUnitario = primeraLinea?.precio_unitario || selectedContrato?.precio || 0;
+    
+    // Calcular importe de destare (negativo)
+    const importeDestare = -Math.abs(kilosDestare * precioUnitario);
+    
+    // Crear o actualizar línea de destare con kilos y total NEGATIVOS
     const lineaDestare = {
       descripcion: `Descuento Destare (${descuentoPorcentaje}%)`,
       producto: 'DESTARE',
-      cantidad: kilosDestare,
+      cantidad: -Math.abs(kilosDestare), // Kilos en negativo
       unidad: 'kg',
-      precio_unitario: 0,
-      total: 0,
+      precio_unitario: precioUnitario, // Mismo precio que la línea principal
+      descuento: 0,
+      total: importeDestare, // Importe en negativo
       es_destare: true
     };
     
