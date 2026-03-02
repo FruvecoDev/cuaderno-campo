@@ -499,20 +499,64 @@ const AlbaranForm = () => {
 
       {/* Form */}
       <form onSubmit={handleSubmit}>
+        {/* Sección 1: Tipo y Fecha */}
         <div className="card mb-4">
-          {/* Sección 1: Proveedor/Cliente */}
-          <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            1. {formData.tipo === 'Albarán de venta' ? 'Cliente' : 'Proveedor'}
+          <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem' }}>
+            1. Datos Generales
           </h3>
           
-          <div className="grid-4 mb-4">
+          <div className="grid-3">
+            <div className="form-group">
+              <label className="form-label">Tipo de Albarán *</label>
+              <select 
+                className="form-select" 
+                value={formData.tipo} 
+                onChange={(e) => setFormData({...formData, tipo: e.target.value, contrato_id: '', proveedor: '', cliente: ''})} 
+                required 
+                data-testid="select-tipo"
+              >
+                <option value="Albarán de compra">Albarán de compra</option>
+                <option value="Albarán de venta">Albarán de venta</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Fecha *</label>
+              <input 
+                type="date" 
+                className="form-input" 
+                value={formData.fecha} 
+                onChange={(e) => setFormData({...formData, fecha: e.target.value})} 
+                required 
+                data-testid="input-fecha" 
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Total Albarán</label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={`${calculateGrandTotal().toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`} 
+                disabled
+                style={{ backgroundColor: '#f0fdf4', fontWeight: '600', color: '#166534' }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Sección 2: Proveedor/Cliente y Contrato */}
+        <div className="card mb-4">
+          <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem' }}>
+            2. {formData.tipo === 'Albarán de venta' ? 'Cliente' : 'Proveedor'} y Contrato
+          </h3>
+          
+          <div className="grid-2 mb-4">
             {formData.tipo === 'Albarán de venta' ? (
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Cliente *</label>
                 <select
                   className="form-select"
                   value={formData.cliente}
-                  onChange={(e) => setFormData({...formData, cliente: e.target.value})}
+                  onChange={(e) => setFormData({...formData, cliente: e.target.value, contrato_id: ''})}
                   required
                   data-testid="select-cliente-albaran"
                 >
@@ -530,7 +574,7 @@ const AlbaranForm = () => {
                 <select
                   className="form-select"
                   value={formData.proveedor}
-                  onChange={(e) => setFormData({...formData, proveedor: e.target.value})}
+                  onChange={(e) => setFormData({...formData, proveedor: e.target.value, contrato_id: ''})}
                   required
                   data-testid="select-proveedor-albaran"
                 >
@@ -543,32 +587,32 @@ const AlbaranForm = () => {
                 </select>
               </div>
             )}
-          </div>
-        </div>
-
-        <div className="card mb-4">
-          {/* Sección 2: Contrato */}
-          <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem' }}>
-            2. Vincular a Contrato (Opcional)
-          </h3>
-          
-          <div className="form-group">
-            <label className="form-label">Contrato de {formData.tipo === 'Albarán de venta' ? 'Venta' : 'Compra'}</label>
-            <select
-              className="form-select"
-              value={formData.contrato_id}
-              onChange={(e) => handleContratoChange(e.target.value)}
-              data-testid="select-contrato"
-            >
-              <option value="">-- Sin contrato vinculado --</option>
-              {contratos
-                .filter(c => formData.tipo === 'Albarán de venta' ? c.tipo === 'Venta' : c.tipo === 'Compra')
-                .map(c => (
-                  <option key={c._id} value={c._id}>
-                    {c.numero || c._id.slice(-6)} | {c.proveedor || c.cliente} | {c.cultivo} | {c.campana}
-                  </option>
-                ))}
-            </select>
+            
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Contrato (Opcional)</label>
+              <select
+                className="form-select"
+                value={formData.contrato_id}
+                onChange={(e) => handleContratoChange(e.target.value)}
+                data-testid="select-contrato"
+              >
+                <option value="">-- Sin contrato vinculado --</option>
+                {contratos
+                  .filter(c => {
+                    // Filtrar por tipo de albarán
+                    const tipoMatch = formData.tipo === 'Albarán de venta' ? c.tipo === 'Venta' : c.tipo === 'Compra';
+                    // Filtrar por proveedor/cliente si está seleccionado
+                    const proveedorMatch = !formData.proveedor || c.proveedor === formData.proveedor;
+                    const clienteMatch = !formData.cliente || c.cliente === formData.cliente;
+                    return tipoMatch && (formData.tipo === 'Albarán de venta' ? clienteMatch : proveedorMatch);
+                  })
+                  .map(c => (
+                    <option key={c._id} value={c._id}>
+                      {c.numero || c._id.slice(-6)} | {c.cultivo} | {c.campana}
+                    </option>
+                  ))}
+              </select>
+            </div>
           </div>
           
           {/* Datos del contrato seleccionado */}
@@ -578,15 +622,17 @@ const AlbaranForm = () => {
               border: '1px solid hsl(var(--primary) / 0.2)',
               borderRadius: '8px',
               padding: '1rem',
-              marginTop: '1rem'
+              marginTop: '0.5rem'
             }}>
               <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.75rem', color: 'hsl(var(--primary))' }}>
                 Datos del Contrato Vinculado
               </h4>
               <div className="grid-4">
                 <div>
-                  <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Proveedor</span>
-                  <p style={{ fontWeight: '500' }}>{selectedContrato.proveedor || '-'}</p>
+                  <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                    {formData.tipo === 'Albarán de venta' ? 'Cliente' : 'Proveedor'}
+                  </span>
+                  <p style={{ fontWeight: '500' }}>{selectedContrato.proveedor || selectedContrato.cliente || '-'}</p>
                 </div>
                 <div>
                   <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Cultivo</span>
@@ -632,57 +678,11 @@ const AlbaranForm = () => {
           )}
         </div>
 
+        {/* Sección 3: Líneas del Albarán */}
         <div className="card mb-4">
-          {/* Sección 3: Datos del Albarán */}
           <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem' }}>
-            3. Datos del Albarán
+            3. Líneas del Albarán
           </h3>
-          
-          <div className="grid-3 mb-4">
-            <div className="form-group">
-              <label className="form-label">Tipo *</label>
-              <select 
-                className="form-select" 
-                value={formData.tipo} 
-                onChange={(e) => setFormData({...formData, tipo: e.target.value})} 
-                required 
-                data-testid="select-tipo"
-              >
-                <option value="Albarán de compra">Albarán de compra</option>
-                <option value="Albarán de venta">Albarán de venta</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label className="form-label">Fecha *</label>
-              <input 
-                type="date" 
-                className="form-input" 
-                value={formData.fecha} 
-                onChange={(e) => setFormData({...formData, fecha: e.target.value})} 
-                required 
-                data-testid="input-fecha" 
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Total Albarán</label>
-              <input 
-                type="text" 
-                className="form-input" 
-                value={`${calculateGrandTotal().toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`} 
-                disabled
-                style={{ backgroundColor: '#f0fdf4', fontWeight: '600' }}
-              />
-            </div>
-          </div>
-          
-          {/* Líneas del albarán */}
-          <div className="form-group">
-            <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Package size={16} /> Líneas del Albarán
-              <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', fontWeight: 'normal' }}>
-                ({articulosCatalogo.length} artículos disponibles en catálogo)
-              </span>
-            </label>
             
             <div className="table-container" style={{ marginTop: '0.5rem' }}>
               <table>
