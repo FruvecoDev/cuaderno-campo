@@ -120,9 +120,9 @@ const AlbaranForm = () => {
         setClientes(clientesRes.clientes || clientesRes || []);
         setParcelas(parcelasRes.parcelas || parcelasRes || []);
         
-        // Try to load articulos catalog (optional)
+        // Load articulos catalog
         try {
-          const articulosRes = await api.get('/api/articulos-explotacion?limit=500');
+          const articulosRes = await api.get('/api/articulos/activos');
           setArticulosCatalogo(articulosRes.articulos || articulosRes || []);
         } catch (e) {
           console.log('Articulos catalog not available');
