@@ -738,7 +738,7 @@ const AlbaranForm = () => {
                               data-testid={`item-descripcion-${index}`}
                             />
                             {articulosCatalogo.length > 0 && (
-                              <div style={{ position: 'relative' }}>
+                              <div style={{ position: 'relative' }} data-article-search="true">
                                 <div style={{ position: 'relative' }}>
                                   <Search size={14} style={{ 
                                     position: 'absolute', 
