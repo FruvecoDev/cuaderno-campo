@@ -14,6 +14,7 @@ import Tratamientos from './pages/Tratamientos';
 import Irrigaciones from './pages/Irrigaciones';
 import Recetas from './pages/Recetas';
 import Albaranes from './pages/Albaranes';
+import AlbaranForm from './pages/AlbaranForm';
 import Cosechas from './pages/Cosechas';
 import Documentos from './pages/Documentos';
 import Usuarios from './pages/Usuarios';
