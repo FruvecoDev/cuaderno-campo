@@ -614,11 +614,21 @@ const AlbaranForm = () => {
                     const clienteMatch = !formData.cliente || c.cliente === formData.cliente;
                     return tipoMatch && (formData.tipo === 'Albarán de venta' ? clienteMatch : proveedorMatch);
                   })
-                  .map(c => (
-                    <option key={c._id} value={c._id}>
-                      {c.numero || c._id.slice(-6)} | {c.cultivo} | {c.campana}
-                    </option>
-                  ))}
+                  .map(c => {
+                    // Obtener parcela asociada al contrato
+                    const parcelaContrato = parcelas.find(p => 
+                      c.parcelas?.includes(p._id) || 
+                      c.parcela_id === p._id ||
+                      p.contrato_id === c._id
+                    );
+                    const codigoParcela = parcelaContrato?.codigo_plantacion || parcelaContrato?.finca || '';
+                    
+                    return (
+                      <option key={c._id} value={c._id}>
+                        {c.numero || `MP-${c._id.slice(-6).toUpperCase()}`} | {c.cultivo} | {c.campana}{codigoParcela ? ` | ${codigoParcela}` : ''}
+                      </option>
+                    );
+                  })}
               </select>
             </div>
           </div>
