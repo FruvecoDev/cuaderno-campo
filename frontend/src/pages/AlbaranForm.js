@@ -815,7 +815,7 @@ const AlbaranForm = () => {
                             className="form-input"
                             value="-"
                             disabled
-                            style={{ textAlign: 'center', backgroundColor: '#fef2f2', color: '#9ca3af' }}
+                            style={{ textAlign: 'center', backgroundColor: '#fef2f2', color: '#9ca3af', minWidth: '90px' }}
                           />
                         ) : (
                           <input
@@ -827,7 +827,7 @@ const AlbaranForm = () => {
                             value={item.descuento || ''}
                             onChange={(e) => updateItemTotal(index, 'descuento', parseFloat(e.target.value) || 0)}
                             placeholder="0"
-                            style={{ textAlign: 'center' }}
+                            style={{ textAlign: 'center', minWidth: '90px' }}
                             data-testid={`item-dto-${index}`}
                           />
                         )}
