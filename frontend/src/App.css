@@ -950,3 +950,24 @@ tr:hover {
   overflow: visible;
   position: relative;
 }
+
+
+/* Ocultar badge de Emergent para presentaciones */
+[data-testid="emergent-badge"],
+.emergent-badge,
+div[class*="emergent"],
+a[href*="emergentagent.com"]:not([href*="preview"]),
+iframe[src*="emergent"],
+#emergent-watermark,
+.watermark-emergent,
+/* Badge inyectado externamente */
+div[style*="position: fixed"][style*="bottom"],
+div[style*="z-index: 9999"],
+div[style*="z-index: 10000"],
+a[href*="emergent"][style*="fixed"],
+div:has(> a[href*="emergent"]) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
