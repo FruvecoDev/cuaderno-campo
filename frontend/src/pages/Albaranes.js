@@ -36,11 +36,10 @@ const FIELD_LABELS = {
 };
 
 const Albaranes = () => {
+  const navigate = useNavigate();
   const [albaranes, setAlbaranes] = useState([]);
   const [contratos, setContratos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const { token, canDoOperacion } = useAuth();
