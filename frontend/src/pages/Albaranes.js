@@ -817,10 +817,19 @@ const Albaranes = () => {
     if (filters.contrato_id && a.contrato_id !== filters.contrato_id) return false;
     if (filters.proveedor && a.proveedor !== filters.proveedor) return false;
     if (filters.cultivo && a.cultivo !== filters.cultivo) return false;
+    // Filtro por fecha
+    if (filters.fecha_desde) {
+      const fechaAlbaran = a.fecha ? a.fecha.split('T')[0] : '';
+      if (fechaAlbaran < filters.fecha_desde) return false;
+    }
+    if (filters.fecha_hasta) {
+      const fechaAlbaran = a.fecha ? a.fecha.split('T')[0] : '';
+      if (fechaAlbaran > filters.fecha_hasta) return false;
+    }
     return true;
   });
   
-  const hasActiveFilters = filters.tipo || filters.contrato_id || filters.proveedor || filters.cultivo;
+  const hasActiveFilters = filters.tipo || filters.contrato_id || filters.proveedor || filters.cultivo || filters.fecha_desde || filters.fecha_hasta;
 
   return (
     <div data-testid="albaranes-page">
