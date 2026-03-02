@@ -243,6 +243,8 @@ class ParcelaUpdate(BaseModel):
     longitud: Optional[float] = None
     estado: Optional[str] = None
     observaciones: Optional[str] = None
+    imagen_mapa_url: Optional[str] = None
+    imagen_mapa_path: Optional[str] = None
 
 class ParcelaInDB(ParcelaBase):
     id: str = Field(alias="_id")

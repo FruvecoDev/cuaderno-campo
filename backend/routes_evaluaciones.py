@@ -1062,7 +1062,7 @@ async def generate_evaluacion_pdf(
         </div>
     """
     
-    # Añadir sección de mapa de la parcela si hay geometría
+    # Añadir sección de mapa de la parcela si hay geometría o imagen
     if parcela_data:
         geometria = None
         if parcela_data.get('recintos') and len(parcela_data['recintos']) > 0:
@@ -1070,6 +1070,8 @@ async def generate_evaluacion_pdf(
         
         lat_parcela = parcela_data.get('latitud', 0)
         lng_parcela = parcela_data.get('longitud', 0)
+        imagen_mapa_url = parcela_data.get('imagen_mapa_url', '')
+        imagen_mapa_path = parcela_data.get('imagen_mapa_path', '')
         
         html_content += """
         <div class="section">
@@ -1077,7 +1079,57 @@ async def generate_evaluacion_pdf(
             <div class="section-content" style="text-align: center;">
         """
         
-        if geometria and len(geometria) > 1:
+        # Primero intentar mostrar la imagen capturada del mapa
+        if imagen_mapa_url or imagen_mapa_path:
+            # Construir la ruta absoluta de la imagen
+            if imagen_mapa_path and os.path.exists(imagen_mapa_path):
+                img_src = f"file://{imagen_mapa_path}"
+            elif imagen_mapa_url:
+                # Convertir URL relativa a path absoluto
+                if imagen_mapa_url.startswith('/api/uploads/'):
+                    local_path = imagen_mapa_url.replace('/api/uploads/', '/app/uploads/')
+                    if os.path.exists(local_path):
+                        img_src = f"file://{local_path}"
+                    else:
+                        img_src = None
+                else:
+                    img_src = None
+            else:
+                img_src = None
+            
+            if img_src:
+                html_content += f"""
+                <div style="margin-bottom: 15px;">
+                    <img src="{img_src}" style="max-width: 100%; max-height: 400px; border: 2px solid #2e7d32; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" alt="Mapa de la parcela" />
+                </div>
+                """
+                
+                # Añadir información de coordenadas si hay geometría
+                if geometria and len(geometria) > 1:
+                    lats = [p.get('lat', 0) for p in geometria]
+                    lngs = [p.get('lng', 0) for p in geometria]
+                    center_lat = sum(lats) / len(lats)
+                    center_lng = sum(lngs) / len(lngs)
+                    
+                    html_content += f"""
+                    <table style="width: 100%; margin-top: 10px; border-collapse: collapse;">
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; background: #f5f5f5; width: 50%;">
+                                <strong>Centro del polígono:</strong><br/>
+                                <span style="font-family: monospace;">{center_lat:.6f}, {center_lng:.6f}</span>
+                            </td>
+                            <td style="padding: 8px; border: 1px solid #ddd; background: #f5f5f5; width: 50%;">
+                                <strong>Polígono:</strong><br/>
+                                {len(geometria)} vértices
+                            </td>
+                        </tr>
+                    </table>
+                    """
+            else:
+                # No se pudo cargar la imagen, usar SVG como fallback
+                pass
+        
+        elif geometria and len(geometria) > 1:
             # Calcular centro y bounds del polígono
             lats = [p.get('lat', 0) for p in geometria]
             lngs = [p.get('lng', 0) for p in geometria]

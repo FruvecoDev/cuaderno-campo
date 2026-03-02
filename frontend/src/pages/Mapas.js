@@ -3,9 +3,10 @@ import { MapContainer, TileLayer, Marker, Popup, Polygon, useMap, FeatureGroup }
 import { EditControl } from 'react-leaflet-draw';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { Map, Layers, MapPin, Edit2, Save, X, Maximize2, List, Filter, Leaf, Ruler, Pentagon, Trash2, Check, Upload, Search, Navigation, Eye } from 'lucide-react';
+import { Map, Layers, MapPin, Edit2, Save, X, Maximize2, List, Filter, Leaf, Ruler, Pentagon, Trash2, Check, Upload, Search, Navigation, Eye, Camera } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import GeoImportModal from '../components/GeoImportModal';
+import html2canvas from 'html2canvas';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import L from 'leaflet';
@@ -156,7 +157,9 @@ const Mapas = () => {
   const [flyToParcela, setFlyToParcela] = useState(null);
   const [mapType, setMapType] = useState('street'); // 'street' or 'satellite'
   const [disableFitBounds, setDisableFitBounds] = useState(false);
+  const [capturingMap, setCapturingMap] = useState(false);
   const featureGroupRef = useRef(null);
+  const mapContainerRef = useRef(null);
 
   useEffect(() => {
     fetchParcelas();
@@ -241,10 +244,50 @@ const Mapas = () => {
       // Calculate area
       const calculatedArea = calculatePolygonArea(drawnPolygon);
       
+      // Capture map image before saving
+      let imagenMapaUrl = null;
+      if (mapContainerRef.current) {
+        try {
+          setCapturingMap(true);
+          // Asegurar vista satélite para la captura
+          const originalMapType = mapType;
+          if (mapType !== 'satellite') {
+            setMapType('satellite');
+            await new Promise(resolve => setTimeout(resolve, 1500)); // Wait for tiles to load
+          }
+          
+          const canvas = await html2canvas(mapContainerRef.current, {
+            useCORS: true,
+            allowTaint: true,
+            scale: 1,
+            logging: false
+          });
+          
+          // Convert to blob and upload
+          const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 0.9));
+          const formData = new FormData();
+          formData.append('file', blob, `mapa_parcela_${selectedParcela._id}.png`);
+          
+          const uploadResponse = await api.postFormData('/api/upload/mapa-parcela', formData);
+          imagenMapaUrl = uploadResponse.url;
+          
+          // Restore original map type
+          if (originalMapType !== 'satellite') {
+            setMapType(originalMapType);
+          }
+        } catch (captureError) {
+          console.error('Error capturing map:', captureError);
+          // Continue without image
+        } finally {
+          setCapturingMap(false);
+        }
+      }
+      
       const updatedParcela = {
         ...selectedParcela,
         latitud: centerLat,
         longitud: centerLng,
+        imagen_mapa_url: imagenMapaUrl || selectedParcela.imagen_mapa_url,
         recintos: [{
           geometria: drawnPolygon,
           superficie_recinto: calculatedArea
@@ -313,6 +356,50 @@ const Mapas = () => {
     // Clear any existing drawings
     if (featureGroupRef.current) {
       featureGroupRef.current.clearLayers();
+    }
+  };
+
+  // Function to capture map image and save to parcela
+  const captureMapImage = async (parcela) => {
+    if (!mapContainerRef.current) return;
+    
+    try {
+      setCapturingMap(true);
+      
+      // Wait a moment for tiles to fully load
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const canvas = await html2canvas(mapContainerRef.current, {
+        useCORS: true,
+        allowTaint: true,
+        scale: 1.5,
+        logging: false
+      });
+      
+      // Convert to blob and upload
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 0.9));
+      const formData = new FormData();
+      formData.append('file', blob, `mapa_parcela_${parcela._id}.png`);
+      
+      const uploadResponse = await api.postFormData('/api/upload/mapa-parcela', formData);
+      
+      // Update parcela with new image URL
+      await api.put(`/api/parcelas/${parcela._id}`, {
+        ...parcela,
+        imagen_mapa_url: uploadResponse.url,
+        imagen_mapa_path: uploadResponse.path
+      });
+      
+      // Reload parcelas
+      const res = await api.get('/api/parcelas');
+      setParcelas(res.parcelas || res || []);
+      
+      alert('Imagen del mapa guardada correctamente');
+    } catch (error) {
+      console.error('Error capturing map:', error);
+      alert('Error al capturar la imagen del mapa');
+    } finally {
+      setCapturingMap(false);
     }
   };
 
@@ -529,7 +616,27 @@ const Mapas = () => {
       {/* Main content */}
       <div style={{ display: 'grid', gridTemplateColumns: showList ? '1fr 350px' : '1fr', gap: '1rem', height: drawMode ? 'calc(100% - 280px)' : 'calc(100% - 200px)' }}>
         {/* Map */}
-        <div className="card" style={{ padding: 0, overflow: 'hidden', borderRadius: '12px', minHeight: '400px', position: 'relative' }}>
+        <div className="card" ref={mapContainerRef} style={{ padding: 0, overflow: 'hidden', borderRadius: '12px', minHeight: '400px', position: 'relative' }}>
+          {/* Capturing overlay */}
+          {capturingMap && (
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 2000,
+              color: 'white',
+              fontSize: '1.2rem'
+            }}>
+              <Camera size={24} style={{ marginRight: '10px' }} />
+              Capturando imagen del mapa...
+            </div>
+          )}
           {/* Map type selector */}
           <div style={{
             position: 'absolute',
@@ -837,6 +944,27 @@ const Mapas = () => {
                     >
                       <Pentagon size={12} /> {hasPolygon ? 'Redibujar' : 'Polígono'}
                     </button>
+                    {hasPolygon && (
+                      <button 
+                        className="btn btn-xs"
+                        onClick={async (e) => { 
+                          e.stopPropagation(); 
+                          setDisableFitBounds(true);
+                          setFlyToParcela(p);
+                          // Wait for map to center, then switch to satellite and capture
+                          setTimeout(async () => {
+                            setMapType('satellite');
+                            setTimeout(async () => {
+                              await captureMapImage(p);
+                            }, 1500);
+                          }, 1500);
+                        }}
+                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.7rem', backgroundColor: '#0ea5e9', color: 'white' }}
+                        title="Capturar imagen del mapa"
+                      >
+                        <Camera size={12} />
+                      </button>
+                    )}
                   </div>
                 </div>
               );

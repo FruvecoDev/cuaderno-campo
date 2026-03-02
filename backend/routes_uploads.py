@@ -329,3 +329,45 @@ async def analyze_all_visita_fotos(
         "results": results,
         "fotos": fotos
     }
+
+
+
+# Create directory for map images
+os.makedirs(f"{UPLOAD_DIR}/mapas_parcelas", exist_ok=True)
+
+@router.post("/upload/mapa-parcela")
+async def upload_mapa_parcela(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(RequireEdit)
+):
+    """Upload a map screenshot for a parcel"""
+    # Validate extension
+    if not validate_file(file):
+        raise HTTPException(status_code=400, detail="Formato no permitido. Use JPG, PNG o WebP")
+    
+    # Generate unique filename
+    ext = os.path.splitext(file.filename)[1].lower() if file.filename else ".png"
+    unique_filename = f"{uuid.uuid4().hex}{ext}"
+    file_path = f"{UPLOAD_DIR}/mapas_parcelas/{unique_filename}"
+    
+    try:
+        # Read and validate file size
+        content = await file.read()
+        if len(content) > MAX_FILE_SIZE:
+            raise HTTPException(status_code=400, detail="El archivo excede el tamaño máximo de 10MB")
+        
+        # Save file
+        async with aiofiles.open(file_path, 'wb') as f:
+            await f.write(content)
+        
+        # Return URL
+        file_url = f"/api/uploads/mapas_parcelas/{unique_filename}"
+        
+        return {
+            "success": True,
+            "url": file_url,
+            "path": file_path,
+            "filename": unique_filename
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al guardar imagen: {str(e)}")
