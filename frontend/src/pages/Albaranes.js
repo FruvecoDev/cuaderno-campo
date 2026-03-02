@@ -477,57 +477,25 @@ const Albaranes = () => {
     }
   };
   
-  // Función para calcular el total de una línea individual SIN considerar destare
-  // El destare solo se aplica en el resumen final, no en cada línea
+  // Función para calcular el total de una línea individual
   const calculateItemTotal = (item) => {
     const cantidad = parseFloat(item.cantidad) || 0;
     const precio = parseFloat(item.precio_unitario) || 0;
     const descuento = parseFloat(item.descuento) || 0;
     
     // Total línea = cantidad × precio × (1 - descuento/100)
-    // SIN aplicar factor de destare
     const subtotal = cantidad * precio;
     return subtotal * (1 - descuento / 100);
   };
 
   const calculateGrandTotal = () => {
-    // Calcular total considerando kilos netos (después de destare)
-    // Fórmula: Total = (Kilos Brutos - Kilos Destare) * Precio * (1 - Descuento % / 100)
-    const itemsSinDestare = formData.items.filter(item => !item.es_destare);
-    
-    // Si hay destare configurado, recalcular cada línea con la proporción de kilos netos
-    const kilosBrutos = formData.kilos_brutos || 0;
-    const kilosDestare = formData.kilos_destare || 0;
-    const hayDestare = kilosBrutos > 0 && kilosDestare > 0;
-    
-    if (hayDestare) {
-      // Calcular el factor de reducción por destare
-      const factorNeto = (kilosBrutos - kilosDestare) / kilosBrutos;
-      
-      return itemsSinDestare.reduce((sum, item) => {
-        const cantidad = parseFloat(item.cantidad) || 0;
-        const precio = parseFloat(item.precio_unitario) || 0;
-        const descuento = parseFloat(item.descuento) || 0;
-        const unidad = (item.unidad || 'kg').toLowerCase();
-        
-        // Solo aplicar factor neto a items en kg
-        if (unidad === 'kg') {
-          // Total = kilos_netos * precio * (1 - descuento/100)
-          const kilosNetosLinea = cantidad * factorNeto;
-          const subtotal = kilosNetosLinea * precio;
-          const totalConDescuento = subtotal * (1 - descuento / 100);
-          return sum + totalConDescuento;
-        } else {
-          // Para otras unidades, usar el cálculo normal
-          const subtotal = cantidad * precio;
-          const totalConDescuento = subtotal * (1 - descuento / 100);
-          return sum + totalConDescuento;
-        }
-      }, 0);
-    }
-    
-    // Sin destare: suma simple de totales de líneas
-    return itemsSinDestare.reduce((sum, item) => sum + (parseFloat(item.total) || 0), 0);
+    // Suma de todas las líneas (incluyendo destare con importe negativo)
+    // Línea normal: 100.000 kg × 0,23 € = 23.000 €
+    // Línea destare: -5.000 kg × 0,23 € = -1.150 €
+    // Total: 23.000 - 1.150 = 21.850 €
+    return formData.items.reduce((sum, item) => {
+      return sum + calculateItemTotal(item);
+    }, 0);
   };
   
   // Calcular y mostrar línea de destare automáticamente
