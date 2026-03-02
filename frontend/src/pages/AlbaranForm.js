@@ -557,7 +557,7 @@ const AlbaranForm = () => {
             2. {formData.tipo === 'Albarán de venta' ? 'Cliente' : 'Proveedor'} y Contrato
           </h3>
           
-          <div className="grid-2 mb-4">
+          <div className="grid-3 mb-4">
             {formData.tipo === 'Albarán de venta' ? (
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Cliente *</label>
