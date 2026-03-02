@@ -109,7 +109,6 @@ const FlyToParcela = ({ parcela, onComplete }) => {
     if (onComplete) {
       setTimeout(onComplete, 2000);
     }
-    }
   }, [parcela, map, onComplete]);
   
   return null;
