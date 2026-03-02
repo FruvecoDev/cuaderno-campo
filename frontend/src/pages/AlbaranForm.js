@@ -99,19 +99,27 @@ const AlbaranForm = () => {
     const loadData = async () => {
       setLoading(true);
       try {
-        const [contratosRes, proveedoresRes, clientesRes, parcelasRes, articulosRes] = await Promise.all([
+        // Load essential data - don't fail if optional endpoints don't exist
+        const [contratosRes, proveedoresRes, clientesRes, parcelasRes] = await Promise.all([
           api.get('/api/contratos?limit=500'),
           api.get('/api/proveedores?limit=500'),
           api.get('/api/clientes?limit=500'),
-          api.get('/api/parcelas?limit=500'),
-          api.get('/api/articulos-explotacion?limit=500')
+          api.get('/api/parcelas?limit=500')
         ]);
         
         setContratos(contratosRes.contratos || contratosRes || []);
         setProveedores(proveedoresRes.proveedores || proveedoresRes || []);
         setClientes(clientesRes.clientes || clientesRes || []);
         setParcelas(parcelasRes.parcelas || parcelasRes || []);
-        setArticulosCatalogo(articulosRes.articulos || articulosRes || []);
+        
+        // Try to load articulos catalog (optional)
+        try {
+          const articulosRes = await api.get('/api/articulos-explotacion?limit=500');
+          setArticulosCatalogo(articulosRes.articulos || articulosRes || []);
+        } catch (e) {
+          console.log('Articulos catalog not available');
+          setArticulosCatalogo([]);
+        }
         
         // If editing, load albaran data
         if (isEditing) {
