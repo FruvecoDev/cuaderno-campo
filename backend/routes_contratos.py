@@ -273,3 +273,286 @@ async def regenerar_numeros_contratos(
         "errores": errores,
         "total_contratos": len(contratos)
     }
+
+
+
+# ============================================================================
+# EXPORT FUNCTIONS - PDF & EXCEL
+# ============================================================================
+
+def format_number_es(value: float, decimals: int = 2) -> str:
+    """Formatea un número al estilo español con punto de miles y coma decimal"""
+    if value is None:
+        return "0"
+    if decimals == 0:
+        formatted = f"{value:,.0f}"
+    else:
+        formatted = f"{value:,.{decimals}f}"
+    formatted = formatted.replace(",", "X").replace(".", ",").replace("X", ".")
+    return formatted
+
+
+@router.get("/contratos/export/pdf")
+async def export_contratos_pdf(
+    proveedor: Optional[str] = None,
+    cultivo: Optional[str] = None,
+    campana: Optional[str] = None,
+    tipo: Optional[str] = None,
+    fecha_desde: Optional[str] = None,
+    fecha_hasta: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Exporta el listado de contratos filtrado a PDF"""
+    from weasyprint import HTML
+    from fastapi.responses import Response
+    
+    # Build query
+    query = {}
+    if proveedor:
+        query["proveedor"] = proveedor
+    if cultivo:
+        query["cultivo"] = cultivo
+    if campana:
+        query["campana"] = campana
+    if tipo:
+        query["tipo"] = tipo
+    if fecha_desde or fecha_hasta:
+        date_filter = {}
+        if fecha_desde:
+            date_filter["$gte"] = fecha_desde
+        if fecha_hasta:
+            date_filter["$lte"] = fecha_hasta
+        query["fecha_contrato"] = date_filter
+    
+    # Get contracts
+    contratos = await contratos_collection.find(query).sort("fecha_contrato", -1).to_list(1000)
+    
+    # Calculate totals
+    total_cantidad = sum(c.get("cantidad_kg", 0) or 0 for c in contratos)
+    total_importe = sum((c.get("cantidad_kg", 0) or 0) * (c.get("precio_kg", 0) or 0) for c in contratos)
+    
+    # Build filter description
+    filtros_texto = []
+    if proveedor:
+        filtros_texto.append(f"Proveedor: {proveedor}")
+    if cultivo:
+        filtros_texto.append(f"Cultivo: {cultivo}")
+    if campana:
+        filtros_texto.append(f"Campaña: {campana}")
+    if tipo:
+        filtros_texto.append(f"Tipo: {tipo}")
+    if fecha_desde:
+        filtros_texto.append(f"Desde: {fecha_desde}")
+    if fecha_hasta:
+        filtros_texto.append(f"Hasta: {fecha_hasta}")
+    
+    # Generate HTML
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            body {{ font-family: Arial, sans-serif; font-size: 10pt; margin: 20px; }}
+            h1 {{ color: #2563eb; font-size: 18pt; margin-bottom: 5px; }}
+            .header {{ margin-bottom: 20px; border-bottom: 2px solid #2563eb; padding-bottom: 10px; }}
+            .filters {{ background: #f3f4f6; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 9pt; }}
+            table {{ width: 100%; border-collapse: collapse; margin-top: 10px; }}
+            th {{ background: #2563eb; color: white; padding: 8px 5px; text-align: left; font-size: 9pt; }}
+            td {{ padding: 6px 5px; border-bottom: 1px solid #e5e7eb; font-size: 9pt; }}
+            tr:nth-child(even) {{ background: #f9fafb; }}
+            .tipo-compra {{ background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 3px; font-size: 8pt; }}
+            .tipo-venta {{ background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 3px; font-size: 8pt; }}
+            .totals {{ margin-top: 20px; background: #eff6ff; padding: 15px; border-radius: 5px; }}
+            .totals-grid {{ display: flex; justify-content: space-between; }}
+            .total-item {{ text-align: center; }}
+            .total-value {{ font-size: 14pt; font-weight: bold; color: #2563eb; }}
+            .total-label {{ font-size: 9pt; color: #6b7280; }}
+            .right {{ text-align: right; }}
+            .date {{ font-size: 9pt; color: #6b7280; }}
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>LISTADO DE CONTRATOS</h1>
+            <div class="date">Generado el {datetime.now().strftime('%d/%m/%Y %H:%M')}</div>
+        </div>
+        
+        {f'<div class="filters"><strong>Filtros aplicados:</strong> {" | ".join(filtros_texto)}</div>' if filtros_texto else ''}
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Nº Contrato</th>
+                    <th>Tipo</th>
+                    <th>Campaña</th>
+                    <th>Proveedor/Cliente</th>
+                    <th>Cultivo</th>
+                    <th class="right">Cantidad (kg)</th>
+                    <th class="right">Precio (€/kg)</th>
+                    <th class="right">Total (€)</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+    """
+    
+    for c in contratos:
+        cantidad = c.get("cantidad_kg", 0) or 0
+        precio = c.get("precio_kg", 0) or 0
+        total = cantidad * precio
+        tipo_class = "tipo-compra" if c.get("tipo") == "Compra" else "tipo-venta"
+        proveedor_cliente = c.get("proveedor") or c.get("cliente") or "-"
+        
+        html_content += f"""
+            <tr>
+                <td><strong>{c.get('numero_contrato', '-')}</strong></td>
+                <td><span class="{tipo_class}">{c.get('tipo', '-')}</span></td>
+                <td>{c.get('campana', '-')}</td>
+                <td>{proveedor_cliente}</td>
+                <td>{c.get('cultivo', '-')}</td>
+                <td class="right">{format_number_es(cantidad, 0)}</td>
+                <td class="right">{format_number_es(precio, 2)}</td>
+                <td class="right"><strong>{format_number_es(total, 2)}</strong></td>
+                <td>{c.get('fecha_contrato', '-')}</td>
+            </tr>
+        """
+    
+    html_content += f"""
+            </tbody>
+        </table>
+        
+        <div class="totals">
+            <div class="totals-grid">
+                <div class="total-item">
+                    <div class="total-value">{len(contratos)}</div>
+                    <div class="total-label">Contratos</div>
+                </div>
+                <div class="total-item">
+                    <div class="total-value">{format_number_es(total_cantidad, 0)} kg</div>
+                    <div class="total-label">Cantidad Total</div>
+                </div>
+                <div class="total-item">
+                    <div class="total-value">{format_number_es(total_importe, 2)} €</div>
+                    <div class="total-label">Importe Total</div>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    # Generate PDF
+    pdf = HTML(string=html_content).write_pdf()
+    
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename=contratos_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"}
+    )
+
+
+@router.get("/contratos/export/excel")
+async def export_contratos_excel(
+    proveedor: Optional[str] = None,
+    cultivo: Optional[str] = None,
+    campana: Optional[str] = None,
+    tipo: Optional[str] = None,
+    fecha_desde: Optional[str] = None,
+    fecha_hasta: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Exporta el listado de contratos filtrado a Excel"""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+    from openpyxl.utils import get_column_letter
+    from io import BytesIO
+    from fastapi.responses import Response
+    
+    # Build query
+    query = {}
+    if proveedor:
+        query["proveedor"] = proveedor
+    if cultivo:
+        query["cultivo"] = cultivo
+    if campana:
+        query["campana"] = campana
+    if tipo:
+        query["tipo"] = tipo
+    if fecha_desde or fecha_hasta:
+        date_filter = {}
+        if fecha_desde:
+            date_filter["$gte"] = fecha_desde
+        if fecha_hasta:
+            date_filter["$lte"] = fecha_hasta
+        query["fecha_contrato"] = date_filter
+    
+    # Get contracts
+    contratos = await contratos_collection.find(query).sort("fecha_contrato", -1).to_list(1000)
+    
+    # Create workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Contratos"
+    
+    # Styles
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="2563EB", end_color="2563EB", fill_type="solid")
+    header_alignment = Alignment(horizontal="center", vertical="center")
+    border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Headers
+    headers = ["Nº Contrato", "Tipo", "Campaña", "Proveedor/Cliente", "Cultivo", "Cantidad (kg)", "Precio (€/kg)", "Total (€)", "Fecha"]
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_alignment
+        cell.border = border
+    
+    # Data rows
+    for row, c in enumerate(contratos, 2):
+        cantidad = c.get("cantidad_kg", 0) or 0
+        precio = c.get("precio_kg", 0) or 0
+        total = cantidad * precio
+        proveedor_cliente = c.get("proveedor") or c.get("cliente") or ""
+        
+        ws.cell(row=row, column=1, value=c.get('numero_contrato', '')).border = border
+        ws.cell(row=row, column=2, value=c.get('tipo', '')).border = border
+        ws.cell(row=row, column=3, value=c.get('campana', '')).border = border
+        ws.cell(row=row, column=4, value=proveedor_cliente).border = border
+        ws.cell(row=row, column=5, value=c.get('cultivo', '')).border = border
+        ws.cell(row=row, column=6, value=cantidad).border = border
+        ws.cell(row=row, column=7, value=precio).border = border
+        ws.cell(row=row, column=8, value=total).border = border
+        ws.cell(row=row, column=9, value=c.get('fecha_contrato', '')).border = border
+    
+    # Totals row
+    total_row = len(contratos) + 2
+    total_cantidad = sum(c.get("cantidad_kg", 0) or 0 for c in contratos)
+    total_importe = sum((c.get("cantidad_kg", 0) or 0) * (c.get("precio_kg", 0) or 0) for c in contratos)
+    
+    ws.cell(row=total_row, column=5, value="TOTALES:").font = Font(bold=True)
+    ws.cell(row=total_row, column=6, value=total_cantidad).font = Font(bold=True)
+    ws.cell(row=total_row, column=8, value=total_importe).font = Font(bold=True)
+    
+    # Adjust column widths
+    column_widths = [18, 10, 12, 25, 15, 15, 15, 15, 12]
+    for i, width in enumerate(column_widths, 1):
+        ws.column_dimensions[get_column_letter(i)].width = width
+    
+    # Save to bytes
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+    
+    return Response(
+        content=output.getvalue(),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename=contratos_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"}
+    )

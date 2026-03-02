@@ -1025,6 +1025,84 @@ const Contratos = () => {
               Limpiar filtros
             </button>
           )}
+          
+          {/* Botones de exportación */}
+          <div style={{ display: 'flex', gap: '0.5rem', marginLeft: '1rem' }}>
+            <button
+              type="button"
+              className="btn btn-sm"
+              onClick={async () => {
+                try {
+                  const params = new URLSearchParams();
+                  if (filters.proveedor) params.append('proveedor', filters.proveedor);
+                  if (filters.cultivo) params.append('cultivo', filters.cultivo);
+                  if (filters.campana) params.append('campana', filters.campana);
+                  if (filters.tipo) params.append('tipo', filters.tipo);
+                  if (filters.fecha_desde) params.append('fecha_desde', filters.fecha_desde);
+                  if (filters.fecha_hasta) params.append('fecha_hasta', filters.fecha_hasta);
+                  
+                  const response = await fetch(`${BACKEND_URL}/api/contratos/export/pdf?${params.toString()}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                  });
+                  const blob = await response.blob();
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `contratos_${new Date().toISOString().slice(0,10)}.pdf`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  window.URL.revokeObjectURL(url);
+                } catch (error) {
+                  console.error('Error exporting PDF:', error);
+                  alert('Error al exportar PDF');
+                }
+              }}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', backgroundColor: '#dc2626', color: 'white' }}
+              title="Exportar a PDF"
+              data-testid="btn-export-pdf"
+            >
+              <FileText size={14} />
+              PDF
+            </button>
+            <button
+              type="button"
+              className="btn btn-sm"
+              onClick={async () => {
+                try {
+                  const params = new URLSearchParams();
+                  if (filters.proveedor) params.append('proveedor', filters.proveedor);
+                  if (filters.cultivo) params.append('cultivo', filters.cultivo);
+                  if (filters.campana) params.append('campana', filters.campana);
+                  if (filters.tipo) params.append('tipo', filters.tipo);
+                  if (filters.fecha_desde) params.append('fecha_desde', filters.fecha_desde);
+                  if (filters.fecha_hasta) params.append('fecha_hasta', filters.fecha_hasta);
+                  
+                  const response = await fetch(`${BACKEND_URL}/api/contratos/export/excel?${params.toString()}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                  });
+                  const blob = await response.blob();
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `contratos_${new Date().toISOString().slice(0,10)}.xlsx`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  window.URL.revokeObjectURL(url);
+                } catch (error) {
+                  console.error('Error exporting Excel:', error);
+                  alert('Error al exportar Excel');
+                }
+              }}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', backgroundColor: '#16a34a', color: 'white' }}
+              title="Exportar a Excel"
+              data-testid="btn-export-excel"
+            >
+              <Download size={14} />
+              Excel
+            </button>
+          </div>
         </div>
         
         {/* Filtros avanzados */}
