@@ -769,7 +769,42 @@ const Albaranes = () => {
   const clearFilters = () => {
     setFilters({ tipo: '', contrato_id: '', proveedor: '', cultivo: '', fecha_desde: '', fecha_hasta: '' });
   };
-  
+
+  // Funciones de filtro rápido de fechas
+  const setQuickDateFilter = (type) => {
+    const today = new Date();
+    let fecha_desde = '';
+    let fecha_hasta = today.toISOString().split('T')[0];
+    
+    switch (type) {
+      case 'today':
+        fecha_desde = fecha_hasta;
+        break;
+      case 'week':
+        const weekStart = new Date(today);
+        weekStart.setDate(today.getDate() - today.getDay() + 1); // Lunes de esta semana
+        fecha_desde = weekStart.toISOString().split('T')[0];
+        break;
+      case 'month':
+        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+        fecha_desde = monthStart.toISOString().split('T')[0];
+        break;
+      case 'quarter':
+        const quarterMonth = Math.floor(today.getMonth() / 3) * 3;
+        const quarterStart = new Date(today.getFullYear(), quarterMonth, 1);
+        fecha_desde = quarterStart.toISOString().split('T')[0];
+        break;
+      case 'year':
+        const yearStart = new Date(today.getFullYear(), 0, 1);
+        fecha_desde = yearStart.toISOString().split('T')[0];
+        break;
+      default:
+        break;
+    }
+    
+    setFilters(prev => ({ ...prev, fecha_desde, fecha_hasta }));
+  };
+
   const clearContratoSearch = () => {
     setContratoSearch({ proveedor: '', cultivo: '', campana: '', parcela: '' });
   };
