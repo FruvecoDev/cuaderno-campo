@@ -108,12 +108,13 @@ const Mapas = () => {
   const [drawMode, setDrawMode] = useState(false);
   const [editCoords, setEditCoords] = useState({ latitud: '', longitud: '' });
   const [drawnPolygon, setDrawnPolygon] = useState(null);
-  const [filters, setFilters] = useState({ cultivo: '', finca: '' });
-  const [showList, setShowList] = useState(false);
+  const [filters, setFilters] = useState({ cultivo: '', finca: '', search: '' });
+  const [showList, setShowList] = useState(true);
   const [mapCenter, setMapCenter] = useState([40.4168, -3.7038]); // Madrid default
   const [mapZoom, setMapZoom] = useState(6);
   const [saving, setSaving] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [flyToParcela, setFlyToParcela] = useState(null);
   const featureGroupRef = useRef(null);
 
   useEffect(() => {
