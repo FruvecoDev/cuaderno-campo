@@ -419,6 +419,24 @@ const Mapas = () => {
       <div className="card mb-4" style={{ padding: '0.75rem' }}>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <Filter size={18} style={{ color: 'hsl(var(--muted-foreground))' }} />
+          <div style={{ position: 'relative' }}>
+            <Search size={16} style={{ 
+              position: 'absolute', 
+              left: '10px', 
+              top: '50%', 
+              transform: 'translateY(-50%)',
+              color: 'hsl(var(--muted-foreground))'
+            }} />
+            <input 
+              type="text"
+              className="form-input"
+              placeholder="Buscar parcela..."
+              style={{ width: '200px', paddingLeft: '36px' }}
+              value={filters.search}
+              onChange={(e) => setFilters({...filters, search: e.target.value})}
+              data-testid="filter-search"
+            />
+          </div>
           <select 
             className="form-select" 
             style={{ width: 'auto', minWidth: '150px' }}
@@ -443,10 +461,10 @@ const Mapas = () => {
               <option key={f._id} value={f._id}>{f.nombre}</option>
             ))}
           </select>
-          {(filters.cultivo || filters.finca) && (
+          {(filters.cultivo || filters.finca || filters.search) && (
             <button 
               className="btn btn-sm btn-ghost"
-              onClick={() => setFilters({ cultivo: '', finca: '' })}
+              onClick={() => setFilters({ cultivo: '', finca: '', search: '' })}
             >
               <X size={16} /> Limpiar
             </button>
