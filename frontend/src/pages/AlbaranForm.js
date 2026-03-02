@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, PlusCircle, MinusCircle, Package, Printer, Check, Download, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, PlusCircle, MinusCircle, Package, Printer, Check, Download, AlertTriangle, Search, X } from 'lucide-react';
 import { usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
