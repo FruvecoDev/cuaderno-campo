@@ -510,6 +510,14 @@ const Mapas = () => {
             
             <FitBounds parcelas={parcelasConUbicacion} />
             
+            {/* Fly to selected parcela */}
+            {flyToParcela && (
+              <FlyToParcela 
+                parcela={flyToParcela} 
+                onComplete={() => setFlyToParcela(null)} 
+              />
+            )}
+            
             {/* Drawing controls - only show in draw mode */}
             {drawMode && (
               <FeatureGroup ref={featureGroupRef}>
