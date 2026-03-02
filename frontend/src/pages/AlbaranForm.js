@@ -706,7 +706,7 @@ const AlbaranForm = () => {
             3. Líneas del Albarán
           </h3>
             
-            <div className="table-container" style={{ marginTop: '0.5rem' }}>
+            <div className="table-container" style={{ marginTop: '0.5rem', overflow: 'visible' }}>
               <table>
                 <thead>
                   <tr>
