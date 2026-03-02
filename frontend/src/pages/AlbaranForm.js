@@ -749,7 +749,7 @@ const AlbaranForm = () => {
                           <input
                             type="text"
                             className="form-input"
-                            value={formatNumberES(item.cantidad)}
+                            value={formatCantidad(item.cantidad)}
                             readOnly
                             style={{ textAlign: 'right', backgroundColor: '#fef2f2', color: '#dc2626', fontWeight: '500' }}
                           />
@@ -757,10 +757,10 @@ const AlbaranForm = () => {
                           <input
                             type="text"
                             className="form-input"
-                            value={formatNumberES(item.cantidad)}
+                            value={formatCantidad(item.cantidad)}
                             onChange={(e) => {
                               const rawValue = e.target.value.replace(/[^\d.,]/g, '');
-                              const numValue = parseSpanishNumber(rawValue);
+                              const numValue = Math.round(parseSpanishNumber(rawValue));
                               updateItemTotal(index, 'cantidad', numValue || rawValue);
                             }}
                             placeholder="0"
