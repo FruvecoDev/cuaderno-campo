@@ -1887,7 +1887,7 @@ const Albaranes = () => {
                         </button>
                         <PermissionButton
                           permission="edit"
-                          onClick={() => handleEdit(albaran)}
+                          onClick={() => navigate(`/albaranes/editar/${albaran._id}`)}
                           className="btn btn-sm btn-secondary"
                           title="Editar"
                         >
