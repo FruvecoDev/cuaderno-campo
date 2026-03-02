@@ -108,7 +108,9 @@ const Albaranes = () => {
     tipo: '',
     contrato_id: '',
     proveedor: '',
-    cultivo: ''
+    cultivo: '',
+    fecha_desde: '',
+    fecha_hasta: ''
   });
   
   // Filtros para buscar contratos en el formulario
