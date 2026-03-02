@@ -185,7 +185,9 @@ const AlbaranForm = () => {
   // Close article dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (activeSearchIndex !== null && !event.target.closest('[data-article-search]')) {
+      // Don't close if clicking inside any article search container
+      const isInsideSearch = event.target.closest('[data-article-search="true"]');
+      if (activeSearchIndex !== null && !isInsideSearch) {
         setActiveSearchIndex(null);
       }
     };
