@@ -708,29 +708,31 @@ const AlbaranForm = () => {
                           </div>
                         ) : (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                            <select
-                              className="form-select"
-                              value={item.articulo_id || ''}
-                              onChange={(e) => handleArticuloSelect(index, e.target.value)}
-                              style={{ fontSize: '0.875rem' }}
-                              data-testid={`item-articulo-${index}`}
-                            >
-                              <option value="">-- O seleccionar del catálogo --</option>
-                              {articulosCatalogo.map(art => (
-                                <option key={art._id} value={art._id}>
-                                  {art.codigo} - {art.nombre} ({art.precio_unitario?.toFixed(2) || '0.00'} €/{art.unidad_medida})
-                                </option>
-                              ))}
-                            </select>
                             <input
                               type="text"
                               className="form-input"
                               value={item.descripcion}
                               onChange={(e) => updateItemTotal(index, 'descripcion', e.target.value)}
                               placeholder="Descripción del artículo..."
-                              style={{ fontSize: '0.875rem' }}
+                              style={{ fontSize: '0.875rem', fontWeight: '500' }}
                               data-testid={`item-descripcion-${index}`}
                             />
+                            {articulosCatalogo.length > 0 && (
+                              <select
+                                className="form-select"
+                                value={item.articulo_id || ''}
+                                onChange={(e) => handleArticuloSelect(index, e.target.value)}
+                                style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}
+                                data-testid={`item-articulo-${index}`}
+                              >
+                                <option value="">-- Seleccionar del catálogo --</option>
+                                {articulosCatalogo.map(art => (
+                                  <option key={art._id} value={art._id}>
+                                    {art.codigo} - {art.nombre} ({art.precio_unitario?.toFixed(2) || '0.00'} €/{art.unidad_medida})
+                                  </option>
+                                ))}
+                              </select>
+                            )}
                           </div>
                         )}
                       </td>
