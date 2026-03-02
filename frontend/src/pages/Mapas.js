@@ -530,19 +530,57 @@ const Mapas = () => {
       {/* Main content */}
       <div style={{ display: 'grid', gridTemplateColumns: showList ? '1fr 350px' : '1fr', gap: '1rem', height: drawMode ? 'calc(100% - 280px)' : 'calc(100% - 200px)' }}>
         {/* Map */}
-        <div className="card" style={{ padding: 0, overflow: 'hidden', borderRadius: '12px', minHeight: '400px' }}>
+        <div className="card" style={{ padding: 0, overflow: 'hidden', borderRadius: '12px', minHeight: '400px', position: 'relative' }}>
+          {/* Map type selector */}
+          <div style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            zIndex: 1000,
+            display: 'flex',
+            gap: '4px',
+            background: 'white',
+            padding: '4px',
+            borderRadius: '8px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+          }}>
+            <button
+              className={`btn btn-sm ${mapType === 'street' ? 'btn-primary' : 'btn-ghost'}`}
+              onClick={() => setMapType('street')}
+              style={{ padding: '4px 8px', fontSize: '0.75rem' }}
+              title="Mapa callejero"
+            >
+              <Map size={14} /> Mapa
+            </button>
+            <button
+              className={`btn btn-sm ${mapType === 'satellite' ? 'btn-primary' : 'btn-ghost'}`}
+              onClick={() => setMapType('satellite')}
+              style={{ padding: '4px 8px', fontSize: '0.75rem' }}
+              title="Vista satélite"
+            >
+              <Layers size={14} /> Satélite
+            </button>
+          </div>
+          
           <MapContainer
             center={mapCenter}
             zoom={mapZoom}
             style={{ height: '100%', width: '100%', minHeight: '400px' }}
             data-testid="map-container"
           >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
+            {mapType === 'street' ? (
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+            ) : (
+              <TileLayer
+                attribution='Imagery &copy; <a href="https://www.esri.com/">Esri</a>'
+                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              />
+            )}
             
-            <FitBounds parcelas={parcelasConUbicacion} />
+            <FitBounds parcelas={parcelasConUbicacion} disabled={disableFitBounds} />
             
             {/* Fly to selected parcela */}
             {flyToParcela && (
