@@ -1077,40 +1077,118 @@ async def generate_evaluacion_pdf(
             <div class="section-content" style="text-align: center;">
         """
         
-        if geometria and len(geometria) > 0:
-            # Calcular centro del polígono
-            center_lat = sum(p.get('lat', 0) for p in geometria) / len(geometria)
-            center_lng = sum(p.get('lng', 0) for p in geometria) / len(geometria)
+        if geometria and len(geometria) > 1:
+            # Calcular centro y bounds del polígono
+            lats = [p.get('lat', 0) for p in geometria]
+            lngs = [p.get('lng', 0) for p in geometria]
+            center_lat = sum(lats) / len(lats)
+            center_lng = sum(lngs) / len(lngs)
             
-            # Generar URL del mapa estático usando OpenStreetMap
-            # Creamos una imagen de mapa usando un servicio de mapas estáticos
-            map_zoom = 15
-            map_url = f"https://staticmap.openstreetmap.de/staticmap.php?center={center_lat},{center_lng}&zoom={map_zoom}&size=600x300&maptype=mapnik"
+            min_lat, max_lat = min(lats), max(lats)
+            min_lng, max_lng = min(lngs), max(lngs)
             
-            # Añadir marcadores para los vértices del polígono
-            for i, point in enumerate(geometria[:10]):  # Limitar a 10 puntos para la URL
-                map_url += f"&markers={point.get('lat', 0)},{point.get('lng', 0)},red"
+            # Calcular dimensiones del SVG
+            svg_width = 500
+            svg_height = 300
+            padding = 30
+            
+            # Escalar coordenadas al SVG
+            lat_range = max_lat - min_lat if max_lat != min_lat else 0.001
+            lng_range = max_lng - min_lng if max_lng != min_lng else 0.001
+            
+            # Función para convertir coordenadas geo a coordenadas SVG
+            def geo_to_svg(lat, lng):
+                x = padding + ((lng - min_lng) / lng_range) * (svg_width - 2 * padding)
+                y = padding + ((max_lat - lat) / lat_range) * (svg_height - 2 * padding)  # Invertir Y
+                return x, y
+            
+            # Generar puntos del polígono
+            polygon_points = ' '.join([f"{geo_to_svg(p.get('lat', 0), p.get('lng', 0))[0]:.1f},{geo_to_svg(p.get('lat', 0), p.get('lng', 0))[1]:.1f}" for p in geometria])
+            
+            # Generar SVG del mapa con el polígono
+            svg_map = f'''
+            <svg width="{svg_width}" height="{svg_height}" viewBox="0 0 {svg_width} {svg_height}" style="border: 2px solid #ddd; border-radius: 8px; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);">
+                <!-- Fondo con patrón de cuadrícula -->
+                <defs>
+                    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#a5d6a7" stroke-width="0.5"/>
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)"/>
+                
+                <!-- Polígono de la parcela -->
+                <polygon points="{polygon_points}" fill="rgba(76, 175, 80, 0.4)" stroke="#2e7d32" stroke-width="3"/>
+                
+                <!-- Vértices del polígono -->
+                {"".join([f'<circle cx="{geo_to_svg(p.get("lat", 0), p.get("lng", 0))[0]:.1f}" cy="{geo_to_svg(p.get("lat", 0), p.get("lng", 0))[1]:.1f}" r="5" fill="#c62828" stroke="white" stroke-width="2"/>' for p in geometria])}
+                
+                <!-- Etiqueta del centro -->
+                <circle cx="{geo_to_svg(center_lat, center_lng)[0]:.1f}" cy="{geo_to_svg(center_lat, center_lng)[1]:.1f}" r="8" fill="#1565c0" stroke="white" stroke-width="2"/>
+                <text x="{geo_to_svg(center_lat, center_lng)[0]:.1f}" y="{geo_to_svg(center_lat, center_lng)[1] + 25:.1f}" text-anchor="middle" font-size="11" fill="#1565c0" font-weight="bold">Centro</text>
+                
+                <!-- Leyenda -->
+                <rect x="10" y="{svg_height - 50}" width="180" height="40" fill="white" fill-opacity="0.9" rx="5"/>
+                <circle cx="25" cy="{svg_height - 35}" r="5" fill="#c62828"/>
+                <text x="35" y="{svg_height - 31}" font-size="10" fill="#333">Vértices ({len(geometria)})</text>
+                <circle cx="25" cy="{svg_height - 18}" r="5" fill="#1565c0"/>
+                <text x="35" y="{svg_height - 14}" font-size="10" fill="#333">Centro del polígono</text>
+            </svg>
+            '''
             
             html_content += f"""
-                <div style="margin-bottom: 10px;">
-                    <img src="{map_url}" style="max-width: 100%; border: 2px solid #ddd; border-radius: 8px;" alt="Mapa de la parcela" />
+                <div style="margin-bottom: 15px;">
+                    {svg_map}
                 </div>
-                <div style="margin-top: 10px; text-align: left;">
-                    <p style="font-size: 10pt; margin: 5px 0;"><strong>Centro:</strong> {center_lat:.6f}, {center_lng:.6f}</p>
-                    <p style="font-size: 10pt; margin: 5px 0;"><strong>Puntos del polígono:</strong> {len(geometria)} vértices</p>
-                </div>
+                <table style="width: 100%; margin-top: 10px; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background: #f5f5f5; width: 50%;">
+                            <strong>Centro del polígono:</strong><br/>
+                            <span style="font-family: monospace;">{center_lat:.6f}, {center_lng:.6f}</span>
+                        </td>
+                        <td style="padding: 8px; border: 1px solid #ddd; background: #f5f5f5; width: 50%;">
+                            <strong>Polígono:</strong><br/>
+                            {len(geometria)} vértices
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="padding: 8px; border: 1px solid #ddd; font-size: 9pt;">
+                            <strong>Coordenadas de los vértices:</strong><br/>
+                            {' → '.join([f"({p.get('lat', 0):.5f}, {p.get('lng', 0):.5f})" for p in geometria[:6]])}
+                            {'...' if len(geometria) > 6 else ''}
+                        </td>
+                    </tr>
+                </table>
             """
         elif lat_parcela and lng_parcela:
-            # Si solo hay coordenadas puntuales
-            map_zoom = 15
-            map_url = f"https://staticmap.openstreetmap.de/staticmap.php?center={lat_parcela},{lng_parcela}&zoom={map_zoom}&size=600x300&maptype=mapnik&markers={lat_parcela},{lng_parcela},red"
+            # Si solo hay coordenadas puntuales, mostrar un marcador
+            svg_point = f'''
+            <svg width="300" height="200" viewBox="0 0 300 200" style="border: 2px solid #ddd; border-radius: 8px; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);">
+                <defs>
+                    <pattern id="grid2" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#a5d6a7" stroke-width="0.5"/>
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid2)"/>
+                
+                <!-- Marcador de ubicación -->
+                <circle cx="150" cy="100" r="12" fill="#c62828" stroke="white" stroke-width="3"/>
+                <circle cx="150" cy="100" r="25" fill="none" stroke="#c62828" stroke-width="2" stroke-dasharray="5,5"/>
+                
+                <!-- Etiqueta -->
+                <text x="150" y="145" text-anchor="middle" font-size="12" fill="#333" font-weight="bold">Ubicación de la parcela</text>
+            </svg>
+            '''
             
             html_content += f"""
-                <div style="margin-bottom: 10px;">
-                    <img src="{map_url}" style="max-width: 100%; border: 2px solid #ddd; border-radius: 8px;" alt="Ubicación de la parcela" />
+                <div style="margin-bottom: 15px;">
+                    {svg_point}
                 </div>
-                <div style="margin-top: 10px;">
-                    <p style="font-size: 10pt;"><strong>Coordenadas:</strong> {lat_parcela:.6f}, {lng_parcela:.6f}</p>
+                <div style="margin-top: 10px; padding: 10px; background: #f5f5f5; border-radius: 5px;">
+                    <p style="font-size: 11pt; margin: 0;"><strong>Coordenadas:</strong> 
+                    <span style="font-family: monospace;">{lat_parcela:.6f}, {lng_parcela:.6f}</span></p>
+                    <p style="font-size: 9pt; color: #666; margin: 5px 0 0 0;">
+                        (Punto de referencia - no hay polígono dibujado)
+                    </p>
                 </div>
             """
         else:
