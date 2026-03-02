@@ -31,6 +31,10 @@ const AlbaranForm = () => {
   const [selectedContrato, setSelectedContrato] = useState(null);
   const [articulosCatalogo, setArticulosCatalogo] = useState([]);
   
+  // Article search state
+  const [articuloSearch, setArticuloSearch] = useState({});
+  const [activeSearchIndex, setActiveSearchIndex] = useState(null);
+  
   // Form data
   const [formData, setFormData] = useState({
     tipo: 'Albarán de compra',
