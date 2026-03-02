@@ -182,6 +182,17 @@ const AlbaranForm = () => {
     loadData();
   }, [id, isEditing]);
 
+  // Close article dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (activeSearchIndex !== null && !event.target.closest('[data-article-search]')) {
+        setActiveSearchIndex(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [activeSearchIndex]);
+
   // Auto-calculate destare when items change
   useEffect(() => {
     if (!selectedContrato || !selectedContrato.descuento_destare) return;
