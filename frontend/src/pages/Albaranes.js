@@ -767,7 +767,7 @@ const Albaranes = () => {
   };
   
   const clearFilters = () => {
-    setFilters({ tipo: '', contrato_id: '', proveedor: '', cultivo: '' });
+    setFilters({ tipo: '', contrato_id: '', proveedor: '', cultivo: '', fecha_desde: '', fecha_hasta: '' });
   };
   
   const clearContratoSearch = () => {
