@@ -926,7 +926,6 @@ const AlbaranForm = () => {
             >
               <PlusCircle size={16} /> Añadir Línea
             </button>
-          </div>
           
           {/* Observaciones */}
           <div className="form-group" style={{ marginTop: '1rem' }}>
