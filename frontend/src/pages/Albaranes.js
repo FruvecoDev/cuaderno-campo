@@ -1015,7 +1015,7 @@ const Albaranes = () => {
         </div>
       </div>
 
-      {/* Formulario */}
+      {/* Tabla */}
       {showForm && (
         <div className="card mb-6" data-testid="albaran-form">
           <h2 className="card-title">{editingId ? 'Editar Albarán' : 'Nuevo Albarán'}</h2>
