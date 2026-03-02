@@ -75,6 +75,40 @@ const FitBounds = ({ parcelas }) => {
   return null;
 };
 
+// Component to fly to a specific parcela
+const FlyToParcela = ({ parcela, onComplete }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (!parcela) return;
+    
+    let targetLat, targetLng;
+    let zoomLevel = 16;
+    
+    // If parcela has polygon, fly to its center
+    if (parcela.recintos?.[0]?.geometria?.length > 0) {
+      const geo = parcela.recintos[0].geometria;
+      targetLat = geo.reduce((sum, c) => sum + c.lat, 0) / geo.length;
+      targetLng = geo.reduce((sum, c) => sum + c.lng, 0) / geo.length;
+      
+      // Fit to polygon bounds
+      const bounds = geo.map(c => [c.lat, c.lng]);
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 17 });
+    } else if (parcela.latitud && parcela.longitud) {
+      // Fly to marker position
+      targetLat = parcela.latitud;
+      targetLng = parcela.longitud;
+      map.flyTo([targetLat, targetLng], zoomLevel, { duration: 1.5 });
+    }
+    
+    if (onComplete) {
+      setTimeout(onComplete, 1500);
+    }
+  }, [parcela, map, onComplete]);
+  
+  return null;
+};
+
 // Calculate polygon area in hectares
 const calculatePolygonArea = (coordinates) => {
   if (!coordinates || coordinates.length < 3) return 0;
