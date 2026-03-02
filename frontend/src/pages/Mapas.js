@@ -739,7 +739,12 @@ const Mapas = () => {
                     borderRadius: '8px',
                     background: hasPolygon ? 'hsl(142 76% 36% / 0.1)' : 'hsl(var(--muted) / 0.3)',
                     border: hasPolygon ? '1px solid hsl(142 76% 36% / 0.3)' : '1px solid hsl(var(--border))',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
                   }}
+                  onClick={() => setFlyToParcela(p)}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <div 
@@ -751,24 +756,38 @@ const Mapas = () => {
                       }}
                     />
                     <div style={{ fontWeight: '500', fontSize: '0.85rem', flex: 1 }}>{p.codigo_plantacion}</div>
+                    <button
+                      className="btn btn-xs"
+                      onClick={(e) => { e.stopPropagation(); setFlyToParcela(p); }}
+                      style={{ 
+                        padding: '0.15rem 0.4rem', 
+                        fontSize: '0.65rem',
+                        background: 'hsl(var(--primary))',
+                        color: 'white'
+                      }}
+                      title="Ir a parcela"
+                    >
+                      <Navigation size={10} />
+                    </button>
                     {hasPolygon && (
                       <Pentagon size={14} style={{ color: 'hsl(142 76% 36%)' }} />
                     )}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginLeft: '1.25rem' }}>
                     {p.cultivo || 'Sin cultivo'} • {p.superficie_total} ha
+                    {p.finca && <span> • {p.finca}</span>}
                   </div>
                   <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.5rem' }}>
                     <button 
                       className="btn btn-xs btn-secondary"
-                      onClick={() => openEditMode(p)}
+                      onClick={(e) => { e.stopPropagation(); openEditMode(p); }}
                       style={{ flex: 1, padding: '0.25rem 0.5rem', fontSize: '0.7rem' }}
                     >
                       <MapPin size={12} /> Punto
                     </button>
                     <button 
                       className="btn btn-xs btn-primary"
-                      onClick={() => openDrawMode(p)}
+                      onClick={(e) => { e.stopPropagation(); openDrawMode(p); }}
                       style={{ flex: 1, padding: '0.25rem 0.5rem', fontSize: '0.7rem' }}
                     >
                       <Pentagon size={12} /> {hasPolygon ? 'Redibujar' : 'Polígono'}
