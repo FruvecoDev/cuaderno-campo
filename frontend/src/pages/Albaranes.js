@@ -1080,6 +1080,53 @@ const Albaranes = () => {
               data-testid="filter-fecha-hasta"
             />
           </div>
+          <div className="form-group" style={{ marginBottom: 0, gridColumn: 'span 2' }}>
+            <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              <Calendar size={14} /> Filtros Rápidos
+            </label>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <button 
+                type="button" 
+                className={`btn btn-sm ${filters.fecha_desde === new Date().toISOString().split('T')[0] && filters.fecha_hasta === new Date().toISOString().split('T')[0] ? 'btn-primary' : 'btn-outline'}`}
+                onClick={() => setQuickDateFilter('today')}
+                data-testid="quick-filter-today"
+              >
+                Hoy
+              </button>
+              <button 
+                type="button" 
+                className="btn btn-sm btn-outline"
+                onClick={() => setQuickDateFilter('week')}
+                data-testid="quick-filter-week"
+              >
+                Esta Semana
+              </button>
+              <button 
+                type="button" 
+                className="btn btn-sm btn-outline"
+                onClick={() => setQuickDateFilter('month')}
+                data-testid="quick-filter-month"
+              >
+                Este Mes
+              </button>
+              <button 
+                type="button" 
+                className="btn btn-sm btn-outline"
+                onClick={() => setQuickDateFilter('quarter')}
+                data-testid="quick-filter-quarter"
+              >
+                Trimestre
+              </button>
+              <button 
+                type="button" 
+                className="btn btn-sm btn-outline"
+                onClick={() => setQuickDateFilter('year')}
+                data-testid="quick-filter-year"
+              >
+                Este Año
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
