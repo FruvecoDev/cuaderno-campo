@@ -52,27 +52,20 @@ class ApiError extends Error {
  * Parse response safely - clones response to avoid "body stream already read"
  */
 const parseResponse = async (response) => {
-  // Clone response before reading to prevent body stream issues
-  const clonedResponse = response.clone();
-  
   const contentType = response.headers.get('content-type');
   
   try {
     if (contentType && contentType.includes('application/json')) {
-      return await clonedResponse.json();
+      return await response.json();
     } else if (contentType && contentType.includes('text/')) {
-      return await clonedResponse.text();
+      return await response.text();
     } else {
       // For blob responses (files, images)
-      return await clonedResponse.blob();
+      return await response.blob();
     }
   } catch (error) {
-    // If parsing fails, try to get text
-    try {
-      return await response.text();
-    } catch {
-      return null;
-    }
+    console.error('Error parsing response:', error);
+    return null;
   }
 };
 
