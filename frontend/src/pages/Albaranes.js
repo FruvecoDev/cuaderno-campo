@@ -1562,9 +1562,9 @@ const Albaranes = () => {
                             <input
                               type="text"
                               className="form-input"
-                              value="0,00 €"
+                              value={`${(item.precio_unitario || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`}
                               readOnly
-                              style={{ backgroundColor: '#fef2f2', color: '#9ca3af', fontStyle: 'italic' }}
+                              style={{ backgroundColor: '#fef2f2', color: '#dc2626' }}
                             />
                           ) : (
                           <input
@@ -1614,15 +1614,14 @@ const Albaranes = () => {
                             <input
                               type="text"
                               className="form-input"
-                              value="0,00 €"
+                              value={`${calculateItemTotal(item).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`}
                               disabled
                               style={{ 
                                 minWidth: '120px', 
                                 textAlign: 'right', 
                                 fontWeight: '500',
                                 backgroundColor: '#fef2f2',
-                                color: '#9ca3af',
-                                fontStyle: 'italic'
+                                color: '#dc2626'
                               }}
                             />
                           ) : (
