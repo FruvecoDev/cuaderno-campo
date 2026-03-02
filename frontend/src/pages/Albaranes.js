@@ -1720,7 +1720,7 @@ const Albaranes = () => {
                         {calculateGrandTotal().toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
                       </p>
                       <span style={{ fontSize: '0.65rem', color: '#6b7280' }}>
-                        (Netos × Precio × (1-Dto%))
+                        (Líneas - Destare)
                       </span>
                     </div>
                   </div>
