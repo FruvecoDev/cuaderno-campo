@@ -969,7 +969,7 @@ const Albaranes = () => {
             </button>
           )}
         </div>
-        <div className="grid-4">
+        <div className="grid-4" style={{ marginBottom: '1rem' }}>
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label">Tipo</label>
             <select 
@@ -1022,6 +1022,28 @@ const Albaranes = () => {
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
+          </div>
+        </div>
+        <div className="grid-4">
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Fecha Desde</label>
+            <input 
+              type="date" 
+              className="form-input" 
+              value={filters.fecha_desde} 
+              onChange={(e) => setFilters({...filters, fecha_desde: e.target.value})}
+              data-testid="filter-fecha-desde"
+            />
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Fecha Hasta</label>
+            <input 
+              type="date" 
+              className="form-input" 
+              value={filters.fecha_hasta} 
+              onChange={(e) => setFilters({...filters, fecha_hasta: e.target.value})}
+              data-testid="filter-fecha-hasta"
+            />
           </div>
         </div>
       </div>
