@@ -71,6 +71,14 @@ const AlbaranForm = () => {
     return n.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
   };
 
+  // Format quantity without decimals
+  const formatCantidad = (num) => {
+    if (num === null || num === undefined || num === '') return '';
+    const n = parseFloat(num);
+    if (isNaN(n)) return '';
+    return Math.round(n).toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  };
+
   // Parse Spanish number input to float
   const parseSpanishNumber = (str) => {
     if (!str || str === '') return 0;
