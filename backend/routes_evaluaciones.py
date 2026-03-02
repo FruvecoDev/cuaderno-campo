@@ -3,6 +3,7 @@ from typing import Optional, List, Dict, Any
 from bson import ObjectId
 from datetime import datetime
 from pydantic import BaseModel, Field
+import os
 
 from database import db, serialize_doc, serialize_docs, parcelas_collection
 from rbac_guards import RequireCreate, RequireEdit, RequireDelete, get_current_user
