@@ -381,11 +381,21 @@ async def create_albaran(
                 cliente_nombre = None
                 
                 if tipo_agente == "compra" and albaran.proveedor:
-                    proveedor_doc = await proveedores_collection.find_one({"_id": ObjectId(albaran.proveedor)})
-                    proveedor_nombre = proveedor_doc.get("nombre", "Sin nombre") if proveedor_doc else "Sin nombre"
+                    # Verificar si es un ObjectId válido o un nombre directo
+                    if ObjectId.is_valid(albaran.proveedor):
+                        proveedor_doc = await proveedores_collection.find_one({"_id": ObjectId(albaran.proveedor)})
+                        proveedor_nombre = proveedor_doc.get("nombre", albaran.proveedor) if proveedor_doc else albaran.proveedor
+                    else:
+                        # Es un nombre directo
+                        proveedor_nombre = albaran.proveedor
                 elif tipo_agente == "venta" and albaran.cliente:
-                    cliente_doc = await clientes_collection.find_one({"_id": ObjectId(albaran.cliente)})
-                    cliente_nombre = cliente_doc.get("nombre", "Sin nombre") if cliente_doc else "Sin nombre"
+                    # Verificar si es un ObjectId válido o un nombre directo
+                    if ObjectId.is_valid(albaran.cliente):
+                        cliente_doc = await clientes_collection.find_one({"_id": ObjectId(albaran.cliente)})
+                        cliente_nombre = cliente_doc.get("nombre", albaran.cliente) if cliente_doc else albaran.cliente
+                    else:
+                        # Es un nombre directo
+                        cliente_nombre = albaran.cliente
                 
                 # Generar número de albarán
                 numero_albaran = f"ALB-{albaran_id[-6:].upper()}"
