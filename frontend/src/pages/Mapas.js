@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polygon, useMap, FeatureGroup }
 import { EditControl } from 'react-leaflet-draw';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { Map, Layers, MapPin, Edit2, Save, X, Maximize2, List, Filter, Leaf, Ruler, Pentagon, Trash2, Check, Upload } from 'lucide-react';
+import { Map, Layers, MapPin, Edit2, Save, X, Maximize2, List, Filter, Leaf, Ruler, Pentagon, Trash2, Check, Upload, Search, Navigation, Eye } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import GeoImportModal from '../components/GeoImportModal';
 import 'leaflet/dist/leaflet.css';
