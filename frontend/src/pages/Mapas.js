@@ -465,7 +465,7 @@ const Mapas = () => {
             data-testid="filter-finca"
           >
             <option value="">Todas las fincas</option>
-            {fincas.map(f => (
+            {fincas.filter(f => f.nombre && f.nombre.trim() !== '').map(f => (
               <option key={f._id} value={f._id}>{f.nombre}</option>
             ))}
           </select>
