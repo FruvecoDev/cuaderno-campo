@@ -149,6 +149,8 @@ const Mapas = () => {
   const [saving, setSaving] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [flyToParcela, setFlyToParcela] = useState(null);
+  const [mapType, setMapType] = useState('street'); // 'street' or 'satellite'
+  const [disableFitBounds, setDisableFitBounds] = useState(false);
   const featureGroupRef = useRef(null);
 
   useEffect(() => {
