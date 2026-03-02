@@ -444,6 +444,11 @@ async def generate_evaluacion_pdf(
     
     parcela_id = evaluacion.get("parcela_id", "")
     
+    # Obtener datos completos de la parcela incluyendo geometría
+    parcela_data = None
+    if parcela_id and ObjectId.is_valid(parcela_id):
+        parcela_data = await parcelas_collection.find_one({"_id": ObjectId(parcela_id)})
+    
     # Obtener visitas de la parcela
     visitas = []
     if parcela_id:
@@ -1057,6 +1062,70 @@ async def generate_evaluacion_pdf(
         </div>
     """
     
+    # Añadir sección de mapa de la parcela si hay geometría
+    if parcela_data:
+        geometria = None
+        if parcela_data.get('recintos') and len(parcela_data['recintos']) > 0:
+            geometria = parcela_data['recintos'][0].get('geometria', [])
+        
+        lat_parcela = parcela_data.get('latitud', 0)
+        lng_parcela = parcela_data.get('longitud', 0)
+        
+        html_content += """
+        <div class="section">
+            <div class="section-title" style="background-color: #0d6efd;">UBICACIÓN DE LA PARCELA</div>
+            <div class="section-content" style="text-align: center;">
+        """
+        
+        if geometria and len(geometria) > 0:
+            # Calcular centro del polígono
+            center_lat = sum(p.get('lat', 0) for p in geometria) / len(geometria)
+            center_lng = sum(p.get('lng', 0) for p in geometria) / len(geometria)
+            
+            # Generar URL del mapa estático usando OpenStreetMap
+            # Creamos una imagen de mapa usando un servicio de mapas estáticos
+            map_zoom = 15
+            map_url = f"https://staticmap.openstreetmap.de/staticmap.php?center={center_lat},{center_lng}&zoom={map_zoom}&size=600x300&maptype=mapnik"
+            
+            # Añadir marcadores para los vértices del polígono
+            for i, point in enumerate(geometria[:10]):  # Limitar a 10 puntos para la URL
+                map_url += f"&markers={point.get('lat', 0)},{point.get('lng', 0)},red"
+            
+            html_content += f"""
+                <div style="margin-bottom: 10px;">
+                    <img src="{map_url}" style="max-width: 100%; border: 2px solid #ddd; border-radius: 8px;" alt="Mapa de la parcela" />
+                </div>
+                <div style="margin-top: 10px; text-align: left;">
+                    <p style="font-size: 10pt; margin: 5px 0;"><strong>Centro:</strong> {center_lat:.6f}, {center_lng:.6f}</p>
+                    <p style="font-size: 10pt; margin: 5px 0;"><strong>Puntos del polígono:</strong> {len(geometria)} vértices</p>
+                </div>
+            """
+        elif lat_parcela and lng_parcela:
+            # Si solo hay coordenadas puntuales
+            map_zoom = 15
+            map_url = f"https://staticmap.openstreetmap.de/staticmap.php?center={lat_parcela},{lng_parcela}&zoom={map_zoom}&size=600x300&maptype=mapnik&markers={lat_parcela},{lng_parcela},red"
+            
+            html_content += f"""
+                <div style="margin-bottom: 10px;">
+                    <img src="{map_url}" style="max-width: 100%; border: 2px solid #ddd; border-radius: 8px;" alt="Ubicación de la parcela" />
+                </div>
+                <div style="margin-top: 10px;">
+                    <p style="font-size: 10pt;"><strong>Coordenadas:</strong> {lat_parcela:.6f}, {lng_parcela:.6f}</p>
+                </div>
+            """
+        else:
+            html_content += """
+                <div class="no-image-box">
+                    <p>No hay coordenadas de ubicación disponibles para esta parcela</p>
+                    <p style="font-size: 9pt; margin-top: 10px;">Añada las coordenadas o dibuje el polígono en el módulo de Mapas</p>
+                </div>
+            """
+        
+        html_content += """
+            </div>
+        </div>
+        """
+    
     # Secciones de cuestionarios
     secciones_config = [
         ('toma_datos', 'TOMA DE DATOS'),
@@ -1344,7 +1413,11 @@ async def generate_evaluacion_pdf(
         
         if aplicador:
             nombre_completo = f"{aplicador.get('nombre', '')} {aplicador.get('apellidos', '')}"
-            img_certificado = aplicador.get('imagen_certificado_url', '')
+            # Usar path absoluto para WeasyPrint
+            img_certificado_path = aplicador.get('imagen_certificado_path', '')
+            img_certificado_url = aplicador.get('imagen_certificado_url', '')
+            # Si hay path local, usarlo; si no, usar URL
+            img_certificado = f"file://{img_certificado_path}" if img_certificado_path else img_certificado_url
             
             html_content += f"""
         <div class="ficha-datos">
@@ -1436,7 +1509,10 @@ async def generate_evaluacion_pdf(
         """
         
         if maquina:
-            img_placa_ce = maquina.get('imagen_placa_ce_url', '')
+            # Usar path absoluto para WeasyPrint
+            img_placa_ce_path = maquina.get('imagen_placa_ce_path', '')
+            img_placa_ce_url = maquina.get('imagen_placa_ce_url', '')
+            img_placa_ce = f"file://{img_placa_ce_path}" if img_placa_ce_path else img_placa_ce_url
             
             html_content += f"""
         <div class="ficha-datos">
