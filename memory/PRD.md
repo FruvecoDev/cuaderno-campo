@@ -12,50 +12,25 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
 
 ---
 
-## Última Actualización: 1 Marzo 2026 (Sesión 8)
+## Última Actualización: 2 Marzo 2026 (Sesión 9)
 
 ### Completadas en esta sesión:
 
-#### 1. Ajuste del cálculo de totales en Albaranes ✅ (P0 - Ajuste de negocio)
-- **Cambio solicitado**: El total de cada LÍNEA NO debe considerar el destare (solo cantidad × precio × (1-Dto%))
-- **El destare solo se aplica en el TOTAL FINAL del albarán**
-- **Solución implementada** (`Albaranes.js`):
-  - Nueva función `calculateItemTotal(item)` para total de línea SIN destare
-  - `calculateGrandTotal()` aplica destare solo para el total final
-  - Columna "Total" de cada línea muestra: `Cantidad × Precio × (1 - Dto%)`
-  - Total Albarán muestra: `Kilos Netos × Precio × (1 - Dto%)`
-
-#### 2. Añadidos campos al "Resumen de Cálculo" ✅ (P0 - Mejora UI)
-- **Precio**: Muestra el precio promedio de las líneas
-- **Dto %**: Muestra el descuento promedio aplicado (en naranja)
-- **Fórmula explicativa**: `(Netos × Precio × (1-Dto%))`
-- Grid expandido de 4 a 6 columnas para mejor visualización
-
-#### 3. Columna "Nº Albarán" en Comisiones Generadas ✅ (P1)
-- Añadida columna "Nº Albarán" antes de "Fecha" en ambas vistas (agrupada y lista)
-- Formato: `ALB-XXXXXX` (últimos 6 caracteres del ID)
-- Backend genera `numero_albaran` para comisiones nuevas y existentes
-
-#### 4. Exportación de Comisiones a PDF y Excel ✅ (P1 - Nueva funcionalidad)
-- **Filtros de fecha añadidos**: "Fecha Desde" y "Fecha Hasta" para filtrar comisiones por periodo
-- **Botón PDF**: Genera listado de comisiones agrupado por agente con:
-  - Tabla por cada agente con detalle de comisiones
-  - Subtotales por agente
-  - Total general con kilos netos y euros
-  - Filtros aplicados mostrados en cabecera
-- **Botón Excel**: Genera archivo .xlsx con:
-  - Todos los datos de comisiones
-  - Subtotales por agente
-  - Total general
-  - Formato profesional con estilos
-- **Backend endpoints**:
-  - `GET /api/comisiones-generadas/pdf?fecha_desde=X&fecha_hasta=Y`
-  - `GET /api/comisiones-generadas/excel?fecha_desde=X&fecha_hasta=Y`
-- **Uso**: Perfecto para calcular el importe a pagar a un agente en un periodo (ej: comisiones del mes)
+#### 1. Selector de Búsqueda de Artículos en Albaranes ✅ (P0 - Nueva funcionalidad)
+- **Ubicación**: Campo de búsqueda debajo de "Descripción del artículo" en cada línea del albarán
+- **Características implementadas**:
+  - Buscador con icono de lupa y botón de limpiar
+  - Filtrado en tiempo real por código, nombre o categoría
+  - Dropdown desplegable con artículos agrupados por categoría (Fertilizantes, Fitosanitarios, Semillas, etc.)
+  - Cada artículo muestra: nombre, código y precio con unidad (ej: "25.50 €/Saco")
+  - Al seleccionar: auto-completa descripción, precio unitario y unidad de medida
+  - Indicador visual verde "✓ Artículo seleccionado del catálogo" cuando hay artículo vinculado
+- **Endpoint utilizado**: `GET /api/articulos/activos` (ya existía)
+- **Fix de CSS**: Añadida clase `overflow-visible` para permitir que el dropdown se muestre sobre la tabla
 
 ---
 
-## Sesión 7:
+## Sesión 8:
 
 ### Completadas en sesión anterior:
 
