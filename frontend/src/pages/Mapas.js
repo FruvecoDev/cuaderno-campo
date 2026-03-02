@@ -46,10 +46,14 @@ const CROP_COLORS = {
 };
 
 // Component to fit bounds to markers/polygons
-const FitBounds = ({ parcelas }) => {
+const FitBounds = ({ parcelas, disabled }) => {
   const map = useMap();
+  const [hasInitialized, setHasInitialized] = useState(false);
   
   useEffect(() => {
+    // Only fit bounds on initial load, not when flyTo is active
+    if (disabled || hasInitialized) return;
+    
     const bounds = [];
     
     parcelas.forEach(p => {
@@ -69,8 +73,9 @@ const FitBounds = ({ parcelas }) => {
     
     if (bounds.length > 0) {
       map.fitBounds(bounds, { padding: [50, 50] });
+      setHasInitialized(true);
     }
-  }, [parcelas, map]);
+  }, [parcelas, map, disabled, hasInitialized]);
   
   return null;
 };
@@ -83,7 +88,7 @@ const FlyToParcela = ({ parcela, onComplete }) => {
     if (!parcela) return;
     
     let targetLat, targetLng;
-    let zoomLevel = 16;
+    let zoomLevel = 17;
     
     // If parcela has polygon, fly to its center
     if (parcela.recintos?.[0]?.geometria?.length > 0) {
@@ -91,9 +96,9 @@ const FlyToParcela = ({ parcela, onComplete }) => {
       targetLat = geo.reduce((sum, c) => sum + c.lat, 0) / geo.length;
       targetLng = geo.reduce((sum, c) => sum + c.lng, 0) / geo.length;
       
-      // Fit to polygon bounds
+      // Fit to polygon bounds with animation
       const bounds = geo.map(c => [c.lat, c.lng]);
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 17 });
+      map.flyToBounds(bounds, { padding: [80, 80], maxZoom: 18, duration: 1.5 });
     } else if (parcela.latitud && parcela.longitud) {
       // Fly to marker position
       targetLat = parcela.latitud;
@@ -102,7 +107,8 @@ const FlyToParcela = ({ parcela, onComplete }) => {
     }
     
     if (onComplete) {
-      setTimeout(onComplete, 1500);
+      setTimeout(onComplete, 2000);
+    }
     }
   }, [parcela, map, onComplete]);
   
