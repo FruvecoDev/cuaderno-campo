@@ -163,6 +163,18 @@ function App() {
           </ProtectedRoute>
         } />
         
+        <Route path="/albaranes/nuevo" element={
+          <ProtectedRoute>
+            <Layout><AlbaranForm /></Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/albaranes/editar/:id" element={
+          <ProtectedRoute>
+            <Layout><AlbaranForm /></Layout>
+          </ProtectedRoute>
+        } />
+        
         <Route path="/cosechas" element={
           <ProtectedRoute>
             <Layout><Cosechas /></Layout>
