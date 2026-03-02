@@ -620,20 +620,38 @@ const AlbaranForm = () => {
                     const numStr = String(c.numero || 0).padStart(6, '0');
                     const numeroFormateado = `MP-${year}-${numStr}`;
                     
-                    // Obtener parcela asociada al contrato
-                    const parcelaContrato = parcelas.find(p => 
-                      c.parcelas?.includes(p._id) || 
-                      c.parcela_id === p._id ||
-                      p.contrato_id === c._id
-                    );
-                    const codigoParcela = parcelaContrato?.codigo_plantacion || parcelaContrato?.finca || '';
-                    
                     return (
                       <option key={c._id} value={c._id}>
-                        {numeroFormateado} | {c.cultivo} | {c.campana}{codigoParcela ? ` | ${codigoParcela}` : ''}
+                        {numeroFormateado} | {c.cultivo} | {c.campana}
                       </option>
                     );
                   })}
+              </select>
+            </div>
+            
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Parcela</label>
+              <select
+                className="form-select"
+                value={formData.parcela_id}
+                onChange={(e) => {
+                  const parcela = parcelasDelContrato.find(p => p._id === e.target.value);
+                  setFormData(prev => ({
+                    ...prev,
+                    parcela_id: e.target.value,
+                    parcela_codigo: parcela?.codigo_plantacion || parcela?.finca || ''
+                  }));
+                }}
+                disabled={!selectedContrato || parcelasDelContrato.length === 0}
+                data-testid="select-parcela"
+              >
+                <option value="">-- Seleccionar parcela --</option>
+                {parcelasDelContrato.map(p => (
+                  <option key={p._id} value={p._id}>
+                    {p.codigo_plantacion || p.finca || `Parcela ${p._id?.slice(-6)}`}
+                    {p.cultivo ? ` - ${p.cultivo}` : ''}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
