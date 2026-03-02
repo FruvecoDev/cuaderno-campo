@@ -861,7 +861,7 @@ const Albaranes = () => {
           </button>
           <PermissionButton
             permission="create"
-            onClick={() => { resetForm(); setShowForm(!showForm); setEditingId(null); }}
+            onClick={() => navigate('/albaranes/nuevo')}
             className="btn btn-primary"
             data-testid="btn-nuevo-albaran"
           >
