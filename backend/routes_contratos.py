@@ -327,9 +327,9 @@ async def export_contratos_pdf(
     # Get contracts
     contratos = await contratos_collection.find(query).sort("fecha_contrato", -1).to_list(1000)
     
-    # Calculate totals
-    total_cantidad = sum(c.get("cantidad_kg", 0) or 0 for c in contratos)
-    total_importe = sum((c.get("cantidad_kg", 0) or 0) * (c.get("precio_kg", 0) or 0) for c in contratos)
+    # Calculate totals - usando los campos correctos
+    total_cantidad = sum(c.get("cantidad", 0) or 0 for c in contratos)
+    total_importe = sum((c.get("cantidad", 0) or 0) * (c.get("precio", 0) or 0) for c in contratos)
     
     # Build filter description
     filtros_texto = []
@@ -398,8 +398,8 @@ async def export_contratos_pdf(
     """
     
     for c in contratos:
-        cantidad = c.get("cantidad_kg", 0) or 0
-        precio = c.get("precio_kg", 0) or 0
+        cantidad = c.get("cantidad", 0) or 0
+        precio = c.get("precio", 0) or 0
         total = cantidad * precio
         tipo_class = "tipo-compra" if c.get("tipo") == "Compra" else "tipo-venta"
         proveedor_cliente = c.get("proveedor") or c.get("cliente") or "-"
@@ -517,8 +517,8 @@ async def export_contratos_excel(
     
     # Data rows
     for row, c in enumerate(contratos, 2):
-        cantidad = c.get("cantidad_kg", 0) or 0
-        precio = c.get("precio_kg", 0) or 0
+        cantidad = c.get("cantidad", 0) or 0
+        precio = c.get("precio", 0) or 0
         total = cantidad * precio
         proveedor_cliente = c.get("proveedor") or c.get("cliente") or ""
         
@@ -534,8 +534,8 @@ async def export_contratos_excel(
     
     # Totals row
     total_row = len(contratos) + 2
-    total_cantidad = sum(c.get("cantidad_kg", 0) or 0 for c in contratos)
-    total_importe = sum((c.get("cantidad_kg", 0) or 0) * (c.get("precio_kg", 0) or 0) for c in contratos)
+    total_cantidad = sum(c.get("cantidad", 0) or 0 for c in contratos)
+    total_importe = sum((c.get("cantidad", 0) or 0) * (c.get("precio", 0) or 0) for c in contratos)
     
     ws.cell(row=total_row, column=5, value="TOTALES:").font = Font(bold=True)
     ws.cell(row=total_row, column=6, value=total_cantidad).font = Font(bold=True)
