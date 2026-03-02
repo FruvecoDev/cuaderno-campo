@@ -716,7 +716,7 @@ const AlbaranForm = () => {
                             <span style={{ fontWeight: '500' }}>{item.descripcion}</span>
                           </div>
                         ) : (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', position: 'relative' }}>
                             <input
                               type="text"
                               className="form-input"
@@ -727,20 +727,163 @@ const AlbaranForm = () => {
                               data-testid={`item-descripcion-${index}`}
                             />
                             {articulosCatalogo.length > 0 && (
-                              <select
-                                className="form-select"
-                                value={item.articulo_id || ''}
-                                onChange={(e) => handleArticuloSelect(index, e.target.value)}
-                                style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}
-                                data-testid={`item-articulo-${index}`}
-                              >
-                                <option value="">-- Seleccionar del catálogo --</option>
-                                {articulosCatalogo.map(art => (
-                                  <option key={art._id} value={art._id}>
-                                    {art.codigo} - {art.nombre} ({art.precio_unitario?.toFixed(2) || '0.00'} €/{art.unidad_medida})
-                                  </option>
-                                ))}
-                              </select>
+                              <div style={{ position: 'relative' }}>
+                                <div style={{ position: 'relative' }}>
+                                  <Search size={14} style={{ 
+                                    position: 'absolute', 
+                                    left: '8px', 
+                                    top: '50%', 
+                                    transform: 'translateY(-50%)',
+                                    color: 'hsl(var(--muted-foreground))'
+                                  }} />
+                                  <input
+                                    type="text"
+                                    className="form-input"
+                                    placeholder="Buscar artículo..."
+                                    value={articuloSearch[index] || ''}
+                                    onChange={(e) => {
+                                      setArticuloSearch(prev => ({ ...prev, [index]: e.target.value }));
+                                      setActiveSearchIndex(index);
+                                    }}
+                                    onFocus={() => setActiveSearchIndex(index)}
+                                    style={{ 
+                                      fontSize: '0.8rem', 
+                                      paddingLeft: '28px',
+                                      backgroundColor: item.articulo_id ? '#f0fdf4' : 'white'
+                                    }}
+                                    data-testid={`item-buscar-articulo-${index}`}
+                                  />
+                                  {articuloSearch[index] && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setArticuloSearch(prev => ({ ...prev, [index]: '' }));
+                                        setActiveSearchIndex(null);
+                                      }}
+                                      style={{
+                                        position: 'absolute',
+                                        right: '8px',
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        padding: '2px',
+                                        color: 'hsl(var(--muted-foreground))'
+                                      }}
+                                    >
+                                      <X size={14} />
+                                    </button>
+                                  )}
+                                </div>
+                                {activeSearchIndex === index && (
+                                  <div style={{
+                                    position: 'absolute',
+                                    top: '100%',
+                                    left: 0,
+                                    right: 0,
+                                    backgroundColor: 'white',
+                                    border: '1px solid hsl(var(--border))',
+                                    borderRadius: '6px',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                                    maxHeight: '250px',
+                                    overflowY: 'auto',
+                                    zIndex: 100
+                                  }}>
+                                    {(() => {
+                                      const searchTerm = (articuloSearch[index] || '').toLowerCase();
+                                      const filteredArticulos = articulosCatalogo.filter(art => 
+                                        art.codigo?.toLowerCase().includes(searchTerm) ||
+                                        art.nombre?.toLowerCase().includes(searchTerm) ||
+                                        art.categoria?.toLowerCase().includes(searchTerm)
+                                      );
+                                      
+                                      // Agrupar por categoría
+                                      const grouped = filteredArticulos.reduce((acc, art) => {
+                                        const cat = art.categoria || 'General';
+                                        if (!acc[cat]) acc[cat] = [];
+                                        acc[cat].push(art);
+                                        return acc;
+                                      }, {});
+                                      
+                                      if (filteredArticulos.length === 0) {
+                                        return (
+                                          <div style={{ padding: '12px', textAlign: 'center', color: 'hsl(var(--muted-foreground))' }}>
+                                            No se encontraron artículos
+                                          </div>
+                                        );
+                                      }
+                                      
+                                      return Object.entries(grouped).map(([categoria, arts]) => (
+                                        <div key={categoria}>
+                                          <div style={{ 
+                                            padding: '6px 12px', 
+                                            backgroundColor: 'hsl(var(--muted))',
+                                            fontSize: '0.7rem',
+                                            fontWeight: '600',
+                                            textTransform: 'uppercase',
+                                            color: 'hsl(var(--muted-foreground))',
+                                            position: 'sticky',
+                                            top: 0
+                                          }}>
+                                            {categoria}
+                                          </div>
+                                          {arts.map(art => (
+                                            <div
+                                              key={art._id}
+                                              onClick={() => {
+                                                handleArticuloSelect(index, art._id);
+                                                setArticuloSearch(prev => ({ ...prev, [index]: art.nombre }));
+                                                setActiveSearchIndex(null);
+                                              }}
+                                              style={{
+                                                padding: '8px 12px',
+                                                cursor: 'pointer',
+                                                borderBottom: '1px solid hsl(var(--border))',
+                                                transition: 'background-color 0.15s'
+                                              }}
+                                              onMouseEnter={(e) => e.target.style.backgroundColor = 'hsl(var(--primary) / 0.1)'}
+                                              onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                                              data-testid={`articulo-option-${art._id}`}
+                                            >
+                                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div>
+                                                  <span style={{ fontWeight: '500', fontSize: '0.85rem' }}>{art.nombre}</span>
+                                                  <span style={{ 
+                                                    marginLeft: '8px', 
+                                                    fontSize: '0.75rem', 
+                                                    color: 'hsl(var(--muted-foreground))',
+                                                    backgroundColor: 'hsl(var(--muted))',
+                                                    padding: '1px 6px',
+                                                    borderRadius: '4px'
+                                                  }}>
+                                                    {art.codigo}
+                                                  </span>
+                                                </div>
+                                                <span style={{ fontWeight: '600', color: 'hsl(var(--primary))', fontSize: '0.85rem' }}>
+                                                  {(art.precio_unitario || 0).toFixed(2)} €/{art.unidad_medida || 'ud'}
+                                                </span>
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      ));
+                                    })()}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            {item.articulo_id && (
+                              <div style={{ 
+                                fontSize: '0.7rem', 
+                                color: '#16a34a',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}>
+                                <Check size={12} />
+                                Artículo seleccionado del catálogo
+                              </div>
                             )}
                           </div>
                         )}
