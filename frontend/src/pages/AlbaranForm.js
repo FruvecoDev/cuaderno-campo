@@ -662,57 +662,21 @@ const AlbaranForm = () => {
               backgroundColor: 'hsl(var(--primary) / 0.05)', 
               border: '1px solid hsl(var(--primary) / 0.2)',
               borderRadius: '8px',
-              padding: '1rem',
+              padding: '0.75rem 1rem',
               marginTop: '0.5rem'
             }}>
-              <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.75rem', color: 'hsl(var(--primary))' }}>
-                Datos del Contrato Vinculado
-              </h4>
-              <div className="grid-4">
-                <div>
-                  <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
-                    {formData.tipo === 'Albarán de venta' ? 'Cliente' : 'Proveedor'}
-                  </span>
-                  <p style={{ fontWeight: '500' }}>{selectedContrato.proveedor || selectedContrato.cliente || '-'}</p>
-                </div>
+              <div className="grid-3" style={{ gap: '1rem' }}>
                 <div>
                   <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Cultivo</span>
-                  <p style={{ fontWeight: '500' }}>{selectedContrato.cultivo || '-'}</p>
-                </div>
-                <div>
-                  <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Parcela</span>
-                  {parcelasDelContrato.length > 1 ? (
-                    <select
-                      className="form-select"
-                      value={formData.parcela_codigo}
-                      onChange={(e) => {
-                        const parcela = parcelasDelContrato.find(p => 
-                          (p.codigo_plantacion || p.finca || p._id) === e.target.value
-                        );
-                        setFormData(prev => ({
-                          ...prev,
-                          parcela_codigo: e.target.value,
-                          parcela_id: parcela?._id || ''
-                        }));
-                      }}
-                      style={{ marginTop: '0.25rem' }}
-                      data-testid="select-parcela"
-                    >
-                      <option value="">-- Seleccionar parcela --</option>
-                      {parcelasDelContrato.map(p => (
-                        <option key={p._id} value={p.codigo_plantacion || p.finca || p._id}>
-                          {p.codigo_plantacion || p.finca || `Parcela ${p._id?.slice(-6)}`}
-                          {p.cultivo ? ` - ${p.cultivo}` : ''}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <p style={{ fontWeight: '500' }}>{formData.parcela_codigo || '-'}</p>
-                  )}
+                  <p style={{ fontWeight: '500', margin: '0.25rem 0 0 0' }}>{selectedContrato.cultivo || '-'}</p>
                 </div>
                 <div>
                   <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Campaña</span>
-                  <p style={{ fontWeight: '500' }}>{formData.campana || '-'}</p>
+                  <p style={{ fontWeight: '500', margin: '0.25rem 0 0 0' }}>{formData.campana || '-'}</p>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Precio Contrato</span>
+                  <p style={{ fontWeight: '500', margin: '0.25rem 0 0 0' }}>{selectedContrato.precio ? `${selectedContrato.precio} €/kg` : '-'}</p>
                 </div>
               </div>
             </div>
