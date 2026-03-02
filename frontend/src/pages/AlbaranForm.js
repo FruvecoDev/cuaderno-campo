@@ -722,7 +722,7 @@ const AlbaranForm = () => {
                 <tbody>
                   {formData.items.map((item, index) => (
                     <tr key={index} style={item.es_destare ? { backgroundColor: '#fef2f2' } : {}}>
-                      <td>
+                      <td style={{ overflow: 'visible', position: 'relative' }}>
                         {item.es_destare ? (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#dc2626' }}>
                             <AlertTriangle size={16} />
