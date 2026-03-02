@@ -331,6 +331,14 @@ const Mapas = () => {
   const filteredParcelas = parcelas.filter(p => {
     if (filters.cultivo && p.cultivo !== filters.cultivo) return false;
     if (filters.finca && p.finca_id !== filters.finca) return false;
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      const matchCodigo = p.codigo_plantacion?.toLowerCase().includes(searchLower);
+      const matchFinca = p.finca?.toLowerCase().includes(searchLower);
+      const matchCultivo = p.cultivo?.toLowerCase().includes(searchLower);
+      const matchProveedor = p.proveedor?.toLowerCase().includes(searchLower);
+      if (!matchCodigo && !matchFinca && !matchCultivo && !matchProveedor) return false;
+    }
     return true;
   });
 
