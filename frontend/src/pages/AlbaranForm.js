@@ -615,6 +615,11 @@ const AlbaranForm = () => {
                     return tipoMatch && (formData.tipo === 'Albarán de venta' ? clienteMatch : proveedorMatch);
                   })
                   .map(c => {
+                    // Formatear número de contrato: MP-2026-000018
+                    const year = c.campana?.split('/')[0] || new Date().getFullYear();
+                    const numStr = String(c.numero || 0).padStart(6, '0');
+                    const numeroFormateado = `MP-${year}-${numStr}`;
+                    
                     // Obtener parcela asociada al contrato
                     const parcelaContrato = parcelas.find(p => 
                       c.parcelas?.includes(p._id) || 
@@ -625,7 +630,7 @@ const AlbaranForm = () => {
                     
                     return (
                       <option key={c._id} value={c._id}>
-                        {c.numero || `MP-${c._id.slice(-6).toUpperCase()}`} | {c.cultivo} | {c.campana}{codigoParcela ? ` | ${codigoParcela}` : ''}
+                        {numeroFormateado} | {c.cultivo} | {c.campana}{codigoParcela ? ` | ${codigoParcela}` : ''}
                       </option>
                     );
                   })}
