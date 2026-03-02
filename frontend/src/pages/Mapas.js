@@ -788,7 +788,7 @@ const Mapas = () => {
                     cursor: 'pointer',
                     transition: 'all 0.2s'
                   }}
-                  onClick={() => setFlyToParcela(p)}
+                  onClick={() => { setDisableFitBounds(true); setFlyToParcela(p); }}
                   onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
                   onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                 >
@@ -804,7 +804,7 @@ const Mapas = () => {
                     <div style={{ fontWeight: '500', fontSize: '0.85rem', flex: 1 }}>{p.codigo_plantacion}</div>
                     <button
                       className="btn btn-xs"
-                      onClick={(e) => { e.stopPropagation(); setFlyToParcela(p); }}
+                      onClick={(e) => { e.stopPropagation(); setDisableFitBounds(true); setFlyToParcela(p); }}
                       style={{ 
                         padding: '0.15rem 0.4rem', 
                         fontSize: '0.65rem',
