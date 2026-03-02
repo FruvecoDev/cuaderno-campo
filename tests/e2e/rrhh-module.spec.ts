@@ -1,6 +1,6 @@
 import { test, expect, Page } from '@playwright/test';
 
-const BASE_URL = process.env.REACT_APP_BACKEND_URL || 'https://harvest-hub-300.preview.emergentagent.com';
+const BASE_URL = process.env.REACT_APP_BACKEND_URL || 'https://harvest-hub-302.preview.emergentagent.com';
 
 // Helper functions
 async function login(page: Page) {

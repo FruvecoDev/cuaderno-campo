@@ -7,7 +7,7 @@ Cada sección puede ser configurable pudiendo habilitar o deshabilitar secciones
 
 El usuario ha solicitado recientemente la creación de un módulo RRHH para la gestión de personas, control horario, control de productividad, gestión documental, y un portal del empleado.
 
-En las últimas interacciones, el usuario ha solicitado la adición de campos específicos a los contratos, incluyendo formas de pago/cobro y un descuento por destare, y ha pedido mejoras en la interfaz de usuario, como la apertura de formularios en páginas dedicadas y el formato automático de números.
+En las últimas interacciones, el usuario ha solicitado la adición de campos de descuento en los albaranes (tanto por peso -destare- como por porcentaje) y la capacidad de asociar parcelas a los albaranes de forma dinámica basándose en el contrato seleccionado.
 
 **PRODUCT REQUIREMENTS:**
 -   **Modules:** Contracts, Parcels, Maps, Farms, Visits, Tasks, Harvests, Treatments, Irrigations, Recipes, Delivery Notes, Suppliers, Crops, Machinery, Evaluation Sheets, Applicator Technicians, Farm Articles, Purchase/Sale Agents, Clients, **Human Resources (RRHH)**.
@@ -38,72 +38,84 @@ En las últimas interacciones, el usuario ha solicitado la adición de campos es
 **User's preferred language**: Español
 
 **what currently exists?**
-Una aplicación full-stack de gestión agrícola (React, FastAPI, MongoDB) con varios módulos funcionales, incluyendo Contratos, Parcelas, Mapas, Tratamientos y Cuaderno de Campo. Las características clave implementadas son la generación de PDF, mapas interactivos con dibujo de polígonos, importación de KML/GeoJSON y autenticación de usuarios.
+La aplicación es un sistema de gestión agrícola full-stack. En esta sesión se ha trabajado intensamente en los módulos de Albaranes y Comisiones Generadas.
 
-En esta sesión se han realizado numerosas mejoras de usabilidad y funcionalidad basadas en las peticiones del usuario:
--   Los formularios de creación/edición de **Tratamientos** y **Contratos** ahora se abren en páginas dedicadas para una mejor experiencia de usuario.
--   Se han añadido funcionalidades de autocompletado y generación automática de códigos en los formularios de **Parcelas** y **Contratos**.
--   Se ha implementado la gestión de estados (p. ej., pendiente, completado, cancelado) para **Tratamientos** y **Hojas de Evaluación**.
--   Se han corregido bugs importantes, como la desaparición de polígonos dibujados en el mapa y la falta de datos del técnico aplicador en los PDF generados.
--   Se ha mejorado la visualización de datos en los formularios, añadiendo formato de separadores de miles para campos numéricos.
+-   **Módulo de Albaranes Refactorizado**:
+    -   El formulario para crear/editar albaranes se ha movido a su propia página (, ), separándolo de la lista principal.
+    -   La lógica de cálculo del **destare** (descuento por peso) ha sido modificada significativamente. Ahora se representa como una línea de artículo adicional con cantidad y total negativos, y el total del albarán es la suma de todas las líneas.
+    -   El layout del formulario ha sido reorganizado siguiendo las indicaciones del usuario, con secciones para datos generales, proveedor/contrato/parcela, y las líneas de artículos.
+    -   Se han corregido errores de guardado (, conversión de  en el backend) y se han realizado ajustes de UI (ancho de campos, formato de números).
+
+-   **Módulo de Comisiones Mejorado**:
+    -   Se ha añadido la funcionalidad de **filtrar comisiones por rango de fechas**.
+    -   Se han implementado botones para **exportar la lista filtrada a PDF y Excel**.
+    -   Se ha añadido la columna Nº Albarán a la lista, modificando el backend para guardar y mostrar este dato.
+    -   Se ha corregido un bug que impedía mostrar el nombre del proveedor/cliente en la lista.
 
 **Last working item**:
--   **Last item agent was working**: Implementar nuevos campos en el módulo de **Contratos** según la última petición del usuario. Los campos solicitados son: **agente**, **tipo de comisión**, **valor de comisión**, **forma de pago/cobro**, y **descuento destare**. El agente había verificado que los campos de agente y comisión ya existían y estaba a punto de añadir los nuevos campos al modelo de datos y al formulario.
--   **Status**: IN PROGRESS
+-   **Last item agent was working**: El agente estaba a punto de añadir un selector de búsqueda de artículos en las líneas del formulario de albaranes, según la última petición del usuario.
+-   **Status**: NOT STARTED
 -   **Agent Testing Done**: N
--   **Which testing method agent to use?**: screenshot tool. Se debe verificar que los nuevos campos (/ y ) aparecen condicionalmente en el formulario de Contratos según el tipo de contrato (compra/venta).
+-   **Which testing method agent to use?**: screenshot tool. El agente debe añadir el selector en el formulario y tomar una captura de pantalla para que el usuario verifique visualmente que el componente está en su sitio y es funcional.
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Implementar lógica y campos restantes en el módulo de Contratos (Prioridad: P0)**
-    -   **Description**: Finalizar la implementación de los nuevos campos solicitados por el usuario en el formulario y modelo de Contratos. Esto incluye  (para compras),  (para ventas) y  (% sobre kilos, solo para compras).
-    -   **Attempted fixes**: El agente analizó el archivo  y confirmó que algunos campos ya existían.
+-   **Issue 1: Añadir selector de búsqueda de artículos en el formulario de albaranes (Prioridad: P0)**
+    -   **Description**: El usuario ha solicitado añadir un campo de búsqueda para seleccionar artículos del catálogo en cada línea del albarán, justo debajo del campo de descripción.
+    -   **Attempted fixes**: Ninguno. La petición es nueva.
     -   **Next debug checklist**:
-        1.  Modificar el modelo Pydantic en  para añadir los campos , , y .
-        2.  Actualizar la ruta  y  de contratos en  para manejar los nuevos campos.
-        3.  En , añadir los nuevos campos al formulario, mostrando  y  solo si , y  si .
-        4.  Asegurar que los nuevos campos se inicializan correctamente en el estado  y se envían en el .
-    -   **Why fix this issue and what will be achieved with the fix?**: Cumplir con un requisito explícito del usuario para una gestión de contratos más detallada.
-    -   **Status**: IN PROGRESS
+        1.  Abrir el fichero .
+        2.  En la sección que renderiza las líneas del albarán (), añadir un componente de selección (p. ej., un  de  o un componente similar) debajo del campo de descripción.
+        3.  Conectar este selector a un endpoint de API para obtener la lista de artículos. Nota: El endpoint  resultó ser inexistente en una comprobación anterior; será necesario crearlo o encontrar el correcto.
+        4.  Asegurarse de que al seleccionar un artículo, se actualicen los campos correspondientes de la línea (p. ej., descripción, precio).
+    -   **Why fix this issue and what will be achieved with the fix?**: Para agilizar la creación de albaranes, permitiendo al usuario seleccionar artículos predefinidos en lugar de escribirlos manualmente.
+    -   **Status**: NOT STARTED
     -   **Is recurring issue?**: N
-    -   **Should Test frontend/backend/both after fix?**: Both.
+    -   **Should Test frontend/backend/both after fix?**: Frontend (y backend si se crea el endpoint).
     -   **Blocked on other issue**: No.
 
+-   **Issue 2: Habilitar Notificaciones por Email (Prioridad: P1)**
+    -   **Description**: La integración con  está implementada pero desactivada por falta de la clave de API.
+    -   **Next debug checklist**:
+        1.  Preguntar al usuario si desea activar esta funcionalidad y si puede proporcionar la .
+        2.  Añadir la clave al archivo  del backend y reiniciar el servicio.
+    -   **Why fix this issue and what will be achieved with the fix?**: Activará una funcionalidad clave pendiente para las notificaciones automáticas.
+    -   **Status**: BLOCKED
+    -   **Is recurring issue?**: Y
+    -   **Should Test frontend/backend/both after fix?**: Backend.
+    -   **Blocked on other issue**: Esperando input del usuario (API Key).
+
 **In progress Task List**:
--   **Task 1: Añadir nuevos campos al formulario de Contratos.**
-    -   **Where to resume**: En el backend, modificar el archivo  para añadir los nuevos campos al modelo del contrato.
-    -   **What will be achieved with this?**: El formulario de contratos contendrá todos los campos requeridos por el usuario, con la lógica condicional necesaria.
+-   **Task 1: Añadir selector de búsqueda de artículos en el formulario de albaranes.**
+    -   **Where to resume**: En el fichero . Se debe implementar el componente de UI para el selector de artículos y la lógica para obtener los datos desde el backend.
+    -   **What will be achieved with this?**: Se cumplirá la última petición del usuario, mejorando la usabilidad del formulario de albaranes.
     -   **Status**: IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?**: Both.
+    -   **Should Test frontend/backend/both after fix?**: Frontend (y posiblemente backend).
     -   **Blocked on something**: No.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks**:
-    -   **P0: Implementar lógica de **: Una vez añadido el campo, se debe implementar la lógica para que, al crear albaranes de compra, se aplique este descuento automáticamente, generando una línea de destare que reduzca los kilos totales y afecte al cálculo de la comisión del agente.
-    -   **P1: Habilitar Notificaciones por Email**: La funcionalidad de backend está lista pero bloqueada. Es crucial solicitar al usuario la  para activar esta característica.
-    -   **P2: Completar Refactorización de **: El archivo sigue manejando múltiples responsabilidades (Empleados, Fichajes, Productividad). Se debe dividir en archivos separados para mejorar la mantenibilidad.
+    -   **P2: Refactorizar **: El archivo sigue manejando múltiples responsabilidades (Empleados, Fichajes, etc.). Se debe dividir en archivos separados por funcionalidad para mejorar la mantenibilidad.
 -   **Future Tasks**:
     -   Implementar los módulos principales restantes del cuaderno de campo (p. ej., Recetas, Tareas).
     -   Implementar las integraciones de IA planificadas (resúmenes de contratos, predicciones de cosecha).
     -   Implementar la identificación por NFC para el control horario.
     -   Generalizar la generación de informes PDF/Excel para todos los módulos.
+    -   Generalizar el sistema de historial de auditoría a otros módulos críticos.
 
 **Completed work in this session**
--   **UI/UX**: Los formularios de **Tratamientos** y **Contratos** ahora se abren en páginas dedicadas para evitar problemas de scroll y mejorar la usabilidad.
--   **Formularios Mejorados**:
-    -   **Parcelas**:  auto-generado;  y  son selectores opcionales.
-    -   **Tratamientos**:  se autocompleta desde las parcelas seleccionadas pero sigue siendo editable.
-    -   **Contratos**:  se genera automáticamente; se corrigieron todas las etiquetas al español y se añadió formato de miles a los campos numéricos.
--   **Gestión de Estado**:
-    -   Se añadieron botones y lógica para marcar **Tratamientos** como Completado o Cancelado.
-    -   Se añadieron botones y lógica para marcar **Hojas de Evaluación** como Finalizada o Archivada.
--   **Bug Fixes**:
-    -   Corregido un bug crítico donde los datos del **técnico aplicador** no aparecían en el PDF de la hoja de evaluación. El problema se rastreó hasta un nombre de campo incorrecto ( en lugar de ).
-    -   Solucionado un problema donde el campo **Maquinaria** no era visible en el formulario de tratamiento debido a una configuración antigua en .
-    -   Resuelto un bug visual donde un **polígono dibujado** en el mapa desaparecía después de la confirmación en el formulario de creación de parcelas.
+-   **Refactorización del Módulo de Albaranes**:
+    -   Se ha movido el formulario de albaranes a un componente y ruta dedicados ().
+    -   Se ha reimplementado la lógica de cálculo de  para que sea una línea con valores negativos.
+    -   Se ha reorganizado la disposición de los campos del formulario según las peticiones del usuario.
+    -   Se han corregido varios bugs relacionados con el guardado y el formato de los datos.
+-   **Mejoras en el Módulo de Comisiones**:
+    -   Se ha añadido la funcionalidad de filtrado por fechas y exportación a PDF/Excel.
+    -   Se ha añadido la columna Nº Albarán a la vista de lista.
+    -   Se ha corregido el bug que impedía ver el nombre del proveedor/cliente.
 
 **Earlier issues found/mentioned but not fixed**
--   Ninguno. El código muerto en  mencionado en el handoff anterior ya había sido eliminado.
+-   Ninguno.
 
 **Known issue recurrence from previous fork**
 -   Ninguno.
@@ -112,60 +124,56 @@ En esta sesión se han realizado numerosas mejoras de usabilidad y funcionalidad
 
 
 **Key Technical Concepts**
--   **Refactorización de UI con React Router**: Se utilizó ,  y  para dividir componentes grandes (listas y formularios) en vistas separadas (p. ej.,  para la lista,  para el formulario), mejorando la experiencia de usuario y la mantenibilidad.
--   **Gestión de Estado Condicional**: Implementación de lógica para mostrar/ocultar campos de formulario (, ) basándose en otros valores del estado ( de contrato).
--   **Manejo de **: Se implementó una estrategia robusta para fusionar la configuración de campos por defecto con la configuración guardada por el usuario en , evitando que campos nuevos no aparezcan.
--   **Extensión de API (FastAPI)**: Se añadió un nuevo endpoint  para actualizar parcialmente un recurso, siguiendo las mejores prácticas REST.
--   **Depuración de Backend a Frontend**: Se diagnosticó y resolvió un problema complejo en la generación de PDF () rastreando el flujo de datos desde la consulta a la base de datos en el backend hasta su renderizado final, identificando un nombre de campo incorrecto como la causa raíz.
--   **Formateo de Entradas (Frontend)**: Se crearon funciones de utilidad para formatear números en tiempo real mientras el usuario escribe en los campos de entrada, añadiendo separadores de miles y manejando la conversión de vuelta a número para el envío al backend.
+-   **Component Splitting (React)**: Se separó un componente monolítico () en una vista de lista y una vista de formulario (), mejorando la mantenibilidad y la navegación mediante React Router.
+-   **Generación de Ficheros en Backend (FastAPI)**: Se crearon endpoints que generan dinámicamente ficheros PDF () y Excel () a partir de datos filtrados, sirviéndolos como .
+-   **Enriquecimiento de Datos en Lectura**: El backend enriquece los datos de comisiones al leerlos (añadiendo  o  si no existen) para mantener la compatibilidad con registros antiguos sin necesidad de una migración de base deatos.
+-   **Lógica de Negocio Compleja en Frontend**: El formulario de albaranes gestiona un estado complejo en tiempo real, recalculando totales y mostrando líneas condicionales () basadas en la entrada del usuario.
 
 **key DB schema**
--   **contratos**: A punto de añadir  (string),  (string) y  (float).
--   **tratamientos**: Se añadió un campo  (string: 'pendiente', 'completado', 'cancelado').
--   **evaluaciones**: Se utiliza el campo existente  (string: 'borrador', 'completada', 'archivada').
-
-**changes in tech stack**
--   Ninguna.
+-   **comisiones**: El documento ahora puede contener los campos , , y .
+-   **albaranes**: El array de  ahora incluye la línea de  como un ítem más, pero con  y  negativos.
 
 **All files of reference**
--   : Archivo principal para la tarea actual.
--   : Archivo de backend a modificar a continuación.
--   : Referencia para el patrón de formulario en página separada.
--   : Contiene la corrección del bug del PDF.
+-   : Componente principal para crear y editar albaranes.
+-   : Componente para la gestión de comisiones.
+-   : Contiene la lógica de backend para ambos módulos.
+-   : Define las nuevas rutas de la aplicación.
+-   : Contiene la corrección para el bug de .
 
 **Areas that need refactoring**:
--   : Sigue siendo un archivo monolítico que debería dividirse por funcionalidad.
+-    ya es un fichero muy grande y complejo. Debería dividirse en sub-componentes más pequeños (p. ej., , ).
+-    y  siguen siendo archivos monolíticos que podrían dividirse por funcionalidad para mejorar la claridad.
 
 **key api endpoints**
--   : **(NUEVO)** Actualiza el estado de un tratamiento a 'pendiente', 'completado' o 'cancelado'.
--   : **(NUEVO)** Obtiene el siguiente número de contrato disponible para la generación automática.
--   : **(CORREGIDO)** La generación del PDF ahora incluye correctamente los datos del técnico aplicador asociado.
+-   : Modificado para aceptar los parámetros de consulta  y .
+-   : Nuevo endpoint para exportar las comisiones filtradas a un fichero PDF.
+-   : Nuevo endpoint para exportar las comisiones filtradas a un fichero Excel.
+-   , : Modificados para reflejar la nueva lógica de cálculo y guardado del  como una línea negativa.
 
 **Critical Info for New Agent**
-1.  **Prioridad Inmediata**: Tu primera tarea es completar la implementación de los nuevos campos en el módulo de **Contratos**. Esto requiere modificar el modelo en , las rutas, y luego el componente de React  para añadir los campos condicionales.
-2.  **Patrón de UI**: El usuario prefiere que los formularios de creación/edición se abran en páginas dedicadas. Sigue el patrón ya implementado en  y  (usando  para mostrar condicionalmente el formulario o la lista) si se solicita una refactorización similar en otros módulos.
-3.  **Problemas de **: Ten en cuenta que los usuarios pueden tener configuraciones de UI guardadas en su . Si un nuevo campo de formulario no aparece, es probable que la configuración local esté desactualizada. La solución es fusionar la configuración por defecto con la local, como se hizo en .
-4.  **Lógica de Negocio Pendiente**: La implementación del  no termina al añadir el campo. El siguiente paso será implementar la lógica en el backend para que afecte a los albaranes. Ten esto en mente para la planificación futura.
+1.  **Prioridad Inmediata**: La primera tarea es implementar el selector de búsqueda de artículos en el formulario de albaranes (), como pidió el usuario.
+2.  **Lógica de Cálculo de Albaranes**: La lógica actual es muy específica: el  es una línea de artículo con cantidad y total negativos. El total del albarán es la suma de los totales de todas las líneas. No se debe modificar esta lógica sin una petición explícita del usuario.
+3.  **Refactorización del Frontend**: El formulario de albaranes fue extraído de  a . Este último fichero es ahora el centro de las nuevas peticiones y es bastante complejo.
+4.  **Endpoint de Artículos**: Para implementar el selector de artículos, probablemente necesites crear o localizar el endpoint correcto en el backend que sirva el catálogo de artículos.
 
 **documents and test reports created in this job**
--   
--    (actualizado)
+-    fue actualizado.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **en el contrato hay que añadir el campo agente, tipo de comisión...**: Solicitud para añadir nuevos campos al contrato. (Estado: **EN PROGRESO**)
-2.  **los campos cantidad, kilos... que sean númericos al escribirlos que reconozca...**: Solicitud de formateo de números con separadores de miles. (Estado: **COMPLETADO**)
-3.  **el primer campo siempre será número de contrato... corregir los nombres de los campos...**: Solicitud para auto-generar el número de contrato y corregir etiquetas. (Estado: **COMPLETADO**)
-4.  **en contratos cuando pulse nuevo contrato o editar contrato que se abra en una nueva pantalla**: Solicitud para que el formulario de contratos se abra en una página dedicada. (Estado: **COMPLETADO**)
-5.  **poder poner las hojas de evaluación como finalizadas**: Solicitud para añadir un estado finalizado a las evaluaciones. (Estado: **COMPLETADO**)
-6.  **el archivo pdf hoja de evaluación sigue sin coger los datos del aplicador**: Segundo reporte del bug de datos del aplicador en el PDF. (Estado: **COMPLETADO**)
-7.  **sigue sin verse el campo maquina en nuevo tratamiento**: Segundo reporte del campo de maquinaria desaparecido. (Estado: **COMPLETADO**)
-8.  **en nuevo tratamiento falta el campo maquina... y hace falta tambien un boton para decir que el tratamiento se ha completado y otro de cancelado**: Solicitud para añadir campo y botones de estado en tratamientos. (Estado: **COMPLETADO**)
-9.  **en nuevo tratamiento o editar uno existente que se abra en una pagina nueva**: Solicitud para que el formulario de tratamiento se abra en una página dedicada. (Estado: **COMPLETADO**)
-10. **cuando un tratamiento lleva asociado un tecnico aplicador en la hoja de evaluacion... tienen que salir los datos del aplicador**: Reporte inicial del bug de datos del aplicador en el PDF. (Estado: **COMPLETADO**)
+1.  **falta el selector de buscar articulos**: Petición para añadir un selector de búsqueda de artículos en las líneas del albarán. **(PENDING)**
+2.  **el campo parcela separado...**: Petición para mover la selección de parcela a un campo independiente en el formulario. **(COMPLETADO)**
+3.  **el contrato MP-2026-000018...**: Petición para cambiar el formato del texto en el selector de contratos. **(COMPLETADO)**
+4.  **ampliar el cuento Dto%...**: Petición para hacer más ancho el campo de descuento y mostrar la cantidad sin decimales. **(COMPLETADO)**
+5.  **se ha cambiado con relación al estado anterior...**: Petición para reorganizar las secciones del formulario de albarán. **(COMPLETADO)**
+6.  **cuando le de a nuevo albaran o editar albaran que se abra en un nueva pagina**: Petición para mover el formulario a una página separada. **(COMPLETADO)**
+7.  **al guardar albaran: Failed to execute clone on Response...**: Reporte de un bug al guardar albaranes. **(COMPLETADO)**
+8.  **la linea de destare con los kilos en negativo...**: Petición para cambiar la lógica de cálculo del destare. **(COMPLETADO)**
+9.  **el listado no rellena el campo proveedor**: Reporte de un bug en la lista de comisiones. **(COMPLETADO)**
+10. **poder imprimir un listado de comisiones por agente...**: Petición para añadir filtros de fecha y exportación a la lista de comisiones. **(COMPLETADO)**
 
 **Project Health Check:**
--   **Broken**: No. La aplicación es estable y las funcionalidades principales operan correctamente.
--   **Mocked**: La integración con **Resend** (emails) y **OpenWeatherMap** sigue bloqueada, a la espera de que el usuario proporcione las claves API.
+-   **Broken**: No. La aplicación es funcional y estable.
+-   **Mocked**: La integración con **Resend** para el envío de emails sigue bloqueada a la espera de la API Key del usuario.
 
 **3rd Party Integrations**
 -   **OpenAI GPT-4o**: Usa Emergent LLM Key.
@@ -175,15 +183,16 @@ En esta sesión se han realizado numerosas mejoras de usabilidad y funcionalidad
 -   **react-leaflet-draw**: Usado para la funcionalidad de dibujo de polígonos.
 -   **Recharts**: Usado para gráficos.
 -   **Reportlab**: Usado para la generación de PDFs.
+-   **Openpyxl**: Usado para la generación de ficheros Excel.
 
 **Testing status**
--   **Testing agent used after significant changes**: YES, se utilizó para verificar la corrección del bug del polígono que desaparecía.
--   **Troubleshoot agent used after agent stuck in loop**: NO.
--   **Test files created**: .
+-   **Testing agent used after significant changes**: NO
+-   **Troubleshoot agent used after agent stuck in loop**: NO
+-   **Test files created**: Ninguno.
 -   **Known regressions**: Ninguna.
 
 **Credentials to test flow:**
 -   **Admin**:  / 
 
 **What agent forgot to execute**
--   El agente ha seguido las peticiones del usuario de forma diligente. La tarea recurrente de refactorizar  sigue pendiente, pero esto se debe a la priorización de las solicitudes directas y más urgentes del usuario.</analysis>
+-   El agente ha seguido todas las peticiones del usuario en orden. La única tarea pendiente derivada de una investigación es la creación del endpoint , que será necesaria para la tarea actual.</analysis>
