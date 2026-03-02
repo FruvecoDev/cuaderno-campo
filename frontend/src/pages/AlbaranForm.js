@@ -692,7 +692,7 @@ const AlbaranForm = () => {
                     <th style={{ width: '120px' }}>Cantidad</th>
                     <th style={{ width: '80px' }}>Unidad</th>
                     <th style={{ width: '100px' }}>Precio Unit.</th>
-                    <th style={{ width: '80px' }}>Dto %</th>
+                    <th style={{ width: '100px' }}>Dto %</th>
                     <th style={{ width: '120px' }}>Total</th>
                     <th style={{ width: '50px' }}></th>
                   </tr>
