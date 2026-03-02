@@ -935,3 +935,18 @@ tr:hover {
     background: transparent;
   }
 }
+
+
+/* Article search dropdown overflow fix */
+.table-container.overflow-visible {
+  overflow: visible !important;
+}
+
+.table-container.overflow-visible table {
+  overflow: visible;
+}
+
+.table-container.overflow-visible td {
+  overflow: visible;
+  position: relative;
+}
