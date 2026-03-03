@@ -96,7 +96,12 @@ const Contratos = () => {
     forma_pago: '',      // Para contratos de compra
     forma_cobro: '',     // Para contratos de venta
     // Descuento destare (solo compras)
-    descuento_destare: '' // Porcentaje que se aplica a los kilos
+    descuento_destare: '', // Porcentaje que se aplica a los kilos
+    // Nuevos campos de condiciones
+    condiciones_entrega: '',  // FCA, DDP, EXW, FOB, CFR
+    transporte_por_cuenta: '', // Empresa, Proveedor o Cliente
+    envases_por_cuenta: '',    // Empresa, Proveedor o Cliente
+    cargas_granel: false       // true/false
   });
   
   // Generar número de contrato automático
@@ -339,7 +344,12 @@ const Contratos = () => {
       // Nuevos campos
       forma_pago: contrato.forma_pago || '',
       forma_cobro: contrato.forma_cobro || '',
-      descuento_destare: contrato.descuento_destare || ''
+      descuento_destare: contrato.descuento_destare || '',
+      // Condiciones logísticas
+      condiciones_entrega: contrato.condiciones_entrega || '',
+      transporte_por_cuenta: contrato.transporte_por_cuenta || '',
+      envases_por_cuenta: contrato.envases_por_cuenta || '',
+      cargas_granel: contrato.cargas_granel || false
     });
     setShowForm(true);
     // Navegar a la ruta de edición
@@ -380,7 +390,12 @@ const Contratos = () => {
       comision_venta_valor: '',
       forma_pago: '',
       forma_cobro: '',
-      descuento_destare: ''
+      descuento_destare: '',
+      // Condiciones logísticas
+      condiciones_entrega: '',
+      transporte_por_cuenta: '',
+      envases_por_cuenta: '',
+      cargas_granel: false
     });
   };
   
@@ -438,7 +453,12 @@ const Contratos = () => {
       comision_venta_valor: contrato.comision_venta_valor || '',
       forma_pago: contrato.forma_pago || '',
       forma_cobro: contrato.forma_cobro || '',
-      descuento_destare: contrato.descuento_destare || ''
+      descuento_destare: contrato.descuento_destare || '',
+      // Condiciones logísticas
+      condiciones_entrega: contrato.condiciones_entrega || '',
+      transporte_por_cuenta: contrato.transporte_por_cuenta || '',
+      envases_por_cuenta: contrato.envases_por_cuenta || '',
+      cargas_granel: contrato.cargas_granel || false
     });
     setShowForm(true);
   };
@@ -910,6 +930,80 @@ const Contratos = () => {
                   </small>
                 </div>
               )}
+            </div>
+            
+            {/* Nuevos campos: Condiciones de Entrega, Transporte, Envases y Granel */}
+            <div style={{ marginTop: '1.5rem', padding: '1rem', backgroundColor: 'hsl(var(--muted) / 0.3)', borderRadius: '8px' }}>
+              <h4 style={{ marginBottom: '1rem', fontSize: '0.95rem', fontWeight: '600', color: 'hsl(var(--primary))' }}>
+                Condiciones Logísticas
+              </h4>
+              <div className="grid-4">
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Condiciones de Entrega</label>
+                  <select
+                    className="form-select"
+                    value={formData.condiciones_entrega}
+                    onChange={(e) => setFormData({...formData, condiciones_entrega: e.target.value})}
+                    data-testid="select-condiciones-entrega"
+                  >
+                    <option value="">-- Seleccionar --</option>
+                    <option value="FCA">FCA (Free Carrier)</option>
+                    <option value="DDP">DDP (Delivered Duty Paid)</option>
+                    <option value="EXW">EXW (Ex Works)</option>
+                    <option value="FOB">FOB (Free On Board)</option>
+                    <option value="CFR">CFR (Cost and Freight)</option>
+                  </select>
+                </div>
+                
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Transporte por cuenta de</label>
+                  <select
+                    className="form-select"
+                    value={formData.transporte_por_cuenta}
+                    onChange={(e) => setFormData({...formData, transporte_por_cuenta: e.target.value})}
+                    data-testid="select-transporte-por-cuenta"
+                  >
+                    <option value="">-- Seleccionar --</option>
+                    <option value="Empresa">Empresa</option>
+                    {formData.tipo === 'Compra' ? (
+                      <option value="Proveedor">Proveedor</option>
+                    ) : (
+                      <option value="Cliente">Cliente</option>
+                    )}
+                  </select>
+                </div>
+                
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Envases por cuenta de</label>
+                  <select
+                    className="form-select"
+                    value={formData.envases_por_cuenta}
+                    onChange={(e) => setFormData({...formData, envases_por_cuenta: e.target.value})}
+                    data-testid="select-envases-por-cuenta"
+                  >
+                    <option value="">-- Seleccionar --</option>
+                    <option value="Empresa">Empresa</option>
+                    {formData.tipo === 'Compra' ? (
+                      <option value="Proveedor">Proveedor</option>
+                    ) : (
+                      <option value="Cliente">Cliente</option>
+                    )}
+                  </select>
+                </div>
+                
+                <div className="form-group" style={{ marginBottom: 0, display: 'flex', alignItems: 'center' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={formData.cargas_granel}
+                      onChange={(e) => setFormData({...formData, cargas_granel: e.target.checked})}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                      data-testid="checkbox-cargas-granel"
+                    />
+                    <span style={{ fontWeight: '500' }}>Cargas a Granel</span>
+                  </label>
+                </div>
+              </div>
             </div>
             
             <div className="form-group" style={{ marginTop: '1rem' }}>

@@ -143,6 +143,12 @@ class ContratoCreate(BaseModel):
     # Descuento destare (% sobre kilos, solo para contratos de Compra)
     descuento_destare: Optional[float] = None
     
+    # Condiciones logísticas
+    condiciones_entrega: Optional[str] = None  # FCA, DDP, EXW, FOB, CFR
+    transporte_por_cuenta: Optional[str] = None  # Empresa, Proveedor o Cliente
+    envases_por_cuenta: Optional[str] = None  # Empresa, Proveedor o Cliente
+    cargas_granel: bool = False  # Si las cargas son a granel
+    
     # Tabla de precios por calidad/tenderometría (para guisante)
     precios_calidad: List[ContratoPrecios] = []
 
