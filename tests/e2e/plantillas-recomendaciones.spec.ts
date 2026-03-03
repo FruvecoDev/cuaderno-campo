@@ -5,7 +5,7 @@
 import { test, expect } from '@playwright/test';
 import { login, dismissToasts, removeEmergentBadge, generateUniqueId } from '../fixtures/helpers';
 
-const BASE_URL = process.env.BASE_URL || 'https://harvest-hub-302.preview.emergentagent.com';
+const BASE_URL = process.env.BASE_URL || 'https://cultivo-pro.preview.emergentagent.com';
 
 test.describe('Plantillas - Tab Navigation', () => {
   test.beforeEach(async ({ page }) => {

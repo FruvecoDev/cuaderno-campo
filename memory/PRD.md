@@ -12,9 +12,30 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
 
 ---
 
-## Última Actualización: 2 Marzo 2026 (Sesión 9)
+## Última Actualización: 3 Marzo 2026 (Sesión 10)
 
 ### Completadas en esta sesión:
+
+#### 1. Corrección de "Precios por Tenderometría" en Formulario de Contratos ✅ (P0 - Bug Fix)
+- **Problema**: La sección de "Precios por Tenderometría" para el cultivo "Guisante" no aparecía en el formulario de página (`/contratos/nuevo`) aunque el código existía en el formulario modal.
+- **Causa raíz**: El componente `Contratos.js` tiene dos vistas de formulario: 
+  - Vista modal (`showForm`) - contenía la sección de tenderometría
+  - Vista de página (`isFormMode`) - NO contenía la sección
+- **Solución**: Añadida la sección completa de "Precios por Tenderometría" al formulario de página (líneas 1007-1100 aproximadamente)
+- **Funcionalidades incluidas**:
+  - Sección azul con título "Precios por Tenderometría (Guisante)"
+  - Tabla para definir rangos de tenderometría con: Tend. Mínima, Tend. Máxima, Precio (€/kg)
+  - Botón "+ Añadir Rango" para agregar nuevas filas
+  - Botón eliminar por fila
+  - Mensaje informativo cuando no hay rangos definidos
+- **Archivo modificado**: `/app/frontend/src/pages/Contratos.js`
+- **Verificado**: Sección aparece correctamente al seleccionar cultivo "Guisante (Verde)"
+
+---
+
+## Sesión 9 (2 Marzo 2026):
+
+### Completadas en sesión anterior:
 
 #### 1. Selector de Búsqueda de Artículos en Albaranes ✅ (P0 - Nueva funcionalidad)
 - **Ubicación**: Campo de búsqueda debajo de "Descripción del artículo" en cada línea del albarán

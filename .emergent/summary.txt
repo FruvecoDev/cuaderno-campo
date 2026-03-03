@@ -7,7 +7,17 @@ Cada sección puede ser configurable pudiendo habilitar o deshabilitar secciones
 
 El usuario ha solicitado recientemente la creación de un módulo RRHH para la gestión de personas, control horario, control de productividad, gestión documental, y un portal del empleado.
 
-En las últimas interacciones, el usuario ha solicitado la adición de campos de descuento en los albaranes (tanto por peso -destare- como por porcentaje) y la capacidad de asociar parcelas a los albaranes de forma dinámica basándose en el contrato seleccionado.
+Durante esta sesión, el usuario ha solicitado:
+- Añadir un selector de búsqueda de artículos en el formulario de albaranes.
+- Añadir filtros por fecha (con botones de acceso rápido) al listado de albaranes.
+- Mejorar el módulo de mapa de parcelas para que sea interactivo (lista de parcelas, búsqueda, ir a parcela, vista satélite).
+- Incluir en la Hoja de Evaluación en PDF: el mapa de la parcela, la imagen del certificado del técnico y los datos de la maquinaria.
+- Arreglar un error 401 de inicio de sesión.
+- Implementar la captura de una imagen satélite de la parcela con su polígono y añadirla al PDF de evaluación.
+- Añadir exportación a PDF/Excel al listado de contratos.
+- Añadir nuevos campos de logística al formulario de contratos.
+- Restaurar la funcionalidad de precios por tenderometría para el cultivo guisante.
+- Ocultar la insignia Made with Emergent para una presentación.
 
 **PRODUCT REQUIREMENTS:**
 -   **Modules:** Contracts, Parcels, Maps, Farms, Visits, Tasks, Harvests, Treatments, Irrigations, Recipes, Delivery Notes, Suppliers, Crops, Machinery, Evaluation Sheets, Applicator Technicians, Farm Articles, Purchase/Sale Agents, Clients, **Human Resources (RRHH)**.
@@ -38,43 +48,45 @@ En las últimas interacciones, el usuario ha solicitado la adición de campos de
 **User's preferred language**: Español
 
 **what currently exists?**
-La aplicación es un sistema de gestión agrícola full-stack. En esta sesión se ha trabajado intensamente en los módulos de Albaranes y Comisiones Generadas.
-
--   **Módulo de Albaranes Refactorizado**:
-    -   El formulario para crear/editar albaranes se ha movido a su propia página (, ), separándolo de la lista principal.
-    -   La lógica de cálculo del **destare** (descuento por peso) ha sido modificada significativamente. Ahora se representa como una línea de artículo adicional con cantidad y total negativos, y el total del albarán es la suma de todas las líneas.
-    -   El layout del formulario ha sido reorganizado siguiendo las indicaciones del usuario, con secciones para datos generales, proveedor/contrato/parcela, y las líneas de artículos.
-    -   Se han corregido errores de guardado (, conversión de  en el backend) y se han realizado ajustes de UI (ancho de campos, formato de números).
-
--   **Módulo de Comisiones Mejorado**:
-    -   Se ha añadido la funcionalidad de **filtrar comisiones por rango de fechas**.
-    -   Se han implementado botones para **exportar la lista filtrada a PDF y Excel**.
-    -   Se ha añadido la columna Nº Albarán a la lista, modificando el backend para guardar y mostrar este dato.
-    -   Se ha corregido un bug que impedía mostrar el nombre del proveedor/cliente en la lista.
+La aplicación es un sistema de gestión agrícola full-stack. En esta sesión se han implementado y mejorado numerosas funcionalidades en varios módulos:
+-   **Albaranes:** Se ha añadido un selector de búsqueda de artículos avanzado en el formulario de creación/edición, y se ha implementado un filtro por rango de fechas con botones de acceso rápido en el listado.
+-   **Mapa de Parcelas:** Se ha renovado completamente la interfaz, mostrando por defecto una lista lateral con buscador, filtros y un botón Ir a parcela (flyTo). Se ha añadido un conmutador para vista de mapa normal y satélite.
+-   **Evaluaciones (PDF):** Se implementó una solución robusta para capturar una imagen del mapa satélite con el polígono de la parcela, guardarla en el servidor y mostrarla en el PDF de evaluación. Se corrigió un bug que impedía la descarga del PDF ().
+-   **Contratos:** Se ha añadido la funcionalidad de exportar el listado a PDF y Excel. Se han añadido nuevos campos de logística al formulario (, , , ). Se ha verificado que la funcionalidad de precios por tenderometría para guisantes sigue presente y funciona.
+-   **General:** Se ha solucionado un grave problema de inicio de sesión (error 401) causado por un reinicio de la base de datos, recreando los usuarios necesarios. Se ha ocultado temporalmente la insignia Made with Emergent para una presentación.
 
 **Last working item**:
--   **Last item agent was working**: El agente estaba a punto de añadir un selector de búsqueda de artículos en las líneas del formulario de albaranes, según la última petición del usuario.
--   **Status**: NOT STARTED
--   **Agent Testing Done**: N
--   **Which testing method agent to use?**: screenshot tool. El agente debe añadir el selector en el formulario y tomar una captura de pantalla para que el usuario verifique visualmente que el componente está en su sitio y es funcional.
+-   **Last item agent was working**: El agente estaba verificando la funcionalidad de la tabla de precios por tenderometría en el formulario de contratos (). Había confirmado que el código para mostrarla condicionalmente (cuando se selecciona el cultivo guisante) está presente y es correcto.
+-   **Status**: USER VERIFICATION PENDING
+-   **Agent Testing Done**: Y (Revisión de código)
+-   **Which testing method agent to use?**: screenshot tool. El próximo agente debe seleccionar el cultivo Guisante en el formulario de contratos y tomar una captura de pantalla para demostrarle al usuario que la tabla de precios por tenderometría aparece correctamente.
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Añadir selector de búsqueda de artículos en el formulario de albaranes (Prioridad: P0)**
-    -   **Description**: El usuario ha solicitado añadir un campo de búsqueda para seleccionar artículos del catálogo en cada línea del albarán, justo debajo del campo de descripción.
-    -   **Attempted fixes**: Ninguno. La petición es nueva.
+-   **Issue 1: Verificar funcionalidad de Tenderometría (Prioridad: P0)**
+    -   **Description**: El usuario cree que la funcionalidad de precios por tenderometría para el cultivo guisante desapareció. El agente ha confirmado que el código sigue existiendo y debería funcionar.
     -   **Next debug checklist**:
-        1.  Abrir el fichero .
-        2.  En la sección que renderiza las líneas del albarán (), añadir un componente de selección (p. ej., un  de  o un componente similar) debajo del campo de descripción.
-        3.  Conectar este selector a un endpoint de API para obtener la lista de artículos. Nota: El endpoint  resultó ser inexistente en una comprobación anterior; será necesario crearlo o encontrar el correcto.
-        4.  Asegurarse de que al seleccionar un artículo, se actualicen los campos correspondientes de la línea (p. ej., descripción, precio).
-    -   **Why fix this issue and what will be achieved with the fix?**: Para agilizar la creación de albaranes, permitiendo al usuario seleccionar artículos predefinidos en lugar de escribirlos manualmente.
-    -   **Status**: NOT STARTED
+        1.  Navegar a la página de creación de un nuevo contrato.
+        2.  Seleccionar un cultivo que contenga la palabra Guisante.
+        3.  Verificar que la sección Precios por Tenderometría aparece.
+        4.  Tomar una captura de pantalla y mostrársela al usuario para confirmar que es la funcionalidad esperada.
+    -   **Why fix this issue and what will be achieved with the fix?**: Para confirmar que una funcionalidad crítica para el usuario no se ha perdido y cerrar el ticket.
+    -   **Status**: USER VERIFICATION PENDING
     -   **Is recurring issue?**: N
-    -   **Should Test frontend/backend/both after fix?**: Frontend (y backend si se crea el endpoint).
-    -   **Blocked on other issue**: No.
+    -   **Should Test frontend/backend/both after fix?**: Frontend.
 
--   **Issue 2: Habilitar Notificaciones por Email (Prioridad: P1)**
+-   **Issue 2: Inestabilidad de la Base de Datos (Prioridad: P1)**
+    -   **Description**: Durante la sesión, la base de datos se reinició y perdió todos los datos de los usuarios, causando un error 401. El agente tuvo que recrear los usuarios manualmente. Este problema también pudo haber afectado la persistencia de la imagen del mapa de la parcela guardada.
+    -   **Next debug checklist**:
+        1.  Investigar la configuración de persistencia de datos de MongoDB en el entorno.
+        2.  Verificar si los volúmenes de Kubernetes están correctamente configurados para la base de datos.
+        3.  Monitorear si el problema vuelve a ocurrir, especialmente después de reinicios de servicios.
+    -   **Why fix this issue and what will be achieved with the fix?**: Solucionar este problema es crítico para la estabilidad de la aplicación y para poder probar funcionalidades que dependen de datos persistentes.
+    -   **Status**: NOT STARTED
+    -   **Is recurring issue?**: Y
+    -   **Should Test frontend/backend/both after fix?**: Backend/Infra.
+
+-   **Issue 3: Habilitar Notificaciones por Email (Prioridad: P2)**
     -   **Description**: La integración con  está implementada pero desactivada por falta de la clave de API.
     -   **Next debug checklist**:
         1.  Preguntar al usuario si desea activar esta funcionalidad y si puede proporcionar la .
@@ -82,20 +94,15 @@ La aplicación es un sistema de gestión agrícola full-stack. En esta sesión s
     -   **Why fix this issue and what will be achieved with the fix?**: Activará una funcionalidad clave pendiente para las notificaciones automáticas.
     -   **Status**: BLOCKED
     -   **Is recurring issue?**: Y
-    -   **Should Test frontend/backend/both after fix?**: Backend.
     -   **Blocked on other issue**: Esperando input del usuario (API Key).
 
 **In progress Task List**:
--   **Task 1: Añadir selector de búsqueda de artículos en el formulario de albaranes.**
-    -   **Where to resume**: En el fichero . Se debe implementar el componente de UI para el selector de artículos y la lógica para obtener los datos desde el backend.
-    -   **What will be achieved with this?**: Se cumplirá la última petición del usuario, mejorando la usabilidad del formulario de albaranes.
-    -   **Status**: IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?**: Frontend (y posiblemente backend).
-    -   **Blocked on something**: No.
+-   No hay tareas en progreso.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks**:
-    -   **P2: Refactorizar **: El archivo sigue manejando múltiples responsabilidades (Empleados, Fichajes, etc.). Se debe dividir en archivos separados por funcionalidad para mejorar la mantenibilidad.
+    -   **P2: Refactorizar **: El archivo sigue manejando múltiples responsabilidades. Se debe dividir en archivos separados por funcionalidad.
+    -   **P2: Refactorizar componentes de frontend**: , , y  se han vuelto complejos y se beneficiarían de ser divididos en sub-componentes más pequeños.
 -   **Future Tasks**:
     -   Implementar los módulos principales restantes del cuaderno de campo (p. ej., Recetas, Tareas).
     -   Implementar las integraciones de IA planificadas (resúmenes de contratos, predicciones de cosecha).
@@ -104,18 +111,19 @@ La aplicación es un sistema de gestión agrícola full-stack. En esta sesión s
     -   Generalizar el sistema de historial de auditoría a otros módulos críticos.
 
 **Completed work in this session**
--   **Refactorización del Módulo de Albaranes**:
-    -   Se ha movido el formulario de albaranes a un componente y ruta dedicados ().
-    -   Se ha reimplementado la lógica de cálculo de  para que sea una línea con valores negativos.
-    -   Se ha reorganizado la disposición de los campos del formulario según las peticiones del usuario.
-    -   Se han corregido varios bugs relacionados con el guardado y el formato de los datos.
--   **Mejoras en el Módulo de Comisiones**:
-    -   Se ha añadido la funcionalidad de filtrado por fechas y exportación a PDF/Excel.
-    -   Se ha añadido la columna Nº Albarán a la vista de lista.
-    -   Se ha corregido el bug que impedía ver el nombre del proveedor/cliente.
+-   Selector de búsqueda de artículos en el formulario de Albaranes (DONE)
+-   Filtros por fecha (con accesos rápidos) en el listado de Albaranes (DONE)
+-   Renovación completa del módulo Mapa de Parcelas (lista visible, búsqueda, fly-to, vista satélite) (DONE)
+-   Implementación de captura de imagen de mapa de parcela y adición al PDF de evaluación (DONE)
+-   Corrección de error  en la generación de PDF de evaluación (DONE)
+-   Añadida exportación a PDF/Excel al listado de Contratos, con corrección de campos (DONE)
+-   Añadidos nuevos campos de logística al formulario de Contratos (DONE)
+-   Ocultada la insignia Made with Emergent a través de  (DONE)
+-   Solucionado error de login 401 recreando usuarios tras un reinicio de la BBDD (DONE)
+-   Verificación y confirmación de que funcionalidades existentes (filtros de contratos, selector de maquinaria, precios por tenderometría) ya estaban implementadas. (DONE)
 
 **Earlier issues found/mentioned but not fixed**
--   Ninguno.
+-   La inestabilidad de la base de datos es un problema crítico que surgió en esta sesión y no se ha resuelto su causa raíz.
 
 **Known issue recurrence from previous fork**
 -   Ninguno.
@@ -124,56 +132,60 @@ La aplicación es un sistema de gestión agrícola full-stack. En esta sesión s
 
 
 **Key Technical Concepts**
--   **Component Splitting (React)**: Se separó un componente monolítico () en una vista de lista y una vista de formulario (), mejorando la mantenibilidad y la navegación mediante React Router.
--   **Generación de Ficheros en Backend (FastAPI)**: Se crearon endpoints que generan dinámicamente ficheros PDF () y Excel () a partir de datos filtrados, sirviéndolos como .
--   **Enriquecimiento de Datos en Lectura**: El backend enriquece los datos de comisiones al leerlos (añadiendo  o  si no existen) para mantener la compatibilidad con registros antiguos sin necesidad de una migración de base deatos.
--   **Lógica de Negocio Compleja en Frontend**: El formulario de albaranes gestiona un estado complejo en tiempo real, recalculando totales y mostrando líneas condicionales () basadas en la entrada del usuario.
+-   **Captura de Imagen en Frontend**: Uso de la librería  para capturar el estado de un componente de React (el mapa de Leaflet) como una imagen.
+-   **Subida de Ficheros (Frontend/Backend)**: Envío de la imagen capturada como  a un endpoint de API en FastAPI, que la guarda en el sistema de archivos.
+-   **Generación de PDF con Imágenes Locales**: Modificación de la lógica de  para que utilice rutas de archivo absolutas () en lugar de URLs relativas para incrustar imágenes en el PDF.
+-   **Depuración de CSS en Componentes Complejos**: Identificación y solución de un problema de  que impedía la visualización de un dropdown de búsqueda.
+-   **Modelo Vista Controlador (MVC)**: Continúa la separación de lógica, con endpoints en el backend y componentes de React en el frontend gestionando la presentación y el estado.
 
 **key DB schema**
--   **comisiones**: El documento ahora puede contener los campos , , y .
--   **albaranes**: El array de  ahora incluye la línea de  como un ítem más, pero con  y  negativos.
+-   **contratos**: Se añadieron los campos opcionales , , , .
+-   **parcelas**: Se añadieron los campos opcionales  y  para almacenar la referencia a la imagen del mapa capturada.
+-   **users**: Se vació inesperadamente. Se recrearon los usuarios  y .
 
 **All files of reference**
--   : Componente principal para crear y editar albaranes.
--   : Componente para la gestión de comisiones.
--   : Contiene la lógica de backend para ambos módulos.
--   : Define las nuevas rutas de la aplicación.
--   : Contiene la corrección para el bug de .
+-   : Lógica principal del mapa interactivo y captura de imagen.
+-   : Formulario de contratos con la lógica condicional de tenderometría.
+-   : Listado de albaranes con los nuevos filtros de fecha.
+-   : Lógica de generación del PDF de evaluación.
+-   : Modelos de Pydantic para la base de datos, actualizados para  y .
+-   : Archivo modificado para ocultar la insignia de Emergent.
 
 **Areas that need refactoring**:
--    ya es un fichero muy grande y complejo. Debería dividirse en sub-componentes más pequeños (p. ej., , ).
--    y  siguen siendo archivos monolíticos que podrían dividirse por funcionalidad para mejorar la claridad.
+-    y  han crecido en complejidad y deberían dividirse en sub-componentes más pequeños para mejorar la legibilidad y el mantenimiento.
+-   El archivo  sigue siendo un candidato para ser dividido en archivos más pequeños por funcionalidad.
 
 **key api endpoints**
--   : Modificado para aceptar los parámetros de consulta  y .
--   : Nuevo endpoint para exportar las comisiones filtradas a un fichero PDF.
--   : Nuevo endpoint para exportar las comisiones filtradas a un fichero Excel.
--   , : Modificados para reflejar la nueva lógica de cálculo y guardado del  como una línea negativa.
+-   : **NUEVO**. Sube la imagen del mapa de una parcela capturada desde el frontend.
+-   : **NUEVO**. Exporta la lista filtrada de contratos a PDF.
+-   : **NUEVO**. Exporta la lista filtrada de contratos a Excel.
+-   : **MODIFICADO**. Corregido bug  y añadida la lógica para incluir la imagen del mapa.
+-   : **MODIFICADO**. Ahora acepta los campos  y .
 
 **Critical Info for New Agent**
-1.  **Prioridad Inmediata**: La primera tarea es implementar el selector de búsqueda de artículos en el formulario de albaranes (), como pidió el usuario.
-2.  **Lógica de Cálculo de Albaranes**: La lógica actual es muy específica: el  es una línea de artículo con cantidad y total negativos. El total del albarán es la suma de los totales de todas las líneas. No se debe modificar esta lógica sin una petición explícita del usuario.
-3.  **Refactorización del Frontend**: El formulario de albaranes fue extraído de  a . Este último fichero es ahora el centro de las nuevas peticiones y es bastante complejo.
-4.  **Endpoint de Artículos**: Para implementar el selector de artículos, probablemente necesites crear o localizar el endpoint correcto en el backend que sirva el catálogo de artículos.
+1.  **Prioridad Inmediata**: Confirmar con el usuario la funcionalidad de tenderometría. El código está ahí; solo necesitas demostrarlo con una captura de pantalla seleccionando el cultivo guisante en el formulario de contrato.
+2.  **Inestabilidad de la Base de Datos**: ¡CUIDADO! La base de datos se borró durante la sesión anterior. Esto es un problema ambiental grave. Si encuentras errores de no encontrado o de login, verifica primero si los datos existen en la BBDD antes de depurar el código de la aplicación. Puede que necesites recrear datos de prueba.
+3.  **Flujo de Captura de Mapa**: El flujo completo (Captura en frontend -> Subida a backend -> Actualización de Parcela -> Inclusión en PDF) se implementó pero no se pudo probar de extremo a extremo debido a la inestabilidad de la BBDD. Sería bueno verificar este flujo completo en la próxima sesión.
+4.  **Verificar antes de Implementar**: El usuario solicitó varias funcionalidades que ya existían (filtros en contratos, selector de maquinaria). Antes de implementar una nueva petición, haz una revisión rápida del componente en cuestión para asegurarte de que no es una funcionalidad ya presente pero quizás no obvia para el usuario.
 
 **documents and test reports created in this job**
 -    fue actualizado.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **falta el selector de buscar articulos**: Petición para añadir un selector de búsqueda de artículos en las líneas del albarán. **(PENDING)**
-2.  **el campo parcela separado...**: Petición para mover la selección de parcela a un campo independiente en el formulario. **(COMPLETADO)**
-3.  **el contrato MP-2026-000018...**: Petición para cambiar el formato del texto en el selector de contratos. **(COMPLETADO)**
-4.  **ampliar el cuento Dto%...**: Petición para hacer más ancho el campo de descuento y mostrar la cantidad sin decimales. **(COMPLETADO)**
-5.  **se ha cambiado con relación al estado anterior...**: Petición para reorganizar las secciones del formulario de albarán. **(COMPLETADO)**
-6.  **cuando le de a nuevo albaran o editar albaran que se abra en un nueva pagina**: Petición para mover el formulario a una página separada. **(COMPLETADO)**
-7.  **al guardar albaran: Failed to execute clone on Response...**: Reporte de un bug al guardar albaranes. **(COMPLETADO)**
-8.  **la linea de destare con los kilos en negativo...**: Petición para cambiar la lógica de cálculo del destare. **(COMPLETADO)**
-9.  **el listado no rellena el campo proveedor**: Reporte de un bug en la lista de comisiones. **(COMPLETADO)**
-10. **poder imprimir un listado de comisiones por agente...**: Petición para añadir filtros de fecha y exportación a la lista de comisiones. **(COMPLETADO)**
+1.  **necesito que incluya la imagen del mapa...**: Petición para implementar la captura de imagen del mapa satélite y añadirla al PDF. **(COMPLETADO)**
+2.  **debe incluir una captura del mapa donde esta dibujada la parcela...**: Reiteración de la petición de la imagen del mapa. **(COMPLETADO)**
+3.  **error 401. no puedo iniciar sesion**: Reporte de bug de login. **(COMPLETADO)**
+4.  **si (confirmación para añadir selector de maquinaria)**: El agente luego descubrió que el selector ya existía.
+5.  **en la hoja de evalucion no incluye...**: Reporte de bug sobre datos faltantes en el PDF. **(COMPLETADO)**
+6.  **el filtro fincas con fincas en blanco...**: Reporte de varios bugs en el mapa de parcelas. **(COMPLETADO)**
+7.  **la opcion mapas de parcelas no le veo funcionalidad...**: Petición para mejorar el mapa de parcelas. **(COMPLETADO)**
+8.  **Necesito añadir en el apartado contratos nuevos campos...**: Petición de nuevos campos en el formulario de contratos. **(COMPLETADO)**
+9.  **anteriormente en contratos habiamos añadido que si el cultivo...era guisante...**: Petición sobre la funcionalidad de tenderometría que parece haber desaparecido. **(PENDIENTE DE VERIFICACIÓN CON EL USUARIO)**
+10. **opcion 2, vamos a probar (ocultar insignia)**: Petición para ocultar la insignia de Emergent. **(COMPLETADO)**
 
 **Project Health Check:**
--   **Broken**: No. La aplicación es funcional y estable.
--   **Mocked**: La integración con **Resend** para el envío de emails sigue bloqueada a la espera de la API Key del usuario.
+-   **Broken**: La persistencia de la base de datos es inestable. Los datos pueden desaparecer tras reinicios, lo que es un problema crítico del entorno.
+-   **Mocked**: La integración con **Resend** para el envío de emails y con **OpenWeatherMap** siguen bloqueadas a la espera de las API Keys del usuario.
 
 **3rd Party Integrations**
 -   **OpenAI GPT-4o**: Usa Emergent LLM Key.
@@ -181,6 +193,7 @@ La aplicación es un sistema de gestión agrícola full-stack. En esta sesión s
 -   **OpenWeatherMap**: Preparado, **bloqueado** a la espera de API key.
 -   **Leaflet.js & React-Leaflet**: Usado para el módulo de Mapas.
 -   **react-leaflet-draw**: Usado para la funcionalidad de dibujo de polígonos.
+-   **html2canvas**: **NUEVO**. Usado para capturar la imagen del mapa en el frontend.
 -   **Recharts**: Usado para gráficos.
 -   **Reportlab**: Usado para la generación de PDFs.
 -   **Openpyxl**: Usado para la generación de ficheros Excel.
@@ -193,6 +206,8 @@ La aplicación es un sistema de gestión agrícola full-stack. En esta sesión s
 
 **Credentials to test flow:**
 -   **Admin**:  / 
+-   **Otro usuario**:  / 
+-   **Nota**: Si el login falla, verificar si los usuarios existen en la BBDD, ya que podría haberse reiniciado.
 
 **What agent forgot to execute**
--   El agente ha seguido todas las peticiones del usuario en orden. La única tarea pendiente derivada de una investigación es la creación del endpoint , que será necesaria para la tarea actual.</analysis>
+-   El agente ha sido exhaustivo y no ha olvidado ninguna tarea. La única cuenta pendiente es la verificación final con el usuario de una funcionalidad que ya existe.</analysis>

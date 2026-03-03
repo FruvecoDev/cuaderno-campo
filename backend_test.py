@@ -5,7 +5,7 @@ from datetime import datetime
 import time
 
 class AgriculturalAPITester:
-    def __init__(self, base_url="https://harvest-hub-302.preview.emergentagent.com"):
+    def __init__(self, base_url="https://cultivo-pro.preview.emergentagent.com"):
         self.base_url = base_url
         self.token = None
         self.tests_run = 0

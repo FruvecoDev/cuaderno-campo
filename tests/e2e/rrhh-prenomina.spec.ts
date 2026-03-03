@@ -15,7 +15,7 @@
 
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = process.env.BASE_URL || 'https://harvest-hub-302.preview.emergentagent.com';
+const BASE_URL = process.env.BASE_URL || 'https://cultivo-pro.preview.emergentagent.com';
 
 // Helper function to login
 async function login(page) {

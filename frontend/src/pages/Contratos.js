@@ -1006,6 +1006,105 @@ const Contratos = () => {
               </div>
             </div>
             
+            {/* Tabla de Precios por Tenderometría - Solo para Guisante */}
+            {isGuisante && (
+              <div style={{
+                backgroundColor: '#e3f2fd',
+                padding: '1rem',
+                borderRadius: '8px',
+                marginTop: '1.5rem',
+                marginBottom: '1rem',
+                border: '1px solid #1a5276'
+              }}>
+                <div className="flex justify-between items-center mb-2">
+                  <h3 style={{ margin: 0, color: '#1a5276', fontSize: '1rem', fontWeight: '600' }}>
+                    Precios por Tenderometría (Guisante)
+                  </h3>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-primary"
+                    onClick={addPrecioTenderometria}
+                    data-testid="btn-add-tenderometria"
+                  >
+                    <Plus size={14} /> Añadir Rango
+                  </button>
+                </div>
+                <p style={{ fontSize: '0.8rem', color: '#555', marginBottom: '0.5rem' }}>
+                  Define rangos de tenderometría y su precio correspondiente en €/kg
+                </p>
+                
+                {(formData.precios_calidad || []).length === 0 ? (
+                  <p style={{ color: '#6c757d', fontStyle: 'italic', fontSize: '0.85rem' }}>
+                    No hay rangos definidos. Se usará el precio base del contrato.
+                  </p>
+                ) : (
+                  <table style={{ width: '100%', fontSize: '0.85rem', backgroundColor: 'white', borderRadius: '4px' }}>
+                    <thead>
+                      <tr style={{ backgroundColor: '#1a5276' }}>
+                        <th style={{ padding: '8px', textAlign: 'center', color: 'white' }}>Tend. Mínima</th>
+                        <th style={{ padding: '8px', textAlign: 'center', color: 'white' }}>Tend. Máxima</th>
+                        <th style={{ padding: '8px', textAlign: 'center', color: 'white' }}>Precio (€/kg)</th>
+                        <th style={{ padding: '8px', textAlign: 'center', width: '60px', color: 'white' }}>Eliminar</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(formData.precios_calidad || []).map((pc, idx) => (
+                        <tr key={idx}>
+                          <td style={{ padding: '4px' }}>
+                            <input
+                              type="number"
+                              step="1"
+                              className="form-input"
+                              style={{ textAlign: 'center' }}
+                              value={pc.min_tenderometria}
+                              onChange={(e) => updatePrecioTenderometria(idx, 'min_tenderometria', e.target.value)}
+                              placeholder="Ej: 90"
+                              data-testid={`input-min-tenderometria-${idx}`}
+                            />
+                          </td>
+                          <td style={{ padding: '4px' }}>
+                            <input
+                              type="number"
+                              step="1"
+                              className="form-input"
+                              style={{ textAlign: 'center' }}
+                              value={pc.max_tenderometria}
+                              onChange={(e) => updatePrecioTenderometria(idx, 'max_tenderometria', e.target.value)}
+                              placeholder="Ej: 100"
+                              data-testid={`input-max-tenderometria-${idx}`}
+                            />
+                          </td>
+                          <td style={{ padding: '4px' }}>
+                            <input
+                              type="number"
+                              step="0.01"
+                              className="form-input"
+                              style={{ textAlign: 'center' }}
+                              value={pc.precio}
+                              onChange={(e) => updatePrecioTenderometria(idx, 'precio', e.target.value)}
+                              placeholder="Ej: 0.45"
+                              data-testid={`input-precio-tenderometria-${idx}`}
+                            />
+                          </td>
+                          <td style={{ padding: '4px', textAlign: 'center' }}>
+                            <button
+                              type="button"
+                              className="btn btn-sm"
+                              style={{ backgroundColor: '#fee2e2', color: '#dc2626', padding: '4px 8px' }}
+                              onClick={() => removePrecioTenderometria(idx)}
+                              data-testid={`btn-remove-tenderometria-${idx}`}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            )}
+            
             <div className="form-group" style={{ marginTop: '1rem' }}>
               <label className="form-label">Observaciones</label>
               <textarea 
