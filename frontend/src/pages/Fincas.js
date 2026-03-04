@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, X, MapPin, Search, Home, ChevronDown, ChevronUp, Layers, Loader2, ExternalLink, CheckCircle, AlertCircle, Link2, Unlink, Map, Eye } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import MapaSigpac from '../components/MapaSigpac';
+import ProvinciaSelect from '../components/ProvinciaSelect';
 
 
 // Diccionario de usos SIGPAC
@@ -576,12 +577,10 @@ const Fincas = () => {
                 </div>
                 <div className="form-group">
                   <label className="form-label">Provincia</label>
-                  <input 
-                    className="form-input" 
-                    value={formData.provincia} 
+                  <ProvinciaSelect
+                    value={formData.provincia}
                     onChange={(e) => setFormData({...formData, provincia: e.target.value})}
-                    placeholder="Ej: Sevilla"
-                    data-testid="input-provincia"
+                    testId="select-provincia-finca"
                   />
                 </div>
                 <div className="form-group">

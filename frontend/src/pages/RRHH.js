@@ -10,6 +10,7 @@ import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
 import SignatureCanvas from 'react-signature-canvas';
 import { ControlHorarioTab, ProductividadTab, PrenominaTab, AusenciasTab, DocumentosTab } from './RRHH/index';
+import ProvinciaSelect from '../components/ProvinciaSelect';
 import '../App.css';
 
 const RRHH = () => {
@@ -516,11 +517,10 @@ const RRHH = () => {
                   
                   <div className="form-group">
                     <label className="form-label">Provincia</label>
-                    <input
-                      type="text"
-                      className="form-input"
+                    <ProvinciaSelect
                       value={formData.provincia}
                       onChange={e => setFormData({...formData, provincia: e.target.value})}
+                      testId="select-provincia-empleado"
                     />
                   </div>
                   

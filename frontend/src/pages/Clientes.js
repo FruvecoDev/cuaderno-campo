@@ -5,6 +5,7 @@ import { Plus, Edit2, Trash2, Search, X, Upload, User, Phone, Mail, MapPin, Buil
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import ProvinciaSelect from '../components/ProvinciaSelect';
 import '../App.css';
 
 
@@ -635,11 +636,10 @@ const Clientes = () => {
                 </div>
                 <div className="form-group">
                   <label className="form-label">Provincia</label>
-                  <input
-                    type="text"
-                    className="form-input"
+                  <ProvinciaSelect
                     value={formData.provincia}
                     onChange={(e) => setFormData({...formData, provincia: e.target.value})}
+                    testId="select-provincia-cliente"
                   />
                 </div>
               </div>

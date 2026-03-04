@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, Search, Settings, X, Download, FileText, TrendingUp, Users, Eye, MapPin } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
+import ProvinciaSelect from '../components/ProvinciaSelect';
 import '../App.css';
 
 
@@ -344,11 +345,10 @@ const Proveedores = () => {
               </div>
               <div className="form-group">
                 <label className="form-label">Provincia</label>
-                <input
-                  type="text"
-                  className="form-input"
+                <ProvinciaSelect
                   value={formData.provincia}
                   onChange={(e) => setFormData({ ...formData, provincia: e.target.value })}
+                  testId="select-provincia-proveedor"
                 />
               </div>
               <div className="form-group">
