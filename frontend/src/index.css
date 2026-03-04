@@ -119,3 +119,16 @@ code {
 .leaflet-control-container .leaflet-top.leaflet-right .leaflet-control:first-child {
   margin-top: 10px !important;
 }
+
+/* Fix para modales - Forzar visibilidad ante scripts externos */
+#modal-root > div {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#modal-root [data-testid="modal-config-dashboard"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}

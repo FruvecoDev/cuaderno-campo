@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import ReactDOM from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { MapContainer, TileLayer, Polygon, Popup, useMap } from 'react-leaflet';
@@ -558,8 +559,8 @@ const Dashboard = () => {
         </button>
       </div>
       
-      {/* Modal de Configuración */}
-      {showConfigModal && (
+      {/* Modal de Configuración - Usando Portal para evitar interferencia de scripts externos */}
+      {showConfigModal && ReactDOM.createPortal(
         <>
           <div 
             style={{
@@ -569,7 +570,7 @@ const Dashboard = () => {
               right: 0,
               bottom: 0,
               backgroundColor: 'rgba(0,0,0,0.5)',
-              zIndex: 9998
+              zIndex: 999998
             }}
             onClick={() => setShowConfigModal(false)}
           />
@@ -585,7 +586,7 @@ const Dashboard = () => {
             maxWidth: '700px',
             maxHeight: '85vh',
             overflow: 'auto',
-            zIndex: 9999,
+            zIndex: 999999,
             boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
           }} data-testid="modal-config-dashboard">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -749,7 +750,8 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-        </>
+        </>,
+        document.getElementById('modal-root') || document.body
       )}
       
       {/* Widgets container with flexbox ordering */}
