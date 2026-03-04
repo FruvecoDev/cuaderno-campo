@@ -121,14 +121,35 @@ code {
 }
 
 /* Fix para modales - Forzar visibilidad ante scripts externos */
-#modal-root > div {
-  display: block !important;
+#modal-root,
+#modal-root > *,
+#modal-root [data-testid="modal-config-dashboard"],
+#modal-root [data-testid="modal-config-dashboard"] > * {
+  display: revert !important;
   visibility: visible !important;
   opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
-#modal-root [data-testid="modal-config-dashboard"] {
+#modal-root > div:first-child {
   display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+}
+
+/* Asegurar que todos los elementos interactivos del modal funcionen */
+#modal-root button,
+#modal-root [role="button"],
+#modal-root [onclick],
+#modal-root [style*="cursor: pointer"],
+#modal-root div[style*="width: 48px"],
+#modal-root div[style*="background"] {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+/* Deshabilitar cualquier overlay invisible que pueda bloquear clicks */
+#modal-root span[x-file-name],
+#modal-root span[x-line-number] {
+  pointer-events: none !important;
 }
