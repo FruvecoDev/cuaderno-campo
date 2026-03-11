@@ -371,3 +371,22 @@ async def upload_mapa_parcela(
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al guardar imagen: {str(e)}")
+
+
+@router.get("/docs/download/{filename}")
+async def download_document(filename: str):
+    """Download a document from the docs folder"""
+    from fastapi.responses import FileResponse
+    
+    # Sanitize filename to prevent directory traversal
+    safe_filename = os.path.basename(filename)
+    file_path = f"/app/uploads/docs/{safe_filename}"
+    
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Documento no encontrado")
+    
+    return FileResponse(
+        path=file_path,
+        filename=safe_filename,
+        media_type="application/pdf"
+    )
