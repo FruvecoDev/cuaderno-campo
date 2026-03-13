@@ -37,8 +37,13 @@ async def create_parcela(
 ):
     parcela_dict = parcela.dict()
     
-    # Validar formato del código de plantación
+    # Convertir código de plantación vacío a None para evitar problemas con índice único
     codigo = parcela_dict.get("codigo_plantacion")
+    if codigo == "":
+        parcela_dict["codigo_plantacion"] = None
+        codigo = None
+    
+    # Validar formato del código de plantación
     if codigo and not validar_codigo_plantacion(codigo):
         raise HTTPException(
             status_code=400,
@@ -120,8 +125,13 @@ async def update_parcela(
     # Only include fields that were actually provided
     update_data = {k: v for k, v in parcela.dict().items() if v is not None}
     
-    # Validar formato del código de plantación si se intenta modificar
+    # Convertir código de plantación vacío a None para evitar problemas con índice único
     codigo = update_data.get("codigo_plantacion")
+    if codigo == "":
+        update_data["codigo_plantacion"] = None
+        codigo = None
+    
+    # Validar formato del código de plantación si se intenta modificar
     if codigo and not validar_codigo_plantacion(codigo):
         raise HTTPException(
             status_code=400,
