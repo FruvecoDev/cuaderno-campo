@@ -80,6 +80,7 @@ const Contratos = () => {
     cultivo_id: '',
     cantidad: '',
     precio: '',
+    superficie_ha: '', // Superficie contratada en hectáreas
     periodo_desde: '',
     periodo_hasta: '',
     moneda: 'EUR',
@@ -260,6 +261,7 @@ const Contratos = () => {
         ...formData,
         cantidad: parseFloat(parseFormattedNumber(formData.cantidad)) || 0,
         precio: parseFloat(parseFormattedNumber(formData.precio)) || 0,
+        superficie_ha: formData.superficie_ha ? parseFloat(parseFormattedNumber(formData.superficie_ha)) : null,
         comision_compra_valor: formData.comision_compra_valor ? parseFloat(parseFormattedNumber(formData.comision_compra_valor)) : null,
         comision_venta_valor: formData.comision_venta_valor ? parseFloat(parseFormattedNumber(formData.comision_venta_valor)) : null,
         descuento_destare: formData.descuento_destare ? parseFloat(parseFormattedNumber(formData.descuento_destare)) : null,
@@ -330,6 +332,7 @@ const Contratos = () => {
       cultivo_id: contrato.cultivo_id || '',
       cantidad: contrato.cantidad || '',
       precio: contrato.precio || '',
+      superficie_ha: contrato.superficie_ha || '',
       periodo_desde: contrato.periodo_desde || '',
       periodo_hasta: contrato.periodo_hasta || '',
       moneda: contrato.moneda || 'EUR',
@@ -377,6 +380,7 @@ const Contratos = () => {
       cultivo_id: '',
       cantidad: '',
       precio: '',
+      superficie_ha: '',
       periodo_desde: '',
       periodo_hasta: '',
       moneda: 'EUR',
@@ -712,6 +716,23 @@ const Contratos = () => {
                   placeholder="Ej: 1,50"
                   required
                   data-testid="input-precio"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">Superficie Contratada (ha)</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  value={formatNumber(formData.superficie_ha)} 
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/\./g, '');
+                    if (/^\d*,?\d*$/.test(rawValue)) {
+                      setFormData({...formData, superficie_ha: rawValue});
+                    }
+                  }}
+                  placeholder="Ej: 10,5"
+                  data-testid="input-superficie-ha"
                 />
               </div>
               
@@ -1661,6 +1682,22 @@ const Contratos = () => {
               </div>
               
               <div className="form-group">
+                <label className="form-label">Superficie Contratada (ha)</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={formatNumber(formData.superficie_ha)}
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/\./g, '');
+                    if (/^\d*,?\d*$/.test(rawValue)) {
+                      setFormData({...formData, superficie_ha: rawValue});
+                    }
+                  }}
+                  placeholder="Ej: 10,5"
+                />
+              </div>
+              
+              <div className="form-group">
                 <label className="form-label">{t('contracts.startDate')} *</label>
                 <input
                   type="date"
@@ -1670,7 +1707,9 @@ const Contratos = () => {
                   required
                 />
               </div>
-              
+            </div>
+            
+            <div className="grid-3">
               <div className="form-group">
                 <label className="form-label">{t('contracts.endDate')} *</label>
                 <input

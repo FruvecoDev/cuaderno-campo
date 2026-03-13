@@ -62,6 +62,9 @@ class ContratoBase(BaseModel):
     moneda: str = "EUR"
     cambio: float = 1.0
     
+    # Superficie contratada
+    superficie_ha: Optional[float] = None  # Hectáreas contratadas
+    
     # Periodo entrega
     periodo_desde: str
     periodo_hasta: str
@@ -119,6 +122,9 @@ class ContratoCreate(BaseModel):
     periodo_hasta: str
     moneda: str = "EUR"
     observaciones: Optional[str] = None
+    
+    # Superficie contratada
+    superficie_ha: Optional[float] = None  # Hectáreas contratadas
     
     # Agentes según tipo de contrato
     agente_compra: Optional[str] = None  # Solo si tipo = "Compra"

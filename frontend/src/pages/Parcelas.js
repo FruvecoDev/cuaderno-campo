@@ -609,7 +609,8 @@ const Parcelas = () => {
           ...prev,
           proveedor: contrato.proveedor || '',
           cultivo: contrato.cultivo || '',
-          campana: contrato.campana || '2025/26'
+          campana: contrato.campana || '2025/26',
+          superficie_total: contrato.superficie_ha || prev.superficie_total || ''
         }));
       }
     }
@@ -1553,14 +1554,40 @@ const Parcelas = () => {
               <div className="grid-2">
                 {fieldsConfig.superficie_total && (
                   <div className="form-group">
-                    <label className="form-label">Superficie (ha) *</label>
-                    <input type="number" step="0.01" className="form-input" value={formData.superficie_total} onChange={(e) => setFormData({...formData, superficie_total: e.target.value})} required />
+                    <label className="form-label">
+                      Superficie (ha)
+                      <span style={{ 
+                        marginLeft: '0.5rem', 
+                        fontSize: '0.7rem', 
+                        background: 'hsl(var(--primary) / 0.1)', 
+                        color: 'hsl(var(--primary))',
+                        padding: '0.1rem 0.4rem',
+                        borderRadius: '4px'
+                      }}>
+                        Del contrato
+                      </span>
+                    </label>
+                    <input 
+                      type="number" 
+                      step="0.01" 
+                      className="form-input" 
+                      value={formData.superficie_total} 
+                      readOnly
+                      style={{ 
+                        backgroundColor: 'hsl(var(--muted))', 
+                        cursor: 'not-allowed',
+                        fontWeight: '600'
+                      }}
+                    />
+                    <small style={{ color: 'hsl(var(--muted-foreground))' }}>
+                      La superficie viene definida en el contrato asignado
+                    </small>
                   </div>
                 )}
                 {fieldsConfig.num_plantas && (
                   <div className="form-group">
-                    <label className="form-label">Nº Plantas *</label>
-                    <input type="number" className="form-input" value={formData.num_plantas} onChange={(e) => setFormData({...formData, num_plantas: e.target.value})} required />
+                    <label className="form-label">Nº Plantas</label>
+                    <input type="number" className="form-input" value={formData.num_plantas} onChange={(e) => setFormData({...formData, num_plantas: e.target.value})} />
                   </div>
                 )}
               </div>
