@@ -125,10 +125,13 @@ async def update_parcela(
     # Only include fields that were actually provided
     update_data = {k: v for k, v in parcela.dict().items() if v is not None}
     
-    # Convertir código de plantación vacío a None para evitar problemas con índice único
+    # Manejar código de plantación vacío - eliminarlo del documento
     codigo = update_data.get("codigo_plantacion")
-    if codigo == "":
-        update_data["codigo_plantacion"] = None
+    unset_fields = {}
+    if codigo == "" or codigo is None:
+        # No incluir código vacío en la actualización
+        update_data.pop("codigo_plantacion", None)
+        unset_fields["codigo_plantacion"] = ""
         codigo = None
     
     # Validar formato del código de plantación si se intenta modificar
@@ -152,9 +155,14 @@ async def update_parcela(
     
     update_data["updated_at"] = datetime.now()
     
+    # Construir la operación de actualización
+    update_operation = {"$set": update_data}
+    if unset_fields:
+        update_operation["$unset"] = unset_fields
+    
     result = await parcelas_collection.update_one(
         {"_id": ObjectId(parcela_id)},
-        {"$set": update_data}
+        update_operation
     )
     
     if result.matched_count == 0:

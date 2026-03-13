@@ -30,17 +30,21 @@ audit_logs_collection = db['audit_logs']
 async def create_indexes():
     """Crear índices únicos para garantizar integridad de datos."""
     try:
-        # Índice único para codigo_plantacion en parcelas (solo si no es null/vacío)
+        # Índice único para codigo_plantacion en parcelas
+        # Solo aplica a documentos donde codigo_plantacion existe y es un string no vacío
         await parcelas_collection.create_index(
             "codigo_plantacion",
             unique=True,
-            sparse=True,  # Permite múltiples documentos con valor null
-            name="idx_codigo_plantacion_unique"
+            name="idx_codigo_plantacion_unique",
+            partialFilterExpression={
+                "codigo_plantacion": {"$exists": True, "$type": "string"}
+            }
         )
-        print("✅ Índice único para codigo_plantacion creado correctamente")
+        print("✅ Índice único para codigo_plantacion creado/verificado")
     except Exception as e:
         # Si ya existe o hay error, solo loguear
-        print(f"⚠️ Índice codigo_plantacion: {e}")
+        if "already exists" not in str(e):
+            print(f"⚠️ Índice codigo_plantacion: {e}")
 
 
 # Helper function to serialize MongoDB documents
