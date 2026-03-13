@@ -1556,31 +1556,39 @@ const Parcelas = () => {
                   <div className="form-group">
                     <label className="form-label">
                       Superficie (ha)
-                      <span style={{ 
-                        marginLeft: '0.5rem', 
-                        fontSize: '0.7rem', 
-                        background: 'hsl(var(--primary) / 0.1)', 
-                        color: 'hsl(var(--primary))',
-                        padding: '0.1rem 0.4rem',
-                        borderRadius: '4px'
-                      }}>
-                        Del contrato
-                      </span>
+                      {formData.contrato_id && (
+                        <span style={{ 
+                          marginLeft: '0.5rem', 
+                          fontSize: '0.7rem', 
+                          background: formData.superficie_total ? 'hsl(var(--primary) / 0.1)' : 'hsl(38 92% 50% / 0.15)',
+                          color: formData.superficie_total ? 'hsl(var(--primary))' : 'hsl(38 92% 50%)',
+                          padding: '0.1rem 0.4rem',
+                          borderRadius: '4px'
+                        }}>
+                          {formData.superficie_total ? 'Del contrato' : 'No definida en contrato'}
+                        </span>
+                      )}
                     </label>
                     <input 
                       type="number" 
                       step="0.01" 
                       className="form-input" 
                       value={formData.superficie_total} 
-                      readOnly
+                      onChange={(e) => setFormData({...formData, superficie_total: e.target.value})}
+                      placeholder={formData.contrato_id && !formData.superficie_total ? 'Introduce la superficie manualmente' : ''}
                       style={{ 
-                        backgroundColor: 'hsl(var(--muted))', 
-                        cursor: 'not-allowed',
-                        fontWeight: '600'
+                        backgroundColor: formData.superficie_total ? 'hsl(var(--muted))' : 'hsl(var(--background))', 
+                        fontWeight: '600',
+                        borderColor: !formData.superficie_total && formData.contrato_id ? 'hsl(38 92% 50%)' : undefined
                       }}
                     />
                     <small style={{ color: 'hsl(var(--muted-foreground))' }}>
-                      La superficie viene definida en el contrato asignado
+                      {formData.superficie_total 
+                        ? 'La superficie viene del contrato asignado'
+                        : formData.contrato_id 
+                          ? '⚠️ El contrato no tiene superficie definida. Puedes introducirla manualmente o editarla en el contrato.'
+                          : 'Selecciona un contrato para cargar la superficie'
+                      }
                     </small>
                   </div>
                 )}
