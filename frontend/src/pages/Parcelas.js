@@ -6,7 +6,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
-import { Plus, Map as MapIcon, Edit2, Trash2, Filter, Settings, X, ClipboardCheck, Layers, Satellite, History, Beaker, Calendar, FileText, ChevronDown, ChevronUp, BookOpen, Loader2, Eye, Search, ExternalLink, CheckCircle, AlertCircle, Upload } from 'lucide-react';
+import { Plus, Map as MapIcon, Edit2, Trash2, Filter, Settings, X, ClipboardCheck, Layers, Satellite, History, Beaker, Calendar, FileText, ChevronDown, ChevronUp, BookOpen, Loader2, Eye, Search, ExternalLink, CheckCircle, AlertCircle, Upload, Check, RefreshCw } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import AdvancedParcelMap from '../components/AdvancedParcelMap';
 import GeoImportModal from '../components/GeoImportModal';
@@ -223,6 +223,8 @@ const Parcelas = () => {
   const [newDrawnPolygons, setNewDrawnPolygons] = useState([]); // Polígonos nuevos dibujados en modo multi
   const [mapType, setMapType] = useState('satellite'); // Tipo de mapa: osm, satellite, hybrid, topo
   const [showGeneralMap, setShowGeneralMap] = useState(false); // Mostrar mapa general de todas las parcelas
+  const [saveSuccess, setSaveSuccess] = useState(false); // Indica si se guardó exitosamente
+  const [saving, setSaving] = useState(false); // Indica si está guardando
   const { token } = useAuth();
   const navigate = useNavigate();
   
@@ -693,6 +695,9 @@ const Parcelas = () => {
       return;
     }
     
+    setSaving(true);
+    setSaveSuccess(false);
+    
     try {
       const url = editingId 
         ? `/api/parcelas/${editingId}`
@@ -745,43 +750,67 @@ const Parcelas = () => {
       if (data.success) {
         console.log('✅ Parcela saved successfully:', data);
         const totalPolygons = recintos.length;
-        alert(`✅ Parcela ${editingId ? 'actualizada' : 'creada'} correctamente${totalPolygons > 0 ? '\n🗺️ ' + totalPolygons + ' zona(s) guardada(s)' : ''}`);
-        setShowForm(false);
-        setEditingId(null);
+        
+        // Refrescar lista de parcelas
         fetchParcelas();
-        setPolygon([]);
-        setAllRecintos([]);
-        setNewDrawnPolygons([]);
-        setSearchContrato('');
-        setContratoSearch({ proveedor: '', cultivo: '', campana: '' });
-        setSigpacResult(null);
-        setSigpacError(null);
-        setFormData({
-          contrato_id: '',
-          proveedor: '', 
-          cultivo: '', 
-          campana: '2025/26', 
-          variedad: '',
-          superficie_total: '', 
-          codigo_plantacion: '', 
-          num_plantas: '', 
-          finca: '',
-          sigpac: {
-            provincia: '',
-            municipio: '',
-            cod_agregado: '',
-            zona: '',
-            poligono: '',
-            parcela: '',
-            recinto: '',
-            cod_uso: ''
-          }
-        });
+        
+        if (editingId) {
+          // En modo edición: mantener el formulario abierto
+          setSaveSuccess(true);
+          // Actualizar allRecintos con los nuevos polígonos que se acaban de guardar
+          const newAllRecintos = recintos.map(r => r.geometria);
+          setAllRecintos(newAllRecintos);
+          setNewDrawnPolygons([]); // Limpiar los nuevos ya que ahora son parte de allRecintos
+          
+          // Ocultar mensaje de éxito después de 3 segundos
+          setTimeout(() => setSaveSuccess(false), 3000);
+        } else {
+          // Nueva parcela: cerrar formulario
+          alert(`✅ Parcela creada correctamente${totalPolygons > 0 ? '\n🗺️ ' + totalPolygons + ' zona(s) guardada(s)' : ''}`);
+          handleCloseForm();
+        }
       }
     } catch (error) {
       console.error('Error saving parcela:', error);
       alert(api.getErrorMessage(error) || 'Error al guardar la parcela');
+    } finally {
+      setSaving(false);
     }
+  };
+  
+  // Función para cerrar el formulario y limpiar estados
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setEditingId(null);
+    setPolygon([]);
+    setAllRecintos([]);
+    setNewDrawnPolygons([]);
+    setSearchContrato('');
+    setContratoSearch({ proveedor: '', cultivo: '', campana: '' });
+    setSigpacResult(null);
+    setSigpacError(null);
+    setSaveSuccess(false);
+    setFormData({
+      contrato_id: '',
+      proveedor: '', 
+      cultivo: '', 
+      campana: '2025/26', 
+      variedad: '',
+      superficie_total: '', 
+      codigo_plantacion: '', 
+      num_plantas: '', 
+      finca: '',
+      sigpac: {
+        provincia: '',
+        municipio: '',
+        cod_agregado: '',
+        zona: '',
+        poligono: '',
+        parcela: '',
+        recinto: '',
+        cod_uso: ''
+      }
+    });
   };
   
   const handleEdit = (parcela) => {
@@ -836,36 +865,7 @@ const Parcelas = () => {
   };
   
   const handleCancelEdit = () => {
-    setEditingId(null);
-    setShowForm(false);
-    setPolygon([]);
-    setAllRecintos([]);
-    setNewDrawnPolygons([]);
-    setSearchContrato('');
-    setContratoSearch({ proveedor: '', cultivo: '', campana: '' });
-    setSigpacResult(null);
-    setSigpacError(null);
-    setFormData({
-      contrato_id: '',
-      proveedor: '', 
-      cultivo: '', 
-      campana: '2025/26', 
-      variedad: '',
-      superficie_total: '', 
-      codigo_plantacion: '', 
-      num_plantas: '', 
-      finca: '',
-      sigpac: {
-        provincia: '',
-        municipio: '',
-        cod_agregado: '',
-        zona: '',
-        poligono: '',
-        parcela: '',
-        recinto: '',
-        cod_uso: ''
-      }
-    });
+    handleCloseForm();
   };
   
   const handleDelete = async (parcelaId) => {
@@ -1565,11 +1565,60 @@ const Parcelas = () => {
                 )}
               </div>
               
-              <div className="flex gap-2">
-                <button type="submit" className="btn btn-primary" data-testid="btn-guardar-parcela">
-                  {editingId ? 'Actualizar Parcela' : 'Guardar Parcela'}
+              <div className="flex gap-2" style={{ flexWrap: 'wrap', alignItems: 'center' }}>
+                {/* Mensaje de éxito al guardar */}
+                {saveSuccess && (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.5rem 1rem',
+                    background: 'hsl(142 76% 36% / 0.15)',
+                    border: '1px solid hsl(142 76% 36% / 0.3)',
+                    borderRadius: '8px',
+                    color: 'hsl(142 76% 36%)',
+                    fontSize: '0.875rem',
+                    fontWeight: '500'
+                  }}>
+                    <Check size={18} />
+                    ¡Cambios guardados correctamente!
+                  </div>
+                )}
+                
+                <button 
+                  type="submit" 
+                  className="btn btn-primary" 
+                  data-testid="btn-guardar-parcela"
+                  disabled={saving}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                >
+                  {saving ? (
+                    <>
+                      <RefreshCw size={16} className="spin" />
+                      Guardando...
+                    </>
+                  ) : (
+                    editingId ? 'Actualizar Parcela' : 'Guardar Parcela'
+                  )}
                 </button>
-                <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>Cancelar</button>
+                
+                {editingId ? (
+                  <>
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary" 
+                      onClick={handleCloseForm}
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                    >
+                      <X size={16} />
+                      Cerrar Editor
+                    </button>
+                  </>
+                ) : (
+                  <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>
+                    Cancelar
+                  </button>
+                )}
               </div>
             </form>
           </div>
