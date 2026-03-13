@@ -20,6 +20,15 @@ const formatNumber = (value) => {
   return parts.join(',');
 };
 
+// Función para formatear moneda en formato español (punto miles, coma decimal)
+const formatCurrency = (value, decimals = 2) => {
+  if (value === null || value === undefined || isNaN(value)) return '-';
+  return new Intl.NumberFormat('es-ES', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  }).format(value);
+};
+
 // Función para parsear número formateado a número real
 const parseFormattedNumber = (value) => {
   if (!value && value !== 0) return '';
@@ -1899,10 +1908,10 @@ const Contratos = () => {
                       </div>
                     </td>
                     <td>{contrato.cultivo}</td>
-                    <td>{contrato.cantidad?.toLocaleString()}</td>
-                    <td>€{contrato.precio?.toFixed(2)}</td>
-                    <td className="font-semibold">€{((contrato.cantidad || 0) * (contrato.precio || 0)).toFixed(2)}</td>
-                    <td>{contrato.fecha_contrato ? new Date(contrato.fecha_contrato).toLocaleDateString() : '-'}</td>
+                    <td>{formatCurrency(contrato.cantidad, 0)} kg</td>
+                    <td>€{formatCurrency(contrato.precio)}</td>
+                    <td className="font-semibold">€{formatCurrency((contrato.cantidad || 0) * (contrato.precio || 0))}</td>
+                    <td>{contrato.fecha_contrato ? new Date(contrato.fecha_contrato).toLocaleDateString('es-ES') : '-'}</td>
                     {(canEdit || canDelete) ? (
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
