@@ -219,6 +219,7 @@ const Parcelas = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [polygon, setPolygon] = useState([]);
+  const [allRecintos, setAllRecintos] = useState([]); // Todos los recintos/polígonos existentes
   const [mapType, setMapType] = useState('satellite'); // Tipo de mapa: osm, satellite, hybrid, topo
   const [showGeneralMap, setShowGeneralMap] = useState(false); // Mostrar mapa general de todas las parcelas
   const { token } = useAuth();
@@ -599,12 +600,28 @@ const Parcelas = () => {
     }
   }, [formData.proveedor, formData.cultivo, formData.campana, editingId, generarCodigoPlantacion]);
 
-  const handlePolygonCreated = useCallback((coords) => {
+  const handlePolygonCreated = useCallback((coords, isMultiMode) => {
     console.log('🗺️ Polygon created with coords:', coords);
     console.log('🗺️ Coords length:', coords ? coords.length : 0);
-    setPolygon(coords);
-    if (coords && coords.length > 0) {
-      // Show success notification
+    console.log('🗺️ Multi-mode:', isMultiMode);
+    
+    if (isMultiMode) {
+      // En modo multi-polígono, coords puede ser un array de arrays
+      if (Array.isArray(coords) && coords.length > 0) {
+        if (Array.isArray(coords[0]) && Array.isArray(coords[0][0])) {
+          // Es un array de polígonos completos - no hacer nada extra aquí
+          // El componente AdvancedParcelMap maneja esto internamente
+        } else if (coords.length >= 3) {
+          // Es un nuevo polígono individual
+          setPolygon(coords);
+        }
+      }
+    } else {
+      setPolygon(coords);
+    }
+    
+    if (coords && coords.length > 0 && !isMultiMode) {
+      // Show success notification solo en modo tradicional
       const area = calculatePolygonArea(coords);
       console.log('🗺️ Calculated area:', area, 'ha');
       alert(`✅ Polígono dibujado con ${coords.length} puntos\nÁrea aproximada: ${area.toFixed(2)} ha`);
@@ -743,8 +760,19 @@ const Parcelas = () => {
     setSigpacResult(null);
     setSigpacError(null);
     
-    if (parcela.recintos && parcela.recintos.length > 0 && parcela.recintos[0].geometria) {
-      setPolygon(parcela.recintos[0].geometria);
+    // Cargar TODOS los recintos/polígonos existentes
+    if (parcela.recintos && parcela.recintos.length > 0) {
+      const geometrias = parcela.recintos
+        .filter(r => r.geometria && r.geometria.length > 0)
+        .map(r => r.geometria);
+      setAllRecintos(geometrias);
+      // También establecer el primero como polígono principal para compatibilidad
+      if (parcela.recintos[0].geometria) {
+        setPolygon(parcela.recintos[0].geometria);
+      }
+    } else {
+      setAllRecintos([]);
+      setPolygon([]);
     }
     
     setShowForm(true);
@@ -754,6 +782,7 @@ const Parcelas = () => {
     setEditingId(null);
     setShowForm(false);
     setPolygon([]);
+    setAllRecintos([]);
     setSearchContrato('');
     setContratoSearch({ proveedor: '', cultivo: '', campana: '' });
     setSigpacResult(null);
@@ -986,14 +1015,29 @@ const Parcelas = () => {
               <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <MapIcon size={18} />
                 Mapa Avanzado - Dibuja el polígono
+                {editingId && allRecintos.length > 0 && (
+                  <span style={{ 
+                    fontSize: '0.75rem', 
+                    background: 'hsl(142 76% 36% / 0.2)', 
+                    color: 'hsl(142 76% 36%)',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    fontWeight: 'normal'
+                  }}>
+                    {allRecintos.length} zona(s) existente(s)
+                  </span>
+                )}
               </h3>
               
               <AdvancedParcelMap
                 polygon={polygon}
                 setPolygon={setPolygon}
+                allPolygons={editingId ? allRecintos : []}
+                setAllPolygons={setAllRecintos}
                 isEditing={!!editingId}
                 onPolygonCreated={handlePolygonCreated}
                 height="500px"
+                allowMultiplePolygons={!!editingId} // Permitir múltiples zonas en modo edición
               />
               
               {/* Nota informativa */}
@@ -1006,7 +1050,12 @@ const Parcelas = () => {
                 color: 'hsl(var(--muted-foreground))'
               }}>
                 {editingId 
-                  ? 'Dibuja un nuevo polígono para actualizar la geometría (opcional)' 
+                  ? (
+                    <>
+                      <strong>Modo edición:</strong> Puedes añadir nuevas zonas activando "Multi-zona" en la barra de herramientas del mapa. 
+                      Las zonas existentes se muestran en el mapa. Dibuja nuevas áreas o usa las herramientas de edición.
+                    </>
+                  )
                   : 'Usa las herramientas del mapa para dibujar la parcela. Puedes importar archivos GeoJSON, KML o GPX, o buscar por códigos SIGPAC.'}
               </div>
               

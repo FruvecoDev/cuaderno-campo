@@ -115,10 +115,12 @@ function CoordinateDisplay({ onCoordinateClick }) {
 function AdvancedDrawControl({ 
   onPolygonCreated, 
   onPolygonEdited, 
-  editablePolygon, 
+  editablePolygon,
+  allPolygons = [], // Nuevo: lista de todos los polígonos existentes
   isEditing,
   drawMode,
-  onMeasureDistance
+  onMeasureDistance,
+  allowMultiple = false // Nuevo: permitir múltiples polígonos
 }) {
   const map = useMap();
   const drawnItemsRef = useRef(null);
@@ -140,8 +142,22 @@ function AdvancedDrawControl({
     drawnItemsRef.current = drawnItems;
     map.addLayer(drawnItems);
     
-    // Si hay un polígono editable, añadirlo al grupo (tanto en edición como en creación)
-    if (editablePolygon && editablePolygon.length > 0) {
+    // Si hay múltiples polígonos, añadirlos todos
+    if (allowMultiple && allPolygons && allPolygons.length > 0) {
+      allPolygons.forEach((poly, index) => {
+        if (poly && poly.length > 0) {
+          const latlngs = poly.map(p => [p.lat, p.lng]);
+          const polygon = L.polygon(latlngs, { 
+            color: '#2d5a27', 
+            fillColor: '#4CAF50', 
+            fillOpacity: 0.3 + (index * 0.05),
+            dashArray: index > 0 ? '5, 5' : null // Estilo diferente para zonas adicionales
+          });
+          drawnItems.addLayer(polygon);
+        }
+      });
+    } else if (editablePolygon && editablePolygon.length > 0) {
+      // Modo tradicional: un solo polígono
       const latlngs = editablePolygon.map(p => [p.lat, p.lng]);
       const polygon = L.polygon(latlngs, { color: '#2d5a27', fillColor: '#4CAF50', fillOpacity: 0.3 });
       drawnItems.addLayer(polygon);
@@ -153,6 +169,7 @@ function AdvancedDrawControl({
         allowIntersection: false, 
         showArea: true, 
         metric: true,
+        repeatMode: allowMultiple, // Permitir dibujar múltiples en modo multi-polígono
         shapeOptions: { color: '#2d5a27', fillColor: '#4CAF50', fillOpacity: 0.3 }
       } : false,
       rectangle: drawMode === 'rectangle' || drawMode === 'all' ? {
@@ -205,8 +222,10 @@ function AdvancedDrawControl({
         return;
       }
       
-      // Limpiar polígonos anteriores (solo permitir uno)
-      drawnItems.clearLayers();
+      // Si NO es modo múltiple, limpiar polígonos anteriores
+      if (!allowMultiple) {
+        drawnItems.clearLayers();
+      }
       drawnItems.addLayer(layer);
       
       let coordinates = [];
@@ -227,28 +246,46 @@ function AdvancedDrawControl({
         }
       }
       
-      onPolygonCreated(coordinates);
+      onPolygonCreated(coordinates, allowMultiple);
     };
     
     // Evento: Polígono editado
     const handleEdited = (e) => {
       const layers = e.layers;
+      const editedPolygons = [];
       layers.eachLayer((layer) => {
         if (layer.getLatLngs) {
           const latlngs = layer.getLatLngs()[0];
           const coordinates = latlngs.map(point => ({ lat: point.lat, lng: point.lng }));
-          if (onPolygonEdited) {
-            onPolygonEdited(coordinates);
-          } else {
-            onPolygonCreated(coordinates);
-          }
+          editedPolygons.push(coordinates);
         }
       });
+      
+      if (editedPolygons.length > 0) {
+        if (onPolygonEdited) {
+          onPolygonEdited(editedPolygons, allowMultiple);
+        } else if (editedPolygons.length === 1) {
+          onPolygonCreated(editedPolygons[0], allowMultiple);
+        }
+      }
     };
     
     // Evento: Eliminado
-    const handleDeleted = () => {
-      onPolygonCreated([]);
+    const handleDeleted = (e) => {
+      if (allowMultiple) {
+        // En modo múltiple, reconstruir la lista de polígonos restantes
+        const remainingPolygons = [];
+        drawnItems.eachLayer((layer) => {
+          if (layer.getLatLngs) {
+            const latlngs = layer.getLatLngs()[0];
+            const coordinates = latlngs.map(point => ({ lat: point.lat, lng: point.lng }));
+            remainingPolygons.push(coordinates);
+          }
+        });
+        onPolygonCreated(remainingPolygons.length > 0 ? remainingPolygons : [], allowMultiple);
+      } else {
+        onPolygonCreated([]);
+      }
     };
     
     map.on(L.Draw.Event.CREATED, handleCreated);
@@ -266,7 +303,7 @@ function AdvancedDrawControl({
         map.removeLayer(drawnItemsRef.current);
       }
     };
-  }, [map, onPolygonCreated, onPolygonEdited, editablePolygon, isEditing, drawMode, onMeasureDistance]);
+  }, [map, onPolygonCreated, onPolygonEdited, editablePolygon, allPolygons, isEditing, drawMode, onMeasureDistance, allowMultiple]);
   
   return null;
 }
@@ -366,6 +403,8 @@ function GeolocationControl({ onLocate }) {
 const AdvancedParcelMap = ({
   polygon,
   setPolygon,
+  allPolygons = [], // Nuevo: todos los polígonos de la parcela (recintos)
+  setAllPolygons, // Nuevo: setter para múltiples polígonos
   parcelas = [],
   selectedParcelaId,
   onParcelaSelect,
@@ -373,7 +412,8 @@ const AdvancedParcelMap = ({
   showAllParcelas = false,
   height = '400px',
   onPolygonCreated,
-  onPolygonEdited
+  onPolygonEdited,
+  allowMultiplePolygons = false // Nuevo: habilitar modo multi-polígono
 }) => {
   const [mapType, setMapType] = useState('satellite');
   const [drawMode, setDrawMode] = useState('polygon');
@@ -383,16 +423,49 @@ const AdvancedParcelMap = ({
   const [searchAddress, setSearchAddress] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [showImportExport, setShowImportExport] = useState(false);
+  const [multiPolygonMode, setMultiPolygonMode] = useState(allowMultiplePolygons);
+  const [drawnPolygons, setDrawnPolygons] = useState([]); // Polígonos dibujados en esta sesión
   const fileInputRef = useRef(null);
   const mapRef = useRef(null);
   
   // Lista única de cultivos para colores
   const cultivosList = [...new Set(parcelas.map(p => p.cultivo).filter(Boolean))];
   
+  // Combinar polígonos existentes con los dibujados en esta sesión
+  const allCurrentPolygons = multiPolygonMode 
+    ? [...(allPolygons || []), ...drawnPolygons]
+    : (polygon && polygon.length > 0 ? [polygon] : []);
+  
   // Manejar creación de polígono
-  const handlePolygonCreated = (coords) => {
-    if (setPolygon) setPolygon(coords);
-    if (onPolygonCreated) onPolygonCreated(coords);
+  const handlePolygonCreated = (coords, isMultiMode) => {
+    if (isMultiMode || multiPolygonMode) {
+      // Modo multi-polígono: añadir al array
+      if (Array.isArray(coords) && coords.length > 0 && Array.isArray(coords[0])) {
+        // Es un array de polígonos (viene de eliminación)
+        setDrawnPolygons(coords);
+      } else if (coords && coords.length >= 3) {
+        // Es un nuevo polígono
+        setDrawnPolygons(prev => [...prev, coords]);
+      }
+    } else {
+      // Modo tradicional
+      if (setPolygon) setPolygon(coords);
+    }
+    if (onPolygonCreated) onPolygonCreated(coords, isMultiMode || multiPolygonMode);
+  };
+  
+  // Obtener todos los polígonos para guardar
+  const getAllPolygonsForSave = () => {
+    if (multiPolygonMode) {
+      return [...(allPolygons || []), ...drawnPolygons];
+    }
+    return polygon && polygon.length >= 3 ? [polygon] : [];
+  };
+  
+  // Calcular área total de todos los polígonos
+  const getTotalArea = () => {
+    const polygons = getAllPolygonsForSave();
+    return polygons.reduce((sum, poly) => sum + parseFloat(calculateArea(poly) || 0), 0).toFixed(4);
   };
   
   // Buscar dirección usando Nominatim
@@ -675,6 +748,35 @@ const AdvancedParcelMap = ({
             <FileJson size={14} />
           </button>
         </div>
+        
+        {/* Modo Multi-Polígono */}
+        {(allowMultiplePolygons || isEditing) && (
+          <>
+            <div style={{ borderLeft: '1px solid hsl(var(--border))', margin: '0 4px' }} />
+            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+              <button
+                onClick={() => setMultiPolygonMode(!multiPolygonMode)}
+                className={`btn btn-sm ${multiPolygonMode ? 'btn-primary' : 'btn-secondary'}`}
+                style={{ padding: '4px 10px', fontSize: '12px' }}
+                title={multiPolygonMode ? 'Modo multi-zona activado' : 'Activar modo multi-zona'}
+              >
+                <Layers size={14} />
+                <span style={{ marginLeft: '4px' }}>Multi-zona</span>
+              </button>
+              {multiPolygonMode && drawnPolygons.length > 0 && (
+                <span style={{ 
+                  fontSize: '11px', 
+                  background: 'hsl(142 76% 36% / 0.2)', 
+                  color: 'hsl(142 76% 36%)',
+                  padding: '2px 8px',
+                  borderRadius: '4px'
+                }}>
+                  +{drawnPolygons.length} nueva(s)
+                </span>
+              )}
+            </div>
+          </>
+        )}
       </div>
       
       {/* Panel de búsqueda de dirección */}
@@ -748,8 +850,8 @@ const AdvancedParcelMap = ({
         </div>
       )}
       
-      {/* Info del polígono actual */}
-      {polygon && polygon.length >= 3 && (
+      {/* Info del polígono actual o múltiples polígonos */}
+      {(polygon && polygon.length >= 3) || (multiPolygonMode && getAllPolygonsForSave().length > 0) ? (
         <div style={{
           display: 'flex',
           flexWrap: 'wrap',
@@ -761,18 +863,42 @@ const AdvancedParcelMap = ({
           border: '1px solid hsl(142 76% 36% / 0.3)',
           fontSize: '13px'
         }}>
-          <span><strong>Puntos:</strong> {polygon.length}</span>
-          <span><strong>Área:</strong> {calculateArea(polygon)} ha</span>
-          <span><strong>Perímetro:</strong> {calculatePerimeter(polygon)} m</span>
-          <button 
-            onClick={() => handlePolygonCreated([])} 
-            className="btn btn-sm"
-            style={{ marginLeft: 'auto', padding: '2px 8px', fontSize: '11px', background: 'hsl(var(--destructive) / 0.1)', color: 'hsl(var(--destructive))' }}
-          >
-            <Trash2 size={12} /> Limpiar
-          </button>
+          {multiPolygonMode ? (
+            <>
+              <span><strong>Zonas:</strong> {getAllPolygonsForSave().length}</span>
+              <span><strong>Área total:</strong> {getTotalArea()} ha</span>
+              {allPolygons && allPolygons.length > 0 && (
+                <span style={{ color: 'hsl(var(--muted-foreground))' }}>
+                  ({allPolygons.length} existente{allPolygons.length > 1 ? 's' : ''} + {drawnPolygons.length} nueva{drawnPolygons.length !== 1 ? 's' : ''})
+                </span>
+              )}
+              <button 
+                onClick={() => { 
+                  setDrawnPolygons([]); 
+                  if (setPolygon) setPolygon([]); 
+                }} 
+                className="btn btn-sm"
+                style={{ marginLeft: 'auto', padding: '2px 8px', fontSize: '11px', background: 'hsl(var(--destructive) / 0.1)', color: 'hsl(var(--destructive))' }}
+              >
+                <Trash2 size={12} /> Limpiar nuevas
+              </button>
+            </>
+          ) : (
+            <>
+              <span><strong>Puntos:</strong> {polygon.length}</span>
+              <span><strong>Área:</strong> {calculateArea(polygon)} ha</span>
+              <span><strong>Perímetro:</strong> {calculatePerimeter(polygon)} m</span>
+              <button 
+                onClick={() => handlePolygonCreated([])} 
+                className="btn btn-sm"
+                style={{ marginLeft: 'auto', padding: '2px 8px', fontSize: '11px', background: 'hsl(var(--destructive) / 0.1)', color: 'hsl(var(--destructive))' }}
+              >
+                <Trash2 size={12} /> Limpiar
+              </button>
+            </>
+          )}
         </div>
-      )}
+      ) : null}
       
       {/* Distancia medida */}
       {measuredDistance !== null && (
@@ -810,9 +936,11 @@ const AdvancedParcelMap = ({
           onPolygonCreated={handlePolygonCreated}
           onPolygonEdited={onPolygonEdited}
           editablePolygon={polygon}
+          allPolygons={multiPolygonMode ? getAllPolygonsForSave() : []}
           isEditing={isEditing}
           drawMode={drawMode}
           onMeasureDistance={(d) => setMeasuredDistance(d)}
+          allowMultiple={multiPolygonMode}
         />
         
         <FitBounds polygon={polygon} parcelas={showAllParcelas ? parcelas : null} />
