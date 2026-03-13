@@ -26,6 +26,23 @@ users_collection = db['users']
 evaluaciones_collection = db['evaluaciones']
 audit_logs_collection = db['audit_logs']
 
+
+async def create_indexes():
+    """Crear índices únicos para garantizar integridad de datos."""
+    try:
+        # Índice único para codigo_plantacion en parcelas (solo si no es null/vacío)
+        await parcelas_collection.create_index(
+            "codigo_plantacion",
+            unique=True,
+            sparse=True,  # Permite múltiples documentos con valor null
+            name="idx_codigo_plantacion_unique"
+        )
+        print("✅ Índice único para codigo_plantacion creado correctamente")
+    except Exception as e:
+        # Si ya existe o hay error, solo loguear
+        print(f"⚠️ Índice codigo_plantacion: {e}")
+
+
 # Helper function to serialize MongoDB documents
 def serialize_doc(doc):
     if doc is None:

@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import Optional
 from bson import ObjectId
 from datetime import datetime
+import re
 
 from models import ParcelaCreate, ParcelaUpdate
 from database import parcelas_collection, serialize_doc, serialize_docs
@@ -17,6 +18,16 @@ from rbac_guards import (
 
 router = APIRouter(prefix="/api", tags=["parcelas"])
 
+# Regex para validar formato del código de plantación: XXX-XXX-NN-NNN (con variantes)
+# Ejemplos válidos: AZE-BON-25-001, AGR-BRO-25-002, AZE-BON-25-001-1234 (con timestamp)
+CODIGO_PLANTACION_REGEX = re.compile(r'^[A-Z]{2,4}-[A-Z]{2,4}-\d{2}-\d{3}(-\d+)?$')
+
+def validar_codigo_plantacion(codigo: str) -> bool:
+    """Valida el formato del código de plantación."""
+    if not codigo:
+        return True  # Permitir vacío
+    return bool(CODIGO_PLANTACION_REGEX.match(codigo))
+
 
 @router.post("/parcelas", response_model=dict)
 async def create_parcela(
@@ -26,15 +37,23 @@ async def create_parcela(
 ):
     parcela_dict = parcela.dict()
     
+    # Validar formato del código de plantación
+    codigo = parcela_dict.get("codigo_plantacion")
+    if codigo and not validar_codigo_plantacion(codigo):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Formato de código inválido: '{codigo}'. Formato esperado: XXX-XXX-NN-NNN (ej: AZE-BON-25-001)"
+        )
+    
     # Validar que el código de plantación sea único
-    if parcela_dict.get("codigo_plantacion"):
+    if codigo:
         existing = await parcelas_collection.find_one({
-            "codigo_plantacion": parcela_dict["codigo_plantacion"]
+            "codigo_plantacion": codigo
         })
         if existing:
             raise HTTPException(
                 status_code=400, 
-                detail=f"El código de plantación '{parcela_dict['codigo_plantacion']}' ya existe. Debe ser único."
+                detail=f"El código de plantación '{codigo}' ya existe. Debe ser único."
             )
     
     parcela_dict.update({
@@ -101,16 +120,24 @@ async def update_parcela(
     # Only include fields that were actually provided
     update_data = {k: v for k, v in parcela.dict().items() if v is not None}
     
+    # Validar formato del código de plantación si se intenta modificar
+    codigo = update_data.get("codigo_plantacion")
+    if codigo and not validar_codigo_plantacion(codigo):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Formato de código inválido: '{codigo}'. Formato esperado: XXX-XXX-NN-NNN (ej: AZE-BON-25-001)"
+        )
+    
     # Validar que el código de plantación siga siendo único si se intenta modificar
-    if update_data.get("codigo_plantacion"):
+    if codigo:
         existing = await parcelas_collection.find_one({
-            "codigo_plantacion": update_data["codigo_plantacion"],
+            "codigo_plantacion": codigo,
             "_id": {"$ne": ObjectId(parcela_id)}  # Excluir la parcela actual
         })
         if existing:
             raise HTTPException(
                 status_code=400, 
-                detail=f"El código de plantación '{update_data['codigo_plantacion']}' ya existe en otra parcela."
+                detail=f"El código de plantación '{codigo}' ya existe en otra parcela."
             )
     
     update_data["updated_at"] = datetime.now()

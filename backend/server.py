@@ -81,6 +81,9 @@ async def startup_event():
     init_scheduler()
     # Initialize RRHH routes with database
     set_rrhh_db(db)
+    # Create database indexes for data integrity
+    from database import create_indexes
+    await create_indexes()
 
 @app.on_event("shutdown")
 async def shutdown_event():
