@@ -352,23 +352,47 @@ const Parcelas = () => {
     const campana = formData.campana || '2025/26';
     
     // Extraer iniciales del proveedor (primeras 3 letras)
-    const proveedorCode = proveedor.substring(0, 3).toUpperCase().replace(/\s/g, '');
+    const proveedorCode = proveedor.substring(0, 3).toUpperCase().replace(/[^A-Z]/g, '');
     
     // Extraer iniciales del cultivo (primeras 3 letras)
-    const cultivoCode = cultivo.substring(0, 3).toUpperCase().replace(/\s/g, '');
+    const cultivoCode = cultivo.substring(0, 3).toUpperCase().replace(/[^A-Z]/g, '');
     
     // Extraer año de la campaña (ej: 2025/26 -> 25)
     const yearCode = campana.split('/')[0].slice(-2);
     
-    // Contar parcelas existentes con el mismo prefijo para generar número secuencial
-    const prefix = `${proveedorCode}-${cultivoCode}-${yearCode}`;
-    const existingCount = parcelas.filter(p => 
+    // Generar prefijo base
+    const prefix = `${proveedorCode || 'XXX'}-${cultivoCode || 'XXX'}-${yearCode}`;
+    
+    // Contar parcelas existentes con el mismo prefijo
+    const existingWithPrefix = parcelas.filter(p => 
       p.codigo_plantacion && p.codigo_plantacion.startsWith(prefix)
-    ).length;
+    );
     
-    const secuencial = String(existingCount + 1).padStart(3, '0');
+    // Encontrar el número más alto existente para este prefijo
+    let maxNum = 0;
+    existingWithPrefix.forEach(p => {
+      const match = p.codigo_plantacion.match(/-(\d+)$/);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (num > maxNum) maxNum = num;
+      }
+    });
     
-    return `${prefix}-${secuencial}`;
+    // Siguiente número secuencial
+    const secuencial = String(maxNum + 1).padStart(3, '0');
+    
+    // Código final
+    const codigo = `${prefix}-${secuencial}`;
+    
+    // Verificar que no exista (por si acaso)
+    const exists = parcelas.some(p => p.codigo_plantacion === codigo);
+    if (exists) {
+      // Si existe, añadir timestamp para garantizar unicidad
+      const timestamp = Date.now().toString().slice(-4);
+      return `${prefix}-${secuencial}-${timestamp}`;
+    }
+    
+    return codigo;
   }, [formData.proveedor, formData.cultivo, formData.campana, parcelas]);
   
   // Obtener variedades disponibles para el cultivo seleccionado
@@ -1383,16 +1407,36 @@ const Parcelas = () => {
               
               {fieldsConfig.codigo_plantacion && (
                 <div className="form-group">
-                  <label className="form-label">Código Plantación {!editingId && '(Auto)'}</label>
+                  <label className="form-label">
+                    Código Plantación 
+                    <span style={{ 
+                      marginLeft: '0.5rem', 
+                      fontSize: '0.7rem', 
+                      background: 'hsl(var(--primary) / 0.1)', 
+                      color: 'hsl(var(--primary))',
+                      padding: '0.1rem 0.4rem',
+                      borderRadius: '4px'
+                    }}>
+                      Automático
+                    </span>
+                  </label>
                   <input 
                     type="text" 
                     className="form-input" 
                     value={formData.codigo_plantacion} 
-                    onChange={(e) => setFormData({...formData, codigo_plantacion: e.target.value})} 
-                    readOnly={!editingId}
-                    style={!editingId ? { backgroundColor: 'hsl(var(--muted))', cursor: 'not-allowed' } : {}}
+                    readOnly
+                    style={{ 
+                      backgroundColor: 'hsl(var(--muted))', 
+                      cursor: 'not-allowed',
+                      fontFamily: 'monospace',
+                      fontWeight: '600'
+                    }}
                   />
-                  {!editingId && <small style={{ color: 'hsl(var(--muted-foreground))' }}>Se genera automáticamente al seleccionar contrato</small>}
+                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
+                    {editingId 
+                      ? 'El código no se puede modificar para mantener la trazabilidad'
+                      : 'Se genera automáticamente. Formato: PRV-CUL-AÑO-NNN'}
+                  </small>
                 </div>
               )}
               

@@ -25,6 +25,18 @@ async def create_parcela(
     _access: dict = Depends(RequireParcelasAccess)
 ):
     parcela_dict = parcela.dict()
+    
+    # Validar que el código de plantación sea único
+    if parcela_dict.get("codigo_plantacion"):
+        existing = await parcelas_collection.find_one({
+            "codigo_plantacion": parcela_dict["codigo_plantacion"]
+        })
+        if existing:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"El código de plantación '{parcela_dict['codigo_plantacion']}' ya existe. Debe ser único."
+            )
+    
     parcela_dict.update({
         "activo": True,
         "unidad_medida": "ha",
@@ -88,6 +100,19 @@ async def update_parcela(
     
     # Only include fields that were actually provided
     update_data = {k: v for k, v in parcela.dict().items() if v is not None}
+    
+    # Validar que el código de plantación siga siendo único si se intenta modificar
+    if update_data.get("codigo_plantacion"):
+        existing = await parcelas_collection.find_one({
+            "codigo_plantacion": update_data["codigo_plantacion"],
+            "_id": {"$ne": ObjectId(parcela_id)}  # Excluir la parcela actual
+        })
+        if existing:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"El código de plantación '{update_data['codigo_plantacion']}' ya existe en otra parcela."
+            )
+    
     update_data["updated_at"] = datetime.now()
     
     result = await parcelas_collection.update_one(
