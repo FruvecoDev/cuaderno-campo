@@ -1,0 +1,82 @@
+{
+  "summary": "Testing for Multiple Polygons (Zonas) per Parcela feature - All tests passed. Backend API correctly handles creating, updating, and deleting multiple recintos per parcela. Frontend Mapas page displays zone counter in popups, shows 'Editar zona', 'Eliminar', and 'Añadir otra zona' buttons, and has draw mode banner showing existing zones count.",
+  "mode": "generate",
+  "baseline_commit": "cd1607b235ad01456527b80dbb65b085d595ce4e",
+  "head_commit": "14dcbf4f88dcc38761fd287017339f312910cde1",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "regression_results": {
+    "total_specs": 34,
+    "passed": 34,
+    "failed": 0,
+    "skipped": 0
+  },
+  "specs_created": [
+    "/app/tests/e2e/mapas-multiple-polygons.spec.ts",
+    "/app/backend/tests/test_multiple_polygons.py"
+  ],
+  "specs_updated": [],
+  "quarantined_tests": [],
+  "test_report_links": [
+    "/app/tests/e2e/mapas-multiple-polygons.spec.ts",
+    "/app/backend/tests/test_multiple_polygons.py",
+    "/app/test_reports/pytest/test_multiple_polygons.xml"
+  ],
+  "action_items": [],
+  "updated_files": [
+    "/app/tests/e2e/mapas-multiple-polygons.spec.ts",
+    "/app/backend/tests/test_multiple_polygons.py"
+  ],
+  "success_rate": {
+    "backend": "100%",
+    "frontend": "100%"
+  },
+  "seed_data_creation": "None - used existing parcelas with polygons for testing",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Multiple polygon feature fully tested. Mapas page (/mapas) allows users to draw and save multiple zones (recintos) per parcela. Zone counter visible in popups ('Zona X de Y'), edit/delete individual zones, add new zones. Backend API PUT /api/parcelas/{id} accepts array of recintos and correctly persists them.",
+  "features_tested": {
+    "backend": [
+      "Create parcela with multiple recintos",
+      "Verify multiple recintos persisted in DB",
+      "Add third recinto to existing parcela",
+      "Update specific recinto geometry",
+      "Delete one recinto while keeping others",
+      "Replace all recintos",
+      "Preserve recinto fields (superficie_recinto, sigpac)",
+      "Allow empty recintos array"
+    ],
+    "frontend": [
+      "Mapas page loads with testid",
+      "Page title displays correctly",
+      "Map container visible",
+      "Import KML/GeoJSON button visible",
+      "List toggle button visible",
+      "Zone counter in polygon popup (Zona X de Y)",
+      "Editar zona button in popup",
+      "Eliminar button for individual zone deletion",
+      "Añadir otra zona button in popup",
+      "Parcela superficie info in popup",
+      "Draw mode banner when adding zone",
+      "Existing zones count in banner",
+      "Helper text about multiple zones as recintos",
+      "Cancel and Save buttons in draw mode",
+      "Close draw mode on Cancel",
+      "Edit mode when clicking Editar zona",
+      "Leaflet draw controls visible in edit mode",
+      "Parcelas list panel",
+      "Punto and Polígono buttons for parcelas",
+      "Toggle list visibility",
+      "Satellite map view",
+      "Street map view",
+      "Search filter"
+    ]
+  }
+}

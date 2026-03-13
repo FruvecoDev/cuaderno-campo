@@ -12,9 +12,34 @@ Desarrollar una aplicación de Cuaderno de Campo para el sector agrícola que pe
 
 ---
 
-## Última Actualización: 3 Marzo 2026 (Sesión 10)
+## Última Actualización: 13 Marzo 2026 (Sesión 11)
 
 ### Completadas en esta sesión:
+
+#### 1. Soporte para Múltiples Polígonos por Parcela ✅ (P0 - Nueva funcionalidad)
+- **Petición del usuario**: Poder dibujar y guardar varias zonas (polígonos) en el mapa para una única parcela
+- **Implementación**:
+  - El modelo de datos `Parcela` ya soportaba múltiples recintos (`recintos: List[ParcelaRecinto]`)
+  - Se modificó el frontend (`Mapas.js`) para trabajar con todos los recintos, no solo el primero
+- **Funcionalidades incluidas**:
+  - **Dibujar múltiples polígonos**: Al entrar en modo dibujo, el usuario puede crear varios polígonos que se guardan como recintos independientes
+  - **Banner informativo**: Muestra "Añadiendo zonas a: [parcela]" con contador de polígonos dibujados y área total
+  - **Popup mejorado**: Al hacer clic en un polígono, muestra:
+    - Badge "Zona X de Y" indicando qué zona es
+    - Superficie de la zona específica
+    - Área total de todas las zonas
+    - Botones: "Editar zona", "Eliminar" (zona individual), "Añadir otra zona"
+  - **Panel lateral actualizado**: Muestra contador de zonas por parcela y botón "+ Zona"
+  - **KPIs actualizados**: El contador "Con polígono" ahora muestra también el total de zonas cuando hay múltiples
+  - **Eliminación selectiva**: Se puede eliminar una zona específica o todas las zonas de una parcela
+  - **Edición de zona específica**: Se puede redibujar una zona manteniendo las demás
+  - **Visualización diferenciada**: Las zonas adicionales usan borde punteado para distinguirlas visualmente
+- **Archivos modificados**: `/app/frontend/src/pages/Mapas.js`
+- **Verificado con screenshot**: Funcionalidad probada correctamente
+
+---
+
+## Sesión 10 (3 Marzo 2026):
 
 #### 1. Corrección de "Precios por Tenderometría" en Formulario de Contratos ✅ (P0 - Bug Fix)
 - **Problema**: La sección de "Precios por Tenderometría" para el cultivo "Guisante" no aparecía en el formulario de página (`/contratos/nuevo`) aunque el código existía en el formulario modal.

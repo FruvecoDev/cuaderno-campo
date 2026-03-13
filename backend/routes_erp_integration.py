@@ -25,6 +25,7 @@ clientes_collection = db['clientes']
 cultivos_collection = db['cultivos']
 agentes_collection = db['agentes']
 parcelas_collection = db['parcelas']
+fincas_collection = db['fincas']
 
 # API Key configuration - En producción, guardar en .env
 # Generar una API Key única para el ERP
@@ -639,5 +640,653 @@ async def listar_agentes_erp(auth: dict = Depends(verify_api_key)):
                 "comision_defecto": a.get("comision_defecto")
             }
             for a in agentes
+        ]
+    }
+
+
+
+# === MODELOS DE FINCAS Y PARCELAS ===
+
+class FincaERP(BaseModel):
+    """Modelo de finca para integración ERP"""
+    referencia_erp: str = Field(..., description="Código único de la finca en el ERP")
+    denominacion: str = Field(..., description="Nombre de la finca")
+    codigo: Optional[str] = Field(None, description="Código interno")
+    provincia: Optional[str] = Field(None, description="Provincia")
+    poblacion: Optional[str] = Field(None, description="Población/Localidad")
+    direccion: Optional[str] = Field(None, description="Dirección")
+    codigo_postal: Optional[str] = Field(None, description="Código postal")
+    poligono: Optional[str] = Field(None, description="Polígono catastral")
+    parcela_catastral: Optional[str] = Field(None, description="Parcela catastral")
+    hectareas: Optional[float] = Field(None, description="Superficie en hectáreas")
+    propietario: Optional[str] = Field(None, description="Nombre del propietario")
+    propietario_cif: Optional[str] = Field(None, description="CIF/NIF del propietario")
+    finca_propia: Optional[bool] = Field(False, description="Si es propiedad de la empresa")
+    observaciones: Optional[str] = Field(None, description="Observaciones")
+
+
+class CoordenadasERP(BaseModel):
+    """Coordenadas para geometría de parcela"""
+    longitud: float = Field(..., description="Longitud (ej: -1.13)")
+    latitud: float = Field(..., description="Latitud (ej: 37.98)")
+
+
+class GeometriaERP(BaseModel):
+    """Geometría GeoJSON para parcela"""
+    tipo: str = Field("Polygon", description="Tipo de geometría (Polygon)")
+    coordenadas: List[List[CoordenadasERP]] = Field(..., description="Array de coordenadas del polígono")
+
+
+class ParcelaERP(BaseModel):
+    """Modelo de parcela para integración ERP"""
+    referencia_erp: str = Field(..., description="Código único de la parcela en el ERP")
+    codigo: Optional[str] = Field(None, description="Código de parcela (ej: PAR-001)")
+    nombre: str = Field(..., description="Nombre descriptivo de la parcela")
+    
+    # Vinculación con finca
+    finca_referencia_erp: Optional[str] = Field(None, description="Referencia ERP de la finca")
+    finca_nombre: Optional[str] = Field(None, description="Nombre de la finca (alternativo)")
+    
+    # Vinculación con contrato (opcional)
+    contrato_referencia_erp: Optional[str] = Field(None, description="Referencia ERP del contrato")
+    
+    # Proveedor
+    proveedor_cif: Optional[str] = Field(None, description="CIF/NIF del proveedor")
+    proveedor_nombre: Optional[str] = Field(None, description="Nombre del proveedor")
+    
+    # Cultivo
+    cultivo_codigo: Optional[str] = Field(None, description="Código del cultivo")
+    cultivo_nombre: str = Field(..., description="Nombre del cultivo")
+    variedad: Optional[str] = Field(None, description="Variedad del cultivo")
+    
+    # Datos de campaña
+    campana: str = Field(..., description="Campaña agrícola (ej: 2025/26)")
+    
+    # Superficie y características
+    superficie: float = Field(..., description="Superficie en hectáreas")
+    superficie_unidad: str = Field("ha", description="Unidad: 'ha' o 'm2'")
+    plantas_hectarea: Optional[int] = Field(None, description="Plantas por hectárea")
+    sistema_riego: Optional[str] = Field(None, description="Sistema de riego: Goteo, Aspersión, Pivot, Inundación")
+    
+    # Fechas
+    fecha_siembra: Optional[str] = Field(None, description="Fecha de siembra (YYYY-MM-DD)")
+    fecha_cosecha_prevista: Optional[str] = Field(None, description="Fecha prevista de cosecha (YYYY-MM-DD)")
+    
+    # Estado
+    estado: Optional[str] = Field("Activa", description="Estado: Activa, Cosechada, Baja")
+    
+    # Ubicación geográfica (opcional)
+    latitud: Optional[float] = Field(None, description="Latitud del centro de la parcela")
+    longitud: Optional[float] = Field(None, description="Longitud del centro de la parcela")
+    
+    # Datos SIGPAC (opcional)
+    sigpac_provincia: Optional[str] = Field(None, description="Código provincia SIGPAC (2 dígitos)")
+    sigpac_municipio: Optional[str] = Field(None, description="Código municipio SIGPAC (3 dígitos)")
+    sigpac_agregado: Optional[str] = Field(None, description="Agregado SIGPAC")
+    sigpac_zona: Optional[str] = Field(None, description="Zona SIGPAC")
+    sigpac_poligono: Optional[str] = Field(None, description="Polígono SIGPAC")
+    sigpac_parcela: Optional[str] = Field(None, description="Parcela SIGPAC")
+    sigpac_recinto: Optional[str] = Field(None, description="Recinto SIGPAC")
+    
+    # Observaciones
+    observaciones: Optional[str] = Field(None, description="Observaciones adicionales")
+
+
+# === ENDPOINTS DE FINCAS ===
+
+@router.post("/fincas", response_model=dict)
+async def crear_finca_erp(
+    finca: FincaERP,
+    auth: dict = Depends(verify_api_key)
+):
+    """
+    Crear una nueva finca desde el ERP.
+    
+    **Autenticación**: Requiere header `X-API-Key`
+    """
+    try:
+        # Verificar si ya existe
+        existing = await fincas_collection.find_one({"referencia_erp": finca.referencia_erp})
+        if existing:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Ya existe una finca con referencia ERP: {finca.referencia_erp}"
+            )
+        
+        # Buscar proveedor si se proporciona CIF
+        proveedor_id = None
+        if finca.propietario_cif:
+            proveedor = await proveedores_collection.find_one({"cif_nif": finca.propietario_cif})
+            if proveedor:
+                proveedor_id = str(proveedor["_id"])
+        
+        # Generar código si no se proporciona
+        codigo = finca.codigo
+        if not codigo:
+            last_finca = await fincas_collection.find_one(sort=[("codigo", -1)])
+            if last_finca and last_finca.get("codigo"):
+                try:
+                    num = int(last_finca["codigo"].replace("FIN", "").replace("-", "")) + 1
+                except:
+                    num = 1
+            else:
+                num = 1
+            codigo = f"FIN-{str(num).zfill(3)}"
+        
+        # Construir documento
+        finca_doc = {
+            "referencia_erp": finca.referencia_erp,
+            "codigo": codigo,
+            "denominacion": finca.denominacion,
+            "provincia": finca.provincia,
+            "poblacion": finca.poblacion,
+            "direccion": finca.direccion,
+            "codigo_postal": finca.codigo_postal,
+            "poligono": finca.poligono,
+            "parcela": finca.parcela_catastral,
+            "hectareas": finca.hectareas,
+            "propietario": finca.propietario,
+            "propietario_id": proveedor_id,
+            "finca_propia": finca.finca_propia,
+            "observaciones": finca.observaciones,
+            "activo": True,
+            "created_at": datetime.now(),
+            "created_by": f"ERP Integration ({auth['erp_name']})"
+        }
+        
+        result = await fincas_collection.insert_one(finca_doc)
+        
+        return {
+            "success": True,
+            "message": "Finca creada correctamente",
+            "data": {
+                "id": str(result.inserted_id),
+                "codigo": codigo,
+                "referencia_erp": finca.referencia_erp,
+                "denominacion": finca.denominacion
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al crear finca: {str(e)}")
+
+
+@router.put("/fincas/{referencia_erp}", response_model=dict)
+async def actualizar_finca_erp(
+    referencia_erp: str,
+    finca: FincaERP,
+    auth: dict = Depends(verify_api_key)
+):
+    """
+    Actualizar una finca existente usando la referencia ERP.
+    
+    **Autenticación**: Requiere header `X-API-Key`
+    """
+    try:
+        existing = await fincas_collection.find_one({"referencia_erp": referencia_erp})
+        if not existing:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No se encontró finca con referencia ERP: {referencia_erp}"
+            )
+        
+        update_data = {
+            "denominacion": finca.denominacion,
+            "provincia": finca.provincia,
+            "poblacion": finca.poblacion,
+            "direccion": finca.direccion,
+            "codigo_postal": finca.codigo_postal,
+            "poligono": finca.poligono,
+            "parcela": finca.parcela_catastral,
+            "hectareas": finca.hectareas,
+            "propietario": finca.propietario,
+            "finca_propia": finca.finca_propia,
+            "observaciones": finca.observaciones,
+            "updated_at": datetime.now(),
+            "updated_by": f"ERP Integration ({auth['erp_name']})"
+        }
+        
+        await fincas_collection.update_one(
+            {"_id": existing["_id"]},
+            {"$set": update_data}
+        )
+        
+        return {
+            "success": True,
+            "message": "Finca actualizada correctamente",
+            "data": {
+                "id": str(existing["_id"]),
+                "codigo": existing.get("codigo"),
+                "referencia_erp": referencia_erp
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al actualizar finca: {str(e)}")
+
+
+@router.get("/fincas/{referencia_erp}", response_model=dict)
+async def obtener_finca_erp(
+    referencia_erp: str,
+    auth: dict = Depends(verify_api_key)
+):
+    """
+    Obtener una finca por su referencia ERP.
+    
+    **Autenticación**: Requiere header `X-API-Key`
+    """
+    finca = await fincas_collection.find_one({"referencia_erp": referencia_erp})
+    if not finca:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No se encontró finca con referencia ERP: {referencia_erp}"
+        )
+    
+    return {
+        "success": True,
+        "data": serialize_doc(finca)
+    }
+
+
+@router.delete("/fincas/{referencia_erp}", response_model=dict)
+async def eliminar_finca_erp(
+    referencia_erp: str,
+    auth: dict = Depends(verify_api_key)
+):
+    """
+    Eliminar (dar de baja) una finca por su referencia ERP.
+    
+    **Autenticación**: Requiere header `X-API-Key`
+    """
+    finca = await fincas_collection.find_one({"referencia_erp": referencia_erp})
+    if not finca:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No se encontró finca con referencia ERP: {referencia_erp}"
+        )
+    
+    await fincas_collection.update_one(
+        {"_id": finca["_id"]},
+        {"$set": {
+            "activo": False,
+            "fecha_baja": datetime.now().strftime("%Y-%m-%d"),
+            "updated_at": datetime.now(),
+            "deleted_by": "ERP Integration"
+        }}
+    )
+    
+    return {
+        "success": True,
+        "message": "Finca dada de baja correctamente",
+        "data": {
+            "id": str(finca["_id"]),
+            "codigo": finca.get("codigo"),
+            "referencia_erp": referencia_erp
+        }
+    }
+
+
+# === ENDPOINTS DE PARCELAS ===
+
+@router.post("/parcelas", response_model=dict)
+async def crear_parcela_erp(
+    parcela: ParcelaERP,
+    auth: dict = Depends(verify_api_key)
+):
+    """
+    Crear una nueva parcela desde el ERP.
+    
+    La parcela puede vincularse a una finca y/o contrato existentes usando sus referencias ERP.
+    Si el proveedor no existe, se creará automáticamente.
+    
+    **Autenticación**: Requiere header `X-API-Key`
+    """
+    try:
+        # Verificar si ya existe
+        existing = await parcelas_collection.find_one({"referencia_erp": parcela.referencia_erp})
+        if existing:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Ya existe una parcela con referencia ERP: {parcela.referencia_erp}"
+            )
+        
+        # Buscar finca si se proporciona referencia ERP
+        finca_id = None
+        finca_nombre = parcela.finca_nombre or ""
+        if parcela.finca_referencia_erp:
+            finca = await fincas_collection.find_one({"referencia_erp": parcela.finca_referencia_erp})
+            if finca:
+                finca_id = str(finca["_id"])
+                finca_nombre = finca.get("denominacion", "")
+        elif parcela.finca_nombre:
+            finca = await fincas_collection.find_one({
+                "denominacion": {"$regex": f"^{parcela.finca_nombre}$", "$options": "i"}
+            })
+            if finca:
+                finca_id = str(finca["_id"])
+                finca_nombre = finca.get("denominacion", "")
+        
+        # Buscar contrato si se proporciona referencia ERP
+        contrato_id = None
+        numero_contrato = None
+        if parcela.contrato_referencia_erp:
+            contrato = await contratos_collection.find_one({"referencia_erp": parcela.contrato_referencia_erp})
+            if contrato:
+                contrato_id = str(contrato["_id"])
+                numero_contrato = contrato.get("numero_contrato")
+        
+        # Buscar o crear proveedor
+        proveedor_id = None
+        proveedor_nombre = parcela.proveedor_nombre or ""
+        if parcela.proveedor_cif:
+            proveedor = await proveedores_collection.find_one({"cif_nif": parcela.proveedor_cif})
+            if proveedor:
+                proveedor_id = str(proveedor["_id"])
+                proveedor_nombre = proveedor.get("nombre", "")
+            else:
+                # Crear proveedor automáticamente
+                new_prov = {
+                    "nombre": parcela.proveedor_nombre or f"Proveedor {parcela.proveedor_cif}",
+                    "cif_nif": parcela.proveedor_cif,
+                    "activo": True,
+                    "created_at": datetime.now(),
+                    "created_by": "ERP Integration"
+                }
+                result_prov = await proveedores_collection.insert_one(new_prov)
+                proveedor_id = str(result_prov.inserted_id)
+                proveedor_nombre = new_prov["nombre"]
+        
+        # Buscar cultivo
+        cultivo_id = None
+        cultivo_nombre = parcela.cultivo_nombre
+        if parcela.cultivo_codigo:
+            cultivo = await cultivos_collection.find_one({"codigo": parcela.cultivo_codigo})
+            if cultivo:
+                cultivo_id = str(cultivo["_id"])
+                cultivo_nombre = cultivo.get("nombre", parcela.cultivo_nombre)
+        else:
+            cultivo = await cultivos_collection.find_one({
+                "nombre": {"$regex": f"^{parcela.cultivo_nombre}$", "$options": "i"}
+            })
+            if cultivo:
+                cultivo_id = str(cultivo["_id"])
+                cultivo_nombre = cultivo.get("nombre", parcela.cultivo_nombre)
+        
+        # Generar código si no se proporciona
+        codigo = parcela.codigo
+        if not codigo:
+            last_parcela = await parcelas_collection.find_one(sort=[("codigo", -1)])
+            if last_parcela and last_parcela.get("codigo"):
+                try:
+                    num = int(last_parcela["codigo"].replace("PAR-", "").replace("PAR", "")) + 1
+                except:
+                    num = 1
+            else:
+                num = 1
+            codigo = f"PAR-{str(num).zfill(3)}"
+        
+        # Construir geometría si se proporcionan coordenadas
+        geometry = None
+        if parcela.latitud and parcela.longitud:
+            # Crear un polígono pequeño alrededor del punto central
+            delta = 0.005  # Aproximadamente 500m
+            geometry = {
+                "type": "Polygon",
+                "coordinates": [[
+                    [parcela.longitud - delta, parcela.latitud - delta],
+                    [parcela.longitud + delta, parcela.latitud - delta],
+                    [parcela.longitud + delta, parcela.latitud + delta],
+                    [parcela.longitud - delta, parcela.latitud + delta],
+                    [parcela.longitud - delta, parcela.latitud - delta]
+                ]]
+            }
+        
+        # Construir datos SIGPAC si se proporcionan
+        recintos = []
+        if parcela.sigpac_provincia and parcela.sigpac_municipio and parcela.sigpac_poligono and parcela.sigpac_parcela:
+            recintos.append({
+                "provincia": parcela.sigpac_provincia,
+                "municipio": parcela.sigpac_municipio,
+                "agregado": parcela.sigpac_agregado or "0",
+                "zona": parcela.sigpac_zona or "0",
+                "poligono": parcela.sigpac_poligono,
+                "parcela": parcela.sigpac_parcela,
+                "recinto": parcela.sigpac_recinto or "1"
+            })
+        
+        # Construir documento
+        parcela_doc = {
+            "referencia_erp": parcela.referencia_erp,
+            "codigo": codigo,
+            "nombre": parcela.nombre,
+            "finca_id": finca_id,
+            "finca": finca_nombre,
+            "contrato_id": contrato_id,
+            "numero_contrato": numero_contrato,
+            "proveedor_id": proveedor_id,
+            "proveedor": proveedor_nombre,
+            "cultivo_id": cultivo_id,
+            "cultivo": cultivo_nombre,
+            "variedad": parcela.variedad,
+            "campana": parcela.campana,
+            "superficie": parcela.superficie,
+            "superficie_unidad": parcela.superficie_unidad,
+            "plantas_hectarea": parcela.plantas_hectarea,
+            "sistema_riego": parcela.sistema_riego,
+            "fecha_siembra": parcela.fecha_siembra,
+            "fecha_cosecha_prevista": parcela.fecha_cosecha_prevista,
+            "estado": parcela.estado or "Activa",
+            "geometry": geometry,
+            "recintos": recintos,
+            "observaciones": parcela.observaciones,
+            "activo": True,
+            "created_at": datetime.now(),
+            "created_by": f"ERP Integration ({auth['erp_name']})"
+        }
+        
+        result = await parcelas_collection.insert_one(parcela_doc)
+        
+        return {
+            "success": True,
+            "message": "Parcela creada correctamente",
+            "data": {
+                "id": str(result.inserted_id),
+                "codigo": codigo,
+                "referencia_erp": parcela.referencia_erp,
+                "nombre": parcela.nombre,
+                "finca_id": finca_id,
+                "contrato_id": contrato_id,
+                "proveedor_id": proveedor_id,
+                "cultivo_id": cultivo_id
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al crear parcela: {str(e)}")
+
+
+@router.put("/parcelas/{referencia_erp}", response_model=dict)
+async def actualizar_parcela_erp(
+    referencia_erp: str,
+    parcela: ParcelaERP,
+    auth: dict = Depends(verify_api_key)
+):
+    """
+    Actualizar una parcela existente usando la referencia ERP.
+    
+    **Autenticación**: Requiere header `X-API-Key`
+    """
+    try:
+        existing = await parcelas_collection.find_one({"referencia_erp": referencia_erp})
+        if not existing:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No se encontró parcela con referencia ERP: {referencia_erp}"
+            )
+        
+        # Buscar cultivo actualizado
+        cultivo_id = existing.get("cultivo_id")
+        cultivo_nombre = parcela.cultivo_nombre
+        if parcela.cultivo_codigo:
+            cultivo = await cultivos_collection.find_one({"codigo": parcela.cultivo_codigo})
+            if cultivo:
+                cultivo_id = str(cultivo["_id"])
+                cultivo_nombre = cultivo.get("nombre", parcela.cultivo_nombre)
+        
+        update_data = {
+            "nombre": parcela.nombre,
+            "cultivo_id": cultivo_id,
+            "cultivo": cultivo_nombre,
+            "variedad": parcela.variedad,
+            "campana": parcela.campana,
+            "superficie": parcela.superficie,
+            "superficie_unidad": parcela.superficie_unidad,
+            "plantas_hectarea": parcela.plantas_hectarea,
+            "sistema_riego": parcela.sistema_riego,
+            "fecha_siembra": parcela.fecha_siembra,
+            "fecha_cosecha_prevista": parcela.fecha_cosecha_prevista,
+            "estado": parcela.estado,
+            "observaciones": parcela.observaciones,
+            "updated_at": datetime.now(),
+            "updated_by": f"ERP Integration ({auth['erp_name']})"
+        }
+        
+        await parcelas_collection.update_one(
+            {"_id": existing["_id"]},
+            {"$set": update_data}
+        )
+        
+        return {
+            "success": True,
+            "message": "Parcela actualizada correctamente",
+            "data": {
+                "id": str(existing["_id"]),
+                "codigo": existing.get("codigo"),
+                "referencia_erp": referencia_erp
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al actualizar parcela: {str(e)}")
+
+
+@router.get("/parcelas/{referencia_erp}", response_model=dict)
+async def obtener_parcela_erp(
+    referencia_erp: str,
+    auth: dict = Depends(verify_api_key)
+):
+    """
+    Obtener una parcela por su referencia ERP.
+    
+    **Autenticación**: Requiere header `X-API-Key`
+    """
+    parcela = await parcelas_collection.find_one({"referencia_erp": referencia_erp})
+    if not parcela:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No se encontró parcela con referencia ERP: {referencia_erp}"
+        )
+    
+    return {
+        "success": True,
+        "data": serialize_doc(parcela)
+    }
+
+
+@router.delete("/parcelas/{referencia_erp}", response_model=dict)
+async def eliminar_parcela_erp(
+    referencia_erp: str,
+    auth: dict = Depends(verify_api_key)
+):
+    """
+    Eliminar (dar de baja) una parcela por su referencia ERP.
+    
+    **Autenticación**: Requiere header `X-API-Key`
+    """
+    parcela = await parcelas_collection.find_one({"referencia_erp": referencia_erp})
+    if not parcela:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No se encontró parcela con referencia ERP: {referencia_erp}"
+        )
+    
+    await parcelas_collection.update_one(
+        {"_id": parcela["_id"]},
+        {"$set": {
+            "activo": False,
+            "estado": "Baja",
+            "fecha_baja": datetime.now().strftime("%Y-%m-%d"),
+            "updated_at": datetime.now(),
+            "deleted_by": "ERP Integration"
+        }}
+    )
+    
+    return {
+        "success": True,
+        "message": "Parcela dada de baja correctamente",
+        "data": {
+            "id": str(parcela["_id"]),
+            "codigo": parcela.get("codigo"),
+            "referencia_erp": referencia_erp
+        }
+    }
+
+
+# === CATÁLOGOS ADICIONALES ===
+
+@router.get("/catalogos/fincas", response_model=dict)
+async def listar_fincas_erp(auth: dict = Depends(verify_api_key)):
+    """Obtener lista de fincas disponibles."""
+    fincas = await fincas_collection.find({"activo": {"$ne": False}}).to_list(1000)
+    return {
+        "success": True,
+        "data": [
+            {
+                "id": str(f["_id"]),
+                "referencia_erp": f.get("referencia_erp"),
+                "codigo": f.get("codigo"),
+                "denominacion": f.get("denominacion"),
+                "provincia": f.get("provincia"),
+                "hectareas": f.get("hectareas")
+            }
+            for f in fincas
+        ]
+    }
+
+
+@router.get("/catalogos/parcelas", response_model=dict)
+async def listar_parcelas_erp(
+    campana: Optional[str] = None,
+    auth: dict = Depends(verify_api_key)
+):
+    """Obtener lista de parcelas disponibles."""
+    query = {"activo": {"$ne": False}}
+    if campana:
+        query["campana"] = campana
+    
+    parcelas = await parcelas_collection.find(query).to_list(1000)
+    return {
+        "success": True,
+        "data": [
+            {
+                "id": str(p["_id"]),
+                "referencia_erp": p.get("referencia_erp"),
+                "codigo": p.get("codigo"),
+                "nombre": p.get("nombre"),
+                "finca": p.get("finca"),
+                "cultivo": p.get("cultivo"),
+                "campana": p.get("campana"),
+                "superficie": p.get("superficie"),
+                "estado": p.get("estado")
+            }
+            for p in parcelas
         ]
     }

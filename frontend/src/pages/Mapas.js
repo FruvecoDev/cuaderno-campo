@@ -58,11 +58,15 @@ const FitBounds = ({ parcelas, disabled }) => {
     const bounds = [];
     
     parcelas.forEach(p => {
-      // Add polygon bounds if available
-      if (p.recintos?.[0]?.geometria?.length > 0) {
-        p.recintos[0].geometria.forEach(coord => {
-          if (coord.lat && coord.lng) {
-            bounds.push([coord.lat, coord.lng]);
+      // Add all polygon bounds if available (support multiple recintos)
+      if (p.recintos?.length > 0) {
+        p.recintos.forEach(recinto => {
+          if (recinto.geometria?.length > 0) {
+            recinto.geometria.forEach(coord => {
+              if (coord.lat && coord.lng) {
+                bounds.push([coord.lat, coord.lng]);
+              }
+            });
           }
         });
       }
@@ -91,15 +95,19 @@ const FlyToParcela = ({ parcela, onComplete }) => {
     let targetLat, targetLng;
     let zoomLevel = 17;
     
-    // If parcela has polygon, fly to its center
-    if (parcela.recintos?.[0]?.geometria?.length > 0) {
-      const geo = parcela.recintos[0].geometria;
-      targetLat = geo.reduce((sum, c) => sum + c.lat, 0) / geo.length;
-      targetLng = geo.reduce((sum, c) => sum + c.lng, 0) / geo.length;
-      
-      // Fit to polygon bounds with animation
-      const bounds = geo.map(c => [c.lat, c.lng]);
-      map.flyToBounds(bounds, { padding: [80, 80], maxZoom: 18, duration: 1.5 });
+    // If parcela has polygons, fly to bounds of all of them
+    const allCoords = [];
+    if (parcela.recintos?.length > 0) {
+      parcela.recintos.forEach(recinto => {
+        if (recinto.geometria?.length > 0) {
+          recinto.geometria.forEach(c => allCoords.push([c.lat, c.lng]));
+        }
+      });
+    }
+    
+    if (allCoords.length > 0) {
+      // Fly to all polygons' bounds
+      map.flyToBounds(allCoords, { padding: [80, 80], maxZoom: 18, duration: 1.5 });
     } else if (parcela.latitud && parcela.longitud) {
       // Fly to marker position
       targetLat = parcela.latitud;
@@ -147,7 +155,7 @@ const Mapas = () => {
   const [editMode, setEditMode] = useState(false);
   const [drawMode, setDrawMode] = useState(false);
   const [editCoords, setEditCoords] = useState({ latitud: '', longitud: '' });
-  const [drawnPolygon, setDrawnPolygon] = useState(null);
+  const [drawnPolygons, setDrawnPolygons] = useState([]); // Array de polígonos dibujados
   const [filters, setFilters] = useState({ cultivo: '', finca: '', search: '' });
   const [showList, setShowList] = useState(true);
   const [mapCenter, setMapCenter] = useState([40.4168, -3.7038]); // Madrid default
@@ -158,8 +166,10 @@ const Mapas = () => {
   const [mapType, setMapType] = useState('street'); // 'street' or 'satellite'
   const [disableFitBounds, setDisableFitBounds] = useState(false);
   const [capturingMap, setCapturingMap] = useState(false);
+  const [editingRecintoIndex, setEditingRecintoIndex] = useState(null); // Índice del recinto que se está editando
   const featureGroupRef = useRef(null);
   const mapContainerRef = useRef(null);
+  const drawnLayersRef = useRef({}); // Mapeo de layer IDs a polígonos
 
   useEffect(() => {
     fetchParcelas();
@@ -174,16 +184,25 @@ const Mapas = () => {
       // Set center to first parcela with coords or polygon
       const withLocation = (data.parcelas || []).filter(p => 
         (p.latitud && p.longitud) || 
-        (p.recintos?.[0]?.geometria?.length > 0)
+        (p.recintos?.some(r => r.geometria?.length > 0))
       );
       if (withLocation.length > 0) {
         const p = withLocation[0];
-        if (p.recintos?.[0]?.geometria?.length > 0) {
-          const geo = p.recintos[0].geometria;
-          const centerLat = geo.reduce((sum, c) => sum + c.lat, 0) / geo.length;
-          const centerLng = geo.reduce((sum, c) => sum + c.lng, 0) / geo.length;
+        // Get center from all recintos
+        const allCoords = [];
+        if (p.recintos?.length > 0) {
+          p.recintos.forEach(recinto => {
+            if (recinto.geometria?.length > 0) {
+              recinto.geometria.forEach(c => allCoords.push(c));
+            }
+          });
+        }
+        
+        if (allCoords.length > 0) {
+          const centerLat = allCoords.reduce((sum, c) => sum + c.lat, 0) / allCoords.length;
+          const centerLng = allCoords.reduce((sum, c) => sum + c.lng, 0) / allCoords.length;
           setMapCenter([centerLat, centerLng]);
-        } else {
+        } else if (p.latitud && p.longitud) {
           setMapCenter([p.latitud, p.longitud]);
         }
         setMapZoom(12);
@@ -232,28 +251,48 @@ const Mapas = () => {
     }
   };
 
-  const handleSavePolygon = async () => {
-    if (!selectedParcela || !drawnPolygon) return;
+  const handleSavePolygons = async () => {
+    if (!selectedParcela || drawnPolygons.length === 0) return;
     
     setSaving(true);
     try {
-      // Calculate center of polygon for marker
-      const centerLat = drawnPolygon.reduce((sum, c) => sum + c.lat, 0) / drawnPolygon.length;
-      const centerLng = drawnPolygon.reduce((sum, c) => sum + c.lng, 0) / drawnPolygon.length;
+      // Combinar recintos existentes con nuevos dibujados
+      const existingRecintos = selectedParcela.recintos || [];
       
-      // Calculate area
-      const calculatedArea = calculatePolygonArea(drawnPolygon);
+      // Si estamos editando un recinto específico, reemplazarlo
+      let updatedRecintos;
+      if (editingRecintoIndex !== null && drawnPolygons.length === 1) {
+        updatedRecintos = [...existingRecintos];
+        updatedRecintos[editingRecintoIndex] = {
+          geometria: drawnPolygons[0],
+          superficie_recinto: calculatePolygonArea(drawnPolygons[0])
+        };
+      } else {
+        // Agregar nuevos polígonos a los existentes
+        const newRecintos = drawnPolygons.map(poly => ({
+          geometria: poly,
+          superficie_recinto: calculatePolygonArea(poly)
+        }));
+        updatedRecintos = [...existingRecintos, ...newRecintos];
+      }
+      
+      // Calcular el centro de todos los polígonos
+      const allCoords = updatedRecintos.flatMap(r => r.geometria || []);
+      let centerLat = 0, centerLng = 0;
+      if (allCoords.length > 0) {
+        centerLat = allCoords.reduce((sum, c) => sum + c.lat, 0) / allCoords.length;
+        centerLng = allCoords.reduce((sum, c) => sum + c.lng, 0) / allCoords.length;
+      }
       
       // Capture map image before saving
       let imagenMapaUrl = null;
       if (mapContainerRef.current) {
         try {
           setCapturingMap(true);
-          // Asegurar vista satélite para la captura
           const originalMapType = mapType;
           if (mapType !== 'satellite') {
             setMapType('satellite');
-            await new Promise(resolve => setTimeout(resolve, 1500)); // Wait for tiles to load
+            await new Promise(resolve => setTimeout(resolve, 1500));
           }
           
           const canvas = await html2canvas(mapContainerRef.current, {
@@ -263,7 +302,6 @@ const Mapas = () => {
             logging: false
           });
           
-          // Convert to blob and upload
           const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 0.9));
           const formData = new FormData();
           formData.append('file', blob, `mapa_parcela_${selectedParcela._id}.png`);
@@ -271,13 +309,11 @@ const Mapas = () => {
           const uploadResponse = await api.postFormData('/api/upload/mapa-parcela', formData);
           imagenMapaUrl = uploadResponse.url;
           
-          // Restore original map type
           if (originalMapType !== 'satellite') {
             setMapType(originalMapType);
           }
         } catch (captureError) {
           console.error('Error capturing map:', captureError);
-          // Continue without image
         } finally {
           setCapturingMap(false);
         }
@@ -288,10 +324,7 @@ const Mapas = () => {
         latitud: centerLat,
         longitud: centerLng,
         imagen_mapa_url: imagenMapaUrl || selectedParcela.imagen_mapa_url,
-        recintos: [{
-          geometria: drawnPolygon,
-          superficie_recinto: calculatedArea
-        }]
+        recintos: updatedRecintos
       };
       
       await api.put(`/api/parcelas/${selectedParcela._id}`, updatedParcela);
@@ -303,33 +336,49 @@ const Mapas = () => {
       
       setDrawMode(false);
       setSelectedParcela(null);
-      setDrawnPolygon(null);
+      setDrawnPolygons([]);
+      setEditingRecintoIndex(null);
+      drawnLayersRef.current = {};
       
       // Clear drawn layers
       if (featureGroupRef.current) {
         featureGroupRef.current.clearLayers();
       }
     } catch (err) {
-      console.error('Error saving polygon:', err);
-      alert('Error al guardar el polígono');
+      console.error('Error saving polygons:', err);
+      alert('Error al guardar los polígonos');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDeletePolygon = async (parcela) => {
-    if (!confirm('¿Eliminar el polígono de esta parcela?')) return;
+  const handleDeletePolygon = async (parcela, recintoIndex = null) => {
+    const message = recintoIndex !== null 
+      ? `¿Eliminar la zona ${recintoIndex + 1} de esta parcela?`
+      : '¿Eliminar TODOS los polígonos de esta parcela?';
+    
+    if (!confirm(message)) return;
     
     try {
+      let updatedRecintos;
+      
+      if (recintoIndex !== null) {
+        // Eliminar solo el recinto específico
+        updatedRecintos = parcela.recintos.filter((_, idx) => idx !== recintoIndex);
+      } else {
+        // Eliminar todos los recintos
+        updatedRecintos = [];
+      }
+      
       const updatedParcela = {
         ...parcela,
-        recintos: []
+        recintos: updatedRecintos
       };
       
       await api.put(`/api/parcelas/${parcela._id}`, updatedParcela);
       
       setParcelas(parcelas.map(p => 
-        p._id === parcela._id ? { ...p, recintos: [] } : p
+        p._id === parcela._id ? { ...p, recintos: updatedRecintos } : p
       ));
     } catch (err) {
       console.error('Error deleting polygon:', err);
@@ -347,11 +396,13 @@ const Mapas = () => {
     setDrawMode(false);
   };
 
-  const openDrawMode = (parcela) => {
+  const openDrawMode = (parcela, recintoIndex = null) => {
     setSelectedParcela(parcela);
     setDrawMode(true);
     setEditMode(false);
-    setDrawnPolygon(null);
+    setDrawnPolygons([]);
+    setEditingRecintoIndex(recintoIndex);
+    drawnLayersRef.current = {};
     
     // Clear any existing drawings
     if (featureGroupRef.current) {
@@ -405,15 +456,53 @@ const Mapas = () => {
 
   const handleDrawCreated = (e) => {
     const { layer } = e;
+    const layerId = L.Util.stamp(layer);
     const coords = layer.getLatLngs()[0].map(latlng => ({
       lat: latlng.lat,
       lng: latlng.lng
     }));
-    setDrawnPolygon(coords);
+    
+    // Almacenar el mapeo de layer ID a polígono
+    drawnLayersRef.current[layerId] = coords;
+    
+    // Actualizar el array de polígonos dibujados
+    setDrawnPolygons(prev => [...prev, coords]);
   };
 
-  const handleDrawDeleted = () => {
-    setDrawnPolygon(null);
+  const handleDrawEdited = (e) => {
+    const layers = e.layers;
+    const updatedPolygons = [];
+    
+    layers.eachLayer((layer) => {
+      const coords = layer.getLatLngs()[0].map(latlng => ({
+        lat: latlng.lat,
+        lng: latlng.lng
+      }));
+      updatedPolygons.push(coords);
+    });
+    
+    // Actualizar los polígonos editados
+    if (updatedPolygons.length > 0) {
+      setDrawnPolygons(updatedPolygons);
+    }
+  };
+
+  const handleDrawDeleted = (e) => {
+    const layers = e.layers;
+    const deletedIds = [];
+    
+    layers.eachLayer((layer) => {
+      const layerId = L.Util.stamp(layer);
+      deletedIds.push(layerId);
+    });
+    
+    // Eliminar los polígonos borrados del mapeo
+    deletedIds.forEach(id => {
+      delete drawnLayersRef.current[id];
+    });
+    
+    // Actualizar el estado con los polígonos restantes
+    setDrawnPolygons(Object.values(drawnLayersRef.current));
   };
 
   const handleImportComplete = (result) => {
@@ -437,12 +526,13 @@ const Mapas = () => {
   });
 
   const parcelasConUbicacion = filteredParcelas.filter(p => 
-    (p.latitud && p.longitud) || (p.recintos?.[0]?.geometria?.length > 0)
+    (p.latitud && p.longitud) || (p.recintos?.some(r => r.geometria?.length > 0))
   );
   const parcelasSinUbicacion = filteredParcelas.filter(p => 
-    !p.latitud && !p.longitud && !p.recintos?.[0]?.geometria?.length
+    !p.latitud && !p.longitud && !p.recintos?.some(r => r.geometria?.length > 0)
   );
-  const parcelasConPoligono = filteredParcelas.filter(p => p.recintos?.[0]?.geometria?.length > 0);
+  const parcelasConPoligono = filteredParcelas.filter(p => p.recintos?.some(r => r.geometria?.length > 0));
+  const totalZonas = filteredParcelas.reduce((sum, p) => sum + (p.recintos?.filter(r => r.geometria?.length > 0).length || 0), 0);
 
   // Get unique cultivos for filter
   const cultivosUnicos = [...new Set(parcelas.map(p => p.cultivo).filter(Boolean))];
@@ -492,7 +582,14 @@ const Mapas = () => {
         </div>
         <div className="card" style={{ padding: '0.75rem', textAlign: 'center', background: 'linear-gradient(135deg, hsl(142 76% 36% / 0.1), hsl(142 76% 36% / 0.05))' }}>
           <Pentagon size={20} style={{ margin: '0 auto', color: 'hsl(142 76% 36%)' }} />
-          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'hsl(142 76% 36%)' }}>{parcelasConPoligono.length}</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'hsl(142 76% 36%)' }}>
+            {parcelasConPoligono.length}
+            {totalZonas > parcelasConPoligono.length && (
+              <span style={{ fontSize: '0.8rem', fontWeight: '500', marginLeft: '0.25rem' }}>
+                ({totalZonas} zonas)
+              </span>
+            )}
+          </div>
           <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))' }}>Con polígono</div>
         </div>
         <div className="card" style={{ padding: '0.75rem', textAlign: 'center', background: 'linear-gradient(135deg, hsl(38 92% 50% / 0.1), hsl(38 92% 50% / 0.05))' }}>
@@ -574,12 +671,25 @@ const Mapas = () => {
           border: '2px solid hsl(210 100% 50%)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
               <Pentagon size={20} style={{ color: 'hsl(210 100% 50%)' }} />
               <span style={{ fontWeight: '600' }}>
-                Dibujando polígono para: <strong>{selectedParcela.codigo_plantacion}</strong>
+                {editingRecintoIndex !== null 
+                  ? `Editando zona ${editingRecintoIndex + 1} de: `
+                  : 'Añadiendo zonas a: '}
+                <strong>{selectedParcela.codigo_plantacion}</strong>
               </span>
-              {drawnPolygon && (
+              {selectedParcela.recintos?.length > 0 && editingRecintoIndex === null && (
+                <span style={{ 
+                  background: 'hsl(var(--muted) / 0.3)', 
+                  padding: '0.2rem 0.5rem', 
+                  borderRadius: '4px',
+                  fontSize: '0.8rem'
+                }}>
+                  Ya tiene {selectedParcela.recintos.length} zona(s)
+                </span>
+              )}
+              {drawnPolygons.length > 0 && (
                 <span style={{ 
                   background: 'hsl(142 76% 36% / 0.2)', 
                   padding: '0.25rem 0.5rem', 
@@ -587,28 +697,36 @@ const Mapas = () => {
                   fontSize: '0.85rem',
                   color: 'hsl(142 76% 36%)'
                 }}>
-                  Área: {calculatePolygonArea(drawnPolygon).toFixed(2)} ha
+                  {drawnPolygons.length} nuevo(s) • Área total: {drawnPolygons.reduce((sum, poly) => sum + calculatePolygonArea(poly), 0).toFixed(2)} ha
                 </span>
               )}
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button 
                 className="btn btn-secondary btn-sm"
-                onClick={() => { setDrawMode(false); setSelectedParcela(null); setDrawnPolygon(null); }}
+                onClick={() => { 
+                  setDrawMode(false); 
+                  setSelectedParcela(null); 
+                  setDrawnPolygons([]); 
+                  setEditingRecintoIndex(null);
+                  drawnLayersRef.current = {};
+                }}
               >
                 <X size={16} /> Cancelar
               </button>
               <button 
                 className="btn btn-primary btn-sm"
-                onClick={handleSavePolygon}
-                disabled={!drawnPolygon || saving}
+                onClick={handleSavePolygons}
+                disabled={drawnPolygons.length === 0 || saving}
               >
-                <Save size={16} /> {saving ? 'Guardando...' : 'Guardar Polígono'}
+                <Save size={16} /> {saving ? 'Guardando...' : `Guardar ${drawnPolygons.length} polígono(s)`}
               </button>
             </div>
           </div>
           <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
-            Usa las herramientas de dibujo en el mapa para crear el polígono de la parcela. Haz clic en los vértices para definir el área.
+            {editingRecintoIndex !== null 
+              ? 'Dibuja el nuevo polígono para reemplazar la zona actual.'
+              : 'Puedes dibujar múltiples zonas. Cada zona se guardará como un recinto independiente de la parcela.'}
           </p>
         </div>
       )}
@@ -702,6 +820,7 @@ const Mapas = () => {
                 <EditControl
                   position="topright"
                   onCreated={handleDrawCreated}
+                  onEdited={handleDrawEdited}
                   onDeleted={handleDrawDeleted}
                   draw={{
                     rectangle: false,
@@ -729,61 +848,102 @@ const Mapas = () => {
               </FeatureGroup>
             )}
             
-            {/* Render existing polygons */}
+            {/* Render existing polygons - ALL recintos for each parcela */}
             {filteredParcelas.map(parcela => {
-              const hasPolygon = parcela.recintos?.[0]?.geometria?.length > 0;
-              if (!hasPolygon) return null;
+              const recintos = parcela.recintos || [];
+              if (recintos.length === 0) return null;
               
-              const polygonCoords = parcela.recintos[0].geometria.map(c => [c.lat, c.lng]);
-              const color = CROP_COLORS[parcela.cultivo] || CROP_COLORS.default;
-              
-              return (
-                <Polygon
-                  key={`polygon-${parcela._id}`}
-                  positions={polygonCoords}
-                  pathOptions={{
-                    color: color,
-                    fillColor: color,
-                    fillOpacity: 0.3,
-                    weight: 2
-                  }}
-                >
-                  <Popup>
-                    <div style={{ minWidth: '220px' }}>
-                      <h3 style={{ margin: '0 0 0.5rem', fontWeight: '600', fontSize: '1rem' }}>
-                        {parcela.codigo_plantacion}
-                      </h3>
-                      <div style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginBottom: '0.25rem' }}>
-                          <Leaf size={14} style={{ color }} />
-                          <strong>{parcela.cultivo || 'Sin cultivo'}</strong>
+              return recintos.map((recinto, recintoIndex) => {
+                if (!recinto.geometria?.length) return null;
+                
+                const polygonCoords = recinto.geometria.map(c => [c.lat, c.lng]);
+                const color = CROP_COLORS[parcela.cultivo] || CROP_COLORS.default;
+                // Variar ligeramente el color para distinguir zonas de la misma parcela
+                const opacity = 0.3 + (recintoIndex * 0.1);
+                const strokeWeight = recintoIndex === 0 ? 3 : 2;
+                
+                return (
+                  <Polygon
+                    key={`polygon-${parcela._id}-${recintoIndex}`}
+                    positions={polygonCoords}
+                    pathOptions={{
+                      color: color,
+                      fillColor: color,
+                      fillOpacity: Math.min(opacity, 0.5),
+                      weight: strokeWeight,
+                      dashArray: recintoIndex > 0 ? '5, 5' : null
+                    }}
+                  >
+                    <Popup>
+                      <div style={{ minWidth: '240px' }}>
+                        <h3 style={{ margin: '0 0 0.5rem', fontWeight: '600', fontSize: '1rem' }}>
+                          {parcela.codigo_plantacion}
+                          <span style={{ 
+                            marginLeft: '0.5rem', 
+                            fontSize: '0.75rem', 
+                            background: color + '33',
+                            padding: '0.15rem 0.4rem',
+                            borderRadius: '4px',
+                            color: color
+                          }}>
+                            Zona {recintoIndex + 1} de {recintos.length}
+                          </span>
+                        </h3>
+                        <div style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginBottom: '0.25rem' }}>
+                            <Leaf size={14} style={{ color }} />
+                            <strong>{parcela.cultivo || 'Sin cultivo'}</strong>
+                          </div>
+                          <div>Superficie parcela: <strong>{parcela.superficie_total} ha</strong></div>
+                          {recinto.superficie_recinto && (
+                            <div>Área esta zona: <strong>{recinto.superficie_recinto.toFixed(2)} ha</strong></div>
+                          )}
+                          {recintos.length > 1 && (
+                            <div style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.8rem', marginTop: '0.25rem' }}>
+                              Área total zonas: <strong>
+                                {recintos.reduce((sum, r) => sum + (r.superficie_recinto || 0), 0).toFixed(2)} ha
+                              </strong>
+                            </div>
+                          )}
+                          {parcela.variedad && <div>Variedad: {parcela.variedad}</div>}
                         </div>
-                        <div>Superficie: <strong>{parcela.superficie_total} ha</strong></div>
-                        {parcela.recintos[0].superficie_recinto && (
-                          <div>Área polígono: <strong>{parcela.recintos[0].superficie_recinto.toFixed(2)} ha</strong></div>
+                        <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+                          <button 
+                            className="btn btn-sm btn-secondary"
+                            onClick={() => openDrawMode(parcela, recintoIndex)}
+                            style={{ flex: 1 }}
+                          >
+                            <Edit2 size={14} /> Editar zona
+                          </button>
+                          <button 
+                            className="btn btn-sm"
+                            onClick={() => handleDeletePolygon(parcela, recintoIndex)}
+                            style={{ flex: 1, background: 'hsl(0 84% 60%)', color: 'white' }}
+                          >
+                            <Trash2 size={14} /> Eliminar
+                          </button>
+                        </div>
+                        {recintos.length > 1 && (
+                          <button 
+                            className="btn btn-sm btn-ghost"
+                            onClick={() => handleDeletePolygon(parcela, null)}
+                            style={{ width: '100%', marginTop: '0.5rem', color: 'hsl(0 84% 60%)' }}
+                          >
+                            <Trash2 size={14} /> Eliminar todas las zonas
+                          </button>
                         )}
-                        {parcela.variedad && <div>Variedad: {parcela.variedad}</div>}
-                      </div>
-                      <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
                         <button 
-                          className="btn btn-sm btn-secondary"
+                          className="btn btn-sm btn-primary"
                           onClick={() => openDrawMode(parcela)}
-                          style={{ flex: 1 }}
+                          style={{ width: '100%', marginTop: '0.5rem' }}
                         >
-                          <Edit2 size={14} /> Redibujar
-                        </button>
-                        <button 
-                          className="btn btn-sm"
-                          onClick={() => handleDeletePolygon(parcela)}
-                          style={{ flex: 1, background: 'hsl(0 84% 60%)', color: 'white' }}
-                        >
-                          <Trash2 size={14} /> Eliminar
+                          <Pentagon size={14} /> Añadir otra zona
                         </button>
                       </div>
-                    </div>
-                  </Popup>
-                </Polygon>
-              );
+                    </Popup>
+                  </Polygon>
+                );
+              });
             })}
             
             {/* Markers for parcelas without polygons */}
@@ -881,7 +1041,8 @@ const Mapas = () => {
               Con ubicación ({parcelasConUbicacion.length})
             </h4>
             {parcelasConUbicacion.map(p => {
-              const hasPolygon = p.recintos?.[0]?.geometria?.length > 0;
+              const hasPolygon = p.recintos?.some(r => r.geometria?.length > 0);
+              const numZonas = p.recintos?.filter(r => r.geometria?.length > 0).length || 0;
               return (
                 <div 
                   key={p._id}
@@ -922,12 +1083,26 @@ const Mapas = () => {
                       <Navigation size={10} />
                     </button>
                     {hasPolygon && (
-                      <Pentagon size={14} style={{ color: 'hsl(142 76% 36%)' }} />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <Pentagon size={14} style={{ color: 'hsl(142 76% 36%)' }} />
+                        {numZonas > 1 && (
+                          <span style={{ 
+                            fontSize: '0.65rem', 
+                            background: 'hsl(142 76% 36% / 0.2)', 
+                            padding: '0.1rem 0.3rem',
+                            borderRadius: '4px',
+                            color: 'hsl(142 76% 36%)'
+                          }}>
+                            {numZonas}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginLeft: '1.25rem' }}>
                     {p.cultivo || 'Sin cultivo'} • {p.superficie_total} ha
                     {p.finca && <span> • {p.finca}</span>}
+                    {numZonas > 1 && <span style={{ color: 'hsl(142 76% 36%)' }}> • {numZonas} zonas</span>}
                   </div>
                   <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.5rem' }}>
                     <button 
@@ -942,7 +1117,7 @@ const Mapas = () => {
                       onClick={(e) => { e.stopPropagation(); openDrawMode(p); }}
                       style={{ flex: 1, padding: '0.25rem 0.5rem', fontSize: '0.7rem' }}
                     >
-                      <Pentagon size={12} /> {hasPolygon ? 'Redibujar' : 'Polígono'}
+                      <Pentagon size={12} /> {hasPolygon ? '+ Zona' : 'Polígono'}
                     </button>
                     {hasPolygon && (
                       <button 
@@ -951,7 +1126,6 @@ const Mapas = () => {
                           e.stopPropagation(); 
                           setDisableFitBounds(true);
                           setFlyToParcela(p);
-                          // Wait for map to center, then switch to satellite and capture
                           setTimeout(async () => {
                             setMapType('satellite');
                             setTimeout(async () => {

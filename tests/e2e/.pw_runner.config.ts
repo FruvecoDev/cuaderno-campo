@@ -2,16 +2,16 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: '/app/tests/e2e',
-  outputDir: '/root/.emergent/automation_output/20260301_114741/test-results',
+  outputDir: '/root/.emergent/automation_output/20260313_132115/test-results',
   timeout: 60000,
   retries: 0,
   workers: 1,
   reporter: [
     ['line'],
-    ['json', { outputFile: '/root/.emergent/automation_output/20260301_114741/results.json' }],
+    ['json', { outputFile: '/root/.emergent/automation_output/20260313_132115/results.json' }],
   ],
   use: {
-    baseURL: 'https://cultivo-pro.preview.emergentagent.com',
+    baseURL: 'https://harvest-hub-345.preview.emergentagent.com',
     screenshot: 'only-on-failure',
     trace: 'off',
     headless: true,

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = process.env.BASE_URL || 'https://cultivo-pro.preview.emergentagent.com';
+const BASE_URL = process.env.BASE_URL || 'https://harvest-hub-345.preview.emergentagent.com';
 
 test.describe('Usuarios - Gestión y Vinculación', () => {
   

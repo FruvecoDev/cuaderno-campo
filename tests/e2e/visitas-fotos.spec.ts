@@ -12,7 +12,7 @@ import * as path from 'path';
  * - Photo deletion
  */
 
-const BASE_URL = 'https://cultivo-pro.preview.emergentagent.com';
+const BASE_URL = 'https://harvest-hub-345.preview.emergentagent.com';
 
 // Helper to create a minimal valid PNG image
 function createTestPNG(): Buffer {
