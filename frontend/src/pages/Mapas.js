@@ -167,9 +167,12 @@ const Mapas = () => {
   const [disableFitBounds, setDisableFitBounds] = useState(false);
   const [capturingMap, setCapturingMap] = useState(false);
   const [editingRecintoIndex, setEditingRecintoIndex] = useState(null); // Índice del recinto que se está editando
+  const [isDrawingActive, setIsDrawingActive] = useState(false); // Controla si la herramienta de dibujo está activa
   const featureGroupRef = useRef(null);
   const mapContainerRef = useRef(null);
   const drawnLayersRef = useRef({}); // Mapeo de layer IDs a polígonos
+  const editControlRef = useRef(null); // Referencia al EditControl
+  const mapInstanceRef = useRef(null); // Referencia al mapa para activar dibujo
 
   useEffect(() => {
     fetchParcelas();
@@ -467,6 +470,19 @@ const Mapas = () => {
     
     // Actualizar el array de polígonos dibujados
     setDrawnPolygons(prev => [...prev, coords]);
+    
+    // Marcar que la herramienta de dibujo ya no está activa (el usuario cerró el polígono)
+    setIsDrawingActive(false);
+  };
+
+  // Función para activar manualmente la herramienta de dibujo de polígonos
+  const activatePolygonDrawing = () => {
+    // Buscar el botón de dibujo de polígono en el DOM y hacer clic
+    const drawButton = document.querySelector('.leaflet-draw-draw-polygon');
+    if (drawButton) {
+      drawButton.click();
+      setIsDrawingActive(true);
+    }
   };
 
   const handleDrawEdited = (e) => {
@@ -709,6 +725,7 @@ const Mapas = () => {
                   setSelectedParcela(null); 
                   setDrawnPolygons([]); 
                   setEditingRecintoIndex(null);
+                  setIsDrawingActive(false);
                   drawnLayersRef.current = {};
                 }}
               >
@@ -723,11 +740,39 @@ const Mapas = () => {
               </button>
             </div>
           </div>
-          <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
-            {editingRecintoIndex !== null 
-              ? 'Dibuja el nuevo polígono para reemplazar la zona actual.'
-              : 'Puedes dibujar múltiples zonas. Cada zona se guardará como un recinto independiente de la parcela.'}
-          </p>
+          
+          {/* Barra de herramientas de dibujo */}
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.75rem', 
+            marginTop: '0.75rem',
+            padding: '0.5rem',
+            background: 'hsl(var(--card))',
+            borderRadius: '8px',
+            border: '1px solid hsl(var(--border))'
+          }}>
+            <button
+              className={`btn btn-sm ${isDrawingActive ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={activatePolygonDrawing}
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.5rem',
+                fontWeight: isDrawingActive ? '600' : '500'
+              }}
+            >
+              <Pentagon size={16} />
+              {isDrawingActive ? 'Dibujando...' : (drawnPolygons.length > 0 ? 'Dibujar otra zona' : 'Empezar a dibujar')}
+            </button>
+            <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
+              {isDrawingActive 
+                ? 'Haz clic en el mapa para añadir puntos. Cierra el polígono haciendo clic en el primer punto.'
+                : drawnPolygons.length > 0 
+                  ? 'Puedes seguir añadiendo más zonas o guardar las actuales.'
+                  : 'Haz clic en "Empezar a dibujar" y luego marca los puntos en el mapa.'}
+            </span>
+          </div>
         </div>
       )}
 
@@ -830,6 +875,7 @@ const Mapas = () => {
                     polyline: false,
                     polygon: {
                       allowIntersection: false,
+                      repeatMode: true, // Permite dibujar múltiples polígonos consecutivamente
                       drawError: {
                         color: '#e1e4e8',
                         message: 'Los bordes no pueden cruzarse'
