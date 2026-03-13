@@ -220,6 +220,7 @@ const Parcelas = () => {
   const [editingId, setEditingId] = useState(null);
   const [polygon, setPolygon] = useState([]);
   const [allRecintos, setAllRecintos] = useState([]); // Todos los recintos/polígonos existentes
+  const [newDrawnPolygons, setNewDrawnPolygons] = useState([]); // Polígonos nuevos dibujados en modo multi
   const [mapType, setMapType] = useState('satellite'); // Tipo de mapa: osm, satellite, hybrid, topo
   const [showGeneralMap, setShowGeneralMap] = useState(false); // Mostrar mapa general de todas las parcelas
   const { token } = useAuth();
@@ -630,27 +631,25 @@ const Parcelas = () => {
     console.log('🗺️ Multi-mode:', isMultiMode);
     
     if (isMultiMode) {
-      // En modo multi-polígono, coords puede ser un array de arrays
+      // En modo multi-polígono, acumular los polígonos nuevos
       if (Array.isArray(coords) && coords.length > 0) {
-        if (Array.isArray(coords[0]) && Array.isArray(coords[0][0])) {
-          // Es un array de polígonos completos - no hacer nada extra aquí
-          // El componente AdvancedParcelMap maneja esto internamente
-        } else if (coords.length >= 3) {
-          // Es un nuevo polígono individual
-          setPolygon(coords);
+        // Verificar si es un polígono válido (array de coordenadas con lat/lng)
+        if (coords[0] && typeof coords[0].lat === 'number') {
+          // Es un nuevo polígono individual - añadirlo al array
+          setNewDrawnPolygons(prev => [...prev, coords]);
+          console.log('🗺️ Added new polygon to multi-mode. Total new:', newDrawnPolygons.length + 1);
         }
       }
     } else {
+      // Modo tradicional - reemplazar el polígono
       setPolygon(coords);
+      if (coords && coords.length > 0) {
+        const area = calculatePolygonArea(coords);
+        console.log('🗺️ Calculated area:', area, 'ha');
+        alert(`✅ Polígono dibujado con ${coords.length} puntos\nÁrea aproximada: ${area.toFixed(2)} ha`);
+      }
     }
-    
-    if (coords && coords.length > 0 && !isMultiMode) {
-      // Show success notification solo en modo tradicional
-      const area = calculatePolygonArea(coords);
-      console.log('🗺️ Calculated area:', area, 'ha');
-      alert(`✅ Polígono dibujado con ${coords.length} puntos\nÁrea aproximada: ${area.toFixed(2)} ha`);
-    }
-  }, []);
+  }, [newDrawnPolygons.length]);
 
   // Helper function to calculate polygon area
   const calculatePolygonArea = (coordinates) => {
@@ -675,14 +674,21 @@ const Parcelas = () => {
     
     console.log('📤 Submit - polygon state:', polygon);
     console.log('📤 Submit - polygon.length:', polygon ? polygon.length : 0);
+    console.log('📤 Submit - allRecintos:', allRecintos.length);
+    console.log('📤 Submit - newDrawnPolygons:', newDrawnPolygons.length);
     
     if (!formData.contrato_id) {
       alert('⚠️ Debes seleccionar un contrato. Toda parcela debe estar asociada a un contrato.');
       return;
     }
     
-    if (!editingId && (!polygon || polygon.length < 3)) {
-      console.log('❌ Polygon validation failed:', polygon);
+    // Para nuevas parcelas, verificar que tenga al menos un polígono
+    const hasExistingPolygons = allRecintos.length > 0;
+    const hasNewPolygons = newDrawnPolygons.length > 0;
+    const hasSinglePolygon = polygon && polygon.length >= 3;
+    
+    if (!editingId && !hasSinglePolygon && !hasNewPolygons) {
+      console.log('❌ Polygon validation failed');
       alert(`⚠️ Dibuja un polígono en el mapa primero.\n\nPuntos actuales: ${polygon ? polygon.length : 0}\nNecesitas al menos 3 puntos.`);
       return;
     }
@@ -698,15 +704,39 @@ const Parcelas = () => {
         num_plantas: parseInt(formData.num_plantas) || 0
       };
       
-      // Añadir recintos si hay polígono dibujado
-      if (polygon && polygon.length >= 3) {
-        console.log('Adding polygon to payload:', polygon);
-        payload.recintos = [{ geometria: polygon }];
-      } else if (!editingId) {
-        console.log('No polygon drawn, polygon:', polygon);
-        // Para nuevas parcelas sin polígono, enviar recintos vacío
-        payload.recintos = [];
+      // Construir array de recintos
+      let recintos = [];
+      
+      if (editingId) {
+        // En modo edición: combinar recintos existentes + nuevos dibujados
+        // Los recintos existentes ya están como geometrías
+        recintos = allRecintos.map(geom => ({ geometria: geom }));
+        
+        // Añadir los nuevos polígonos dibujados
+        if (hasNewPolygons) {
+          newDrawnPolygons.forEach(geom => {
+            recintos.push({ geometria: geom });
+          });
+        }
+        
+        // Si no hay nuevos polígonos pero sí un polígono simple dibujado (modo no-multi)
+        if (!hasNewPolygons && hasSinglePolygon && !hasExistingPolygons) {
+          recintos = [{ geometria: polygon }];
+        }
+      } else {
+        // Nueva parcela
+        if (hasNewPolygons) {
+          // Modo multi-zona
+          recintos = newDrawnPolygons.map(geom => ({ geometria: geom }));
+        } else if (hasSinglePolygon) {
+          // Modo tradicional
+          recintos = [{ geometria: polygon }];
+        }
       }
+      
+      payload.recintos = recintos;
+      
+      console.log('📤 Final payload recintos:', recintos.length, 'polígonos');
       
       const data = editingId 
         ? await api.put(url, payload)
@@ -714,12 +744,14 @@ const Parcelas = () => {
       
       if (data.success) {
         console.log('✅ Parcela saved successfully:', data);
-        const hadPolygon = payload.recintos && payload.recintos.length > 0 && payload.recintos[0].geometria && payload.recintos[0].geometria.length >= 3;
-        alert(`✅ Parcela ${editingId ? 'actualizada' : 'creada'} correctamente${hadPolygon ? '\n🗺️ Polígono guardado con ' + payload.recintos[0].geometria.length + ' puntos' : ''}`);
+        const totalPolygons = recintos.length;
+        alert(`✅ Parcela ${editingId ? 'actualizada' : 'creada'} correctamente${totalPolygons > 0 ? '\n🗺️ ' + totalPolygons + ' zona(s) guardada(s)' : ''}`);
         setShowForm(false);
         setEditingId(null);
         fetchParcelas();
         setPolygon([]);
+        setAllRecintos([]);
+        setNewDrawnPolygons([]);
         setSearchContrato('');
         setContratoSearch({ proveedor: '', cultivo: '', campana: '' });
         setSigpacResult(null);
@@ -748,6 +780,7 @@ const Parcelas = () => {
       }
     } catch (error) {
       console.error('Error saving parcela:', error);
+      alert(api.getErrorMessage(error) || 'Error al guardar la parcela');
     }
   };
   
@@ -807,6 +840,7 @@ const Parcelas = () => {
     setShowForm(false);
     setPolygon([]);
     setAllRecintos([]);
+    setNewDrawnPolygons([]);
     setSearchContrato('');
     setContratoSearch({ proveedor: '', cultivo: '', campana: '' });
     setSigpacResult(null);
@@ -1060,6 +1094,7 @@ const Parcelas = () => {
                 setAllPolygons={setAllRecintos}
                 isEditing={!!editingId}
                 onPolygonCreated={handlePolygonCreated}
+                onDrawnPolygonsChange={setNewDrawnPolygons}
                 height="500px"
                 allowMultiplePolygons={!!editingId} // Permitir múltiples zonas en modo edición
               />

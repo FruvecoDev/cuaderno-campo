@@ -413,6 +413,7 @@ const AdvancedParcelMap = ({
   height = '400px',
   onPolygonCreated,
   onPolygonEdited,
+  onDrawnPolygonsChange, // Callback para notificar cambios en polígonos dibujados
   allowMultiplePolygons = false // Nuevo: habilitar modo multi-polígono
 }) => {
   const [mapType, setMapType] = useState('satellite');
@@ -435,6 +436,13 @@ const AdvancedParcelMap = ({
   const allCurrentPolygons = multiPolygonMode 
     ? [...(allPolygons || []), ...drawnPolygons]
     : (polygon && polygon.length > 0 ? [polygon] : []);
+  
+  // Notificar al padre cuando cambian los polígonos dibujados
+  useEffect(() => {
+    if (onDrawnPolygonsChange && multiPolygonMode) {
+      onDrawnPolygonsChange(drawnPolygons);
+    }
+  }, [drawnPolygons, multiPolygonMode, onDrawnPolygonsChange]);
   
   // Manejar creación de polígono
   const handlePolygonCreated = (coords, isMultiMode) => {
