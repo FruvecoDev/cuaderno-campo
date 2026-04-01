@@ -4,8 +4,9 @@ import {
   Brain, Sparkles, Bug, TrendingUp, Loader2, AlertTriangle, 
   CheckCircle2, ChevronDown, ChevronUp, Leaf, Package, Calendar,
   BarChart3, Lightbulb, Shield, Clock, Target, ArrowRight, FileSignature,
-  DollarSign, AlertCircle
+  DollarSign, AlertCircle, History, Eye, X, Zap, FileText
 } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
@@ -15,7 +16,8 @@ import '../App.css';
 const TABS = {
   TREATMENTS: 'treatments',
   PREDICTIONS: 'predictions',
-  CONTRACTS: 'contracts'
+  CONTRACTS: 'contracts',
+  HISTORY: 'history'
 };
 
 const AsistenteIA = () => {
@@ -48,9 +50,16 @@ const AsistenteIA = () => {
   const [contractSummary, setContractSummary] = useState(null);
   const [summaryError, setSummaryError] = useState(null);
 
+  // AI Dashboard/History State
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loadingDashboard, setLoadingDashboard] = useState(false);
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [loadingReport, setLoadingReport] = useState(false);
+
   useEffect(() => {
     fetchParcelas();
     fetchContratos();
+    fetchDashboard();
   }, []);
 
   const fetchParcelas = async () => {
@@ -68,6 +77,32 @@ const AsistenteIA = () => {
       setContratos(data.contratos || []);
     } catch (err) {
       console.error('Error fetching contratos:', err);
+    }
+  };
+
+  const fetchDashboard = async () => {
+    setLoadingDashboard(true);
+    try {
+      const data = await api.get('/api/ai/dashboard');
+      setDashboardData(data);
+    } catch (err) {
+      console.error('Error fetching AI dashboard:', err);
+    } finally {
+      setLoadingDashboard(false);
+    }
+  };
+
+  const fetchReportDetail = async (reportId) => {
+    setLoadingReport(true);
+    try {
+      const data = await api.get(`/api/ai/report-detail/${reportId}`);
+      if (data.success) {
+        setSelectedReport(data.report);
+      }
+    } catch (err) {
+      console.error('Error fetching report detail:', err);
+    } finally {
+      setLoadingReport(false);
     }
   };
 
@@ -90,6 +125,7 @@ const AsistenteIA = () => {
 
       if (data.success) {
         setSuggestions(data);
+        fetchDashboard();
       } else {
         throw new Error('No se pudieron generar las sugerencias');
       }
@@ -116,6 +152,7 @@ const AsistenteIA = () => {
 
       if (data.success) {
         setPrediction(data);
+        fetchDashboard();
       } else {
         throw new Error('No se pudo generar la predicción');
       }
@@ -142,6 +179,7 @@ const AsistenteIA = () => {
 
       if (data.success) {
         setContractSummary(data);
+        fetchDashboard();
       } else {
         throw new Error('No se pudo generar el resumen');
       }
@@ -240,7 +278,7 @@ const AsistenteIA = () => {
       {/* Feature Cards */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(3, 1fr)', 
+        gridTemplateColumns: 'repeat(4, 1fr)', 
         gap: '1rem', 
         marginBottom: '2rem' 
       }}>
@@ -335,6 +373,38 @@ const AsistenteIA = () => {
               </h3>
               <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }}>
                 Genera resúmenes ejecutivos inteligentes de tus contratos con análisis de cumplimiento, financiero y recomendaciones.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* History Card */}
+        <div 
+          className="card" 
+          style={{ 
+            cursor: 'pointer',
+            border: activeTab === TABS.HISTORY ? '2px solid #d97706' : '1px solid hsl(var(--border))',
+            backgroundColor: activeTab === TABS.HISTORY ? '#fffbeb' : 'white',
+            transition: 'all 0.2s ease'
+          }}
+          onClick={() => { setActiveTab(TABS.HISTORY); fetchDashboard(); }}
+          data-testid="tab-history"
+        >
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+            <div style={{ 
+              padding: '1rem', 
+              borderRadius: '12px', 
+              backgroundColor: '#d97706',
+              color: 'white'
+            }}>
+              <History size={28} />
+            </div>
+            <div>
+              <h3 style={{ fontWeight: '600', fontSize: '1.1rem', marginBottom: '0.5rem' }}>
+                Historial y Métricas
+              </h3>
+              <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }}>
+                Consulta el historial de todos los análisis IA generados con métricas de uso y actividad.
               </p>
             </div>
           </div>
@@ -1103,6 +1173,197 @@ const AsistenteIA = () => {
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* History & Metrics Panel */}
+      {activeTab === TABS.HISTORY && (
+        <div data-testid="panel-history">
+          {loadingDashboard ? (
+            <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
+              <Loader2 size={32} style={{ animation: 'spin 1s linear infinite', color: '#d97706' }} />
+              <p style={{ marginTop: '1rem', color: 'hsl(var(--muted-foreground))' }}>Cargando métricas...</p>
+            </div>
+          ) : dashboardData ? (
+            <>
+              {/* KPI Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                <div className="card" style={{ textAlign: 'center', borderTop: '3px solid #d97706' }}>
+                  <div style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.25rem' }}>Total Informes IA</div>
+                  <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#d97706' }}>{dashboardData.total_reports}</div>
+                </div>
+                <div className="card" style={{ textAlign: 'center', borderTop: '3px solid #7c3aed' }}>
+                  <div style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.25rem' }}>Tratamientos</div>
+                  <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#7c3aed' }}>{dashboardData.by_type?.treatment_suggestion || 0}</div>
+                </div>
+                <div className="card" style={{ textAlign: 'center', borderTop: '3px solid #059669' }}>
+                  <div style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.25rem' }}>Predicciones</div>
+                  <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#059669' }}>{dashboardData.by_type?.yield_prediction || 0}</div>
+                </div>
+                <div className="card" style={{ textAlign: 'center', borderTop: '3px solid #2563eb' }}>
+                  <div style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.25rem' }}>Resúmenes</div>
+                  <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#2563eb' }}>{dashboardData.by_type?.contract_summary || 0}</div>
+                </div>
+              </div>
+
+              {/* Activity Chart + Avg Time */}
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                <div className="card">
+                  <h4 style={{ fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <BarChart3 size={18} style={{ color: '#d97706' }} /> Actividad IA (Últimos 30 días)
+                  </h4>
+                  {dashboardData.activity?.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={220}>
+                      <BarChart data={dashboardData.activity}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="date" tickFormatter={(d) => d.slice(5)} fontSize={11} />
+                        <YAxis allowDecimals={false} fontSize={11} />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey="treatment_suggestion" name="Tratamientos" fill="#7c3aed" stackId="a" />
+                        <Bar dataKey="yield_prediction" name="Predicciones" fill="#059669" stackId="a" />
+                        <Bar dataKey="contract_summary" name="Resúmenes" fill="#2563eb" stackId="a" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div style={{ textAlign: 'center', padding: '2rem', color: 'hsl(var(--muted-foreground))' }}>
+                      <History size={40} style={{ opacity: 0.3, marginBottom: '0.5rem' }} />
+                      <p>Aún no hay actividad registrada. Genera tu primer informe IA.</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                  <Zap size={32} style={{ color: '#d97706', marginBottom: '0.5rem' }} />
+                  <div style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>Tiempo Medio de Generación</div>
+                  <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#d97706' }}>
+                    {dashboardData.avg_generation_time || 0}s
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginTop: '0.5rem' }}>
+                    Modelo: GPT-4o
+                  </div>
+                </div>
+              </div>
+
+              {/* Recent Reports Table */}
+              <div className="card">
+                <h4 style={{ fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <FileText size={18} style={{ color: '#d97706' }} /> Historial de Informes Recientes
+                </h4>
+                {dashboardData.recent_reports?.length > 0 ? (
+                  <div style={{ overflowX: 'auto' }}>
+                    <table className="data-table" style={{ width: '100%' }}>
+                      <thead>
+                        <tr>
+                          <th>Tipo</th>
+                          <th>Título</th>
+                          <th>Entidad</th>
+                          <th>Tiempo</th>
+                          <th>Fecha</th>
+                          <th>Acción</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {dashboardData.recent_reports.map((r) => (
+                          <tr key={r.id}>
+                            <td>
+                              <span style={{
+                                padding: '3px 8px',
+                                borderRadius: '6px',
+                                fontSize: '0.7rem',
+                                fontWeight: '600',
+                                backgroundColor: r.report_type === 'treatment_suggestion' ? '#f3e8ff' :
+                                                 r.report_type === 'yield_prediction' ? '#ecfdf5' : '#dbeafe',
+                                color: r.report_type === 'treatment_suggestion' ? '#7c3aed' :
+                                       r.report_type === 'yield_prediction' ? '#059669' : '#2563eb'
+                              }}>
+                                {r.report_type === 'treatment_suggestion' ? 'Tratamiento' :
+                                 r.report_type === 'yield_prediction' ? 'Predicción' :
+                                 r.report_type === 'contract_summary' ? 'Resumen' : r.report_type}
+                              </span>
+                            </td>
+                            <td style={{ fontWeight: '500', maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {r.title}
+                            </td>
+                            <td style={{ fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))' }}>{r.entity_name}</td>
+                            <td style={{ fontSize: '0.85rem' }}>{r.generation_time_seconds}s</td>
+                            <td style={{ fontSize: '0.85rem' }}>
+                              {r.created_at ? new Date(r.created_at).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-'}
+                            </td>
+                            <td>
+                              <button
+                                className="btn btn-secondary"
+                                style={{ padding: '4px 8px', fontSize: '0.75rem' }}
+                                onClick={() => fetchReportDetail(r.id)}
+                                data-testid={`btn-view-report-${r.id}`}
+                              >
+                                <Eye size={14} /> Ver
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '2rem', color: 'hsl(var(--muted-foreground))' }}>
+                    <History size={40} style={{ opacity: 0.3, marginBottom: '0.5rem' }} />
+                    <p>No hay informes generados todavía. Usa las pestañas de Tratamientos, Predicciones o Resúmenes para generar tu primer análisis IA.</p>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
+              <p>Error cargando datos del dashboard</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Report Detail Modal */}
+      {selectedReport && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000,
+          display: 'flex', justifyContent: 'center', alignItems: 'center',
+          padding: '2rem'
+        }} onClick={() => setSelectedReport(null)}>
+          <div style={{
+            backgroundColor: 'white', borderRadius: '12px', maxWidth: '800px',
+            width: '100%', maxHeight: '80vh', overflow: 'auto', padding: '2rem'
+          }} onClick={(e) => e.stopPropagation()} data-testid="report-detail-modal">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 style={{ fontWeight: '700', fontSize: '1.2rem' }}>{selectedReport.title}</h3>
+              <button onClick={() => setSelectedReport(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                <X size={24} />
+              </button>
+            </div>
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap', fontSize: '0.85rem' }}>
+              <span style={{ padding: '4px 10px', borderRadius: '8px', backgroundColor: '#f3e8ff', color: '#7c3aed', fontWeight: '600' }}>
+                {selectedReport.report_type}
+              </span>
+              <span style={{ color: 'hsl(var(--muted-foreground))' }}>
+                {selectedReport.entity_name}
+              </span>
+              <span style={{ color: 'hsl(var(--muted-foreground))' }}>
+                {selectedReport.generation_time_seconds}s | {selectedReport.model_used}
+              </span>
+              <span style={{ color: 'hsl(var(--muted-foreground))' }}>
+                {selectedReport.created_at ? new Date(selectedReport.created_at).toLocaleString('es-ES') : ''}
+              </span>
+            </div>
+            {selectedReport.summary && (
+              <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '8px', lineHeight: '1.6' }}>
+                {selectedReport.summary}
+              </div>
+            )}
+            <div style={{ padding: '1rem', backgroundColor: '#f1f5f9', borderRadius: '8px', overflow: 'auto', maxHeight: '400px' }}>
+              <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '0.8rem', fontFamily: 'monospace' }}>
+                {JSON.stringify(selectedReport.content, null, 2)}
+              </pre>
+            </div>
+          </div>
         </div>
       )}
 

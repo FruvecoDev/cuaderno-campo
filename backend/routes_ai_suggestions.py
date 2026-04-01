@@ -28,6 +28,7 @@ tratamientos_collection = db['tratamientos']
 cosechas_collection = db['cosechas']
 contratos_collection = db['contratos']
 fitosanitarios_collection = db['fitosanitarios']
+ai_reports_collection = db['ai_reports']
 
 # AI Configuration
 API_KEY = os.getenv("EMERGENT_LLM_KEY")
@@ -183,7 +184,22 @@ Responde ÚNICAMENTE con el JSON."""
         suggestions = json.loads(response_text)
         
         generation_time = time.time() - start_time
-        
+
+        # Save to history
+        await ai_reports_collection.insert_one({
+            "report_type": "treatment_suggestion",
+            "entity_type": "parcela",
+            "entity_id": parcela_id,
+            "entity_name": f"{parcela.get('codigo_plantacion', 'N/A')} - {crop}",
+            "title": f"Tratamiento: {problema[:60]}",
+            "summary": suggestions.get("problema_identificado", ""),
+            "content": suggestions,
+            "model_used": MODEL,
+            "generation_time_seconds": round(generation_time, 2),
+            "created_at": datetime.now(),
+            "created_by": current_user.get("email")
+        })
+
         return {
             "success": True,
             "suggestions": suggestions,
@@ -369,7 +385,22 @@ Responde SOLO con el JSON."""
         prediction = json.loads(response_text)
         
         generation_time = time.time() - start_time
-        
+
+        # Save to history
+        await ai_reports_collection.insert_one({
+            "report_type": "yield_prediction",
+            "entity_type": "contrato",
+            "entity_id": contrato_id,
+            "entity_name": f"{proveedor} - {cultivo} ({campana})",
+            "title": f"Prediccion: {cultivo} - {campana}",
+            "summary": prediction.get("notas", ""),
+            "content": prediction,
+            "model_used": MODEL,
+            "generation_time_seconds": round(generation_time, 2),
+            "created_at": datetime.now(),
+            "created_by": current_user.get("email")
+        })
+
         return {
             "success": True,
             "prediction": prediction,
@@ -572,6 +603,21 @@ Responde SOLO con el JSON."""
 
         generation_time = time.time() - start_time
 
+        # Save to history
+        await ai_reports_collection.insert_one({
+            "report_type": "contract_summary",
+            "entity_type": "contrato",
+            "entity_id": contrato_id,
+            "entity_name": f"{contrato.get('proveedor')} - {contrato.get('cultivo')} ({contrato.get('campana')})",
+            "title": summary.get("titulo", f"Resumen Contrato {contrato.get('serie')}-{contrato.get('numero')}"),
+            "summary": summary.get("resumen_ejecutivo", ""),
+            "content": summary,
+            "model_used": MODEL,
+            "generation_time_seconds": round(generation_time, 2),
+            "created_at": datetime.now(),
+            "created_by": current_user.get("email")
+        })
+
         return {
             "success": True,
             "summary": summary,
@@ -592,3 +638,131 @@ Responde SOLO con el JSON."""
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating contract summary: {str(e)}")
+
+
+@router.get("/ai/dashboard", response_model=dict)
+async def get_ai_dashboard(
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireAIAccess)
+):
+    """Get AI usage dashboard with metrics and recent activity"""
+    try:
+        # Total counts by report type
+        pipeline_counts = [
+            {"$group": {"_id": "$report_type", "count": {"$sum": 1}}}
+        ]
+        type_counts_cursor = ai_reports_collection.aggregate(pipeline_counts)
+        type_counts = {}
+        async for doc in type_counts_cursor:
+            type_counts[doc["_id"]] = doc["count"]
+
+        total_reports = sum(type_counts.values())
+
+        # Average generation time
+        pipeline_avg = [
+            {"$group": {"_id": None, "avg_time": {"$avg": "$generation_time_seconds"}}}
+        ]
+        avg_cursor = ai_reports_collection.aggregate(pipeline_avg)
+        avg_time = 0
+        async for doc in avg_cursor:
+            avg_time = round(doc.get("avg_time", 0), 2)
+
+        # Activity by date (last 30 days)
+        from datetime import timedelta, timezone
+        thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+        pipeline_activity = [
+            {"$match": {"created_at": {"$gte": thirty_days_ago}}},
+            {"$group": {
+                "_id": {
+                    "date": {"$dateToString": {"format": "%Y-%m-%d", "date": "$created_at"}},
+                    "type": "$report_type"
+                },
+                "count": {"$sum": 1}
+            }},
+            {"$sort": {"_id.date": 1}}
+        ]
+        activity_cursor = ai_reports_collection.aggregate(pipeline_activity)
+        activity_raw = []
+        async for doc in activity_cursor:
+            activity_raw.append({
+                "date": doc["_id"]["date"],
+                "type": doc["_id"]["type"],
+                "count": doc["count"]
+            })
+
+        # Pivot activity data by date
+        activity_map = {}
+        for item in activity_raw:
+            d = item["date"]
+            if d not in activity_map:
+                activity_map[d] = {"date": d, "treatment_suggestion": 0, "yield_prediction": 0, "contract_summary": 0, "parcel_campaign": 0, "cost_analysis": 0, "recommendations": 0}
+            activity_map[d][item["type"]] = item["count"]
+        activity = list(activity_map.values())
+
+        # Recent reports (last 20)
+        recent = await ai_reports_collection.find(
+            {}, {"content": 0}
+        ).sort("created_at", -1).limit(20).to_list(20)
+
+        recent_serialized = []
+        for r in recent:
+            recent_serialized.append({
+                "id": str(r["_id"]),
+                "report_type": r.get("report_type"),
+                "entity_type": r.get("entity_type"),
+                "entity_name": r.get("entity_name"),
+                "title": r.get("title"),
+                "summary": (r.get("summary", "") or "")[:200],
+                "model_used": r.get("model_used"),
+                "generation_time_seconds": r.get("generation_time_seconds"),
+                "created_at": r.get("created_at").isoformat() if r.get("created_at") else None,
+                "created_by": r.get("created_by")
+            })
+
+        return {
+            "total_reports": total_reports,
+            "by_type": type_counts,
+            "avg_generation_time": avg_time,
+            "activity": activity,
+            "recent_reports": recent_serialized
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching AI dashboard: {str(e)}")
+
+
+@router.get("/ai/report-detail/{report_id}", response_model=dict)
+async def get_ai_report_detail(
+    report_id: str,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireAIAccess)
+):
+    """Get full detail of a saved AI report"""
+    try:
+        if not ObjectId.is_valid(report_id):
+            raise HTTPException(status_code=400, detail="Invalid report_id")
+
+        report = await ai_reports_collection.find_one({"_id": ObjectId(report_id)})
+        if not report:
+            raise HTTPException(status_code=404, detail="Report not found")
+
+        return {
+            "success": True,
+            "report": {
+                "id": str(report["_id"]),
+                "report_type": report.get("report_type"),
+                "entity_type": report.get("entity_type"),
+                "entity_id": report.get("entity_id"),
+                "entity_name": report.get("entity_name"),
+                "title": report.get("title"),
+                "summary": report.get("summary"),
+                "content": report.get("content"),
+                "model_used": report.get("model_used"),
+                "generation_time_seconds": report.get("generation_time_seconds"),
+                "created_at": report.get("created_at").isoformat() if report.get("created_at") else None,
+                "created_by": report.get("created_by")
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching report: {str(e)}")
