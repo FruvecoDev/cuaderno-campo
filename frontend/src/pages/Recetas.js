@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, Filter, Settings, X, FileText, Beaker, Calculator, ChevronDown, ChevronUp, CheckCircle, XCircle, AlertTriangle, Package } from 'lucide-react';
+import { Plus, Edit2, Trash2, Filter, Settings, X, FileText, Beaker, Calculator, ChevronDown, ChevronUp, CheckCircle, XCircle, AlertTriangle, Package, Download } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
-import api from '../services/api';
+import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
 
 
@@ -385,6 +385,28 @@ const Recetas = () => {
           >
             <Plus size={18} /> Nueva Receta
           </PermissionButton>
+          <button className="btn btn-sm" onClick={async () => {
+            try {
+              const resp = await fetch(`${BACKEND_URL}/api/recetas/export/excel`, { headers: { 'Authorization': `Bearer ${token}` }});
+              const blob = await resp.blob();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a'); a.href = url; a.download = `recetas_${new Date().toISOString().slice(0,10)}.xlsx`;
+              a.click(); window.URL.revokeObjectURL(url);
+            } catch (err) { console.error('Export error:', err); }
+          }} style={{ backgroundColor: '#16a34a', color: 'white' }} data-testid="btn-export-recetas-excel">
+            <Download size={14} /> Excel
+          </button>
+          <button className="btn btn-sm" onClick={async () => {
+            try {
+              const resp = await fetch(`${BACKEND_URL}/api/recetas/export/pdf`, { headers: { 'Authorization': `Bearer ${token}` }});
+              const blob = await resp.blob();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a'); a.href = url; a.download = `recetas_${new Date().toISOString().slice(0,10)}.pdf`;
+              a.click(); window.URL.revokeObjectURL(url);
+            } catch (err) { console.error('Export error:', err); }
+          }} style={{ backgroundColor: '#dc2626', color: 'white' }} data-testid="btn-export-recetas-pdf">
+            <FileText size={14} /> PDF
+          </button>
         </div>
       </div>
 

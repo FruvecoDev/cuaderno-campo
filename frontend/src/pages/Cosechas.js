@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { Plus, Trash2, Edit2, Package, TrendingUp, TrendingDown, Check, ChevronDown, ChevronUp, X, Download, Target, Scale, DollarSign, Clock, CheckCircle, Loader2, Leaf } from 'lucide-react';
+import { Plus, Trash2, Edit2, Package, TrendingUp, TrendingDown, Check, ChevronDown, ChevronUp, X, Download, Target, Scale, DollarSign, Clock, CheckCircle, Loader2, Leaf, FileText } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
@@ -307,7 +307,18 @@ const Cosechas = () => {
             ) : (
               <Download size={18} />
             )}
-            Exportar
+            Excel
+          </button>
+          <button className="btn btn-sm" onClick={async () => {
+            try {
+              const resp = await fetch(`${BACKEND_URL}/api/cosechas/export/pdf`, { headers: { 'Authorization': `Bearer ${token}` }});
+              const blob = await resp.blob();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a'); a.href = url; a.download = `cosechas_${new Date().toISOString().slice(0,10)}.pdf`;
+              a.click(); window.URL.revokeObjectURL(url);
+            } catch (err) { console.error('Export error:', err); }
+          }} style={{ backgroundColor: '#dc2626', color: 'white' }} data-testid="btn-export-cosechas-pdf">
+            <FileText size={18} /> PDF
           </button>
           <button 
             className="btn btn-primary" 

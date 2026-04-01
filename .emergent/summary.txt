@@ -1,213 +1,143 @@
-<analysis>**original_problem_statement:**
+<analysis>### Handover Summary
+
+**original_problem_statement**: 
 Desarrollar una aplicación de campo para el sector de agricultura que permita realizar un Cuaderno de Campo completo; Contratos, Parcelas, Mapas, Fincas, Visitas, Tareas, Cosechas, Tratamientos, Irrigaciones, Recetas y Albaranes… Dashboard, Generación de informes en pdf y Excel, panel de configuración de usuarios y permisos de aplicación. Acceso a la aplicación con usuario y login. Aplicar integraciones con IA.
 
-Un contrato siempre estará asignado a una parcela y un cultivo. Sobre una parcela que tiene asociado un cultivo se pueden realizar múltiples visitas y tratamientos. Cuando finaliza un cultivo de una parcela se podrá generar el cuaderno de campo descargable en pdf con todo el seguimiento realizado de esa parcela y cultivo.
-
-Cada sección puede ser configurable pudiendo habilitar o deshabilitar secciones por usuario. También los campos de cada sección son configurables.
-
-El usuario ha solicitado recientemente la creación de un módulo RRHH para la gestión de personas, control horario, control de productividad, gestión documental, y un portal del empleado.
-
-Durante esta sesión, el usuario ha solicitado:
-- Añadir un selector de búsqueda de artículos en el formulario de albaranes.
-- Añadir filtros por fecha (con botones de acceso rápido) al listado de albaranes.
-- Mejorar el módulo de mapa de parcelas para que sea interactivo (lista de parcelas, búsqueda, ir a parcela, vista satélite).
-- Incluir en la Hoja de Evaluación en PDF: el mapa de la parcela, la imagen del certificado del técnico y los datos de la maquinaria.
-- Arreglar un error 401 de inicio de sesión.
-- Implementar la captura de una imagen satélite de la parcela con su polígono y añadirla al PDF de evaluación.
-- Añadir exportación a PDF/Excel al listado de contratos.
-- Añadir nuevos campos de logística al formulario de contratos.
-- Restaurar la funcionalidad de precios por tenderometría para el cultivo guisante.
-- Ocultar la insignia Made with Emergent para una presentación.
-
 **PRODUCT REQUIREMENTS:**
--   **Modules:** Contracts, Parcels, Maps, Farms, Visits, Tasks, Harvests, Treatments, Irrigations, Recipes, Delivery Notes, Suppliers, Crops, Machinery, Evaluation Sheets, Applicator Technicians, Farm Articles, Purchase/Sale Agents, Clients, **Human Resources (RRHH)**.
--   **Core Features:**
-    -   Dashboard with KPIs and upcoming events.
-    -   PDF and Excel report generation.
-    -   User and permissions management panel (RBAC).
-    -   User authentication (login).
-    -   Advanced search filters and configurable fields per module.
-    -   Dynamically generated questionnaires.
-    -   Collapsible side menu.
-    -   Multi-language support & custom translation dictionary.
-    -   Smart Field Notebook generation (PDF with AI summary).
-    -   Drag-and-drop file uploads for polygons (KML/GeoJSON).
--   **AI Integrations:**
-    -   AI-powered summary reports for contracts.
-    -   AI Assistant for treatment suggestions and harvest yield predictions.
--   **RRHH Module Features:**
-    -   Employee management.
-    -   Time tracking (QR, NFC, Facial Recognition), including offline capabilities.
-    -   Real-time productivity monitoring.
-    -   Pre-payroll calculation.
-    -   Document management with digital signature.
-    -   Employee portal.
-    -   Absence management.
-    -   In-app and email notifications.
+- **Modules:** Contracts, Parcels, Maps, Farms, Visits, Tasks, Harvests, Treatments, Irrigations, Recipes, Delivery Notes, Suppliers, Crops, Machinery, Evaluation Sheets, Applicator Technicians, Farm Articles, Purchase/Sale Agents, Clients, RRHH.
+- **Core Features:** Dashboard with KPIs, PDF/Excel reports, RBAC, Advanced search filters, configurable fields, Smart Field Notebook generation, Drag-and-drop file uploads for polygons, ERP sync API.
+- **AI Integrations:** AI-powered summary reports, AI Assistant for treatments and harvest predictions.
 
-**User's preferred language**: Español
+**User's preferred language**: Español (You MUST automatically detect the user's primary language from their messages inside the <trajectory> tag and INSTRUCT next agent to respond in the user's preferred language only. The user is writing in Spanish, so you MUST respond in Spanish).
 
-**what currently exists?**
-La aplicación es un sistema de gestión agrícola full-stack. En esta sesión se han implementado y mejorado numerosas funcionalidades en varios módulos:
--   **Albaranes:** Se ha añadido un selector de búsqueda de artículos avanzado en el formulario de creación/edición, y se ha implementado un filtro por rango de fechas con botones de acceso rápido en el listado.
--   **Mapa de Parcelas:** Se ha renovado completamente la interfaz, mostrando por defecto una lista lateral con buscador, filtros y un botón Ir a parcela (flyTo). Se ha añadido un conmutador para vista de mapa normal y satélite.
--   **Evaluaciones (PDF):** Se implementó una solución robusta para capturar una imagen del mapa satélite con el polígono de la parcela, guardarla en el servidor y mostrarla en el PDF de evaluación. Se corrigió un bug que impedía la descarga del PDF ().
--   **Contratos:** Se ha añadido la funcionalidad de exportar el listado a PDF y Excel. Se han añadido nuevos campos de logística al formulario (, , , ). Se ha verificado que la funcionalidad de precios por tenderometría para guisantes sigue presente y funciona.
--   **General:** Se ha solucionado un grave problema de inicio de sesión (error 401) causado por un reinicio de la base de datos, recreando los usuarios necesarios. Se ha ocultado temporalmente la insignia Made with Emergent para una presentación.
+**what currently exists?** 
+A full-stack agricultural management app. The frontend heavily uses React and Leaflet. In this session, significant refactoring was completed to reduce massive monolithic files (, , ). The  map was successfully updated to support drawing multiple polygons/zones. Currently, the agent is working on adding PDF and Excel export functionalities to the Field Notebook modules (Recetas, Tareas, Cosechas). 
 
-**Last working item**:
--   **Last item agent was working**: El agente estaba verificando la funcionalidad de la tabla de precios por tenderometría en el formulario de contratos (). Había confirmado que el código para mostrarla condicionalmente (cuando se selecciona el cultivo guisante) está presente y es correcto.
--   **Status**: USER VERIFICATION PENDING
--   **Agent Testing Done**: Y (Revisión de código)
--   **Which testing method agent to use?**: screenshot tool. El próximo agente debe seleccionar el cultivo Guisante en el formulario de contratos y tomar una captura de pantalla para demostrarle al usuario que la tabla de precios por tenderometría aparece correctamente.
--   **User Testing Done**: N
+**Last working item**: 
+- **Last item agent was working**: Adding PDF/Excel export endpoints for the  (Harvests) module. The PDF export endpoint is throwing a 500 error because  was used without being imported in .
+- **Status**: IN PROGRESS
+- **Agent Testing Done**: Y (Agent tested using bash/curl, which revealed the 500 error).
+- **Which testing method agent to use?**: backend testing agent / manual testing by curl.
+- **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Verificar funcionalidad de Tenderometría (Prioridad: P0)**
-    -   **Description**: El usuario cree que la funcionalidad de precios por tenderometría para el cultivo guisante desapareció. El agente ha confirmado que el código sigue existiendo y debería funcionar.
-    -   **Next debug checklist**:
-        1.  Navegar a la página de creación de un nuevo contrato.
-        2.  Seleccionar un cultivo que contenga la palabra Guisante.
-        3.  Verificar que la sección Precios por Tenderometría aparece.
-        4.  Tomar una captura de pantalla y mostrársela al usuario para confirmar que es la funcionalidad esperada.
-    -   **Why fix this issue and what will be achieved with the fix?**: Para confirmar que una funcionalidad crítica para el usuario no se ha perdido y cerrar el ticket.
-    -   **Status**: USER VERIFICATION PENDING
-    -   **Is recurring issue?**: N
-    -   **Should Test frontend/backend/both after fix?**: Frontend.
+- **Issue 1: Missing  import in  (Priority: P0)**
+  - Attempted fixes: The agent recognized the error () and viewed the file, but ran out of context before making the  edit.
+  - Next debug checklist: Check  lines 1-10. Add .
+  - Why fix this issue and what will be achieved with the fix?: This will fix the 500 Internal Server Error when exporting Cosechas to PDF.
+  - Status: IN PROGRESS
+  - Is recurring issue? N
+  - Should Test frontend/backend/both after fix?: Backend (via curl) and then Frontend (verify the download button works).
+  - Blocked on other issue: None.
 
--   **Issue 2: Inestabilidad de la Base de Datos (Prioridad: P1)**
-    -   **Description**: Durante la sesión, la base de datos se reinició y perdió todos los datos de los usuarios, causando un error 401. El agente tuvo que recrear los usuarios manualmente. Este problema también pudo haber afectado la persistencia de la imagen del mapa de la parcela guardada.
-    -   **Next debug checklist**:
-        1.  Investigar la configuración de persistencia de datos de MongoDB en el entorno.
-        2.  Verificar si los volúmenes de Kubernetes están correctamente configurados para la base de datos.
-        3.  Monitorear si el problema vuelve a ocurrir, especialmente después de reinicios de servicios.
-    -   **Why fix this issue and what will be achieved with the fix?**: Solucionar este problema es crítico para la estabilidad de la aplicación y para poder probar funcionalidades que dependen de datos persistentes.
-    -   **Status**: NOT STARTED
-    -   **Is recurring issue?**: Y
-    -   **Should Test frontend/backend/both after fix?**: Backend/Infra.
-
--   **Issue 3: Habilitar Notificaciones por Email (Prioridad: P2)**
-    -   **Description**: La integración con  está implementada pero desactivada por falta de la clave de API.
-    -   **Next debug checklist**:
-        1.  Preguntar al usuario si desea activar esta funcionalidad y si puede proporcionar la .
-        2.  Añadir la clave al archivo  del backend y reiniciar el servicio.
-    -   **Why fix this issue and what will be achieved with the fix?**: Activará una funcionalidad clave pendiente para las notificaciones automáticas.
-    -   **Status**: BLOCKED
-    -   **Is recurring issue?**: Y
-    -   **Blocked on other issue**: Esperando input del usuario (API Key).
+- **Issue 2: Habilitar Notificaciones por Email (Priority: P2)**
+  - Attempted fixes: Integration with  is implemented but disabled.
+  - Next debug checklist: Wait for user to provide the  to activate the feature in .
+  - Why fix this issue and what will be achieved with the fix?: Will enable the automated email notifications feature.
+  - Status: BLOCKED
+  - Is recurring issue?: N
+  - Should Test frontend/backend/both after fix?: Backend
+  - Blocked on other issue: Waiting for User API Key.
 
 **In progress Task List**:
--   No hay tareas en progreso.
+- **Task 1: Enhance Field Notebook modules with Export capabilities (Priority: P0)**
+  - Where to resume: After fixing the import in , ensure the UI buttons for exporting PDF/Excel in , , and  are fully wired up and working.
+  - What will be achieved with this?: Users can download their agricultural data in standardized formats across all modules.
+  - Status: IN PROGRESS
+  - Should Test frontend/backend/both after fix?: Both.
+  - Blocked on something: Issue 1 (Missing import).
 
 **Upcoming and Future Tasks**
--   **Upcoming Tasks**:
-    -   **P2: Refactorizar **: El archivo sigue manejando múltiples responsabilidades. Se debe dividir en archivos separados por funcionalidad.
-    -   **P2: Refactorizar componentes de frontend**: , , y  se han vuelto complejos y se beneficiarían de ser divididos en sub-componentes más pequeños.
--   **Future Tasks**:
-    -   Implementar los módulos principales restantes del cuaderno de campo (p. ej., Recetas, Tareas).
-    -   Implementar las integraciones de IA planificadas (resúmenes de contratos, predicciones de cosecha).
-    -   Implementar la identificación por NFC para el control horario.
-    -   Generalizar la generación de informes PDF/Excel para todos los módulos.
-    -   Generalizar el sistema de historial de auditoría a otros módulos críticos.
+- **Upcoming Tasks:**
+  - P1: Implement AI integrations (Contract summaries, Harvest predictions) - *User selected this as Option C in their sequence plan.*
+  - P1: Implement NFC identification for HR time tracking - *User selected this as Option D in their sequence plan.*
+- **Future Tasks:**
+  - P2: Generalize PDF/Excel report generation for any remaining smaller modules.
+  - P2: Continue refactoring large components if needed ( is still ~1500 lines).
 
 **Completed work in this session**
--   Selector de búsqueda de artículos en el formulario de Albaranes (DONE)
--   Filtros por fecha (con accesos rápidos) en el listado de Albaranes (DONE)
--   Renovación completa del módulo Mapa de Parcelas (lista visible, búsqueda, fly-to, vista satélite) (DONE)
--   Implementación de captura de imagen de mapa de parcela y adición al PDF de evaluación (DONE)
--   Corrección de error  en la generación de PDF de evaluación (DONE)
--   Añadida exportación a PDF/Excel al listado de Contratos, con corrección de campos (DONE)
--   Añadidos nuevos campos de logística al formulario de Contratos (DONE)
--   Ocultada la insignia Made with Emergent a través de  (DONE)
--   Solucionado error de login 401 recreando usuarios tras un reinicio de la BBDD (DONE)
--   Verificación y confirmación de que funcionalidades existentes (filtros de contratos, selector de maquinaria, precios por tenderometría) ya estaban implementadas. (DONE)
+-  &  → Support for multiple polygons (zones) per parcel. (DONE)
+-  → Bug fix: Código Plantación field made strictly  and auto-generated. (DONE)
+-  → Refactored from 2168 to 788 lines by extracting 5 widget subcomponents. (DONE)
+-  → Refactored from 1917 to 388 lines by extracting form, filters, and table subcomponents. (DONE)
+-  → Refactored from 1905 to 270 lines by splitting into sub-routers (, , , ). (DONE)
+-  &  → Added PDF/Excel export endpoints for Recetas and Tareas. Fixed async cursor serialization. (DONE)
 
 **Earlier issues found/mentioned but not fixed**
--   La inestabilidad de la base de datos es un problema crítico que surgió en esta sesión y no se ha resuelto su causa raíz.
+- None.
 
 **Known issue recurrence from previous fork**
--   Ninguno.
+- Recurrence count: 0
+- Status: RESOLVED
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Captura de Imagen en Frontend**: Uso de la librería  para capturar el estado de un componente de React (el mapa de Leaflet) como una imagen.
--   **Subida de Ficheros (Frontend/Backend)**: Envío de la imagen capturada como  a un endpoint de API en FastAPI, que la guarda en el sistema de archivos.
--   **Generación de PDF con Imágenes Locales**: Modificación de la lógica de  para que utilice rutas de archivo absolutas () en lugar de URLs relativas para incrustar imágenes en el PDF.
--   **Depuración de CSS en Componentes Complejos**: Identificación y solución de un problema de  que impedía la visualización de un dropdown de búsqueda.
--   **Modelo Vista Controlador (MVC)**: Continúa la separación de lógica, con endpoints en el backend y componentes de React en el frontend gestionando la presentación y el estado.
+- Full-stack React + FastAPI + MongoDB.
+- Leaflet (, ) used for polygon drawing; modified to save arrays of geometries ().
+- Refactored frontend structure utilizing smaller subcomponents.
+- Backend PDF/Excel exports heavily rely on , , and FastAPI's .
 
 **key DB schema**
--   **contratos**: Se añadieron los campos opcionales , , , .
--   **parcelas**: Se añadieron los campos opcionales  y  para almacenar la referencia a la imagen del mapa capturada.
--   **users**: Se vació inesperadamente. Se recrearon los usuarios  y .
+- : The  array field handles multiple geometry objects.
+- , , : Collections being targeted for the new export capabilities.
+
+**changes in tech stack**
+- None beyond extensive directory restructuring and file extraction in  and .
 
 **All files of reference**
--   : Lógica principal del mapa interactivo y captura de imagen.
--   : Formulario de contratos con la lógica condicional de tenderometría.
--   : Listado de albaranes con los nuevos filtros de fecha.
--   : Lógica de generación del PDF de evaluación.
--   : Modelos de Pydantic para la base de datos, actualizados para  y .
--   : Archivo modificado para ocultar la insignia de Emergent.
+-  (Must add  import).
+-  (Contains the Recetas exports).
+- , , .
 
 **Areas that need refactoring**:
--    y  han crecido en complejidad y deberían dividirse en sub-componentes más pequeños para mejorar la legibilidad y el mantenimiento.
--   El archivo  sigue siendo un candidato para ser dividido en archivos más pequeños por funcionalidad.
+-  is still over 1500 lines long and could be a candidate for extraction similar to  and .
 
 **key api endpoints**
--   : **NUEVO**. Sube la imagen del mapa de una parcela capturada desde el frontend.
--   : **NUEVO**. Exporta la lista filtrada de contratos a PDF.
--   : **NUEVO**. Exporta la lista filtrada de contratos a Excel.
--   : **MODIFICADO**. Corregido bug  y añadida la lógica para incluir la imagen del mapa.
--   : **MODIFICADO**. Ahora acepta los campos  y .
+- 
+- 
+- 
+-  (Currently failing with 500)
 
 **Critical Info for New Agent**
-1.  **Prioridad Inmediata**: Confirmar con el usuario la funcionalidad de tenderometría. El código está ahí; solo necesitas demostrarlo con una captura de pantalla seleccionando el cultivo guisante en el formulario de contrato.
-2.  **Inestabilidad de la Base de Datos**: ¡CUIDADO! La base de datos se borró durante la sesión anterior. Esto es un problema ambiental grave. Si encuentras errores de no encontrado o de login, verifica primero si los datos existen en la BBDD antes de depurar el código de la aplicación. Puede que necesites recrear datos de prueba.
-3.  **Flujo de Captura de Mapa**: El flujo completo (Captura en frontend -> Subida a backend -> Actualización de Parcela -> Inclusión en PDF) se implementó pero no se pudo probar de extremo a extremo debido a la inestabilidad de la BBDD. Sería bueno verificar este flujo completo en la próxima sesión.
-4.  **Verificar antes de Implementar**: El usuario solicitó varias funcionalidades que ya existían (filtros en contratos, selector de maquinaria). Antes de implementar una nueva petición, haz una revisión rápida del componente en cuestión para asegurarte de que no es una funcionalidad ya presente pero quizás no obvia para el usuario.
+- **MongoDB Async Cursors**: Motor cursors must be awaited with  before being passed to synchronous serialization functions like . The agent ran into this issue during exports and fixed it by doing  prior to serialization.
+- **FastAPI Responses**: Do not forget to import  from  whenever returning an in-memory file export.
 
 **documents and test reports created in this job**
--    fue actualizado.
+-  (Multi-zone parcelas tests)
+-  (Refactoring regression tests)
+- 
+-  (Updated)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **necesito que incluya la imagen del mapa...**: Petición para implementar la captura de imagen del mapa satélite y añadirla al PDF. **(COMPLETADO)**
-2.  **debe incluir una captura del mapa donde esta dibujada la parcela...**: Reiteración de la petición de la imagen del mapa. **(COMPLETADO)**
-3.  **error 401. no puedo iniciar sesion**: Reporte de bug de login. **(COMPLETADO)**
-4.  **si (confirmación para añadir selector de maquinaria)**: El agente luego descubrió que el selector ya existía.
-5.  **en la hoja de evalucion no incluye...**: Reporte de bug sobre datos faltantes en el PDF. **(COMPLETADO)**
-6.  **el filtro fincas con fincas en blanco...**: Reporte de varios bugs en el mapa de parcelas. **(COMPLETADO)**
-7.  **la opcion mapas de parcelas no le veo funcionalidad...**: Petición para mejorar el mapa de parcelas. **(COMPLETADO)**
-8.  **Necesito añadir en el apartado contratos nuevos campos...**: Petición de nuevos campos en el formulario de contratos. **(COMPLETADO)**
-9.  **anteriormente en contratos habiamos añadido que si el cultivo...era guisante...**: Petición sobre la funcionalidad de tenderometría que parece haber desaparecido. **(PENDIENTE DE VERIFICACIÓN CON EL USUARIO)**
-10. **opcion 2, vamos a probar (ocultar insignia)**: Petición para ocultar la insignia de Emergent. **(COMPLETADO)**
+1. si, apruebo el plan (DONE)
+2. Este campo se genera automaticamente para cada parcela y es unico para cada parcela, no se puede modificar (DONE - Codigo plantacion made readOnly)
+3. continuar con las siguientes acciones previstas (DONE)
+4. ok (DONE)
+5. ok, perfecto (DONE)
+6. Empezamos por la opción A, después B, después C y acabamos con la D (IN PROGRESS - User defined sequence: A=Refactor Contratos, B=Enhance Field Notebook, C=AI Integrations, D=NFC for HR. Agent finished A, is currently finishing B).
 
 **Project Health Check:**
--   **Broken**: La persistencia de la base de datos es inestable. Los datos pueden desaparecer tras reinicios, lo que es un problema crítico del entorno.
--   **Mocked**: La integración con **Resend** para el envío de emails y con **OpenWeatherMap** siguen bloqueadas a la espera de las API Keys del usuario.
+- Broken: The  endpoint is throwing a 500 error due to a missing import.
 
 **3rd Party Integrations**
--   **OpenAI GPT-4o**: Usa Emergent LLM Key.
--   **Resend**: Integrado, **bloqueado** a la espera de .
--   **OpenWeatherMap**: Preparado, **bloqueado** a la espera de API key.
--   **Leaflet.js & React-Leaflet**: Usado para el módulo de Mapas.
--   **react-leaflet-draw**: Usado para la funcionalidad de dibujo de polígonos.
--   **html2canvas**: **NUEVO**. Usado para capturar la imagen del mapa en el frontend.
--   **Recharts**: Usado para gráficos.
--   **Reportlab**: Usado para la generación de PDFs.
--   **Openpyxl**: Usado para la generación de ficheros Excel.
+- OpenAI GPT-4o (Emergent LLM Key)
+- Resend (Blocked - Needs User API Key)
+- OpenWeatherMap (Blocked - Needs User API Key)
 
 **Testing status**
--   **Testing agent used after significant changes**: NO
--   **Troubleshoot agent used after agent stuck in loop**: NO
--   **Test files created**: Ninguno.
--   **Known regressions**: Ninguna.
+- Testing agent used after significant changes: YES
+- Troubleshoot agent used after agent stuck in loop: NO
+- Test files created: None
+- Known regressions:  crash due to missing import.
 
 **Credentials to test flow:**
--   **Admin**:  / 
--   **Otro usuario**:  / 
--   **Nota**: Si el login falla, verificar si los usuarios existen en la BBDD, ya que podría haberse reiniciado.
+- Admin:  / 
 
 **What agent forgot to execute**
--   El agente ha sido exhaustivo y no ha olvidado ninguna tarea. La única cuenta pendiente es la verificación final con el usuario de una funcionalidad que ya existe.</analysis>
+- The agent discovered that  was not imported in , which broke the PDF export endpoint, but ran out of context before fixing it.
+- **Debugging checklist for current issue**:
+    Issue: 500 Server Error when exporting Cosechas to PDF.
+    Backend files to check: 
+    Fix: Add  at the top of the file.</analysis>

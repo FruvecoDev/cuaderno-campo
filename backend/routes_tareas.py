@@ -483,3 +483,65 @@ async def export_tareas_excel(
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
+
+
+
+@router.get("/tareas/export/pdf")
+async def export_tareas_pdf(
+    estado: Optional[str] = None,
+    prioridad: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Exportar tareas a PDF"""
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import mm
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    
+    query = {}
+    if estado:
+        query["estado"] = estado
+    if prioridad:
+        query["prioridad"] = prioridad
+    
+    tareas_raw = await tareas_collection.find(query).sort("fecha_limite", 1).to_list(1000)
+    tareas = serialize_docs(tareas_raw)
+    
+    output = io.BytesIO()
+    pdf = SimpleDocTemplate(output, pagesize=landscape(A4), topMargin=15*mm, bottomMargin=15*mm)
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=16, textColor=colors.HexColor('#2E7D32'), alignment=1, spaceAfter=8*mm)
+    elements.append(Paragraph("Listado de Tareas - FRUVECO", title_style))
+    elements.append(Paragraph(f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}", ParagraphStyle('Sub', parent=styles['Normal'], alignment=1, textColor=colors.gray)))
+    elements.append(Spacer(1, 8*mm))
+    
+    table_data = [["Titulo", "Tipo", "Prioridad", "Estado", "Asignado", "Parcela", "Fecha Limite"]]
+    for t in tareas:
+        table_data.append([
+            t.get("titulo", "")[:35], t.get("tipo_tarea", "")[:15],
+            t.get("prioridad", "")[:10], t.get("estado", "")[:15],
+            t.get("asignado_a", "-")[:20], t.get("parcela", "-")[:20],
+            t.get("fecha_limite", "-")
+        ])
+    
+    col_widths = [60*mm, 30*mm, 22*mm, 22*mm, 40*mm, 40*mm, 25*mm]
+    doc_table = Table(table_data, colWidths=col_widths)
+    doc_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2E7D32')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.gray),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F5F5F5')])
+    ]))
+    elements.append(doc_table)
+    
+    pdf.build(elements)
+    output.seek(0)
+    filename = f"tareas_{datetime.now().strftime('%Y%m%d')}.pdf"
+    return StreamingResponse(output, media_type="application/pdf",
+                             headers={"Content-Disposition": f"attachment; filename={filename}"})

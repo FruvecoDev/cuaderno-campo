@@ -4,7 +4,7 @@
 
 **Versión:** 1.0  
 **Fecha:** Marzo 2026  
-**Base URL:** `https://farm-zones-1.preview.emergentagent.com/api/erp`
+**Base URL:** `https://campo-export-pro.preview.emergentagent.com/api/erp`
 
 ---
 
@@ -33,7 +33,7 @@ X-API-Key: fruveco-erp-key-2026
 
 ### Ejemplo de petición autenticada:
 ```bash
-curl -X GET "https://farm-zones-1.preview.emergentagent.com/api/erp/health" \
+curl -X GET "https://campo-export-pro.preview.emergentagent.com/api/erp/health" \
   -H "X-API-Key: fruveco-erp-key-2026"
 ```
 
@@ -91,7 +91,7 @@ X-API-Key: fruveco-erp-key-2026
 ### Ejemplo Completo - Contrato de Compra
 
 ```bash
-curl -X POST "https://farm-zones-1.preview.emergentagent.com/api/erp/contratos" \
+curl -X POST "https://campo-export-pro.preview.emergentagent.com/api/erp/contratos" \
   -H "Content-Type: application/json" \
   -H "X-API-Key: fruveco-erp-key-2026" \
   -d '{
@@ -164,7 +164,7 @@ PUT /api/erp/contratos/{referencia_erp}
 
 ### Ejemplo
 ```bash
-curl -X PUT "https://farm-zones-1.preview.emergentagent.com/api/erp/contratos/ERP-2026-00001" \
+curl -X PUT "https://campo-export-pro.preview.emergentagent.com/api/erp/contratos/ERP-2026-00001" \
   -H "Content-Type: application/json" \
   -H "X-API-Key: fruveco-erp-key-2026" \
   -d '{
@@ -193,7 +193,7 @@ GET /api/erp/contratos/{referencia_erp}
 
 ### Ejemplo
 ```bash
-curl -X GET "https://farm-zones-1.preview.emergentagent.com/api/erp/contratos/ERP-2026-00001" \
+curl -X GET "https://campo-export-pro.preview.emergentagent.com/api/erp/contratos/ERP-2026-00001" \
   -H "X-API-Key: fruveco-erp-key-2026"
 ```
 
@@ -208,7 +208,7 @@ DELETE /api/erp/contratos/{referencia_erp}
 
 ### Ejemplo
 ```bash
-curl -X DELETE "https://farm-zones-1.preview.emergentagent.com/api/erp/contratos/ERP-2026-00001" \
+curl -X DELETE "https://campo-export-pro.preview.emergentagent.com/api/erp/contratos/ERP-2026-00001" \
   -H "X-API-Key: fruveco-erp-key-2026"
 ```
 
@@ -241,7 +241,7 @@ POST /api/erp/proveedores
 
 ### Ejemplo
 ```bash
-curl -X POST "https://farm-zones-1.preview.emergentagent.com/api/erp/proveedores" \
+curl -X POST "https://campo-export-pro.preview.emergentagent.com/api/erp/proveedores" \
   -H "Content-Type: application/json" \
   -H "X-API-Key: fruveco-erp-key-2026" \
   -d '{
@@ -284,7 +284,7 @@ POST /api/erp/clientes
 
 ### Ejemplo
 ```bash
-curl -X POST "https://farm-zones-1.preview.emergentagent.com/api/erp/clientes" \
+curl -X POST "https://campo-export-pro.preview.emergentagent.com/api/erp/clientes" \
   -H "Content-Type: application/json" \
   -H "X-API-Key: fruveco-erp-key-2026" \
   -d '{
@@ -320,7 +320,7 @@ POST /api/erp/cultivos
 
 ### Ejemplo
 ```bash
-curl -X POST "https://farm-zones-1.preview.emergentagent.com/api/erp/cultivos" \
+curl -X POST "https://campo-export-pro.preview.emergentagent.com/api/erp/cultivos" \
   -H "Content-Type: application/json" \
   -H "X-API-Key: fruveco-erp-key-2026" \
   -d '{
@@ -337,13 +337,13 @@ curl -X POST "https://farm-zones-1.preview.emergentagent.com/api/erp/cultivos" \
 
 ### Obtener Cultivos Disponibles
 ```bash
-curl -X GET "https://farm-zones-1.preview.emergentagent.com/api/erp/catalogos/cultivos" \
+curl -X GET "https://campo-export-pro.preview.emergentagent.com/api/erp/catalogos/cultivos" \
   -H "X-API-Key: fruveco-erp-key-2026"
 ```
 
 ### Obtener Agentes Disponibles
 ```bash
-curl -X GET "https://farm-zones-1.preview.emergentagent.com/api/erp/catalogos/agentes" \
+curl -X GET "https://campo-export-pro.preview.emergentagent.com/api/erp/catalogos/agentes" \
   -H "X-API-Key: fruveco-erp-key-2026"
 ```
 
@@ -445,7 +445,7 @@ class FruvecoERPClient:
 if __name__ == "__main__":
     # Configuración
     cliente = FruvecoERPClient(
-        base_url="https://farm-zones-1.preview.emergentagent.com",
+        base_url="https://campo-export-pro.preview.emergentagent.com",
         api_key="fruveco-erp-key-2026"
     )
     
@@ -496,7 +496,7 @@ if __name__ == "__main__":
 **API Key actual:** `fruveco-erp-key-2026`
 
 **Documentación interactiva (Swagger):**
-`https://farm-zones-1.preview.emergentagent.com/api/docs`
+`https://campo-export-pro.preview.emergentagent.com/api/docs`
 
 ---
 

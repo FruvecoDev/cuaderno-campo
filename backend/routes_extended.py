@@ -232,6 +232,108 @@ def calcular_comision_agente(tipo_comision: str, valor_comision: float, kilos_ne
     return 0.0
 
 
+@router.get("/recetas/export/excel")
+async def export_recetas_excel(current_user: dict = Depends(get_current_user)):
+    """Exportar recetas a Excel"""
+    import io
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    
+    recetas_raw = await recetas_collection.find().sort("nombre", 1).to_list(1000)
+    recetas = serialize_docs(recetas_raw)
+    
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Recetas Fitosanitarias"
+    
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="2E7D32", end_color="2E7D32", fill_type="solid")
+    thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+    
+    headers = ["Nombre", "Cultivo", "Tipo Tratamiento", "Objetivo", "Productos", "Plazo Seguridad (dias)", "Instrucciones", "Activa"]
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.border = thin_border
+        cell.alignment = Alignment(horizontal="center")
+    
+    for row, receta in enumerate(recetas, 2):
+        productos_str = "; ".join([f"{p.get('nombre_comercial','')} ({p.get('dosis','')} {p.get('unidad','')})" for p in receta.get("productos", [])])
+        values = [
+            receta.get("nombre", ""), receta.get("cultivo_objetivo", ""),
+            receta.get("tipo_tratamiento", ""), receta.get("objetivo_tratamiento", ""),
+            productos_str, receta.get("plazo_seguridad", 0),
+            receta.get("instrucciones", ""), "Si" if receta.get("activa") else "No"
+        ]
+        for col, val in enumerate(values, 1):
+            ws.cell(row=row, column=col, value=val).border = thin_border
+    
+    for col_letter, width in [('A', 30), ('B', 20), ('C', 20), ('D', 25), ('E', 50), ('F', 18), ('G', 40), ('H', 8)]:
+        ws.column_dimensions[col_letter].width = width
+    
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    filename = f"recetas_fitosanitarias_{datetime.now().strftime('%Y%m%d')}.xlsx"
+    return StreamingResponse(output, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                             headers={"Content-Disposition": f"attachment; filename={filename}"})
+
+
+@router.get("/recetas/export/pdf")
+async def export_recetas_pdf(current_user: dict = Depends(get_current_user)):
+    """Exportar recetas a PDF"""
+    import io
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import mm
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    
+    recetas_raw = await recetas_collection.find().sort("nombre", 1).to_list(1000)
+    recetas = serialize_docs(recetas_raw)
+    
+    output = io.BytesIO()
+    pdf = SimpleDocTemplate(output, pagesize=landscape(A4), topMargin=15*mm, bottomMargin=15*mm)
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=16, textColor=colors.HexColor('#2E7D32'), alignment=1, spaceAfter=8*mm)
+    elements.append(Paragraph("Recetas Fitosanitarias - FRUVECO", title_style))
+    elements.append(Paragraph(f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}", ParagraphStyle('Sub', parent=styles['Normal'], alignment=1, textColor=colors.gray)))
+    elements.append(Spacer(1, 8*mm))
+    
+    table_data = [["Nombre", "Cultivo", "Tipo", "Productos", "Plazo Seg.", "Activa"]]
+    for r in recetas:
+        prods = ", ".join([p.get('nombre_comercial', '') for p in r.get("productos", [])[:3]])
+        if len(r.get("productos", [])) > 3:
+            prods += f" (+{len(r['productos']) - 3})"
+        table_data.append([
+            r.get("nombre", "")[:30], r.get("cultivo_objetivo", "")[:20],
+            r.get("tipo_tratamiento", "")[:15], prods[:40],
+            f"{r.get('plazo_seguridad', 0)} dias", "Si" if r.get("activa") else "No"
+        ])
+    
+    col_widths = [55*mm, 35*mm, 30*mm, 80*mm, 25*mm, 15*mm]
+    doc_table = Table(table_data, colWidths=col_widths)
+    doc_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2E7D32')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.gray),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F5F5F5')])
+    ]))
+    elements.append(doc_table)
+    
+    pdf.build(elements)
+    output.seek(0)
+    filename = f"recetas_fitosanitarias_{datetime.now().strftime('%Y%m%d')}.pdf"
+    return StreamingResponse(output, media_type="application/pdf",
+                             headers={"Content-Disposition": f"attachment; filename={filename}"})
+
+
 @router.post("/albaranes", response_model=dict)
 async def create_albaran(
     albaran: AlbaranCreate,

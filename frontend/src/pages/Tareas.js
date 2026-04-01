@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { 
-  Plus, Edit2, Trash2, X, Search, Calendar, Filter, Download, 
+  Plus, Edit2, Trash2, X, Search, Calendar, Filter, Download, FileText,
   ChevronLeft, ChevronRight, Clock, User, Flag, CheckSquare, 
   Square, ChevronDown, ChevronUp, ClipboardList
 } from 'lucide-react';
@@ -441,6 +441,20 @@ const Tareas = () => {
           <button className="btn btn-secondary" onClick={handleExportExcel}>
             <Download size={16} className="mr-1" />
             Excel
+          </button>
+          <button className="btn btn-sm" onClick={async () => {
+            try {
+              const params = new URLSearchParams();
+              if (filters.estado) params.append('estado', filters.estado);
+              if (filters.prioridad) params.append('prioridad', filters.prioridad);
+              const resp = await fetch(`${BACKEND_URL}/api/tareas/export/pdf?${params}`, { headers: { 'Authorization': `Bearer ${token}` }});
+              const blob = await resp.blob();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a'); a.href = url; a.download = `tareas_${new Date().toISOString().slice(0,10)}.pdf`;
+              a.click(); window.URL.revokeObjectURL(url);
+            } catch (err) { console.error('Export error:', err); }
+          }} style={{ backgroundColor: '#dc2626', color: 'white' }} data-testid="btn-export-tareas-pdf">
+            <FileText size={16} /> PDF
           </button>
           {canCreate && (
             <button 
