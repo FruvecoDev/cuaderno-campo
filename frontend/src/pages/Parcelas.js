@@ -1,189 +1,13 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { MapContainer, TileLayer, Polygon, useMap, LayersControl } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import 'leaflet-draw';
-import 'leaflet-draw/dist/leaflet.draw.css';
-import { Plus, Map as MapIcon, Edit2, Trash2, Filter, Settings, X, ClipboardCheck, Layers, Satellite, History, Beaker, Calendar, FileText, ChevronDown, ChevronUp, BookOpen, Loader2, Eye, Search, ExternalLink, CheckCircle, AlertCircle, Upload } from 'lucide-react';
+import { Plus, Map as MapIcon, Edit2, Trash2, Filter, Settings, X, ClipboardCheck, History, Calendar, FileText, ChevronDown, ChevronUp, BookOpen, Loader2, Eye, Search, ExternalLink, CheckCircle, AlertCircle, Upload } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import AdvancedParcelMap from '../components/AdvancedParcelMap';
 import GeoImportModal from '../components/GeoImportModal';
 import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
 
-
-// Fix leaflet icon
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-  iconUrl: require('leaflet/dist/images/marker-icon.png'),
-  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
-});
-
-// Tile layers para diferentes vistas
-const TILE_LAYERS = {
-  osm: {
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; OpenStreetMap contributors',
-    name: 'Mapa Base'
-  },
-  satellite: {
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attribution: '&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP',
-    name: 'Satélite'
-  },
-  hybrid: {
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attribution: '&copy; Esri',
-    name: 'Híbrido'
-  },
-  topo: {
-    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; OpenTopoMap',
-    name: 'Topográfico'
-  }
-};
-
-function DrawControl({ onPolygonCreated, onPolygonEdited, editablePolygon, isEditing }) {
-  const map = useMap();
-  const drawnItemsRef = useRef(null);
-  const drawControlRef = useRef(null);
-  
-  useEffect(() => {
-    if (!map) return;
-    
-    // Limpiar controles anteriores
-    if (drawControlRef.current) {
-      map.removeControl(drawControlRef.current);
-    }
-    if (drawnItemsRef.current) {
-      map.removeLayer(drawnItemsRef.current);
-    }
-    
-    const drawnItems = new L.FeatureGroup();
-    drawnItemsRef.current = drawnItems;
-    map.addLayer(drawnItems);
-    
-    // Si hay un polígono editable, añadirlo al grupo (tanto en edición como en creación)
-    if (editablePolygon && editablePolygon.length > 0) {
-      const latlngs = editablePolygon.map(p => [p.lat, p.lng]);
-      const polygon = L.polygon(latlngs, { color: '#2d5a27', fillColor: '#4CAF50', fillOpacity: 0.3 });
-      drawnItems.addLayer(polygon);
-    }
-    
-    const drawControl = new L.Control.Draw({
-      position: 'topright',
-      draw: {
-        polygon: { 
-          allowIntersection: false, 
-          showArea: true, 
-          metric: true,
-          shapeOptions: {
-            color: '#2d5a27',
-            fillColor: '#4CAF50',
-            fillOpacity: 0.3
-          }
-        },
-        polyline: false, 
-        circle: false, 
-        rectangle: false, 
-        marker: false, 
-        circlemarker: false
-      },
-      edit: { 
-        featureGroup: drawnItems, 
-        remove: true,
-        edit: true
-      }
-    });
-    
-    drawControlRef.current = drawControl;
-    map.addControl(drawControl);
-    
-    // Evento: Polígono creado
-    const handleCreated = (e) => {
-      const layer = e.layer;
-      // Limpiar polígonos anteriores (solo permitir uno)
-      drawnItems.clearLayers();
-      drawnItems.addLayer(layer);
-      const latlngs = layer.getLatLngs()[0];
-      const coordinates = latlngs.map(point => ({ lat: point.lat, lng: point.lng }));
-      onPolygonCreated(coordinates);
-    };
-    
-    // Evento: Polígono editado
-    const handleEdited = (e) => {
-      const layers = e.layers;
-      layers.eachLayer((layer) => {
-        const latlngs = layer.getLatLngs()[0];
-        const coordinates = latlngs.map(point => ({ lat: point.lat, lng: point.lng }));
-        if (onPolygonEdited) {
-          onPolygonEdited(coordinates);
-        } else {
-          onPolygonCreated(coordinates);
-        }
-      });
-    };
-    
-    // Evento: Polígono eliminado
-    const handleDeleted = () => {
-      onPolygonCreated([]);
-    };
-    
-    map.on(L.Draw.Event.CREATED, handleCreated);
-    map.on(L.Draw.Event.EDITED, handleEdited);
-    map.on(L.Draw.Event.DELETED, handleDeleted);
-    
-    return () => {
-      map.off(L.Draw.Event.CREATED, handleCreated);
-      map.off(L.Draw.Event.EDITED, handleEdited);
-      map.off(L.Draw.Event.DELETED, handleDeleted);
-      if (drawControlRef.current) {
-        map.removeControl(drawControlRef.current);
-      }
-      if (drawnItemsRef.current) {
-        map.removeLayer(drawnItemsRef.current);
-      }
-    };
-  }, [map, onPolygonCreated, onPolygonEdited, editablePolygon, isEditing]);
-  
-  return null;
-}
-
-// Componente para centrar el mapa en el polígono
-function FitBounds({ polygon }) {
-  const map = useMap();
-  
-  useEffect(() => {
-    if (!map || !map._container) return;
-    
-    let isMounted = true;
-    
-    const fitBounds = () => {
-      if (!isMounted || !map || !map._container) return;
-      
-      if (polygon && polygon.length > 0) {
-        try {
-          const bounds = L.latLngBounds(polygon.map(p => [p.lat, p.lng]));
-          map.fitBounds(bounds, { padding: [50, 50] });
-        } catch (e) {
-          console.debug('FitBounds skipped:', e.message);
-        }
-      }
-    };
-    
-    const timeoutId = setTimeout(fitBounds, 100);
-    
-    return () => {
-      isMounted = false;
-      clearTimeout(timeoutId);
-    };
-  }, [map, polygon]);
-  
-  return null;
-}
 
 // Default field configuration
 const DEFAULT_FIELDS_CONFIG = {
@@ -218,7 +42,7 @@ const Parcelas = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [polygon, setPolygon] = useState([]);
+  const [zones, setZones] = useState([]); // Array de polígonos (multi-zona)
   const [mapType, setMapType] = useState('satellite'); // Tipo de mapa: osm, satellite, hybrid, topo
   const [showGeneralMap, setShowGeneralMap] = useState(false); // Mostrar mapa general de todas las parcelas
   const { token } = useAuth();
@@ -435,11 +259,11 @@ const Parcelas = () => {
           }));
         }
         
-        // Si hay geometría, convertirla a polígono para el mapa
+        // Si hay geometría, convertirla a polígono y añadirla como zona
         if (data.geometria_wkt) {
           const coords = parseWKTToPolygon(data.geometria_wkt);
           if (coords && coords.length > 0) {
-            setPolygon(coords);
+            setZones(prev => [...prev, coords]);
           }
         }
       } else {
@@ -599,15 +423,13 @@ const Parcelas = () => {
     }
   }, [formData.proveedor, formData.cultivo, formData.campana, editingId, generarCodigoPlantacion]);
 
-  const handlePolygonCreated = useCallback((coords) => {
-    console.log('🗺️ Polygon created with coords:', coords);
-    console.log('🗺️ Coords length:', coords ? coords.length : 0);
-    setPolygon(coords);
-    if (coords && coords.length > 0) {
-      // Show success notification
-      const area = calculatePolygonArea(coords);
-      console.log('🗺️ Calculated area:', area, 'ha');
-      alert(`✅ Polígono dibujado con ${coords.length} puntos\nÁrea aproximada: ${area.toFixed(2)} ha`);
+  const handleZonesChanged = useCallback((newZones) => {
+    console.log('Zones changed:', newZones.length, 'zonas');
+    setZones(newZones);
+    if (newZones.length > 0) {
+      const totalPoints = newZones.reduce((s, z) => s + z.length, 0);
+      const totalArea = newZones.reduce((sum, z) => sum + calculatePolygonArea(z), 0);
+      console.log(`Total: ${newZones.length} zonas, ${totalPoints} puntos, ${totalArea.toFixed(2)} ha`);
     }
   }, []);
 
@@ -632,17 +454,15 @@ const Parcelas = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    console.log('📤 Submit - polygon state:', polygon);
-    console.log('📤 Submit - polygon.length:', polygon ? polygon.length : 0);
+    console.log('Submit - zones:', zones.length);
     
     if (!formData.contrato_id) {
-      alert('⚠️ Debes seleccionar un contrato. Toda parcela debe estar asociada a un contrato.');
+      alert('Debes seleccionar un contrato. Toda parcela debe estar asociada a un contrato.');
       return;
     }
     
-    if (!editingId && (!polygon || polygon.length < 3)) {
-      console.log('❌ Polygon validation failed:', polygon);
-      alert(`⚠️ Dibuja un polígono en el mapa primero.\n\nPuntos actuales: ${polygon ? polygon.length : 0}\nNecesitas al menos 3 puntos.`);
+    if (!editingId && (zones.length === 0 || !zones.some(z => z.length >= 3))) {
+      alert(`Dibuja al menos un polígono (zona) en el mapa.\n\nZonas actuales: ${zones.length}\nNecesitas al menos 1 zona con 3+ puntos.`);
       return;
     }
     
@@ -657,13 +477,12 @@ const Parcelas = () => {
         num_plantas: parseInt(formData.num_plantas) || 0
       };
       
-      // Añadir recintos si hay polígono dibujado
-      if (polygon && polygon.length >= 3) {
-        console.log('Adding polygon to payload:', polygon);
-        payload.recintos = [{ geometria: polygon }];
+      // Construir recintos desde todas las zonas dibujadas
+      if (zones.length > 0) {
+        payload.recintos = zones
+          .filter(z => z && z.length >= 3)
+          .map(z => ({ geometria: z }));
       } else if (!editingId) {
-        console.log('No polygon drawn, polygon:', polygon);
-        // Para nuevas parcelas sin polígono, enviar recintos vacío
         payload.recintos = [];
       }
       
@@ -672,13 +491,13 @@ const Parcelas = () => {
         : await api.post(url, payload);
       
       if (data.success) {
-        console.log('✅ Parcela saved successfully:', data);
-        const hadPolygon = payload.recintos && payload.recintos.length > 0 && payload.recintos[0].geometria && payload.recintos[0].geometria.length >= 3;
-        alert(`✅ Parcela ${editingId ? 'actualizada' : 'creada'} correctamente${hadPolygon ? '\n🗺️ Polígono guardado con ' + payload.recintos[0].geometria.length + ' puntos' : ''}`);
+        const zonaCount = payload.recintos ? payload.recintos.length : 0;
+        const totalPts = payload.recintos ? payload.recintos.reduce((s, r) => s + (r.geometria ? r.geometria.length : 0), 0) : 0;
+        alert(`Parcela ${editingId ? 'actualizada' : 'creada'} correctamente${zonaCount > 0 ? `\n${zonaCount} zona(s) guardada(s) con ${totalPts} puntos totales` : ''}`);
         setShowForm(false);
         setEditingId(null);
         fetchParcelas();
-        setPolygon([]);
+        setZones([]);
         setSearchContrato('');
         setContratoSearch({ proveedor: '', cultivo: '', campana: '' });
         setSigpacResult(null);
@@ -743,8 +562,14 @@ const Parcelas = () => {
     setSigpacResult(null);
     setSigpacError(null);
     
-    if (parcela.recintos && parcela.recintos.length > 0 && parcela.recintos[0].geometria) {
-      setPolygon(parcela.recintos[0].geometria);
+    // Cargar TODAS las zonas/recintos de la parcela
+    if (parcela.recintos && parcela.recintos.length > 0) {
+      const loadedZones = parcela.recintos
+        .filter(r => r.geometria && r.geometria.length >= 3)
+        .map(r => r.geometria);
+      setZones(loadedZones);
+    } else {
+      setZones([]);
     }
     
     setShowForm(true);
@@ -753,7 +578,7 @@ const Parcelas = () => {
   const handleCancelEdit = () => {
     setEditingId(null);
     setShowForm(false);
-    setPolygon([]);
+    setZones([]);
     setSearchContrato('');
     setContratoSearch({ proveedor: '', cultivo: '', campana: '' });
     setSigpacResult(null);
@@ -989,10 +814,10 @@ const Parcelas = () => {
               </h3>
               
               <AdvancedParcelMap
-                polygon={polygon}
-                setPolygon={setPolygon}
+                zones={zones}
+                setZones={setZones}
                 isEditing={!!editingId}
-                onPolygonCreated={handlePolygonCreated}
+                onZonesChanged={handleZonesChanged}
                 height="500px"
               />
               
@@ -1006,8 +831,8 @@ const Parcelas = () => {
                 color: 'hsl(var(--muted-foreground))'
               }}>
                 {editingId 
-                  ? 'Dibuja un nuevo polígono para actualizar la geometría (opcional)' 
-                  : 'Usa las herramientas del mapa para dibujar la parcela. Puedes importar archivos GeoJSON, KML o GPX, o buscar por códigos SIGPAC.'}
+                  ? 'Dibuja nuevos polígonos para actualizar las zonas. Puedes dibujar varias zonas independientes.' 
+                  : 'Dibuja una o varias zonas en el mapa. Cada zona puede tener cualquier cantidad de puntos. Usa las herramientas de edicion para modificar o eliminar zonas individuales.'}
               </div>
               
               {/* Sección SIGPAC */}
@@ -1465,6 +1290,7 @@ const Parcelas = () => {
                   {fieldsConfig.superficie_total ? <th>Superficie</th> : null}
                   {fieldsConfig.num_plantas ? <th>Plantas</th> : null}
                   {fieldsConfig.campana ? <th>Campaña</th> : null}
+                  <th>Zonas</th>
                   <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
@@ -1480,6 +1306,11 @@ const Parcelas = () => {
                     {fieldsConfig.superficie_total ? <td>{p.superficie_total} ha</td> : null}
                     {fieldsConfig.num_plantas ? <td>{p.num_plantas?.toLocaleString()}</td> : null}
                     {fieldsConfig.campana ? <td>{p.campana}</td> : null}
+                    <td>
+                      <span className={`badge ${p.recintos && p.recintos.length > 0 ? 'badge-success' : 'badge-default'}`} data-testid={`zones-count-${p._id}`}>
+                        {p.recintos ? p.recintos.length : 0}
+                      </span>
+                    </td>
                     <td><span className={`badge ${p.activo ? 'badge-success' : 'badge-default'}`}>{p.activo ? 'Activa' : 'Inactiva'}</span></td>
                     <td>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>

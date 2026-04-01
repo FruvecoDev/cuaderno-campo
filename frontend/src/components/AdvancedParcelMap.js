@@ -111,11 +111,27 @@ function CoordinateDisplay({ onCoordinateClick }) {
   );
 }
 
-// Componente de control de dibujo avanzado
+// Colores para distintas zonas
+const ZONE_COLORS = [
+  { color: '#2d5a27', fill: '#4CAF50' },
+  { color: '#1565c0', fill: '#42a5f5' },
+  { color: '#c62828', fill: '#ef5350' },
+  { color: '#e65100', fill: '#ff9800' },
+  { color: '#6a1b9a', fill: '#ab47bc' },
+  { color: '#00695c', fill: '#26a69a' },
+  { color: '#4e342e', fill: '#8d6e63' },
+  { color: '#37474f', fill: '#78909c' },
+];
+
+const getZoneStyle = (index) => {
+  const c = ZONE_COLORS[index % ZONE_COLORS.length];
+  return { color: c.color, fillColor: c.fill, fillOpacity: 0.3, weight: 2 };
+};
+
+// Componente de control de dibujo avanzado - MULTI-ZONA
 function AdvancedDrawControl({ 
-  onPolygonCreated, 
-  onPolygonEdited, 
-  editablePolygon, 
+  onZonesChanged, 
+  editableZones, 
   isEditing,
   drawMode,
   onMeasureDistance
@@ -123,7 +139,20 @@ function AdvancedDrawControl({
   const map = useMap();
   const drawnItemsRef = useRef(null);
   const drawControlRef = useRef(null);
-  const measureLayerRef = useRef(null);
+  
+  // Extraer todas las zonas del FeatureGroup
+  const extractAllZones = useCallback((drawnItems) => {
+    const newZones = [];
+    drawnItems.eachLayer((layer) => {
+      if (layer.getLatLngs) {
+        const latlngs = layer.getLatLngs()[0];
+        if (latlngs && latlngs.length >= 3) {
+          newZones.push(latlngs.map(point => ({ lat: point.lat, lng: point.lng })));
+        }
+      }
+    });
+    return newZones;
+  }, []);
   
   useEffect(() => {
     if (!map) return;
@@ -140,14 +169,19 @@ function AdvancedDrawControl({
     drawnItemsRef.current = drawnItems;
     map.addLayer(drawnItems);
     
-    // Si hay un polígono editable, añadirlo al grupo (tanto en edición como en creación)
-    if (editablePolygon && editablePolygon.length > 0) {
-      const latlngs = editablePolygon.map(p => [p.lat, p.lng]);
-      const polygon = L.polygon(latlngs, { color: '#2d5a27', fillColor: '#4CAF50', fillOpacity: 0.3 });
-      drawnItems.addLayer(polygon);
+    // Cargar todas las zonas existentes
+    if (editableZones && editableZones.length > 0) {
+      editableZones.forEach((zone, idx) => {
+        if (zone && zone.length >= 3) {
+          const latlngs = zone.map(p => [p.lat, p.lng]);
+          const style = getZoneStyle(idx);
+          const polygon = L.polygon(latlngs, style);
+          drawnItems.addLayer(polygon);
+        }
+      });
     }
     
-    // Configurar opciones de dibujo según el modo
+    // Configurar opciones de dibujo
     const drawOptions = {
       polygon: drawMode === 'polygon' || drawMode === 'all' ? { 
         allowIntersection: false, 
@@ -181,7 +215,7 @@ function AdvancedDrawControl({
     drawControlRef.current = drawControl;
     map.addControl(drawControl);
     
-    // Evento: Figura creada
+    // Evento: Figura creada - AÑADE al grupo (NO reemplaza)
     const handleCreated = (e) => {
       const layer = e.layer;
       const layerType = e.layerType;
@@ -196,7 +230,6 @@ function AdvancedDrawControl({
         if (onMeasureDistance) {
           onMeasureDistance(distance);
         }
-        // Añadir etiqueta de distancia
         const midPoint = latlngs[Math.floor(latlngs.length / 2)];
         L.popup()
           .setLatLng(midPoint)
@@ -205,17 +238,12 @@ function AdvancedDrawControl({
         return;
       }
       
-      // Limpiar polígonos anteriores (solo permitir uno)
-      drawnItems.clearLayers();
-      drawnItems.addLayer(layer);
-      
       let coordinates = [];
       
       if (layerType === 'polygon' || layerType === 'rectangle') {
         const latlngs = layer.getLatLngs()[0];
         coordinates = latlngs.map(point => ({ lat: point.lat, lng: point.lng }));
       } else if (layerType === 'circle') {
-        // Convertir círculo a polígono aproximado (32 puntos)
         const center = layer.getLatLng();
         const radius = layer.getRadius();
         const points = 32;
@@ -227,28 +255,29 @@ function AdvancedDrawControl({
         }
       }
       
-      onPolygonCreated(coordinates);
+      if (coordinates.length >= 3) {
+        // Aplicar estilo de color según el índice de la nueva zona
+        const currentCount = drawnItems.getLayers().length;
+        const style = getZoneStyle(currentCount);
+        layer.setStyle(style);
+        drawnItems.addLayer(layer);
+        
+        // Notificar todas las zonas actuales
+        const allZones = extractAllZones(drawnItems);
+        onZonesChanged(allZones);
+      }
     };
     
-    // Evento: Polígono editado
-    const handleEdited = (e) => {
-      const layers = e.layers;
-      layers.eachLayer((layer) => {
-        if (layer.getLatLngs) {
-          const latlngs = layer.getLatLngs()[0];
-          const coordinates = latlngs.map(point => ({ lat: point.lat, lng: point.lng }));
-          if (onPolygonEdited) {
-            onPolygonEdited(coordinates);
-          } else {
-            onPolygonCreated(coordinates);
-          }
-        }
-      });
+    // Evento: Zonas editadas - recalcular todas
+    const handleEdited = () => {
+      const allZones = extractAllZones(drawnItems);
+      onZonesChanged(allZones);
     };
     
-    // Evento: Eliminado
+    // Evento: Zonas eliminadas - recalcular restantes
     const handleDeleted = () => {
-      onPolygonCreated([]);
+      const allZones = extractAllZones(drawnItems);
+      onZonesChanged(allZones);
     };
     
     map.on(L.Draw.Event.CREATED, handleCreated);
@@ -266,13 +295,13 @@ function AdvancedDrawControl({
         map.removeLayer(drawnItemsRef.current);
       }
     };
-  }, [map, onPolygonCreated, onPolygonEdited, editablePolygon, isEditing, drawMode, onMeasureDistance]);
+  }, [map, onZonesChanged, editableZones, isEditing, drawMode, onMeasureDistance, extractAllZones]);
   
   return null;
 }
 
-// Componente para centrar el mapa
-function FitBounds({ polygon, parcelas }) {
+// Componente para centrar el mapa - soporta múltiples zonas
+function FitBounds({ zones, parcelas }) {
   const map = useMap();
   
   useEffect(() => {
@@ -284,20 +313,33 @@ function FitBounds({ polygon, parcelas }) {
       if (!isMounted || !map || !map._container) return;
       
       try {
-        if (polygon && polygon.length > 0) {
-          const bounds = L.latLngBounds(polygon.map(p => [p.lat, p.lng]));
-          map.fitBounds(bounds, { padding: [50, 50] });
-        } else if (parcelas && parcelas.length > 0) {
-          const allCoords = [];
-          parcelas.forEach(p => {
-            if (p.recintos && p.recintos[0]?.geometria) {
-              p.recintos[0].geometria.forEach(c => allCoords.push([c.lat, c.lng]));
+        const allCoords = [];
+        
+        // Recoger coordenadas de todas las zonas
+        if (zones && zones.length > 0) {
+          zones.forEach(zone => {
+            if (zone && zone.length > 0) {
+              zone.forEach(p => allCoords.push([p.lat, p.lng]));
             }
           });
-          if (allCoords.length > 0) {
-            const bounds = L.latLngBounds(allCoords);
-            map.fitBounds(bounds, { padding: [50, 50] });
-          }
+        }
+        
+        // Recoger coordenadas de todas las parcelas (vista general)
+        if (allCoords.length === 0 && parcelas && parcelas.length > 0) {
+          parcelas.forEach(p => {
+            if (p.recintos) {
+              p.recintos.forEach(r => {
+                if (r.geometria) {
+                  r.geometria.forEach(c => allCoords.push([c.lat, c.lng]));
+                }
+              });
+            }
+          });
+        }
+        
+        if (allCoords.length > 0) {
+          const bounds = L.latLngBounds(allCoords);
+          map.fitBounds(bounds, { padding: [50, 50] });
         }
       } catch (e) {
         console.debug('FitBounds skipped:', e.message);
@@ -310,7 +352,7 @@ function FitBounds({ polygon, parcelas }) {
       isMounted = false;
       clearTimeout(timeoutId);
     };
-  }, [map, polygon, parcelas]);
+  }, [map, zones, parcelas]);
   
   return null;
 }
@@ -362,10 +404,12 @@ function GeolocationControl({ onLocate }) {
   );
 }
 
-// Componente principal del mapa avanzado
+// Componente principal del mapa avanzado - MULTI-ZONA
 const AdvancedParcelMap = ({
   polygon,
+  zones = [],
   setPolygon,
+  setZones,
   parcelas = [],
   selectedParcelaId,
   onParcelaSelect,
@@ -373,6 +417,7 @@ const AdvancedParcelMap = ({
   showAllParcelas = false,
   height = '400px',
   onPolygonCreated,
+  onZonesChanged: onZonesChangedProp,
   onPolygonEdited
 }) => {
   const [mapType, setMapType] = useState('satellite');
@@ -386,14 +431,28 @@ const AdvancedParcelMap = ({
   const fileInputRef = useRef(null);
   const mapRef = useRef(null);
   
+  // Compatibilidad: usar zones si existe, si no convertir polygon a zones
+  const effectiveZones = zones.length > 0 ? zones : (polygon && polygon.length >= 3 ? [polygon] : []);
+  
   // Lista única de cultivos para colores
   const cultivosList = [...new Set(parcelas.map(p => p.cultivo).filter(Boolean))];
   
-  // Manejar creación de polígono
-  const handlePolygonCreated = (coords) => {
-    if (setPolygon) setPolygon(coords);
-    if (onPolygonCreated) onPolygonCreated(coords);
-  };
+  // Manejar cambio de zonas (multi-polígono)
+  const handleZonesChanged = useCallback((newZones) => {
+    if (setZones) setZones(newZones);
+    if (onZonesChangedProp) onZonesChangedProp(newZones);
+    // Compatibilidad retroactiva: actualizar polygon con la primera zona
+    if (setPolygon) {
+      setPolygon(newZones.length > 0 ? newZones[0] : []);
+    }
+    if (onPolygonCreated && newZones.length > 0) {
+      onPolygonCreated(newZones[0]);
+    }
+  }, [setZones, onZonesChangedProp, setPolygon, onPolygonCreated]);
+  
+  // Calcular totales de todas las zonas
+  const totalArea = effectiveZones.reduce((sum, z) => sum + parseFloat(calculateArea(z) || 0), 0);
+  const totalPoints = effectiveZones.reduce((sum, z) => sum + (z ? z.length : 0), 0);
   
   // Buscar dirección usando Nominatim
   const handleSearchAddress = async () => {
@@ -423,52 +482,62 @@ const AdvancedParcelMap = ({
     }
   };
   
-  // Exportar a GeoJSON
+  // Exportar a GeoJSON - todas las zonas
   const exportToGeoJSON = () => {
-    if (!polygon || polygon.length < 3) {
-      alert('No hay polígono para exportar');
+    if (effectiveZones.length === 0) {
+      alert('No hay polígonos para exportar');
       return;
     }
     
-    const geojson = {
+    const features = effectiveZones.map((zone, idx) => ({
       type: 'Feature',
-      properties: {},
+      properties: { zone_index: idx },
       geometry: {
         type: 'Polygon',
-        coordinates: [[...polygon.map(p => [p.lng, p.lat]), [polygon[0].lng, polygon[0].lat]]]
+        coordinates: [[...zone.map(p => [p.lng, p.lat]), [zone[0].lng, zone[0].lat]]]
       }
+    }));
+    
+    const geojson = {
+      type: 'FeatureCollection',
+      features
     };
     
     const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'parcela.geojson';
+    a.download = 'parcela_zonas.geojson';
     a.click();
     URL.revokeObjectURL(url);
   };
   
-  // Exportar a KML
+  // Exportar a KML - todas las zonas
   const exportToKML = () => {
-    if (!polygon || polygon.length < 3) {
-      alert('No hay polígono para exportar');
+    if (effectiveZones.length === 0) {
+      alert('No hay polígonos para exportar');
       return;
     }
     
-    const coords = polygon.map(p => `${p.lng},${p.lat},0`).join(' ');
-    const kml = `<?xml version="1.0" encoding="UTF-8"?>
-<kml xmlns="http://www.opengis.net/kml/2.2">
-  <Document>
-    <Placemark>
-      <name>Parcela</name>
+    const placemarks = effectiveZones.map((zone, idx) => {
+      const coords = zone.map(p => `${p.lng},${p.lat},0`).join(' ');
+      return `    <Placemark>
+      <name>Zona ${idx + 1}</name>
       <Polygon>
         <outerBoundaryIs>
           <LinearRing>
-            <coordinates>${coords} ${polygon[0].lng},${polygon[0].lat},0</coordinates>
+            <coordinates>${coords} ${zone[0].lng},${zone[0].lat},0</coordinates>
           </LinearRing>
         </outerBoundaryIs>
       </Polygon>
-    </Placemark>
+    </Placemark>`;
+    }).join('\n');
+    
+    const kml = `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Parcela - ${effectiveZones.length} zonas</name>
+${placemarks}
   </Document>
 </kml>`;
     
@@ -476,24 +545,27 @@ const AdvancedParcelMap = ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'parcela.kml';
+    a.download = 'parcela_zonas.kml';
     a.click();
     URL.revokeObjectURL(url);
   };
   
-  // Copiar coordenadas al portapapeles
+  // Copiar coordenadas de todas las zonas
   const copyCoordinates = () => {
-    if (!polygon || polygon.length < 3) {
-      alert('No hay polígono para copiar');
+    if (effectiveZones.length === 0) {
+      alert('No hay polígonos para copiar');
       return;
     }
     
-    const text = polygon.map(p => `${p.lat}, ${p.lng}`).join('\n');
+    const text = effectiveZones.map((zone, idx) => {
+      const coords = zone.map(p => `${p.lat}, ${p.lng}`).join('\n');
+      return `--- Zona ${idx + 1} ---\n${coords}`;
+    }).join('\n\n');
     navigator.clipboard.writeText(text);
     alert('Coordenadas copiadas al portapapeles');
   };
   
-  // Importar archivo
+  // Importar archivo - añade como nueva zona
   const handleFileImport = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -502,53 +574,60 @@ const AdvancedParcelMap = ({
     reader.onload = (event) => {
       try {
         const content = event.target.result;
-        let coordinates = [];
+        let importedZones = [];
         
         if (file.name.endsWith('.geojson') || file.name.endsWith('.json')) {
-          // Parse GeoJSON
           const geojson = JSON.parse(content);
           if (geojson.type === 'Feature' && geojson.geometry?.type === 'Polygon') {
-            coordinates = geojson.geometry.coordinates[0].map(c => ({ lat: c[1], lng: c[0] }));
-            coordinates.pop(); // Remove closing point
-          } else if (geojson.type === 'FeatureCollection' && geojson.features?.[0]) {
-            const feature = geojson.features[0];
-            if (feature.geometry?.type === 'Polygon') {
-              coordinates = feature.geometry.coordinates[0].map(c => ({ lat: c[1], lng: c[0] }));
-              coordinates.pop();
-            }
+            const coords = geojson.geometry.coordinates[0].map(c => ({ lat: c[1], lng: c[0] }));
+            coords.pop();
+            importedZones.push(coords);
+          } else if (geojson.type === 'FeatureCollection' && geojson.features) {
+            geojson.features.forEach(feature => {
+              if (feature.geometry?.type === 'Polygon') {
+                const coords = feature.geometry.coordinates[0].map(c => ({ lat: c[1], lng: c[0] }));
+                coords.pop();
+                importedZones.push(coords);
+              }
+            });
           }
         } else if (file.name.endsWith('.kml')) {
-          // Parse KML (básico)
           const parser = new DOMParser();
           const kml = parser.parseFromString(content, 'text/xml');
-          const coordsText = kml.querySelector('coordinates')?.textContent;
-          if (coordsText) {
-            const points = coordsText.trim().split(/\s+/);
-            coordinates = points.map(p => {
-              const [lng, lat] = p.split(',');
-              return { lat: parseFloat(lat), lng: parseFloat(lng) };
-            });
-            if (coordinates.length > 1) coordinates.pop(); // Remove closing point
-          }
+          const coordElements = kml.querySelectorAll('coordinates');
+          coordElements.forEach(coordEl => {
+            const coordsText = coordEl.textContent;
+            if (coordsText) {
+              const points = coordsText.trim().split(/\s+/);
+              const coordinates = points.map(p => {
+                const [lng, lat] = p.split(',');
+                return { lat: parseFloat(lat), lng: parseFloat(lng) };
+              }).filter(c => !isNaN(c.lat) && !isNaN(c.lng));
+              if (coordinates.length > 1) coordinates.pop();
+              if (coordinates.length >= 3) importedZones.push(coordinates);
+            }
+          });
         } else if (file.name.endsWith('.gpx')) {
-          // Parse GPX
           const parser = new DOMParser();
           const gpx = parser.parseFromString(content, 'text/xml');
           const trackPoints = gpx.querySelectorAll('trkpt, rtept, wpt');
-          coordinates = Array.from(trackPoints).map(pt => ({
+          const coordinates = Array.from(trackPoints).map(pt => ({
             lat: parseFloat(pt.getAttribute('lat')),
             lng: parseFloat(pt.getAttribute('lon'))
           }));
+          if (coordinates.length >= 3) importedZones.push(coordinates);
         }
         
-        if (coordinates.length >= 3) {
-          handlePolygonCreated(coordinates);
-          // Centrar mapa en el polígono importado
+        if (importedZones.length > 0) {
+          const newZones = [...effectiveZones, ...importedZones];
+          handleZonesChanged(newZones);
+          // Centrar mapa en las zonas importadas
           if (mapRef.current) {
-            const bounds = L.latLngBounds(coordinates.map(c => [c.lat, c.lng]));
+            const allCoords = importedZones.flat();
+            const bounds = L.latLngBounds(allCoords.map(c => [c.lat, c.lng]));
             mapRef.current.fitBounds(bounds, { padding: [50, 50] });
           }
-          alert(`Polígono importado con ${coordinates.length} puntos`);
+          alert(`Importadas ${importedZones.length} zona(s) con ${importedZones.reduce((s, z) => s + z.length, 0)} puntos totales`);
         } else {
           alert('No se pudo extraer un polígono válido del archivo');
         }
@@ -558,11 +637,11 @@ const AdvancedParcelMap = ({
       }
     };
     reader.readAsText(file);
-    e.target.value = ''; // Reset input
+    e.target.value = '';
   };
   
-  const mapCenter = polygon && polygon.length > 0 
-    ? [polygon[0].lat, polygon[0].lng] 
+  const mapCenter = effectiveZones.length > 0 && effectiveZones[0].length > 0
+    ? [effectiveZones[0][0].lat, effectiveZones[0][0].lng] 
     : [37.3891, -5.9845]; // Sevilla default
   
   return (
@@ -748,29 +827,46 @@ const AdvancedParcelMap = ({
         </div>
       )}
       
-      {/* Info del polígono actual */}
-      {polygon && polygon.length >= 3 && (
+      {/* Info de zonas dibujadas */}
+      {effectiveZones.length > 0 && (
         <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '1rem',
           marginBottom: '0.5rem',
           padding: '0.5rem 0.75rem',
           background: 'hsl(142 76% 36% / 0.1)',
           borderRadius: '0.5rem',
           border: '1px solid hsl(142 76% 36% / 0.3)',
           fontSize: '13px'
-        }}>
-          <span><strong>Puntos:</strong> {polygon.length}</span>
-          <span><strong>Área:</strong> {calculateArea(polygon)} ha</span>
-          <span><strong>Perímetro:</strong> {calculatePerimeter(polygon)} m</span>
-          <button 
-            onClick={() => handlePolygonCreated([])} 
-            className="btn btn-sm"
-            style={{ marginLeft: 'auto', padding: '2px 8px', fontSize: '11px', background: 'hsl(var(--destructive) / 0.1)', color: 'hsl(var(--destructive))' }}
-          >
-            <Trash2 size={12} /> Limpiar
-          </button>
+        }} data-testid="zones-info-panel">
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', marginBottom: effectiveZones.length > 1 ? '0.5rem' : 0 }}>
+            <span><strong>Zonas:</strong> {effectiveZones.length}</span>
+            <span><strong>Puntos totales:</strong> {totalPoints}</span>
+            <span><strong>Area total:</strong> {totalArea.toFixed(4)} ha</span>
+            <button 
+              onClick={() => handleZonesChanged([])} 
+              className="btn btn-sm"
+              style={{ marginLeft: 'auto', padding: '2px 8px', fontSize: '11px', background: 'hsl(var(--destructive) / 0.1)', color: 'hsl(var(--destructive))' }}
+              data-testid="btn-clear-all-zones"
+            >
+              <Trash2 size={12} /> Limpiar todo
+            </button>
+          </div>
+          {effectiveZones.length > 1 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.25rem' }}>
+              {effectiveZones.map((zone, idx) => (
+                <span key={idx} style={{
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  fontSize: '11px',
+                  background: `${ZONE_COLORS[idx % ZONE_COLORS.length].fill}22`,
+                  border: `1px solid ${ZONE_COLORS[idx % ZONE_COLORS.length].color}`,
+                  color: ZONE_COLORS[idx % ZONE_COLORS.length].color,
+                  fontWeight: '500'
+                }}>
+                  Zona {idx + 1}: {zone.length} pts, {calculateArea(zone)} ha
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       )}
       
@@ -807,53 +903,57 @@ const AdvancedParcelMap = ({
         />
         
         <AdvancedDrawControl 
-          onPolygonCreated={handlePolygonCreated}
-          onPolygonEdited={onPolygonEdited}
-          editablePolygon={polygon}
+          onZonesChanged={handleZonesChanged}
+          editableZones={effectiveZones}
           isEditing={isEditing}
           drawMode={drawMode}
           onMeasureDistance={(d) => setMeasuredDistance(d)}
         />
         
-        <FitBounds polygon={polygon} parcelas={showAllParcelas ? parcelas : null} />
+        <FitBounds zones={effectiveZones} parcelas={showAllParcelas ? parcelas : null} />
         
         <GeolocationControl />
         
         {showCoordinates && <CoordinateDisplay />}
         
-        {/* Mostrar todas las parcelas */}
+        {/* Mostrar todas las parcelas - todos los recintos */}
         {showAllParcelas && parcelas.map((parcela) => {
-          if (!parcela.recintos?.[0]?.geometria) return null;
-          const coords = parcela.recintos[0].geometria;
+          if (!parcela.recintos || parcela.recintos.length === 0) return null;
           const color = getCultivoColor(parcela.cultivo, cultivosList);
           const isSelected = parcela._id === selectedParcelaId;
           
-          return (
-            <Polygon
-              key={parcela._id}
-              positions={coords.map(c => [c.lat, c.lng])}
-              pathOptions={{
-                color: isSelected ? '#ff0000' : color,
-                fillColor: color,
-                fillOpacity: isSelected ? 0.5 : 0.3,
-                weight: isSelected ? 3 : 2
-              }}
-              eventHandlers={{
-                click: () => onParcelaSelect && onParcelaSelect(parcela)
-              }}
-            >
-              <Popup>
-                <div style={{ minWidth: '200px' }}>
-                  <h4 style={{ margin: '0 0 8px 0' }}>{parcela.codigo_plantacion}</h4>
-                  <p style={{ margin: '4px 0', fontSize: '12px' }}><strong>Cultivo:</strong> {parcela.cultivo}</p>
-                  <p style={{ margin: '4px 0', fontSize: '12px' }}><strong>Proveedor:</strong> {parcela.proveedor}</p>
-                  <p style={{ margin: '4px 0', fontSize: '12px' }}><strong>Finca:</strong> {parcela.finca}</p>
-                  <p style={{ margin: '4px 0', fontSize: '12px' }}><strong>Superficie:</strong> {parcela.superficie_total} ha</p>
-                  <p style={{ margin: '4px 0', fontSize: '12px' }}><strong>Campaña:</strong> {parcela.campana}</p>
-                </div>
-              </Popup>
-            </Polygon>
-          );
+          return parcela.recintos.map((recinto, rIdx) => {
+            if (!recinto.geometria || recinto.geometria.length < 3) return null;
+            return (
+              <Polygon
+                key={`${parcela._id}-zone-${rIdx}`}
+                positions={recinto.geometria.map(c => [c.lat, c.lng])}
+                pathOptions={{
+                  color: isSelected ? '#ff0000' : color,
+                  fillColor: color,
+                  fillOpacity: isSelected ? 0.5 : 0.3,
+                  weight: isSelected ? 3 : 2
+                }}
+                eventHandlers={{
+                  click: () => onParcelaSelect && onParcelaSelect(parcela)
+                }}
+              >
+                <Popup>
+                  <div style={{ minWidth: '200px' }}>
+                    <h4 style={{ margin: '0 0 8px 0' }}>{parcela.codigo_plantacion}</h4>
+                    {parcela.recintos.length > 1 && (
+                      <p style={{ margin: '4px 0', fontSize: '12px', color: '#1565c0' }}><strong>Zona {rIdx + 1}</strong> de {parcela.recintos.length}</p>
+                    )}
+                    <p style={{ margin: '4px 0', fontSize: '12px' }}><strong>Cultivo:</strong> {parcela.cultivo}</p>
+                    <p style={{ margin: '4px 0', fontSize: '12px' }}><strong>Proveedor:</strong> {parcela.proveedor}</p>
+                    <p style={{ margin: '4px 0', fontSize: '12px' }}><strong>Finca:</strong> {parcela.finca}</p>
+                    <p style={{ margin: '4px 0', fontSize: '12px' }}><strong>Superficie:</strong> {parcela.superficie_total} ha</p>
+                    <p style={{ margin: '4px 0', fontSize: '12px' }}><strong>Campana:</strong> {parcela.campana}</p>
+                  </div>
+                </Popup>
+              </Polygon>
+            );
+          });
         })}
       </MapContainer>
       
