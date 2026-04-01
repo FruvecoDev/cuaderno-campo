@@ -4,30 +4,29 @@
 Desarrollar una aplicacion de Cuaderno de Campo para el sector agricola que permita gestionar:
 Contratos, Parcelas, Mapas, Fincas, Visitas, Tareas, Cosechas, Tratamientos, Irrigaciones, Recetas, Albaranes, Dashboard, Generacion de informes PDF/Excel, RBAC, Autenticacion, Integraciones IA, RRHH completo.
 
-## Ultima Actualizacion: 1 Abril 2026 (Sesion 11)
+## Ultima Actualizacion: 1 Abril 2026 (Sesion 12)
 
 ### Completadas en esta sesion:
 
-#### 1. Soporte Multi-Zona en Parcelas (P0 - Completado)
-- Multiples poligonos independientes por parcela con cualquier numero de puntos
-- Colores distintos por zona, panel info con detalle por zona
-- Exportacion/importacion multi-zona (GeoJSON/KML)
-- Columna "Zonas" en tabla de parcelas
-- Archivos: `AdvancedParcelMap.js`, `Parcelas.js`
-- Testing: 29/29 backend + 100% frontend (iteration_46.json)
+#### 1. Fix Bug Cosechas PDF Export (P0 - Completado)
+- Añadido import `StreamingResponse` faltante en `routes_cosechas.py`
+- Verificados 6 endpoints de exportacion (PDF/Excel) para Cosechas, Recetas y Tareas
+- Testing: 17/17 backend (iteration_48.json)
 
-#### 2. Campo Codigo Plantacion readonly (Bug Fix)
-- Campo siempre readonly y auto-generado
+#### 2. AI Contract Summary Feature (P1 - Completado)
+- Nuevo endpoint `POST /api/ai/summarize-contract/{contrato_id}` en `routes_ai_suggestions.py`
+- Genera resumen ejecutivo, analisis financiero, estado cumplimiento, riesgos y recomendaciones
+- Tercera pestaña en AsistenteIA.js: "Resumen de Contratos"
+- Testing: 100% backend + frontend (iteration_48.json)
 
-#### 3. Refactorizacion P1 Dashboard.js (2168 -> 788 lineas, -64%)
-- Extraidos: VisitasCalendar, DashboardConfigModal, DashboardFincasWidget, DashboardContratosWidget, DashboardMapWidget
-- Ubicacion: `/app/frontend/src/components/dashboard/`
-- Testing: 100% (iteration_47.json)
-
-#### 4. Refactorizacion P1 routes_rrhh.py (1905 -> 270 lineas, -86%)
-- Extraidos: rrhh_fichajes.py (549 lineas), rrhh_productividad.py (201 lineas), rrhh_documentos.py (386 lineas)
-- Ubicacion: `/app/backend/routes/`
-- Testing: 15/15 backend (iteration_47.json)
+### Completadas en sesiones anteriores:
+- Soporte Multi-Zona en Parcelas (iteration_46.json)
+- Campo Codigo Plantacion readonly
+- Refactorizacion Dashboard.js (2168 -> 788 lineas)
+- Refactorizacion routes_rrhh.py (1905 -> 270 lineas)
+- Refactorizacion Contratos.js (1917 -> 388 lineas)
+- Exportaciones PDF/Excel para Recetas y Tareas
+- Asistente IA: Sugerencias Tratamientos + Prediccion Cosecha
 
 ---
 
@@ -36,32 +35,37 @@ Contratos, Parcelas, Mapas, Fincas, Visitas, Tareas, Cosechas, Tratamientos, Irr
 /app/
   backend/
     server.py
-    models.py
+    ai_service.py (AI report generation)
+    routes_ai.py (AI reports: parcels, costs, recommendations)
+    routes_ai_suggestions.py (AI: treatments, predictions, contract summaries)
+    routes_cosechas.py (Cosechas CRUD + PDF/Excel export)
+    routes_tareas.py (Tareas CRUD + PDF/Excel export)
+    routes_extended.py (Recetas, Albaranes + exports)
     routes/
-      routes_rrhh.py (270 lines - Empleados + Portal)
-      rrhh_fichajes.py (549 lines)
-      rrhh_productividad.py (201 lines)
-      rrhh_documentos.py (386 lines)
-      rrhh_ausencias.py (159 lines)
-      rrhh_prenominas.py (859 lines)
-      routes_erp_integration.py
-    routes_parcelas.py
-    routes_uploads.py
+      routes_rrhh.py, rrhh_fichajes.py, rrhh_productividad.py,
+      rrhh_documentos.py, rrhh_ausencias.py, rrhh_prenominas.py
   frontend/src/
     pages/
-      Dashboard.js (788 lines)
+      AsistenteIA.js (3 tabs: Treatments, Predictions, Contract Summary)
+      Dashboard.js (788 lines, refactored)
+      Contratos.js (refactored with subcomponents)
       Parcelas.js (multi-zona)
-      Contratos.js (1917 lines - candidato a refactorizar)
+      Cosechas.js, Tareas.js, Recetas.js (with export buttons)
     components/
-      dashboard/
-        VisitasCalendar.js
-        DashboardConfigModal.js
-        DashboardFincasWidget.js
-        DashboardContratosWidget.js
-        DashboardMapWidget.js
-      AdvancedParcelMap.js (multi-zona)
-      ProvinciaSelect.js
+      dashboard/ (5 widget subcomponents)
+      contratos/ (form, filters, table subcomponents)
+      AdvancedParcelMap.js (multi-polygon drawing)
 ```
+
+## AI Features Status
+| Feature | Status | Endpoint |
+|---------|--------|----------|
+| Sugerencias Tratamientos | DONE | POST /api/ai/suggest-treatments/{parcela_id} |
+| Prediccion Cosecha | DONE | POST /api/ai/predict-yield/{contrato_id} |
+| Resumen Contratos | DONE | POST /api/ai/summarize-contract/{contrato_id} |
+| Informe Parcela | DONE | POST /api/ai/report/parcel/{parcela_id} |
+| Analisis Costes | DONE | POST /api/ai/analysis/costs |
+| Recomendaciones Agronomicas | DONE | POST /api/ai/recommendations |
 
 ## Test Credentials
 - Admin: admin@fruveco.com / admin123
@@ -70,10 +74,10 @@ Contratos, Parcelas, Mapas, Fincas, Visitas, Tareas, Cosechas, Tratamientos, Irr
 - Notificaciones por Email (P2) - BLOCKED: Necesita RESEND_API_KEY
 
 ## Upcoming Tasks
-- P1: Refactorizar Contratos.js (1917 lineas)
-- P2: Mejorar modulos Recetas, Tareas, Cosechas
+- P1: NFC para RRHH (identificacion NFC para fichajes de empleados) - Opcion D del usuario
+- P2: Generalizar PDF/Excel a modulos restantes
+- P2: Refactorizar Parcelas.js (~1500 lineas)
 
 ## Future/Backlog
-- P2: Integraciones IA avanzadas
-- P2: NFC para RRHH
-- P2: Informes PDF/Excel generalizados
+- P2: Notificaciones por Email (necesita RESEND_API_KEY)
+- P2: OpenWeatherMap (necesita API key)
