@@ -1159,16 +1159,16 @@ const Parcelas = () => {
               
               {fieldsConfig.codigo_plantacion && (
                 <div className="form-group">
-                  <label className="form-label">Código Plantación {!editingId && '(Auto)'}</label>
+                  <label className="form-label">Codigo Plantacion (Auto)</label>
                   <input 
                     type="text" 
                     className="form-input" 
                     value={formData.codigo_plantacion} 
-                    onChange={(e) => setFormData({...formData, codigo_plantacion: e.target.value})} 
-                    readOnly={!editingId}
-                    style={!editingId ? { backgroundColor: 'hsl(var(--muted))', cursor: 'not-allowed' } : {}}
+                    readOnly
+                    style={{ backgroundColor: 'hsl(var(--muted))', cursor: 'not-allowed' }}
+                    data-testid="input-codigo-plantacion"
                   />
-                  {!editingId && <small style={{ color: 'hsl(var(--muted-foreground))' }}>Se genera automáticamente al seleccionar contrato</small>}
+                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>Se genera automaticamente y no se puede modificar</small>
                 </div>
               )}
               
