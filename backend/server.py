@@ -60,6 +60,9 @@ from routes.routes_rrhh import router as rrhh_router, set_database as set_rrhh_d
 from routes.routes_portal_empleado import router as portal_empleado_router
 from routes.rrhh_ausencias import router as ausencias_router
 from routes.rrhh_prenominas import router as prenominas_router
+from routes.rrhh_fichajes import router as fichajes_router
+from routes.rrhh_productividad import router as productividad_router
+from routes.rrhh_documentos import router as documentos_router
 from routes_erp_integration import router as erp_router
 from scheduler_service import init_scheduler, shutdown_scheduler
 from database import db
@@ -131,6 +134,9 @@ app.include_router(geo_import_router)
 app.include_router(rrhh_router)
 app.include_router(ausencias_router)
 app.include_router(prenominas_router)
+app.include_router(fichajes_router)
+app.include_router(productividad_router)
+app.include_router(documentos_router)
 app.include_router(portal_empleado_router)
 app.include_router(audit_router)
 
