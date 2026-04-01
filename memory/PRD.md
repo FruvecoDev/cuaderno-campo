@@ -9,15 +9,27 @@ Contratos, Parcelas, Mapas, Fincas, Visitas, Tareas, Cosechas, Tratamientos, Irr
 ### Completadas en esta sesion:
 
 #### 1. Fix Bug Cosechas PDF Export (P0 - Completado)
-- Añadido import `StreamingResponse` faltante en `routes_cosechas.py`
+- Anadido import `StreamingResponse` faltante en `routes_cosechas.py`
 - Verificados 6 endpoints de exportacion (PDF/Excel) para Cosechas, Recetas y Tareas
 - Testing: 17/17 backend (iteration_48.json)
 
 #### 2. AI Contract Summary Feature (P1 - Completado)
-- Nuevo endpoint `POST /api/ai/summarize-contract/{contrato_id}` en `routes_ai_suggestions.py`
+- Nuevo endpoint `POST /api/ai/summarize-contract/{contrato_id}` 
 - Genera resumen ejecutivo, analisis financiero, estado cumplimiento, riesgos y recomendaciones
-- Tercera pestaña en AsistenteIA.js: "Resumen de Contratos"
-- Testing: 100% backend + frontend (iteration_48.json)
+- Tercera pestana en AsistenteIA.js: "Resumen de Contratos"
+- Testing: 100% (iteration_48.json)
+
+#### 3. AI Dashboard - Historial y Metricas (Nuevo - Completado)
+- Persistencia automatica: todos los resultados IA se guardan en `ai_reports` collection
+- `GET /api/ai/dashboard`: metricas agregadas (total, por tipo, tiempo medio, actividad 30 dias)
+- `GET /api/ai/report-detail/{id}`: detalle completo de informe guardado
+- 4a pestana "Historial y Metricas" en AsistenteIA.js:
+  - KPIs: total informes, tratamientos, predicciones, resumenes
+  - Grafico de barras de actividad (ultimos 30 dias, por tipo, recharts)
+  - Tabla de historial con tipo, titulo, entidad, tiempo, fecha
+  - Modal de detalle con contenido JSON completo
+  - Actualizacion automatica tras cada generacion
+- Testing: 9/9 backend + 100% frontend (iteration_49.json)
 
 ### Completadas en sesiones anteriores:
 - Soporte Multi-Zona en Parcelas (iteration_46.json)
@@ -37,7 +49,7 @@ Contratos, Parcelas, Mapas, Fincas, Visitas, Tareas, Cosechas, Tratamientos, Irr
     server.py
     ai_service.py (AI report generation)
     routes_ai.py (AI reports: parcels, costs, recommendations)
-    routes_ai_suggestions.py (AI: treatments, predictions, contract summaries)
+    routes_ai_suggestions.py (AI: treatments, predictions, contract summaries, dashboard, history)
     routes_cosechas.py (Cosechas CRUD + PDF/Excel export)
     routes_tareas.py (Tareas CRUD + PDF/Excel export)
     routes_extended.py (Recetas, Albaranes + exports)
@@ -46,7 +58,7 @@ Contratos, Parcelas, Mapas, Fincas, Visitas, Tareas, Cosechas, Tratamientos, Irr
       rrhh_documentos.py, rrhh_ausencias.py, rrhh_prenominas.py
   frontend/src/
     pages/
-      AsistenteIA.js (3 tabs: Treatments, Predictions, Contract Summary)
+      AsistenteIA.js (4 tabs: Treatments, Predictions, Contract Summary, History & Metrics)
       Dashboard.js (788 lines, refactored)
       Contratos.js (refactored with subcomponents)
       Parcelas.js (multi-zona)
@@ -63,9 +75,11 @@ Contratos, Parcelas, Mapas, Fincas, Visitas, Tareas, Cosechas, Tratamientos, Irr
 | Sugerencias Tratamientos | DONE | POST /api/ai/suggest-treatments/{parcela_id} |
 | Prediccion Cosecha | DONE | POST /api/ai/predict-yield/{contrato_id} |
 | Resumen Contratos | DONE | POST /api/ai/summarize-contract/{contrato_id} |
+| Dashboard IA | DONE | GET /api/ai/dashboard |
+| Detalle Informe | DONE | GET /api/ai/report-detail/{report_id} |
 | Informe Parcela | DONE | POST /api/ai/report/parcel/{parcela_id} |
 | Analisis Costes | DONE | POST /api/ai/analysis/costs |
-| Recomendaciones Agronomicas | DONE | POST /api/ai/recommendations |
+| Recomendaciones | DONE | POST /api/ai/recommendations |
 
 ## Test Credentials
 - Admin: admin@fruveco.com / admin123
