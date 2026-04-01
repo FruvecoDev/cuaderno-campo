@@ -440,3 +440,155 @@ async def get_contratos_for_predictions(
         return {"contratos": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching contratos: {str(e)}")
+
+
+@router.post("/ai/summarize-contract/{contrato_id}", response_model=dict)
+async def summarize_contract(
+    contrato_id: str,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireAIAccess)
+):
+    """
+    Generate AI-powered summary and analysis of a contract
+    """
+    try:
+        start_time = time.time()
+
+        if not ObjectId.is_valid(contrato_id):
+            raise HTTPException(status_code=400, detail="Invalid contrato_id")
+
+        contrato = await contratos_collection.find_one({"_id": ObjectId(contrato_id)})
+        if not contrato:
+            raise HTTPException(status_code=404, detail="Contrato not found")
+
+        # Get related parcels
+        parcelas = await parcelas_collection.find({
+            "contrato_id": contrato_id
+        }).to_list(50)
+
+        # Get treatments for this contract's parcels
+        parcela_ids = [str(p["_id"]) for p in parcelas]
+        treatments = await tratamientos_collection.find({
+            "parcelas_ids": {"$in": parcela_ids}
+        }).to_list(200)
+
+        # Get harvests
+        cosechas = await cosechas_collection.find({
+            "contrato_id": contrato_id
+        }).to_list(50)
+
+        # Get visits
+        visits = await visitas_collection.find({
+            "parcela_id": {"$in": parcela_ids}
+        }).to_list(100)
+
+        # Build context
+        context = {
+            "contrato": {
+                "serie": contrato.get("serie"),
+                "numero": contrato.get("numero"),
+                "ano": contrato.get("año"),
+                "proveedor": contrato.get("proveedor"),
+                "cultivo": contrato.get("cultivo"),
+                "variedad": contrato.get("variedad"),
+                "campana": contrato.get("campana"),
+                "cantidad_kg": contrato.get("cantidad", 0),
+                "precio_kg": contrato.get("precio", 0),
+                "estado": contrato.get("estado", "Activo"),
+                "fecha_inicio": str(contrato.get("fecha_inicio", "")),
+                "fecha_fin": str(contrato.get("fecha_fin", "")),
+                "observaciones": contrato.get("observaciones", ""),
+                "condiciones": contrato.get("condiciones", "")
+            },
+            "parcelas": {
+                "cantidad": len(parcelas),
+                "superficie_total_ha": sum(p.get("superficie_total", 0) for p in parcelas),
+                "detalle": [
+                    {
+                        "codigo": p.get("codigo_plantacion"),
+                        "cultivo": p.get("cultivo"),
+                        "variedad": p.get("variedad"),
+                        "superficie": p.get("superficie_total", 0)
+                    } for p in parcelas[:10]
+                ]
+            },
+            "actividad": {
+                "visitas_realizadas": len(visits),
+                "tratamientos_aplicados": len(treatments),
+                "cosechas_registradas": len(cosechas),
+                "kilos_recolectados": sum(c.get("kilos_netos", 0) for c in cosechas),
+                "coste_tratamientos": sum(t.get("coste_total", 0) for t in treatments)
+            }
+        }
+
+        system_message = """Eres un experto en gestion de contratos agricolas.
+Tu tarea es generar resumenes ejecutivos claros, concisos y accionables de contratos.
+
+Debes:
+1. Analizar los datos del contrato y su ejecucion
+2. Identificar el estado actual de cumplimiento
+3. Destacar puntos criticos y oportunidades
+4. Proporcionar una valoracion general del contrato
+Responde SIEMPRE en formato JSON valido."""
+
+        user_prompt = f"""Analiza el siguiente contrato agricola y genera un resumen ejecutivo completo:
+
+DATOS:
+{json.dumps(context, indent=2, ensure_ascii=False)}
+
+Genera un resumen en formato JSON:
+{{
+  "titulo": "Resumen Contrato [serie]-[numero]",
+  "resumen_ejecutivo": "Parrafo con resumen ejecutivo del contrato",
+  "datos_clave": [
+    {{"concepto": "nombre", "valor": "valor", "estado": "OK|Alerta|Critico"}}
+  ],
+  "estado_cumplimiento": {{
+    "porcentaje_entrega": 0,
+    "kilos_pendientes": 0,
+    "valoracion": "En plazo|Retrasado|Completado|En riesgo"
+  }},
+  "analisis_financiero": {{
+    "valor_total_contrato": 0,
+    "ingresos_actuales": 0,
+    "costes_tratamientos": 0,
+    "margen_estimado": 0,
+    "rentabilidad": "Alta|Media|Baja"
+  }},
+  "puntos_fuertes": ["punto 1", "punto 2"],
+  "riesgos": ["riesgo 1", "riesgo 2"],
+  "recomendaciones": ["recomendacion 1", "recomendacion 2"],
+  "proximos_pasos": ["paso 1", "paso 2"]
+}}
+
+Responde SOLO con el JSON."""
+
+        chat = create_chat(system_message, f"contract-summary-{contrato_id}-{int(time.time())}")
+        message = UserMessage(text=user_prompt)
+
+        response = await chat.send_message(message)
+        response_text = clean_json_response(response)
+        summary = json.loads(response_text)
+
+        generation_time = time.time() - start_time
+
+        return {
+            "success": True,
+            "summary": summary,
+            "metadata": {
+                "contrato_id": contrato_id,
+                "proveedor": contrato.get("proveedor"),
+                "cultivo": contrato.get("cultivo"),
+                "campana": contrato.get("campana"),
+                "model_used": MODEL,
+                "generation_time_seconds": round(generation_time, 2),
+                "generated_at": datetime.now().isoformat()
+            }
+        }
+
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=500, detail=f"Error parsing AI response: {str(e)}")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating contract summary: {str(e)}")

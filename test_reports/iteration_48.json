@@ -1,0 +1,82 @@
+{
+  "summary": "Export endpoints (PDF/Excel) and AI features tested successfully. All 17 backend tests passed. Frontend AsistenteIA page loads with 3 tabs (treatments, predictions, contracts). NEW contract summary feature working.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_exports_ai.py",
+    "/app/test_reports/pytest/test_exports_ai.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/tests/test_exports_ai.py"
+  ],
+  "success_rate": {
+    "backend": "100% (17/17 tests passed)",
+    "frontend": "100%"
+  },
+  "test_credentials": "admin@fruveco.com / admin123",
+  "seed_data_creation": "None - used existing data",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Export and AI features verified. Cosechas PDF export fixed (StreamingResponse import). AI endpoints use GPT-4o via Emergent LLM Key (real API, not mocked). AI endpoints take 5-15 seconds to respond. Contract summary is a new feature added in this iteration.",
+  "features_verified": {
+    "export_endpoints": [
+      "GET /api/cosechas/export/pdf - WORKING (StreamingResponse fix verified)",
+      "GET /api/cosechas/export/excel - WORKING (returns JSON for frontend)",
+      "GET /api/recetas/export/pdf - WORKING",
+      "GET /api/recetas/export/excel - WORKING (returns Excel file)",
+      "GET /api/tareas/export/pdf - WORKING",
+      "GET /api/tareas/export/excel - WORKING (returns Excel file)"
+    ],
+    "ai_list_endpoints": [
+      "GET /api/ai/parcelas-for-suggestions - WORKING",
+      "GET /api/ai/contratos-for-predictions - WORKING"
+    ],
+    "ai_generation_endpoints": [
+      "POST /api/ai/suggest-treatments/{parcela_id} - WORKING (real GPT-4o)",
+      "POST /api/ai/predict-yield/{contrato_id} - WORKING (real GPT-4o)",
+      "POST /api/ai/summarize-contract/{contrato_id} - WORKING (NEW, real GPT-4o)"
+    ],
+    "frontend_asistente_ia": [
+      "AsistenteIA page loads - WORKING",
+      "3 tabs visible (treatments, predictions, contracts) - WORKING",
+      "Treatments tab: parcela select, problem input, generate button - WORKING",
+      "Predictions tab: contrato select, generate button - WORKING",
+      "Contracts tab (NEW): contrato select, generate summary button - WORKING"
+    ]
+  },
+  "test_results": {
+    "test_exports_ai.py": {
+      "total": 17,
+      "passed": 17,
+      "failed": 0,
+      "tests": [
+        "TestCosechasExport::test_cosechas_export_pdf_returns_200 - PASSED",
+        "TestCosechasExport::test_cosechas_export_pdf_with_filters - PASSED",
+        "TestCosechasExport::test_cosechas_export_excel_returns_200 - PASSED",
+        "TestRecetasExport::test_recetas_export_pdf_returns_200 - PASSED",
+        "TestRecetasExport::test_recetas_export_excel_returns_200 - PASSED",
+        "TestTareasExport::test_tareas_export_pdf_returns_200 - PASSED",
+        "TestTareasExport::test_tareas_export_pdf_with_filters - PASSED",
+        "TestTareasExport::test_tareas_export_excel_returns_200 - PASSED",
+        "TestAIListEndpoints::test_ai_parcelas_list_returns_200 - PASSED",
+        "TestAIListEndpoints::test_ai_contratos_list_returns_200 - PASSED",
+        "TestAITreatmentSuggestions::test_ai_suggest_treatments_returns_200 - PASSED",
+        "TestAITreatmentSuggestions::test_ai_suggest_treatments_invalid_parcela - PASSED",
+        "TestAIYieldPrediction::test_ai_predict_yield_returns_200 - PASSED",
+        "TestAIYieldPrediction::test_ai_predict_yield_invalid_contrato - PASSED",
+        "TestAIContractSummary::test_ai_summarize_contract_returns_200 - PASSED",
+        "TestAIContractSummary::test_ai_summarize_contract_invalid_id - PASSED",
+        "TestAIContractSummary::test_ai_summarize_contract_not_found - PASSED"
+      ]
+    }
+  }
+}

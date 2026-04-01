@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { 
   Brain, Sparkles, Bug, TrendingUp, Loader2, AlertTriangle, 
   CheckCircle2, ChevronDown, ChevronUp, Leaf, Package, Calendar,
-  BarChart3, Lightbulb, Shield, Clock, Target, ArrowRight
+  BarChart3, Lightbulb, Shield, Clock, Target, ArrowRight, FileSignature,
+  DollarSign, AlertCircle
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
@@ -13,7 +14,8 @@ import '../App.css';
 // Tab type constants
 const TABS = {
   TREATMENTS: 'treatments',
-  PREDICTIONS: 'predictions'
+  PREDICTIONS: 'predictions',
+  CONTRACTS: 'contracts'
 };
 
 const AsistenteIA = () => {
@@ -39,6 +41,12 @@ const AsistenteIA = () => {
   // Expanded sections
   const [expandedSuggestion, setExpandedSuggestion] = useState(null);
   const [expandedRisk, setExpandedRisk] = useState(null);
+
+  // Contract Summary State
+  const [selectedContratoSummary, setSelectedContratoSummary] = useState('');
+  const [loadingSummary, setLoadingSummary] = useState(false);
+  const [contractSummary, setContractSummary] = useState(null);
+  const [summaryError, setSummaryError] = useState(null);
 
   useEffect(() => {
     fetchParcelas();
@@ -115,6 +123,32 @@ const AsistenteIA = () => {
       setPredictionError(api.getErrorMessage(err));
     } finally {
       setLoadingPrediction(false);
+    }
+  };
+
+  // Generate contract summary
+  const handleGenerateSummary = async () => {
+    if (!selectedContratoSummary) {
+      setSummaryError('Selecciona un contrato');
+      return;
+    }
+
+    setLoadingSummary(true);
+    setSummaryError(null);
+    setContractSummary(null);
+
+    try {
+      const data = await api.post(`/api/ai/summarize-contract/${selectedContratoSummary}`);
+
+      if (data.success) {
+        setContractSummary(data);
+      } else {
+        throw new Error('No se pudo generar el resumen');
+      }
+    } catch (err) {
+      setSummaryError(api.getErrorMessage(err));
+    } finally {
+      setLoadingSummary(false);
     }
   };
 
@@ -206,7 +240,7 @@ const AsistenteIA = () => {
       {/* Feature Cards */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(2, 1fr)', 
+        gridTemplateColumns: 'repeat(3, 1fr)', 
         gap: '1rem', 
         marginBottom: '2rem' 
       }}>
@@ -269,6 +303,38 @@ const AsistenteIA = () => {
               </h3>
               <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }}>
                 Obtén estimaciones de rendimiento para tus contratos basadas en datos históricos, tratamientos aplicados y estado actual del cultivo.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Contract Summary Card */}
+        <div 
+          className="card" 
+          style={{ 
+            cursor: 'pointer',
+            border: activeTab === TABS.CONTRACTS ? '2px solid #2563eb' : '1px solid hsl(var(--border))',
+            backgroundColor: activeTab === TABS.CONTRACTS ? '#eff6ff' : 'white',
+            transition: 'all 0.2s ease'
+          }}
+          onClick={() => setActiveTab(TABS.CONTRACTS)}
+          data-testid="tab-contracts"
+        >
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+            <div style={{ 
+              padding: '1rem', 
+              borderRadius: '12px', 
+              backgroundColor: '#2563eb',
+              color: 'white'
+            }}>
+              <FileSignature size={28} />
+            </div>
+            <div>
+              <h3 style={{ fontWeight: '600', fontSize: '1.1rem', marginBottom: '0.5rem' }}>
+                Resumen de Contratos
+              </h3>
+              <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }}>
+                Genera resúmenes ejecutivos inteligentes de tus contratos con análisis de cumplimiento, financiero y recomendaciones.
               </p>
             </div>
           </div>
@@ -774,6 +840,265 @@ const AsistenteIA = () => {
               {prediction.prediction?.notas && (
                 <div style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: 'hsl(var(--muted))', borderRadius: '8px', fontSize: '0.875rem' }}>
                   <strong>Notas:</strong> {prediction.prediction.notas}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Contract Summary Panel */}
+      {activeTab === TABS.CONTRACTS && (
+        <div className="card" data-testid="panel-contracts">
+          <h2 style={{ fontWeight: '600', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <FileSignature size={20} style={{ color: '#2563eb' }} />
+            Resumen Ejecutivo de Contrato
+          </h2>
+
+          {/* Form */}
+          <div className="form-group">
+            <label className="form-label">Contrato *</label>
+            <select
+              className="form-select"
+              value={selectedContratoSummary}
+              onChange={(e) => setSelectedContratoSummary(e.target.value)}
+              style={{ maxWidth: '500px' }}
+              data-testid="select-contrato-summary"
+            >
+              <option value="">Seleccionar contrato...</option>
+              {contratos.map(c => (
+                <option key={c._id} value={c._id}>
+                  {c.proveedor} - {c.cultivo} {c.variedad ? `(${c.variedad})` : ''} | {c.campana} | {c.cantidad?.toLocaleString()} kg
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button
+            className="btn btn-primary"
+            onClick={handleGenerateSummary}
+            disabled={loadingSummary || !selectedContratoSummary}
+            style={{ 
+              backgroundColor: '#2563eb',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+            data-testid="btn-generate-summary"
+          >
+            {loadingSummary ? (
+              <>
+                <Loader2 size={18} className="animate-spin" style={{ animation: 'spin 1s linear infinite' }} />
+                Generando resumen...
+              </>
+            ) : (
+              <>
+                <Sparkles size={18} />
+                Generar Resumen IA
+              </>
+            )}
+          </button>
+
+          {/* Error */}
+          {summaryError && (
+            <div style={{
+              marginTop: '1rem',
+              padding: '1rem',
+              backgroundColor: '#fef2f2',
+              border: '1px solid #fecaca',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              color: '#dc2626'
+            }}>
+              <AlertTriangle size={18} />
+              {summaryError}
+            </div>
+          )}
+
+          {/* Results */}
+          {contractSummary && (
+            <div style={{ marginTop: '2rem' }}>
+              <div style={{
+                padding: '1rem',
+                backgroundColor: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                borderRadius: '8px',
+                marginBottom: '1.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <CheckCircle2 size={20} style={{ color: '#16a34a' }} />
+                <span style={{ fontWeight: '500', color: '#166534' }}>
+                  Resumen generado en {contractSummary.metadata?.generation_time_seconds}s
+                </span>
+              </div>
+
+              {/* Title and Executive Summary */}
+              <div className="card" style={{ marginBottom: '1rem', border: '2px solid #2563eb', backgroundColor: '#eff6ff' }}>
+                <h3 style={{ fontWeight: '700', fontSize: '1.2rem', marginBottom: '1rem', color: '#1e40af' }}>
+                  {contractSummary.summary?.titulo}
+                </h3>
+                <p style={{ lineHeight: '1.7' }}>{contractSummary.summary?.resumen_ejecutivo}</p>
+              </div>
+
+              {/* Key Data */}
+              {contractSummary.summary?.datos_clave?.length > 0 && (
+                <div className="card" style={{ marginBottom: '1rem' }}>
+                  <h4 style={{ fontWeight: '600', marginBottom: '1rem' }}>Datos Clave</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.75rem' }}>
+                    {contractSummary.summary.datos_clave.map((d, i) => (
+                      <div key={i} style={{
+                        padding: '0.75rem',
+                        backgroundColor: d.estado === 'OK' ? '#f0fdf4' : d.estado === 'Alerta' ? '#fef9c3' : '#fef2f2',
+                        border: `1px solid ${d.estado === 'OK' ? '#bbf7d0' : d.estado === 'Alerta' ? '#fde68a' : '#fecaca'}`,
+                        borderRadius: '8px'
+                      }}>
+                        <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>{d.concepto}</div>
+                        <div style={{ fontWeight: '700', fontSize: '1.1rem' }}>{d.valor}</div>
+                        <span style={{
+                          fontSize: '0.7rem',
+                          padding: '2px 6px',
+                          borderRadius: '6px',
+                          backgroundColor: d.estado === 'OK' ? '#dcfce7' : d.estado === 'Alerta' ? '#fef9c3' : '#fecaca',
+                          color: d.estado === 'OK' ? '#166534' : d.estado === 'Alerta' ? '#854d0e' : '#dc2626'
+                        }}>{d.estado}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Compliance and Financial Analysis - two columns */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                {/* Compliance */}
+                {contractSummary.summary?.estado_cumplimiento && (
+                  <div className="card" style={{ border: '1px solid #a7f3d0' }}>
+                    <h4 style={{ fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Target size={18} style={{ color: '#059669' }} /> Estado de Cumplimiento
+                    </h4>
+                    <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+                      <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#059669' }}>
+                        {contractSummary.summary.estado_cumplimiento.porcentaje_entrega}%
+                      </div>
+                      <div style={{ fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))' }}>de entrega</div>
+                    </div>
+                    <div style={{
+                      padding: '0.5rem',
+                      backgroundColor: contractSummary.summary.estado_cumplimiento.valoracion === 'Completado' ? '#dcfce7' :
+                                       contractSummary.summary.estado_cumplimiento.valoracion === 'En plazo' ? '#dbeafe' :
+                                       contractSummary.summary.estado_cumplimiento.valoracion === 'Retrasado' ? '#fef9c3' : '#fecaca',
+                      borderRadius: '6px',
+                      textAlign: 'center',
+                      fontWeight: '600'
+                    }}>
+                      {contractSummary.summary.estado_cumplimiento.valoracion}
+                    </div>
+                    {contractSummary.summary.estado_cumplimiento.kilos_pendientes > 0 && (
+                      <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', textAlign: 'center' }}>
+                        <strong>{contractSummary.summary.estado_cumplimiento.kilos_pendientes?.toLocaleString()}</strong> kg pendientes
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Financial Analysis */}
+                {contractSummary.summary?.analisis_financiero && (
+                  <div className="card" style={{ border: '1px solid #bfdbfe' }}>
+                    <h4 style={{ fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <DollarSign size={18} style={{ color: '#2563eb' }} /> Análisis Financiero
+                    </h4>
+                    <div style={{ display: 'grid', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', backgroundColor: '#f8fafc', borderRadius: '4px' }}>
+                        <span>Valor Total Contrato</span>
+                        <strong>{contractSummary.summary.analisis_financiero.valor_total_contrato?.toLocaleString()} €</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', backgroundColor: '#f0fdf4', borderRadius: '4px' }}>
+                        <span>Ingresos Actuales</span>
+                        <strong style={{ color: '#16a34a' }}>{contractSummary.summary.analisis_financiero.ingresos_actuales?.toLocaleString()} €</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', backgroundColor: '#fef2f2', borderRadius: '4px' }}>
+                        <span>Costes Tratamientos</span>
+                        <strong style={{ color: '#dc2626' }}>{contractSummary.summary.analisis_financiero.costes_tratamientos?.toLocaleString()} €</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', backgroundColor: '#eff6ff', borderRadius: '4px', borderTop: '2px solid #2563eb' }}>
+                        <span style={{ fontWeight: '600' }}>Margen Estimado</span>
+                        <strong style={{ color: '#2563eb' }}>{contractSummary.summary.analisis_financiero.margen_estimado?.toLocaleString()} €</strong>
+                      </div>
+                      <div style={{ textAlign: 'center', padding: '0.5rem' }}>
+                        <span style={{
+                          padding: '4px 12px',
+                          borderRadius: '12px',
+                          fontSize: '0.8rem',
+                          fontWeight: '600',
+                          backgroundColor: contractSummary.summary.analisis_financiero.rentabilidad === 'Alta' ? '#dcfce7' :
+                                           contractSummary.summary.analisis_financiero.rentabilidad === 'Media' ? '#fef9c3' : '#fecaca',
+                          color: contractSummary.summary.analisis_financiero.rentabilidad === 'Alta' ? '#166534' :
+                                 contractSummary.summary.analisis_financiero.rentabilidad === 'Media' ? '#854d0e' : '#dc2626'
+                        }}>
+                          Rentabilidad: {contractSummary.summary.analisis_financiero.rentabilidad}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Strengths and Risks - two columns */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                {contractSummary.summary?.puntos_fuertes?.length > 0 && (
+                  <div className="card" style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0' }}>
+                    <h4 style={{ fontWeight: '600', marginBottom: '0.75rem', color: '#166534', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <CheckCircle2 size={18} /> Puntos Fuertes
+                    </h4>
+                    <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
+                      {contractSummary.summary.puntos_fuertes.map((p, i) => (
+                        <li key={i} style={{ marginBottom: '0.25rem' }}>{p}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {contractSummary.summary?.riesgos?.length > 0 && (
+                  <div className="card" style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca' }}>
+                    <h4 style={{ fontWeight: '600', marginBottom: '0.75rem', color: '#dc2626', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <AlertCircle size={18} /> Riesgos Identificados
+                    </h4>
+                    <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
+                      {contractSummary.summary.riesgos.map((r, i) => (
+                        <li key={i} style={{ marginBottom: '0.25rem' }}>{r}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              {/* Recommendations */}
+              {contractSummary.summary?.recomendaciones?.length > 0 && (
+                <div className="card" style={{ marginBottom: '1rem', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe' }}>
+                  <h4 style={{ fontWeight: '600', marginBottom: '0.75rem', color: '#1e40af', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Lightbulb size={18} /> Recomendaciones
+                  </h4>
+                  <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
+                    {contractSummary.summary.recomendaciones.map((r, i) => (
+                      <li key={i} style={{ marginBottom: '0.25rem' }}>{r}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Next Steps */}
+              {contractSummary.summary?.proximos_pasos?.length > 0 && (
+                <div className="card" style={{ backgroundColor: '#fef9c3', border: '1px solid #fde68a' }}>
+                  <h4 style={{ fontWeight: '600', marginBottom: '0.75rem', color: '#854d0e', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <ArrowRight size={18} /> Próximos Pasos
+                  </h4>
+                  <ol style={{ margin: 0, paddingLeft: '1.25rem' }}>
+                    {contractSummary.summary.proximos_pasos.map((p, i) => (
+                      <li key={i} style={{ marginBottom: '0.25rem' }}>{p}</li>
+                    ))}
+                  </ol>
                 </div>
               )}
             </div>
