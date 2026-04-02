@@ -14,6 +14,7 @@ import DashboardConfigModal from '../components/dashboard/DashboardConfigModal';
 import DashboardFincasWidget from '../components/dashboard/DashboardFincasWidget';
 import DashboardContratosWidget from '../components/dashboard/DashboardContratosWidget';
 import DashboardMapWidget from '../components/dashboard/DashboardMapWidget';
+import DashboardExportWidget from '../components/dashboard/DashboardExportWidget';
 
 const Dashboard = () => {
   const [kpis, setKpis] = useState(null);
@@ -307,6 +308,13 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+      
+      {/* Centro de Exportacion */}
+      {isWidgetVisible('centro_exportacion') && (
+        <div style={{ order: getWidgetOrder('centro_exportacion'), marginBottom: '1.5rem' }}>
+          <DashboardExportWidget />
+        </div>
+      )}
       
       {/* Fincas Widget */}
       {isWidgetVisible('resumen_fincas') && kpis.fincas && (

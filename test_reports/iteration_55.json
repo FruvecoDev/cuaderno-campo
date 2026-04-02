@@ -1,0 +1,95 @@
+{
+  "summary": "Centralized Export Panel Testing Complete: All 8 backend tests passed (100%) and all frontend UI elements verified. The Dashboard export widget is fully functional with module selection, format toggle, and download capabilities.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_combined_exports.py",
+    "/app/test_reports/pytest/test_combined_exports.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/tests/test_combined_exports.py"
+  ],
+  "success_rate": {
+    "backend": "100% (8/8 tests passed)",
+    "frontend": "100% (all UI elements verified)"
+  },
+  "test_credentials": "admin@fruveco.com / admin123",
+  "seed_data_creation": "No seed data created - used existing data",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Centralized export panel fully verified. Backend endpoints: GET /api/exports/modules (returns 13 modules with counts), POST /api/exports/combined (supports excel/pdf format with multiple modules). Frontend widget: data-testid=dashboard-export-widget, btn-select-all-modules, export-module-{key}, export-format-excel, export-format-pdf, btn-export-combined. All working correctly.",
+  "features_verified": {
+    "backend_endpoints": [
+      "GET /api/exports/modules - WORKING (returns 13 modules with record counts)",
+      "POST /api/exports/combined (modules=['contratos','parcelas'], format='excel') - WORKING (200, xlsx file)",
+      "POST /api/exports/combined (modules=['contratos','parcelas'], format='pdf') - WORKING (200, pdf file)",
+      "POST /api/exports/combined (all 13 modules) - WORKING (200, xlsx file)",
+      "POST /api/exports/combined (empty modules) - WORKING (returns 400 as expected)",
+      "POST /api/exports/combined (invalid modules) - WORKING (returns 400 as expected)"
+    ],
+    "authentication_required": [
+      "GET /api/exports/modules requires auth - VERIFIED (returns 401/403 without token)",
+      "POST /api/exports/combined requires auth - VERIFIED (returns 401/403 without token)"
+    ],
+    "frontend_ui_elements": [
+      "Dashboard export widget (data-testid=dashboard-export-widget) - VISIBLE",
+      "Select All button (data-testid=btn-select-all-modules) - WORKING (toggles text)",
+      "Module checkboxes (data-testid=export-module-{key}) - ALL 13 PRESENT with counts",
+      "Excel format button (data-testid=export-format-excel) - WORKING",
+      "PDF format button (data-testid=export-format-pdf) - WORKING",
+      "Export button (data-testid=btn-export-combined) - WORKING (enables/disables correctly)"
+    ],
+    "functional_tests": [
+      "Clicking 'Seleccionar Todo' selects all modules - VERIFIED (button text changes to 'Deseleccionar Todo')",
+      "Export button triggers download when modules selected - VERIFIED (downloaded fruveco_informe_combinado_*.pdf)",
+      "Format toggle between Excel and PDF works - VERIFIED"
+    ]
+  },
+  "test_results": {
+    "test_combined_exports.py": {
+      "total": 8,
+      "passed": 8,
+      "failed": 0,
+      "tests": [
+        "TestCombinedExportEndpoints::test_get_export_modules - PASSED",
+        "TestCombinedExportEndpoints::test_combined_export_excel_two_modules - PASSED",
+        "TestCombinedExportEndpoints::test_combined_export_pdf_two_modules - PASSED",
+        "TestCombinedExportEndpoints::test_combined_export_all_13_modules - PASSED",
+        "TestCombinedExportEndpoints::test_combined_export_empty_modules_returns_400 - PASSED",
+        "TestCombinedExportEndpoints::test_combined_export_invalid_modules_returns_400 - PASSED",
+        "TestCombinedExportWithoutAuth::test_get_modules_requires_auth - PASSED",
+        "TestCombinedExportWithoutAuth::test_combined_export_requires_auth - PASSED"
+      ]
+    },
+    "playwright_tests": {
+      "dashboard_export_widget": "PASSED - All UI elements present and functional",
+      "select_all_functionality": "PASSED - Button toggles correctly",
+      "format_toggle": "PASSED - Excel/PDF toggle works",
+      "export_download": "PASSED - Download triggered successfully"
+    }
+  },
+  "modules_available": [
+    {"key": "contratos", "label": "Contratos", "count": 12},
+    {"key": "parcelas", "label": "Parcelas", "count": 12},
+    {"key": "fincas", "label": "Fincas", "count": 7},
+    {"key": "visitas", "label": "Visitas", "count": 25},
+    {"key": "tareas", "label": "Tareas", "count": 0},
+    {"key": "cosechas", "label": "Cosechas", "count": 0},
+    {"key": "tratamientos", "label": "Tratamientos", "count": 39},
+    {"key": "irrigaciones", "label": "Irrigaciones", "count": 0},
+    {"key": "recetas", "label": "Recetas", "count": 0},
+    {"key": "albaranes", "label": "Albaranes", "count": 25},
+    {"key": "evaluaciones", "label": "Evaluaciones", "count": 1},
+    {"key": "tecnicos_aplicadores", "label": "Tecnicos Aplicadores", "count": 8},
+    {"key": "maquinaria", "label": "Maquinaria", "count": 12}
+  ]
+}

@@ -38,7 +38,8 @@ DEFAULT_WIDGETS = [
     {"widget_id": "graficos_cultivos", "visible": True, "order": 6, "name": "Gráficos de Cultivos", "description": "Superficie por cultivo y distribución de costes"},
     {"widget_id": "mapa_parcelas", "visible": True, "order": 7, "name": "Mapa de Parcelas", "description": "Mapa interactivo con ubicación de parcelas"},
     {"widget_id": "calendario", "visible": True, "order": 8, "name": "Calendario", "description": "Eventos y actividades programadas"},
-    {"widget_id": "actividad_reciente", "visible": True, "order": 9, "name": "Actividad Reciente", "description": "Últimas visitas y tratamientos"}
+    {"widget_id": "actividad_reciente", "visible": True, "order": 9, "name": "Actividad Reciente", "description": "Últimas visitas y tratamientos"},
+    {"widget_id": "centro_exportacion", "visible": True, "order": 10, "name": "Centro de Exportación", "description": "Exportación combinada de múltiples módulos en PDF/Excel"}
 ]
 
 
