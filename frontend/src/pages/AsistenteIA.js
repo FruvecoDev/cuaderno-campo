@@ -372,12 +372,7 @@ const AsistenteIA = () => {
       </div>
 
       {/* Feature Cards */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(5, 1fr)', 
-        gap: '0.75rem', 
-        marginBottom: '2rem' 
-      }}>
+      <div className="ai-tabs-grid" style={{ marginBottom: '2rem' }}>
         {/* Treatment Suggestions Card */}
         <div 
           className="card" 
@@ -1170,7 +1165,7 @@ const AsistenteIA = () => {
               )}
 
               {/* Compliance and Financial Analysis - two columns */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+              <div className="ai-two-col" style={{ marginBottom: '1rem' }}>
                 {/* Compliance */}
                 {contractSummary.summary?.estado_cumplimiento && (
                   <div className="card" style={{ border: '1px solid #a7f3d0' }}>
@@ -1245,7 +1240,7 @@ const AsistenteIA = () => {
               </div>
 
               {/* Strengths and Risks - two columns */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+              <div className="ai-two-col" style={{ marginBottom: '1rem' }}>
                 {contractSummary.summary?.puntos_fuertes?.length > 0 && (
                   <div className="card" style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0' }}>
                     <h4 style={{ fontWeight: '600', marginBottom: '0.75rem', color: '#166534', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -1315,7 +1310,7 @@ const AsistenteIA = () => {
           ) : dashboardData ? (
             <>
               {/* KPI Cards */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+              <div className="ai-kpi-grid" style={{ marginBottom: '1.5rem' }}>
                 <div className="card" style={{ textAlign: 'center', borderTop: '3px solid #d97706' }}>
                   <div style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.25rem' }}>Total Informes IA</div>
                   <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#d97706' }}>{dashboardData.total_reports}</div>
@@ -1335,7 +1330,7 @@ const AsistenteIA = () => {
               </div>
 
               {/* Activity Chart + Avg Time */}
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+              <div className="ai-activity-grid" style={{ marginBottom: '1.5rem' }}>
                 <div className="card">
                   <h4 style={{ fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <BarChart3 size={18} style={{ color: '#d97706' }} /> Actividad IA (Últimos 30 días)
@@ -1451,7 +1446,7 @@ const AsistenteIA = () => {
 
       {/* Chat Panel */}
       {activeTab === TABS.CHAT && (
-        <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '1rem', height: '600px' }} data-testid="panel-chat">
+        <div className="ai-chat-grid" data-testid="panel-chat">
           {/* Sessions Sidebar */}
           <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>

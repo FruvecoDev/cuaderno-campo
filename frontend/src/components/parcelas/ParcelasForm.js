@@ -12,7 +12,7 @@ export const ParcelasForm = ({
   return (
     <div className="card mb-6">
       <h2 className="card-title">{editingId ? 'Editar Parcela' : 'Crear Parcela'}</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }} className="form-grid-responsive">
+      <div className="form-grid-responsive">
         {/* Left column: Map + SIGPAC */}
         <div>
           <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

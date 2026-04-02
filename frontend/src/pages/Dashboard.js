@@ -251,11 +251,62 @@ const Dashboard = () => {
           <div className="stat-value">{'\u20AC'}{kpis.rentabilidad.margen_bruto.toLocaleString()}</div>
           <div className="stat-change positive">
             <TrendingUp size={14} style={{ display: 'inline' }} />
-            {((kpis.rentabilidad.margen_bruto / kpis.produccion.total_ingresos) * 100).toFixed(1)}% {t('dashboard.stats.margin')}
+            {kpis.produccion.total_ingresos > 0 ? ((kpis.rentabilidad.margen_bruto / kpis.produccion.total_ingresos) * 100).toFixed(1) : '0.0'}% {t('dashboard.stats.margin')}
           </div>
         </div>
       </div>
       )}
+      
+      {/* Productividad Widget - New Advanced KPIs */}
+      <div className="card mb-6" data-testid="dashboard-productividad" style={{ order: getWidgetOrder('kpis_principales') + 0.5 }}>
+        <h2 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+          <TrendingUp size={20} style={{ color: 'hsl(var(--chart-1))' }} /> Análisis de Productividad
+        </h2>
+        <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
+          <div className="stat-card" style={{ borderLeft: '4px solid #4caf50' }}>
+            <div className="stat-label">Rendimiento</div>
+            <div className="stat-value" style={{ fontSize: '1.5rem' }}>
+              {kpis.superficie.total_ha > 0 ? (kpis.produccion.total_kg / kpis.superficie.total_ha).toFixed(0) : '0'}
+            </div>
+            <div className="text-sm text-muted">kg / ha</div>
+          </div>
+          <div className="stat-card" style={{ borderLeft: '4px solid #f44336' }}>
+            <div className="stat-label">Coste por Hectárea</div>
+            <div className="stat-value" style={{ fontSize: '1.5rem' }}>
+              {'\u20AC'}{kpis.superficie.total_ha > 0 ? (kpis.costes.total / kpis.superficie.total_ha).toFixed(0) : '0'}
+            </div>
+            <div className="text-sm text-muted">{'\u20AC'} / ha</div>
+          </div>
+          <div className="stat-card" style={{ borderLeft: '4px solid #2196f3' }}>
+            <div className="stat-label">Ingresos por Hectárea</div>
+            <div className="stat-value" style={{ fontSize: '1.5rem' }}>
+              {'\u20AC'}{kpis.superficie.total_ha > 0 ? (kpis.produccion.total_ingresos / kpis.superficie.total_ha).toFixed(0) : '0'}
+            </div>
+            <div className="text-sm text-muted">{'\u20AC'} / ha</div>
+          </div>
+          <div className="stat-card" style={{ borderLeft: '4px solid #ff9800' }}>
+            <div className="stat-label">Margen Neto / ha</div>
+            <div className="stat-value" style={{ fontSize: '1.5rem' }}>
+              {'\u20AC'}{kpis.superficie.total_ha > 0 ? (kpis.rentabilidad.margen_bruto / kpis.superficie.total_ha).toFixed(0) : '0'}
+            </div>
+            <div className="text-sm text-muted">{'\u20AC'} / ha</div>
+          </div>
+          <div className="stat-card" style={{ borderLeft: '4px solid #9c27b0' }}>
+            <div className="stat-label">Superficie Media</div>
+            <div className="stat-value" style={{ fontSize: '1.5rem' }}>
+              {kpis.superficie.promedio_ha_parcela?.toFixed(2) || '0'}
+            </div>
+            <div className="text-sm text-muted">ha / parcela</div>
+          </div>
+          <div className="stat-card" style={{ borderLeft: '4px solid #00bcd4' }}>
+            <div className="stat-label">Precio Medio / kg</div>
+            <div className="stat-value" style={{ fontSize: '1.5rem' }}>
+              {'\u20AC'}{kpis.produccion.total_kg > 0 ? (kpis.produccion.total_ingresos / kpis.produccion.total_kg).toFixed(2) : '0'}
+            </div>
+            <div className="text-sm text-muted">{'\u20AC'} / kg</div>
+          </div>
+        </div>
+      </div>
       
       {/* Fincas Widget */}
       {isWidgetVisible('resumen_fincas') && kpis.fincas && (

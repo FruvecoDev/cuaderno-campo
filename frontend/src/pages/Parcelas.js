@@ -9,6 +9,7 @@ import { ParcelasGeneralMap } from '../components/parcelas/ParcelasGeneralMap';
 import { ParcelasForm } from '../components/parcelas/ParcelasForm';
 import { ParcelasTable } from '../components/parcelas/ParcelasTable';
 import { ParcelasHistorial } from '../components/parcelas/ParcelasHistorial';
+import Pagination from '../components/Pagination';
 import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
 
@@ -61,6 +62,11 @@ const Parcelas = () => {
   const [fincas, setFincas] = useState([]);
   const [cultivos, setCultivos] = useState([]);
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+  const [totalItems, setTotalItems] = useState(0);
+
   useEffect(() => {
     fetchParcelas();
     fetchContratos();
@@ -68,6 +74,10 @@ const Parcelas = () => {
     fetchFincas();
     fetchCultivos();
   }, []);
+
+  useEffect(() => {
+    fetchParcelas();
+  }, [currentPage, pageSize]);
 
   const fetchProvincias = async () => {
     try {
@@ -195,8 +205,13 @@ const Parcelas = () => {
 
   const fetchParcelas = async () => {
     try {
-      const data = await api.get('/api/parcelas');
+      const skip = (currentPage - 1) * pageSize;
+      const params = new URLSearchParams({ skip: skip.toString(), limit: pageSize.toString() });
+      if (filters.proveedor) params.append('proveedor', filters.proveedor);
+      if (filters.campana) params.append('campana', filters.campana);
+      const data = await api.get(`/api/parcelas?${params.toString()}`);
       setParcelas(data.parcelas || []);
+      setTotalItems(data.total || (data.parcelas || []).length);
       const p = data.parcelas || [];
       setFilterOptions({
         proveedores: [...new Set(p.map(x => x.proveedor).filter(Boolean))],
@@ -330,9 +345,9 @@ const Parcelas = () => {
 
   return (
     <div data-testid="parcelas-page">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6" style={{ flexWrap: 'wrap', gap: '0.75rem' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>Parcelas</h1>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className="page-actions">
           <button className={`btn ${showGeneralMap ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setShowGeneralMap(!showGeneralMap)} data-testid="btn-general-map">
             <Eye size={18} /> {showGeneralMap ? 'Ocultar Mapa' : 'Ver Mapa'}
@@ -377,6 +392,15 @@ const Parcelas = () => {
         fieldsConfig={fieldsConfig} contratos={contratos} handleEdit={handleEdit}
         handleDelete={handleDelete} handleGenerateCuaderno={handleGenerateCuaderno}
         generatingCuaderno={generatingCuaderno} fetchHistorialTratamientos={fetchHistorialTratamientos}
+      />
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={Math.ceil(totalItems / pageSize) || 1}
+        totalItems={totalItems}
+        pageSize={pageSize}
+        onPageChange={(p) => setCurrentPage(p)}
+        onPageSizeChange={(s) => { setPageSize(s); setCurrentPage(1); }}
       />
 
       <ParcelasHistorial
