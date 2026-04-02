@@ -975,7 +975,7 @@ const RRHH = () => {
               {/* Métodos de identificación */}
               <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid hsl(var(--border))' }}>
                 <h3 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.75rem' }}>Métodos de Identificación</h3>
-                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
                   <div style={{ padding: '0.5rem 1rem', borderRadius: '0.5rem', background: empleadoDetalle.qr_code ? 'hsl(142 76% 36% / 0.1)' : 'hsl(var(--muted))', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <QrCode size={18} />
                     <span>QR {empleadoDetalle.qr_code ? '✓' : '-'}</span>
@@ -988,6 +988,87 @@ const RRHH = () => {
                     <Camera size={18} />
                     <span>Facial {empleadoDetalle.foto_url ? '✓' : '-'}</span>
                   </div>
+                </div>
+                
+                {/* NFC Management */}
+                <div style={{ 
+                  padding: '1rem', borderRadius: '0.5rem', 
+                  border: '1px solid hsl(var(--border))', 
+                  background: 'hsl(var(--muted) / 0.3)' 
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                    <CreditCard size={16} style={{ color: 'hsl(var(--primary))' }} />
+                    <span style={{ fontWeight: '600', fontSize: '0.85rem' }}>Gestión NFC</span>
+                  </div>
+                  
+                  {empleadoDetalle.nfc_id ? (
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{ 
+                          padding: '0.5rem 1rem', borderRadius: '0.375rem', 
+                          background: 'hsl(142 76% 36% / 0.1)', 
+                          fontFamily: 'monospace', fontSize: '0.9rem', flex: 1 
+                        }}>
+                          {empleadoDetalle.nfc_id}
+                        </div>
+                        <button
+                          onClick={async () => {
+                            if (window.confirm('¿Eliminar la tarjeta NFC de este empleado?')) {
+                              try {
+                                await api.delete(`/api/rrhh/empleados/${empleadoDetalle._id}/nfc`);
+                                setEmpleadoDetalle(prev => ({ ...prev, nfc_id: null }));
+                                fetchEmpleados();
+                              } catch (err) {
+                                alert('Error al eliminar NFC: ' + api.getErrorMessage(err));
+                              }
+                            }
+                          }}
+                          className="btn btn-secondary"
+                          style={{ padding: '0.5rem', color: 'hsl(0 84% 60%)' }}
+                          title="Eliminar NFC"
+                          data-testid="btn-remove-nfc"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <input
+                          type="text"
+                          className="form-input"
+                          placeholder="Introducir ID de tarjeta NFC..."
+                          id="nfc-assign-input"
+                          style={{ flex: 1 }}
+                          data-testid="nfc-assign-input"
+                        />
+                        <button
+                          onClick={async () => {
+                            const input = document.getElementById('nfc-assign-input');
+                            const nfcId = input?.value?.trim();
+                            if (!nfcId) return;
+                            try {
+                              await api.put(`/api/rrhh/empleados/${empleadoDetalle._id}/nfc`, { nfc_id: nfcId });
+                              setEmpleadoDetalle(prev => ({ ...prev, nfc_id: nfcId }));
+                              fetchEmpleados();
+                              input.value = '';
+                            } catch (err) {
+                              alert('Error: ' + api.getErrorMessage(err));
+                            }
+                          }}
+                          className="btn btn-primary"
+                          style={{ padding: '0.5rem 1rem' }}
+                          data-testid="btn-assign-nfc"
+                        >
+                          Asignar
+                        </button>
+                      </div>
+                      <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginTop: '0.5rem' }}>
+                        Introduzca el número de serie de la tarjeta NFC del empleado
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

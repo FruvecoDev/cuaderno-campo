@@ -156,6 +156,52 @@ async def delete_empleado(empleado_id: str):
     return {"success": True}
 
 
+@router.put("/empleados/{empleado_id}/nfc")
+async def assign_nfc_to_empleado(empleado_id: str, data: dict):
+    """Assign or update NFC ID for an employee"""
+    database = get_db()
+    nfc_id = data.get("nfc_id", "").strip()
+    if not nfc_id:
+        raise HTTPException(status_code=400, detail="NFC ID es requerido")
+
+    # Check if NFC ID is already assigned to another employee
+    existing = await database.empleados.find_one({"nfc_id": nfc_id, "_id": {"$ne": ObjectId(empleado_id)}})
+    if existing:
+        raise HTTPException(status_code=409, detail=f"NFC ya asignado a {existing.get('nombre', '')} {existing.get('apellidos', '')}")
+
+    result = await database.empleados.update_one(
+        {"_id": ObjectId(empleado_id)},
+        {"$set": {"nfc_id": nfc_id, "updated_at": datetime.now()}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Empleado no encontrado")
+    return {"success": True, "nfc_id": nfc_id}
+
+
+@router.delete("/empleados/{empleado_id}/nfc")
+async def remove_nfc_from_empleado(empleado_id: str):
+    """Remove NFC ID from an employee"""
+    database = get_db()
+    result = await database.empleados.update_one(
+        {"_id": ObjectId(empleado_id)},
+        {"$unset": {"nfc_id": ""}, "$set": {"updated_at": datetime.now()}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Empleado no encontrado")
+    return {"success": True}
+
+
+@router.get("/empleados/nfc-lookup/{nfc_id}")
+async def lookup_empleado_by_nfc(nfc_id: str):
+    """Look up an employee by NFC ID"""
+    database = get_db()
+    empleado = await database.empleados.find_one({"nfc_id": nfc_id, "activo": True})
+    if not empleado:
+        raise HTTPException(status_code=404, detail="NFC no registrado")
+    empleado["_id"] = str(empleado["_id"])
+    return {"success": True, "empleado": empleado}
+
+
 @router.delete("/empleados/{empleado_id}/permanente")
 async def delete_empleado_permanente(empleado_id: str):
     database = get_db()

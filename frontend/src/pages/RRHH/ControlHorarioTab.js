@@ -26,6 +26,11 @@ const ControlHorarioTab = ({ empleados }) => {
   const [capturedPhoto, setCapturedPhoto] = useState(null);
   const [facialEmpleado, setFacialEmpleado] = useState('');
   
+  // Estados NFC
+  const [nfcReading, setNfcReading] = useState(false);
+  const [nfcManualId, setNfcManualId] = useState('');
+  const [nfcSupported, setNfcSupported] = useState(false);
+  
   // Estado para feedback
   const [fichajeResult, setFichajeResult] = useState(null);
   
@@ -51,8 +56,15 @@ const ControlHorarioTab = ({ empleados }) => {
       setScanError(null);
       setCapturedPhoto(null);
       setFichajeResult(null);
+      setNfcReading(false);
+      setNfcManualId('');
     }
   }, [showFicharModal]);
+  
+  // Detect NFC support
+  useEffect(() => {
+    setNfcSupported('NDEFReader' in window);
+  }, []);
   
   const fetchFichajesHoy = async () => {
     try {
@@ -184,6 +196,55 @@ const ControlHorarioTab = ({ empleados }) => {
       }, 2000);
     } catch (err) {
       setFichajeResult({ success: false, error: api.getErrorMessage(err) });
+    }
+  };
+  
+  // NFC Functions
+  const handleNfcFichaje = async (nfcId) => {
+    if (!nfcId) return;
+    try {
+      const response = await api.post('/api/rrhh/fichajes/nfc', {
+        nfc_id: nfcId,
+        tipo: tipoFichaje
+      });
+      setFichajeResult({ success: true, data: response.data });
+      fetchFichajesHoy();
+      setNfcReading(false);
+      setTimeout(() => {
+        setShowFicharModal(false);
+        setFichajeResult(null);
+        setNfcManualId('');
+      }, 2500);
+    } catch (err) {
+      setFichajeResult({ success: false, error: api.getErrorMessage(err) });
+      setNfcReading(false);
+    }
+  };
+
+  const startNfcScan = async () => {
+    if (!nfcSupported) return;
+    setNfcReading(true);
+    setScanError(null);
+    try {
+      const ndef = new window.NDEFReader();
+      await ndef.scan();
+      ndef.addEventListener('reading', ({ serialNumber }) => {
+        handleNfcFichaje(serialNumber);
+      });
+      ndef.addEventListener('readingerror', () => {
+        setScanError('Error al leer la tarjeta NFC. Inténtalo de nuevo.');
+        setNfcReading(false);
+      });
+    } catch (err) {
+      setScanError('No se pudo iniciar la lectura NFC: ' + err.message);
+      setNfcReading(false);
+    }
+  };
+
+  const handleNfcManualSubmit = () => {
+    const nfcId = nfcManualId.trim();
+    if (nfcId) {
+      handleNfcFichaje(nfcId);
     }
   };
   
@@ -606,17 +667,11 @@ const ControlHorarioTab = ({ empleados }) => {
               )}
               
               {metodoFichaje === 'nfc' && (
-                <div style={{ textAlign: 'center', padding: '2rem' }}>
-                  <CreditCard size={64} style={{ margin: '0 auto', opacity: 0.5 }} />
-                  <p style={{ marginTop: '1rem', color: 'hsl(var(--muted-foreground))' }}>
-                    Acerque la tarjeta NFC al lector
-                  </p>
-                  <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
-                    (Requiere dispositivo con NFC habilitado - Chrome en Android)
-                  </p>
-                  
-                  <div style={{ marginTop: '1.5rem' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem', maxWidth: '300px', margin: '0 auto' }}>
+                <div>
+                  {/* Tipo entrada/salida */}
+                  <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                    <label>Tipo de Fichaje</label>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
                       <button
                         onClick={() => setTipoFichaje('entrada')}
                         className={`btn ${tipoFichaje === 'entrada' ? 'btn-primary' : 'btn-secondary'}`}
@@ -633,6 +688,109 @@ const ControlHorarioTab = ({ empleados }) => {
                       </button>
                     </div>
                   </div>
+
+                  {/* NFC Scan Area */}
+                  {nfcSupported && !nfcReading && !fichajeResult && (
+                    <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                      <button
+                        onClick={startNfcScan}
+                        className="btn btn-primary"
+                        style={{ padding: '1rem 2rem', fontSize: '1rem' }}
+                        data-testid="btn-nfc-scan"
+                      >
+                        <CreditCard size={24} style={{ marginRight: '0.5rem' }} />
+                        Activar Lectura NFC
+                      </button>
+                    </div>
+                  )}
+
+                  {nfcReading && (
+                    <div style={{ textAlign: 'center', padding: '2rem' }}>
+                      <div style={{ 
+                        width: '100px', height: '100px', borderRadius: '50%', 
+                        border: '3px solid hsl(var(--primary))',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        margin: '0 auto',
+                        animation: 'pulse 1.5s ease-in-out infinite'
+                      }}>
+                        <CreditCard size={48} style={{ color: 'hsl(var(--primary))' }} />
+                      </div>
+                      <p style={{ marginTop: '1rem', fontWeight: '600', color: 'hsl(var(--primary))' }}>
+                        Esperando tarjeta NFC...
+                      </p>
+                      <p style={{ fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))' }}>
+                        Acerque la tarjeta al dispositivo
+                      </p>
+                      <button
+                        onClick={() => setNfcReading(false)}
+                        className="btn btn-secondary"
+                        style={{ marginTop: '1rem' }}
+                      >
+                        Cancelar
+                      </button>
+                      <style>{`@keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.7; } }`}</style>
+                    </div>
+                  )}
+
+                  {/* Separator */}
+                  <div style={{ 
+                    display: 'flex', alignItems: 'center', gap: '1rem', 
+                    margin: '1.5rem 0',
+                    color: 'hsl(var(--muted-foreground))'
+                  }}>
+                    <div style={{ flex: 1, height: '1px', background: 'hsl(var(--border))' }} />
+                    <span style={{ fontSize: '0.8rem' }}>o introducir ID manualmente</span>
+                    <div style={{ flex: 1, height: '1px', background: 'hsl(var(--border))' }} />
+                  </div>
+
+                  {/* Manual NFC ID input */}
+                  <div className="form-group">
+                    <label>ID de Tarjeta NFC</label>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <input
+                        type="text"
+                        className="form-input"
+                        placeholder="Introducir ID de la tarjeta NFC..."
+                        value={nfcManualId}
+                        onChange={e => setNfcManualId(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') handleNfcManualSubmit(); }}
+                        data-testid="nfc-manual-input"
+                      />
+                      <button
+                        onClick={handleNfcManualSubmit}
+                        className="btn btn-primary"
+                        disabled={!nfcManualId.trim()}
+                        data-testid="btn-nfc-manual-submit"
+                      >
+                        <Check size={18} />
+                        Fichar
+                      </button>
+                    </div>
+                  </div>
+
+                  {!nfcSupported && (
+                    <div style={{ 
+                      marginTop: '1rem', padding: '0.75rem', 
+                      background: 'hsl(38 92% 50% / 0.1)', 
+                      borderRadius: '0.5rem',
+                      fontSize: '0.85rem',
+                      color: 'hsl(38 92% 50%)'
+                    }}>
+                      Web NFC no disponible en este navegador. Use la entrada manual o un dispositivo Android con Chrome.
+                    </div>
+                  )}
+
+                  {scanError && (
+                    <div style={{ 
+                      marginTop: '1rem', padding: '0.75rem', 
+                      background: 'hsl(0 84% 60% / 0.1)', 
+                      borderRadius: '0.5rem',
+                      color: 'hsl(0 84% 60%)',
+                      textAlign: 'center'
+                    }}>
+                      {scanError}
+                    </div>
+                  )}
                 </div>
               )}
               
