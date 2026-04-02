@@ -1,133 +1,66 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Plus, Map as MapIcon, Edit2, Trash2, Filter, Settings, X, ClipboardCheck, History, Calendar, FileText, ChevronDown, ChevronUp, BookOpen, Loader2, Eye, Search, ExternalLink, CheckCircle, AlertCircle, Upload } from 'lucide-react';
+import { Plus, Map as MapIcon, Eye, Settings, Upload } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import AdvancedParcelMap from '../components/AdvancedParcelMap';
 import GeoImportModal from '../components/GeoImportModal';
+import { ParcelasFilters } from '../components/parcelas/ParcelasFilters';
+import { ParcelasGeneralMap } from '../components/parcelas/ParcelasGeneralMap';
+import { ParcelasForm } from '../components/parcelas/ParcelasForm';
+import { ParcelasTable } from '../components/parcelas/ParcelasTable';
+import { ParcelasHistorial } from '../components/parcelas/ParcelasHistorial';
 import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
 
-
-// Default field configuration
 const DEFAULT_FIELDS_CONFIG = {
-  contrato_id: true,
-  codigo_plantacion: true,
-  proveedor: true,
-  finca: true,
-  cultivo: true,
-  variedad: true,
-  superficie_total: true,
-  num_plantas: true,
-  campana: true
-};
-
-const FIELD_LABELS = {
-  contrato_id: 'Contrato',
-  codigo_plantacion: 'Código Plantación',
-  proveedor: 'Proveedor',
-  finca: 'Finca',
-  cultivo: 'Cultivo',
-  variedad: 'Variedad',
-  superficie_total: 'Superficie',
-  num_plantas: 'Nº Plantas',
-  campana: 'Campaña'
+  contrato_id: true, codigo_plantacion: true, proveedor: true, finca: true,
+  cultivo: true, variedad: true, superficie_total: true, num_plantas: true, campana: true
 };
 
 const Parcelas = () => {
   const { t } = useTranslation();
   const [parcelas, setParcelas] = useState([]);
   const [contratos, setContratos] = useState([]);
-  const [searchContrato, setSearchContrato] = useState('');
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [zones, setZones] = useState([]); // Array de polígonos (multi-zona)
-  const [mapType, setMapType] = useState('satellite'); // Tipo de mapa: osm, satellite, hybrid, topo
-  const [showGeneralMap, setShowGeneralMap] = useState(false); // Mostrar mapa general de todas las parcelas
+  const [zones, setZones] = useState([]);
+  const [showGeneralMap, setShowGeneralMap] = useState(false);
   const { token } = useAuth();
   const navigate = useNavigate();
-  
-  // Cuaderno de campo
+
   const [generatingCuaderno, setGeneratingCuaderno] = useState(null);
-  
-  // Historial de tratamientos
+
   const [showHistorial, setShowHistorial] = useState(false);
   const [historialParcela, setHistorialParcela] = useState(null);
   const [historialData, setHistorialData] = useState(null);
   const [historialLoading, setHistorialLoading] = useState(false);
-  
-  // Filtros de búsqueda de contratos (dentro del formulario)
-  const [contratoSearch, setContratoSearch] = useState({
-    proveedor: '',
-    cultivo: '',
-    campana: ''
-  });
-  
-  // Opciones únicas para filtros de contratos (dentro del formulario)
-  const [contratoFilterOptions, setContratoFilterOptions] = useState({
-    proveedores: [],
-    cultivos: [],
-    campanas: []
-  });
-  
-  // Filtros
-  const [filters, setFilters] = useState({
-    proveedor: '',
-    cultivo: '',
-    campana: '',
-    codigo_plantacion: ''
-  });
-  
-  // Configuración de campos
+
+  const [contratoSearch, setContratoSearch] = useState({ proveedor: '', cultivo: '', campana: '' });
+  const [contratoFilterOptions, setContratoFilterOptions] = useState({ proveedores: [], cultivos: [], campanas: [] });
+
+  const [filters, setFilters] = useState({ proveedor: '', cultivo: '', campana: '', codigo_plantacion: '' });
   const [showFieldsConfig, setShowFieldsConfig] = useState(false);
   const [fieldsConfig, setFieldsConfig] = useState(() => {
     const saved = localStorage.getItem('parcelas_fields_config');
     return saved ? JSON.parse(saved) : DEFAULT_FIELDS_CONFIG;
   });
-  
-  // Opciones únicas para filtros
-  const [filterOptions, setFilterOptions] = useState({
-    proveedores: [],
-    cultivos: [],
-    campanas: [],
-    parcelas: []
-  });
-  
+  const [filterOptions, setFilterOptions] = useState({ proveedores: [], cultivos: [], campanas: [], parcelas: [] });
+
   const [formData, setFormData] = useState({
-    contrato_id: '',
-    proveedor: '',
-    cultivo: '',
-    campana: '2025/26',
-    variedad: '',
-    superficie_total: '',
-    codigo_plantacion: '',
-    num_plantas: '',
-    finca: '',
-    // Datos SIGPAC
-    sigpac: {
-      provincia: '',
-      municipio: '',
-      cod_agregado: '',
-      zona: '',
-      poligono: '',
-      parcela: '',
-      recinto: '',
-      cod_uso: ''
-    }
+    contrato_id: '', codigo_plantacion: '', proveedor: '', cultivo: '', variedad: '',
+    superficie_total: '', num_plantas: '', campana: '', observaciones: '', finca: '',
+    sigpac: { provincia: '', municipio: '', poligono: '', parcela: '', cod_agregado: '0', zona: '0', recinto: '1', cod_uso: '' }
   });
-  
-  // Estado para búsqueda SIGPAC
+
   const [sigpacLoading, setSigpacLoading] = useState(false);
   const [sigpacResult, setSigpacResult] = useState(null);
   const [sigpacError, setSigpacError] = useState(null);
   const [provincias, setProvincias] = useState([]);
   const [showGeoImport, setShowGeoImport] = useState(false);
-  
-  // Estado para fincas y cultivos (variedades)
   const [fincas, setFincas] = useState([]);
   const [cultivos, setCultivos] = useState([]);
-  
+
   useEffect(() => {
     fetchParcelas();
     fetchContratos();
@@ -135,251 +68,165 @@ const Parcelas = () => {
     fetchFincas();
     fetchCultivos();
   }, []);
-  
-  // Fetch provincias SIGPAC
+
   const fetchProvincias = async () => {
     try {
       const data = await api.get('/api/sigpac/provincias');
-      if (data.success) {
-        setProvincias(data.provincias);
-      }
-    } catch (err) {
-      console.error('Error fetching provincias:', err);
-    }
+      if (data.success) setProvincias(data.provincias);
+    } catch (err) { console.error('Error fetching provincias:', err); }
   };
-  
-  // Fetch fincas
+
   const fetchFincas = async () => {
     try {
       const data = await api.get('/api/fincas');
       setFincas(data.fincas || []);
-    } catch (err) {
-      console.error('Error fetching fincas:', err);
-    }
+    } catch (err) { console.error('Error fetching fincas:', err); }
   };
-  
-  // Fetch cultivos (para variedades)
+
   const fetchCultivos = async () => {
     try {
       const data = await api.get('/api/cultivos');
       setCultivos(data.cultivos || []);
-    } catch (err) {
-      console.error('Error fetching cultivos:', err);
-    }
+    } catch (err) { console.error('Error fetching cultivos:', err); }
   };
-  
-  // Generar código de plantación automático
+
   const generarCodigoPlantacion = useCallback(() => {
     const proveedor = formData.proveedor || 'PRV';
     const cultivo = formData.cultivo || 'CUL';
     const campana = formData.campana || '2025/26';
-    
-    // Extraer iniciales del proveedor (primeras 3 letras)
     const proveedorCode = proveedor.substring(0, 3).toUpperCase().replace(/\s/g, '');
-    
-    // Extraer iniciales del cultivo (primeras 3 letras)
     const cultivoCode = cultivo.substring(0, 3).toUpperCase().replace(/\s/g, '');
-    
-    // Extraer año de la campaña (ej: 2025/26 -> 25)
     const yearCode = campana.split('/')[0].slice(-2);
-    
-    // Contar parcelas existentes con el mismo prefijo para generar número secuencial
     const prefix = `${proveedorCode}-${cultivoCode}-${yearCode}`;
-    const existingCount = parcelas.filter(p => 
-      p.codigo_plantacion && p.codigo_plantacion.startsWith(prefix)
-    ).length;
-    
-    const secuencial = String(existingCount + 1).padStart(3, '0');
-    
-    return `${prefix}-${secuencial}`;
+    const existingCount = parcelas.filter(p => p.codigo_plantacion && p.codigo_plantacion.startsWith(prefix)).length;
+    return `${prefix}-${String(existingCount + 1).padStart(3, '0')}`;
   }, [formData.proveedor, formData.cultivo, formData.campana, parcelas]);
-  
-  // Obtener variedades disponibles para el cultivo seleccionado
+
   const getVariedadesParaCultivo = useCallback(() => {
     if (!formData.cultivo) return [];
-    
-    // Filtrar cultivos que coincidan con el nombre del cultivo seleccionado
-    const cultivosDelTipo = cultivos.filter(c => 
-      c.nombre && c.nombre.toLowerCase() === formData.cultivo.toLowerCase()
-    );
-    
-    // Extraer variedades únicas
-    const variedades = [...new Set(cultivosDelTipo.map(c => c.variedad).filter(Boolean))];
-    
-    // Si no hay variedades específicas, buscar variedades de todos los cultivos del mismo tipo
-    if (variedades.length === 0) {
-      // Devolver todas las variedades únicas de todos los cultivos como alternativa
-      return [...new Set(cultivos.map(c => c.variedad).filter(Boolean))];
-    }
-    
-    return variedades;
+    const cultivoObj = cultivos.find(c => c.nombre?.toLowerCase() === formData.cultivo.toLowerCase());
+    return cultivoObj?.variedades || [];
   }, [formData.cultivo, cultivos]);
-  
-  // Búsqueda en SIGPAC
+
+  useEffect(() => {
+    if (formData.contrato_id) {
+      const contrato = contratos.find(c => c._id === formData.contrato_id);
+      if (contrato) {
+        setFormData(prev => ({
+          ...prev,
+          proveedor: contrato.proveedor || prev.proveedor,
+          cultivo: contrato.cultivo || prev.cultivo,
+          variedad: contrato.variedad || prev.variedad,
+          campana: contrato.campana || prev.campana
+        }));
+      }
+    }
+  }, [formData.contrato_id, contratos]);
+
+  useEffect(() => {
+    if (!editingId) {
+      const codigo = generarCodigoPlantacion();
+      setFormData(prev => ({ ...prev, codigo_plantacion: codigo }));
+    }
+  }, [formData.proveedor, formData.cultivo, formData.campana, editingId, generarCodigoPlantacion]);
+
+  const updateSigpac = (field, value) => {
+    setFormData(prev => ({ ...prev, sigpac: { ...prev.sigpac, [field]: value } }));
+    setSigpacResult(null);
+    setSigpacError(null);
+  };
+
   const buscarEnSigpac = async () => {
-    const { provincia, municipio, poligono, parcela, cod_agregado, zona, recinto } = formData.sigpac;
-    
+    const { provincia, municipio, poligono, parcela } = formData.sigpac;
     if (!provincia || !municipio || !poligono || !parcela) {
-      setSigpacError('Debe completar al menos: Provincia, Municipio, Polígono y Parcela');
+      setSigpacError('Completa al menos Provincia, Municipio, Polígono y Parcela');
       return;
     }
-    
     setSigpacLoading(true);
     setSigpacError(null);
     setSigpacResult(null);
-    
     try {
       const params = new URLSearchParams({
-        provincia,
-        municipio,
-        poligono,
-        parcela,
-        agregado: cod_agregado || '0',
-        zona: zona || '0'
+        provincia, municipio, poligono, parcela,
+        cod_agregado: formData.sigpac.cod_agregado || '0',
+        zona: formData.sigpac.zona || '0',
+        recinto: formData.sigpac.recinto || '1'
       });
-      
-      if (recinto) {
-        params.append('recinto', recinto);
-      }
-      
-      const data = await api.get(`/api/sigpac/consulta?${params}`);
-      
-      if (data.success) {
-        setSigpacResult(data);
-        
-        // Auto-rellenar campos
-        if (data.sigpac) {
-          setFormData(prev => ({
-            ...prev,
-            sigpac: {
-              ...prev.sigpac,
-              ...data.sigpac
-            },
-            superficie_total: data.superficie_ha || prev.superficie_total
-          }));
-        }
-        
-        // Si hay geometría, convertirla a polígono y añadirla como zona
-        if (data.geometria_wkt) {
-          const coords = parseWKTToPolygon(data.geometria_wkt);
-          if (coords && coords.length > 0) {
-            setZones(prev => [...prev, coords]);
+      const data = await api.get(`/api/sigpac/parcela?${params.toString()}`);
+      if (data.success && data.parcela) {
+        setSigpacResult(data.parcela);
+        if (data.parcela.geometria) {
+          const coords = data.parcela.geometria.coordinates;
+          if (coords && coords[0]) {
+            const leafletCoords = coords[0].map(c => ({ lat: c[1], lng: c[0] }));
+            setZones([leafletCoords]);
           }
         }
+        if (data.parcela.superficie_ha) {
+          setFormData(prev => ({ ...prev, superficie_total: data.parcela.superficie_ha.toFixed(4) }));
+        }
+        if (data.parcela.uso_sigpac) {
+          updateSigpac('cod_uso', data.parcela.uso_sigpac);
+        }
       } else {
-        setSigpacError(data.message || data.error || 'Error al consultar SIGPAC');
+        setSigpacError('Parcela no encontrada en SIGPAC');
       }
     } catch (err) {
-      console.error('Error consultando SIGPAC:', err);
-      setSigpacError('Error de conexión al servicio SIGPAC');
-    }
-    
-    setSigpacLoading(false);
-  };
-  
-  // Parsear WKT a formato de polígono Leaflet
-  const parseWKTToPolygon = (wkt) => {
-    if (!wkt || !wkt.includes('POLYGON')) return null;
-    try {
-      const coordsMatch = wkt.match(/POLYGON\(\(([^)]+)\)\)/);
-      if (!coordsMatch) return null;
-      const coordsString = coordsMatch[1];
-      const coords = coordsString.split(',').map(pair => {
-        const [lon, lat] = pair.trim().split(' ').map(Number);
-        return { lat, lng: lon };
-      });
-      return coords;
-    } catch (e) {
-      console.error('Error parsing WKT:', e);
-      return null;
+      setSigpacError(api.getErrorMessage(err));
+    } finally {
+      setSigpacLoading(false);
     }
   };
-  
-  // Actualizar campo SIGPAC
-  const updateSigpac = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      sigpac: {
-        ...prev.sigpac,
-        [field]: value
-      }
-    }));
-    if (sigpacResult) {
-      setSigpacResult(null);
-    }
-  };
-  
-  // Extraer opciones únicas cuando cambian las parcelas
-  useEffect(() => {
-    const proveedores = [...new Set(parcelas.map(p => p.proveedor).filter(Boolean))];
-    const cultivos = [...new Set(parcelas.map(p => p.cultivo).filter(Boolean))];
-    const campanas = [...new Set(parcelas.map(p => p.campana).filter(Boolean))];
-    const parcelasCodigos = [...new Set(parcelas.map(p => p.codigo_plantacion).filter(Boolean))];
-    
-    setFilterOptions({
-      proveedores,
-      cultivos,
-      campanas,
-      parcelas: parcelasCodigos
-    });
-  }, [parcelas]);
-  
-  // Extraer opciones únicas de contratos para el buscador del formulario
-  useEffect(() => {
-    const proveedores = [...new Set(contratos.map(c => c.proveedor).filter(Boolean))];
-    const cultivos = [...new Set(contratos.map(c => c.cultivo).filter(Boolean))];
-    const campanas = [...new Set(contratos.map(c => c.campana).filter(Boolean))];
-    
-    setContratoFilterOptions({
-      proveedores,
-      cultivos,
-      campanas
-    });
-  }, [contratos]);
-  
-  // Guardar configuración de campos en localStorage
-  useEffect(() => {
-    localStorage.setItem('parcelas_fields_config', JSON.stringify(fieldsConfig));
-  }, [fieldsConfig]);
-  
-  // Cargar historial de tratamientos de una parcela
+
   const fetchHistorialTratamientos = async (parcela) => {
-    setHistorialLoading(true);
-    setHistorialParcela(parcela);
     setShowHistorial(true);
-    
+    setHistorialParcela(parcela);
+    setHistorialLoading(true);
     try {
-      const data = await api.get(`/api/tratamientos/parcela/${parcela._id}/historial`);
+      const data = await api.get(`/api/parcelas/${parcela._id}/historial-tratamientos`);
       setHistorialData(data);
-    } catch (error) {
-      console.error('Error:', error);
+    } catch (err) {
+      console.error('Error fetching historial:', err);
       setHistorialData(null);
     } finally {
       setHistorialLoading(false);
     }
   };
-  
+
   const fetchParcelas = async () => {
     try {
       const data = await api.get('/api/parcelas');
       setParcelas(data.parcelas || []);
-    } catch (error) {
-      console.error('Error fetching parcelas:', error);
-    } finally {
-      setLoading(false);
-    }
+      const p = data.parcelas || [];
+      setFilterOptions({
+        proveedores: [...new Set(p.map(x => x.proveedor).filter(Boolean))],
+        cultivos: [...new Set(p.map(x => x.cultivo).filter(Boolean))],
+        campanas: [...new Set(p.map(x => x.campana).filter(Boolean))],
+        parcelas: [...new Set(p.map(x => x.codigo_plantacion).filter(Boolean))]
+      });
+    } catch (err) { console.error('Error:', err); } finally { setLoading(false); }
   };
-  
+
   const fetchContratos = async () => {
     try {
       const data = await api.get('/api/contratos');
-      setContratos(data.contratos || []);
-    } catch (error) {
-      console.error('Error fetching contratos:', error);
-    }
+      const c = data.contratos || [];
+      setContratos(c);
+      setContratoFilterOptions({
+        proveedores: [...new Set(c.map(x => x.proveedor).filter(Boolean))],
+        cultivos: [...new Set(c.map(x => x.cultivo).filter(Boolean))],
+        campanas: [...new Set(c.map(x => x.campana).filter(Boolean))]
+      });
+    } catch (err) { console.error('Error:', err); }
   };
 
-  // Filtrar parcelas
+  const clearFilters = () => setFilters({ proveedor: '', cultivo: '', campana: '', codigo_plantacion: '' });
+  const toggleFieldConfig = (field) => {
+    const newConfig = { ...fieldsConfig, [field]: !fieldsConfig[field] };
+    setFieldsConfig(newConfig);
+    localStorage.setItem('parcelas_fields_config', JSON.stringify(newConfig));
+  };
+
   const filteredParcelas = parcelas.filter(p => {
     if (filters.proveedor && p.proveedor !== filters.proveedor) return false;
     if (filters.cultivo && p.cultivo !== filters.cultivo) return false;
@@ -387,284 +234,114 @@ const Parcelas = () => {
     if (filters.codigo_plantacion && p.codigo_plantacion !== filters.codigo_plantacion) return false;
     return true;
   });
-  
-  const clearFilters = () => {
-    setFilters({ proveedor: '', cultivo: '', campana: '', codigo_plantacion: '' });
-  };
-  
-  const toggleFieldConfig = (field) => {
-    setFieldsConfig(prev => ({ ...prev, [field]: !prev[field] }));
-  };
-  
-  // Autocompletar campos cuando se selecciona un contrato
-  useEffect(() => {
-    if (formData.contrato_id) {
-      const contrato = contratos.find(c => c._id === formData.contrato_id);
-      if (contrato) {
-        setFormData(prev => ({
-          ...prev,
-          proveedor: contrato.proveedor || '',
-          cultivo: contrato.cultivo || '',
-          campana: contrato.campana || '2025/26'
-        }));
-      }
-    }
-  }, [formData.contrato_id, contratos]);
-  
-  // Generar código de plantación automáticamente cuando cambian proveedor, cultivo o campaña
-  useEffect(() => {
-    // Solo generar código para nuevas parcelas (no en edición)
-    if (!editingId && formData.proveedor && formData.cultivo) {
-      const nuevoCodigo = generarCodigoPlantacion();
-      setFormData(prev => ({
-        ...prev,
-        codigo_plantacion: nuevoCodigo
-      }));
-    }
-  }, [formData.proveedor, formData.cultivo, formData.campana, editingId, generarCodigoPlantacion]);
 
   const handleZonesChanged = useCallback((newZones) => {
-    console.log('Zones changed:', newZones.length, 'zonas');
     setZones(newZones);
-    if (newZones.length > 0) {
-      const totalPoints = newZones.reduce((s, z) => s + z.length, 0);
-      const totalArea = newZones.reduce((sum, z) => sum + calculatePolygonArea(z), 0);
-      console.log(`Total: ${newZones.length} zonas, ${totalPoints} puntos, ${totalArea.toFixed(2)} ha`);
-    }
   }, []);
 
-  // Helper function to calculate polygon area
-  const calculatePolygonArea = (coordinates) => {
-    if (!coordinates || coordinates.length < 3) return 0;
-    const earthRadius = 6371000;
-    let area = 0;
-    const n = coordinates.length;
-    for (let i = 0; i < n; i++) {
-      const j = (i + 1) % n;
-      const lat1 = coordinates[i].lat * Math.PI / 180;
-      const lat2 = coordinates[j].lat * Math.PI / 180;
-      const lng1 = coordinates[i].lng * Math.PI / 180;
-      const lng2 = coordinates[j].lng * Math.PI / 180;
-      area += (lng2 - lng1) * (2 + Math.sin(lat1) + Math.sin(lat2));
-    }
-    area = Math.abs(area * earthRadius * earthRadius / 2);
-    return area / 10000;
-  };
-  
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    console.log('Submit - zones:', zones.length);
-    
-    if (!formData.contrato_id) {
-      alert('Debes seleccionar un contrato. Toda parcela debe estar asociada a un contrato.');
-      return;
-    }
-    
-    if (!editingId && (zones.length === 0 || !zones.some(z => z.length >= 3))) {
-      alert(`Dibuja al menos un polígono (zona) en el mapa.\n\nZonas actuales: ${zones.length}\nNecesitas al menos 1 zona con 3+ puntos.`);
-      return;
-    }
-    
+    const recintos = zones.filter(z => z && z.length >= 3).map(z => ({ geometria: z }));
+    const payload = {
+      ...formData,
+      superficie_total: parseFloat(formData.superficie_total) || 0,
+      num_plantas: parseInt(formData.num_plantas) || 0,
+      recintos: recintos.length > 0 ? recintos : undefined
+    };
     try {
-      const url = editingId 
-        ? `/api/parcelas/${editingId}`
-        : `/api/parcelas`;
-      
-      const payload = {
-        ...formData,
-        superficie_total: parseFloat(formData.superficie_total) || 0,
-        num_plantas: parseInt(formData.num_plantas) || 0
-      };
-      
-      // Construir recintos desde todas las zonas dibujadas
-      if (zones.length > 0) {
-        payload.recintos = zones
-          .filter(z => z && z.length >= 3)
-          .map(z => ({ geometria: z }));
-      } else if (!editingId) {
-        payload.recintos = [];
+      if (editingId) {
+        await api.put(`/api/parcelas/${editingId}`, payload);
+      } else {
+        await api.post('/api/parcelas', payload);
       }
-      
-      const data = editingId 
-        ? await api.put(url, payload)
-        : await api.post(url, payload);
-      
-      if (data.success) {
-        const zonaCount = payload.recintos ? payload.recintos.length : 0;
-        const totalPts = payload.recintos ? payload.recintos.reduce((s, r) => s + (r.geometria ? r.geometria.length : 0), 0) : 0;
-        alert(`Parcela ${editingId ? 'actualizada' : 'creada'} correctamente${zonaCount > 0 ? `\n${zonaCount} zona(s) guardada(s) con ${totalPts} puntos totales` : ''}`);
-        setShowForm(false);
-        setEditingId(null);
-        fetchParcelas();
-        setZones([]);
-        setSearchContrato('');
-        setContratoSearch({ proveedor: '', cultivo: '', campana: '' });
-        setSigpacResult(null);
-        setSigpacError(null);
-        setFormData({
-          contrato_id: '',
-          proveedor: '', 
-          cultivo: '', 
-          campana: '2025/26', 
-          variedad: '',
-          superficie_total: '', 
-          codigo_plantacion: '', 
-          num_plantas: '', 
-          finca: '',
-          sigpac: {
-            provincia: '',
-            municipio: '',
-            cod_agregado: '',
-            zona: '',
-            poligono: '',
-            parcela: '',
-            recinto: '',
-            cod_uso: ''
-          }
-        });
-      }
-    } catch (error) {
-      console.error('Error saving parcela:', error);
-    }
+      setShowForm(false);
+      setEditingId(null);
+      setZones([]);
+      setFormData({
+        contrato_id: '', codigo_plantacion: '', proveedor: '', cultivo: '', variedad: '',
+        superficie_total: '', num_plantas: '', campana: '', observaciones: '', finca: '',
+        sigpac: { provincia: '', municipio: '', poligono: '', parcela: '', cod_agregado: '0', zona: '0', recinto: '1', cod_uso: '' }
+      });
+      setContratoSearch({ proveedor: '', cultivo: '', campana: '' });
+      setSigpacResult(null);
+      setSigpacError(null);
+      fetchParcelas();
+    } catch (err) { alert('Error: ' + api.getErrorMessage(err)); }
   };
-  
+
   const handleEdit = (parcela) => {
     setEditingId(parcela._id);
-    
-    // Extraer datos SIGPAC del primer recinto si existe
-    const primerRecinto = parcela.recintos && parcela.recintos.length > 0 ? parcela.recintos[0] : null;
-    const sigpacData = primerRecinto?.sigpac || {};
-    
+    setShowForm(true);
     setFormData({
       contrato_id: parcela.contrato_id || '',
+      codigo_plantacion: parcela.codigo_plantacion || '',
       proveedor: parcela.proveedor || '',
       cultivo: parcela.cultivo || '',
-      campana: parcela.campana || '2025/26',
       variedad: parcela.variedad || '',
       superficie_total: parcela.superficie_total || '',
-      codigo_plantacion: parcela.codigo_plantacion || '',
       num_plantas: parcela.num_plantas || '',
+      campana: parcela.campana || '',
+      observaciones: parcela.observaciones || '',
       finca: parcela.finca || '',
-      sigpac: {
-        provincia: sigpacData.provincia || primerRecinto?.provincia_sigpac || '',
-        municipio: sigpacData.municipio || primerRecinto?.municipio_sigpac || '',
-        cod_agregado: sigpacData.cod_agregado || primerRecinto?.agregado_sigpac || '',
-        zona: sigpacData.zona || primerRecinto?.zona_sigpac || '',
-        poligono: sigpacData.poligono || primerRecinto?.poligono_sigpac || '',
-        parcela: sigpacData.parcela || primerRecinto?.parcela_sigpac || '',
-        recinto: sigpacData.recinto || primerRecinto?.recinto_sigpac || '',
-        cod_uso: sigpacData.cod_uso || primerRecinto?.uso_sigpac || ''
-      }
+      sigpac: parcela.sigpac || { provincia: '', municipio: '', poligono: '', parcela: '', cod_agregado: '0', zona: '0', recinto: '1', cod_uso: '' }
     });
-    
-    // Limpiar estados de SIGPAC
-    setSigpacResult(null);
-    setSigpacError(null);
-    
-    // Cargar TODAS las zonas/recintos de la parcela
     if (parcela.recintos && parcela.recintos.length > 0) {
-      const loadedZones = parcela.recintos
-        .filter(r => r.geometria && r.geometria.length >= 3)
-        .map(r => r.geometria);
-      setZones(loadedZones);
+      setZones(parcela.recintos.map(r => r.geometria || r));
+    } else if (parcela.geometria) {
+      setZones([parcela.geometria]);
     } else {
       setZones([]);
     }
-    
-    setShowForm(true);
-  };
-  
-  const handleCancelEdit = () => {
-    setEditingId(null);
-    setShowForm(false);
-    setZones([]);
-    setSearchContrato('');
-    setContratoSearch({ proveedor: '', cultivo: '', campana: '' });
     setSigpacResult(null);
     setSigpacError(null);
-    setFormData({
-      contrato_id: '',
-      proveedor: '', 
-      cultivo: '', 
-      campana: '2025/26', 
-      variedad: '',
-      superficie_total: '', 
-      codigo_plantacion: '', 
-      num_plantas: '', 
-      finca: '',
-      sigpac: {
-        provincia: '',
-        municipio: '',
-        cod_agregado: '',
-        zona: '',
-        poligono: '',
-        parcela: '',
-        recinto: '',
-        cod_uso: ''
-      }
-    });
   };
-  
+
+  const handleCancelEdit = () => {
+    setShowForm(false);
+    setEditingId(null);
+    setZones([]);
+    setContratoSearch({ proveedor: '', cultivo: '', campana: '' });
+    setFormData({
+      contrato_id: '', codigo_plantacion: '', proveedor: '', cultivo: '', variedad: '',
+      superficie_total: '', num_plantas: '', campana: '', observaciones: '', finca: '',
+      sigpac: { provincia: '', municipio: '', poligono: '', parcela: '', cod_agregado: '0', zona: '0', recinto: '1', cod_uso: '' }
+    });
+    setSigpacResult(null);
+    setSigpacError(null);
+  };
+
   const handleDelete = async (parcelaId) => {
-    if (!window.confirm(t('parcels.confirmDelete') || '¿Estás seguro de que quieres eliminar esta parcela?')) {
-      return;
-    }
-    
+    if (!window.confirm('¿Seguro que deseas eliminar esta parcela?')) return;
     try {
       await api.delete(`/api/parcelas/${parcelaId}`);
       fetchParcelas();
-    } catch (error) {
-      console.error('Error deleting parcela:', error);
-      alert(t('messages.errorDeleting'));
-    }
+    } catch (err) { alert('Error: ' + api.getErrorMessage(err)); }
   };
-  
-  // Generate Field Notebook (Cuaderno de Campo)
+
   const handleGenerateCuaderno = async (parcelaId, campana) => {
     setGeneratingCuaderno(parcelaId);
     try {
-      await api.downloadWithPost('/api/cuaderno-campo/generar', {
-        parcela_id: parcelaId,
-        campana: campana,
-        include_ai_summary: true
-      }, 'Cuaderno_Campo.pdf');
-    } catch (error) {
-      console.error('Error generating cuaderno:', error);
-      alert(api.getErrorMessage(error) || t('fieldNotebook.errorGenerating'));
-    } finally {
-      setGeneratingCuaderno(null);
-    }
+      await api.post(`/api/cuaderno-campo/generar/${parcelaId}`, { campana });
+      fetchParcelas();
+    } catch (err) { alert('Error: ' + api.getErrorMessage(err)); } finally { setGeneratingCuaderno(null); }
   };
-  
+
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
-  
+
   return (
     <div data-testid="parcelas-page">
       <div className="flex justify-between items-center mb-6">
         <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>Parcelas</h1>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button 
-            className={`btn ${showGeneralMap ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setShowGeneralMap(!showGeneralMap)}
-            title="Ver mapa general de parcelas"
-            data-testid="btn-general-map"
-          >
+          <button className={`btn ${showGeneralMap ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setShowGeneralMap(!showGeneralMap)} data-testid="btn-general-map">
             <Eye size={18} /> {showGeneralMap ? 'Ocultar Mapa' : 'Ver Mapa'}
           </button>
-          <button 
-            className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setShowFieldsConfig(!showFieldsConfig)}
-            title="Configurar campos visibles"
-            data-testid="btn-config-fields"
-          >
+          <button className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setShowFieldsConfig(!showFieldsConfig)} data-testid="btn-config-fields">
             <Settings size={18} />
           </button>
-          <button 
-            className="btn btn-secondary"
-            onClick={() => setShowGeoImport(true)}
-            data-testid="btn-import-geo"
-          >
+          <button className="btn btn-secondary" onClick={() => setShowGeoImport(true)} data-testid="btn-import-geo">
             <Upload size={18} /> Importar KML/GeoJSON
           </button>
           <button className="btn btn-primary" onClick={() => setShowForm(!showForm)} data-testid="btn-nueva-parcela">
@@ -672,894 +349,42 @@ const Parcelas = () => {
           </button>
         </div>
       </div>
-      
-      {/* Mapa general de todas las parcelas */}
-      {showGeneralMap && (
-        <div className="card mb-6">
-          <h3 style={{ fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <MapIcon size={18} /> Mapa General de Parcelas
-          </h3>
-          <AdvancedParcelMap
-            parcelas={filteredParcelas}
-            showAllParcelas={true}
-            height="500px"
-            onParcelaSelect={(parcela) => {
-              // Scroll to the parcela in the table or open edit
-              const row = document.querySelector(`[data-parcela-id="${parcela._id}"]`);
-              if (row) {
-                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                row.style.backgroundColor = 'hsl(var(--primary) / 0.1)';
-                setTimeout(() => {
-                  row.style.backgroundColor = '';
-                }, 2000);
-              }
-            }}
-          />
-          <p style={{ marginTop: '0.75rem', fontSize: '0.8125rem', color: 'hsl(var(--muted-foreground))' }}>
-            Haz clic en una parcela del mapa para localizarla en la tabla. Colores según cultivo.
-          </p>
-        </div>
-      )}
-      
-      {/* Panel de configuración de campos */}
-      {showFieldsConfig && (
-        <div className="card mb-6" data-testid="fields-config-panel">
-          <div className="flex justify-between items-center mb-4">
-            <h3 style={{ fontWeight: '600' }}>Configurar Campos Visibles</h3>
-            <button className="btn btn-sm btn-secondary" onClick={() => setShowFieldsConfig(false)}>
-              <X size={16} />
-            </button>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem' }}>
-            {Object.entries(FIELD_LABELS).map(([key, label]) => (
-              <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={fieldsConfig[key]}
-                  onChange={() => toggleFieldConfig(key)}
-                  style={{ width: '18px', height: '18px' }}
-                />
-                <span style={{ fontSize: '0.875rem' }}>{label}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-      )}
-      
-      {/* Filtros de búsqueda */}
-      <div className="card mb-6" data-testid="filters-panel">
-        <div className="flex justify-between items-center mb-4">
-          <h3 style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Filter size={18} /> Filtros de Búsqueda
-          </h3>
-          {hasActiveFilters && (
-            <button className="btn btn-sm btn-secondary" onClick={clearFilters}>
-              Limpiar filtros
-            </button>
-          )}
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Proveedor</label>
-            <select
-              className="form-select"
-              value={filters.proveedor}
-              onChange={(e) => setFilters({...filters, proveedor: e.target.value})}
-              data-testid="filter-proveedor"
-            >
-              <option value="">Todos</option>
-              {filterOptions.proveedores.map(p => (
-                <option key={p} value={p}>{p}</option>
-              ))}
-            </select>
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Cultivo</label>
-            <select
-              className="form-select"
-              value={filters.cultivo}
-              onChange={(e) => setFilters({...filters, cultivo: e.target.value})}
-              data-testid="filter-cultivo"
-            >
-              <option value="">Todos</option>
-              {filterOptions.cultivos.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Campaña</label>
-            <select
-              className="form-select"
-              value={filters.campana}
-              onChange={(e) => setFilters({...filters, campana: e.target.value})}
-              data-testid="filter-campana"
-            >
-              <option value="">Todas</option>
-              {filterOptions.campanas.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Parcela</label>
-            <select
-              className="form-select"
-              value={filters.codigo_plantacion}
-              onChange={(e) => setFilters({...filters, codigo_plantacion: e.target.value})}
-              data-testid="filter-parcela"
-            >
-              <option value="">Todas</option>
-              {filterOptions.parcelas.map(p => (
-                <option key={p} value={p}>{p}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-        {hasActiveFilters && (
-          <p style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
-            Mostrando {filteredParcelas.length} de {parcelas.length} parcelas
-          </p>
-        )}
-      </div>
-      
+
+      <ParcelasGeneralMap filteredParcelas={filteredParcelas} showGeneralMap={showGeneralMap} />
+
+      <ParcelasFilters
+        filters={filters} setFilters={setFilters} filterOptions={filterOptions}
+        hasActiveFilters={hasActiveFilters} clearFilters={clearFilters}
+        showFieldsConfig={showFieldsConfig} setShowFieldsConfig={setShowFieldsConfig}
+        fieldsConfig={fieldsConfig} toggleFieldConfig={toggleFieldConfig}
+      />
+
       {showForm && (
-        <div className="card mb-6">
-          <h2 className="card-title">{editingId ? 'Editar Parcela' : 'Crear Parcela'}</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }} className="form-grid-responsive">
-            <div>
-              <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <MapIcon size={18} />
-                Mapa Avanzado - Dibuja el polígono
-              </h3>
-              
-              <AdvancedParcelMap
-                zones={zones}
-                setZones={setZones}
-                isEditing={!!editingId}
-                onZonesChanged={handleZonesChanged}
-                height="500px"
-              />
-              
-              {/* Nota informativa */}
-              <div style={{ 
-                marginTop: '0.75rem', 
-                padding: '0.75rem',
-                backgroundColor: 'hsl(var(--muted))',
-                borderRadius: '6px',
-                fontSize: '0.8125rem',
-                color: 'hsl(var(--muted-foreground))'
-              }}>
-                {editingId 
-                  ? 'Dibuja nuevos polígonos para actualizar las zonas. Puedes dibujar varias zonas independientes.' 
-                  : 'Dibuja una o varias zonas en el mapa. Cada zona puede tener cualquier cantidad de puntos. Usa las herramientas de edicion para modificar o eliminar zonas individuales.'}
-              </div>
-              
-              {/* Sección SIGPAC */}
-              <div style={{ 
-                marginTop: '1rem',
-                backgroundColor: '#e3f2fd', 
-                padding: '1rem', 
-                borderRadius: '8px',
-                border: '1px solid #90caf9'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <h4 style={{ color: '#1565c0', fontWeight: '600', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-                    <MapIcon size={16} />
-                    Localizar por SIGPAC
-                  </h4>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button
-                      type="button"
-                      className="btn btn-sm"
-                      style={{ 
-                        backgroundColor: '#1565c0', 
-                        color: 'white',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.25rem',
-                        fontSize: '0.8rem',
-                        padding: '4px 10px'
-                      }}
-                      onClick={buscarEnSigpac}
-                      disabled={sigpacLoading}
-                      data-testid="btn-buscar-sigpac-parcela"
-                    >
-                      {sigpacLoading ? (
-                        <Loader2 size={12} className="animate-spin" />
-                      ) : (
-                        <Search size={12} />
-                      )}
-                      Buscar
-                    </button>
-                    <a
-                      href="https://sigpac.mapa.es/fega/visor/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn btn-sm"
-                      style={{ 
-                        backgroundColor: '#fff', 
-                        color: '#1565c0',
-                        border: '1px solid #1565c0',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.25rem',
-                        textDecoration: 'none',
-                        fontSize: '0.8rem',
-                        padding: '4px 10px'
-                      }}
-                    >
-                      <ExternalLink size={12} />
-                      Visor
-                    </a>
-                  </div>
-                </div>
-                
-                <p style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.75rem', fontStyle: 'italic' }}>
-                  Introduce los códigos SIGPAC y pulsa "Buscar" para localizar y dibujar automáticamente la parcela en el mapa.
-                </p>
-                
-                {/* Resultado de búsqueda SIGPAC */}
-                {sigpacResult && (
-                  <div style={{ 
-                    backgroundColor: '#c8e6c9', 
-                    padding: '0.5rem 0.75rem', 
-                    borderRadius: '6px', 
-                    marginBottom: '0.75rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    fontSize: '0.85rem'
-                  }}>
-                    <CheckCircle size={16} style={{ color: '#2e7d32' }} />
-                    <span style={{ color: '#2e7d32' }}>
-                      <strong>Parcela encontrada:</strong> {sigpacResult.superficie_ha?.toFixed(4)} ha - Uso: {sigpacResult.uso_sigpac}
-                    </span>
-                  </div>
-                )}
-                
-                {/* Error de búsqueda SIGPAC */}
-                {sigpacError && (
-                  <div style={{ 
-                    backgroundColor: '#ffcdd2', 
-                    padding: '0.5rem 0.75rem', 
-                    borderRadius: '6px', 
-                    marginBottom: '0.75rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    fontSize: '0.85rem'
-                  }}>
-                    <AlertCircle size={16} style={{ color: '#c62828' }} />
-                    <span style={{ color: '#c62828' }}>{sigpacError}</span>
-                  </div>
-                )}
-                
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label style={{ fontSize: '0.7rem', fontWeight: '500' }}>Provincia *</label>
-                    <select
-                      className="form-select"
-                      style={{ fontSize: '0.8rem', padding: '4px 8px' }}
-                      value={formData.sigpac.provincia}
-                      onChange={(e) => updateSigpac('provincia', e.target.value)}
-                      data-testid="sigpac-provincia"
-                    >
-                      <option value="">Seleccionar...</option>
-                      {provincias.map(p => (
-                        <option key={p.codigo} value={p.codigo}>{p.codigo} - {p.nombre}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label style={{ fontSize: '0.7rem', fontWeight: '500' }}>Municipio *</label>
-                    <input 
-                      className="form-input" 
-                      style={{ fontSize: '0.8rem', padding: '4px 8px' }}
-                      value={formData.sigpac.municipio} 
-                      onChange={(e) => updateSigpac('municipio', e.target.value)}
-                      placeholder="Ej: 053"
-                      data-testid="sigpac-municipio"
-                    />
-                  </div>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label style={{ fontSize: '0.7rem', fontWeight: '500' }}>Polígono *</label>
-                    <input 
-                      className="form-input" 
-                      style={{ fontSize: '0.8rem', padding: '4px 8px' }}
-                      value={formData.sigpac.poligono} 
-                      onChange={(e) => updateSigpac('poligono', e.target.value)}
-                      placeholder="Ej: 5"
-                      data-testid="sigpac-poligono"
-                    />
-                  </div>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label style={{ fontSize: '0.7rem', fontWeight: '500' }}>Parcela *</label>
-                    <input 
-                      className="form-input" 
-                      style={{ fontSize: '0.8rem', padding: '4px 8px' }}
-                      value={formData.sigpac.parcela} 
-                      onChange={(e) => updateSigpac('parcela', e.target.value)}
-                      placeholder="Ej: 12"
-                      data-testid="sigpac-parcela"
-                    />
-                  </div>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label style={{ fontSize: '0.7rem', fontWeight: '500' }}>Agregado</label>
-                    <input 
-                      className="form-input" 
-                      style={{ fontSize: '0.8rem', padding: '4px 8px' }}
-                      value={formData.sigpac.cod_agregado} 
-                      onChange={(e) => updateSigpac('cod_agregado', e.target.value)}
-                      placeholder="0"
-                      data-testid="sigpac-agregado"
-                    />
-                  </div>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label style={{ fontSize: '0.7rem', fontWeight: '500' }}>Zona</label>
-                    <input 
-                      className="form-input" 
-                      style={{ fontSize: '0.8rem', padding: '4px 8px' }}
-                      value={formData.sigpac.zona} 
-                      onChange={(e) => updateSigpac('zona', e.target.value)}
-                      placeholder="0"
-                      data-testid="sigpac-zona"
-                    />
-                  </div>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label style={{ fontSize: '0.7rem', fontWeight: '500' }}>Recinto</label>
-                    <input 
-                      className="form-input" 
-                      style={{ fontSize: '0.8rem', padding: '4px 8px' }}
-                      value={formData.sigpac.recinto} 
-                      onChange={(e) => updateSigpac('recinto', e.target.value)}
-                      placeholder="1"
-                      data-testid="sigpac-recinto"
-                    />
-                  </div>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label style={{ fontSize: '0.7rem', fontWeight: '500' }}>Cod. Uso</label>
-                    <input 
-                      className="form-input" 
-                      style={{ fontSize: '0.8rem', padding: '4px 8px' }}
-                      value={formData.sigpac.cod_uso} 
-                      onChange={(e) => updateSigpac('cod_uso', e.target.value)}
-                      placeholder="TA"
-                      data-testid="sigpac-uso"
-                      readOnly={!!sigpacResult}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <form onSubmit={handleSubmit}>
-              <div className="card" style={{ backgroundColor: 'hsl(var(--muted))', marginBottom: '1rem', padding: '0.75rem' }}>
-                <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
-                  Toda parcela debe asociarse a un contrato.
-                  {editingId && ' El mapa es opcional. Solo dibuja si quieres cambiar la geometría.'}
-                </p>
-              </div>
-              
-              {fieldsConfig.contrato_id && (
-                <div className="form-group">
-                  <label className="form-label">Contrato * (Obligatorio)</label>
-                  
-                  {/* Filtros de búsqueda de contratos */}
-                  <div style={{ 
-                    backgroundColor: 'hsl(var(--muted))', 
-                    padding: '1rem', 
-                    borderRadius: '0.5rem', 
-                    marginBottom: '0.75rem' 
-                  }}>
-                    <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>
-                      Buscar contrato por:
-                    </p>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
-                      <div>
-                        <label style={{ fontSize: '0.75rem', fontWeight: '500' }}>Proveedor</label>
-                        <select
-                          className="form-select"
-                          value={contratoSearch.proveedor}
-                          onChange={(e) => setContratoSearch({...contratoSearch, proveedor: e.target.value})}
-                          style={{ fontSize: '0.875rem' }}
-                          data-testid="contrato-search-proveedor"
-                        >
-                          <option value="">Todos</option>
-                          {contratoFilterOptions.proveedores.map(p => (
-                            <option key={p} value={p}>{p}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label style={{ fontSize: '0.75rem', fontWeight: '500' }}>Cultivo</label>
-                        <select
-                          className="form-select"
-                          value={contratoSearch.cultivo}
-                          onChange={(e) => setContratoSearch({...contratoSearch, cultivo: e.target.value})}
-                          style={{ fontSize: '0.875rem' }}
-                          data-testid="contrato-search-cultivo"
-                        >
-                          <option value="">Todos</option>
-                          {contratoFilterOptions.cultivos.map(c => (
-                            <option key={c} value={c}>{c}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label style={{ fontSize: '0.75rem', fontWeight: '500' }}>Campaña</label>
-                        <select
-                          className="form-select"
-                          value={contratoSearch.campana}
-                          onChange={(e) => setContratoSearch({...contratoSearch, campana: e.target.value})}
-                          style={{ fontSize: '0.875rem' }}
-                          data-testid="contrato-search-campana"
-                        >
-                          <option value="">Todas</option>
-                          {contratoFilterOptions.campanas.map(c => (
-                            <option key={c} value={c}>{c}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                    {(contratoSearch.proveedor || contratoSearch.cultivo || contratoSearch.campana) && (
-                      <button
-                        type="button"
-                        onClick={() => setContratoSearch({ proveedor: '', cultivo: '', campana: '' })}
-                        style={{ 
-                          marginTop: '0.5rem', 
-                          fontSize: '0.75rem', 
-                          color: 'hsl(var(--primary))',
-                          background: 'none',
-                          border: 'none',
-                          cursor: 'pointer',
-                          textDecoration: 'underline'
-                        }}
-                      >
-                        Limpiar filtros de búsqueda
-                      </button>
-                    )}
-                  </div>
-                  
-                  {/* Selector de contrato filtrado */}
-                  <select
-                    className="form-select"
-                    value={formData.contrato_id}
-                    onChange={(e) => setFormData({...formData, contrato_id: e.target.value})}
-                    required
-                    data-testid="select-contrato"
-                  >
-                    <option value="">-- Seleccionar contrato --</option>
-                    {contratos
-                      .filter(c => {
-                        if (contratoSearch.proveedor && c.proveedor !== contratoSearch.proveedor) return false;
-                        if (contratoSearch.cultivo && c.cultivo !== contratoSearch.cultivo) return false;
-                        if (contratoSearch.campana && c.campana !== contratoSearch.campana) return false;
-                        return true;
-                      })
-                      .map(c => (
-                        <option key={c._id} value={c._id}>
-                          {c.serie}-{c.año}-{String(c.numero).padStart(3, '0')} - {c.proveedor} - {c.cultivo} ({c.campana})
-                        </option>
-                      ))
-                    }
-                  </select>
-                  {(contratoSearch.proveedor || contratoSearch.cultivo || contratoSearch.campana) && (
-                    <small style={{ color: 'hsl(var(--muted-foreground))' }}>
-                      Mostrando {contratos.filter(c => {
-                        if (contratoSearch.proveedor && c.proveedor !== contratoSearch.proveedor) return false;
-                        if (contratoSearch.cultivo && c.cultivo !== contratoSearch.cultivo) return false;
-                        if (contratoSearch.campana && c.campana !== contratoSearch.campana) return false;
-                        return true;
-                      }).length} de {contratos.length} contratos
-                    </small>
-                  )}
-                </div>
-              )}
-              
-              {fieldsConfig.codigo_plantacion && (
-                <div className="form-group">
-                  <label className="form-label">Codigo Plantacion (Auto)</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    value={formData.codigo_plantacion} 
-                    readOnly
-                    style={{ backgroundColor: 'hsl(var(--muted))', cursor: 'not-allowed' }}
-                    data-testid="input-codigo-plantacion"
-                  />
-                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>Se genera automaticamente y no se puede modificar</small>
-                </div>
-              )}
-              
-              {fieldsConfig.proveedor && (
-                <div className="form-group">
-                  <label className="form-label">Proveedor *</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    value={formData.proveedor} 
-                    onChange={(e) => setFormData({...formData, proveedor: e.target.value})} 
-                    disabled={formData.contrato_id !== ''}
-                    required 
-                  />
-                  {formData.contrato_id && <small style={{ color: 'hsl(var(--muted-foreground))' }}>Autocompletado desde contrato</small>}
-                </div>
-              )}
-              
-              {fieldsConfig.finca && (
-                <div className="form-group">
-                  <label className="form-label">Finca</label>
-                  <select
-                    className="form-select"
-                    value={formData.finca}
-                    onChange={(e) => setFormData({...formData, finca: e.target.value})}
-                    data-testid="select-finca"
-                  >
-                    <option value="">-- Sin finca asignada --</option>
-                    {fincas
-                      .filter(f => f.denominacion) // Solo fincas con nombre
-                      .map(f => (
-                        <option key={f._id} value={f.denominacion}>
-                          {f.denominacion} {f.provincia ? `(${f.provincia})` : ''}
-                        </option>
-                      ))
-                    }
-                  </select>
-                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>Opcional - Selecciona una finca existente</small>
-                </div>
-              )}
-              
-              {fieldsConfig.cultivo && (
-                <div className="form-group">
-                  <label className="form-label">Cultivo *</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    value={formData.cultivo} 
-                    onChange={(e) => setFormData({...formData, cultivo: e.target.value})} 
-                    disabled={formData.contrato_id !== ''}
-                    required 
-                  />
-                  {formData.contrato_id && <small style={{ color: 'hsl(var(--muted-foreground))' }}>Autocompletado desde contrato</small>}
-                </div>
-              )}
-              
-              {fieldsConfig.variedad && (
-                <div className="form-group">
-                  <label className="form-label">Variedad</label>
-                  <select
-                    className="form-select"
-                    value={formData.variedad}
-                    onChange={(e) => setFormData({...formData, variedad: e.target.value})}
-                    data-testid="select-variedad"
-                  >
-                    <option value="">-- Sin variedad --</option>
-                    {getVariedadesParaCultivo().map(v => (
-                      <option key={v} value={v}>{v}</option>
-                    ))}
-                  </select>
-                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
-                    {formData.cultivo 
-                      ? `Variedades disponibles para ${formData.cultivo}` 
-                      : 'Selecciona un cultivo primero'}
-                  </small>
-                </div>
-              )}
-              
-              <div className="grid-2">
-                {fieldsConfig.superficie_total && (
-                  <div className="form-group">
-                    <label className="form-label">Superficie (ha) *</label>
-                    <input type="number" step="0.01" className="form-input" value={formData.superficie_total} onChange={(e) => setFormData({...formData, superficie_total: e.target.value})} required />
-                  </div>
-                )}
-                {fieldsConfig.num_plantas && (
-                  <div className="form-group">
-                    <label className="form-label">Nº Plantas *</label>
-                    <input type="number" className="form-input" value={formData.num_plantas} onChange={(e) => setFormData({...formData, num_plantas: e.target.value})} required />
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex gap-2">
-                <button type="submit" className="btn btn-primary" data-testid="btn-guardar-parcela">
-                  {editingId ? 'Actualizar Parcela' : 'Guardar Parcela'}
-                </button>
-                <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>Cancelar</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-      
-      <div className="card">
-        <h2 className="card-title">Lista de Parcelas ({filteredParcelas.length})</h2>
-        {loading ? <p>Cargando...</p> : filteredParcelas.length === 0 ? (
-          <p className="text-muted">{hasActiveFilters ? 'No hay parcelas que coincidan con los filtros' : 'No hay parcelas registradas'}</p>
-        ) : (
-          <div className="table-container">
-            <table data-testid="parcelas-table">
-              <thead>
-                <tr>
-                  {fieldsConfig.codigo_plantacion ? <th>Código</th> : null}
-                  {fieldsConfig.proveedor ? <th>Proveedor</th> : null}
-                  {fieldsConfig.finca ? <th>Finca</th> : null}
-                  {fieldsConfig.cultivo ? <th>Cultivo</th> : null}
-                  {fieldsConfig.variedad ? <th>Variedad</th> : null}
-                  {fieldsConfig.superficie_total ? <th>Superficie</th> : null}
-                  {fieldsConfig.num_plantas ? <th>Plantas</th> : null}
-                  {fieldsConfig.campana ? <th>Campaña</th> : null}
-                  <th>Zonas</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredParcelas.map((p) => (
-                  <tr key={p._id} data-parcela-id={p._id} style={{ transition: 'background-color 0.3s' }}>
-                    {fieldsConfig.codigo_plantacion ? <td className="font-semibold">{p.codigo_plantacion}</td> : null}
-                    {fieldsConfig.proveedor ? <td>{p.proveedor}</td> : null}
-                    {fieldsConfig.finca ? <td>{p.finca}</td> : null}
-                    {fieldsConfig.cultivo ? <td>{p.cultivo}</td> : null}
-                    {fieldsConfig.variedad ? <td>{p.variedad}</td> : null}
-                    {fieldsConfig.superficie_total ? <td>{p.superficie_total} ha</td> : null}
-                    {fieldsConfig.num_plantas ? <td>{p.num_plantas?.toLocaleString()}</td> : null}
-                    {fieldsConfig.campana ? <td>{p.campana}</td> : null}
-                    <td>
-                      <span className={`badge ${p.recintos && p.recintos.length > 0 ? 'badge-success' : 'badge-default'}`} data-testid={`zones-count-${p._id}`}>
-                        {p.recintos ? p.recintos.length : 0}
-                      </span>
-                    </td>
-                    <td><span className={`badge ${p.activo ? 'badge-success' : 'badge-default'}`}>{p.activo ? 'Activa' : 'Inactiva'}</span></td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button 
-                          className="btn btn-sm btn-primary" 
-                          onClick={() => navigate(`/evaluaciones?parcela_id=${p._id}`)} 
-                          title="Nueva Hoja de Evaluación"
-                          data-testid={`evaluacion-parcela-${p._id}`}
-                        >
-                          <ClipboardCheck size={14} />
-                        </button>
-                        <button 
-                          className="btn btn-sm"
-                          style={{ backgroundColor: '#f0fdf4', color: '#166534' }}
-                          onClick={() => fetchHistorialTratamientos(p)} 
-                          title="Historial de Tratamientos" 
-                          data-testid={`historial-parcela-${p._id}`}
-                        >
-                          <History size={14} />
-                        </button>
-                        <button 
-                          className="btn btn-sm btn-primary" 
-                          onClick={() => handleGenerateCuaderno(p._id, p.campana)}
-                          title={t('fieldNotebook.generate')}
-                          disabled={generatingCuaderno === p._id}
-                          data-testid={`cuaderno-parcela-${p._id}`}
-                        >
-                          {generatingCuaderno === p._id ? (
-                            <Loader2 size={14} className="animate-spin" />
-                          ) : (
-                            <BookOpen size={14} />
-                          )}
-                        </button>
-                        <button className="btn btn-sm btn-secondary" onClick={() => handleEdit(p)} title="Editar" data-testid={`edit-parcela-${p._id}`}>
-                          <Edit2 size={14} />
-                        </button>
-                        <button className="btn btn-sm btn-error" onClick={() => handleDelete(p._id)} title="Eliminar" data-testid={`delete-parcela-${p._id}`}>
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-      
-      {/* Modal de Historial de Tratamientos */}
-      {showHistorial && (
-        <div 
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}
-          onClick={() => setShowHistorial(false)}
-        >
-          <div 
-            className="card"
-            style={{
-              width: '90%',
-              maxWidth: '900px',
-              maxHeight: '85vh',
-              overflow: 'auto',
-              margin: '1rem'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 style={{ fontSize: '1.25rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <History size={24} style={{ color: '#166534' }} />
-                Historial de Tratamientos
-              </h2>
-              <button className="btn btn-sm btn-secondary" onClick={() => setShowHistorial(false)}>
-                <X size={18} />
-              </button>
-            </div>
-            
-            {historialParcela && (
-              <div style={{ 
-                backgroundColor: 'hsl(var(--primary) / 0.1)', 
-                padding: '1rem', 
-                borderRadius: '8px',
-                marginBottom: '1rem'
-              }}>
-                <h3 style={{ fontWeight: '600', marginBottom: '0.5rem' }}>
-                  Parcela: {historialParcela.codigo_plantacion}
-                </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.5rem', fontSize: '0.875rem' }}>
-                  <div><strong>Proveedor:</strong> {historialParcela.proveedor}</div>
-                  <div><strong>Cultivo:</strong> {historialParcela.cultivo}</div>
-                  <div><strong>Superficie:</strong> {historialParcela.superficie_total} ha</div>
-                  <div><strong>Campaña:</strong> {historialParcela.campana}</div>
-                </div>
-              </div>
-            )}
-            
-            {historialLoading ? (
-              <div style={{ textAlign: 'center', padding: '2rem' }}>
-                <p>Cargando historial...</p>
-              </div>
-            ) : historialData ? (
-              <>
-                {/* Estadísticas */}
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(3, 1fr)', 
-                  gap: '1rem',
-                  marginBottom: '1.5rem'
-                }}>
-                  <div className="card" style={{ padding: '1rem', textAlign: 'center', backgroundColor: '#f0fdf4' }}>
-                    <div style={{ fontSize: '2rem', fontWeight: '700', color: '#166534' }}>
-                      {historialData.estadisticas.total_tratamientos}
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
-                      Tratamientos Totales
-                    </div>
-                  </div>
-                  <div className="card" style={{ padding: '1rem', textAlign: 'center', backgroundColor: '#eff6ff' }}>
-                    <div style={{ fontSize: '2rem', fontWeight: '700', color: '#1e40af' }}>
-                      {historialData.estadisticas.productos_usados.length}
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
-                      Productos Diferentes
-                    </div>
-                  </div>
-                  <div className="card" style={{ padding: '1rem', textAlign: 'center', backgroundColor: '#fef3c7' }}>
-                    <div style={{ fontSize: '2rem', fontWeight: '700', color: '#92400e' }}>
-                      {historialData.estadisticas.tipos_aplicados.length}
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
-                      Tipos de Tratamiento
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Lista de tratamientos */}
-                {historialData.historial.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '2rem', color: 'hsl(var(--muted-foreground))' }}>
-                    <Beaker size={48} style={{ marginBottom: '1rem', opacity: 0.5 }} />
-                    <p>No hay tratamientos registrados para esta parcela.</p>
-                  </div>
-                ) : (
-                  <div style={{ overflowX: 'auto' }}>
-                    <table className="table" style={{ fontSize: '0.875rem' }}>
-                      <thead>
-                        <tr>
-                          <th>Fecha</th>
-                          <th>Producto</th>
-                          <th>Tipo</th>
-                          <th>Dosis</th>
-                          <th>Superficie</th>
-                          <th>Aplicador</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {historialData.historial.map((t, idx) => (
-                          <tr key={t._id || idx}>
-                            <td style={{ whiteSpace: 'nowrap' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                                <Calendar size={14} />
-                                {t.fecha_tratamiento ? new Date(t.fecha_tratamiento).toLocaleDateString('es-ES') : '-'}
-                              </div>
-                              {t.fecha_aplicacion && (
-                                <small style={{ color: 'hsl(var(--muted-foreground))' }}>
-                                  Aplicado: {new Date(t.fecha_aplicacion).toLocaleDateString('es-ES')}
-                                </small>
-                              )}
-                            </td>
-                            <td>
-                              {t.producto_fitosanitario_nombre ? (
-                                <div>
-                                  <strong style={{ color: '#166534' }}>{t.producto_fitosanitario_nombre}</strong>
-                                </div>
-                              ) : (
-                                <span style={{ color: 'hsl(var(--muted-foreground))' }}>Sin producto</span>
-                              )}
-                            </td>
-                            <td>
-                              <span style={{
-                                padding: '0.25rem 0.5rem',
-                                borderRadius: '4px',
-                                fontSize: '0.7rem',
-                                backgroundColor: 
-                                  t.subtipo === 'Herbicida' ? '#fef3c7' :
-                                  t.subtipo === 'Insecticida' ? '#fce7f3' :
-                                  t.subtipo === 'Fungicida' ? '#dbeafe' : '#f3f4f6'
-                              }}>
-                                {t.subtipo || t.tipo_tratamiento}
-                              </span>
-                            </td>
-                            <td>
-                              {t.producto_fitosanitario_dosis ? (
-                                <span>{t.producto_fitosanitario_dosis} {t.producto_fitosanitario_unidad}</span>
-                              ) : '-'}
-                            </td>
-                            <td>{t.superficie_aplicacion ? `${t.superficie_aplicacion} ha` : '-'}</td>
-                            <td>{t.aplicador_nombre || '-'}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-                
-                {/* Productos usados */}
-                {historialData.estadisticas.productos_usados.length > 0 && (
-                  <div style={{ marginTop: '1.5rem' }}>
-                    <h4 style={{ fontWeight: '600', marginBottom: '0.75rem' }}>Productos Utilizados</h4>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                      {historialData.estadisticas.productos_usados.map((prod, idx) => (
-                        <span 
-                          key={idx}
-                          style={{
-                            padding: '0.25rem 0.75rem',
-                            backgroundColor: '#f0fdf4',
-                            border: '1px solid #86efac',
-                            borderRadius: '20px',
-                            fontSize: '0.8rem',
-                            color: '#166534'
-                          }}
-                        >
-                          <Beaker size={12} style={{ display: 'inline', marginRight: '0.25rem' }} />
-                          {prod}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '2rem', color: 'hsl(var(--destructive))' }}>
-                <p>Error al cargar el historial de tratamientos.</p>
-              </div>
-            )}
-          </div>
-        </div>
+        <ParcelasForm
+          editingId={editingId} zones={zones} setZones={setZones}
+          handleZonesChanged={handleZonesChanged} handleSubmit={handleSubmit}
+          handleCancelEdit={handleCancelEdit} formData={formData} setFormData={setFormData}
+          fieldsConfig={fieldsConfig} contratos={contratos} fincas={fincas}
+          contratoSearch={contratoSearch} setContratoSearch={setContratoSearch}
+          contratoFilterOptions={contratoFilterOptions} getVariedadesParaCultivo={getVariedadesParaCultivo}
+          provincias={provincias} sigpacLoading={sigpacLoading} sigpacResult={sigpacResult}
+          sigpacError={sigpacError} buscarEnSigpac={buscarEnSigpac} updateSigpac={updateSigpac}
+        />
       )}
 
-      {/* Modal de importación KML/GeoJSON */}
+      <ParcelasTable
+        filteredParcelas={filteredParcelas} loading={loading} hasActiveFilters={hasActiveFilters}
+        fieldsConfig={fieldsConfig} contratos={contratos} handleEdit={handleEdit}
+        handleDelete={handleDelete} handleGenerateCuaderno={handleGenerateCuaderno}
+        generatingCuaderno={generatingCuaderno} fetchHistorialTratamientos={fetchHistorialTratamientos}
+      />
+
+      <ParcelasHistorial
+        showHistorial={showHistorial} setShowHistorial={setShowHistorial}
+        historialParcela={historialParcela} historialData={historialData}
+        historialLoading={historialLoading}
+      />
+
       <GeoImportModal
         isOpen={showGeoImport}
         onClose={() => setShowGeoImport(false)}
