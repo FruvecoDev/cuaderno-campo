@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { 
   Plus, Edit2, Trash2, Search, UserCheck, Upload, X, 
   AlertTriangle, CheckCircle, XCircle, FileImage, Calendar,
-  Award, CreditCard, Eye
+  Award, CreditCard, Eye, Download, FileText
 } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
@@ -309,14 +309,40 @@ const TecnicosAplicadores = () => {
             Gestión de técnicos aplicadores certificados para tratamientos fitosanitarios
           </p>
         </div>
-        <PermissionButton
-          permission="create"
-          className="btn btn-primary"
-          onClick={() => setShowForm(true)}
-          data-testid="btn-nuevo-tecnico"
-        >
-          <Plus size={18} /> Nuevo Técnico
-        </PermissionButton>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <button
+            className="btn btn-secondary"
+            data-testid="btn-export-excel-tecnicos"
+            onClick={async () => {
+              try {
+                await api.download('/api/tecnicos-aplicadores/export/excel', `tecnicos_aplicadores_${new Date().toISOString().split('T')[0]}.xlsx`);
+              } catch (err) { console.error('Error exporting Excel:', err); }
+            }}
+            title="Exportar Excel"
+          >
+            <Download size={16} /> Excel
+          </button>
+          <button
+            className="btn btn-secondary"
+            data-testid="btn-export-pdf-tecnicos"
+            onClick={async () => {
+              try {
+                await api.download('/api/tecnicos-aplicadores/export/pdf', `tecnicos_aplicadores_${new Date().toISOString().split('T')[0]}.pdf`);
+              } catch (err) { console.error('Error exporting PDF:', err); }
+            }}
+            title="Exportar PDF"
+          >
+            <FileText size={16} /> PDF
+          </button>
+          <PermissionButton
+            permission="create"
+            className="btn btn-primary"
+            onClick={() => setShowForm(true)}
+            data-testid="btn-nuevo-tecnico"
+          >
+            <Plus size={18} /> Nuevo Técnico
+          </PermissionButton>
+        </div>
       </div>
 
       {/* Error */}

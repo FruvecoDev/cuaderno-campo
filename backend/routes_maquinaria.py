@@ -429,3 +429,59 @@ async def export_maquinaria_excel(
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f"attachment; filename=maquinaria_{datetime.now().strftime('%Y%m%d')}.xlsx"}
     )
+
+
+@router.get("/maquinaria/export/pdf")
+async def export_maquinaria_pdf(
+    current_user: dict = Depends(get_current_user)
+):
+    """Export maquinaria to PDF"""
+    from fastapi.responses import StreamingResponse
+    import io as _io
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import mm
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+
+    maquinaria_list = await maquinaria_collection.find({}).sort("denominacion", 1).to_list(5000)
+    maquinaria_raw = serialize_docs(maquinaria_list)
+
+    output = _io.BytesIO()
+    pdf = SimpleDocTemplate(output, pagesize=landscape(A4), topMargin=15*mm, bottomMargin=15*mm)
+    elements = []
+    styles = getSampleStyleSheet()
+
+    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=16, textColor=colors.HexColor('#37474F'), alignment=1, spaceAfter=8*mm)
+    elements.append(Paragraph("Registro de Maquinaria - FRUVECO", title_style))
+    elements.append(Paragraph(f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}", ParagraphStyle('Sub', parent=styles['Normal'], alignment=1, textColor=colors.gray)))
+    elements.append(Spacer(1, 8*mm))
+
+    table_data = [["Denominacion", "Tipo", "Marca", "Modelo", "Matricula", "N Serie", "Estado", "Año"]]
+    for m in maquinaria_raw:
+        table_data.append([
+            m.get("denominacion", "")[:25], m.get("tipo", "")[:15],
+            m.get("marca", "")[:15], m.get("modelo", "")[:15],
+            m.get("matricula", "")[:12], m.get("numero_serie", "")[:15],
+            m.get("estado", "")[:12], str(m.get("ano_fabricacion", ""))
+        ])
+
+    col_widths = [40*mm, 25*mm, 25*mm, 25*mm, 25*mm, 30*mm, 20*mm, 15*mm]
+    doc_table = Table(table_data, colWidths=col_widths)
+    doc_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#37474F')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.gray),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#ECEFF1')]),
+    ]))
+    elements.append(doc_table)
+
+    pdf.build(elements)
+    output.seek(0)
+    filename = f"maquinaria_{datetime.now().strftime('%Y%m%d')}.pdf"
+    return StreamingResponse(output, media_type="application/pdf",
+                             headers={"Content-Disposition": f"attachment; filename={filename}"})
+

@@ -502,9 +502,23 @@ const Maquinaria = () => {
             className="btn btn-secondary"
             onClick={handleExportExcel}
             title="Exportar a Excel"
+            data-testid="btn-export-excel-maquinaria"
           >
             <Download size={18} />
             Excel
+          </button>
+          <button
+            className="btn btn-secondary"
+            data-testid="btn-export-pdf-maquinaria"
+            onClick={async () => {
+              try {
+                await api.download('/api/maquinaria/export/pdf', `maquinaria_${new Date().toISOString().split('T')[0]}.pdf`);
+              } catch (err) { console.error('Error exporting PDF:', err); }
+            }}
+            title="Exportar a PDF"
+          >
+            <Download size={18} />
+            PDF
           </button>
           <button 
             className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`}

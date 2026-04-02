@@ -345,3 +345,113 @@ async def delete_tecnico_aplicador(
         raise HTTPException(status_code=404, detail="Técnico aplicador no encontrado")
     
     return {"success": True, "message": "Técnico aplicador eliminado"}
+
+
+
+@router.get("/tecnicos-aplicadores/export/excel")
+async def export_tecnicos_excel(
+    current_user: dict = Depends(get_current_user)
+):
+    """Export tecnicos aplicadores to Excel"""
+    from fastapi.responses import StreamingResponse
+    import io as _io
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+
+    tecnicos_list = await tecnicos_aplicadores_collection.find({}).sort("nombre", 1).to_list(5000)
+    tecnicos_raw = serialize_docs(tecnicos_list)
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Tecnicos Aplicadores"
+
+    headers = ["Nombre", "Apellidos", "DNI/NIE", "Nivel", "N Carnet", "Caducidad Carnet", "Telefono", "Email", "Activo"]
+    header_fill = PatternFill(start_color="E65100", end_color="E65100", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF", size=10)
+    thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+
+    for col, h in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=h)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = Alignment(horizontal='center')
+        cell.border = thin_border
+
+    for idx, t in enumerate(tecnicos_raw, 2):
+        row = [
+            t.get("nombre", ""), t.get("apellidos", ""), t.get("dni_nie", ""),
+            t.get("nivel_capacitacion", ""), t.get("numero_carnet", ""),
+            t.get("fecha_caducidad_carnet", "")[:10] if t.get("fecha_caducidad_carnet") else "",
+            t.get("telefono", ""), t.get("email", ""),
+            "Si" if t.get("activo") else "No"
+        ]
+        for col, val in enumerate(row, 1):
+            cell = ws.cell(row=idx, column=col, value=val)
+            cell.border = thin_border
+
+    for col in range(1, len(headers) + 1):
+        ws.column_dimensions[chr(64 + col)].width = 20
+
+    output = _io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    filename = f"tecnicos_aplicadores_{datetime.now().strftime('%Y%m%d')}.xlsx"
+    return StreamingResponse(output, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                             headers={"Content-Disposition": f"attachment; filename={filename}"})
+
+
+@router.get("/tecnicos-aplicadores/export/pdf")
+async def export_tecnicos_pdf(
+    current_user: dict = Depends(get_current_user)
+):
+    """Export tecnicos aplicadores to PDF"""
+    from fastapi.responses import StreamingResponse
+    import io as _io
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import mm
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+
+    tecnicos_list = await tecnicos_aplicadores_collection.find({}).sort("nombre", 1).to_list(5000)
+    tecnicos_raw = serialize_docs(tecnicos_list)
+
+    output = _io.BytesIO()
+    pdf = SimpleDocTemplate(output, pagesize=landscape(A4), topMargin=15*mm, bottomMargin=15*mm)
+    elements = []
+    styles = getSampleStyleSheet()
+
+    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=16, textColor=colors.HexColor('#E65100'), alignment=1, spaceAfter=8*mm)
+    elements.append(Paragraph("Tecnicos Aplicadores - FRUVECO", title_style))
+    elements.append(Paragraph(f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}", ParagraphStyle('Sub', parent=styles['Normal'], alignment=1, textColor=colors.gray)))
+    elements.append(Spacer(1, 8*mm))
+
+    table_data = [["Nombre", "DNI/NIE", "Nivel", "N Carnet", "Caducidad", "Telefono", "Activo"]]
+    for t in tecnicos_raw:
+        table_data.append([
+            f"{t.get('nombre', '')} {t.get('apellidos', '')}".strip()[:30],
+            t.get("dni_nie", "")[:12], t.get("nivel_capacitacion", "")[:15],
+            t.get("numero_carnet", "")[:15],
+            t.get("fecha_caducidad_carnet", "")[:10] if t.get("fecha_caducidad_carnet") else "",
+            t.get("telefono", "")[:12],
+            "Si" if t.get("activo") else "No"
+        ])
+
+    col_widths = [50*mm, 25*mm, 30*mm, 30*mm, 25*mm, 25*mm, 15*mm]
+    doc_table = Table(table_data, colWidths=col_widths)
+    doc_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#E65100')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.gray),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#FFF3E0')]),
+    ]))
+    elements.append(doc_table)
+
+    pdf.build(elements)
+    output.seek(0)
+    filename = f"tecnicos_aplicadores_{datetime.now().strftime('%Y%m%d')}.pdf"
+    return StreamingResponse(output, media_type="application/pdf",
+                             headers={"Content-Disposition": f"attachment; filename={filename}"})

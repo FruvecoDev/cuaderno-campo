@@ -772,7 +772,31 @@ const Evaluaciones = () => {
     <div data-testid="evaluaciones-page">
       <div className="flex justify-between items-center mb-6">
         <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>{t('evaluations.title')}</h1>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <button
+            className="btn btn-secondary"
+            data-testid="btn-export-excel-evaluaciones"
+            onClick={async () => {
+              try {
+                await api.download('/api/evaluaciones/export/excel', `evaluaciones_${new Date().toISOString().split('T')[0]}.xlsx`);
+              } catch (err) { console.error('Error exporting Excel:', err); }
+            }}
+            title="Exportar Excel"
+          >
+            <Download size={16} /> Excel
+          </button>
+          <button
+            className="btn btn-secondary"
+            data-testid="btn-export-pdf-evaluaciones"
+            onClick={async () => {
+              try {
+                await api.download('/api/evaluaciones/export/pdf', `evaluaciones_${new Date().toISOString().split('T')[0]}.pdf`);
+              } catch (err) { console.error('Error exporting PDF:', err); }
+            }}
+            title="Exportar PDF"
+          >
+            <FileText size={16} /> PDF
+          </button>
           {(user?.role === 'Admin' || user?.role === 'Manager') && (
             <button
               className="btn btn-secondary"

@@ -418,6 +418,65 @@ async def reorder_preguntas(
     return {"success": True, "message": "Orden actualizado", "preguntas": nuevas_preguntas}
 
 
+
+@router.get("/evaluaciones/export/pdf")
+async def export_evaluaciones_pdf(
+    current_user: dict = Depends(get_current_user)
+):
+    """Export evaluaciones to PDF"""
+    from fastapi.responses import StreamingResponse
+    import io as _io
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import mm
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+
+    evaluaciones_list = await evaluaciones_collection.find({}).sort("created_at", -1).to_list(5000)
+    evaluaciones_raw = serialize_docs(evaluaciones_list)
+
+    output = _io.BytesIO()
+    pdf = SimpleDocTemplate(output, pagesize=landscape(A4), topMargin=15*mm, bottomMargin=15*mm)
+    elements = []
+    styles = getSampleStyleSheet()
+
+    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=16, textColor=colors.HexColor('#4A148C'), alignment=1, spaceAfter=8*mm)
+    elements.append(Paragraph("Hojas de Evaluacion - FRUVECO", title_style))
+    elements.append(Paragraph(f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}", ParagraphStyle('Sub', parent=styles['Normal'], alignment=1, textColor=colors.gray)))
+    elements.append(Spacer(1, 8*mm))
+
+    table_data = [["Parcela", "Cultivo", "Proveedor", "Campana", "Estado", "Tecnico", "Fecha"]]
+    for e in evaluaciones_raw:
+        table_data.append([
+            e.get("codigo_plantacion", "")[:20],
+            e.get("cultivo", "")[:15],
+            e.get("proveedor", "")[:20],
+            e.get("campana", "")[:10],
+            e.get("estado", "")[:12],
+            e.get("tecnico", "")[:20],
+            e.get("created_at", "")[:10] if e.get("created_at") else "",
+        ])
+
+    col_widths = [40*mm, 30*mm, 40*mm, 25*mm, 25*mm, 40*mm, 25*mm]
+    doc_table = Table(table_data, colWidths=col_widths)
+    doc_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4A148C')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.gray),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F3E5F5')]),
+    ]))
+    elements.append(doc_table)
+
+    pdf.build(elements)
+    output.seek(0)
+    filename = f"evaluaciones_{datetime.now().strftime('%Y%m%d')}.pdf"
+    return StreamingResponse(output, media_type="application/pdf",
+                             headers={"Content-Disposition": f"attachment; filename={filename}"})
+
+
 # ============================================================================
 # GENERACIÓN DE PDF - CON VISITAS Y TRATAMIENTOS
 # ============================================================================
@@ -1897,3 +1956,57 @@ async def generate_evaluacion_pdf(
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generando PDF: {str(e)}")
+
+
+
+@router.get("/evaluaciones/export/excel")
+async def export_evaluaciones_excel(
+    current_user: dict = Depends(get_current_user)
+):
+    """Export evaluaciones to Excel"""
+    from fastapi.responses import StreamingResponse
+    import io as _io
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+
+    evaluaciones_list = await evaluaciones_collection.find({}).sort("created_at", -1).to_list(5000)
+    evaluaciones_raw = serialize_docs(evaluaciones_list)
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Evaluaciones"
+
+    headers = ["Titulo", "Parcela", "Cultivo", "Proveedor", "Campana", "Estado", "Puntuacion", "Fecha", "Evaluador"]
+    header_fill = PatternFill(start_color="4A148C", end_color="4A148C", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF", size=10)
+    thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+
+    for col, h in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=h)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = Alignment(horizontal='center')
+        cell.border = thin_border
+
+    for idx, e in enumerate(evaluaciones_raw, 2):
+        row = [
+            e.get("titulo", ""), e.get("parcela_codigo", ""), e.get("cultivo", ""),
+            e.get("proveedor", ""), e.get("campana", ""), e.get("estado", ""),
+            e.get("puntuacion_total", 0),
+            e.get("created_at", "")[:10] if e.get("created_at") else "",
+            e.get("evaluador", "")
+        ]
+        for col, val in enumerate(row, 1):
+            cell = ws.cell(row=idx, column=col, value=val)
+            cell.border = thin_border
+
+    for col in range(1, len(headers) + 1):
+        ws.column_dimensions[chr(64 + col)].width = 18
+
+    output = _io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    filename = f"evaluaciones_{datetime.now().strftime('%Y%m%d')}.xlsx"
+    return StreamingResponse(output, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                             headers={"Content-Disposition": f"attachment; filename={filename}"})
+
