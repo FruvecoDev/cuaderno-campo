@@ -4,7 +4,8 @@ import {
   Brain, Sparkles, Bug, TrendingUp, Loader2, AlertTriangle, 
   CheckCircle2, ChevronDown, ChevronUp, Leaf, Package, Calendar,
   BarChart3, Lightbulb, Shield, Clock, Target, ArrowRight, FileSignature,
-  DollarSign, AlertCircle, History, Eye, X, Zap, FileText
+  DollarSign, AlertCircle, History, Eye, X, Zap, FileText,
+  MessageCircle, Send, Plus, Trash2
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useAuth } from '../contexts/AuthContext';
@@ -17,7 +18,8 @@ const TABS = {
   TREATMENTS: 'treatments',
   PREDICTIONS: 'predictions',
   CONTRACTS: 'contracts',
-  HISTORY: 'history'
+  HISTORY: 'history',
+  CHAT: 'chat'
 };
 
 const AsistenteIA = () => {
@@ -55,6 +57,14 @@ const AsistenteIA = () => {
   const [loadingDashboard, setLoadingDashboard] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
   const [loadingReport, setLoadingReport] = useState(false);
+
+  // Chat State
+  const [chatSessions, setChatSessions] = useState([]);
+  const [currentSessionId, setCurrentSessionId] = useState('');
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState('');
+  const [sendingMessage, setSendingMessage] = useState(false);
+  const chatEndRef = React.useRef(null);
 
   useEffect(() => {
     fetchParcelas();
@@ -105,6 +115,92 @@ const AsistenteIA = () => {
       setLoadingReport(false);
     }
   };
+
+  // Chat functions
+  const fetchChatSessions = async () => {
+    try {
+      const data = await api.get('/api/ai/chat/sessions');
+      setChatSessions(data.sessions || []);
+    } catch (err) {
+      console.error('Error fetching chat sessions:', err);
+    }
+  };
+
+  const loadChatSession = async (sessionId) => {
+    setCurrentSessionId(sessionId);
+    try {
+      const data = await api.get(`/api/ai/chat/history/${sessionId}`);
+      setChatMessages(data.messages || []);
+    } catch (err) {
+      console.error('Error loading chat history:', err);
+    }
+  };
+
+  const startNewChat = () => {
+    setCurrentSessionId('');
+    setChatMessages([]);
+    setChatInput('');
+  };
+
+  const handleSendMessage = async () => {
+    const text = chatInput.trim();
+    if (!text || sendingMessage) return;
+
+    // Optimistic UI: add user message
+    const tempUserMsg = { id: 'temp-user', role: 'user', content: text, created_at: new Date().toISOString() };
+    setChatMessages(prev => [...prev, tempUserMsg]);
+    setChatInput('');
+    setSendingMessage(true);
+
+    try {
+      const data = await api.post('/api/ai/chat', {
+        session_id: currentSessionId,
+        message: text
+      });
+
+      if (data.success) {
+        // Update session id if new
+        if (!currentSessionId && data.session_id) {
+          setCurrentSessionId(data.session_id);
+          fetchChatSessions();
+        }
+        // Add assistant response
+        const assistantMsg = {
+          id: 'resp-' + Date.now(),
+          role: 'assistant',
+          content: data.response,
+          generation_time_seconds: data.generation_time_seconds,
+          created_at: new Date().toISOString()
+        };
+        setChatMessages(prev => [...prev, assistantMsg]);
+      }
+    } catch (err) {
+      setChatMessages(prev => [...prev, {
+        id: 'err-' + Date.now(), role: 'assistant',
+        content: 'Error al procesar el mensaje. Inténtalo de nuevo.',
+        created_at: new Date().toISOString()
+      }]);
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+
+  const deleteChatSession = async (sessionId) => {
+    try {
+      await api.delete(`/api/ai/chat/session/${sessionId}`);
+      setChatSessions(prev => prev.filter(s => s.id !== sessionId));
+      if (currentSessionId === sessionId) {
+        startNewChat();
+      }
+    } catch (err) {
+      console.error('Error deleting session:', err);
+    }
+  };
+
+  // Auto-scroll chat
+  React.useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
 
   // Generate treatment suggestions
   const handleGenerateSuggestions = async () => {
@@ -278,8 +374,8 @@ const AsistenteIA = () => {
       {/* Feature Cards */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(4, 1fr)', 
-        gap: '1rem', 
+        gridTemplateColumns: 'repeat(5, 1fr)', 
+        gap: '0.75rem', 
         marginBottom: '2rem' 
       }}>
         {/* Treatment Suggestions Card */}
@@ -405,6 +501,38 @@ const AsistenteIA = () => {
               </h3>
               <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }}>
                 Consulta el historial de todos los análisis IA generados con métricas de uso y actividad.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Chat Card */}
+        <div 
+          className="card" 
+          style={{ 
+            cursor: 'pointer',
+            border: activeTab === TABS.CHAT ? '2px solid #0891b2' : '1px solid hsl(var(--border))',
+            backgroundColor: activeTab === TABS.CHAT ? '#ecfeff' : 'white',
+            transition: 'all 0.2s ease'
+          }}
+          onClick={() => { setActiveTab(TABS.CHAT); fetchChatSessions(); }}
+          data-testid="tab-chat"
+        >
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+            <div style={{ 
+              padding: '1rem', 
+              borderRadius: '12px', 
+              backgroundColor: '#0891b2',
+              color: 'white'
+            }}>
+              <MessageCircle size={28} />
+            </div>
+            <div>
+              <h3 style={{ fontWeight: '600', fontSize: '1.1rem', marginBottom: '0.5rem' }}>
+                Chat Agrónomo
+              </h3>
+              <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }}>
+                Consulta con un agrónomo IA experto sobre tus cultivos, plagas y tratamientos.
               </p>
             </div>
           </div>
@@ -1318,6 +1446,187 @@ const AsistenteIA = () => {
               <p>Error cargando datos del dashboard</p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Chat Panel */}
+      {activeTab === TABS.CHAT && (
+        <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '1rem', height: '600px' }} data-testid="panel-chat">
+          {/* Sessions Sidebar */}
+          <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h4 style={{ fontWeight: '600', fontSize: '0.9rem' }}>Conversaciones</h4>
+              <button
+                onClick={startNewChat}
+                className="btn btn-primary"
+                style={{ padding: '4px 10px', fontSize: '0.75rem', backgroundColor: '#0891b2' }}
+                data-testid="btn-new-chat"
+              >
+                <Plus size={14} /> Nueva
+              </button>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              {chatSessions.length === 0 ? (
+                <p style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', textAlign: 'center', padding: '1rem' }}>
+                  Sin conversaciones previas
+                </p>
+              ) : chatSessions.map(s => (
+                <div
+                  key={s.id}
+                  style={{
+                    padding: '0.6rem',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    marginBottom: '0.25rem',
+                    backgroundColor: currentSessionId === s.id ? '#ecfeff' : 'transparent',
+                    border: currentSessionId === s.id ? '1px solid #0891b2' : '1px solid transparent',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    gap: '0.5rem'
+                  }}
+                  onClick={() => loadChatSession(s.id)}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '0.8rem', fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {s.title}
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))' }}>
+                      {s.message_count} msgs
+                    </div>
+                  </div>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); deleteChatSession(s.id); }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: '#dc2626', opacity: 0.5, flexShrink: 0 }}
+                    title="Eliminar"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Chat Area */}
+          <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            {/* Chat Header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '1px solid hsl(var(--border))' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#0891b2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                <Brain size={20} />
+              </div>
+              <div>
+                <div style={{ fontWeight: '600', fontSize: '0.95rem' }}>Agrónomo IA</div>
+                <div style={{ fontSize: '0.7rem', color: '#059669' }}>En línea - GPT-4o</div>
+              </div>
+            </div>
+
+            {/* Messages */}
+            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '0.5rem 0' }}>
+              {chatMessages.length === 0 && !sendingMessage && (
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '2rem', textAlign: 'center' }}>
+                  <MessageCircle size={48} style={{ color: '#0891b2', opacity: 0.3, marginBottom: '1rem' }} />
+                  <p style={{ fontWeight: '600', marginBottom: '0.5rem' }}>Pregúntale al agrónomo</p>
+                  <p style={{ fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))', marginBottom: '1.5rem' }}>
+                    Tiene acceso a tus parcelas, contratos y tratamientos para darte respuestas personalizadas.
+                  </p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'center' }}>
+                    {[
+                      'Tengo hojas amarillas en mis limoneros',
+                      'Que tratamiento uso contra el pulgon?',
+                      'Cuando deberia empezar la cosecha?',
+                      'Que opinas del estado de mis parcelas?'
+                    ].map((q, i) => (
+                      <button
+                        key={i}
+                        onClick={() => { setChatInput(q); }}
+                        style={{
+                          padding: '6px 12px', borderRadius: '20px', border: '1px solid #0891b2',
+                          backgroundColor: 'white', color: '#0891b2', fontSize: '0.8rem', cursor: 'pointer',
+                          transition: 'all 0.15s'
+                        }}
+                        data-testid={`suggested-question-${i}`}
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {chatMessages.map((msg) => (
+                <div
+                  key={msg.id}
+                  style={{
+                    display: 'flex',
+                    justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                    gap: '0.5rem'
+                  }}
+                >
+                  {msg.role === 'assistant' && (
+                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#0891b2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0, marginTop: '2px' }}>
+                      <Leaf size={14} />
+                    </div>
+                  )}
+                  <div style={{
+                    maxWidth: '75%',
+                    padding: '0.75rem 1rem',
+                    borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                    backgroundColor: msg.role === 'user' ? '#0891b2' : '#f1f5f9',
+                    color: msg.role === 'user' ? 'white' : 'inherit',
+                    fontSize: '0.9rem',
+                    lineHeight: '1.5',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word'
+                  }}>
+                    {msg.content}
+                    {msg.generation_time_seconds && (
+                      <div style={{ fontSize: '0.65rem', opacity: 0.6, marginTop: '0.25rem', textAlign: 'right' }}>
+                        {msg.generation_time_seconds}s
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              {sendingMessage && (
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#0891b2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0 }}>
+                    <Leaf size={14} />
+                  </div>
+                  <div style={{ padding: '0.75rem 1rem', borderRadius: '16px 16px 16px 4px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Loader2 size={16} style={{ animation: 'spin 1s linear infinite', color: '#0891b2' }} />
+                    <span style={{ fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))' }}>Analizando...</span>
+                  </div>
+                </div>
+              )}
+
+              <div ref={chatEndRef} />
+            </div>
+
+            {/* Input Area */}
+            <div style={{ display: 'flex', gap: '0.5rem', paddingTop: '0.75rem', borderTop: '1px solid hsl(var(--border))' }}>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="Escribe tu pregunta al agrónomo IA..."
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }}
+                disabled={sendingMessage}
+                style={{ flex: 1 }}
+                data-testid="chat-input"
+              />
+              <button
+                className="btn btn-primary"
+                onClick={handleSendMessage}
+                disabled={sendingMessage || !chatInput.trim()}
+                style={{ backgroundColor: '#0891b2', padding: '0.5rem 1rem' }}
+                data-testid="btn-send-chat"
+              >
+                {sendingMessage ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={18} />}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

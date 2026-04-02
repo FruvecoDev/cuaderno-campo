@@ -29,6 +29,7 @@ from routes_auth import router as auth_router
 from routes_catalogos import router as catalogos_router
 from routes_ai import router as ai_router
 from routes_ai_suggestions import router as ai_suggestions_router
+from routes_ai_chat import router as ai_chat_router
 from routes_maquinaria import router as maquinaria_router
 from routes_evaluaciones import router as evaluaciones_router
 from routes_notifications import router as notifications_router
@@ -105,6 +106,7 @@ app.include_router(extended_router)
 app.include_router(catalogos_router)
 app.include_router(ai_router)
 app.include_router(ai_suggestions_router)
+app.include_router(ai_chat_router)
 app.include_router(maquinaria_router)
 app.include_router(evaluaciones_router)
 app.include_router(notifications_router)
