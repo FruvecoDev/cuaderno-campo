@@ -7,10 +7,12 @@
 ---
 
 ### P2 Completado:
-- Exportaciones PDF/Excel para Evaluaciones, Tecnicos Aplicadores, Maquinaria
-  - 6 endpoints backend: evaluaciones/export/excel, evaluaciones/export/pdf, tecnicos-aplicadores/export/excel, tecnicos-aplicadores/export/pdf, maquinaria/export/excel, maquinaria/export/pdf
-  - Botones UI integrados en frontend (Excel + PDF en header de cada pagina)
-  - Testing: iteration_54 (9/9 backend, 6/6 frontend = 100%)
+- Exportaciones PDF/Excel para Evaluaciones, Tecnicos Aplicadores, Maquinaria (6 endpoints)
+- **Centro de Exportacion Centralizado** en Dashboard:
+  - Widget interactivo con seleccion de 13 modulos, toggle PDF/Excel, conteo de registros
+  - Backend: GET /api/exports/modules + POST /api/exports/combined
+  - Genera informes combinados con hoja resumen + una pestana/pagina por modulo
+  - Testing: iteration_54 + iteration_55 (17/17 backend, 100% frontend)
 
 ### P1 Completado:
 - Responsive/Mobile: CSS responsive classes, AsistenteIA, Parcelas, Dashboard responsive
@@ -22,7 +24,7 @@
 - Exports generalizados: Visitas, Parcelas (PDF+Excel), Tratamientos, Irrigaciones (PDF)
 - Fix Cosechas PDF, AI Contract Summary, AI Dashboard, AI Chat, NFC RRHH
 
-### Test Totals: 104+ tests, 0 failures
+### Test Totals: 112+ tests, 0 failures
 
 ## Test Credentials
 - Admin: admin@fruveco.com / admin123
