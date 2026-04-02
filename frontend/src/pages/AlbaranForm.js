@@ -712,7 +712,7 @@ const AlbaranForm = () => {
                   <tr>
                     <th style={{ minWidth: '250px' }}>Artículo / Descripción</th>
                     <th style={{ width: '120px' }}>Cantidad</th>
-                    <th style={{ width: '80px' }}>Unidad</th>
+                    <th style={{ width: '110px' }}>Unidad</th>
                     <th style={{ width: '100px' }}>Precio Unit.</th>
                     <th style={{ width: '100px' }}>Dto %</th>
                     <th style={{ width: '120px' }}>Total</th>
@@ -934,6 +934,7 @@ const AlbaranForm = () => {
                             className="form-select"
                             value={item.unidad}
                             onChange={(e) => updateItemTotal(index, 'unidad', e.target.value)}
+                            style={{ minWidth: '90px', width: '100%' }}
                             data-testid={`item-unidad-${index}`}
                           >
                             <option value="kg">kg</option>
