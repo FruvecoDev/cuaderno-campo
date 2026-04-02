@@ -1,66 +1,45 @@
 # FRUVECO - PRD (Product Requirements Document)
 
-## Ultima Actualizacion: 2 Abril 2026 (Sesion 12)
+## Ultima Actualizacion: 2 Abril 2026
 
-## Secuencia del usuario: A -> B -> C -> D (COMPLETADAS)
-## P0 Calidad y Robustez: COMPLETADO
-
----
-
-### P0 Completado en esta sesion:
-
-#### 1. Refactorizacion Parcelas.js (1572 -> 397 lineas)
-- Extraidos 5 subcomponentes: ParcelasFilters, ParcelasTable, ParcelasForm, ParcelasHistorial, ParcelasGeneralMap
-- Funcionalidad preservada al 100% (iteration_52)
-
-#### 2. Generalizacion Exports PDF/Excel
-Nuevos endpoints:
-- GET /api/visitas/export/excel + pdf
-- GET /api/parcelas/export/excel + pdf
-- GET /api/tratamientos/export/pdf (Excel ya existia)
-- GET /api/irrigaciones/export/pdf (Excel ya existia)
-Total endpoints export: 30+ (iteration_52)
-
-#### 3. Fix Bug + AI Features (anteriores)
-- Fix Cosechas PDF export, AI Contract Summary, AI Dashboard, AI Chat Agronomo, NFC RRHH
+## Progreso: P0 DONE, P1 DONE, P2 PENDIENTE
 
 ---
 
-## Complete Export Coverage
-| Modulo | Excel | PDF |
-|--------|-------|-----|
-| Contratos | Y | Y |
-| Parcelas | Y | Y |
-| Cosechas | Y | Y |
-| Recetas | Y | Y |
-| Tareas | Y | Y |
-| Tratamientos | Y | Y |
-| Irrigaciones | Y | Y |
-| Visitas | Y | Y |
-| Albaranes | Y | - |
-| Maquinaria | Y | - |
-| Proveedores | Y | - |
-| Clientes | Y | - |
-| Gastos | Y | Y |
-| Ingresos | Y | Y |
-| RRHH Fichajes | Y | Y |
-| RRHH Documentos | Y | Y |
-| RRHH Prenominas | Y | Y |
+### P1 Completado:
+
+#### 1. Responsive/Mobile
+- CSS responsive classes: ai-tabs-grid (5->3->2->1 cols), ai-kpi-grid, ai-chat-grid, form-grid-responsive
+- AsistenteIA, Parcelas, Dashboard - todos responsive en mobile (390px)
+- Page actions flex-wrap para botones
+- Testing: iteration_53
+
+#### 2. Paginacion Frontend
+- Componente Pagination.js reutilizable (page size 25/50/100, navegacion)
+- Integrado en Parcelas con skip/limit params al backend
+- Testing: iteration_53
+
+#### 3. Dashboard Avanzado
+- Widget "Analisis de Productividad" con 6 KPIs calculados:
+  - Rendimiento (kg/ha), Coste/ha, Ingresos/ha, Margen Neto/ha, Superficie Media, Precio Medio/kg
+- Fix NaN% margin bug (division por zero)
+- Testing: iteration_53
+
+### P0 Completado:
+- Refactorizacion Parcelas.js (1572 -> 397 lineas, 5 subcomponentes)
+- Exports generalizados: Visitas, Parcelas (PDF+Excel), Tratamientos, Irrigaciones (PDF)
+- Fix Cosechas PDF, AI Contract Summary, AI Dashboard, AI Chat, NFC RRHH
+
+### Test Totals: 95+ tests, 0 failures
 
 ## Test Credentials
 - Admin: admin@fruveco.com / admin123
 
-## Upcoming: P1 Funcionalidades Pendientes
-- Notificaciones Email (RESEND_API_KEY requerida)
-- Datos meteorologicos (OpenWeatherMap API key requerida)
-- Sync ERP API
-
-## Upcoming: P1 Mejoras UX/Produccion
-- Lazy loading y paginacion tablas grandes
-- Responsive/Mobile para uso en campo
-- Mejoras Dashboard KPIs
-
 ## Upcoming: P2 Backlog Avanzado
 - Hojas de Evaluacion (modulo completo)
 - Tecnicos Aplicadores (gestion certificados)
-- Maquinaria (seguimiento uso/mantenimiento)
+- Maquinaria (seguimiento uso/mantenimiento avanzado)
+
+## Blocked
+- Email (RESEND_API_KEY)
+- Meteorologia (OpenWeatherMap key)
