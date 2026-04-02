@@ -4,41 +4,36 @@
 Desarrollar una aplicacion de Cuaderno de Campo para el sector agricola que permita gestionar:
 Contratos, Parcelas, Mapas, Fincas, Visitas, Tareas, Cosechas, Tratamientos, Irrigaciones, Recetas, Albaranes, Dashboard, Generacion de informes PDF/Excel, RBAC, Autenticacion, Integraciones IA, RRHH completo.
 
-## Ultima Actualizacion: 1 Abril 2026 (Sesion 12)
+## Ultima Actualizacion: 2 Abril 2026 (Sesion 12)
 
 ### Completadas en esta sesion:
 
-#### 1. Fix Bug Cosechas PDF Export (P0 - Completado)
-- Anadido import `StreamingResponse` faltante en `routes_cosechas.py`
-- Verificados 6 endpoints de exportacion (PDF/Excel) para Cosechas, Recetas y Tareas
-- Testing: 17/17 backend (iteration_48.json)
+#### 1. Fix Bug Cosechas PDF Export (P0)
+- Import StreamingResponse en routes_cosechas.py
+- 6 endpoints exportacion verificados (iteration_48)
 
-#### 2. AI Contract Summary Feature (P1 - Completado)
-- Nuevo endpoint `POST /api/ai/summarize-contract/{contrato_id}` 
-- Genera resumen ejecutivo, analisis financiero, estado cumplimiento, riesgos y recomendaciones
-- Tercera pestana en AsistenteIA.js: "Resumen de Contratos"
-- Testing: 100% (iteration_48.json)
+#### 2. AI Contract Summary (P1)
+- POST /api/ai/summarize-contract/{contrato_id}
+- 3a pestana en AsistenteIA.js (iteration_48)
 
-#### 3. AI Dashboard - Historial y Metricas (Nuevo - Completado)
-- Persistencia automatica: todos los resultados IA se guardan en `ai_reports` collection
-- `GET /api/ai/dashboard`: metricas agregadas (total, por tipo, tiempo medio, actividad 30 dias)
-- `GET /api/ai/report-detail/{id}`: detalle completo de informe guardado
-- 4a pestana "Historial y Metricas" en AsistenteIA.js:
-  - KPIs: total informes, tratamientos, predicciones, resumenes
-  - Grafico de barras de actividad (ultimos 30 dias, por tipo, recharts)
-  - Tabla de historial con tipo, titulo, entidad, tiempo, fecha
-  - Modal de detalle con contenido JSON completo
-  - Actualizacion automatica tras cada generacion
-- Testing: 9/9 backend + 100% frontend (iteration_49.json)
+#### 3. AI Dashboard - Historial y Metricas (Nuevo)
+- Persistencia automatica de resultados IA en ai_reports
+- GET /api/ai/dashboard, GET /api/ai/report-detail/{id}
+- 4a pestana con KPIs, grafico actividad, tabla historial, modal detalle (iteration_49)
 
-### Completadas en sesiones anteriores:
-- Soporte Multi-Zona en Parcelas (iteration_46.json)
-- Campo Codigo Plantacion readonly
-- Refactorizacion Dashboard.js (2168 -> 788 lineas)
-- Refactorizacion routes_rrhh.py (1905 -> 270 lineas)
-- Refactorizacion Contratos.js (1917 -> 388 lineas)
-- Exportaciones PDF/Excel para Recetas y Tareas
-- Asistente IA: Sugerencias Tratamientos + Prediccion Cosecha
+#### 4. Chat Agronomo IA (Nuevo)
+- POST /api/ai/chat (conversacion con contexto agricola)
+- GET /api/ai/chat/sessions, GET /api/ai/chat/history/{id}
+- DELETE /api/ai/chat/session/{id}
+- 5a pestana con sidebar sesiones, burbujas chat, preguntas sugeridas
+- Contexto automatico: parcelas, contratos, tratamientos, cosechas, visitas
+- Historial de conversacion persistente (iteration_50)
+
+### Sesiones anteriores:
+- Multi-Zona Parcelas, Codigo Plantacion readonly
+- Refactorizacion Dashboard, routes_rrhh, Contratos
+- Exportaciones PDF/Excel Recetas y Tareas
+- AI Sugerencias Tratamientos + Prediccion Cosecha
 
 ---
 
@@ -47,51 +42,45 @@ Contratos, Parcelas, Mapas, Fincas, Visitas, Tareas, Cosechas, Tratamientos, Irr
 /app/
   backend/
     server.py
-    ai_service.py (AI report generation)
-    routes_ai.py (AI reports: parcels, costs, recommendations)
-    routes_ai_suggestions.py (AI: treatments, predictions, contract summaries, dashboard, history)
-    routes_cosechas.py (Cosechas CRUD + PDF/Excel export)
-    routes_tareas.py (Tareas CRUD + PDF/Excel export)
-    routes_extended.py (Recetas, Albaranes + exports)
-    routes/
-      routes_rrhh.py, rrhh_fichajes.py, rrhh_productividad.py,
-      rrhh_documentos.py, rrhh_ausencias.py, rrhh_prenominas.py
+    ai_service.py
+    routes_ai.py (parcel reports, costs, recommendations)
+    routes_ai_suggestions.py (treatments, predictions, summaries, dashboard)
+    routes_ai_chat.py (chat agronomo IA)
+    routes_cosechas.py, routes_tareas.py, routes_extended.py
+    routes/ (RRHH sub-routers)
   frontend/src/
     pages/
-      AsistenteIA.js (4 tabs: Treatments, Predictions, Contract Summary, History & Metrics)
-      Dashboard.js (788 lines, refactored)
-      Contratos.js (refactored with subcomponents)
-      Parcelas.js (multi-zona)
-      Cosechas.js, Tareas.js, Recetas.js (with export buttons)
+      AsistenteIA.js (5 tabs: Treatments, Predictions, Summaries, History, Chat)
+      Dashboard.js, Contratos.js, Parcelas.js
+      Cosechas.js, Tareas.js, Recetas.js
     components/
-      dashboard/ (5 widget subcomponents)
-      contratos/ (form, filters, table subcomponents)
-      AdvancedParcelMap.js (multi-polygon drawing)
+      dashboard/, contratos/, AdvancedParcelMap.js
 ```
 
-## AI Features Status
-| Feature | Status | Endpoint |
-|---------|--------|----------|
-| Sugerencias Tratamientos | DONE | POST /api/ai/suggest-treatments/{parcela_id} |
-| Prediccion Cosecha | DONE | POST /api/ai/predict-yield/{contrato_id} |
-| Resumen Contratos | DONE | POST /api/ai/summarize-contract/{contrato_id} |
-| Dashboard IA | DONE | GET /api/ai/dashboard |
-| Detalle Informe | DONE | GET /api/ai/report-detail/{report_id} |
-| Informe Parcela | DONE | POST /api/ai/report/parcel/{parcela_id} |
-| Analisis Costes | DONE | POST /api/ai/analysis/costs |
-| Recomendaciones | DONE | POST /api/ai/recommendations |
+## AI Features Status (All DONE)
+| Feature | Endpoint |
+|---------|----------|
+| Sugerencias Tratamientos | POST /api/ai/suggest-treatments/{parcela_id} |
+| Prediccion Cosecha | POST /api/ai/predict-yield/{contrato_id} |
+| Resumen Contratos | POST /api/ai/summarize-contract/{contrato_id} |
+| Dashboard IA | GET /api/ai/dashboard |
+| Detalle Informe | GET /api/ai/report-detail/{id} |
+| Chat Agronomo | POST /api/ai/chat |
+| Sesiones Chat | GET /api/ai/chat/sessions |
+| Historial Chat | GET /api/ai/chat/history/{id} |
+| Borrar Sesion | DELETE /api/ai/chat/session/{id} |
 
 ## Test Credentials
 - Admin: admin@fruveco.com / admin123
 
-## Pending/Blocked Issues
-- Notificaciones por Email (P2) - BLOCKED: Necesita RESEND_API_KEY
+## Pending/Blocked
+- Email (P2) - BLOCKED: RESEND_API_KEY
 
 ## Upcoming Tasks
-- P1: NFC para RRHH (identificacion NFC para fichajes de empleados) - Opcion D del usuario
+- P1: NFC para RRHH (Opcion D del usuario)
 - P2: Generalizar PDF/Excel a modulos restantes
 - P2: Refactorizar Parcelas.js (~1500 lineas)
 
 ## Future/Backlog
-- P2: Notificaciones por Email (necesita RESEND_API_KEY)
-- P2: OpenWeatherMap (necesita API key)
+- Notificaciones por Email (necesita RESEND_API_KEY)
+- OpenWeatherMap (necesita API key)
