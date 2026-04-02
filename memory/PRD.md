@@ -1,93 +1,66 @@
 # FRUVECO - PRD (Product Requirements Document)
 
-## Problem Statement
-Desarrollar una aplicacion de Cuaderno de Campo para el sector agricola que permita gestionar:
-Contratos, Parcelas, Mapas, Fincas, Visitas, Tareas, Cosechas, Tratamientos, Irrigaciones, Recetas, Albaranes, Dashboard, Generacion de informes PDF/Excel, RBAC, Autenticacion, Integraciones IA, RRHH completo.
-
 ## Ultima Actualizacion: 2 Abril 2026 (Sesion 12)
 
-## Secuencia del usuario: A -> B -> C -> D (TODAS COMPLETADAS)
-
-### Opcion A: Refactorizar Contratos - DONE
-### Opcion B: Cuaderno de Campo (Exports PDF/Excel) - DONE
-### Opcion C: Integraciones IA - DONE
-### Opcion D: NFC para RRHH - DONE
+## Secuencia del usuario: A -> B -> C -> D (COMPLETADAS)
+## P0 Calidad y Robustez: COMPLETADO
 
 ---
 
-### Completadas en esta sesion:
+### P0 Completado en esta sesion:
 
-#### 1. Fix Bug Cosechas PDF Export (P0)
-- Import StreamingResponse en routes_cosechas.py (iteration_48)
+#### 1. Refactorizacion Parcelas.js (1572 -> 397 lineas)
+- Extraidos 5 subcomponentes: ParcelasFilters, ParcelasTable, ParcelasForm, ParcelasHistorial, ParcelasGeneralMap
+- Funcionalidad preservada al 100% (iteration_52)
 
-#### 2. AI Contract Summary (P1)
-- POST /api/ai/summarize-contract/{contrato_id} (iteration_48)
+#### 2. Generalizacion Exports PDF/Excel
+Nuevos endpoints:
+- GET /api/visitas/export/excel + pdf
+- GET /api/parcelas/export/excel + pdf
+- GET /api/tratamientos/export/pdf (Excel ya existia)
+- GET /api/irrigaciones/export/pdf (Excel ya existia)
+Total endpoints export: 30+ (iteration_52)
 
-#### 3. AI Dashboard - Historial y Metricas
-- Persistencia automatica de resultados IA en ai_reports
-- GET /api/ai/dashboard, GET /api/ai/report-detail/{id}
-- 4a pestana con KPIs, grafico, historial (iteration_49)
-
-#### 4. Chat Agronomo IA
-- POST /api/ai/chat + sessions + history + delete
-- 5a pestana con sidebar sesiones, burbujas chat, preguntas sugeridas (iteration_50)
-
-#### 5. NFC para RRHH (Opcion D)
-- Backend: PUT/DELETE /api/rrhh/empleados/{id}/nfc (assign/remove)
-- Backend: GET /api/rrhh/empleados/nfc-lookup/{nfc_id}
-- Backend: POST /api/rrhh/fichajes/nfc (ya existia, ahora funcional e2e)
-- Frontend ControlHorarioTab: Web NFC API + fallback manual input
-- Frontend RRHH.js: Gestion NFC en ficha de empleado (assign/remove)
-- Proteccion contra duplicados NFC (409)
-- Testing: 17/17 (iteration_51)
+#### 3. Fix Bug + AI Features (anteriores)
+- Fix Cosechas PDF export, AI Contract Summary, AI Dashboard, AI Chat Agronomo, NFC RRHH
 
 ---
 
-## Architecture
-```
-/app/
-  backend/
-    server.py
-    ai_service.py, routes_ai.py, routes_ai_suggestions.py, routes_ai_chat.py
-    routes_cosechas.py, routes_tareas.py, routes_extended.py
-    routes/
-      routes_rrhh.py (empleados + NFC assign/remove/lookup)
-      rrhh_fichajes.py (fichajes CRUD + QR/NFC/facial + informes)
-      rrhh_productividad.py, rrhh_documentos.py, rrhh_ausencias.py, rrhh_prenominas.py
-  frontend/src/
-    pages/
-      AsistenteIA.js (5 tabs: Treatments, Predictions, Summaries, History, Chat)
-      RRHH.js (NFC management in employee detail)
-      RRHH/ControlHorarioTab.js (NFC scan + manual input)
-```
-
-## AI Features (All DONE)
-| Feature | Endpoint |
-|---------|----------|
-| Sugerencias Tratamientos | POST /api/ai/suggest-treatments/{parcela_id} |
-| Prediccion Cosecha | POST /api/ai/predict-yield/{contrato_id} |
-| Resumen Contratos | POST /api/ai/summarize-contract/{contrato_id} |
-| Dashboard IA | GET /api/ai/dashboard |
-| Detalle Informe | GET /api/ai/report-detail/{id} |
-| Chat Agronomo | POST /api/ai/chat |
-| Sesiones Chat | GET /api/ai/chat/sessions |
-| Historial Chat | GET /api/ai/chat/history/{id} |
-
-## NFC RRHH Endpoints
-| Endpoint | Descripcion |
-|----------|-------------|
-| PUT /api/rrhh/empleados/{id}/nfc | Asignar NFC |
-| DELETE /api/rrhh/empleados/{id}/nfc | Eliminar NFC |
-| GET /api/rrhh/empleados/nfc-lookup/{nfc_id} | Buscar por NFC |
-| POST /api/rrhh/fichajes/nfc | Fichar por NFC |
+## Complete Export Coverage
+| Modulo | Excel | PDF |
+|--------|-------|-----|
+| Contratos | Y | Y |
+| Parcelas | Y | Y |
+| Cosechas | Y | Y |
+| Recetas | Y | Y |
+| Tareas | Y | Y |
+| Tratamientos | Y | Y |
+| Irrigaciones | Y | Y |
+| Visitas | Y | Y |
+| Albaranes | Y | - |
+| Maquinaria | Y | - |
+| Proveedores | Y | - |
+| Clientes | Y | - |
+| Gastos | Y | Y |
+| Ingresos | Y | Y |
+| RRHH Fichajes | Y | Y |
+| RRHH Documentos | Y | Y |
+| RRHH Prenominas | Y | Y |
 
 ## Test Credentials
 - Admin: admin@fruveco.com / admin123
 
-## Pending/Blocked
-- Email (P2) - BLOCKED: RESEND_API_KEY
-- OpenWeatherMap - BLOCKED: API key
+## Upcoming: P1 Funcionalidades Pendientes
+- Notificaciones Email (RESEND_API_KEY requerida)
+- Datos meteorologicos (OpenWeatherMap API key requerida)
+- Sync ERP API
 
-## Remaining Tasks (Backlog)
-- P2: Generalizar PDF/Excel a modulos restantes
-- P2: Refactorizar Parcelas.js (~1500 lineas)
+## Upcoming: P1 Mejoras UX/Produccion
+- Lazy loading y paginacion tablas grandes
+- Responsive/Mobile para uso en campo
+- Mejoras Dashboard KPIs
+
+## Upcoming: P2 Backlog Avanzado
+- Hojas de Evaluacion (modulo completo)
+- Tecnicos Aplicadores (gestion certificados)
+- Maquinaria (seguimiento uso/mantenimiento)
