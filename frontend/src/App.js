@@ -42,10 +42,12 @@ import Mapas from './pages/Mapas';
 import CuadernoCampo from './pages/CuadernoCampo';
 import IntegracionERP from './pages/IntegracionERP';
 import ConsultaSIGPAC from './pages/ConsultaSIGPAC';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 
 function App() {
   return (
     <AuthProvider>
+      <PWAInstallPrompt />
       <Routes>
         <Route path="/login" element={<Login />} />
         
