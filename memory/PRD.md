@@ -17,6 +17,7 @@ Aplicacion de campo para agricultura: Cuaderno de Campo completo con modulos de 
 - Consulta SIGPAC con Mapa Interactivo (WMS oficial, click-to-identify, importacion)
 - PWA (Progressive Web App - instalable en moviles)
 - Notificaciones In-App con badge y auto-generacion de alertas
+- Historial de Tratamientos por Parcela (modal con estadisticas y tabla)
 
 ## Funcionalidades Core
 - Autenticacion JWT con RBAC
@@ -44,5 +45,9 @@ Aplicacion de campo para agricultura: Cuaderno de Campo completo con modulos de 
 - Admin: admin@fruveco.com / admin123
 
 ## Backlog
+- P1: Integraciones IA avanzadas (resumenes contratos, predicciones cosechas)
+- P1: Identificacion NFC para fichajes RRHH
+- P0: App movil nativa (React Native)
+- P2: Refactorizar Visitas.js (~1920 lineas)
 - P2: Email (Resend) - Bloqueado API Key
 - P2: Meteorologia (OpenWeatherMap) - Bloqueado API Key
