@@ -15,6 +15,7 @@ import DashboardFincasWidget from '../components/dashboard/DashboardFincasWidget
 import DashboardContratosWidget from '../components/dashboard/DashboardContratosWidget';
 import DashboardMapWidget from '../components/dashboard/DashboardMapWidget';
 import DashboardExportWidget from '../components/dashboard/DashboardExportWidget';
+import DashboardAlertasWidget from '../components/dashboard/DashboardAlertasWidget';
 
 const Dashboard = () => {
   const [kpis, setKpis] = useState(null);
@@ -313,6 +314,13 @@ const Dashboard = () => {
       {isWidgetVisible('centro_exportacion') && (
         <div style={{ order: getWidgetOrder('centro_exportacion'), marginBottom: '1.5rem' }}>
           <DashboardExportWidget />
+        </div>
+      )}
+
+      {/* Alertas y Avisos */}
+      {isWidgetVisible('alertas_avisos') && (
+        <div style={{ order: getWidgetOrder('alertas_avisos'), marginBottom: '1.5rem' }}>
+          <DashboardAlertasWidget />
         </div>
       )}
       

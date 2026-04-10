@@ -97,6 +97,25 @@ const MaquinariaForm = ({
           </div>
         )}
 
+        {/* ITV & Mantenimiento */}
+        <div style={{ backgroundColor: 'hsl(var(--muted) / 0.3)', padding: '1rem', borderRadius: '0.5rem', marginBottom: '1rem' }}>
+          <h4 style={{ fontWeight: '600', marginBottom: '0.75rem', fontSize: '0.9rem' }}>ITV y Mantenimiento</h4>
+          <div className="grid-3">
+            <div className="form-group">
+              <label className="form-label">Fecha Proxima ITV</label>
+              <input type="date" className="form-input" value={formData.fecha_proxima_itv || ''} onChange={(e) => setFormData({...formData, fecha_proxima_itv: e.target.value})} data-testid="input-fecha-itv" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Fecha Ultimo Mantenimiento</label>
+              <input type="date" className="form-input" value={formData.fecha_ultimo_mantenimiento || ''} onChange={(e) => setFormData({...formData, fecha_ultimo_mantenimiento: e.target.value})} data-testid="input-fecha-mantenimiento" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Intervalo Mantenimiento (dias)</label>
+              <input type="number" min="1" className="form-input" value={formData.intervalo_mantenimiento_dias || ''} onChange={(e) => setFormData({...formData, intervalo_mantenimiento_dias: e.target.value ? parseInt(e.target.value) : ''})} placeholder="Ej: 180" data-testid="input-intervalo-mantenimiento" />
+            </div>
+          </div>
+        </div>
+
         {/* Image upload for Placa CE */}
         {fieldsConfig.imagen_placa_ce && (
           <div className="form-group">

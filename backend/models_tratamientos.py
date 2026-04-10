@@ -188,7 +188,10 @@ class MaquinariaCreate(BaseModel):
     capacidad: Optional[str] = None
     estado: str = "Operativo"
     observaciones: Optional[str] = None
-    imagen_placa_ce_url: Optional[str] = None  # URL de la imagen de la placa CE
+    imagen_placa_ce_url: Optional[str] = None
+    fecha_proxima_itv: Optional[str] = None
+    fecha_ultimo_mantenimiento: Optional[str] = None
+    intervalo_mantenimiento_dias: Optional[int] = None
 
 class MaquinariaInDB(MaquinariaBase):
     id: str = Field(alias="_id")

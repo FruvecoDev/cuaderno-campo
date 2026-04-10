@@ -66,6 +66,7 @@ from routes.rrhh_productividad import router as productividad_router
 from routes.rrhh_documentos import router as documentos_router
 from routes_erp_integration import router as erp_router
 from routes_exports import router as exports_router
+from routes_alertas import router as alertas_router
 from scheduler_service import init_scheduler, shutdown_scheduler
 from database import db
 
@@ -146,6 +147,7 @@ app.include_router(audit_router)
 # ERP Integration API
 app.include_router(erp_router)
 app.include_router(exports_router)
+app.include_router(alertas_router)
 
 # Mount static files for uploaded images
 uploads_dir = "/app/uploads"

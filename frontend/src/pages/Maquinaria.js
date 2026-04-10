@@ -67,7 +67,8 @@ const Maquinaria = () => {
   });
   const [formData, setFormData] = useState({
     nombre: '', tipo: 'Tractor', marca: '', modelo: '', matricula: '',
-    num_serie: '', año_fabricacion: '', capacidad: '', estado: 'Operativo', observaciones: ''
+    num_serie: '', año_fabricacion: '', capacidad: '', estado: 'Operativo', observaciones: '',
+    fecha_proxima_itv: '', fecha_ultimo_mantenimiento: '', intervalo_mantenimiento_dias: ''
   });
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -161,7 +162,7 @@ const Maquinaria = () => {
     if (!formData.nombre.trim()) { setError('El nombre es obligatorio'); setTimeout(() => setError(null), 5000); return; }
     try {
       setError(null);
-      const payload = { ...formData, año_fabricacion: formData.año_fabricacion ? parseInt(formData.año_fabricacion) : null };
+      const payload = { ...formData, año_fabricacion: formData.año_fabricacion ? parseInt(formData.año_fabricacion) : null, intervalo_mantenimiento_dias: formData.intervalo_mantenimiento_dias ? parseInt(formData.intervalo_mantenimiento_dias) : null };
       let data;
       if (editingId) { data = await api.put(`/api/maquinaria/${editingId}`, payload); }
       else { data = await api.post('/api/maquinaria', payload); }
@@ -174,13 +175,13 @@ const Maquinaria = () => {
   };
 
   const resetForm = () => {
-    setFormData({ nombre: '', tipo: 'Tractor', marca: '', modelo: '', matricula: '', num_serie: '', año_fabricacion: '', capacidad: '', estado: 'Operativo', observaciones: '' });
+    setFormData({ nombre: '', tipo: 'Tractor', marca: '', modelo: '', matricula: '', num_serie: '', año_fabricacion: '', capacidad: '', estado: 'Operativo', observaciones: '', fecha_proxima_itv: '', fecha_ultimo_mantenimiento: '', intervalo_mantenimiento_dias: '' });
     setSelectedImage(null); setImagePreview(null);
   };
 
   const handleEdit = (item) => {
     setEditingId(item._id);
-    setFormData({ nombre: item.nombre || '', tipo: item.tipo || 'Tractor', marca: item.marca || '', modelo: item.modelo || '', matricula: item.matricula || '', num_serie: item.num_serie || '', año_fabricacion: item.año_fabricacion || '', capacidad: item.capacidad || '', estado: item.estado || 'Operativo', observaciones: item.observaciones || '' });
+    setFormData({ nombre: item.nombre || '', tipo: item.tipo || 'Tractor', marca: item.marca || '', modelo: item.modelo || '', matricula: item.matricula || '', num_serie: item.num_serie || '', año_fabricacion: item.año_fabricacion || '', capacidad: item.capacidad || '', estado: item.estado || 'Operativo', observaciones: item.observaciones || '', fecha_proxima_itv: item.fecha_proxima_itv || '', fecha_ultimo_mantenimiento: item.fecha_ultimo_mantenimiento || '', intervalo_mantenimiento_dias: item.intervalo_mantenimiento_dias || '' });
     if (item.imagen_placa_ce_url) {
       let url = item.imagen_placa_ce_url;
       if (url.startsWith('/api/uploads/')) url = `${BACKEND_URL}${url}`;

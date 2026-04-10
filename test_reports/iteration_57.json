@@ -1,0 +1,114 @@
+{
+  "summary": "Alertas System Testing Complete: All 12 backend tests passed (100%). Dashboard Alertas Widget and Maquinaria ITV/Maintenance fields verified working. Evaluaciones and Maquinaria pages regression passed.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Console warnings",
+        "issues": ["React hydration warnings about span inside option/select/tr/td - these are from development tooling (x-file-name attributes) and do not affect production"]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_alertas.py",
+    "/app/test_reports/pytest/test_alertas.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/tests/test_alertas.py"
+  ],
+  "success_rate": {
+    "backend": "100% (12/12 tests passed)",
+    "frontend": "100% (all UI elements verified)"
+  },
+  "test_credentials": "admin@fruveco.com / admin123",
+  "seed_data_creation": "Test maquinaria created and deleted during backend tests",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Alertas system fully verified. Dashboard widget shows 2 alerts (1 ITV vencida, 1 mantenimiento pendiente) for Tractor John Deere 6120M. Maquinaria form has ITV/maintenance fields working. All data-testids present and functional.",
+  "features_verified": {
+    "backend_endpoints": {
+      "GET /api/alertas/resumen": "PASSED - Returns alert summary with tecnicos and maquinaria sections",
+      "alertas_detects_itv_vencida": "PASSED - Detects ITV vencida for maquinaria with past fecha_proxima_itv",
+      "alertas_detects_mantenimiento_pendiente": "PASSED - Detects mantenimiento pendiente when last maintenance + interval < today",
+      "alertas_requires_authentication": "PASSED - Returns 401/403 without auth",
+      "POST /api/maquinaria (with ITV fields)": "PASSED - Creates maquinaria with fecha_proxima_itv, fecha_ultimo_mantenimiento, intervalo_mantenimiento_dias",
+      "PUT /api/maquinaria/{id} (with ITV fields)": "PASSED - Updates maquinaria with ITV/maintenance fields",
+      "GET /api/maquinaria": "PASSED - Returns maquinaria list",
+      "GET /api/maquinaria/stats/resumen": "PASSED - Returns stats including con_itv_vencida",
+      "GET /api/evaluaciones": "PASSED - Returns evaluaciones list",
+      "GET /api/evaluaciones/config/preguntas": "PASSED - Returns config"
+    },
+    "frontend_ui_elements": {
+      "dashboard_alertas_widget": {
+        "data-testid": "dashboard-alertas-widget",
+        "status": "PASSED - Widget visible at bottom of dashboard",
+        "badge_count": "PASSED - Shows '2' total alerts (data-testid=alertas-badge-count)",
+        "itv_section": "PASSED - ITV Maquinaria section with '1 vencido' badge (data-testid=alertas-section-itv)",
+        "mantenimiento_section": "PASSED - Mantenimiento Maquinaria section with '1 vencido' badge (data-testid=alertas-section-mantenimiento)",
+        "expandable_sections": "PASSED - Sections expand to show details (Tractor John Deere 6120M - 11 dias de retraso)"
+      },
+      "maquinaria_page": {
+        "data-testid": "maquinaria-page",
+        "status": "PASSED - Page loads correctly",
+        "kpis": "PASSED - Shows Total (12), Activa (0), En Mantenimiento (0), ITV Vencida (1)",
+        "filters": "PASSED - Tipo and Estado filters present",
+        "table": "PASSED - data-testid=maquinaria-table shows 12 items"
+      },
+      "maquinaria_form": {
+        "data-testid": "maquinaria-form",
+        "status": "PASSED - Form opens correctly",
+        "itv_section": "PASSED - 'ITV y Mantenimiento' section visible",
+        "fecha_proxima_itv": "PASSED - data-testid=input-fecha-itv present and fillable",
+        "fecha_ultimo_mantenimiento": "PASSED - data-testid=input-fecha-mantenimiento present and fillable",
+        "intervalo_mantenimiento_dias": "PASSED - data-testid=input-intervalo-mantenimiento present and fillable"
+      },
+      "evaluaciones_page": {
+        "data-testid": "evaluaciones-page",
+        "status": "PASSED - Page loads correctly (regression check)",
+        "filters": "PASSED - 6 filters present (Parcelas, Cultivos, Proveedores, Campaña, Contratos, Estado)",
+        "nueva_evaluacion_button": "PASSED - Button present"
+      }
+    }
+  },
+  "test_results": {
+    "test_alertas.py": {
+      "total": 12,
+      "passed": 12,
+      "failed": 0,
+      "tests": [
+        "TestAlertasEndpoints::test_get_alertas_resumen_returns_200 - PASSED",
+        "TestAlertasEndpoints::test_alertas_resumen_tecnicos_structure - PASSED",
+        "TestAlertasEndpoints::test_alertas_resumen_maquinaria_structure - PASSED",
+        "TestAlertasEndpoints::test_alertas_detects_itv_vencida - PASSED",
+        "TestAlertasEndpoints::test_alertas_detects_mantenimiento_pendiente - PASSED",
+        "TestAlertasEndpoints::test_alertas_requires_authentication - PASSED",
+        "TestMaquinariaITVFields::test_create_maquinaria_with_itv_fields - PASSED",
+        "TestMaquinariaITVFields::test_update_maquinaria_with_itv_fields - PASSED",
+        "TestMaquinariaPageRegression::test_maquinaria_list_endpoint - PASSED",
+        "TestMaquinariaPageRegression::test_maquinaria_stats_endpoint - PASSED",
+        "TestEvaluacionesPageRegression::test_evaluaciones_list_endpoint - PASSED",
+        "TestEvaluacionesPageRegression::test_evaluaciones_config_endpoint - PASSED"
+      ]
+    },
+    "playwright_tests": {
+      "dashboard_alertas_widget": "PASSED - Widget found, badge shows 2, ITV and Mantenimiento sections expandable",
+      "maquinaria_form_itv_fields": "PASSED - All 3 ITV/maintenance fields present and fillable",
+      "evaluaciones_page_regression": "PASSED - Page loads with filters and buttons"
+    }
+  },
+  "alert_data_verified": {
+    "total_alertas": 2,
+    "itv_vencida": 1,
+    "mantenimiento_pendiente": 1,
+    "maquinaria_with_alerts": "Tractor John Deere 6120M (id: 69a80f4c029f45cd54591668)",
+    "itv_date": "2026-03-15 (vencida)",
+    "maintenance_date": "2025-10-01 with 180 day interval (11 days overdue)"
+  }
+}
