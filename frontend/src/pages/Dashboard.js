@@ -1,12 +1,28 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, MapPin, FileText, Sprout, Euro, Calendar as CalendarIcon, Bell, Layers, Satellite, ChevronLeft, ChevronRight, Mail, Send, CheckCircle, AlertCircle, Eye, Edit2, Home, AlertTriangle, Building2, Wheat, Droplets, Clock, Package, FileSignature, ShoppingCart, TrendingDown, ClipboardList, Users, Settings, X, GripVertical, RotateCcw, Save, ChevronUp, ChevronDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { TrendingUp, MapPin, FileText, Sprout, Euro, Calendar as CalendarIcon, Bell, Layers, Satellite, ChevronLeft, ChevronRight, Mail, Send, CheckCircle, AlertCircle, Eye, Edit2, Home, AlertTriangle, Building2, Wheat, Droplets, Clock, Package, FileSignature, ShoppingCart, TrendingDown, ClipboardList, Users, Settings, X, GripVertical, RotateCcw, Save, ChevronUp, ChevronDown, ArrowUp, ArrowDown, Move } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import '../App.css';
+
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable';
+import SortableDashboardWidget from '../components/dashboard/SortableDashboardWidget';
 
 // Subcomponentes extraidos
 import VisitasCalendar from '../components/dashboard/VisitasCalendar';
@@ -33,6 +49,7 @@ const Dashboard = () => {
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [configWidgets, setConfigWidgets] = useState([]);
   const [savingConfig, setSavingConfig] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   
   const { token, user, canDoOperacion } = useAuth();
   const navigate = useNavigate();
@@ -116,12 +133,39 @@ const Dashboard = () => {
   
   const sortedWidgetIds = useMemo(() => {
     if (!dashboardConfig?.widgets) {
-      return ['kpis_principales', 'resumen_fincas', 'proximas_cosechas', 'tratamientos_pendientes', 
-              'contratos_activos', 'proximas_visitas', 'graficos_cultivos', 'mapa_parcelas', 
-              'calendario', 'actividad_reciente'];
+      return ['kpis_principales', 'productividad', 'centro_exportacion', 'alertas_avisos', 'resumen_fincas', 'proximas_cosechas', 'contratos_activos', 'graficos_cultivos', 'mapa_parcelas', 'calendario', 'actividad_reciente'];
     }
     return [...dashboardConfig.widgets].sort((a, b) => a.order - b.order).map(w => w.widget_id);
   }, [dashboardConfig]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = useCallback(async (event) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    
+    const oldIndex = sortedWidgetIds.indexOf(active.id);
+    const newIndex = sortedWidgetIds.indexOf(over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const newOrder = arrayMove(sortedWidgetIds, oldIndex, newIndex);
+    const newWidgets = (dashboardConfig?.widgets || []).map(w => ({
+      ...w,
+      order: newOrder.indexOf(w.widget_id)
+    }));
+    newWidgets.sort((a, b) => a.order - b.order);
+    
+    setDashboardConfig(prev => ({ ...prev, widgets: newWidgets }));
+    setConfigWidgets(newWidgets);
+
+    // Auto-save
+    try {
+      await api.post('/api/dashboard/config', { widgets: newWidgets, layout: dashboardConfig?.layout || 'default' });
+    } catch (err) { console.error('Error saving widget order:', err); }
+  }, [sortedWidgetIds, dashboardConfig]);
   
   const fetchDashboardData = async () => {
     try { const data = await api.get('/api/dashboard/kpis'); setKpis(data); }
@@ -180,10 +224,26 @@ const Dashboard = () => {
     <div data-testid="dashboard-page">
       <div className="flex justify-between items-center mb-6">
         <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>{t('dashboard.title')}</h1>
-        <button onClick={() => setShowConfigModal(true)} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} data-testid="btn-config-dashboard">
-          <Settings size={18} /> Configurar
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button
+            onClick={() => setIsEditMode(!isEditMode)}
+            className={`btn ${isEditMode ? 'btn-primary' : 'btn-secondary'}`}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            data-testid="btn-edit-mode"
+          >
+            <Move size={18} /> {isEditMode ? 'Listo' : 'Reordenar'}
+          </button>
+          <button onClick={() => setShowConfigModal(true)} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} data-testid="btn-config-dashboard">
+            <Settings size={18} /> Configurar
+          </button>
+        </div>
       </div>
+      
+      {isEditMode && (
+        <div style={{ padding: '0.75rem 1rem', marginBottom: '1rem', borderRadius: '8px', backgroundColor: 'hsl(var(--primary) / 0.08)', border: '1px solid hsl(var(--primary) / 0.2)', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'hsl(var(--primary))' }} data-testid="edit-mode-banner">
+          <GripVertical size={16} /> Arrastra los widgets para reordenarlos. Pulsa "Listo" cuando termines.
+        </div>
+      )}
       
       {/* Modal de Configuracion */}
       {showConfigModal && (
@@ -199,10 +259,13 @@ const Dashboard = () => {
         />
       )}
       
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={sortedWidgetIds} strategy={verticalListSortingStrategy}>
+      <div style={{ display: 'flex', flexDirection: 'column', paddingLeft: isEditMode ? '2rem' : 0, transition: 'padding 0.2s ease' }}>
       
       {/* KPI Cards */}
       {isWidgetVisible('kpis_principales') && (
+      <SortableDashboardWidget id="kpis_principales" isEditMode={isEditMode}>
       <div className="stats-grid" data-testid="dashboard-kpis" style={{ order: getWidgetOrder('kpis_principales') }}>
         {puedeCompra && (
         <div className="stat-card">
@@ -257,9 +320,11 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+      </SortableDashboardWidget>
       )}
       
       {/* Productividad Widget - New Advanced KPIs */}
+      <SortableDashboardWidget id="productividad" isEditMode={isEditMode}>
       <div className="card mb-6" data-testid="dashboard-productividad" style={{ order: getWidgetOrder('kpis_principales') + 0.5 }}>
         <h2 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
           <TrendingUp size={20} style={{ color: 'hsl(var(--chart-1))' }} /> Análisis de Productividad
@@ -309,31 +374,33 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+      </SortableDashboardWidget>
       
       {/* Centro de Exportacion */}
       {isWidgetVisible('centro_exportacion') && (
-        <div style={{ order: getWidgetOrder('centro_exportacion'), marginBottom: '1.5rem' }}>
+        <SortableDashboardWidget id="centro_exportacion" isEditMode={isEditMode}>
           <DashboardExportWidget />
-        </div>
+        </SortableDashboardWidget>
       )}
 
       {/* Alertas y Avisos */}
       {isWidgetVisible('alertas_avisos') && (
-        <div style={{ order: getWidgetOrder('alertas_avisos'), marginBottom: '1.5rem' }}>
+        <SortableDashboardWidget id="alertas_avisos" isEditMode={isEditMode}>
           <DashboardAlertasWidget />
-        </div>
+        </SortableDashboardWidget>
       )}
       
       {/* Fincas Widget */}
       {isWidgetVisible('resumen_fincas') && kpis.fincas && (
-        <div style={{ order: getWidgetOrder('resumen_fincas') }}>
+        <SortableDashboardWidget id="resumen_fincas" isEditMode={isEditMode}>
           <DashboardFincasWidget kpis={kpis} navigate={navigate} />
-        </div>
+        </SortableDashboardWidget>
       )}
       
       {/* Proximas Cosechas y Tratamientos Pendientes */}
       {(isWidgetVisible('proximas_cosechas') || isWidgetVisible('tratamientos_pendientes')) && (
-      <div className="grid-2 mb-6" data-testid="dashboard-widgets" style={{ order: Math.min(getWidgetOrder('proximas_cosechas'), getWidgetOrder('tratamientos_pendientes')) }}>
+      <SortableDashboardWidget id="proximas_cosechas" isEditMode={isEditMode}>
+      <div className="grid-2 mb-6" data-testid="dashboard-widgets">
         {isWidgetVisible('proximas_cosechas') && (
         <div className="card" data-testid="proximas-cosechas">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
@@ -484,18 +551,20 @@ const Dashboard = () => {
         </div>
         )}
       </div>
+      </SortableDashboardWidget>
       )}
       
       {/* Contratos Widget */}
       {isWidgetVisible('contratos_activos') && kpis.contratos_stats && (
-        <div style={{ order: getWidgetOrder('contratos_activos') }}>
+        <SortableDashboardWidget id="contratos_activos" isEditMode={isEditMode}>
           <DashboardContratosWidget kpis={kpis} navigate={navigate} />
-        </div>
+        </SortableDashboardWidget>
       )}
       
       {/* Proximas Visitas */}
       {isWidgetVisible('proximas_visitas') && kpis.visitas_stats && (
-        <div className="card mb-6" data-testid="proximas-visitas" style={{ order: getWidgetOrder('proximas_visitas') }}>
+        <SortableDashboardWidget id="proximas_visitas" isEditMode={isEditMode}>
+        <div className="card mb-6" data-testid="proximas-visitas">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <ClipboardList size={22} style={{ color: '#00897b' }} /> Proximas Visitas
@@ -565,11 +634,13 @@ const Dashboard = () => {
             </div>
           )}
         </div>
+      </SortableDashboardWidget>
       )}
       
       {/* Charts */}
       {isWidgetVisible('graficos_cultivos') && (
-      <div className="grid-2" style={{ marginBottom: '2rem', order: getWidgetOrder('graficos_cultivos') }}>
+      <SortableDashboardWidget id="graficos_cultivos" isEditMode={isEditMode}>
+      <div className="grid-2" style={{ marginBottom: '2rem' }}>
         {cultivoData.length > 0 && (
           <div className="card">
             <h2 className="card-title">{t('dashboard.charts.surfaceByCrop')}</h2>
@@ -606,18 +677,20 @@ const Dashboard = () => {
           </ResponsiveContainer>
         </div>
       </div>
+      </SortableDashboardWidget>
       )}
       
       {/* Mapa de Parcelas */}
       {isWidgetVisible('mapa_parcelas') && (
-        <div style={{ order: getWidgetOrder('mapa_parcelas') }}>
+        <SortableDashboardWidget id="mapa_parcelas" isEditMode={isEditMode}>
           <DashboardMapWidget parcelas={parcelas} mapType={mapType} setMapType={setMapType} navigate={navigate} t={t} />
-        </div>
+        </SortableDashboardWidget>
       )}
       
       {/* Calendario y Planificador de Visitas */}
       {isWidgetVisible('calendario') && (
-      <div className="grid-2 mb-6" style={{ order: getWidgetOrder('calendario') }}>
+      <SortableDashboardWidget id="calendario" isEditMode={isEditMode}>
+      <div className="grid-2 mb-6">
         <div className="card" data-testid="calendario-visitas">
           <h2 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <CalendarIcon size={20} /> {t('dashboard.calendar.title')}
@@ -699,11 +772,13 @@ const Dashboard = () => {
           )}
         </div>
       </div>
+      </SortableDashboardWidget>
       )}
       
       {/* Panel de Notificaciones por Email */}
       {isWidgetVisible('actividad_reciente') && (
-      <div className="card mb-6" data-testid="panel-notificaciones" style={{ order: getWidgetOrder('actividad_reciente') }}>
+      <SortableDashboardWidget id="actividad_reciente" isEditMode={isEditMode}>
+      <div className="card mb-6" data-testid="panel-notificaciones">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <h2 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Mail size={20} /> {t('dashboard.notifications.title')}
@@ -739,11 +814,12 @@ const Dashboard = () => {
           <p style={{ fontSize: '0.75rem', color: '#f57c00', marginTop: '1rem', padding: '0.5rem', backgroundColor: '#fff8e1', borderRadius: '4px' }}>{t('dashboard.notifications.configureApi')}</p>
         )}
       </div>
+      </SortableDashboardWidget>
       )}
       
       {/* Recent Activity */}
       {isWidgetVisible('actividad_reciente') && kpis.actividad_reciente && (
-        <div className="grid-2" style={{ order: getWidgetOrder('actividad_reciente') + 1 }}>
+        <div className="grid-2" style={{ marginBottom: '1.5rem' }}>
           <div className="card">
             <h2 className="card-title">{t('dashboard.visits.recentVisits')}</h2>
             {kpis.actividad_reciente.visitas.length > 0 ? (
@@ -775,7 +851,10 @@ const Dashboard = () => {
         </div>
       )}
       
-      </div>{/* Cierre del container flex de widgets */}
+      </div>
+      </SortableContext>
+      </DndContext>
+      {/* Cierre del container flex de widgets */}
       
       {/* Modal de Detalles de Visita */}
       {selectedVisita && (
