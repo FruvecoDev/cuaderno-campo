@@ -1,9 +1,20 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { MapContainer, TileLayer, WMSTileLayer, Polygon, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
 import {
   Search, MapPin, Download, CheckCircle, AlertCircle, Layers, Map,
-  ChevronDown, ChevronUp, Info, ExternalLink, Loader2
+  ChevronDown, ChevronUp, Info, ExternalLink, Loader2, Eye, EyeOff, Maximize2, Minimize2
 } from 'lucide-react';
 import api from '../services/api';
+import 'leaflet/dist/leaflet.css';
+
+// Fix marker icon
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
 
 const PROVINCIAS_ESPANA = {
   '01': 'Alava', '02': 'Albacete', '03': 'Alicante', '04': 'Almeria', '05': 'Avila',
@@ -19,6 +30,30 @@ const PROVINCIAS_ESPANA = {
   '50': 'Zaragoza', '51': 'Ceuta', '52': 'Melilla',
 };
 
+// FitBounds component
+const FitBoundsHelper = ({ bounds }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (bounds && map) {
+      try { map.fitBounds(bounds, { padding: [40, 40], maxZoom: 18 }); } catch (e) {}
+    }
+  }, [bounds, map]);
+  return null;
+};
+
+// FlyTo component
+const FlyToHelper = ({ center, zoom }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (center && map) {
+      try { map.flyTo(center, zoom || 16, { duration: 1.5 }); } catch (e) {}
+    }
+  }, [center, zoom, map]);
+  return null;
+};
+
+const SIGPAC_WMS_URL = 'https://wms.mapa.gob.es/sigpac/wms';
+
 export default function ConsultaSIGPAC() {
   const [form, setForm] = useState({
     provincia: '', municipio: '', agregado: '0', zona: '0', poligono: '', parcela: ''
@@ -31,6 +66,14 @@ export default function ConsultaSIGPAC() {
   const [importForm, setImportForm] = useState({ nombre: '', cultivo: '', campana: '', proveedor: '' });
   const [showImportForm, setShowImportForm] = useState(null);
   const [expandedRecinto, setExpandedRecinto] = useState({});
+  // Map state
+  const [showMap, setShowMap] = useState(true);
+  const [mapExpanded, setMapExpanded] = useState(false);
+  const [showWMS, setShowWMS] = useState(true);
+  const [baseLayer, setBaseLayer] = useState('satellite');
+  const [mapCenter, setMapCenter] = useState([39.5, -3.0]); // Center of Spain
+  const [mapZoom, setMapZoom] = useState(6);
+  const [geojsonData, setGeojsonData] = useState(null);
 
   const handleSearch = async () => {
     if (!form.provincia || !form.municipio || !form.poligono || !form.parcela) {
@@ -46,6 +89,27 @@ export default function ConsultaSIGPAC() {
       const data = await api.get(`/api/sigpac/consulta?${params.toString()}`);
       if (data.success) {
         setResults(data);
+        // Also fetch GeoJSON for map display
+        try {
+          const geoData = await api.get(`/api/sigpac/recintos?${params.toString()}`);
+          if (geoData.success && geoData.geojson) {
+            setGeojsonData(geoData.geojson);
+          }
+        } catch (geoErr) {
+          // GeoJSON is optional, don't block search results
+          console.debug('GeoJSON fetch optional:', geoErr);
+        }
+        // Approximate center based on province code
+        const provinceCenters = {
+          '30': [37.98, -1.13], '41': [37.39, -5.99], '46': [39.47, -0.38],
+          '04': [36.84, -2.46], '14': [37.88, -4.78], '18': [37.18, -3.60],
+          '23': [37.77, -3.79], '29': [36.72, -4.42], '03': [38.35, -0.49],
+          '08': [41.39, 2.17], '28': [40.42, -3.70], '50': [41.65, -0.88],
+        };
+        const center = provinceCenters[form.provincia] || [39.5, -3.0];
+        setMapCenter(center);
+        setMapZoom(14);
+        setShowMap(true);
       } else {
         setError(data.message || 'Error al consultar SIGPAC');
       }
@@ -165,6 +229,150 @@ export default function ConsultaSIGPAC() {
             Recintos: <strong>{importSuccess.recintos_importados}</strong>
           </div>
         </div>
+      )}
+
+      {/* Interactive Map */}
+      {showMap && (
+        <div style={{ marginBottom: '1.5rem' }} data-testid="sigpac-map-section">
+          <div style={{
+            borderRadius: mapExpanded ? '0' : '8px',
+            overflow: 'hidden',
+            border: '2px solid #1565c0',
+            ...(mapExpanded ? { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, borderRadius: 0 } : {})
+          }}>
+            {/* Map header */}
+            <div style={{
+              backgroundColor: '#1565c0', color: 'white', padding: '0.5rem 1rem',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+            }}>
+              <span style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Map size={18} /> Mapa SIGPAC Interactivo
+              </span>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button onClick={() => setShowWMS(!showWMS)} style={{
+                  background: showWMS ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)',
+                  border: 'none', color: 'white', padding: '3px 8px', borderRadius: '4px', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem'
+                }} data-testid="btn-toggle-wms" title="Mostrar/Ocultar capa SIGPAC oficial">
+                  {showWMS ? <Eye size={14} /> : <EyeOff size={14} />}
+                  Capa SIGPAC
+                </button>
+                <select value={baseLayer} onChange={e => setBaseLayer(e.target.value)} style={{
+                  padding: '3px 6px', borderRadius: '4px', border: 'none', fontSize: '0.8rem'
+                }} data-testid="select-base-layer">
+                  <option value="satellite">Satelite</option>
+                  <option value="osm">Callejero</option>
+                  <option value="topo">Topografico</option>
+                </select>
+                <button onClick={() => setMapExpanded(!mapExpanded)} style={{
+                  background: 'rgba(255,255,255,0.15)', border: 'none', color: 'white',
+                  padding: '3px 8px', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px'
+                }} data-testid="btn-expand-map">
+                  {mapExpanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                </button>
+                <button onClick={() => setShowMap(false)} style={{
+                  background: 'rgba(255,255,255,0.15)', border: 'none', color: 'white',
+                  padding: '3px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem'
+                }}>x</button>
+              </div>
+            </div>
+
+            {/* Map body */}
+            <div style={{ height: mapExpanded ? 'calc(100vh - 42px)' : '420px' }}>
+              <MapContainer center={mapCenter} zoom={mapZoom} style={{ height: '100%', width: '100%' }} key={`map-${mapExpanded}`}>
+                {baseLayer === 'satellite' && (
+                  <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" attribution="Esri" />
+                )}
+                {baseLayer === 'osm' && (
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="OSM" />
+                )}
+                {baseLayer === 'topo' && (
+                  <TileLayer url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png" attribution="OpenTopoMap" />
+                )}
+
+                {/* SIGPAC WMS Overlay */}
+                {showWMS && (
+                  <WMSTileLayer
+                    url={SIGPAC_WMS_URL}
+                    layers="AU.Sigpac:recinto"
+                    format="image/png"
+                    transparent={true}
+                    opacity={0.6}
+                    attribution="SIGPAC - Ministerio de Agricultura"
+                  />
+                )}
+
+                {/* GeoJSON parcels from search results */}
+                {geojsonData?.features?.map((feature, idx) => {
+                  if (!feature.geometry) return null;
+                  const { type, coordinates } = feature.geometry;
+                  if (type === 'Polygon') {
+                    const positions = coordinates[0]?.map(c => [c[1], c[0]]) || [];
+                    return (
+                      <Polygon key={`poly-${idx}`} positions={positions} pathOptions={{
+                        color: '#ff6b00', weight: 3, fillColor: '#ff6b00', fillOpacity: 0.25
+                      }}>
+                        <Popup>
+                          <strong>Recinto {feature.properties?.recinto || idx + 1}</strong><br />
+                          Uso: {feature.properties?.uso_sigpac || '-'}<br />
+                          Sup: {(feature.properties?.dn_surface || 0).toFixed(4)} ha
+                        </Popup>
+                      </Polygon>
+                    );
+                  }
+                  if (type === 'MultiPolygon') {
+                    return coordinates.map((poly, pi) => {
+                      const positions = poly[0]?.map(c => [c[1], c[0]]) || [];
+                      return <Polygon key={`mpoly-${idx}-${pi}`} positions={positions} pathOptions={{
+                        color: '#ff6b00', weight: 3, fillColor: '#ff6b00', fillOpacity: 0.25
+                      }} />;
+                    });
+                  }
+                  return null;
+                })}
+
+                {/* Marker for search result center */}
+                {results && results.success && (
+                  <Marker position={mapCenter}>
+                    <Popup>
+                      <strong>Ref: {results.referencia}</strong><br />
+                      {results.total_recintos} recinto(s)
+                    </Popup>
+                  </Marker>
+                )}
+
+                <FlyToHelper center={mapCenter} zoom={mapZoom} />
+              </MapContainer>
+            </div>
+
+            {/* Map legend */}
+            <div style={{
+              backgroundColor: '#f5f5f5', padding: '0.4rem 1rem', fontSize: '0.75rem',
+              display: 'flex', gap: '1.5rem', alignItems: 'center', color: '#555',
+              borderTop: '1px solid #ddd'
+            }}>
+              {showWMS && (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <span style={{ width: 12, height: 12, background: 'rgba(100,100,255,0.4)', border: '1px solid #66f', display: 'inline-block', borderRadius: 2 }}></span>
+                  Recintos SIGPAC (WMS oficial)
+                </span>
+              )}
+              {geojsonData && (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <span style={{ width: 12, height: 12, background: 'rgba(255,107,0,0.25)', border: '2px solid #ff6b00', display: 'inline-block', borderRadius: 2 }}></span>
+                  Parcela consultada
+                </span>
+              )}
+              <span style={{ marginLeft: 'auto', fontStyle: 'italic' }}>Fuente: Ministerio de Agricultura, Pesca y Alimentacion</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!showMap && (
+        <button onClick={() => setShowMap(true)} className="btn btn-secondary btn-sm" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }} data-testid="btn-show-map">
+          <Map size={16} /> Mostrar Mapa
+        </button>
       )}
 
       {/* Results */}
