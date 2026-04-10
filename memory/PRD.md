@@ -19,11 +19,18 @@ Aplicacion de campo para agricultura: Cuaderno de Campo completo con modulos de 
 - Notificaciones In-App con badge y auto-generacion de alertas
 - Historial de Tratamientos por Parcela (modal con estadisticas y tabla)
 
+## Refactorizaciones Completadas
+- Dashboard.js: 2168 -> 788 lineas (5 widgets extraidos)
+- Contratos.js: 1917 -> 388 lineas (form, filters, table extraidos)
+- routes_rrhh.py: 1905 -> 270 lineas (4 sub-routers)
+- Tratamientos.js: 2631 -> 1785 lineas (4 subcomponentes)
+- Visitas.js: 1921 -> 447 lineas (5 subcomponentes: Filters, Form, Table, DetailModal, AnalysisModal)
+
 ## Funcionalidades Core
 - Autenticacion JWT con RBAC
 - Dashboard drag-and-drop personalizable (@dnd-kit)
 - Exportacion PDF/Excel en todos los modulos
-- Alertas inteligentes + notificaciones automaticas (ITV, mantenimiento, certificados, tareas vencidas, contratos por vencer)
+- Alertas inteligentes + notificaciones automaticas
 - Asistente IA (GPT-4o via Emergent LLM Key)
 - API REST completa para integracion ERP bidireccional
 - SIGPAC: mapa WMS interactivo, click-to-identify (OGC API)
@@ -45,9 +52,7 @@ Aplicacion de campo para agricultura: Cuaderno de Campo completo con modulos de 
 - Admin: admin@fruveco.com / admin123
 
 ## Backlog
-- P1: Integraciones IA avanzadas (resumenes contratos, predicciones cosechas)
 - P1: Identificacion NFC para fichajes RRHH
 - P0: App movil nativa (React Native)
-- P2: Refactorizar Visitas.js (~1920 lineas)
 - P2: Email (Resend) - Bloqueado API Key
 - P2: Meteorologia (OpenWeatherMap) - Bloqueado API Key
