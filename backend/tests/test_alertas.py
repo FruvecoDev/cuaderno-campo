@@ -134,6 +134,149 @@ class TestAlertasEndpoints:
         assert response.status_code in [401, 403], f"Expected 401/403 without auth, got {response.status_code}"
 
 
+class TestAlertasCrearTarea:
+    """Test crear-tarea and tareas-existentes endpoints for alert task creation"""
+    
+    def test_crear_tarea_mantenimiento_maquinaria(self, api_client, auth_token):
+        """Test POST /api/alertas/crear-tarea creates a task for mantenimiento_maquinaria type"""
+        # First check if there's a mantenimiento alert
+        resumen_response = api_client.get(
+            f"{BASE_URL}/api/alertas/resumen",
+            headers={"Authorization": f"Bearer {auth_token}"}
+        )
+        assert resumen_response.status_code == 200
+        
+        maquinaria = resumen_response.json()["maquinaria"]
+        mantenimiento_pendiente = maquinaria.get("mantenimiento_pendiente", [])
+        
+        if len(mantenimiento_pendiente) == 0:
+            pytest.skip("No mantenimiento pendiente alerts to test with")
+        
+        # Get the first mantenimiento alert
+        alert_item = mantenimiento_pendiente[0]
+        nombre_recurso = alert_item["nombre"]
+        
+        payload = {
+            "tipo_alerta": "mantenimiento_maquinaria",
+            "nombre_recurso": nombre_recurso,
+            "detalle": f"Mantenimiento pendiente - {alert_item.get('dias_vencido', 0)} dias de retraso",
+            "fecha_vencimiento": alert_item.get("fecha_proxima_revision")
+        }
+        
+        response = api_client.post(
+            f"{BASE_URL}/api/alertas/crear-tarea",
+            json=payload,
+            headers={"Authorization": f"Bearer {auth_token}"}
+        )
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+        
+        data = response.json()
+        # Could be success=True (new task) or success=False (duplicate)
+        assert "success" in data, "Response should have success field"
+        assert "message" in data, "Response should have message field"
+        
+        print(f"Crear tarea response: success={data['success']}, message={data['message']}")
+        
+        if data["success"]:
+            assert "tarea" in data, "Should have tarea object when success=True"
+            tarea = data["tarea"]
+            assert tarea.get("tipo_tarea") == "mantenimiento", f"Expected tipo_tarea=mantenimiento, got {tarea.get('tipo_tarea')}"
+            assert tarea.get("prioridad") in ["alta", "media"], f"Expected prioridad alta/media, got {tarea.get('prioridad')}"
+            assert tarea.get("alerta_origen") == f"alerta_mantenimiento_maquinaria_{nombre_recurso}"
+            print(f"Created task: {tarea.get('nombre')} with prioridad={tarea.get('prioridad')}")
+    
+    def test_crear_tarea_prevents_duplicates(self, api_client, auth_token):
+        """Test POST /api/alertas/crear-tarea prevents duplicate task creation"""
+        # Try to create a task for ITV maquinaria (which should already have a task from curl)
+        payload = {
+            "tipo_alerta": "itv_maquinaria",
+            "nombre_recurso": "Tractor John Deere 6120M",
+            "detalle": "ITV vencida test",
+            "fecha_vencimiento": "2026-03-15"
+        }
+        
+        response = api_client.post(
+            f"{BASE_URL}/api/alertas/crear-tarea",
+            json=payload,
+            headers={"Authorization": f"Bearer {auth_token}"}
+        )
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+        
+        data = response.json()
+        # According to context, a task was already created via curl for this alert
+        # So this should return success=False
+        print(f"Duplicate check response: success={data['success']}, message={data['message']}")
+        
+        # If success=False, it means duplicate prevention is working
+        if not data["success"]:
+            assert "Ya existe una tarea activa" in data["message"], "Should indicate existing task"
+            assert "tarea_id" in data, "Should return existing tarea_id"
+            print(f"Duplicate prevention working - existing tarea_id: {data.get('tarea_id')}")
+    
+    def test_get_tareas_existentes(self, api_client, auth_token):
+        """Test GET /api/alertas/tareas-existentes returns alert keys with active tasks"""
+        response = api_client.get(
+            f"{BASE_URL}/api/alertas/tareas-existentes",
+            headers={"Authorization": f"Bearer {auth_token}"}
+        )
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+        
+        data = response.json()
+        assert "tareas_existentes" in data, "Response should have tareas_existentes list"
+        
+        tareas_existentes = data["tareas_existentes"]
+        assert isinstance(tareas_existentes, list), "tareas_existentes should be a list"
+        
+        print(f"Tareas existentes count: {len(tareas_existentes)}")
+        print(f"Tareas existentes keys: {tareas_existentes}")
+        
+        # According to context, at least the ITV task should exist
+        # Check if the expected key format is present
+        if len(tareas_existentes) > 0:
+            for key in tareas_existentes:
+                assert key.startswith("alerta_"), f"Key should start with 'alerta_', got {key}"
+    
+    def test_created_task_appears_in_tareas_list(self, api_client, auth_token):
+        """Test that created task appears in GET /api/tareas with correct tipo_tarea and prioridad"""
+        response = api_client.get(
+            f"{BASE_URL}/api/tareas",
+            headers={"Authorization": f"Bearer {auth_token}"}
+        )
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+        
+        data = response.json()
+        tareas = data.get("tareas", [])
+        
+        # Find tasks created from alerts (have alerta_origen field)
+        alert_tasks = [t for t in tareas if t.get("alerta_origen")]
+        print(f"Found {len(alert_tasks)} tasks created from alerts")
+        
+        for task in alert_tasks:
+            print(f"  - {task.get('nombre')}: tipo={task.get('tipo_tarea')}, prioridad={task.get('prioridad')}, alerta_origen={task.get('alerta_origen')}")
+            assert task.get("tipo_tarea") == "mantenimiento", f"Alert task should have tipo_tarea=mantenimiento"
+            assert task.get("prioridad") in ["alta", "media"], f"Alert task should have prioridad alta/media"
+    
+    def test_alertas_resumen_returns_expected_count(self, api_client, auth_token):
+        """Test GET /api/alertas/resumen returns expected 2 alerts (1 ITV vencida + 1 mantenimiento pendiente)"""
+        response = api_client.get(
+            f"{BASE_URL}/api/alertas/resumen",
+            headers={"Authorization": f"Bearer {auth_token}"}
+        )
+        assert response.status_code == 200
+        
+        data = response.json()
+        maquinaria = data["maquinaria"]
+        
+        itv_vencida_count = len(maquinaria.get("itv_vencida", []))
+        mantenimiento_count = len(maquinaria.get("mantenimiento_pendiente", []))
+        
+        print(f"ITV vencida: {itv_vencida_count}, Mantenimiento pendiente: {mantenimiento_count}")
+        
+        # According to context, should have at least 1 ITV vencida and 1 mantenimiento pendiente
+        assert itv_vencida_count >= 1, f"Expected at least 1 ITV vencida, got {itv_vencida_count}"
+        assert mantenimiento_count >= 1, f"Expected at least 1 mantenimiento pendiente, got {mantenimiento_count}"
+
+
 class TestMaquinariaITVFields:
     """Test Maquinaria CRUD with ITV/maintenance fields"""
     

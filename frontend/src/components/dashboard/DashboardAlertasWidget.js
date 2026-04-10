@@ -1,39 +1,90 @@
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, Shield, Cog, ChevronDown, ChevronUp, Clock, XCircle, AlertCircle } from 'lucide-react';
+import { AlertTriangle, Shield, Cog, ChevronDown, ChevronUp, Clock, XCircle, AlertCircle, Plus, CheckCircle } from 'lucide-react';
 import api from '../../services/api';
 
-const AlertItem = ({ item, icon, colorClass }) => (
-  <div style={{
-    display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.75rem',
-    borderRadius: '6px', backgroundColor: `hsl(var(${colorClass}) / 0.06)`,
-    border: `1px solid hsl(var(${colorClass}) / 0.15)`,
-  }}>
-    <div style={{ flexShrink: 0, color: `hsl(var(${colorClass}))` }}>{icon}</div>
-    <div style={{ flex: 1, minWidth: 0 }}>
-      <div style={{ fontWeight: '500', fontSize: '0.85rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.nombre}</div>
-      <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>{item.detalle}</div>
+const AlertItem = ({ item, icon, colorClass, alertKey, tareasExistentes, onCrearTarea, creatingTask }) => {
+  const tareaExiste = tareasExistentes.includes(alertKey);
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.75rem',
+      borderRadius: '6px', backgroundColor: `hsl(var(${colorClass}) / 0.06)`,
+      border: `1px solid hsl(var(${colorClass}) / 0.15)`,
+    }}>
+      <div style={{ flexShrink: 0, color: `hsl(var(${colorClass}))` }}>{icon}</div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontWeight: '500', fontSize: '0.85rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.nombre}</div>
+        <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>{item.detalle}</div>
+      </div>
+      <span style={{
+        fontSize: '0.7rem', fontWeight: '600', padding: '0.15rem 0.5rem', borderRadius: '10px',
+        backgroundColor: `hsl(var(${colorClass}) / 0.15)`, color: `hsl(var(${colorClass}))`,
+        whiteSpace: 'nowrap', flexShrink: 0,
+      }}>{item.badge}</span>
+      {tareaExiste ? (
+        <span data-testid={`tarea-existente-${alertKey}`} style={{
+          display: 'flex', alignItems: 'center', gap: '0.2rem',
+          fontSize: '0.7rem', color: 'hsl(142 76% 36%)', fontWeight: '600', whiteSpace: 'nowrap', flexShrink: 0,
+        }}>
+          <CheckCircle size={14} /> Tarea creada
+        </span>
+      ) : (
+        <button
+          data-testid={`crear-tarea-${alertKey}`}
+          onClick={() => onCrearTarea(item)}
+          disabled={creatingTask}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '0.2rem',
+            fontSize: '0.7rem', fontWeight: '600', padding: '0.25rem 0.5rem',
+            borderRadius: '6px', border: '1px solid hsl(var(--primary) / 0.3)',
+            backgroundColor: 'hsl(var(--primary) / 0.08)', color: 'hsl(var(--primary))',
+            cursor: creatingTask ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+            opacity: creatingTask ? 0.5 : 1,
+          }}
+        >
+          <Plus size={12} /> Crear Tarea
+        </button>
+      )}
     </div>
-    <span style={{
-      fontSize: '0.7rem', fontWeight: '600', padding: '0.15rem 0.5rem', borderRadius: '10px',
-      backgroundColor: `hsl(var(${colorClass}) / 0.15)`, color: `hsl(var(${colorClass}))`,
-      whiteSpace: 'nowrap', flexShrink: 0,
-    }}>{item.badge}</span>
-  </div>
-);
+  );
+};
 
 const DashboardAlertasWidget = () => {
   const [alertas, setAlertas] = useState(null);
   const [loading, setLoading] = useState(true);
   const [expandedSection, setExpandedSection] = useState(null);
+  const [tareasExistentes, setTareasExistentes] = useState([]);
+  const [creatingTask, setCreatingTask] = useState(false);
 
-  useEffect(() => { fetchAlertas(); }, []);
+  useEffect(() => {
+    fetchAlertas();
+    fetchTareasExistentes();
+  }, []);
 
   const fetchAlertas = async () => {
-    try {
-      const data = await api.get('/api/alertas/resumen');
-      setAlertas(data);
-    } catch (err) { console.error('Error fetching alerts:', err); }
+    try { const data = await api.get('/api/alertas/resumen'); setAlertas(data); }
+    catch (err) { console.error('Error fetching alerts:', err); }
     finally { setLoading(false); }
+  };
+
+  const fetchTareasExistentes = async () => {
+    try { const data = await api.get('/api/alertas/tareas-existentes'); setTareasExistentes(data.tareas_existentes || []); }
+    catch (err) { console.error('Error fetching existing tasks:', err); }
+  };
+
+  const handleCrearTarea = async (item) => {
+    setCreatingTask(true);
+    try {
+      const res = await api.post('/api/alertas/crear-tarea', {
+        tipo_alerta: item.tipo_alerta,
+        nombre_recurso: item.nombre,
+        detalle: item.detalle,
+        fecha_vencimiento: item.fecha_vencimiento || null,
+      });
+      if (res.success) {
+        fetchTareasExistentes();
+      }
+    } catch (err) { console.error('Error creating task:', err); }
+    finally { setCreatingTask(false); }
   };
 
   if (loading) {
@@ -64,26 +115,29 @@ const DashboardAlertasWidget = () => {
   const { tecnicos, maquinaria } = alertas;
   const totalCriticas = (tecnicos?.total_criticas || 0) + (maquinaria?.total_criticas || 0);
 
+  const buildAlertKey = (tipo, nombre) => `alerta_${tipo}_${nombre}`;
+
   const tecnicosItems = [
-    ...(tecnicos?.vencidos || []).map(t => ({ nombre: t.nombre, detalle: `Carnet ${t.num_carnet} - Vencido: ${t.fecha_validez}`, badge: 'VENCIDO' })),
-    ...(tecnicos?.proximo_30 || []).map(t => ({ nombre: t.nombre, detalle: `Carnet ${t.num_carnet} - Vence: ${t.fecha_validez}`, badge: '< 30 dias' })),
-    ...(tecnicos?.proximo_60 || []).map(t => ({ nombre: t.nombre, detalle: `Carnet ${t.num_carnet} - Vence: ${t.fecha_validez}`, badge: '< 60 dias' })),
-    ...(tecnicos?.proximo_90 || []).map(t => ({ nombre: t.nombre, detalle: `Carnet ${t.num_carnet} - Vence: ${t.fecha_validez}`, badge: '< 90 dias' })),
+    ...(tecnicos?.vencidos || []).map(t => ({ nombre: t.nombre, detalle: `Carnet ${t.num_carnet} - Vencido: ${t.fecha_validez}`, badge: 'VENCIDO', tipo_alerta: 'certificado_tecnico', fecha_vencimiento: t.fecha_validez, alertKey: buildAlertKey('certificado_tecnico', t.nombre) })),
+    ...(tecnicos?.proximo_30 || []).map(t => ({ nombre: t.nombre, detalle: `Carnet ${t.num_carnet} - Vence: ${t.fecha_validez}`, badge: '< 30 dias', tipo_alerta: 'certificado_tecnico', fecha_vencimiento: t.fecha_validez, alertKey: buildAlertKey('certificado_tecnico', t.nombre) })),
+    ...(tecnicos?.proximo_60 || []).map(t => ({ nombre: t.nombre, detalle: `Carnet ${t.num_carnet} - Vence: ${t.fecha_validez}`, badge: '< 60 dias', tipo_alerta: 'certificado_tecnico', fecha_vencimiento: t.fecha_validez, alertKey: buildAlertKey('certificado_tecnico', t.nombre) })),
+    ...(tecnicos?.proximo_90 || []).map(t => ({ nombre: t.nombre, detalle: `Carnet ${t.num_carnet} - Vence: ${t.fecha_validez}`, badge: '< 90 dias', tipo_alerta: 'certificado_tecnico', fecha_vencimiento: t.fecha_validez, alertKey: buildAlertKey('certificado_tecnico', t.nombre) })),
   ];
 
   const maqItvItems = [
-    ...(maquinaria?.itv_vencida || []).map(m => ({ nombre: m.nombre, detalle: `${m.tipo} - ${m.matricula || 'Sin matricula'} - ITV: ${m.fecha_proxima_itv}`, badge: 'VENCIDA' })),
-    ...(maquinaria?.itv_proximo_30 || []).map(m => ({ nombre: m.nombre, detalle: `${m.tipo} - ${m.matricula || 'Sin matricula'} - ITV: ${m.fecha_proxima_itv}`, badge: '< 30 dias' })),
+    ...(maquinaria?.itv_vencida || []).map(m => ({ nombre: m.nombre, detalle: `${m.tipo} - ${m.matricula || 'Sin matricula'} - ITV: ${m.fecha_proxima_itv}`, badge: 'VENCIDA', tipo_alerta: 'itv_maquinaria', fecha_vencimiento: m.fecha_proxima_itv, alertKey: buildAlertKey('itv_maquinaria', m.nombre) })),
+    ...(maquinaria?.itv_proximo_30 || []).map(m => ({ nombre: m.nombre, detalle: `${m.tipo} - ${m.matricula || 'Sin matricula'} - ITV: ${m.fecha_proxima_itv}`, badge: '< 30 dias', tipo_alerta: 'itv_maquinaria', fecha_vencimiento: m.fecha_proxima_itv, alertKey: buildAlertKey('itv_maquinaria', m.nombre) })),
   ];
 
   const maqMantItems = (maquinaria?.mantenimiento_pendiente || []).map(m => ({
-    nombre: m.nombre, detalle: `${m.tipo} - Ultimo: ${m.fecha_ultimo_mantenimiento} - ${m.dias_vencido} dias de retraso`, badge: 'PENDIENTE'
+    nombre: m.nombre, detalle: `${m.tipo} - Ultimo: ${m.fecha_ultimo_mantenimiento} - ${m.dias_vencido} dias de retraso`, badge: 'PENDIENTE',
+    tipo_alerta: 'mantenimiento_maquinaria', fecha_vencimiento: m.fecha_proxima_revision, alertKey: buildAlertKey('mantenimiento_maquinaria', m.nombre)
   }));
 
   const sections = [
     { key: 'tecnicos', label: 'Certificados Tecnicos', icon: <Shield size={18} />, items: tecnicosItems, color: '--destructive', vencidos: tecnicos?.vencidos?.length || 0, proximos: (tecnicos?.proximo_30?.length || 0) + (tecnicos?.proximo_60?.length || 0) + (tecnicos?.proximo_90?.length || 0) },
     { key: 'itv', label: 'ITV Maquinaria', icon: <Cog size={18} />, items: maqItvItems, color: '--destructive', vencidos: maquinaria?.itv_vencida?.length || 0, proximos: maquinaria?.itv_proximo_30?.length || 0 },
-    { key: 'mantenimiento', label: 'Mantenimiento Maquinaria', icon: <AlertCircle size={18} />, items: maqMantItems, color: '--warning-color', vencidos: maqMantItems.length, proximos: 0 },
+    { key: 'mantenimiento', label: 'Mantenimiento Maquinaria', icon: <AlertCircle size={18} />, items: maqMantItems, color: '--primary', vencidos: maqMantItems.length, proximos: 0 },
   ].filter(s => s.items.length > 0);
 
   const toggleExpand = (key) => setExpandedSection(prev => prev === key ? null : key);
@@ -140,6 +194,10 @@ const DashboardAlertasWidget = () => {
                     item={item}
                     icon={item.badge === 'VENCIDO' || item.badge === 'VENCIDA' || item.badge === 'PENDIENTE' ? <XCircle size={16} /> : <Clock size={16} />}
                     colorClass={item.badge === 'VENCIDO' || item.badge === 'VENCIDA' || item.badge === 'PENDIENTE' ? '--destructive' : '--primary'}
+                    alertKey={item.alertKey}
+                    tareasExistentes={tareasExistentes}
+                    onCrearTarea={handleCrearTarea}
+                    creatingTask={creatingTask}
                   />
                 ))}
               </div>
