@@ -1,0 +1,115 @@
+{
+  "summary": "Dashboard DnD (Drag-and-Drop) Widget Reordering Testing Complete. All 13 backend tests passed (100%). Frontend UI elements verified working: Edit mode button, banner, drag handles, sortable widgets, and config modal.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_dashboard_dnd.py",
+    "/app/test_reports/pytest/test_dashboard_dnd.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/tests/test_dashboard_dnd.py"
+  ],
+  "success_rate": {
+    "backend": "100% (13/13 tests passed)",
+    "frontend": "100% (all UI elements verified)"
+  },
+  "test_credentials": "admin@fruveco.com / admin123",
+  "seed_data_creation": "None - used existing data",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Dashboard DnD functionality fully verified. @dnd-kit integration working. All data-testids functional: btn-edit-mode, edit-mode-banner, btn-config-dashboard, sortable-widget-{id}, drag-handle-{id}. Config modal shows all 12 widgets with visibility toggles and up/down arrows.",
+  "features_verified": {
+    "backend_endpoints": {
+      "GET /api/dashboard/config": "PASSED - Returns user config with widgets array and available_widgets",
+      "POST /api/dashboard/config": "PASSED - Saves widget order and visibility, persists to user document",
+      "POST /api/dashboard/config/reset": "PASSED - Restores default widget configuration",
+      "GET /api/dashboard/kpis": "PASSED - Returns all dashboard KPIs data"
+    },
+    "frontend_ui_elements": {
+      "edit_mode_button": {
+        "data-testid": "btn-edit-mode",
+        "status": "PASSED - Button toggles between 'Reordenar' and 'Listo'"
+      },
+      "edit_mode_banner": {
+        "data-testid": "edit-mode-banner",
+        "status": "PASSED - Shows 'Arrastra los widgets para reordenarlos. Pulsa Listo cuando termines.'"
+      },
+      "config_button": {
+        "data-testid": "btn-config-dashboard",
+        "status": "PASSED - Opens config modal"
+      },
+      "drag_handles": {
+        "data-testid": "drag-handle-{widget_id}",
+        "status": "PASSED - 12 drag handles visible in edit mode"
+      },
+      "sortable_widgets": {
+        "data-testid": "sortable-widget-{widget_id}",
+        "status": "PASSED - 12 sortable widgets found"
+      },
+      "config_modal": {
+        "status": "PASSED - Shows all widgets with visibility toggles and up/down arrows"
+      }
+    },
+    "dashboard_widgets_rendered": [
+      "kpis_principales - KPIs grid with contracts, parcels, surface, treatments, production, income, costs, margin",
+      "productividad - Análisis de Productividad with rendimiento, coste/ha, ingresos/ha, margen/ha",
+      "centro_exportacion - Export center with module checkboxes and Excel/PDF buttons",
+      "alertas_avisos - Alerts widget showing ITV and Mantenimiento alerts",
+      "resumen_fincas - Fincas summary with chart by provincia",
+      "proximas_cosechas - Upcoming harvests widget",
+      "contratos_activos - Active contracts widget",
+      "proximas_visitas - Upcoming visits widget",
+      "graficos_cultivos - Charts for surface by crop and cost distribution",
+      "mapa_parcelas - Interactive map widget",
+      "calendario - Calendar widget",
+      "actividad_reciente - Recent activity and notifications panel"
+    ]
+  },
+  "test_results": {
+    "test_dashboard_dnd.py": {
+      "total": 13,
+      "passed": 13,
+      "failed": 0,
+      "tests": [
+        "TestDashboardConfigEndpoints::test_get_dashboard_config_returns_200 - PASSED",
+        "TestDashboardConfigEndpoints::test_get_dashboard_config_structure - PASSED",
+        "TestDashboardConfigEndpoints::test_get_dashboard_config_requires_auth - PASSED",
+        "TestDashboardConfigEndpoints::test_post_dashboard_config_saves_order - PASSED",
+        "TestDashboardConfigEndpoints::test_post_dashboard_config_saves_visibility - PASSED",
+        "TestDashboardConfigEndpoints::test_post_dashboard_config_requires_auth - PASSED",
+        "TestDashboardConfigEndpoints::test_reset_dashboard_config - PASSED",
+        "TestDashboardConfigEndpoints::test_reset_dashboard_config_requires_auth - PASSED",
+        "TestDashboardKPIsEndpoint::test_get_dashboard_kpis_returns_200 - PASSED",
+        "TestDashboardKPIsEndpoint::test_get_dashboard_kpis_structure - PASSED",
+        "TestDashboardKPIsEndpoint::test_get_dashboard_kpis_no_auth_required - PASSED",
+        "TestWidgetOrderPersistence::test_drag_and_drop_order_persists - PASSED",
+        "TestWidgetOrderPersistence::test_multiple_reorders_persist - PASSED"
+      ]
+    },
+    "playwright_tests": {
+      "dashboard_loads": "PASSED - Dashboard page loads with all widgets",
+      "edit_mode_toggle": "PASSED - Button toggles edit mode on/off",
+      "edit_mode_banner": "PASSED - Banner appears/disappears correctly",
+      "drag_handles_visible": "PASSED - 12 drag handles visible in edit mode",
+      "sortable_widgets": "PASSED - 12 sortable widgets with correct data-testids",
+      "config_modal": "PASSED - Modal opens with widget list, toggles, and arrows"
+    }
+  },
+  "dnd_implementation_details": {
+    "library": "@dnd-kit/core, @dnd-kit/sortable",
+    "components": {
+      "Dashboard.js": "DndContext, SortableContext with verticalListSortingStrategy, handleDragEnd callback",
+      "SortableDashboardWidget.js": "useSortable hook, drag handle with GripVertical icon, dashed border in edit mode"
+    },
+    "auto_save": "Widget order auto-saves to backend on drag end via POST /api/dashboard/config"
+  }
+}
