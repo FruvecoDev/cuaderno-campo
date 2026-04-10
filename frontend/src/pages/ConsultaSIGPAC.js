@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { MapContainer, TileLayer, WMSTileLayer, Polygon, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, WMSTileLayer, Polygon, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import {
   Search, MapPin, Download, CheckCircle, AlertCircle, Layers, Map,
-  ChevronDown, ChevronUp, Info, ExternalLink, Loader2, Eye, EyeOff, Maximize2, Minimize2
+  ChevronDown, ChevronUp, Info, ExternalLink, Loader2, Eye, EyeOff, Maximize2, Minimize2,
+  MousePointer, X
 } from 'lucide-react';
 import api from '../services/api';
 import 'leaflet/dist/leaflet.css';
@@ -54,6 +55,31 @@ const FlyToHelper = ({ center, zoom }) => {
 
 const SIGPAC_WMS_URL = 'https://wms.mapa.gob.es/sigpac/wms';
 
+const USOS_SIGPAC = {
+  'AG': 'Corrientes de agua', 'CA': 'Viales', 'CF': 'Citricos-Frutal', 'CI': 'Citricos',
+  'CS': 'Citricos-Cascara', 'ED': 'Edificaciones', 'EP': 'Elem. paisaje',
+  'FF': 'Forestal-Frutal', 'FL': 'Flores', 'FO': 'Forestal', 'FS': 'Forestal-Cascara',
+  'FV': 'Frutal-Vinedo', 'FY': 'Frutal', 'HN': 'Nogales', 'HR': 'Huerta',
+  'IM': 'Improductivos', 'IV': 'Invernadero', 'NR': 'No indicado',
+  'OC': 'Olivar-Citricos', 'OF': 'Olivar-Frutal', 'OV': 'Olivar',
+  'PA': 'Pasto arbolado', 'PR': 'Pasto arbustivo', 'PS': 'Pastizal',
+  'TA': 'Tierra arable', 'TH': 'Huerta sin riego', 'VF': 'Vinedo-Frutal',
+  'VI': 'Vinedo', 'VO': 'Vinedo-Olivar', 'ZC': 'Zona concentrada',
+  'ZU': 'Zona urbana', 'ZV': 'Zona censurada'
+};
+
+// Click handler component
+const MapClickHandler = ({ onMapClick, clickMode }) => {
+  useMapEvents({
+    click: (e) => {
+      if (clickMode) {
+        onMapClick(e.latlng);
+      }
+    }
+  });
+  return null;
+};
+
 export default function ConsultaSIGPAC() {
   const [form, setForm] = useState({
     provincia: '', municipio: '', agregado: '0', zona: '0', poligono: '', parcela: ''
@@ -74,6 +100,11 @@ export default function ConsultaSIGPAC() {
   const [mapCenter, setMapCenter] = useState([39.5, -3.0]); // Center of Spain
   const [mapZoom, setMapZoom] = useState(6);
   const [geojsonData, setGeojsonData] = useState(null);
+  // Click-to-info state
+  const [clickMode, setClickMode] = useState(true);
+  const [clickInfo, setClickInfo] = useState(null);
+  const [clickLoading, setClickLoading] = useState(false);
+  const [clickPolygon, setClickPolygon] = useState(null);
 
   const handleSearch = async () => {
     if (!form.provincia || !form.municipio || !form.poligono || !form.parcela) {
@@ -117,6 +148,29 @@ export default function ConsultaSIGPAC() {
       setError('Error de conexion con SIGPAC');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleMapClick = async (latlng) => {
+    setClickLoading(true);
+    setClickInfo(null);
+    setClickPolygon(null);
+    try {
+      const data = await api.get(`/api/sigpac/info-punto?lat=${latlng.lat}&lng=${latlng.lng}`);
+      if (data.success && data.encontrado) {
+        setClickInfo(data.recinto);
+        // Extract polygon from geometry for highlighting
+        if (data.recinto.geometry?.type === 'Polygon') {
+          const coords = data.recinto.geometry.coordinates[0]?.map(c => [c[1], c[0]]) || [];
+          setClickPolygon(coords);
+        }
+      } else {
+        setClickInfo({ empty: true, message: data.message || 'No se encontro recinto en este punto' });
+      }
+    } catch (e) {
+      setClickInfo({ empty: true, message: 'Error al consultar' });
+    } finally {
+      setClickLoading(false);
     }
   };
 
@@ -249,6 +303,15 @@ export default function ConsultaSIGPAC() {
                 <Map size={18} /> Mapa SIGPAC Interactivo
               </span>
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button onClick={() => setClickMode(!clickMode)} style={{
+                  background: clickMode ? 'rgba(76,175,80,0.5)' : 'rgba(255,255,255,0.1)',
+                  border: clickMode ? '1px solid rgba(76,175,80,0.8)' : 'none',
+                  color: 'white', padding: '3px 8px', borderRadius: '4px', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem'
+                }} data-testid="btn-click-identify" title="Click en el mapa para identificar recintos SIGPAC">
+                  <MousePointer size={14} />
+                  {clickMode ? 'Identificar: ON' : 'Identificar'}
+                </button>
                 <button onClick={() => setShowWMS(!showWMS)} style={{
                   background: showWMS ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)',
                   border: 'none', color: 'white', padding: '3px 8px', borderRadius: '4px', cursor: 'pointer',
@@ -278,7 +341,7 @@ export default function ConsultaSIGPAC() {
             </div>
 
             {/* Map body */}
-            <div style={{ height: mapExpanded ? 'calc(100vh - 42px)' : '420px' }}>
+            <div style={{ height: mapExpanded ? 'calc(100vh - 42px)' : '420px', position: 'relative' }}>
               <MapContainer center={mapCenter} zoom={mapZoom} style={{ height: '100%', width: '100%' }} key={`map-${mapExpanded}`}>
                 {baseLayer === 'satellite' && (
                   <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" attribution="Esri" />
@@ -342,8 +405,108 @@ export default function ConsultaSIGPAC() {
                 )}
 
                 <FlyToHelper center={mapCenter} zoom={mapZoom} />
+                
+                {/* Click handler for identify mode */}
+                <MapClickHandler onMapClick={handleMapClick} clickMode={clickMode} />
+                
+                {/* Highlighted polygon from click */}
+                {clickPolygon && clickPolygon.length > 2 && (
+                  <Polygon positions={clickPolygon} pathOptions={{
+                    color: '#00e676', weight: 3, fillColor: '#00e676', fillOpacity: 0.3,
+                    dashArray: '8,4'
+                  }}>
+                    {clickInfo && !clickInfo.empty && (
+                      <Popup>
+                        <div style={{ minWidth: 200 }}>
+                          <strong style={{ fontSize: '0.95rem' }}>Recinto {clickInfo.recinto}</strong>
+                          <div style={{ fontSize: '0.8rem', marginTop: 4, lineHeight: 1.6 }}>
+                            <div><strong>Ref:</strong> {clickInfo.referencia}</div>
+                            {clickInfo.uso_sigpac && <div><strong>Uso:</strong> {clickInfo.uso_sigpac} ({USOS_SIGPAC[clickInfo.uso_sigpac] || ''})</div>}
+                            {clickInfo.superficie_ha != null && <div><strong>Superficie:</strong> {Number(clickInfo.superficie_ha).toFixed(4)} ha</div>}
+                            {clickInfo.pendiente_media != null && <div><strong>Pendiente:</strong> {clickInfo.pendiente_media}%</div>}
+                            {clickInfo.altitud != null && <div><strong>Altitud:</strong> {clickInfo.altitud} m</div>}
+                            {clickInfo.coef_regadio != null && clickInfo.coef_regadio > 0 && <div><strong>Coef. Regadio:</strong> {clickInfo.coef_regadio}</div>}
+                            {clickInfo.referencia_catastral && <div><strong>Ref. Catastral:</strong> {clickInfo.referencia_catastral}</div>}
+                          </div>
+                        </div>
+                      </Popup>
+                    )}
+                  </Polygon>
+                )}
               </MapContainer>
             </div>
+
+            {/* Click info panel (floating) */}
+            {(clickInfo || clickLoading) && (
+              <div style={{
+                position: 'absolute', bottom: mapExpanded ? 60 : 50, left: 12, zIndex: 1000,
+                backgroundColor: 'rgba(255,255,255,0.97)', borderRadius: '8px',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.25)', padding: '0.75rem',
+                maxWidth: 300, fontSize: '0.85rem'
+              }} data-testid="click-info-panel">
+                {clickLoading ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#1565c0' }}>
+                    <Loader2 size={16} className="animate-spin" /> Consultando SIGPAC...
+                  </div>
+                ) : clickInfo?.empty ? (
+                  <div style={{ color: '#757575' }}>
+                    <Info size={14} style={{ display: 'inline', marginRight: 4 }} />
+                    {clickInfo.message}
+                  </div>
+                ) : clickInfo ? (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                      <strong style={{ color: '#1565c0', fontSize: '0.9rem' }}>
+                        <MapPin size={14} style={{ display: 'inline', marginRight: 4 }} />
+                        Recinto {clickInfo.recinto}
+                      </strong>
+                      <button onClick={() => { setClickInfo(null); setClickPolygon(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.2rem 0.5rem', lineHeight: 1.5 }}>
+                      <span style={{ color: '#757575' }}>Provincia:</span><strong>{String(clickInfo.provincia).padStart(2, '0')}</strong>
+                      <span style={{ color: '#757575' }}>Municipio:</span><strong>{String(clickInfo.municipio).padStart(3, '0')}</strong>
+                      <span style={{ color: '#757575' }}>Poligono:</span><strong>{clickInfo.poligono}</strong>
+                      <span style={{ color: '#757575' }}>Parcela:</span><strong>{clickInfo.parcela}</strong>
+                      <span style={{ color: '#757575' }}>Recinto:</span><strong>{clickInfo.recinto}</strong>
+                      {clickInfo.uso_sigpac && (
+                        <><span style={{ color: '#757575' }}>Uso:</span><strong>{clickInfo.uso_sigpac} <span style={{ fontWeight: 400, fontSize: '0.75rem' }}>({USOS_SIGPAC[clickInfo.uso_sigpac] || ''})</span></strong></>
+                      )}
+                      {clickInfo.superficie_ha != null && (
+                        <><span style={{ color: '#757575' }}>Superficie:</span><strong>{Number(clickInfo.superficie_ha).toFixed(4)} ha</strong></>
+                      )}
+                      {clickInfo.pendiente_media != null && (
+                        <><span style={{ color: '#757575' }}>Pendiente:</span><strong>{clickInfo.pendiente_media}%</strong></>
+                      )}
+                      {clickInfo.altitud != null && (
+                        <><span style={{ color: '#757575' }}>Altitud:</span><strong>{clickInfo.altitud} m</strong></>
+                      )}
+                      {clickInfo.referencia_catastral && (
+                        <><span style={{ color: '#757575' }}>Ref. Cat.:</span><strong style={{ fontSize: '0.75rem' }}>{clickInfo.referencia_catastral}</strong></>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => {
+                        setForm({
+                          provincia: String(clickInfo.provincia).padStart(2, '0'),
+                          municipio: String(clickInfo.municipio).padStart(3, '0'),
+                          agregado: String(clickInfo.agregado || 0),
+                          zona: String(clickInfo.zona || 0),
+                          poligono: String(clickInfo.poligono),
+                          parcela: String(clickInfo.parcela),
+                        });
+                      }}
+                      className="btn btn-primary btn-sm"
+                      style={{ marginTop: '0.5rem', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', fontSize: '0.8rem' }}
+                      data-testid="btn-fill-from-click"
+                    >
+                      <Search size={12} /> Rellenar formulario con estos datos
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            )}
 
             {/* Map legend */}
             <div style={{
@@ -357,10 +520,21 @@ export default function ConsultaSIGPAC() {
                   Recintos SIGPAC (WMS oficial)
                 </span>
               )}
+              {clickPolygon && (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <span style={{ width: 12, height: 12, background: 'rgba(0,230,118,0.3)', border: '2px dashed #00e676', display: 'inline-block', borderRadius: 2 }}></span>
+                  Recinto identificado
+                </span>
+              )}
               {geojsonData && (
                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                   <span style={{ width: 12, height: 12, background: 'rgba(255,107,0,0.25)', border: '2px solid #ff6b00', display: 'inline-block', borderRadius: 2 }}></span>
                   Parcela consultada
+                </span>
+              )}
+              {clickMode && (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#2e7d32', fontWeight: 600 }}>
+                  <MousePointer size={12} /> Click en el mapa para identificar recintos
                 </span>
               )}
               <span style={{ marginLeft: 'auto', fontStyle: 'italic' }}>Fuente: Ministerio de Agricultura, Pesca y Alimentacion</span>

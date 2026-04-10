@@ -297,6 +297,100 @@ async def get_wms_config(current_user: dict = Depends(get_current_user)):
     }
 
 
+SIGPAC_OGC_BASE = "https://sigpac-hubcloud.es/ogcapi"
+
+
+@router.get("/info-punto")
+async def get_info_por_coordenadas(
+    lat: float = Query(..., description="Latitud (WGS84)"),
+    lng: float = Query(..., description="Longitud (WGS84)"),
+    current_user: dict = Depends(get_current_user),
+):
+    """Consultar recinto SIGPAC por coordenadas GPS (click en mapa)"""
+    # Create a small bbox around the click point (~50m)
+    delta = 0.0005  # approx 50m
+    bbox = f"{lng - delta},{lat - delta},{lng + delta},{lat + delta}"
+    url = f"{SIGPAC_OGC_BASE}/collections/recintos/items?f=json&bbox={bbox}&limit=5"
+    
+    try:
+        async with httpx.AsyncClient(timeout=12.0) as client:
+            resp = await client.get(url, headers={"Accept": "application/json", "Accept-Encoding": "gzip, deflate"})
+        
+        if resp.status_code != 200:
+            return {"success": False, "message": f"SIGPAC OGC devolvio status {resp.status_code}"}
+        
+        data = resp.json()
+        features = data.get("features", [])
+        
+        if not features:
+            return {"success": True, "encontrado": False, "message": "No se encontro ningun recinto en este punto"}
+        
+        # Find the closest feature to the click point
+        best = features[0]
+        results = []
+        for feat in features:
+            props = feat.get("properties", {})
+            geom = feat.get("geometry", {})
+            
+            # Get uso from a separate call if available
+            uso_sigpac = props.get("uso_sigpac", "")
+            
+            results.append({
+                "provincia": props.get("provincia"),
+                "municipio": props.get("municipio"),
+                "agregado": props.get("agregado", 0),
+                "zona": props.get("zona", 0),
+                "poligono": props.get("poligono"),
+                "parcela": props.get("parcela"),
+                "recinto": props.get("recinto"),
+                "pendiente_media": props.get("pendiente_media"),
+                "altitud": props.get("altitud"),
+                "uso_sigpac": uso_sigpac,
+                "dn_pk": props.get("dn_pk"),
+                "geometry": geom,
+            })
+        
+        # Now get detailed info for the first recinto (uso, superficie, etc.)
+        main = results[0]
+        pr = str(main["provincia"]).zfill(2)
+        mu = str(main["municipio"]).zfill(3)
+        ag = str(main.get("agregado", 0))
+        zo = str(main.get("zona", 0))
+        po = str(main["poligono"])
+        pa = str(main["parcela"])
+        rec = str(main["recinto"])
+        
+        detail_url = f"{SIGPAC_REST_BASE}/recinfo/{pr}/{mu}/{ag}/{zo}/{po}/{pa}/{rec}.json"
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                detail_resp = await client.get(detail_url)
+            if detail_resp.status_code == 200:
+                detail_data = detail_resp.json()
+                if isinstance(detail_data, list) and detail_data:
+                    d = detail_data[0]
+                    main["uso_sigpac"] = d.get("uso_sigpac", d.get("uso", ""))
+                    main["superficie_ha"] = d.get("dn_surface", d.get("superficie", 0))
+                    main["coef_regadio"] = d.get("coef_regadio", 0)
+                    main["region"] = d.get("region", "")
+                    main["referencia_catastral"] = d.get("referencia_cat", "")
+        except Exception:
+            pass  # Detail is optional, don't fail
+        
+        main["referencia"] = f"{pr}/{mu}/{ag}/{zo}/{po}/{pa}/{rec}"
+        
+        return {
+            "success": True,
+            "encontrado": True,
+            "coordenadas": {"lat": lat, "lng": lng},
+            "recinto": main,
+            "total_recintos_area": len(results),
+        }
+    except httpx.TimeoutException:
+        return {"success": False, "message": "Timeout al consultar SIGPAC"}
+    except Exception as e:
+        return {"success": False, "message": f"Error: {str(e)}"}
+
+
 # Diccionario de usos SIGPAC
 USOS_SIGPAC = {
     "AG": "Corrientes y superficies de agua", "CA": "Viales",
