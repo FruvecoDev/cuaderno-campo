@@ -551,3 +551,161 @@ def calcular_proxima_ejecucion(config: dict) -> Optional[str]:
         return proxima.isoformat()
     except:
         return None
+
+
+
+# ==================== AUTO-GENERATE ALERT NOTIFICATIONS ====================
+
+@router.post("/generar-alertas")
+async def generar_alertas_automaticas(
+    current_user: dict = Depends(get_current_user)
+):
+    """Generate notifications from system alerts (maintenance, ITV, certificates, overdue tasks)"""
+    from datetime import timezone
+    now = datetime.now(timezone.utc)
+    today_str = now.strftime("%Y-%m-%d")
+    generated = 0
+
+    # 1. Machinery maintenance due/overdue
+    try:
+        maquinaria_col = db["maquinaria"]
+        maq_mant = await maquinaria_col.find({
+            "fecha_proximo_mantenimiento": {"$lte": today_str},
+            "activo": {"$ne": False},
+        }).to_list(50)
+        for m in maq_mant:
+            dedup = f"mant-{m.get('nombre','')}-{today_str}"
+            exists = await notificaciones_collection.find_one({"_dedup_key": dedup})
+            if not exists:
+                await notificaciones_collection.insert_one({
+                    "titulo": f"Mantenimiento pendiente: {m.get('nombre', 'Maquinaria')}",
+                    "mensaje": f"La maquina '{m.get('nombre')}' tiene mantenimiento programado para {m.get('fecha_proximo_mantenimiento')}",
+                    "tipo": "warning",
+                    "enlace": "/maquinaria",
+                    "prioridad": "high",
+                    "destinatarios": None,
+                    "datos_extra": {"modulo": "maquinaria", "alerta": "mantenimiento"},
+                    "leida_por": [],
+                    "created_at": now,
+                    "_dedup_key": dedup,
+                })
+                generated += 1
+    except Exception as e:
+        print(f"Error generating maintenance alerts: {e}")
+
+    # 2. ITV expiration
+    try:
+        maq_itv = await maquinaria_col.find({
+            "fecha_proxima_itv": {"$lte": today_str},
+            "activo": {"$ne": False},
+        }).to_list(50)
+        for m in maq_itv:
+            dedup = f"itv-{m.get('nombre','')}-{today_str}"
+            exists = await notificaciones_collection.find_one({"_dedup_key": dedup})
+            if not exists:
+                await notificaciones_collection.insert_one({
+                    "titulo": f"ITV vencida: {m.get('nombre', 'Maquinaria')}",
+                    "mensaje": f"La ITV de '{m.get('nombre')}' vencio el {m.get('fecha_proxima_itv')}. Renovar urgentemente.",
+                    "tipo": "error",
+                    "enlace": "/maquinaria",
+                    "prioridad": "high",
+                    "destinatarios": None,
+                    "datos_extra": {"modulo": "maquinaria", "alerta": "itv"},
+                    "leida_por": [],
+                    "created_at": now,
+                    "_dedup_key": dedup,
+                })
+                generated += 1
+    except Exception as e:
+        print(f"Error generating ITV alerts: {e}")
+
+    # 3. Technician certificate expiration
+    try:
+        tecnicos_col = db["tecnicos_aplicadores"]
+        tecnicos = await tecnicos_col.find({
+            "fecha_caducidad_carnet": {"$lte": today_str},
+            "activo": {"$ne": False},
+        }).to_list(50)
+        for t in tecnicos:
+            dedup = f"cert-{t.get('nombre','')}-{today_str}"
+            exists = await notificaciones_collection.find_one({"_dedup_key": dedup})
+            if not exists:
+                await notificaciones_collection.insert_one({
+                    "titulo": f"Certificado caducado: {t.get('nombre', 'Tecnico')}",
+                    "mensaje": f"El carnet de aplicador de '{t.get('nombre')}' caduco el {t.get('fecha_caducidad_carnet')}",
+                    "tipo": "error",
+                    "enlace": "/tecnicos-aplicadores",
+                    "prioridad": "high",
+                    "destinatarios": None,
+                    "datos_extra": {"modulo": "tecnicos", "alerta": "certificado"},
+                    "leida_por": [],
+                    "created_at": now,
+                    "_dedup_key": dedup,
+                })
+                generated += 1
+    except Exception as e:
+        print(f"Error generating certificate alerts: {e}")
+
+    # 4. Overdue tasks
+    try:
+        tareas_col = db["tareas"]
+        tareas = await tareas_col.find({
+            "fecha_limite": {"$lte": today_str},
+            "realizado": {"$ne": True},
+            "cancelado": {"$ne": True},
+        }).to_list(50)
+        for t in tareas:
+            dedup = f"tarea-{str(t.get('_id',''))}-{today_str}"
+            exists = await notificaciones_collection.find_one({"_dedup_key": dedup})
+            if not exists:
+                titulo_tarea = t.get("titulo", t.get("tipo_tarea", "Tarea"))
+                await notificaciones_collection.insert_one({
+                    "titulo": f"Tarea vencida: {titulo_tarea}",
+                    "mensaje": f"La tarea '{titulo_tarea}' tenia fecha limite {t.get('fecha_limite')}",
+                    "tipo": "warning",
+                    "enlace": "/tareas",
+                    "prioridad": "high",
+                    "destinatarios": None,
+                    "datos_extra": {"modulo": "tareas", "alerta": "vencida"},
+                    "leida_por": [],
+                    "created_at": now,
+                    "_dedup_key": dedup,
+                })
+                generated += 1
+    except Exception as e:
+        print(f"Error generating task alerts: {e}")
+
+    # 5. Contracts expiring soon (within 30 days)
+    try:
+        contratos_col = db["contratos"]
+        from datetime import timedelta as td
+        fecha_limite = (now + td(days=30)).strftime("%Y-%m-%d")
+        contratos = await contratos_col.find({
+            "fecha_fin": {"$lte": fecha_limite, "$gte": today_str},
+            "estado": {"$nin": ["cancelado", "finalizado"]},
+        }).to_list(50)
+        for c in contratos:
+            dedup = f"contrato-{c.get('referencia','')}-{today_str}"
+            exists = await notificaciones_collection.find_one({"_dedup_key": dedup})
+            if not exists:
+                await notificaciones_collection.insert_one({
+                    "titulo": f"Contrato por vencer: {c.get('referencia', 'Sin ref')}",
+                    "mensaje": f"El contrato '{c.get('referencia')}' con {c.get('proveedor_nombre', c.get('cliente_nombre', '?'))} vence el {c.get('fecha_fin')}",
+                    "tipo": "alert",
+                    "enlace": "/contratos",
+                    "prioridad": "normal",
+                    "destinatarios": None,
+                    "datos_extra": {"modulo": "contratos", "alerta": "vencimiento"},
+                    "leida_por": [],
+                    "created_at": now,
+                    "_dedup_key": dedup,
+                })
+                generated += 1
+    except Exception as e:
+        print(f"Error generating contract alerts: {e}")
+
+    return {
+        "success": True,
+        "message": f"Se generaron {generated} notificaciones de alertas",
+        "notificaciones_generadas": generated,
+    }

@@ -12,7 +12,10 @@ const TIPO_ICONS = {
   'warning': { icon: AlertTriangle, color: '#f59e0b' },
   'success': { icon: CheckCircle, color: '#22c55e' },
   'error': { icon: AlertCircle, color: '#ef4444' },
-  'alert': { icon: Bell, color: '#8b5cf6' }
+  'alert': { icon: Bell, color: '#8b5cf6' },
+  'mantenimiento': { icon: AlertTriangle, color: '#f59e0b' },
+  'tarea': { icon: Clock, color: '#3b82f6' },
+  'certificado': { icon: AlertCircle, color: '#ef4444' },
 };
 
 const NotificacionesDropdown = () => {
@@ -25,6 +28,14 @@ const NotificacionesDropdown = () => {
 
   useEffect(() => {
     if (token) {
+      // Generate alert-based notifications once per session
+      const alreadyGenerated = sessionStorage.getItem('alerts-generated');
+      if (!alreadyGenerated) {
+        api.post('/api/notificaciones/generar-alertas', {}).then(() => {
+          sessionStorage.setItem('alerts-generated', 'true');
+          fetchCount();
+        }).catch(() => {});
+      }
       fetchCount();
       // Poll for new notifications every 60 seconds
       const interval = setInterval(fetchCount, 60000);
