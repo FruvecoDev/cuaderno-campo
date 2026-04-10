@@ -1,0 +1,147 @@
+{
+  "summary": "ERP Bidirectional Sync and SIGPAC Integration - Full Testing Complete. All 24 backend tests passed (100%). All frontend UI elements verified working.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "IntegracionERP.js / ConsultaSIGPAC.js",
+        "issues": ["Console warnings about <span> inside <select>/<option> - React hydration warning (cosmetic, not functional)"]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_erp_sigpac.py",
+    "/app/test_reports/pytest/test_erp_sigpac.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Minor: Console warnings about span inside select/option elements - this is a React hydration warning from the preview environment's instrumentation, not a code issue"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_erp_sigpac.py"
+  ],
+  "success_rate": {
+    "backend": "100% (24/24 tests passed)",
+    "frontend": "100% (all UI elements verified)"
+  },
+  "test_credentials": "admin@fruveco.com / admin123",
+  "seed_data_creation": "Created test API keys and webhooks during testing (cleaned up via revoke/delete)",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "ERP Sync and SIGPAC features fully verified. All data-testids functional. SIGPAC external API (sigpac-hubcloud.es) is working and returns real parcel data. Import creates parcelas with origen='SIGPAC'.",
+  "features_verified": {
+    "erp_integration_page": {
+      "route": "/integracion-erp",
+      "tabs_verified": ["API Keys", "Webhooks", "Exportacion", "Historial", "Documentacion"],
+      "data_testids_working": [
+        "erp-integration-page",
+        "tab-btn-keys", "tab-btn-webhooks", "tab-btn-export", "tab-btn-historial", "tab-btn-docs",
+        "tab-api-keys", "btn-new-api-key", "form-new-key", "input-key-name", "btn-create-key", "new-key-alert", "btn-copy-key",
+        "tab-webhooks", "btn-new-webhook", "form-new-webhook", "input-webhook-name", "input-webhook-url", "btn-create-webhook",
+        "tab-export", "select-export-module", "btn-export", "export-results", "btn-download-json",
+        "tab-historial", "tab-documentacion", "doc-section-auth"
+      ]
+    },
+    "sigpac_page": {
+      "route": "/consulta-sigpac",
+      "data_testids_working": [
+        "sigpac-page", "sigpac-search-form", "select-provincia", "input-municipio", "input-poligono", "input-parcela",
+        "btn-search-sigpac", "sigpac-results", "btn-import-all", "import-form", "input-import-nombre", "btn-confirm-import"
+      ]
+    },
+    "sidebar_links": {
+      "Integración ERP": "PASSED - Link visible at /integracion-erp",
+      "Consulta SIGPAC": "PASSED - Link visible at /consulta-sigpac"
+    },
+    "backend_endpoints": {
+      "ERP_API_Keys": {
+        "GET /api/erp/sync/api-keys": "PASSED - Returns list of API keys",
+        "POST /api/erp/sync/api-keys": "PASSED - Creates new API key with fruveco_ prefix",
+        "DELETE /api/erp/sync/api-keys/{id}": "PASSED - Revokes API key"
+      },
+      "ERP_Webhooks": {
+        "GET /api/erp/sync/webhooks": "PASSED - Returns list of webhooks",
+        "POST /api/erp/sync/webhooks": "PASSED - Creates webhook with secret",
+        "POST /api/erp/sync/webhooks/{id}/toggle": "PASSED - Toggles active state",
+        "DELETE /api/erp/sync/webhooks/{id}": "PASSED - Deletes webhook"
+      },
+      "ERP_Export": {
+        "GET /api/erp/sync/export-modules": "PASSED - Returns 17 modules with record counts",
+        "GET /api/erp/sync/export/contratos": "PASSED - Returns paginated contract data",
+        "GET /api/erp/sync/export/parcelas": "PASSED - Returns paginated parcel data",
+        "GET /api/erp/sync/export/invalid": "PASSED - Returns 400 for invalid module"
+      },
+      "ERP_History_Stats": {
+        "GET /api/erp/sync/history": "PASSED - Returns sync logs",
+        "GET /api/erp/sync/history?tipo=export": "PASSED - Filters by type",
+        "GET /api/erp/sync/stats": "PASSED - Returns API keys, webhooks, syncs counts"
+      },
+      "SIGPAC": {
+        "GET /api/sigpac/provincias": "PASSED - Returns 52 Spanish provinces",
+        "GET /api/sigpac/usos": "PASSED - Returns SIGPAC land use codes",
+        "GET /api/sigpac/wms-config": "PASSED - Returns WMS configuration for maps",
+        "GET /api/sigpac/consulta": "PASSED - Queries SIGPAC external API (30/038/15/120 returned 1 recinto)",
+        "POST /api/sigpac/importar": "PASSED - Creates parcela with SIGPAC reference"
+      }
+    }
+  },
+  "test_results": {
+    "pytest_test_erp_sigpac.py": {
+      "total": 24,
+      "passed": 24,
+      "failed": 0,
+      "tests": [
+        "TestERPApiKeys::test_list_api_keys_returns_200 - PASSED",
+        "TestERPApiKeys::test_list_api_keys_structure - PASSED",
+        "TestERPApiKeys::test_create_api_key - PASSED",
+        "TestERPApiKeys::test_revoke_api_key - PASSED",
+        "TestERPApiKeys::test_api_keys_requires_admin - PASSED",
+        "TestERPWebhooks::test_list_webhooks_returns_200 - PASSED",
+        "TestERPWebhooks::test_create_webhook - PASSED",
+        "TestERPWebhooks::test_toggle_webhook - PASSED",
+        "TestERPWebhooks::test_delete_webhook - PASSED",
+        "TestERPExport::test_list_export_modules - PASSED",
+        "TestERPExport::test_export_contratos_module - PASSED",
+        "TestERPExport::test_export_parcelas_module - PASSED",
+        "TestERPExport::test_export_invalid_module - PASSED",
+        "TestERPHistoryStats::test_get_sync_history - PASSED",
+        "TestERPHistoryStats::test_get_sync_history_filter_by_type - PASSED",
+        "TestERPHistoryStats::test_get_sync_stats - PASSED",
+        "TestSIGPAC::test_get_provincias - PASSED",
+        "TestSIGPAC::test_get_usos - PASSED",
+        "TestSIGPAC::test_get_wms_config - PASSED",
+        "TestSIGPAC::test_consulta_sigpac_murcia - PASSED",
+        "TestSIGPAC::test_consulta_sigpac_missing_params - PASSED",
+        "TestSIGPAC::test_importar_sigpac_parcela - PASSED",
+        "TestSidebarLinks::test_integracion_erp_page_accessible - PASSED",
+        "TestSidebarLinks::test_consulta_sigpac_page_accessible - PASSED"
+      ]
+    },
+    "playwright_tests": {
+      "erp_page_loads": "PASSED",
+      "erp_5_tabs_present": "PASSED",
+      "api_keys_create": "PASSED",
+      "api_keys_alert_shown": "PASSED",
+      "webhooks_create": "PASSED",
+      "export_module_select": "PASSED",
+      "export_results_display": "PASSED",
+      "historial_stats_display": "PASSED",
+      "documentacion_expandable": "PASSED",
+      "sigpac_page_loads": "PASSED",
+      "sigpac_search_form": "PASSED",
+      "sigpac_results_display": "PASSED",
+      "sigpac_import_form": "PASSED",
+      "sidebar_erp_link": "PASSED",
+      "sidebar_sigpac_link": "PASSED"
+    }
+  },
+  "mocked_apis": {
+    "has_mocked_apis": false,
+    "note": "SIGPAC uses real external API (sigpac-hubcloud.es) - government service"
+  }
+}

@@ -5,7 +5,7 @@ import {
   LayoutDashboard, FileText, MapPin, Home, Calendar, ListTodo,
   Sprout, Droplets, BookOpen, FileBarChart, Wheat, FolderOpen,
   LogOut, User, Users, Package, Leaf, Cog, ClipboardCheck, Beaker, BarChart3, Globe, Brain, UserCheck,
-  ChevronDown, ChevronRight, TrendingUp, Menu, X, Settings, CloudSun, ChevronsLeft, ChevronsRight, Map, DollarSign
+  ChevronDown, ChevronRight, TrendingUp, Menu, X, Settings, CloudSun, ChevronsLeft, ChevronsRight, Map, DollarSign, Link2, Layers
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
@@ -137,6 +137,7 @@ const Layout = ({ children }) => {
       { path: '/parcelas', label: t('nav.parcels'), icon: MapPin, module: 'parcelas' },
       { path: '/fincas', label: t('nav.farms'), icon: Home, module: 'fincas' },
       { path: '/mapas', label: 'Mapa de Parcelas', icon: Map, module: 'parcelas' },
+      { path: '/consulta-sigpac', label: 'Consulta SIGPAC', icon: Layers, module: 'parcelas' },
       { path: '/cuaderno-campo', label: 'Cuaderno de Campo', icon: BookOpen, module: 'parcelas' },
     ]},
     { section: t('nav.activities'), items: [
@@ -174,6 +175,7 @@ const Layout = ({ children }) => {
       { path: '/usuarios', label: t('nav.users'), icon: Users, requireAdmin: true },
       { path: '/traducciones', label: t('nav.translations'), icon: Globe },
       { path: '/configuracion', label: 'Configuración App', icon: Settings, requireAdmin: true },
+      { path: '/integracion-erp', label: 'Integración ERP', icon: Link2, requireAdmin: true },
     ]}
   ];
   

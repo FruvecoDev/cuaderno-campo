@@ -40,6 +40,8 @@ import RRHH from './pages/RRHH';
 import PortalEmpleado from './pages/PortalEmpleado';
 import Mapas from './pages/Mapas';
 import CuadernoCampo from './pages/CuadernoCampo';
+import IntegracionERP from './pages/IntegracionERP';
+import ConsultaSIGPAC from './pages/ConsultaSIGPAC';
 
 function App() {
   return (
@@ -298,6 +300,18 @@ function App() {
         <Route path="/portal-empleado" element={
           <ProtectedRoute>
             <Layout><PortalEmpleado /></Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/integracion-erp" element={
+          <ProtectedRoute>
+            <Layout><IntegracionERP /></Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/consulta-sigpac" element={
+          <ProtectedRoute>
+            <Layout><ConsultaSIGPAC /></Layout>
           </ProtectedRoute>
         } />
       </Routes>
