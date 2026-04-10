@@ -2,48 +2,40 @@
 
 ## Ultima Actualizacion: 10 Abril 2026
 
-## Progreso: P0 DONE, P1 DONE, P2 DONE, Refactoring DONE
+## Progreso: P0 DONE, P1 DONE, P2 DONE, Refactoring DONE, Alertas DONE
 
 ---
 
+### Sistema de Alertas Inteligente (Nuevo):
+- Widget "Alertas y Avisos" en Dashboard con secciones expandibles
+- Certificados Tecnicos: detecta vencidos y proximos a vencer (30/60/90 dias)
+- ITV Maquinaria: detecta ITV vencida y proxima a vencer (30 dias)
+- Mantenimiento Maquinaria: detecta revisiones pendientes basado en intervalo configurable
+- Campos nuevos en Maquinaria: fecha_proxima_itv, fecha_ultimo_mantenimiento, intervalo_mantenimiento_dias
+- Backend: GET /api/alertas/resumen
+- Testing: iteration_57 (12/12 backend, frontend 100%)
+
 ### Refactoring Completado:
-- `Evaluaciones.js` refactorizado: 1405 -> 502 lineas (64% reduccion)
-  - Subcomponentes: EvaluacionesFilters, EvaluacionesTable, EvaluacionesForm
-- `Maquinaria.js` refactorizado: 1309 -> 325 lineas (75% reduccion)
-  - Subcomponentes: MaquinariaTable, MaquinariaForm, MaquinariaHistorial
-- Testing: iteration_56 (100% backend + frontend, 0 regressions)
-
-### Centro de Exportacion Centralizado (Dashboard):
-- Widget interactivo con seleccion de 13 modulos, toggle PDF/Excel
-- Backend: GET /api/exports/modules + POST /api/exports/combined
-- Testing: iteration_55 (100%)
-
-### P2 Completado:
-- Exportaciones PDF/Excel para Evaluaciones, Tecnicos Aplicadores, Maquinaria (6 endpoints)
-- Testing: iteration_54 (100%)
-
-### P1 Completado:
-- Responsive/Mobile, Paginacion Frontend, Dashboard Avanzado con KPIs
-
-### P0 Completado:
-- Refactorizacion Parcelas.js, Exports generalizados, AI Contract Summary, AI Dashboard, AI Chat, NFC RRHH
-
-### Refactoring History:
-- Dashboard.js: 2168 -> 788 lineas (5 widgets)
-- Contratos.js: 1917 -> 388 lineas (form, filters, table)
-- Parcelas.js: 1572 -> 397 lineas (5 subcomponentes)
-- routes_rrhh.py: 1905 -> 270 lineas (4 sub-routers)
 - Evaluaciones.js: 1405 -> 502 lineas (3 subcomponentes)
 - Maquinaria.js: 1309 -> 325 lineas (3 subcomponentes)
+- Dashboard, Contratos, Parcelas, RRHH: previamente refactorizados
 
-### Test Totals: 120+ tests, 0 failures
+### Centro de Exportacion Centralizado (Dashboard):
+- 13 modulos, toggle PDF/Excel, informe combinado
+
+### P2 Completado: Exportaciones PDF/Excel todos los modulos
+### P1 Completado: Responsive, Paginacion, Dashboard KPIs
+### P0 Completado: AI, NFC, Refactoring, Exports
+
+### Test Totals: 130+ tests, 0 failures
 
 ## Test Credentials
 - Admin: admin@fruveco.com / admin123
 
 ## Upcoming / Future Backlog
-- Funcionalidades avanzadas: seguimiento certificados Tecnicos Aplicadores (alertas caducidad)
-- Funcionalidades avanzadas: seguimiento mantenimiento Maquinaria (registro revisiones, alertas ITV)
+- Agregar mas datos de ITV/mantenimiento a las maquinarias existentes
+- Dashboard: alerta de proximas visitas programadas
+- Mejoras UX: notificaciones push en navegador para alertas criticas
 
 ## Blocked
 - Email (RESEND_API_KEY)
