@@ -9,7 +9,7 @@ from bson import ObjectId
 from datetime import datetime
 
 from models import ParcelaCreate, ParcelaUpdate
-from database import parcelas_collection, serialize_doc, serialize_docs
+from database import parcelas_collection, serialize_doc, serialize_docs, db
 from rbac_guards import (
     RequireCreate, RequireEdit, RequireDelete,
     RequireParcelasAccess, get_current_user
@@ -74,6 +74,56 @@ async def get_parcela(
         raise HTTPException(status_code=404, detail="Parcela not found")
     
     return serialize_doc(parcela)
+
+
+@router.get("/parcelas/{parcela_id}/historial-tratamientos")
+async def get_historial_tratamientos(
+    parcela_id: str,
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireParcelasAccess)
+):
+    if not ObjectId.is_valid(parcela_id):
+        raise HTTPException(status_code=400, detail="Invalid ID")
+
+    parcela = await parcelas_collection.find_one({"_id": ObjectId(parcela_id)})
+    if not parcela:
+        raise HTTPException(status_code=404, detail="Parcela not found")
+
+    tratamientos_col = db['tratamientos']
+    query = {"$or": [
+        {"parcela_id": parcela_id},
+        {"parcelas_ids": parcela_id},
+        {"parcela_id": str(parcela_id)},
+    ]}
+    tratamientos = await tratamientos_col.find(query, {"_id": 0}).sort("fecha_tratamiento", -1).to_list(500)
+
+    productos_usados = set()
+    tipos_aplicados = set()
+    for t in tratamientos:
+        nombre = t.get("producto_fitosanitario_nombre") or t.get("producto_nombre") or ""
+        if nombre:
+            productos_usados.add(nombre)
+        tipo = t.get("subtipo") or t.get("tipo_tratamiento") or ""
+        if tipo:
+            tipos_aplicados.add(tipo)
+        # Map fields to what frontend expects
+        if not t.get("producto_fitosanitario_nombre") and t.get("producto_nombre"):
+            t["producto_fitosanitario_nombre"] = t["producto_nombre"]
+        if not t.get("producto_fitosanitario_dosis") and t.get("dosis_aplicada"):
+            t["producto_fitosanitario_dosis"] = t["dosis_aplicada"]
+        if not t.get("superficie_aplicacion") and t.get("superficie_tratada"):
+            t["superficie_aplicacion"] = t["superficie_tratada"]
+        if not t.get("aplicador_nombre") and t.get("tecnico_aplicador"):
+            t["aplicador_nombre"] = t["tecnico_aplicador"]
+
+    return {
+        "historial": tratamientos,
+        "estadisticas": {
+            "total_tratamientos": len(tratamientos),
+            "productos_usados": list(productos_usados),
+            "tipos_aplicados": list(tipos_aplicados)
+        }
+    }
 
 
 @router.put("/parcelas/{parcela_id}")
