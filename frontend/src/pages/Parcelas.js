@@ -359,7 +359,19 @@ const Parcelas = () => {
           <button className="btn btn-secondary" onClick={() => setShowGeoImport(true)} data-testid="btn-import-geo">
             <Upload size={18} /> Importar KML/GeoJSON
           </button>
-          <button className="btn btn-primary" onClick={() => setShowForm(!showForm)} data-testid="btn-nueva-parcela">
+          <button className="btn btn-primary" onClick={() => {
+            if (!showForm) {
+              setEditingId(null);
+              const codigo = generarCodigoPlantacion();
+              setFormData({
+                contrato_id: '', codigo_plantacion: codigo, proveedor: '', cultivo: '', variedad: '',
+                superficie_total: '', num_plantas: '', campana: '', observaciones: '', finca: '',
+                sigpac: { provincia: '', municipio: '', poligono: '', parcela: '', cod_agregado: '0', zona: '0', recinto: '1', cod_uso: '' }
+              });
+              setZones([]);
+            }
+            setShowForm(!showForm);
+          }} data-testid="btn-nueva-parcela">
             <Plus size={18} /> Nueva Parcela
           </button>
         </div>
