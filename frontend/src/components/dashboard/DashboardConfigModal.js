@@ -117,18 +117,18 @@ const DashboardConfigModal = ({
           ))}
         </div>
         
-        <div style={{ borderTop: '1px solid #e0e0e0', paddingTop: '1rem', marginTop: '0.75rem', display: 'flex', flexWrap: 'nowrap', alignItems: 'center', justifyContent: 'flex-end', gap: '16px' }}>
+        <div style={{ borderTop: '1px solid #e0e0e0', paddingTop: '1rem', marginTop: '0.75rem', display: 'flex', flexWrap: 'nowrap', alignItems: 'center', justifyContent: 'flex-end', gap: '40px' }}>
           {(() => {
-            const base = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px', height: '38px', padding: '0 20px', fontSize: '0.85rem', fontWeight: '500', borderRadius: '8px', cursor: 'pointer', whiteSpace: 'nowrap', boxSizing: 'border-box', lineHeight: '1', verticalAlign: 'middle' };
+            const base = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px', height: '38px', padding: '0 20px', fontSize: '0.85rem', fontWeight: '500', borderRadius: '8px', cursor: 'pointer', whiteSpace: 'nowrap', boxSizing: 'border-box', lineHeight: '1', verticalAlign: 'middle', border: 'none' };
             return (
               <>
-                <button onClick={resetDashboardConfig} style={{ ...base, background: '#f5f5f5', border: '1px solid #d0d0d0', color: '#555' }}>
+                <button onClick={resetDashboardConfig} style={{ ...base, background: '#fff3e0', color: '#e65100', border: '1px solid #ffcc80' }}>
                   <RotateCcw size={14} /> Restaurar
                 </button>
-                <button onClick={onClose} style={{ ...base, background: '#f5f5f5', border: '1px solid #d0d0d0', color: '#555' }}>
+                <button onClick={onClose} style={{ ...base, background: '#ffebee', color: '#c62828', border: '1px solid #ef9a9a' }}>
                   Cancelar
                 </button>
-                <button onClick={saveDashboardConfig} disabled={savingConfig} style={{ ...base, background: 'hsl(var(--primary))', border: '1px solid hsl(var(--primary))', color: 'white' }}>
+                <button onClick={saveDashboardConfig} disabled={savingConfig} style={{ ...base, background: 'hsl(var(--primary))', color: 'white' }}>
                   <Save size={14} /> {savingConfig ? 'Guardando...' : 'Guardar'}
                 </button>
               </>
