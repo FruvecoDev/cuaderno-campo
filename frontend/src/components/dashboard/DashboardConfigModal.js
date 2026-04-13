@@ -117,11 +117,11 @@ const DashboardConfigModal = ({
           ))}
         </div>
         
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
           <button onClick={resetDashboardConfig} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <RotateCcw size={16} /> Restaurar por defecto
           </button>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button onClick={onClose} className="btn btn-secondary">Cancelar</button>
             <button onClick={saveDashboardConfig} className="btn btn-primary" disabled={savingConfig} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               {savingConfig ? <>Guardando...</> : <><Save size={16} /> Guardar cambios</>}
