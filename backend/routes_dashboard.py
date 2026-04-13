@@ -30,17 +30,18 @@ class DashboardConfig(BaseModel):
 # Widgets disponibles por defecto
 DEFAULT_WIDGETS = [
     {"widget_id": "kpis_principales", "visible": True, "order": 0, "name": "KPIs Principales", "description": "Contratos, parcelas, superficie, costes, ingresos"},
-    {"widget_id": "resumen_fincas", "visible": True, "order": 1, "name": "Resumen de Fincas", "description": "KPIs y gráficos de fincas por provincia"},
-    {"widget_id": "proximas_cosechas", "visible": True, "order": 2, "name": "Próximas Cosechas", "description": "Cosechas planificadas y fincas en recolección"},
-    {"widget_id": "tratamientos_pendientes", "visible": True, "order": 3, "name": "Tratamientos Pendientes", "description": "Tratamientos programados y vencidos"},
-    {"widget_id": "contratos_activos", "visible": True, "order": 4, "name": "Contratos Activos", "description": "Balance de compra/venta y contratos vigentes"},
-    {"widget_id": "proximas_visitas", "visible": True, "order": 5, "name": "Próximas Visitas", "description": "Visitas planificadas y estadísticas"},
-    {"widget_id": "graficos_cultivos", "visible": True, "order": 6, "name": "Gráficos de Cultivos", "description": "Superficie por cultivo y distribución de costes"},
-    {"widget_id": "mapa_parcelas", "visible": True, "order": 7, "name": "Mapa de Parcelas", "description": "Mapa interactivo con ubicación de parcelas"},
-    {"widget_id": "calendario", "visible": True, "order": 8, "name": "Calendario", "description": "Eventos y actividades programadas"},
-    {"widget_id": "actividad_reciente", "visible": True, "order": 9, "name": "Actividad Reciente", "description": "Últimas visitas y tratamientos"},
-    {"widget_id": "centro_exportacion", "visible": True, "order": 10, "name": "Centro de Exportación", "description": "Exportación combinada de múltiples módulos en PDF/Excel"},
-    {"widget_id": "alertas_avisos", "visible": True, "order": 11, "name": "Alertas y Avisos", "description": "Alertas de certificados de técnicos y mantenimiento de maquinaria"}
+    {"widget_id": "productividad", "visible": True, "order": 1, "name": "Análisis de Productividad", "description": "Rendimiento, coste/ha, ingresos/ha, margen neto, superficie media, precio medio"},
+    {"widget_id": "resumen_fincas", "visible": True, "order": 2, "name": "Resumen de Fincas", "description": "KPIs y gráficos de fincas por provincia"},
+    {"widget_id": "proximas_cosechas", "visible": True, "order": 3, "name": "Próximas Cosechas", "description": "Cosechas planificadas y fincas en recolección"},
+    {"widget_id": "tratamientos_pendientes", "visible": True, "order": 4, "name": "Tratamientos Pendientes", "description": "Tratamientos programados y vencidos"},
+    {"widget_id": "contratos_activos", "visible": True, "order": 5, "name": "Contratos Activos", "description": "Balance de compra/venta y contratos vigentes"},
+    {"widget_id": "proximas_visitas", "visible": True, "order": 6, "name": "Próximas Visitas", "description": "Visitas planificadas y estadísticas"},
+    {"widget_id": "graficos_cultivos", "visible": True, "order": 7, "name": "Gráficos de Cultivos", "description": "Superficie por cultivo y distribución de costes"},
+    {"widget_id": "mapa_parcelas", "visible": True, "order": 8, "name": "Mapa de Parcelas", "description": "Mapa interactivo con ubicación de parcelas"},
+    {"widget_id": "calendario", "visible": True, "order": 9, "name": "Calendario", "description": "Eventos y actividades programadas"},
+    {"widget_id": "actividad_reciente", "visible": True, "order": 10, "name": "Actividad Reciente", "description": "Últimas visitas y tratamientos"},
+    {"widget_id": "centro_exportacion", "visible": True, "order": 11, "name": "Centro de Exportación", "description": "Exportación combinada de múltiples módulos en PDF/Excel"},
+    {"widget_id": "alertas_avisos", "visible": True, "order": 12, "name": "Alertas y Avisos", "description": "Alertas de certificados de técnicos y mantenimiento de maquinaria"}
 ]
 
 

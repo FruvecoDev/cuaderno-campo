@@ -324,8 +324,9 @@ const Dashboard = () => {
       )}
       
       {/* Productividad Widget - New Advanced KPIs */}
+      {isWidgetVisible('productividad') && (
       <SortableDashboardWidget id="productividad" isEditMode={isEditMode}>
-      <div className="card mb-6" data-testid="dashboard-productividad" style={{ order: getWidgetOrder('kpis_principales') + 0.5 }}>
+      <div className="card mb-6" data-testid="dashboard-productividad" style={{ order: getWidgetOrder('productividad') }}>
         <h2 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
           <TrendingUp size={20} style={{ color: 'hsl(var(--chart-1))' }} /> Análisis de Productividad
         </h2>
@@ -375,6 +376,7 @@ const Dashboard = () => {
         </div>
       </div>
       </SortableDashboardWidget>
+      )}
       
       {/* Centro de Exportacion */}
       {isWidgetVisible('centro_exportacion') && (
