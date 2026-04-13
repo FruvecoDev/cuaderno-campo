@@ -1219,15 +1219,15 @@ div:has(> a[href*="emergent"]) {
   padding: 0 !important;
   border-radius: 6px !important;
   cursor: pointer !important;
-  color: #666 !important;
-  background: #f0f0f0 !important;
+  color: #fff !important;
+  background: #c62828 !important;
   border: none !important;
   flex-shrink: 0 !important;
   margin-left: 1rem !important;
 }
 
 .config-modal-close-btn:hover {
-  background: #e0e0e0 !important;
+  background: #b71c1c !important;
 }
 
 .config-modal-actions {
