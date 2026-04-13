@@ -117,14 +117,14 @@ const DashboardConfigModal = ({
           ))}
         </div>
         
-        <div style={{ borderTop: '1px solid #e0e0e0', paddingTop: '1.25rem', marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <button onClick={resetDashboardConfig} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%' }}>
-            <RotateCcw size={16} /> Restaurar por defecto
+        <div style={{ borderTop: '1px solid #e0e0e0', paddingTop: '1.25rem', marginTop: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <button onClick={resetDashboardConfig} className="btn btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'transparent', border: '1px solid #ccc', color: '#666', fontSize: '0.8rem', padding: '0.5rem 0.875rem' }}>
+            <RotateCcw size={14} /> Restaurar por defecto
           </button>
-          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-            <button onClick={onClose} className="btn btn-secondary" style={{ flex: 1 }}>Cancelar</button>
-            <button onClick={saveDashboardConfig} className="btn btn-primary" disabled={savingConfig} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: 1 }}>
-              {savingConfig ? <>Guardando...</> : <><Save size={16} /> Guardar cambios</>}
+          <div style={{ display: 'flex', gap: '0.625rem' }}>
+            <button onClick={onClose} className="btn btn-sm btn-secondary" style={{ fontSize: '0.8rem', padding: '0.5rem 1.25rem' }}>Cancelar</button>
+            <button onClick={saveDashboardConfig} className="btn btn-sm btn-primary" disabled={savingConfig} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.5rem 1.25rem' }}>
+              {savingConfig ? <>Guardando...</> : <><Save size={14} /> Guardar</>}
             </button>
           </div>
         </div>
