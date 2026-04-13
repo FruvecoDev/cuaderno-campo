@@ -1216,6 +1216,13 @@ div:has(> a[href*="emergent"]) {
   align-items: center !important;
 }
 
+#config-columns-header {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
 .config-modal-close-btn {
   display: inline-flex !important;
   align-items: center !important;

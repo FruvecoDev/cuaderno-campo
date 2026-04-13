@@ -4,6 +4,18 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, UserX, UserCheck, Shield, Settings, X, Check, Eye, EyeOff, Key, ShoppingBag, Link, Unlink, Users, Leaf, FileText, Clipboard } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
+import ColumnConfigModal from '../components/ColumnConfigModal';
+import { useColumnConfig } from '../hooks/useColumnConfig';
+
+const DEFAULT_COLUMNS = [
+  { id: 'nombre', label: 'Nombre', visible: true },
+  { id: 'email', label: 'Email', visible: true },
+  { id: 'rol', label: 'Rol', visible: true },
+  { id: 'empleado', label: 'Empleado Vinculado', visible: true },
+  { id: 'tipo_operacion', label: 'Tipo Operacion', visible: true },
+  { id: 'estado', label: 'Estado', visible: true },
+  { id: 'fecha_creacion', label: 'Fecha Creacion', visible: true },
+];
 
 
 const Usuarios = () => {
@@ -46,6 +58,7 @@ const Usuarios = () => {
   const [busquedaEmpleado, setBusquedaEmpleado] = useState('');
   const [savingVinculacion, setSavingVinculacion] = useState(false);
   const { token, user: currentUser } = useAuth();
+  const { columns, setColumns, showConfig, setShowConfig, save, reset, visibleColumns } = useColumnConfig('usuarios_col_config', DEFAULT_COLUMNS);
   
   const ROLES = [
     { value: 'Admin', label: t('users.admin'), description: t('users.adminDesc') },
@@ -379,15 +392,20 @@ const Usuarios = () => {
           <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>{t('users.title')}</h1>
           <p className="text-muted">{t('users.subtitle')}</p>
         </div>
-        <button
-          className="btn btn-primary"
-          onClick={() => setShowForm(!showForm)}
-          data-testid="btn-nuevo-usuario"
-        >
-          <Plus size={18} />
-          {t('users.newUser')}
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button className="btn btn-secondary" onClick={() => setShowConfig(true)} title="Configurar columnas" data-testid="btn-config-usuarios"><Settings size={18} /></button>
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowForm(!showForm)}
+            data-testid="btn-nuevo-usuario"
+          >
+            <Plus size={18} />
+            {t('users.newUser')}
+          </button>
+        </div>
       </div>
+
+      <ColumnConfigModal show={showConfig} onClose={() => setShowConfig(false)} columns={columns} setColumns={setColumns} onSave={save} onReset={reset} />
 
       {showForm && (
         <div className="card mb-6">
@@ -465,13 +483,7 @@ const Usuarios = () => {
             <table>
               <thead>
                 <tr>
-                  <th>{t('users.userName')}</th>
-                  <th>{t('auth.email')}</th>
-                  <th>{t('users.role')}</th>
-                  <th>Empleado Vinculado</th>
-                  <th>Tipo Operación</th>
-                  <th>{t('common.status')}</th>
-                  <th>{t('users.createdAt')}</th>
+                  {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
                   <th>{t('common.actions')}</th>
                 </tr>
               </thead>
@@ -480,54 +492,18 @@ const Usuarios = () => {
                   const tipoOp = getTipoOperacionBadge(user.tipo_operacion);
                   return (
                   <tr key={user._id}>
-                    <td>
-                      <div style={{ fontWeight: '600' }}>{user.full_name}</div>
-                    </td>
-                    <td>{user.email}</td>
-                    <td>
-                      <span className={`badge ${getRoleBadgeClass(user.role)}`}>
-                        {user.role}
-                      </span>
-                    </td>
-                    <td>
-                      {user.empleado_id ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <Link size={14} style={{ color: 'hsl(142 76% 36%)' }} />
-                          <span style={{ fontSize: '0.875rem' }}>
-                            {empleadosDisponibles.find(e => e._id === user.empleado_id)?.nombre || 'Vinculado'}
-                          </span>
-                        </div>
-                      ) : (
-                        <span style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.8rem' }}>
-                          Sin vincular
-                        </span>
-                      )}
-                    </td>
-                    <td>
-                      <span 
-                        onClick={() => user._id !== currentUser._id && openTipoOperacionModal(user)}
-                        style={{
-                          padding: '0.25rem 0.75rem',
-                          borderRadius: '9999px',
-                          fontSize: '0.75rem',
-                          fontWeight: '600',
-                          backgroundColor: tipoOp.bg,
-                          color: tipoOp.color,
-                          cursor: user._id !== currentUser._id ? 'pointer' : 'default'
-                        }}
-                        title={user._id !== currentUser._id ? 'Clic para cambiar' : ''}
-                      >
-                        {tipoOp.label}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`badge ${user.is_active ? 'badge-success' : 'badge-error'}`}>
-                        {user.is_active ? t('common.active') : t('common.inactive')}
-                      </span>
-                    </td>
-                    <td>
-                      {new Date(user.created_at).toLocaleDateString()}
-                    </td>
+                    {visibleColumns.map(col => {
+                      switch (col.id) {
+                        case 'nombre': return <td key="nombre"><div style={{ fontWeight: '600' }}>{user.full_name}</div></td>;
+                        case 'email': return <td key="email">{user.email}</td>;
+                        case 'rol': return <td key="rol"><span className={`badge ${getRoleBadgeClass(user.role)}`}>{user.role}</span></td>;
+                        case 'empleado': return <td key="empleado">{user.empleado_id ? (<div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Link size={14} style={{ color: 'hsl(142 76% 36%)' }} /><span style={{ fontSize: '0.875rem' }}>{empleadosDisponibles.find(e => e._id === user.empleado_id)?.nombre || 'Vinculado'}</span></div>) : (<span style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.8rem' }}>Sin vincular</span>)}</td>;
+                        case 'tipo_operacion': return <td key="tipo_operacion"><span onClick={() => user._id !== currentUser._id && openTipoOperacionModal(user)} style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: '600', backgroundColor: tipoOp.bg, color: tipoOp.color, cursor: user._id !== currentUser._id ? 'pointer' : 'default' }} title={user._id !== currentUser._id ? 'Clic para cambiar' : ''}>{tipoOp.label}</span></td>;
+                        case 'estado': return <td key="estado"><span className={`badge ${user.is_active ? 'badge-success' : 'badge-error'}`}>{user.is_active ? t('common.active') : t('common.inactive')}</span></td>;
+                        case 'fecha_creacion': return <td key="fecha_creacion">{new Date(user.created_at).toLocaleDateString()}</td>;
+                        default: return null;
+                      }
+                    })}
                     <td>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
                         {user._id !== currentUser._id && (

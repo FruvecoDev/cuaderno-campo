@@ -1,10 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, Filter, Search, X, Package, Check, XCircle, DollarSign } from 'lucide-react';
+import { Plus, Edit2, Trash2, Filter, Search, X, Package, Check, XCircle, DollarSign, Settings } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
+import ColumnConfigModal from '../components/ColumnConfigModal';
+import { useColumnConfig } from '../hooks/useColumnConfig';
+
+const DEFAULT_COLUMNS = [
+  { id: 'codigo', label: 'Codigo', visible: true },
+  { id: 'nombre', label: 'Nombre', visible: true },
+  { id: 'categoria', label: 'Categoria', visible: true },
+  { id: 'unidad', label: 'Unidad', visible: true },
+  { id: 'precio', label: 'Precio', visible: true },
+  { id: 'iva', label: 'IVA', visible: true },
+  { id: 'stock', label: 'Stock', visible: true },
+  { id: 'estado', label: 'Estado', visible: true },
+];
 
 
 const CATEGORIAS = [
@@ -42,6 +55,7 @@ const ArticulosExplotacion = () => {
   const { token } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
+  const { columns, setColumns, showConfig, setShowConfig, save, reset, visibleColumns } = useColumnConfig('articulos_col_config', DEFAULT_COLUMNS);
   
   // Filtros
   const [searchTerm, setSearchTerm] = useState('');
@@ -217,6 +231,7 @@ const ArticulosExplotacion = () => {
           Artículos de Explotación
         </h1>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button className="btn btn-secondary" onClick={() => setShowConfig(true)} title="Configurar columnas" data-testid="btn-config-articulos"><Settings size={18} /></button>
           <button
             className={`btn btn-secondary ${showFilters ? 'active' : ''}`}
             onClick={() => setShowFilters(!showFilters)}
@@ -237,6 +252,8 @@ const ArticulosExplotacion = () => {
           )}
         </div>
       </div>
+
+      <ColumnConfigModal show={showConfig} onClose={() => setShowConfig(false)} columns={columns} setColumns={setColumns} onSave={save} onReset={reset} />
 
       {error && (
         <div className="alert alert-error" style={{ marginBottom: '1rem' }}>
@@ -497,80 +514,26 @@ const ArticulosExplotacion = () => {
             <table data-testid="articulos-table">
               <thead>
                 <tr>
-                  <th>Código</th>
-                  <th>Nombre</th>
-                  <th>Categoría</th>
-                  <th>Unidad</th>
-                  <th>Precio</th>
-                  <th>IVA</th>
-                  <th>Stock</th>
-                  <th>Estado</th>
+                  {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
                   {(canEdit || canDelete) && <th>Acciones</th>}
                 </tr>
               </thead>
               <tbody>
                 {articulos.map((articulo) => (
                   <tr key={articulo._id} style={{ opacity: articulo.activo !== false ? 1 : 0.6 }}>
-                    <td>
-                      <strong style={{ fontFamily: 'monospace' }}>{articulo.codigo}</strong>
-                    </td>
-                    <td>
-                      <div>{articulo.nombre}</div>
-                      {articulo.descripcion && (
-                        <small style={{ color: 'hsl(var(--muted-foreground))' }}>{articulo.descripcion.substring(0, 50)}...</small>
-                      )}
-                    </td>
-                    <td>
-                      <span 
-                        className="badge"
-                        style={{ 
-                          backgroundColor: `${getCategoriaColor(articulo.categoria)}20`,
-                          color: getCategoriaColor(articulo.categoria),
-                          border: `1px solid ${getCategoriaColor(articulo.categoria)}40`
-                        }}
-                      >
-                        {articulo.categoria}
-                      </span>
-                    </td>
-                    <td>{articulo.unidad_medida}</td>
-                    <td>
-                      <strong style={{ color: 'hsl(var(--primary))' }}>
-                        {articulo.precio_unitario?.toFixed(2) || '0.00'} €
-                      </strong>
-                    </td>
-                    <td>{articulo.iva || 21}%</td>
-                    <td>
-                      {articulo.stock_actual !== null && articulo.stock_actual !== undefined ? (
-                        <span style={{ 
-                          color: articulo.stock_minimo && articulo.stock_actual < articulo.stock_minimo 
-                            ? 'hsl(var(--destructive))' 
-                            : 'inherit'
-                        }}>
-                          {articulo.stock_actual} {articulo.unidad_medida}
-                          {articulo.stock_minimo && articulo.stock_actual < articulo.stock_minimo && (
-                            <span style={{ fontSize: '0.75rem', display: 'block', color: 'hsl(var(--destructive))' }}>
-                              ⚠ Stock bajo
-                            </span>
-                          )}
-                        </span>
-                      ) : (
-                        <span style={{ color: 'hsl(var(--muted-foreground))' }}>—</span>
-                      )}
-                    </td>
-                    <td>
-                      <button
-                        onClick={() => handleToggleActivo(articulo._id)}
-                        className={`badge ${articulo.activo !== false ? 'badge-success' : 'badge-secondary'}`}
-                        style={{ cursor: 'pointer', border: 'none' }}
-                        title={articulo.activo !== false ? 'Desactivar' : 'Activar'}
-                      >
-                        {articulo.activo !== false ? (
-                          <><Check size={12} /> Activo</>
-                        ) : (
-                          <><XCircle size={12} /> Inactivo</>
-                        )}
-                      </button>
-                    </td>
+                    {visibleColumns.map(col => {
+                      switch (col.id) {
+                        case 'codigo': return <td key="codigo"><strong style={{ fontFamily: 'monospace' }}>{articulo.codigo}</strong></td>;
+                        case 'nombre': return <td key="nombre"><div>{articulo.nombre}</div>{articulo.descripcion && <small style={{ color: 'hsl(var(--muted-foreground))' }}>{articulo.descripcion.substring(0, 50)}...</small>}</td>;
+                        case 'categoria': return <td key="categoria"><span className="badge" style={{ backgroundColor: `${getCategoriaColor(articulo.categoria)}20`, color: getCategoriaColor(articulo.categoria), border: `1px solid ${getCategoriaColor(articulo.categoria)}40` }}>{articulo.categoria}</span></td>;
+                        case 'unidad': return <td key="unidad">{articulo.unidad_medida}</td>;
+                        case 'precio': return <td key="precio"><strong style={{ color: 'hsl(var(--primary))' }}>{articulo.precio_unitario?.toFixed(2) || '0.00'} &euro;</strong></td>;
+                        case 'iva': return <td key="iva">{articulo.iva || 21}%</td>;
+                        case 'stock': return <td key="stock">{articulo.stock_actual !== null && articulo.stock_actual !== undefined ? (<span style={{ color: articulo.stock_minimo && articulo.stock_actual < articulo.stock_minimo ? 'hsl(var(--destructive))' : 'inherit' }}>{articulo.stock_actual} {articulo.unidad_medida}{articulo.stock_minimo && articulo.stock_actual < articulo.stock_minimo && <span style={{ fontSize: '0.75rem', display: 'block', color: 'hsl(var(--destructive))' }}>Stock bajo</span>}</span>) : (<span style={{ color: 'hsl(var(--muted-foreground))' }}>&mdash;</span>)}</td>;
+                        case 'estado': return <td key="estado"><button onClick={() => handleToggleActivo(articulo._id)} className={`badge ${articulo.activo !== false ? 'badge-success' : 'badge-secondary'}`} style={{ cursor: 'pointer', border: 'none' }} title={articulo.activo !== false ? 'Desactivar' : 'Activar'}>{articulo.activo !== false ? (<><Check size={12} /> Activo</>) : (<><XCircle size={12} /> Inactivo</>)}</button></td>;
+                        default: return null;
+                      }
+                    })}
                     {(canEdit || canDelete) && (
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>

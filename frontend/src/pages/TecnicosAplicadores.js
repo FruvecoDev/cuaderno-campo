@@ -4,11 +4,23 @@ import { useTranslation } from 'react-i18next';
 import { 
   Plus, Edit2, Trash2, Search, UserCheck, Upload, X, 
   AlertTriangle, CheckCircle, XCircle, FileImage, Calendar,
-  Award, CreditCard, Eye, Download, FileText
+  Award, CreditCard, Eye, Download, FileText, Settings
 } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
+import ColumnConfigModal from '../components/ColumnConfigModal';
+import { useColumnConfig } from '../hooks/useColumnConfig';
+
+const DEFAULT_COLUMNS = [
+  { id: 'nombre_completo', label: 'Nombre Completo', visible: true },
+  { id: 'dni', label: 'D.N.I.', visible: true },
+  { id: 'nivel', label: 'Nivel', visible: true },
+  { id: 'num_carnet', label: 'Num Carnet', visible: true },
+  { id: 'certificacion', label: 'Certificacion', visible: true },
+  { id: 'validez', label: 'Validez', visible: true },
+  { id: 'estado', label: 'Estado', visible: true },
+];
 
 
 const TecnicosAplicadores = () => {
@@ -16,6 +28,7 @@ const TecnicosAplicadores = () => {
   const { token } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
+  const { columns, setColumns, showConfig, setShowConfig, save, reset, visibleColumns } = useColumnConfig('tecnicos_col_config', DEFAULT_COLUMNS);
   
   const [tecnicos, setTecnicos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -310,6 +323,7 @@ const TecnicosAplicadores = () => {
           </p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <button className="btn btn-secondary" onClick={() => setShowConfig(true)} title="Configurar columnas" data-testid="btn-config-tecnicos"><Settings size={18} /></button>
           <button
             className="btn btn-secondary"
             data-testid="btn-export-excel-tecnicos"
@@ -344,6 +358,8 @@ const TecnicosAplicadores = () => {
           </PermissionButton>
         </div>
       </div>
+
+      <ColumnConfigModal show={showConfig} onClose={() => setShowConfig(false)} columns={columns} setColumns={setColumns} onSave={save} onReset={reset} />
 
       {/* Error */}
       {error && (
@@ -625,13 +641,7 @@ const TecnicosAplicadores = () => {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Nombre Completo</th>
-                  <th>D.N.I.</th>
-                  <th>Nivel</th>
-                  <th>Nº Carnet</th>
-                  <th>Certificación</th>
-                  <th>Validez</th>
-                  <th>Estado</th>
+                  {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
                   <th>Cert.</th>
                   <th>Acciones</th>
                 </tr>
@@ -641,29 +651,18 @@ const TecnicosAplicadores = () => {
                   const estado = getEstadoBadge(tecnico);
                   return (
                     <tr key={tecnico._id}>
-                      <td style={{ fontWeight: '500' }}>
-                        {tecnico.nombre} {tecnico.apellidos}
-                      </td>
-                      <td>{tecnico.dni}</td>
-                      <td>
-                        <span className="badge badge-info">
-                          <Award size={12} style={{ marginRight: '0.25rem' }} />
-                          {tecnico.nivel_capacitacion}
-                        </span>
-                      </td>
-                      <td>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                          <CreditCard size={14} />
-                          {tecnico.num_carnet}
-                        </span>
-                      </td>
-                      <td>{tecnico.fecha_certificacion}</td>
-                      <td>{tecnico.fecha_validez}</td>
-                      <td>
-                        <span className={`badge ${estado.class}`}>
-                          {estado.icon} {estado.label}
-                        </span>
-                      </td>
+                      {visibleColumns.map(col => {
+                        switch (col.id) {
+                          case 'nombre_completo': return <td key="nombre_completo" style={{ fontWeight: '500' }}>{tecnico.nombre} {tecnico.apellidos}</td>;
+                          case 'dni': return <td key="dni">{tecnico.dni}</td>;
+                          case 'nivel': return <td key="nivel"><span className="badge badge-info"><Award size={12} style={{ marginRight: '0.25rem' }} />{tecnico.nivel_capacitacion}</span></td>;
+                          case 'num_carnet': return <td key="num_carnet"><span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><CreditCard size={14} />{tecnico.num_carnet}</span></td>;
+                          case 'certificacion': return <td key="certificacion">{tecnico.fecha_certificacion}</td>;
+                          case 'validez': return <td key="validez">{tecnico.fecha_validez}</td>;
+                          case 'estado': return <td key="estado"><span className={`badge ${estado.class}`}>{estado.icon} {estado.label}</span></td>;
+                          default: return null;
+                        }
+                      })}
                       <td>
                         {tecnico.imagen_certificado_url ? (
                           <button

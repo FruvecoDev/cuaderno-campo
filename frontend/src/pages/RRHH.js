@@ -4,18 +4,31 @@ import {
   Plus, Edit2, Trash2, Search, Filter, X, User, QrCode, 
   CreditCard, Camera, Download, Upload, FileText, Clock,
   TrendingUp, Users, UserCheck, UserX, ChevronDown, Eye,
-  Smartphone, Fingerprint, Check, PenTool, RefreshCw, Calendar
+  Smartphone, Fingerprint, Check, PenTool, RefreshCw, Calendar, Settings
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
 import SignatureCanvas from 'react-signature-canvas';
 import { ControlHorarioTab, ProductividadTab, PrenominaTab, AusenciasTab, DocumentosTab } from './RRHH/index';
 import ProvinciaSelect from '../components/ProvinciaSelect';
+import ColumnConfigModal from '../components/ColumnConfigModal';
+import { useColumnConfig } from '../hooks/useColumnConfig';
 import '../App.css';
+
+const DEFAULT_COLUMNS = [
+  { id: 'codigo', label: 'Codigo', visible: true },
+  { id: 'nombre', label: 'Nombre', visible: true },
+  { id: 'dni_nie', label: 'DNI/NIE', visible: true },
+  { id: 'puesto', label: 'Puesto', visible: true },
+  { id: 'contrato', label: 'Contrato', visible: true },
+  { id: 'fecha_alta', label: 'Fecha Alta', visible: true },
+  { id: 'estado', label: 'Estado', visible: true },
+];
 
 const RRHH = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { columns, setColumns, showConfig, setShowConfig, save, reset, visibleColumns } = useColumnConfig('rrhh_col_config', DEFAULT_COLUMNS);
   
   // Estados principales
   const [activeTab, setActiveTab] = useState('empleados');
@@ -264,7 +277,9 @@ const RRHH = () => {
           <h1 className="page-title">Recursos Humanos</h1>
           <p className="text-muted-foreground">Gestión de personal, fichajes y productividad</p>
         </div>
+        <button className="btn btn-secondary" onClick={() => setShowConfig(true)} title="Configurar columnas" data-testid="btn-config-rrhh"><Settings size={18} /></button>
       </div>
+      <ColumnConfigModal show={showConfig} onClose={() => setShowConfig(false)} columns={columns} setColumns={setColumns} onSave={save} onReset={reset} />
 
       {/* KPIs */}
       {empleadoStats && (
@@ -679,64 +694,32 @@ const RRHH = () => {
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>Código</th>
-                    <th>Nombre</th>
-                    <th>DNI/NIE</th>
-                    <th>Puesto</th>
-                    <th>Contrato</th>
-                    <th>Fecha Alta</th>
-                    <th>Estado</th>
+                    {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
                     <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredEmpleados.length === 0 ? (
                     <tr>
-                      <td colSpan="8" style={{ textAlign: 'center', padding: '2rem' }}>
+                      <td colSpan={visibleColumns.length + 1} style={{ textAlign: 'center', padding: '2rem' }}>
                         No hay empleados registrados
                       </td>
                     </tr>
                   ) : (
                     filteredEmpleados.map(emp => (
                       <tr key={emp._id}>
-                        <td>
-                          <span style={{ fontFamily: 'monospace', fontWeight: '600' }}>{emp.codigo}</span>
-                        </td>
-                        <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            {emp.foto_url ? (
-                              <img 
-                                src={`${BACKEND_URL}${emp.foto_url}`} 
-                                alt="" 
-                                style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
-                              />
-                            ) : (
-                              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'hsl(var(--muted))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <User size={16} />
-                              </div>
-                            )}
-                            <div>
-                              <div style={{ fontWeight: '500' }}>{emp.nombre} {emp.apellidos}</div>
-                              {emp.email && <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>{emp.email}</div>}
-                            </div>
-                          </div>
-                        </td>
-                        <td>{emp.dni_nie}</td>
-                        <td>{emp.puesto}</td>
-                        <td>{emp.tipo_contrato}</td>
-                        <td>{emp.fecha_alta}</td>
-                        <td>
-                          <span style={{
-                            padding: '0.25rem 0.75rem',
-                            borderRadius: '9999px',
-                            fontSize: '0.75rem',
-                            fontWeight: '500',
-                            background: emp.activo ? 'hsl(142 76% 36% / 0.1)' : 'hsl(0 84% 60% / 0.1)',
-                            color: emp.activo ? 'hsl(142 76% 36%)' : 'hsl(0 84% 60%)'
-                          }}>
-                            {emp.activo ? 'Activo' : 'Baja'}
-                          </span>
-                        </td>
+                        {visibleColumns.map(col => {
+                          switch (col.id) {
+                            case 'codigo': return <td key="codigo"><span style={{ fontFamily: 'monospace', fontWeight: '600' }}>{emp.codigo}</span></td>;
+                            case 'nombre': return <td key="nombre"><div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>{emp.foto_url ? (<img src={`${BACKEND_URL}${emp.foto_url}`} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />) : (<div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'hsl(var(--muted))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><User size={16} /></div>)}<div><div style={{ fontWeight: '500' }}>{emp.nombre} {emp.apellidos}</div>{emp.email && <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>{emp.email}</div>}</div></div></td>;
+                            case 'dni_nie': return <td key="dni_nie">{emp.dni_nie}</td>;
+                            case 'puesto': return <td key="puesto">{emp.puesto}</td>;
+                            case 'contrato': return <td key="contrato">{emp.tipo_contrato}</td>;
+                            case 'fecha_alta': return <td key="fecha_alta">{emp.fecha_alta}</td>;
+                            case 'estado': return <td key="estado"><span style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: '500', background: emp.activo ? 'hsl(142 76% 36% / 0.1)' : 'hsl(0 84% 60% / 0.1)', color: emp.activo ? 'hsl(142 76% 36%)' : 'hsl(0 84% 60%)' }}>{emp.activo ? 'Activo' : 'Baja'}</span></td>;
+                            default: return null;
+                          }
+                        })}
                         <td>
                           <div style={{ display: 'flex', gap: '0.25rem' }}>
                             <button

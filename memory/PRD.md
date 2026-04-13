@@ -1,59 +1,47 @@
-# FRUVECO - PRD (Product Requirements Document)
+# PRD - Cuaderno de Campo / Agricultural Field Management App
 
-## Problema
-Aplicacion de campo para agricultura: Cuaderno de Campo completo con modulos de gestion.
+## Original Problem Statement
+Desarrollar una aplicación de campo para el sector de agricultura que permita realizar un Cuaderno de Campo completo; Contratos, Parcelas, Mapas, Fincas, Visitas, Tareas, Cosechas, Tratamientos, Irrigaciones, Recetas y Albaranes… Dashboard, Generación de informes en pdf y Excel, panel de configuración de usuarios y permisos de aplicación. Acceso a la aplicación con usuario y login. Aplicar integraciones con IA.
 
-## Modulos Implementados (COMPLETOS)
-- Dashboard (KPIs, DnD reordenable, alertas inteligentes, centro exportacion)
-- Contratos, Parcelas, Fincas, Mapas
-- Visitas, Tareas, Cosechas, Tratamientos, Irrigaciones
-- Recetas, Albaranes, Proveedores, Cultivos
-- Maquinaria, Evaluaciones, Tecnicos Aplicadores
-- Articulos Finca, Agentes Compra/Venta, Clientes
-- RRHH (Fichajes, Productividad, Documentos, Ausencias, Portal Empleado)
-- Cuaderno de Campo, Asistente IA
-- Configuracion App, Usuarios y Permisos (RBAC)
-- Integracion ERP Bidireccional
-- Consulta SIGPAC con Mapa Interactivo
-- PWA (Progressive Web App)
-- Notificaciones In-App con badge y auto-generacion de alertas
-- Historial de Tratamientos por Parcela
+## Architecture
+- **Frontend**: React (CRA) + Shadcn UI components
+- **Backend**: FastAPI (Python)
+- **Database**: MongoDB
+- **AI**: OpenAI GPT-4o via Emergent LLM Key
+- **Maps**: Leaflet + SIGPAC integration
+- **PWA**: Service worker enabled for mobile
 
-## Experiencia Movil (PWA Optimizada)
-- Header movil: hamburger + logo + notificaciones
-- Bottom Navigation Bar: Inicio, Parcelas, +FAB, Visitas, Tratamientos, Mas
-- FAB (Floating Action Button): acciones rapidas para crear (Visita, Tratamiento, Tarea, Cosecha, Contrato, Irrigacion)
-- KPIs en 2 columnas en movil
-- Tablas con scroll horizontal
-- Modales full-screen en movil
-- Touch targets optimizados (min 44px)
-- CSS transitions y animaciones tactiles
-- Safe area insets para dispositivos con notch
+## Core Modules (All Implemented)
+- Dashboard, Contratos, Parcelas, Fincas, Visitas, Tareas, Cosechas, Tratamientos, Irrigaciones, Recetas, Albaranes, Proveedores, Cultivos, Maquinaria, Fitosanitarios, TecnicosAplicadores, ArticulosExplotacion, Agentes, Clientes, RRHH, Usuarios
 
-## Refactorizaciones Completadas
-- Dashboard.js: 2168 -> 788 lineas
-- Contratos.js: 1917 -> 388 lineas
-- routes_rrhh.py: 1905 -> 270 lineas
-- Tratamientos.js: 2631 -> 1785 lineas
-- Visitas.js: 1921 -> 447 lineas (5 subcomponentes)
+## Completed Features
 
-## Stack Tecnico
-- Frontend: React + Leaflet + @dnd-kit
-- Backend: FastAPI + Motor (MongoDB async)
-- DB: MongoDB
-- AI: OpenAI GPT-4o (Emergent LLM Key)
+### Column Configuration (P0) - DONE (2026-04-13)
+- Generic `ColumnConfigModal` component and `useColumnConfig` hook
+- Applied to ALL 12 table-based modules: Contratos, Proveedores, Clientes, Cultivos, ArticulosExplotacion, TecnicosAplicadores, Usuarios, RRHH, Albaranes, Fitosanitarios, Agentes, Maquinaria
+- Features: Toggle column visibility, reorder columns with up/down arrows, persist to localStorage, Restaurar/Cancelar/Guardar buttons
+- Parcelas and Tratamientos excluded (map/detail views, no tables)
 
-## Integraciones 3rd Party
-- OpenAI GPT-4o (Emergent LLM Key) - ACTIVO
-- SIGPAC WMS/REST/OGC - ACTIVO
-- Resend (Email) - BLOQUEADO (necesita RESEND_API_KEY)
-- OpenWeatherMap - BLOQUEADO (necesita API_KEY)
+### Mobile UI Optimization - DONE
+- MobileBottomNav, responsive headers, KPI grids, mobile CSS layout
 
-## Credenciales
+### Dashboard Config Modal - DONE
+- Widget visibility/ordering, styled action buttons
+
+### Visitas Refactoring - DONE
+- Reduced from 1921 to 447 lines, extracted subcomponents
+
+### Spanish Number Formatting - DONE
+- Contratos uses Spanish locale for EUR formatting (e.g., 4.250.000,00)
+
+## Pending/Blocked
+- **Email Notifications (Resend)**: Blocked - waiting for RESEND_API_KEY from user
+- **Weather Integration (OpenWeatherMap)**: Blocked - waiting for API key from user
+
+## Upcoming Tasks
+- P0: Preparar Despliegue a Producción
+- P1: Identificación NFC para fichajes RRHH
+- P1: App móvil nativa (React Native) - PWA already optimized
+
+## Credentials
 - Admin: admin@fruveco.com / admin123
-
-## Backlog
-- P1: Integraciones IA avanzadas (resumenes contratos, predicciones cosechas) - YA IMPLEMENTADO
-- P1: Identificacion NFC para fichajes RRHH
-- P2: Email (Resend) - Bloqueado API Key
-- P2: Meteorologia (OpenWeatherMap) - Bloqueado API Key

@@ -5,37 +5,23 @@ import { Plus, Edit2, Trash2, Search, Settings, X, Download, FileText, TrendingU
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import ProvinciaSelect from '../components/ProvinciaSelect';
+import ColumnConfigModal from '../components/ColumnConfigModal';
+import { useColumnConfig } from '../hooks/useColumnConfig';
 import '../App.css';
 
-
-// Configuración de campos visibles en tabla
-const DEFAULT_FIELDS_CONFIG = {
-  nombre: true,
-  cif_nif: true,
-  telefono: true,
-  email: true,
-  poblacion: true,
-  provincia: false,
-  direccion: false,
-  codigo_postal: false,
-  persona_contacto: false,
-  observaciones: false,
-  estado: true
-};
-
-const FIELD_LABELS = {
-  nombre: 'Nombre',
-  cif_nif: 'CIF/NIF',
-  telefono: 'Teléfono',
-  email: 'Email',
-  poblacion: 'Población',
-  provincia: 'Provincia',
-  direccion: 'Dirección',
-  codigo_postal: 'Código Postal',
-  persona_contacto: 'Persona Contacto',
-  observaciones: 'Observaciones',
-  estado: 'Estado'
-};
+const DEFAULT_COLUMNS = [
+  { id: 'nombre', label: 'Nombre', visible: true },
+  { id: 'cif_nif', label: 'CIF/NIF', visible: true },
+  { id: 'telefono', label: 'Telefono', visible: true },
+  { id: 'email', label: 'Email', visible: true },
+  { id: 'poblacion', label: 'Poblacion', visible: true },
+  { id: 'provincia', label: 'Provincia', visible: false },
+  { id: 'direccion', label: 'Direccion', visible: false },
+  { id: 'codigo_postal', label: 'Codigo Postal', visible: false },
+  { id: 'persona_contacto', label: 'Persona Contacto', visible: false },
+  { id: 'observaciones', label: 'Observaciones', visible: false },
+  { id: 'estado', label: 'Estado', visible: true },
+];
 
 const Proveedores = () => {
   const [proveedores, setProveedores] = useState([]);
@@ -44,11 +30,6 @@ const Proveedores = () => {
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showFieldsConfig, setShowFieldsConfig] = useState(false);
-  const [fieldsConfig, setFieldsConfig] = useState(() => {
-    const saved = localStorage.getItem('proveedores_fields_config');
-    return saved ? JSON.parse(saved) : DEFAULT_FIELDS_CONFIG;
-  });
   const [stats, setStats] = useState(null);
   const [showHistorial, setShowHistorial] = useState(false);
   const [historialData, setHistorialData] = useState(null);
@@ -59,6 +40,7 @@ const Proveedores = () => {
   const { token } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
+  const { columns, setColumns, showConfig, setShowConfig, save, reset, visibleColumns } = useColumnConfig('proveedores_col_config', DEFAULT_COLUMNS);
   
   const [formData, setFormData] = useState({
     nombre: '',
@@ -193,13 +175,7 @@ const Proveedores = () => {
     return matchesSearch && matchesEstado;
   });
 
-  useEffect(() => {
-    localStorage.setItem('proveedores_fields_config', JSON.stringify(fieldsConfig));
-  }, [fieldsConfig]);
-
-  const toggleFieldConfig = (field) => {
-    setFieldsConfig(prev => ({ ...prev, [field]: !prev[field] }));
-  };
+  // Column config handled by useColumnConfig hook
 
   return (
     <div data-testid="proveedores-page">
@@ -218,9 +194,10 @@ const Proveedores = () => {
             Excel
           </button>
           <button
-            className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setShowFieldsConfig(!showFieldsConfig)}
+            className={`btn ${showConfig ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setShowConfig(true)}
             title="Configurar columnas"
+            data-testid="btn-config-proveedores"
           >
             <Settings size={18} />
           </button>
@@ -272,30 +249,7 @@ const Proveedores = () => {
         </div>
       )}
 
-      {/* Configuración de campos */}
-      {showFieldsConfig && (
-        <div className="card mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 style={{ fontWeight: '600' }}>Configurar Columnas Visibles</h3>
-            <button className="btn btn-sm btn-secondary" onClick={() => setShowFieldsConfig(false)}>
-              <X size={16} />
-            </button>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '0.75rem' }}>
-            {Object.entries(FIELD_LABELS).map(([key, label]) => (
-              <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={fieldsConfig[key]}
-                  onChange={() => toggleFieldConfig(key)}
-                  style={{ width: '18px', height: '18px' }}
-                />
-                <span style={{ fontSize: '0.875rem' }}>{label}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-      )}
+      <ColumnConfigModal show={showConfig} onClose={() => setShowConfig(false)} columns={columns} setColumns={setColumns} onSave={save} onReset={reset} />
 
       {showForm && (
         <div className="card mb-6">
@@ -471,44 +425,29 @@ const Proveedores = () => {
             <table>
               <thead>
                 <tr>
-                  {fieldsConfig.nombre && <th>Nombre</th>}
-                  {fieldsConfig.cif_nif && <th>CIF/NIF</th>}
-                  {fieldsConfig.telefono && <th>Teléfono</th>}
-                  {fieldsConfig.email && <th>Email</th>}
-                  {fieldsConfig.poblacion && <th>Población</th>}
-                  {fieldsConfig.provincia && <th>Provincia</th>}
-                  {fieldsConfig.direccion && <th>Dirección</th>}
-                  {fieldsConfig.codigo_postal && <th>C.P.</th>}
-                  {fieldsConfig.persona_contacto && <th>Contacto</th>}
-                  {fieldsConfig.observaciones && <th>Observaciones</th>}
-                  {fieldsConfig.estado && <th>Estado</th>}
+                  {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
                   {(canEdit || canDelete) ? <th>Acciones</th> : null}
                 </tr>
               </thead>
               <tbody>
                 {filteredProveedores.map((proveedor) => (
                   <tr key={proveedor._id}>
-                    {fieldsConfig.nombre && <td style={{ fontWeight: '600' }}>{proveedor.nombre}</td>}
-                    {fieldsConfig.cif_nif && <td>{proveedor.cif_nif || '-'}</td>}
-                    {fieldsConfig.telefono && <td>{proveedor.telefono || '-'}</td>}
-                    {fieldsConfig.email && <td>{proveedor.email || '-'}</td>}
-                    {fieldsConfig.poblacion && <td>{proveedor.poblacion || '-'}</td>}
-                    {fieldsConfig.provincia && <td>{proveedor.provincia || '-'}</td>}
-                    {fieldsConfig.direccion && <td>{proveedor.direccion || '-'}</td>}
-                    {fieldsConfig.codigo_postal && <td>{proveedor.codigo_postal || '-'}</td>}
-                    {fieldsConfig.persona_contacto && <td>{proveedor.persona_contacto || '-'}</td>}
-                    {fieldsConfig.observaciones && (
-                      <td style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {proveedor.observaciones || '-'}
-                      </td>
-                    )}
-                    {fieldsConfig.estado && (
-                      <td>
-                        <span className={`badge ${proveedor.activo ? 'badge-success' : 'badge-secondary'}`}>
-                          {proveedor.activo ? 'Activo' : 'Inactivo'}
-                        </span>
-                      </td>
-                    )}
+                    {visibleColumns.map(col => {
+                      switch (col.id) {
+                        case 'nombre': return <td key="nombre" style={{ fontWeight: '600' }}>{proveedor.nombre}</td>;
+                        case 'cif_nif': return <td key="cif_nif">{proveedor.cif_nif || '-'}</td>;
+                        case 'telefono': return <td key="telefono">{proveedor.telefono || '-'}</td>;
+                        case 'email': return <td key="email">{proveedor.email || '-'}</td>;
+                        case 'poblacion': return <td key="poblacion">{proveedor.poblacion || '-'}</td>;
+                        case 'provincia': return <td key="provincia">{proveedor.provincia || '-'}</td>;
+                        case 'direccion': return <td key="direccion">{proveedor.direccion || '-'}</td>;
+                        case 'codigo_postal': return <td key="codigo_postal">{proveedor.codigo_postal || '-'}</td>;
+                        case 'persona_contacto': return <td key="persona_contacto">{proveedor.persona_contacto || '-'}</td>;
+                        case 'observaciones': return <td key="observaciones" style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{proveedor.observaciones || '-'}</td>;
+                        case 'estado': return <td key="estado"><span className={`badge ${proveedor.activo ? 'badge-success' : 'badge-secondary'}`}>{proveedor.activo ? 'Activo' : 'Inactivo'}</span></td>;
+                        default: return null;
+                      }
+                    })}
                     {(canEdit || canDelete) && (
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>

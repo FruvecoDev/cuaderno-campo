@@ -3,12 +3,24 @@ import { useTranslation } from 'react-i18next';
 import { 
   Users, Plus, Edit2, Trash2, Search, Filter, X, Upload, 
   Phone, Mail, Globe, MapPin, Building, Percent, Euro,
-  ChevronDown, ChevronUp, Check
+  ChevronDown, ChevronUp, Check, Settings
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
 import { useDropzone } from 'react-dropzone';
+import ColumnConfigModal from '../components/ColumnConfigModal';
+import { useColumnConfig } from '../hooks/useColumnConfig';
 import '../App.css';
+
+const DEFAULT_COLUMNS = [
+  { id: 'codigo', label: 'Codigo', visible: true },
+  { id: 'nombre', label: 'Nombre', visible: true },
+  { id: 'nif', label: 'N.I.F.', visible: true },
+  { id: 'telefono', label: 'Telefono', visible: true },
+  { id: 'email', label: 'Email', visible: true },
+  { id: 'poblacion', label: 'Poblacion', visible: true },
+  { id: 'estado', label: 'Estado', visible: true },
+];
 
 
 const PROVINCIAS_ESPANA = [
@@ -24,6 +36,7 @@ const PROVINCIAS_ESPANA = [
 const Agentes = () => {
   const { t } = useTranslation();
   const { token, user } = useAuth();
+  const { columns, setColumns, showConfig, setShowConfig, save, reset, visibleColumns } = useColumnConfig('agentes_col_config', DEFAULT_COLUMNS);
   
   const [agentes, setAgentes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -314,6 +327,7 @@ const Agentes = () => {
           Agentes de {activeTab}
         </h1>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button className="btn btn-secondary" onClick={() => setShowConfig(true)} title="Configurar columnas" data-testid="btn-config-agentes"><Settings size={18} /></button>
           <button
             className={`btn ${showFilters ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setShowFilters(!showFilters)}
@@ -333,6 +347,7 @@ const Agentes = () => {
           )}
         </div>
       </div>
+      <ColumnConfigModal show={showConfig} onClose={() => setShowConfig(false)} columns={columns} setColumns={setColumns} onSave={save} onReset={reset} />
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
@@ -665,39 +680,25 @@ const Agentes = () => {
           <table>
             <thead>
               <tr>
-                <th>Código</th>
-                <th>Nombre</th>
-                <th>N.I.F.</th>
-                <th>Teléfono</th>
-                <th>Email</th>
-                <th>Población</th>
-                <th>Estado</th>
+                {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {agentes.map((agente) => (
                 <tr key={agente._id}>
-                  <td className="font-semibold">{agente.codigo}</td>
-                  <td>
-                    <div>{agente.nombre}</div>
-                    {agente.razon_social && (
-                      <div className="text-sm text-muted">{agente.razon_social}</div>
-                    )}
-                  </td>
-                  <td>{agente.nif || '-'}</td>
-                  <td>{agente.telefonos || '-'}</td>
-                  <td>{agente.email || '-'}</td>
-                  <td>{agente.poblacion || '-'}</td>
-                  <td>
-                    <button
-                      className={`badge ${agente.activo ? 'badge-success' : 'badge-secondary'}`}
-                      onClick={() => canEdit && handleToggleActivo(agente._id, agente.activo)}
-                      style={{ cursor: canEdit ? 'pointer' : 'default' }}
-                    >
-                      {agente.activo ? 'Activo' : 'Inactivo'}
-                    </button>
-                  </td>
+                  {visibleColumns.map(col => {
+                    switch (col.id) {
+                      case 'codigo': return <td key="codigo" className="font-semibold">{agente.codigo}</td>;
+                      case 'nombre': return <td key="nombre"><div>{agente.nombre}</div>{agente.razon_social && <div className="text-sm text-muted">{agente.razon_social}</div>}</td>;
+                      case 'nif': return <td key="nif">{agente.nif || '-'}</td>;
+                      case 'telefono': return <td key="telefono">{agente.telefonos || '-'}</td>;
+                      case 'email': return <td key="email">{agente.email || '-'}</td>;
+                      case 'poblacion': return <td key="poblacion">{agente.poblacion || '-'}</td>;
+                      case 'estado': return <td key="estado"><button className={`badge ${agente.activo ? 'badge-success' : 'badge-secondary'}`} onClick={() => canEdit && handleToggleActivo(agente._id, agente.activo)} style={{ cursor: canEdit ? 'pointer' : 'default' }}>{agente.activo ? 'Activo' : 'Inactivo'}</button></td>;
+                      default: return null;
+                    }
+                  })}
                   <td>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                       <button

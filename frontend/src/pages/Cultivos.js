@@ -1,10 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, Search } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Settings } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
+import ColumnConfigModal from '../components/ColumnConfigModal';
+import { useColumnConfig } from '../hooks/useColumnConfig';
 import '../App.css';
+
+const DEFAULT_COLUMNS = [
+  { id: 'nombre', label: 'Nombre', visible: true },
+  { id: 'variedad', label: 'Variedad', visible: true },
+  { id: 'tipo', label: 'Tipo', visible: true },
+  { id: 'unidad_medida', label: 'Unidad Medida', visible: true },
+  { id: 'ciclo', label: 'Ciclo', visible: true },
+  { id: 'estado', label: 'Estado', visible: true },
+];
 
 
 const Cultivos = () => {
@@ -19,6 +30,7 @@ const Cultivos = () => {
   const { token } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
+  const { columns, setColumns, showConfig, setShowConfig, save, reset, visibleColumns } = useColumnConfig('cultivos_col_config', DEFAULT_COLUMNS);
   
   const [formData, setFormData] = useState({
     nombre: '',
@@ -117,20 +129,24 @@ const Cultivos = () => {
           <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>Cultivos</h1>
           <p className="text-muted">Gestiona el catálogo de cultivos y variedades</p>
         </div>
-        <PermissionButton
-          permission="create"
-          onClick={() => {
-            resetForm();
-            setEditingId(null);
-            setShowForm(!showForm);
-          }}
-          className="btn btn-primary"
-          data-testid="btn-nuevo-cultivo"
-        >
-          <Plus size={18} />
-          Nuevo Cultivo
-        </PermissionButton>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <button className={`btn ${showConfig ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setShowConfig(true)} title="Configurar columnas" data-testid="btn-config-cultivos"><Settings size={18} /></button>
+          <PermissionButton
+            permission="create"
+            onClick={() => {
+              resetForm();
+              setEditingId(null);
+              setShowForm(!showForm);
+            }}
+            className="btn btn-primary"
+            data-testid="btn-nuevo-cultivo"
+          >
+            <Plus size={18} />
+            Nuevo Cultivo
+          </PermissionButton>
+        </div>
       </div>
+      <ColumnConfigModal show={showConfig} onClose={() => setShowConfig(false)} columns={columns} setColumns={setColumns} onSave={save} onReset={reset} />
 
       {error && (
         <div className="card" style={{ backgroundColor: 'hsl(var(--destructive) / 0.1)', border: '1px solid hsl(var(--destructive))', marginBottom: '1.5rem', padding: '1rem' }}>
@@ -279,30 +295,24 @@ const Cultivos = () => {
             <table>
               <thead>
                 <tr>
-                  <th>Nombre</th>
-                  <th>Variedad</th>
-                  <th>Tipo</th>
-                  <th>Unidad Medida</th>
-                  <th>Ciclo</th>
-                  <th>Estado</th>
+                  {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
                   {(canEdit || canDelete) ? <th>Acciones</th> : null}
                 </tr>
               </thead>
               <tbody>
                 {filteredCultivos.map((cultivo) => (
                   <tr key={cultivo._id}>
-                    <td style={{ fontWeight: '600' }}>{cultivo.nombre}</td>
-                    <td>{cultivo.variedad || '-'}</td>
-                    <td>
-                      <span className="badge badge-info">{cultivo.tipo}</span>
-                    </td>
-                    <td>{cultivo.unidad_medida}</td>
-                    <td>{cultivo.ciclo_cultivo || '-'}</td>
-                    <td>
-                      <span className={`badge ${cultivo.activo ? 'badge-success' : 'badge-secondary'}`}>
-                        {cultivo.activo ? 'Activo' : 'Inactivo'}
-                      </span>
-                    </td>
+                    {visibleColumns.map(col => {
+                      switch (col.id) {
+                        case 'nombre': return <td key="nombre" style={{ fontWeight: '600' }}>{cultivo.nombre}</td>;
+                        case 'variedad': return <td key="variedad">{cultivo.variedad || '-'}</td>;
+                        case 'tipo': return <td key="tipo"><span className="badge badge-info">{cultivo.tipo}</span></td>;
+                        case 'unidad_medida': return <td key="unidad_medida">{cultivo.unidad_medida}</td>;
+                        case 'ciclo': return <td key="ciclo">{cultivo.ciclo_cultivo || '-'}</td>;
+                        case 'estado': return <td key="estado"><span className={`badge ${cultivo.activo ? 'badge-success' : 'badge-secondary'}`}>{cultivo.activo ? 'Activo' : 'Inactivo'}</span></td>;
+                        default: return null;
+                      }
+                    })}
                     {(canEdit || canDelete) && (
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>

@@ -4,6 +4,8 @@ import { Plus, Edit2, Trash2, Search, Filter, Settings, X, Beaker, AlertTriangle
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
+import ColumnConfigModal from '../components/ColumnConfigModal';
+import { useColumnConfig } from '../hooks/useColumnConfig';
 import '../App.css';
 
 
@@ -18,34 +20,19 @@ const TIPOS_PRODUCTO = [
 
 const UNIDADES_DOSIS = ['L/ha', 'kg/ha', 'ml/ha', 'g/ha', '%'];
 
-// Default table columns
-const DEFAULT_TABLE_CONFIG = {
-  numero_registro: true,
-  nombre_comercial: true,
-  denominacion_comun: true,
-  empresa: false,
-  tipo: true,
-  materia_activa: true,
-  dosis: true,
-  volumen_agua: true,
-  plagas: false,
-  plazo_seguridad: true,
-  activo: true
-};
-
-const TABLE_LABELS = {
-  numero_registro: 'Nº Registro',
-  nombre_comercial: 'Nombre Comercial',
-  denominacion_comun: 'Denominación',
-  empresa: 'Empresa',
-  tipo: 'Tipo',
-  materia_activa: 'Materia Activa',
-  dosis: 'Dosis',
-  volumen_agua: 'Vol. Agua',
-  plagas: 'Plagas Objetivo',
-  plazo_seguridad: 'Plazo Seg.',
-  activo: 'Estado'
-};
+const DEFAULT_COLUMNS = [
+  { id: 'numero_registro', label: 'Num Registro', visible: true },
+  { id: 'nombre_comercial', label: 'Nombre Comercial', visible: true },
+  { id: 'denominacion_comun', label: 'Denominacion', visible: true },
+  { id: 'empresa', label: 'Empresa', visible: false },
+  { id: 'tipo', label: 'Tipo', visible: true },
+  { id: 'materia_activa', label: 'Materia Activa', visible: true },
+  { id: 'dosis', label: 'Dosis', visible: true },
+  { id: 'volumen_agua', label: 'Vol. Agua', visible: true },
+  { id: 'plagas', label: 'Plagas Objetivo', visible: false },
+  { id: 'plazo_seguridad', label: 'Plazo Seg.', visible: true },
+  { id: 'activo', label: 'Estado', visible: true },
+];
 
 const Fitosanitarios = () => {
   const { t } = useTranslation();
@@ -58,6 +45,7 @@ const Fitosanitarios = () => {
   const { token } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
+  const { columns, setColumns, showConfig, setShowConfig, save, reset, visibleColumns } = useColumnConfig('fitosanitarios_col_config', DEFAULT_COLUMNS);
   
   // Import/Export
   const [showImport, setShowImport] = useState(false);
@@ -79,13 +67,6 @@ const Fitosanitarios = () => {
     tipo: '',
     search: '',
     activo: 'true'
-  });
-
-  // Table config
-  const [showConfig, setShowConfig] = useState(false);
-  const [tableConfig, setTableConfig] = useState(() => {
-    const saved = localStorage.getItem('fitosanitarios_table_config');
-    return saved ? JSON.parse(saved) : DEFAULT_TABLE_CONFIG;
   });
 
   // Form data
@@ -110,10 +91,6 @@ const Fitosanitarios = () => {
   useEffect(() => {
     fetchProductos();
   }, [filters]);
-
-  useEffect(() => {
-    localStorage.setItem('fitosanitarios_table_config', JSON.stringify(tableConfig));
-  }, [tableConfig]);
 
   const fetchProductos = async () => {
     try {
@@ -466,10 +443,6 @@ const Fitosanitarios = () => {
     setFilters({ tipo: '', search: '', activo: 'true' });
   };
 
-  const toggleTableConfig = (field) => {
-    setTableConfig(prev => ({ ...prev, [field]: !prev[field] }));
-  };
-
   const hasActiveFilters = filters.tipo || filters.search || filters.activo !== 'true';
 
   // Count by type
@@ -503,9 +476,9 @@ const Fitosanitarios = () => {
           </button>
           <button
             className={`btn ${showConfig ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setShowConfig(!showConfig)}
+            onClick={() => setShowConfig(true)}
             title="Configurar columnas"
-            data-testid="btn-config"
+            data-testid="btn-config-fitosanitarios"
           >
             <Settings size={18} />
           </button>
@@ -880,30 +853,7 @@ const Fitosanitarios = () => {
         ))}
       </div>
 
-      {/* Config panel */}
-      {showConfig && (
-        <div className="card mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 style={{ fontWeight: '600' }}>Configurar Columnas</h3>
-            <button className="btn btn-sm btn-secondary" onClick={() => setShowConfig(false)}>
-              <X size={16} />
-            </button>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '0.75rem' }}>
-            {Object.entries(TABLE_LABELS).map(([key, label]) => (
-              <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={tableConfig[key]}
-                  onChange={() => toggleTableConfig(key)}
-                  style={{ width: '18px', height: '18px' }}
-                />
-                <span style={{ fontSize: '0.875rem' }}>{label}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-      )}
+      <ColumnConfigModal show={showConfig} onClose={() => setShowConfig(false)} columns={columns} setColumns={setColumns} onSave={save} onReset={reset} />
 
       {/* Filters */}
       <div className="card mb-6">
@@ -1195,95 +1145,29 @@ const Fitosanitarios = () => {
             <table className="table" data-testid="productos-table">
               <thead>
                 <tr>
-                  {tableConfig.numero_registro && <th>Nº Registro</th>}
-                  {tableConfig.nombre_comercial && <th>Nombre Comercial</th>}
-                  {tableConfig.denominacion_comun && <th>Denominación</th>}
-                  {tableConfig.empresa && <th>Empresa</th>}
-                  {tableConfig.tipo && <th>Tipo</th>}
-                  {tableConfig.materia_activa && <th>Materia Activa</th>}
-                  {tableConfig.dosis && <th>Dosis</th>}
-                  {tableConfig.volumen_agua && <th>Vol. Agua</th>}
-                  {tableConfig.plagas && <th>Plagas</th>}
-                  {tableConfig.plazo_seguridad && <th>Plazo</th>}
-                  {tableConfig.activo && <th>Estado</th>}
+                  {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {productos.map(producto => (
                   <tr key={producto._id}>
-                    {tableConfig.numero_registro && <td><code style={{ fontSize: '0.75rem' }}>{producto.numero_registro}</code></td>}
-                    {tableConfig.nombre_comercial && <td><strong>{producto.nombre_comercial}</strong></td>}
-                    {tableConfig.denominacion_comun && <td>{producto.denominacion_comun || '-'}</td>}
-                    {tableConfig.empresa && <td style={{ fontSize: '0.8rem' }}>{producto.empresa || '-'}</td>}
-                    {tableConfig.tipo && (
-                      <td>
-                        <span style={{
-                          padding: '0.25rem 0.5rem',
-                          borderRadius: '4px',
-                          fontSize: '0.75rem',
-                          fontWeight: '500',
-                          backgroundColor: 
-                            producto.tipo === 'Herbicida' ? '#fef3c7' :
-                            producto.tipo === 'Insecticida' ? '#fce7f3' :
-                            producto.tipo === 'Fungicida' ? '#dbeafe' :
-                            producto.tipo === 'Acaricida' ? '#f3e8ff' :
-                            producto.tipo === 'Molusquicida' ? '#d1fae5' : '#f3f4f6',
-                          color:
-                            producto.tipo === 'Herbicida' ? '#92400e' :
-                            producto.tipo === 'Insecticida' ? '#be185d' :
-                            producto.tipo === 'Fungicida' ? '#1e40af' :
-                            producto.tipo === 'Acaricida' ? '#7c3aed' :
-                            producto.tipo === 'Molusquicida' ? '#047857' : '#374151'
-                        }}>
-                          {producto.tipo}
-                        </span>
-                      </td>
-                    )}
-                    {tableConfig.materia_activa && <td style={{ fontSize: '0.8rem' }}>{producto.materia_activa || '-'}</td>}
-                    {tableConfig.dosis && (
-                      <td style={{ whiteSpace: 'nowrap' }}>
-                        {producto.dosis_min || producto.dosis_max ? (
-                          <span>
-                            {producto.dosis_min && producto.dosis_max 
-                              ? `${producto.dosis_min}-${producto.dosis_max}`
-                              : producto.dosis_max || producto.dosis_min
-                            } {producto.unidad_dosis}
-                          </span>
-                        ) : '-'}
-                      </td>
-                    )}
-                    {tableConfig.volumen_agua && (
-                      <td style={{ whiteSpace: 'nowrap' }}>
-                        {producto.volumen_agua_min || producto.volumen_agua_max ? (
-                          <span>{producto.volumen_agua_min}-{producto.volumen_agua_max} L/ha</span>
-                        ) : '-'}
-                      </td>
-                    )}
-                    {tableConfig.plagas && (
-                      <td style={{ fontSize: '0.75rem', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {(producto.plagas_objetivo || []).join(', ') || '-'}
-                      </td>
-                    )}
-                    {tableConfig.plazo_seguridad && (
-                      <td style={{ textAlign: 'center' }}>
-                        {producto.plazo_seguridad !== null ? `${producto.plazo_seguridad}d` : '-'}
-                      </td>
-                    )}
-                    {tableConfig.activo && (
-                      <td>
-                        <span style={{
-                          padding: '0.25rem 0.5rem',
-                          borderRadius: '4px',
-                          fontSize: '0.7rem',
-                          fontWeight: '500',
-                          backgroundColor: producto.activo ? '#dcfce7' : '#fee2e2',
-                          color: producto.activo ? '#166534' : '#991b1b'
-                        }}>
-                          {producto.activo ? 'Activo' : 'Inactivo'}
-                        </span>
-                      </td>
-                    )}
+                    {visibleColumns.map(col => {
+                      switch (col.id) {
+                        case 'numero_registro': return <td key="numero_registro"><code style={{ fontSize: '0.75rem' }}>{producto.numero_registro}</code></td>;
+                        case 'nombre_comercial': return <td key="nombre_comercial"><strong>{producto.nombre_comercial}</strong></td>;
+                        case 'denominacion_comun': return <td key="denominacion_comun">{producto.denominacion_comun || '-'}</td>;
+                        case 'empresa': return <td key="empresa" style={{ fontSize: '0.8rem' }}>{producto.empresa || '-'}</td>;
+                        case 'tipo': return <td key="tipo"><span style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '500', backgroundColor: producto.tipo === 'Herbicida' ? '#fef3c7' : producto.tipo === 'Insecticida' ? '#fce7f3' : producto.tipo === 'Fungicida' ? '#dbeafe' : producto.tipo === 'Acaricida' ? '#f3e8ff' : producto.tipo === 'Molusquicida' ? '#d1fae5' : '#f3f4f6', color: producto.tipo === 'Herbicida' ? '#92400e' : producto.tipo === 'Insecticida' ? '#be185d' : producto.tipo === 'Fungicida' ? '#1e40af' : producto.tipo === 'Acaricida' ? '#7c3aed' : producto.tipo === 'Molusquicida' ? '#047857' : '#374151' }}>{producto.tipo}</span></td>;
+                        case 'materia_activa': return <td key="materia_activa" style={{ fontSize: '0.8rem' }}>{producto.materia_activa || '-'}</td>;
+                        case 'dosis': return <td key="dosis" style={{ whiteSpace: 'nowrap' }}>{producto.dosis_min || producto.dosis_max ? <span>{producto.dosis_min && producto.dosis_max ? `${producto.dosis_min}-${producto.dosis_max}` : producto.dosis_max || producto.dosis_min} {producto.unidad_dosis}</span> : '-'}</td>;
+                        case 'volumen_agua': return <td key="volumen_agua" style={{ whiteSpace: 'nowrap' }}>{producto.volumen_agua_min || producto.volumen_agua_max ? <span>{producto.volumen_agua_min}-{producto.volumen_agua_max} L/ha</span> : '-'}</td>;
+                        case 'plagas': return <td key="plagas" style={{ fontSize: '0.75rem', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{(producto.plagas_objetivo || []).join(', ') || '-'}</td>;
+                        case 'plazo_seguridad': return <td key="plazo_seguridad" style={{ textAlign: 'center' }}>{producto.plazo_seguridad !== null ? `${producto.plazo_seguridad}d` : '-'}</td>;
+                        case 'activo': return <td key="activo"><span style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '500', backgroundColor: producto.activo ? '#dcfce7' : '#fee2e2', color: producto.activo ? '#166534' : '#991b1b' }}>{producto.activo ? 'Activo' : 'Inactivo'}</span></td>;
+                        default: return null;
+                      }
+                    })}
                     <td>
                       <div style={{ display: 'flex', gap: '0.25rem' }}>
                         <button

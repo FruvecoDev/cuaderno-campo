@@ -7,6 +7,8 @@ import { useAuth } from '../contexts/AuthContext';
 import MaquinariaTable from '../components/maquinaria/MaquinariaTable';
 import MaquinariaForm from '../components/maquinaria/MaquinariaForm';
 import MaquinariaHistorial from '../components/maquinaria/MaquinariaHistorial';
+import ColumnConfigModal from '../components/ColumnConfigModal';
+import { useColumnConfig } from '../hooks/useColumnConfig';
 import '../App.css';
 
 const DEFAULT_FIELDS_CONFIG = {
@@ -21,14 +23,15 @@ const FIELD_LABELS = {
   estado: 'Estado', observaciones: 'Observaciones', imagen_placa_ce: 'Imagen Placa CE',
 };
 
-const DEFAULT_TABLE_CONFIG = {
-  nombre: true, tipo: true, marca: true, modelo: true, matricula: true, estado: true, imagen_placa_ce: true,
-};
-
-const TABLE_LABELS = {
-  nombre: 'Nombre', tipo: 'Tipo', marca: 'Marca', modelo: 'Modelo',
-  matricula: 'Matricula', estado: 'Estado', imagen_placa_ce: 'Placa CE',
-};
+const DEFAULT_COLUMNS = [
+  { id: 'nombre', label: 'Nombre', visible: true },
+  { id: 'tipo', label: 'Tipo', visible: true },
+  { id: 'marca', label: 'Marca', visible: true },
+  { id: 'modelo', label: 'Modelo', visible: true },
+  { id: 'matricula', label: 'Matricula', visible: true },
+  { id: 'estado', label: 'Estado', visible: true },
+  { id: 'imagen_placa_ce', label: 'Placa CE', visible: true },
+];
 
 const TIPOS_MAQUINARIA = [
   'Tractor', 'Cuba de tratamiento', 'Pulverizador', 'Segadora', 'Cosechadora',
@@ -49,6 +52,7 @@ const Maquinaria = () => {
   const { token } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
+  const { columns, setColumns, showConfig, setShowConfig, save, reset, visibleColumns } = useColumnConfig('maquinaria_col_config', DEFAULT_COLUMNS);
 
   const [stats, setStats] = useState(null);
   const [showHistorial, setShowHistorial] = useState(false);
@@ -60,10 +64,6 @@ const Maquinaria = () => {
   const [fieldsConfig, setFieldsConfig] = useState(() => {
     const saved = localStorage.getItem('maquinaria_fields_config');
     return saved ? { ...DEFAULT_FIELDS_CONFIG, ...JSON.parse(saved) } : DEFAULT_FIELDS_CONFIG;
-  });
-  const [tableConfig, setTableConfig] = useState(() => {
-    const saved = localStorage.getItem('maquinaria_table_config');
-    return saved ? { ...DEFAULT_TABLE_CONFIG, ...JSON.parse(saved) } : DEFAULT_TABLE_CONFIG;
   });
   const [formData, setFormData] = useState({
     nombre: '', tipo: 'Tractor', marca: '', modelo: '', matricula: '',
@@ -79,7 +79,6 @@ const Maquinaria = () => {
 
   useEffect(() => { fetchMaquinaria(); fetchStats(); }, []);
   useEffect(() => { localStorage.setItem('maquinaria_fields_config', JSON.stringify(fieldsConfig)); }, [fieldsConfig]);
-  useEffect(() => { localStorage.setItem('maquinaria_table_config', JSON.stringify(tableConfig)); }, [tableConfig]);
 
   const fetchMaquinaria = async () => {
     try { setError(null); const data = await api.get('/api/maquinaria'); setMaquinaria(data.maquinaria || []); }
@@ -207,7 +206,8 @@ const Maquinaria = () => {
           <button className="btn btn-secondary" data-testid="btn-export-pdf-maquinaria"
             onClick={async () => { try { await api.download('/api/maquinaria/export/pdf', `maquinaria_${new Date().toISOString().split('T')[0]}.pdf`); } catch (err) { console.error(err); } }}
             title="Exportar a PDF"><Download size={18} /> PDF</button>
-          <button className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setShowFieldsConfig(!showFieldsConfig)} title="Configurar campos" data-testid="btn-config-fields"><Settings size={18} /></button>
+          <button className="btn btn-secondary" onClick={() => setShowConfig(true)} title="Configurar columnas" data-testid="btn-config-maquinaria"><Settings size={18} /></button>
+          <button className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setShowFieldsConfig(!showFieldsConfig)} title="Configurar campos formulario" data-testid="btn-config-fields"><Filter size={18} /></button>
           <PermissionButton permission="create" onClick={() => setShowForm(!showForm)} className="btn btn-primary" data-testid="btn-nueva-maquinaria"><Plus size={18} /> Nueva Maquinaria</PermissionButton>
         </div>
       </div>
@@ -224,34 +224,22 @@ const Maquinaria = () => {
 
       {error && <div className="card" style={{ backgroundColor: 'hsl(var(--destructive) / 0.1)', border: '1px solid hsl(var(--destructive))', marginBottom: '1.5rem', padding: '1rem' }}><p style={{ color: 'hsl(var(--destructive))' }}>{error}</p></div>}
 
+      <ColumnConfigModal show={showConfig} onClose={() => setShowConfig(false)} columns={columns} setColumns={setColumns} onSave={save} onReset={reset} />
+
       {/* Fields Config Panel */}
       {showFieldsConfig && (
         <div className="card mb-6" data-testid="fields-config-panel">
           <div className="flex justify-between items-center mb-4">
-            <h3 style={{ fontWeight: '600' }}>Configurar Campos</h3>
+            <h3 style={{ fontWeight: '600' }}>Configurar Campos del Formulario</h3>
             <button className="btn btn-sm btn-secondary" onClick={() => setShowFieldsConfig(false)}><X size={16} /></button>
           </div>
-          <div style={{ marginBottom: '1.5rem' }}>
-            <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.75rem' }}>Campos del Formulario:</h4>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem' }}>
-              {Object.entries(FIELD_LABELS).map(([key, label]) => (
-                <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={fieldsConfig[key]} onChange={() => setFieldsConfig(prev => ({...prev, [key]: !prev[key]}))} disabled={key === 'nombre' || key === 'tipo'} style={{ width: '18px', height: '18px' }} />
-                  <span style={{ fontSize: '0.875rem' }}>{label} {(key === 'nombre' || key === 'tipo') && '(obligatorio)'}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-          <div>
-            <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.75rem' }}>Columnas de la Tabla:</h4>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '0.75rem' }}>
-              {Object.entries(TABLE_LABELS).map(([key, label]) => (
-                <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={tableConfig[key]} onChange={() => setTableConfig(prev => ({...prev, [key]: !prev[key]}))} style={{ width: '18px', height: '18px' }} />
-                  <span style={{ fontSize: '0.875rem' }}>{label}</span>
-                </label>
-              ))}
-            </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem' }}>
+            {Object.entries(FIELD_LABELS).map(([key, label]) => (
+              <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                <input type="checkbox" checked={fieldsConfig[key]} onChange={() => setFieldsConfig(prev => ({...prev, [key]: !prev[key]}))} disabled={key === 'nombre' || key === 'tipo'} style={{ width: '18px', height: '18px' }} />
+                <span style={{ fontSize: '0.875rem' }}>{label} {(key === 'nombre' || key === 'tipo') && '(obligatorio)'}</span>
+              </label>
+            ))}
           </div>
         </div>
       )}
@@ -307,7 +295,7 @@ const Maquinaria = () => {
       {/* Table */}
       <MaquinariaTable
         maquinaria={filteredMaquinaria} loading={loading} hasActiveFilters={hasActiveFilters}
-        tableConfig={tableConfig} canEdit={canEdit} canDelete={canDelete}
+        visibleColumns={visibleColumns} canEdit={canEdit} canDelete={canDelete}
         getEstadoBadgeClass={getEstadoBadgeClass} onViewImage={viewImage}
         onViewHistorial={handleVerHistorial} onEdit={handleEdit} onDelete={handleDelete}
       />

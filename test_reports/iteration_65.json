@@ -1,0 +1,21 @@
+{
+  "iteration": 65,
+  "timestamp": "2026-04-13T19:30:00Z",
+  "test_type": "frontend_screenshots",
+  "feature": "Column Configuration across all modules",
+  "results": {
+    "Proveedores": "PASS - Settings button opens ColumnConfigModal with 11 columns",
+    "Clientes": "PASS - Settings button opens ColumnConfigModal with 14 columns",
+    "RRHH": "PASS - Settings button opens ColumnConfigModal with 7 columns",
+    "Fitosanitarios": "PASS - Settings button opens ColumnConfigModal with 11 columns",
+    "Albaranes": "PASS - Settings button opens ColumnConfigModal with 10 columns",
+    "Agentes": "PASS - Settings button opens ColumnConfigModal with 7 columns",
+    "Maquinaria": "PASS - Settings button opens ColumnConfigModal with 7 columns",
+    "Usuarios": "PASS - Settings button opens ColumnConfigModal with 7 columns",
+    "TecnicosAplicadores": "PASS - Settings button opens ColumnConfigModal with 7 columns",
+    "ArticulosExplotacion": "PASS - Settings button opens ColumnConfigModal with 8 columns",
+    "Cultivos": "PASS - Reference implementation, working correctly"
+  },
+  "overall_status": "ALL PASS",
+  "notes": "All 11 table-based modules now have unified column configuration (visibility toggle + reordering). Parcelas and Tratamientos excluded as they use map/detail views without tables."
+}

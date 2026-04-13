@@ -5,35 +5,22 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, Filter, Settings, X, FileSpreadsheet, FileText, Download, TrendingUp, TrendingDown, ArrowUpDown, Printer, Calendar } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
+import ColumnConfigModal from '../components/ColumnConfigModal';
+import { useColumnConfig } from '../hooks/useColumnConfig';
 import '../App.css';
 
-
-// Configuración de campos visibles en tabla
-const DEFAULT_FIELDS_CONFIG = {
-  numero: true,
-  tipo: true,
-  fecha: true,
-  contrato: true,
-  proveedor: true,
-  cultivo: true,
-  parcela: true,
-  items: true,
-  total: true,
-  observaciones: false
-};
-
-const FIELD_LABELS = {
-  numero: 'Nº Albarán',
-  tipo: 'Tipo',
-  fecha: 'Fecha',
-  contrato: 'Contrato',
-  proveedor: 'Proveedor',
-  cultivo: 'Cultivo',
-  parcela: 'Parcela',
-  items: 'Líneas',
-  total: 'Total',
-  observaciones: 'Observaciones'
-};
+const DEFAULT_COLUMNS = [
+  { id: 'numero', label: 'Num Albaran', visible: true },
+  { id: 'tipo', label: 'Tipo', visible: true },
+  { id: 'fecha', label: 'Fecha', visible: true },
+  { id: 'contrato', label: 'Contrato', visible: true },
+  { id: 'proveedor', label: 'Proveedor/Cliente', visible: true },
+  { id: 'cultivo', label: 'Cultivo', visible: true },
+  { id: 'parcela', label: 'Parcela', visible: true },
+  { id: 'items', label: 'Lineas', visible: true },
+  { id: 'total', label: 'Total', visible: true },
+  { id: 'observaciones', label: 'Observaciones', visible: false },
+];
 
 const Albaranes = () => {
   const navigate = useNavigate();
@@ -46,6 +33,7 @@ const Albaranes = () => {
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   const { t } = useTranslation();
+  const { columns, setColumns, showConfig, setShowConfig, save, reset, visibleColumns } = useColumnConfig('albaranes_col_config', DEFAULT_COLUMNS);
   
   // Stats
   const [stats, setStats] = useState(null);
@@ -127,13 +115,6 @@ const Albaranes = () => {
     cultivos: [],
     campanas: [],
     parcelas: []
-  });
-  
-  // Configuración de campos
-  const [showFieldsConfig, setShowFieldsConfig] = useState(false);
-  const [fieldsConfig, setFieldsConfig] = useState(() => {
-    const saved = localStorage.getItem('albaranes_fields_config_v2');
-    return saved ? JSON.parse(saved) : DEFAULT_FIELDS_CONFIG;
   });
   
   // Opciones de filtros
@@ -330,9 +311,7 @@ const Albaranes = () => {
     setContratoOptions({ proveedores, clientesVenta, cultivos, campanas, parcelas });
   }, [contratos]);
   
-  useEffect(() => {
-    localStorage.setItem('albaranes_fields_config_v2', JSON.stringify(fieldsConfig));
-  }, [fieldsConfig]);
+  // Column config handled by useColumnConfig hook
   
   // Cuando se selecciona un contrato, heredar datos
   const handleContratoSelect = (contratoId) => {
@@ -809,10 +788,6 @@ const Albaranes = () => {
     setContratoSearch({ proveedor: '', cultivo: '', campana: '', parcela: '' });
   };
   
-  const toggleFieldConfig = (field) => {
-    setFieldsConfig(prev => ({ ...prev, [field]: !prev[field] }));
-  };
-  
   // Filtrar contratos para el selector según búsqueda Y tipo de albarán
   const filteredContratos = contratos.filter(c => {
     // Determinar el tipo de contrato (por defecto 'Compra' si no está definido)
@@ -880,9 +855,10 @@ const Albaranes = () => {
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button
-            className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setShowFieldsConfig(!showFieldsConfig)}
+            className={`btn ${showConfig ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setShowConfig(true)}
             title="Configurar columnas"
+            data-testid="btn-config-albaranes"
           >
             <Settings size={18} />
           </button>
@@ -923,30 +899,7 @@ const Albaranes = () => {
         </div>
       )}
 
-      {/* Configuración de campos */}
-      {showFieldsConfig && (
-        <div className="card mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 style={{ fontWeight: '600' }}>Configurar Columnas Visibles</h3>
-            <button className="btn btn-sm btn-secondary" onClick={() => setShowFieldsConfig(false)}>
-              <X size={16} />
-            </button>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '0.75rem' }}>
-            {Object.entries(FIELD_LABELS).map(([key, label]) => (
-              <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={fieldsConfig[key]}
-                  onChange={() => toggleFieldConfig(key)}
-                  style={{ width: '18px', height: '18px' }}
-                />
-                <span style={{ fontSize: '0.875rem' }}>{label}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-      )}
+      <ColumnConfigModal show={showConfig} onClose={() => setShowConfig(false)} columns={columns} setColumns={setColumns} onSave={save} onReset={reset} />
 
       {/* KPIs Dashboard */}
       {stats && (
@@ -1142,77 +1095,28 @@ const Albaranes = () => {
             <table className="table" data-testid="albaranes-table">
               <thead>
                 <tr>
-                  {fieldsConfig.numero && <th>Nº</th>}
-                  {fieldsConfig.tipo && <th>Tipo</th>}
-                  {fieldsConfig.fecha && <th>Fecha</th>}
-                  {fieldsConfig.contrato && <th>Contrato</th>}
-                  {fieldsConfig.proveedor && <th>Proveedor/Cliente</th>}
-                  {fieldsConfig.cultivo && <th>Cultivo</th>}
-                  {fieldsConfig.parcela && <th>Parcela</th>}
-                  {fieldsConfig.items && <th>Líneas</th>}
-                  {fieldsConfig.total && <th>Total</th>}
-                  {fieldsConfig.observaciones && <th>Observaciones</th>}
+                  {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredAlbaranes.map((albaran, index) => (
                   <tr key={albaran._id}>
-                    {fieldsConfig.numero && (
-                      <td>
-                        <code style={{ fontSize: '0.8rem' }}>ALB-{String(index + 1).padStart(4, '0')}</code>
-                      </td>
-                    )}
-                    {fieldsConfig.tipo && (
-                      <td>
-                        <span style={{
-                          padding: '0.25rem 0.5rem',
-                          borderRadius: '4px',
-                          fontSize: '0.75rem',
-                          backgroundColor: albaran.tipo === 'Albarán de compra' ? '#dcfce7' : '#fee2e2',
-                          color: albaran.tipo === 'Albarán de compra' ? '#166534' : '#991b1b'
-                        }}>
-                          {albaran.tipo}
-                        </span>
-                      </td>
-                    )}
-                    {fieldsConfig.fecha && <td>{albaran.fecha ? new Date(albaran.fecha).toLocaleDateString('es-ES') : '-'}</td>}
-                    {fieldsConfig.contrato && (
-                      <td>
-                        {albaran.contrato_id ? (
-                          <code style={{ fontSize: '0.75rem' }}>
-                            {contratos.find(c => c._id === albaran.contrato_id)?.numero_contrato || albaran.contrato_id.slice(-6)}
-                          </code>
-                        ) : '-'}
-                      </td>
-                    )}
-                    {fieldsConfig.proveedor && (
-                      <td>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <span style={{ fontSize: '0.65rem', color: '#6b7280' }}>
-                            {albaran.tipo === 'Albarán de venta' ? 'Cliente:' : 'Prov:'}
-                          </span>
-                          <span>
-                            {albaran.tipo === 'Albarán de venta' 
-                              ? (albaran.cliente || '-')
-                              : (albaran.proveedor || '-')}
-                          </span>
-                        </div>
-                      </td>
-                    )}
-                    {fieldsConfig.cultivo && <td>{albaran.cultivo || '-'}</td>}
-                    {fieldsConfig.parcela && <td>{albaran.parcela_codigo || '-'}</td>}
-                    {fieldsConfig.items && <td>{albaran.items?.length || 0} líneas</td>}
-                    {fieldsConfig.total && (
-                      <td style={{ fontWeight: '600', color: '#166534' }}>
-                        {(albaran.total_albaran || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
-                      </td>
-                    )}
-                    {fieldsConfig.observaciones && (
-                      <td style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {albaran.observaciones || '-'}
-                      </td>
-                    )}
+                    {visibleColumns.map(col => {
+                      switch (col.id) {
+                        case 'numero': return <td key="numero"><code style={{ fontSize: '0.8rem' }}>ALB-{String(index + 1).padStart(4, '0')}</code></td>;
+                        case 'tipo': return <td key="tipo"><span style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', backgroundColor: albaran.tipo === 'Albarán de compra' ? '#dcfce7' : '#fee2e2', color: albaran.tipo === 'Albarán de compra' ? '#166534' : '#991b1b' }}>{albaran.tipo}</span></td>;
+                        case 'fecha': return <td key="fecha">{albaran.fecha ? new Date(albaran.fecha).toLocaleDateString('es-ES') : '-'}</td>;
+                        case 'contrato': return <td key="contrato">{albaran.contrato_id ? <code style={{ fontSize: '0.75rem' }}>{contratos.find(c => c._id === albaran.contrato_id)?.numero_contrato || albaran.contrato_id.slice(-6)}</code> : '-'}</td>;
+                        case 'proveedor': return <td key="proveedor"><div style={{ display: 'flex', flexDirection: 'column' }}><span style={{ fontSize: '0.65rem', color: '#6b7280' }}>{albaran.tipo === 'Albarán de venta' ? 'Cliente:' : 'Prov:'}</span><span>{albaran.tipo === 'Albarán de venta' ? (albaran.cliente || '-') : (albaran.proveedor || '-')}</span></div></td>;
+                        case 'cultivo': return <td key="cultivo">{albaran.cultivo || '-'}</td>;
+                        case 'parcela': return <td key="parcela">{albaran.parcela_codigo || '-'}</td>;
+                        case 'items': return <td key="items">{albaran.items?.length || 0} lineas</td>;
+                        case 'total': return <td key="total" style={{ fontWeight: '600', color: '#166534' }}>{(albaran.total_albaran || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} &euro;</td>;
+                        case 'observaciones': return <td key="observaciones" style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{albaran.observaciones || '-'}</td>;
+                        default: return null;
+                      }
+                    })}
                     <td>
                       <div style={{ display: 'flex', gap: '0.25rem' }}>
                         <button

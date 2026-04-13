@@ -6,43 +6,26 @@ import { PermissionButton, usePermissions, usePermissionError } from '../utils/p
 import { useAuth } from '../contexts/AuthContext';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import ProvinciaSelect from '../components/ProvinciaSelect';
+import ColumnConfigModal from '../components/ColumnConfigModal';
+import { useColumnConfig } from '../hooks/useColumnConfig';
 import '../App.css';
 
-
-// Configuración de campos visibles en tabla
-const DEFAULT_FIELDS_CONFIG = {
-  codigo: true,
-  nombre: true,
-  nif: true,
-  tipo: true,
-  poblacion: true,
-  provincia: false,
-  telefono: true,
-  email: true,
-  direccion: false,
-  cod_postal: false,
-  contacto: false,
-  web: false,
-  observaciones: false,
-  estado: true
-};
-
-const FIELD_LABELS = {
-  codigo: 'Código',
-  nombre: 'Nombre',
-  nif: 'NIF/CIF',
-  tipo: 'Tipo',
-  poblacion: 'Población',
-  provincia: 'Provincia',
-  telefono: 'Teléfono',
-  email: 'Email',
-  direccion: 'Dirección',
-  cod_postal: 'Código Postal',
-  contacto: 'Contacto',
-  web: 'Web',
-  observaciones: 'Observaciones',
-  estado: 'Estado'
-};
+const DEFAULT_COLUMNS = [
+  { id: 'codigo', label: 'Codigo', visible: true },
+  { id: 'nombre', label: 'Nombre', visible: true },
+  { id: 'nif', label: 'NIF/CIF', visible: true },
+  { id: 'tipo', label: 'Tipo', visible: true },
+  { id: 'poblacion', label: 'Poblacion', visible: true },
+  { id: 'provincia', label: 'Provincia', visible: false },
+  { id: 'telefono', label: 'Telefono', visible: true },
+  { id: 'email', label: 'Email', visible: true },
+  { id: 'direccion', label: 'Direccion', visible: false },
+  { id: 'cod_postal', label: 'Codigo Postal', visible: false },
+  { id: 'contacto', label: 'Contacto', visible: false },
+  { id: 'web', label: 'Web', visible: false },
+  { id: 'observaciones', label: 'Observaciones', visible: false },
+  { id: 'estado', label: 'Estado', visible: true },
+];
 
 const Clientes = () => {
   const [clientes, setClientes] = useState([]);
@@ -57,11 +40,6 @@ const Clientes = () => {
   const [tipos, setTipos] = useState([]);
   const [provincias, setProvincias] = useState([]);
   const [uploadingFoto, setUploadingFoto] = useState(false);
-  const [showFieldsConfig, setShowFieldsConfig] = useState(false);
-  const [fieldsConfig, setFieldsConfig] = useState(() => {
-    const saved = localStorage.getItem('clientes_fields_config');
-    return saved ? JSON.parse(saved) : DEFAULT_FIELDS_CONFIG;
-  });
   
   // Estado para el resumen de ventas
   const [showResumenVentas, setShowResumenVentas] = useState(false);
@@ -81,6 +59,7 @@ const Clientes = () => {
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   const { t } = useTranslation();
+  const { columns, setColumns, showConfig, setShowConfig, save, reset, visibleColumns } = useColumnConfig('clientes_col_config', DEFAULT_COLUMNS);
   
   const initialFormData = {
     codigo: '',
@@ -345,13 +324,7 @@ const Clientes = () => {
   const clientesActivos = clientes.filter(c => c.activo).length;
   const clientesConEmail = clientes.filter(c => c.email).length;
 
-  useEffect(() => {
-    localStorage.setItem('clientes_fields_config', JSON.stringify(fieldsConfig));
-  }, [fieldsConfig]);
-
-  const toggleFieldConfig = (field) => {
-    setFieldsConfig(prev => ({ ...prev, [field]: !prev[field] }));
-  };
+  // Column config handled by useColumnConfig hook
   
   return (
     <div data-testid="clientes-page">
@@ -367,9 +340,10 @@ const Clientes = () => {
             Excel
           </button>
           <button
-            className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setShowFieldsConfig(!showFieldsConfig)}
+            className={`btn ${showConfig ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setShowConfig(true)}
             title="Configurar columnas"
+            data-testid="btn-config-clientes"
           >
             <Settings size={18} />
           </button>
@@ -391,30 +365,7 @@ const Clientes = () => {
         </div>
       )}
       
-      {/* Configuración de campos */}
-      {showFieldsConfig && (
-        <div className="card mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 style={{ fontWeight: '600' }}>Configurar Columnas Visibles</h3>
-            <button className="btn btn-sm btn-secondary" onClick={() => setShowFieldsConfig(false)}>
-              <X size={16} />
-            </button>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '0.75rem' }}>
-            {Object.entries(FIELD_LABELS).map(([key, label]) => (
-              <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={fieldsConfig[key]}
-                  onChange={() => toggleFieldConfig(key)}
-                  style={{ width: '18px', height: '18px' }}
-                />
-                <span style={{ fontSize: '0.875rem' }}>{label}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-      )}
+      <ColumnConfigModal show={showConfig} onClose={() => setShowConfig(false)} columns={columns} setColumns={setColumns} onSave={save} onReset={reset} />
       
       {/* KPIs */}
       <div className="grid-3 mb-6">
@@ -837,106 +788,32 @@ const Clientes = () => {
             <table data-testid="clientes-table">
               <thead>
                 <tr>
-                  {fieldsConfig.codigo && <th>Código</th>}
-                  {fieldsConfig.nombre && <th>Nombre</th>}
-                  {fieldsConfig.nif && <th>NIF</th>}
-                  {fieldsConfig.tipo && <th>Tipo</th>}
-                  {fieldsConfig.poblacion && <th>Población</th>}
-                  {fieldsConfig.provincia && <th>Provincia</th>}
-                  {fieldsConfig.telefono && <th>Teléfono</th>}
-                  {fieldsConfig.email && <th>Email</th>}
-                  {fieldsConfig.direccion && <th>Dirección</th>}
-                  {fieldsConfig.cod_postal && <th>C.P.</th>}
-                  {fieldsConfig.contacto && <th>Contacto</th>}
-                  {fieldsConfig.web && <th>Web</th>}
-                  {fieldsConfig.observaciones && <th>Observaciones</th>}
-                  {fieldsConfig.estado && <th>Estado</th>}
+                  {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
                   <th>{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody>
                 {clientes.map((cliente) => (
                   <tr key={cliente._id}>
-                    {fieldsConfig.codigo && <td className="font-semibold">{cliente.codigo}</td>}
-                    {fieldsConfig.nombre && (
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          {cliente.foto_url ? (
-                            <img 
-                              src={`${BACKEND_URL}${cliente.foto_url}`} 
-                              alt="" 
-                              style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
-                            />
-                          ) : null}
-                          <div>
-                            <div>{cliente.nombre}</div>
-                            {cliente.razon ? <div style={{ fontSize: '0.75rem', color: '#666' }}>{cliente.razon}</div> : null}
-                          </div>
-                        </div>
-                      </td>
-                    )}
-                    {fieldsConfig.nif && <td>{cliente.nif || '-'}</td>}
-                    {fieldsConfig.tipo && (
-                      <td>
-                        {cliente.tipo ? (
-                          <span style={{
-                            padding: '0.125rem 0.5rem',
-                            borderRadius: '4px',
-                            fontSize: '0.75rem',
-                            backgroundColor: '#e0f2fe',
-                            color: '#0369a1'
-                          }}>
-                            {cliente.tipo}
-                          </span>
-                        ) : '-'}
-                      </td>
-                    )}
-                    {fieldsConfig.poblacion && <td>{cliente.poblacion || '-'}</td>}
-                    {fieldsConfig.provincia && <td>{cliente.provincia || '-'}</td>}
-                    {fieldsConfig.telefono && <td>{cliente.telefono || cliente.movil || '-'}</td>}
-                    {fieldsConfig.email && (
-                      <td>
-                        {cliente.email ? (
-                          <a href={`mailto:${cliente.email}`} style={{ color: 'var(--primary)' }}>
-                            {cliente.email}
-                          </a>
-                        ) : '-'}
-                      </td>
-                    )}
-                    {fieldsConfig.direccion && <td>{cliente.direccion || '-'}</td>}
-                    {fieldsConfig.cod_postal && <td>{cliente.cod_postal || '-'}</td>}
-                    {fieldsConfig.contacto && <td>{cliente.contacto || '-'}</td>}
-                    {fieldsConfig.web && (
-                      <td>
-                        {cliente.web ? (
-                          <a href={cliente.web} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>
-                            {cliente.web}
-                          </a>
-                        ) : '-'}
-                      </td>
-                    )}
-                    {fieldsConfig.observaciones && (
-                      <td style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {cliente.observaciones || '-'}
-                      </td>
-                    )}
-                    {fieldsConfig.estado && (
-                      <td>
-                        <span 
-                          onClick={() => canEdit && handleToggleActivo(cliente._id)}
-                          style={{
-                            padding: '0.125rem 0.5rem',
-                            borderRadius: '4px',
-                            fontSize: '0.75rem',
-                            cursor: canEdit ? 'pointer' : 'default',
-                            backgroundColor: cliente.activo ? '#dcfce7' : '#fee2e2',
-                            color: cliente.activo ? '#166534' : '#dc2626'
-                          }}
-                        >
-                          {cliente.activo ? 'Activo' : 'Inactivo'}
-                        </span>
-                      </td>
-                    )}
+                    {visibleColumns.map(col => {
+                      switch (col.id) {
+                        case 'codigo': return <td key="codigo" className="font-semibold">{cliente.codigo}</td>;
+                        case 'nombre': return <td key="nombre"><div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>{cliente.foto_url ? <img src={`${BACKEND_URL}${cliente.foto_url}`} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} /> : null}<div><div>{cliente.nombre}</div>{cliente.razon ? <div style={{ fontSize: '0.75rem', color: '#666' }}>{cliente.razon}</div> : null}</div></div></td>;
+                        case 'nif': return <td key="nif">{cliente.nif || '-'}</td>;
+                        case 'tipo': return <td key="tipo">{cliente.tipo ? <span style={{ padding: '0.125rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', backgroundColor: '#e0f2fe', color: '#0369a1' }}>{cliente.tipo}</span> : '-'}</td>;
+                        case 'poblacion': return <td key="poblacion">{cliente.poblacion || '-'}</td>;
+                        case 'provincia': return <td key="provincia">{cliente.provincia || '-'}</td>;
+                        case 'telefono': return <td key="telefono">{cliente.telefono || cliente.movil || '-'}</td>;
+                        case 'email': return <td key="email">{cliente.email ? <a href={`mailto:${cliente.email}`} style={{ color: 'var(--primary)' }}>{cliente.email}</a> : '-'}</td>;
+                        case 'direccion': return <td key="direccion">{cliente.direccion || '-'}</td>;
+                        case 'cod_postal': return <td key="cod_postal">{cliente.cod_postal || '-'}</td>;
+                        case 'contacto': return <td key="contacto">{cliente.contacto || '-'}</td>;
+                        case 'web': return <td key="web">{cliente.web ? <a href={cliente.web} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>{cliente.web}</a> : '-'}</td>;
+                        case 'observaciones': return <td key="observaciones" style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cliente.observaciones || '-'}</td>;
+                        case 'estado': return <td key="estado"><span onClick={() => canEdit && handleToggleActivo(cliente._id)} style={{ padding: '0.125rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', cursor: canEdit ? 'pointer' : 'default', backgroundColor: cliente.activo ? '#dcfce7' : '#fee2e2', color: cliente.activo ? '#166534' : '#dc2626' }}>{cliente.activo ? 'Activo' : 'Inactivo'}</span></td>;
+                        default: return null;
+                      }
+                    })}
                     <td>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <button
