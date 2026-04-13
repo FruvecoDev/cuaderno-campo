@@ -117,14 +117,23 @@ const DashboardConfigModal = ({
           ))}
         </div>
         
-        <div style={{ borderTop: '1px solid #e0e0e0', paddingTop: '1rem', marginTop: '0.75rem', display: 'flex', flexWrap: 'nowrap', alignItems: 'center', justifyContent: 'flex-end', gap: '38px' }}>
-          <button onClick={resetDashboardConfig} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'none', border: '1px solid #d0d0d0', borderRadius: '6px', color: '#666', fontSize: '0.8rem', padding: '8px 16px', cursor: 'pointer', whiteSpace: 'nowrap', height: '36px', boxSizing: 'border-box' }}>
-            <RotateCcw size={13} /> Restaurar
-          </button>
-          <button onClick={onClose} style={{ display: 'inline-flex', alignItems: 'center', background: 'none', border: '1px solid #d0d0d0', borderRadius: '6px', color: '#444', fontSize: '0.8rem', padding: '8px 16px', cursor: 'pointer', whiteSpace: 'nowrap', height: '36px', boxSizing: 'border-box' }}>Cancelar</button>
-          <button onClick={saveDashboardConfig} disabled={savingConfig} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'hsl(var(--primary))', border: 'none', borderRadius: '6px', color: 'white', fontSize: '0.8rem', padding: '8px 16px', cursor: 'pointer', whiteSpace: 'nowrap', height: '36px', boxSizing: 'border-box' }}>
-            {savingConfig ? 'Guardando...' : <><Save size={13} /> Guardar</>}
-          </button>
+        <div style={{ borderTop: '1px solid #e0e0e0', paddingTop: '1rem', marginTop: '0.75rem', display: 'flex', flexWrap: 'nowrap', alignItems: 'center', justifyContent: 'flex-end', gap: '16px' }}>
+          {(() => {
+            const base = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px', height: '38px', padding: '0 20px', fontSize: '0.85rem', fontWeight: '500', borderRadius: '8px', cursor: 'pointer', whiteSpace: 'nowrap', boxSizing: 'border-box', lineHeight: '1', verticalAlign: 'middle' };
+            return (
+              <>
+                <button onClick={resetDashboardConfig} style={{ ...base, background: '#f5f5f5', border: '1px solid #d0d0d0', color: '#555' }}>
+                  <RotateCcw size={14} /> Restaurar
+                </button>
+                <button onClick={onClose} style={{ ...base, background: '#f5f5f5', border: '1px solid #d0d0d0', color: '#555' }}>
+                  Cancelar
+                </button>
+                <button onClick={saveDashboardConfig} disabled={savingConfig} style={{ ...base, background: 'hsl(var(--primary))', border: '1px solid hsl(var(--primary))', color: 'white' }}>
+                  <Save size={14} /> {savingConfig ? 'Guardando...' : 'Guardar'}
+                </button>
+              </>
+            );
+          })()}
         </div>
       </div>
     </>,
