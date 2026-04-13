@@ -2,6 +2,11 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Edit2, Trash2, BookOpen, Loader2 } from 'lucide-react';
 
+const formatES = (num, decimals = 2) => {
+  if (num == null) return '-';
+  return Number(num).toLocaleString('es-ES', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+};
+
 const COLUMN_RENDERERS = {
   numero: (c) => <td key="numero" className="font-semibold">{c.serie}-{c.ano}-{String(c.numero).padStart(3, '0')}</td>,
   tipo: (c) => (
@@ -27,9 +32,9 @@ const COLUMN_RENDERERS = {
     </td>
   ),
   cultivo: (c) => <td key="cultivo">{c.cultivo}</td>,
-  cantidad: (c) => <td key="cantidad">{c.cantidad?.toLocaleString()}</td>,
-  precio: (c) => <td key="precio">{'\u20AC'}{c.precio?.toFixed(2)}</td>,
-  total: (c) => <td key="total" className="font-semibold">{'\u20AC'}{((c.cantidad || 0) * (c.precio || 0)).toFixed(2)}</td>,
+  cantidad: (c) => <td key="cantidad">{formatES(c.cantidad, 0)}</td>,
+  precio: (c) => <td key="precio">{'\u20AC'}{formatES(c.precio, 2)}</td>,
+  total: (c) => <td key="total" className="font-semibold">{'\u20AC'}{formatES((c.cantidad || 0) * (c.precio || 0), 2)}</td>,
   fecha: (c) => <td key="fecha">{c.fecha_contrato ? new Date(c.fecha_contrato).toLocaleDateString() : '-'}</td>,
 };
 
