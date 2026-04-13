@@ -20,6 +20,7 @@ ALL_MENU_ITEMS = [
     {"path": "/parcelas", "label": "Parcelas", "section": "Gestión Principal"},
     {"path": "/fincas", "label": "Fincas", "section": "Gestión Principal"},
     {"path": "/mapas", "label": "Mapa de Parcelas", "section": "Gestión Principal"},
+    {"path": "/consulta-sigpac", "label": "Consulta SIGPAC", "section": "Gestión Principal"},
     {"path": "/cuaderno-campo", "label": "Cuaderno de Campo", "section": "Gestión Principal"},
     # Actividades
     {"path": "/visitas", "label": "Visitas", "section": "Actividades"},
@@ -39,6 +40,7 @@ ALL_MENU_ITEMS = [
     {"path": "/informes-gastos", "label": "Informes Gastos", "section": "Administración"},
     {"path": "/informes-ingresos", "label": "Informes Ingresos", "section": "Administración"},
     {"path": "/liquidacion-comisiones", "label": "Liquidación Comisiones", "section": "Administración"},
+    {"path": "/comisiones-generadas", "label": "Comisiones Auto", "section": "Administración"},
     # Catálogos
     {"path": "/proveedores", "label": "Proveedores", "section": "Catálogos"},
     {"path": "/clientes", "label": "Clientes", "section": "Catálogos"},
@@ -52,6 +54,7 @@ ALL_MENU_ITEMS = [
     {"path": "/usuarios", "label": "Usuarios", "section": "Configuración"},
     {"path": "/traducciones", "label": "Traducciones", "section": "Configuración"},
     {"path": "/configuracion", "label": "Configuración App", "section": "Configuración"},
+    {"path": "/integracion-erp", "label": "Integración ERP", "section": "Configuración"},
 ]
 
 # Default menu permissions - all enabled
@@ -69,6 +72,9 @@ PERMISSION_PROFILES = {
             "/contratos": False,
             "/parcelas": True,
             "/fincas": True,
+            "/mapas": True,
+            "/consulta-sigpac": True,
+            "/cuaderno-campo": True,
             "/visitas": True,
             "/recomendaciones": True,
             "/alertas-clima": True,
@@ -85,6 +91,7 @@ PERMISSION_PROFILES = {
             "/informes-gastos": False,
             "/informes-ingresos": False,
             "/liquidacion-comisiones": False,
+            "/comisiones-generadas": False,
             "/proveedores": True,
             "/clientes": False,
             "/cultivos": True,
@@ -96,6 +103,7 @@ PERMISSION_PROFILES = {
             "/usuarios": False,
             "/traducciones": False,
             "/configuracion": False,
+            "/integracion-erp": False,
         }
     },
     "gestor_administrativo": {
@@ -108,6 +116,9 @@ PERMISSION_PROFILES = {
             "/contratos": True,
             "/parcelas": True,
             "/fincas": True,
+            "/mapas": True,
+            "/consulta-sigpac": False,
+            "/cuaderno-campo": True,
             "/visitas": False,
             "/recomendaciones": False,
             "/alertas-clima": False,
@@ -124,6 +135,7 @@ PERMISSION_PROFILES = {
             "/informes-gastos": True,
             "/informes-ingresos": True,
             "/liquidacion-comisiones": True,
+            "/comisiones-generadas": True,
             "/proveedores": True,
             "/clientes": True,
             "/cultivos": True,
@@ -135,6 +147,7 @@ PERMISSION_PROFILES = {
             "/usuarios": False,
             "/traducciones": False,
             "/configuracion": False,
+            "/integracion-erp": False,
         }
     },
     "responsable_rrhh": {
@@ -147,6 +160,9 @@ PERMISSION_PROFILES = {
             "/contratos": False,
             "/parcelas": False,
             "/fincas": False,
+            "/mapas": False,
+            "/consulta-sigpac": False,
+            "/cuaderno-campo": False,
             "/visitas": False,
             "/recomendaciones": False,
             "/alertas-clima": False,
@@ -163,6 +179,7 @@ PERMISSION_PROFILES = {
             "/informes-gastos": False,
             "/informes-ingresos": False,
             "/liquidacion-comisiones": False,
+            "/comisiones-generadas": False,
             "/proveedores": False,
             "/clientes": False,
             "/cultivos": False,
@@ -174,6 +191,7 @@ PERMISSION_PROFILES = {
             "/usuarios": False,
             "/traducciones": False,
             "/configuracion": False,
+            "/integracion-erp": False,
         }
     },
     "supervisor_completo": {
@@ -186,6 +204,9 @@ PERMISSION_PROFILES = {
             "/contratos": True,
             "/parcelas": True,
             "/fincas": True,
+            "/mapas": True,
+            "/consulta-sigpac": True,
+            "/cuaderno-campo": True,
             "/visitas": True,
             "/recomendaciones": True,
             "/alertas-clima": True,
@@ -202,6 +223,7 @@ PERMISSION_PROFILES = {
             "/informes-gastos": True,
             "/informes-ingresos": True,
             "/liquidacion-comisiones": True,
+            "/comisiones-generadas": True,
             "/proveedores": True,
             "/clientes": True,
             "/cultivos": True,
@@ -213,6 +235,7 @@ PERMISSION_PROFILES = {
             "/usuarios": False,
             "/traducciones": False,
             "/configuracion": False,
+            "/integracion-erp": False,
         }
     },
     "solo_consulta": {
@@ -225,6 +248,9 @@ PERMISSION_PROFILES = {
             "/contratos": True,
             "/parcelas": True,
             "/fincas": True,
+            "/mapas": True,
+            "/consulta-sigpac": True,
+            "/cuaderno-campo": True,
             "/visitas": False,
             "/recomendaciones": False,
             "/alertas-clima": True,
@@ -241,6 +267,7 @@ PERMISSION_PROFILES = {
             "/informes-gastos": False,
             "/informes-ingresos": False,
             "/liquidacion-comisiones": False,
+            "/comisiones-generadas": False,
             "/proveedores": False,
             "/clientes": False,
             "/cultivos": True,
@@ -252,6 +279,7 @@ PERMISSION_PROFILES = {
             "/usuarios": False,
             "/traducciones": False,
             "/configuracion": False,
+            "/integracion-erp": False,
         }
     }
 }
