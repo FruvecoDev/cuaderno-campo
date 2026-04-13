@@ -117,13 +117,13 @@ const DashboardConfigModal = ({
           ))}
         </div>
         
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
-          <button onClick={resetDashboardConfig} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ borderTop: '1px solid #e0e0e0', paddingTop: '1.25rem', marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <button onClick={resetDashboardConfig} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%' }}>
             <RotateCcw size={16} /> Restaurar por defecto
           </button>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <button onClick={onClose} className="btn btn-secondary">Cancelar</button>
-            <button onClick={saveDashboardConfig} className="btn btn-primary" disabled={savingConfig} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+            <button onClick={onClose} className="btn btn-secondary" style={{ flex: 1 }}>Cancelar</button>
+            <button onClick={saveDashboardConfig} className="btn btn-primary" disabled={savingConfig} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: 1 }}>
               {savingConfig ? <>Guardando...</> : <><Save size={16} /> Guardar cambios</>}
             </button>
           </div>
