@@ -69,6 +69,7 @@ from routes_erp_sync import router as erp_sync_router
 from routes_sigpac import router as sigpac_router
 from routes_exports import router as exports_router
 from routes_alertas import router as alertas_router
+from routes_user_config import router as user_config_router
 from scheduler_service import init_scheduler, shutdown_scheduler
 from database import db
 
@@ -152,6 +153,7 @@ app.include_router(erp_sync_router)
 app.include_router(sigpac_router)
 app.include_router(exports_router)
 app.include_router(alertas_router)
+app.include_router(user_config_router)
 
 # Mount static files for uploaded images
 uploads_dir = "/app/uploads"

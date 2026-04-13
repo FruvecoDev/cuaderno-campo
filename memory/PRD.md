@@ -19,7 +19,9 @@ Desarrollar una aplicación de campo para el sector de agricultura que permita r
 ### Column Configuration (P0) - DONE (2026-04-13)
 - Generic `ColumnConfigModal` component and `useColumnConfig` hook
 - Applied to ALL 12 table-based modules: Contratos, Proveedores, Clientes, Cultivos, ArticulosExplotacion, TecnicosAplicadores, Usuarios, RRHH, Albaranes, Fitosanitarios, Agentes, Maquinaria
-- Features: Toggle column visibility, reorder columns with up/down arrows, persist to localStorage, Restaurar/Cancelar/Guardar buttons
+- Features: Toggle column visibility, reorder columns with up/down arrows, Restaurar/Cancelar/Guardar buttons
+- **Server-side persistence**: Column config saved per user in MongoDB (`user_column_config` collection) via API endpoints `GET/PUT /api/user-config/columns/{module}`
+- localStorage used as cache with server as source of truth
 - Parcelas and Tratamientos excluded (map/detail views, no tables)
 
 ### Mobile UI Optimization - DONE
