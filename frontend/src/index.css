@@ -124,11 +124,18 @@ code {
 #modal-root,
 #modal-root > *,
 #modal-root [data-testid="modal-config-dashboard"],
-#modal-root [data-testid="modal-config-dashboard"] > * {
+#modal-root [data-testid="modal-config-dashboard"] > *:not(#config-modal-header-row) {
   display: revert !important;
   visibility: visible !important;
   opacity: 1 !important;
   pointer-events: auto !important;
+}
+
+#config-modal-header-row {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
 }
 
 #modal-root > div:first-child {
