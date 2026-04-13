@@ -1190,3 +1190,56 @@ div:has(> a[href*="emergent"]) {
   opacity: 0 !important;
   pointer-events: none !important;
 }
+
+/* ============================================
+   Dashboard Config Modal Action Buttons
+   ============================================ */
+.config-modal-actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.config-action-btn {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 18px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  font-family: inherit;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1;
+  transition: opacity 0.15s ease;
+}
+
+.config-action-btn:hover {
+  opacity: 0.85;
+}
+
+.config-action-restore {
+  background: #fff3e0;
+  color: #e65100;
+  border: 1px solid #ffcc80;
+}
+
+.config-action-cancel {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+}
+
+.config-action-save {
+  background: hsl(var(--primary));
+  color: white;
+  border: 1px solid hsl(var(--primary));
+}

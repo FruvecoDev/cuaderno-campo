@@ -117,16 +117,18 @@ const DashboardConfigModal = ({
           ))}
         </div>
         
-        <div style={{ borderTop: '1px solid #e0e0e0', paddingTop: '1rem', marginTop: '0.75rem', display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', alignItems: 'stretch', justifyContent: 'flex-end' }}>
-          <button onClick={resetDashboardConfig} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '0 20px', fontSize: '0.85rem', fontWeight: '500', borderRadius: '8px', cursor: 'pointer', whiteSpace: 'nowrap', background: '#fff3e0', color: '#e65100', border: '1px solid #ffcc80', marginRight: '12px' }}>
-            <RotateCcw size={14} /> Restaurar
-          </button>
-          <button onClick={onClose} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '0 20px', fontSize: '0.85rem', fontWeight: '500', borderRadius: '8px', cursor: 'pointer', whiteSpace: 'nowrap', background: '#ffebee', color: '#c62828', border: '1px solid #ef9a9a', marginRight: '12px' }}>
-            Cancelar
-          </button>
-          <button onClick={saveDashboardConfig} disabled={savingConfig} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '0 20px', fontSize: '0.85rem', fontWeight: '500', borderRadius: '8px', cursor: 'pointer', whiteSpace: 'nowrap', background: 'hsl(var(--primary))', color: 'white', border: 'none' }}>
-            <Save size={14} /> {savingConfig ? 'Guardando...' : 'Guardar'}
-          </button>
+        <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '16px', marginTop: '12px' }}>
+          <div className="config-modal-actions" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <button onClick={resetDashboardConfig} className="config-action-btn config-action-restore">
+              <RotateCcw size={14} /> Restaurar
+            </button>
+            <button onClick={onClose} className="config-action-btn config-action-cancel">
+              Cancelar
+            </button>
+            <button onClick={saveDashboardConfig} disabled={savingConfig} className="config-action-btn config-action-save">
+              <Save size={14} /> {savingConfig ? 'Guardando...' : 'Guardar'}
+            </button>
+          </div>
         </div>
       </div>
     </>,
