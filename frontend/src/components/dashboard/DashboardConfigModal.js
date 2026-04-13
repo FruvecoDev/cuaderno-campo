@@ -117,15 +117,15 @@ const DashboardConfigModal = ({
           ))}
         </div>
         
-        <div style={{ borderTop: '1px solid #e0e0e0', paddingTop: '1rem', marginTop: '0.75rem', display: 'flex', flexWrap: 'nowrap', alignItems: 'center', justifyContent: 'flex-end', gap: '40px' }}>
+        <div style={{ borderTop: '1px solid #e0e0e0', paddingTop: '1rem', marginTop: '0.75rem', display: 'flex', flexWrap: 'nowrap', alignItems: 'center', justifyContent: 'flex-end' }}>
           {(() => {
-            const base = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px', height: '38px', padding: '0 20px', fontSize: '0.85rem', fontWeight: '500', borderRadius: '8px', cursor: 'pointer', whiteSpace: 'nowrap', boxSizing: 'border-box', lineHeight: '1', verticalAlign: 'middle', border: 'none' };
+            const base = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px', height: '38px', padding: '0 20px', fontSize: '0.85rem', fontWeight: '500', borderRadius: '8px', cursor: 'pointer', whiteSpace: 'nowrap', boxSizing: 'border-box', lineHeight: '1', border: 'none' };
             return (
               <>
-                <button onClick={resetDashboardConfig} style={{ ...base, background: '#fff3e0', color: '#e65100', border: '1px solid #ffcc80' }}>
+                <button onClick={resetDashboardConfig} style={{ ...base, background: '#fff3e0', color: '#e65100', border: '1px solid #ffcc80', marginRight: '24px' }}>
                   <RotateCcw size={14} /> Restaurar
                 </button>
-                <button onClick={onClose} style={{ ...base, background: '#ffebee', color: '#c62828', border: '1px solid #ef9a9a' }}>
+                <button onClick={onClose} style={{ ...base, background: '#ffebee', color: '#c62828', border: '1px solid #ef9a9a', marginRight: '24px' }}>
                   Cancelar
                 </button>
                 <button onClick={saveDashboardConfig} disabled={savingConfig} style={{ ...base, background: 'hsl(var(--primary))', color: 'white' }}>
