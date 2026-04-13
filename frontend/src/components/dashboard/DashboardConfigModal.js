@@ -117,16 +117,15 @@ const DashboardConfigModal = ({
           ))}
         </div>
         
-        <div style={{ borderTop: '1px solid #e0e0e0', paddingTop: '1.25rem', marginTop: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <button onClick={resetDashboardConfig} className="btn btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'transparent', border: '1px solid #ccc', color: '#666', fontSize: '0.8rem', padding: '0.5rem 0.875rem' }}>
-            <RotateCcw size={14} /> Restaurar por defecto
+        <div style={{ borderTop: '1px solid #e0e0e0', paddingTop: '1rem', marginTop: '0.75rem', display: 'flex', flexWrap: 'nowrap', alignItems: 'center', gap: '0.625rem' }}>
+          <button onClick={resetDashboardConfig} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', background: 'none', border: '1px solid #d0d0d0', borderRadius: '6px', color: '#666', fontSize: '0.8rem', padding: '6px 12px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            <RotateCcw size={13} /> Restaurar
           </button>
-          <div style={{ display: 'flex', gap: '0.625rem' }}>
-            <button onClick={onClose} className="btn btn-sm btn-secondary" style={{ fontSize: '0.8rem', padding: '0.5rem 1.25rem' }}>Cancelar</button>
-            <button onClick={saveDashboardConfig} className="btn btn-sm btn-primary" disabled={savingConfig} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.5rem 1.25rem' }}>
-              {savingConfig ? <>Guardando...</> : <><Save size={14} /> Guardar</>}
-            </button>
-          </div>
+          <span style={{ flex: 1 }} />
+          <button onClick={onClose} style={{ background: 'none', border: '1px solid #d0d0d0', borderRadius: '6px', color: '#444', fontSize: '0.8rem', padding: '6px 16px', cursor: 'pointer', whiteSpace: 'nowrap' }}>Cancelar</button>
+          <button onClick={saveDashboardConfig} disabled={savingConfig} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', background: 'hsl(var(--primary))', border: 'none', borderRadius: '6px', color: 'white', fontSize: '0.8rem', padding: '6px 16px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            {savingConfig ? 'Guardando...' : <><Save size={13} /> Guardar</>}
+          </button>
         </div>
       </div>
     </>,
