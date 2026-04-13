@@ -13,6 +13,7 @@ import LanguageSelector from './LanguageSelector';
 import OfflineIndicator from './OfflineIndicator';
 import NotificacionesDropdown from './NotificacionesDropdown';
 import ResumenDiario from './ResumenDiario';
+import { MobileBottomNav } from './MobileBottomNav';
 import '../App.css';
 import defaultLogo from '../assets/logo.png';
 
@@ -222,15 +223,6 @@ const Layout = ({ children }) => {
         onClick={() => setIsMobileMenuOpen(false)}
       />
       
-      {/* Mobile menu toggle button */}
-      <button 
-        className="mobile-menu-toggle"
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        aria-label={isMobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
-        data-testid="mobile-menu-toggle"
-      >
-        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-      </button>
       
       <aside className={`sidebar ${isMobileMenuOpen ? 'open' : ''} ${isSidebarCollapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-header">
@@ -474,19 +466,29 @@ const Layout = ({ children }) => {
       </aside>
       
       <div className="main-content">
-        {/* Header con indicador offline y notificaciones */}
-        <div style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 30,
-          backgroundColor: 'hsl(var(--background))',
-          borderBottom: '1px solid hsl(var(--border))',
-          padding: '0.5rem 1rem',
-          display: 'flex',
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-          gap: '0.75rem'
-        }}>
+        {/* Mobile top header bar */}
+        <div className="mobile-top-header" data-testid="mobile-top-header">
+          <button 
+            className="mobile-menu-toggle"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? 'Cerrar menu' : 'Abrir menu'}
+            data-testid="mobile-menu-toggle"
+          >
+            {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+          <img 
+            src={dashboardLogo || defaultLogo} 
+            alt="Logo" 
+            className="mobile-header-logo"
+            style={{ height: '30px', objectFit: 'contain' }} 
+          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <NotificacionesDropdown />
+            <OfflineIndicator />
+          </div>
+        </div>
+        {/* Header - desktop only */}
+        <div className="desktop-header">
           <NotificacionesDropdown />
           <OfflineIndicator />
         </div>
@@ -494,6 +496,9 @@ const Layout = ({ children }) => {
           {children}
         </div>
       </div>
+      
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
       
       {/* Resumen Diario Modal */}
       {showResumenDiario && (
