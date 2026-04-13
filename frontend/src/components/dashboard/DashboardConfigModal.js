@@ -117,13 +117,12 @@ const DashboardConfigModal = ({
           ))}
         </div>
         
-        <div style={{ borderTop: '1px solid #e0e0e0', paddingTop: '1rem', marginTop: '0.75rem', display: 'flex', flexWrap: 'nowrap', alignItems: 'center', gap: '0.625rem' }}>
-          <button onClick={resetDashboardConfig} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', background: 'none', border: '1px solid #d0d0d0', borderRadius: '6px', color: '#666', fontSize: '0.8rem', padding: '6px 12px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+        <div style={{ borderTop: '1px solid #e0e0e0', paddingTop: '1rem', marginTop: '0.75rem', display: 'flex', flexWrap: 'nowrap', alignItems: 'center', justifyContent: 'flex-end', gap: '38px' }}>
+          <button onClick={resetDashboardConfig} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'none', border: '1px solid #d0d0d0', borderRadius: '6px', color: '#666', fontSize: '0.8rem', padding: '8px 16px', cursor: 'pointer', whiteSpace: 'nowrap', height: '36px', boxSizing: 'border-box' }}>
             <RotateCcw size={13} /> Restaurar
           </button>
-          <span style={{ flex: 1 }} />
-          <button onClick={onClose} style={{ background: 'none', border: '1px solid #d0d0d0', borderRadius: '6px', color: '#444', fontSize: '0.8rem', padding: '6px 16px', cursor: 'pointer', whiteSpace: 'nowrap' }}>Cancelar</button>
-          <button onClick={saveDashboardConfig} disabled={savingConfig} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', background: 'hsl(var(--primary))', border: 'none', borderRadius: '6px', color: 'white', fontSize: '0.8rem', padding: '6px 16px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+          <button onClick={onClose} style={{ display: 'inline-flex', alignItems: 'center', background: 'none', border: '1px solid #d0d0d0', borderRadius: '6px', color: '#444', fontSize: '0.8rem', padding: '8px 16px', cursor: 'pointer', whiteSpace: 'nowrap', height: '36px', boxSizing: 'border-box' }}>Cancelar</button>
+          <button onClick={saveDashboardConfig} disabled={savingConfig} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'hsl(var(--primary))', border: 'none', borderRadius: '6px', color: 'white', fontSize: '0.8rem', padding: '8px 16px', cursor: 'pointer', whiteSpace: 'nowrap', height: '36px', boxSizing: 'border-box' }}>
             {savingConfig ? 'Guardando...' : <><Save size={13} /> Guardar</>}
           </button>
         </div>
