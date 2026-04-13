@@ -28,13 +28,13 @@ const DashboardConfigModal = ({
         width: '90%', maxWidth: '700px', maxHeight: '85vh', overflow: 'auto',
         zIndex: 999999, boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
       }} data-testid="modal-config-dashboard">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div id="config-modal-header-row" style={{ marginBottom: '1.5rem' }}>
+          <h2 style={{ margin: 0, display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
             <Settings size={24} style={{ color: '#1976d2' }} />
             Configurar Dashboard
           </h2>
-          <button className="btn btn-sm btn-secondary" onClick={onClose}>
-            <X size={16} />
+          <button onClick={onClose} className="config-modal-close-btn">
+            <X size={18} />
           </button>
         </div>
         
