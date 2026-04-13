@@ -2,6 +2,37 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Edit2, Trash2, BookOpen, Loader2 } from 'lucide-react';
 
+const COLUMN_RENDERERS = {
+  numero: (c) => <td key="numero" className="font-semibold">{c.serie}-{c.ano}-{String(c.numero).padStart(3, '0')}</td>,
+  tipo: (c) => (
+    <td key="tipo">
+      <span style={{
+        padding: '0.125rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '500',
+        backgroundColor: c.tipo === 'Compra' ? '#dbeafe' : '#dcfce7',
+        color: c.tipo === 'Compra' ? '#1e40af' : '#166534'
+      }}>
+        {c.tipo || 'Compra'}
+      </span>
+    </td>
+  ),
+  campana: (c) => <td key="campana">{c.campana}</td>,
+  proveedor_cliente: (c) => (
+    <td key="proveedor_cliente">
+      <div>
+        <span style={{ fontSize: '0.7rem', color: '#666' }}>
+          {c.tipo === 'Venta' ? 'Cliente: ' : 'Prov: '}
+        </span>
+        {c.tipo === 'Venta' ? (c.cliente || '-') : c.proveedor}
+      </div>
+    </td>
+  ),
+  cultivo: (c) => <td key="cultivo">{c.cultivo}</td>,
+  cantidad: (c) => <td key="cantidad">{c.cantidad?.toLocaleString()}</td>,
+  precio: (c) => <td key="precio">{'\u20AC'}{c.precio?.toFixed(2)}</td>,
+  total: (c) => <td key="total" className="font-semibold">{'\u20AC'}{((c.cantidad || 0) * (c.precio || 0)).toFixed(2)}</td>,
+  fecha: (c) => <td key="fecha">{c.fecha_contrato ? new Date(c.fecha_contrato).toLocaleDateString() : '-'}</td>,
+};
+
 const ContratoTable = ({
   contratos,
   puedeCompra,
@@ -11,7 +42,8 @@ const ContratoTable = ({
   onEdit,
   onDelete,
   onGenerateCuaderno,
-  generatingCuaderno
+  generatingCuaderno,
+  columnConfig
 }) => {
   const { t } = useTranslation();
 
@@ -23,50 +55,38 @@ const ContratoTable = ({
     return false;
   });
 
+  const visibleColumns = columnConfig.filter(col => col.visible);
+
+  const HEADER_LABELS = {
+    numero: t('contracts.contractNumber'),
+    tipo: 'Tipo',
+    campana: t('contracts.campaign'),
+    proveedor_cliente: 'Proveedor/Cliente',
+    cultivo: t('contracts.crop'),
+    cantidad: t('common.quantity') + ' (kg)',
+    precio: t('contracts.price') + ' (EUR/kg)',
+    total: t('common.total') + ' (EUR)',
+    fecha: t('common.date'),
+  };
+
   return (
     <div className="table-container">
       <table data-testid="contratos-table">
         <thead>
           <tr>
-            <th>{t('contracts.contractNumber')}</th>
-            <th>Tipo</th>
-            <th>{t('contracts.campaign')}</th>
-            <th>Proveedor/Cliente</th>
-            <th>{t('contracts.crop')}</th>
-            <th>{t('common.quantity')} (kg)</th>
-            <th>{t('contracts.price')} (EUR/kg)</th>
-            <th>{t('common.total')} (EUR)</th>
-            <th>{t('common.date')}</th>
+            {visibleColumns.map(col => (
+              <th key={col.id}>{HEADER_LABELS[col.id] || col.label}</th>
+            ))}
             {(canEdit || canDelete) ? <th>{t('common.actions')}</th> : null}
           </tr>
         </thead>
         <tbody>
           {visibleContratos.map((contrato) => (
             <tr key={contrato._id}>
-              <td className="font-semibold">{contrato.serie}-{contrato.ano}-{String(contrato.numero).padStart(3, '0')}</td>
-              <td>
-                <span style={{
-                  padding: '0.125rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '500',
-                  backgroundColor: contrato.tipo === 'Compra' ? '#dbeafe' : '#dcfce7',
-                  color: contrato.tipo === 'Compra' ? '#1e40af' : '#166534'
-                }}>
-                  {contrato.tipo || 'Compra'}
-                </span>
-              </td>
-              <td>{contrato.campana}</td>
-              <td>
-                <div>
-                  <span style={{ fontSize: '0.7rem', color: '#666' }}>
-                    {contrato.tipo === 'Venta' ? 'Cliente: ' : 'Prov: '}
-                  </span>
-                  {contrato.tipo === 'Venta' ? (contrato.cliente || '-') : contrato.proveedor}
-                </div>
-              </td>
-              <td>{contrato.cultivo}</td>
-              <td>{contrato.cantidad?.toLocaleString()}</td>
-              <td>{'\u20AC'}{contrato.precio?.toFixed(2)}</td>
-              <td className="font-semibold">{'\u20AC'}{((contrato.cantidad || 0) * (contrato.precio || 0)).toFixed(2)}</td>
-              <td>{contrato.fecha_contrato ? new Date(contrato.fecha_contrato).toLocaleDateString() : '-'}</td>
+              {visibleColumns.map(col => {
+                const renderer = COLUMN_RENDERERS[col.id];
+                return renderer ? renderer(contrato) : null;
+              })}
               {(canEdit || canDelete) ? (
                 <td>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>

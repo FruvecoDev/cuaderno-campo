@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { Plus, ArrowLeft } from 'lucide-react';
+import { Plus, ArrowLeft, Settings } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
@@ -9,12 +9,25 @@ import AuditHistory from '../components/AuditHistory';
 import ContratoFormFields from '../components/contratos/ContratoFormFields';
 import ContratoFilters from '../components/contratos/ContratoFilters';
 import ContratoTable from '../components/contratos/ContratoTable';
+import ContratoColumnConfig from '../components/contratos/ContratoColumnConfig';
 import '../App.css';
 
 const parseFormattedNumber = (value) => {
   if (!value && value !== 0) return '';
   return String(value).replace(/\./g, '').replace(',', '.');
 };
+
+const DEFAULT_COLUMNS = [
+  { id: 'numero', label: 'Numero Contrato', visible: true },
+  { id: 'tipo', label: 'Tipo', visible: true },
+  { id: 'campana', label: 'Campana', visible: true },
+  { id: 'proveedor_cliente', label: 'Proveedor/Cliente', visible: true },
+  { id: 'cultivo', label: 'Cultivo', visible: true },
+  { id: 'cantidad', label: 'Cantidad (kg)', visible: true },
+  { id: 'precio', label: 'Precio (EUR/kg)', visible: true },
+  { id: 'total', label: 'Total (EUR)', visible: true },
+  { id: 'fecha', label: 'Fecha', visible: true },
+];
 
 const Contratos = () => {
   const navigate = useNavigate();
@@ -41,6 +54,11 @@ const Contratos = () => {
   const [cultivos, setCultivos] = useState([]);
   const [filters, setFilters] = useState({ search: '', proveedor: '', cultivo: '', campana: '', tipo: '', fecha_desde: '', fecha_hasta: '' });
   const [showFilters, setShowFilters] = useState(false);
+  const [showColumnConfig, setShowColumnConfig] = useState(false);
+  const [columnConfig, setColumnConfig] = useState(() => {
+    const saved = localStorage.getItem('contratos_column_config');
+    return saved ? JSON.parse(saved) : DEFAULT_COLUMNS;
+  });
   
   const initialFormData = {
     numero_contrato: '', tipo: puedeCompra ? 'Compra' : 'Venta', campana: '2025/26', procedencia: 'Campo',
@@ -102,6 +120,12 @@ const Contratos = () => {
   // Filter logic
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
   const clearFilters = () => setFilters({ search: '', proveedor: '', cultivo: '', campana: '', tipo: '', fecha_desde: '', fecha_hasta: '' });
+  
+  const saveColumnConfig = () => {
+    localStorage.setItem('contratos_column_config', JSON.stringify(columnConfig));
+    setShowColumnConfig(false);
+  };
+  const resetColumnConfig = () => { setColumnConfig(DEFAULT_COLUMNS); };
   
   const filterOptions = useMemo(() => ({
     proveedores: [...new Set(contratos.map(c => c.proveedor).filter(Boolean))].sort(),
@@ -329,10 +353,29 @@ const Contratos = () => {
     <div data-testid="contratos-page">
       <div className="flex justify-between items-center mb-6">
         <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>{t('contracts.title')}</h1>
-        <PermissionButton permission="create" onClick={handleNewContrato} className="btn btn-primary" data-testid="btn-nuevo-contrato">
-          <Plus size={18} /> {t('contracts.newContract')}
-        </PermissionButton>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <button
+            className={`btn ${showColumnConfig ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setShowColumnConfig(!showColumnConfig)}
+            title="Configurar columnas"
+            data-testid="btn-config-contratos"
+          >
+            <Settings size={18} />
+          </button>
+          <PermissionButton permission="create" onClick={handleNewContrato} className="btn btn-primary" data-testid="btn-nuevo-contrato">
+            <Plus size={18} /> {t('contracts.newContract')}
+          </PermissionButton>
+        </div>
       </div>
+      
+      <ContratoColumnConfig
+        show={showColumnConfig}
+        onClose={() => setShowColumnConfig(false)}
+        columns={columnConfig}
+        setColumns={setColumnConfig}
+        onSave={saveColumnConfig}
+        onReset={resetColumnConfig}
+      />
       
       {error && (
         <div className="card" style={{ backgroundColor: 'hsl(var(--destructive) / 0.1)', border: '1px solid hsl(var(--destructive))', marginBottom: '1.5rem', padding: '1rem' }}>
@@ -378,6 +421,7 @@ const Contratos = () => {
             onEdit={handleEdit} onDelete={handleDelete}
             onGenerateCuaderno={handleGenerateCuaderno}
             generatingCuaderno={generatingCuaderno}
+            columnConfig={columnConfig}
           />
         )}
       </div>
