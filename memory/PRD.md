@@ -13,28 +13,29 @@ Aplicacion de campo para agricultura: Cuaderno de Campo completo con modulos de 
 - RRHH (Fichajes, Productividad, Documentos, Ausencias, Portal Empleado)
 - Cuaderno de Campo, Asistente IA
 - Configuracion App, Usuarios y Permisos (RBAC)
-- Integracion ERP Bidireccional (API Keys, Webhooks, Export bulk, Historial sync)
-- Consulta SIGPAC con Mapa Interactivo (WMS oficial, click-to-identify, importacion)
-- PWA (Progressive Web App - instalable en moviles)
+- Integracion ERP Bidireccional
+- Consulta SIGPAC con Mapa Interactivo
+- PWA (Progressive Web App)
 - Notificaciones In-App con badge y auto-generacion de alertas
-- Historial de Tratamientos por Parcela (modal con estadisticas y tabla)
+- Historial de Tratamientos por Parcela
+
+## Experiencia Movil (PWA Optimizada)
+- Header movil: hamburger + logo + notificaciones
+- Bottom Navigation Bar: Inicio, Parcelas, +FAB, Visitas, Tratamientos, Mas
+- FAB (Floating Action Button): acciones rapidas para crear (Visita, Tratamiento, Tarea, Cosecha, Contrato, Irrigacion)
+- KPIs en 2 columnas en movil
+- Tablas con scroll horizontal
+- Modales full-screen en movil
+- Touch targets optimizados (min 44px)
+- CSS transitions y animaciones tactiles
+- Safe area insets para dispositivos con notch
 
 ## Refactorizaciones Completadas
-- Dashboard.js: 2168 -> 788 lineas (5 widgets extraidos)
-- Contratos.js: 1917 -> 388 lineas (form, filters, table extraidos)
-- routes_rrhh.py: 1905 -> 270 lineas (4 sub-routers)
-- Tratamientos.js: 2631 -> 1785 lineas (4 subcomponentes)
-- Visitas.js: 1921 -> 447 lineas (5 subcomponentes: Filters, Form, Table, DetailModal, AnalysisModal)
-
-## Funcionalidades Core
-- Autenticacion JWT con RBAC
-- Dashboard drag-and-drop personalizable (@dnd-kit)
-- Exportacion PDF/Excel en todos los modulos
-- Alertas inteligentes + notificaciones automaticas
-- Asistente IA (GPT-4o via Emergent LLM Key)
-- API REST completa para integracion ERP bidireccional
-- SIGPAC: mapa WMS interactivo, click-to-identify (OGC API)
-- PWA: manifest, service worker, offline cache, install prompt
+- Dashboard.js: 2168 -> 788 lineas
+- Contratos.js: 1917 -> 388 lineas
+- routes_rrhh.py: 1905 -> 270 lineas
+- Tratamientos.js: 2631 -> 1785 lineas
+- Visitas.js: 1921 -> 447 lineas (5 subcomponentes)
 
 ## Stack Tecnico
 - Frontend: React + Leaflet + @dnd-kit
@@ -44,7 +45,7 @@ Aplicacion de campo para agricultura: Cuaderno de Campo completo con modulos de 
 
 ## Integraciones 3rd Party
 - OpenAI GPT-4o (Emergent LLM Key) - ACTIVO
-- SIGPAC WMS/REST/OGC (API gobierno espanol) - ACTIVO
+- SIGPAC WMS/REST/OGC - ACTIVO
 - Resend (Email) - BLOQUEADO (necesita RESEND_API_KEY)
 - OpenWeatherMap - BLOQUEADO (necesita API_KEY)
 
@@ -52,7 +53,7 @@ Aplicacion de campo para agricultura: Cuaderno de Campo completo con modulos de 
 - Admin: admin@fruveco.com / admin123
 
 ## Backlog
+- P1: Integraciones IA avanzadas (resumenes contratos, predicciones cosechas) - YA IMPLEMENTADO
 - P1: Identificacion NFC para fichajes RRHH
-- P0: App movil nativa (React Native)
 - P2: Email (Resend) - Bloqueado API Key
 - P2: Meteorologia (OpenWeatherMap) - Bloqueado API Key
