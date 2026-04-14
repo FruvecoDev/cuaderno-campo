@@ -41,6 +41,7 @@ class ProveedorBase(BaseModel):
     emails: Optional[List[EmailItem]] = []
     contactos: Optional[List[ContactoItem]] = []
     observaciones: Optional[str] = None
+    avisos: Optional[str] = None
     activo: bool = True
 
 class ProveedorCreate(ProveedorBase):

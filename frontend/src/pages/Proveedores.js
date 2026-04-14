@@ -62,6 +62,7 @@ const Proveedores = () => {
     emails: [{ valor: '', etiqueta: '' }],
     contactos: [{ nombre: '', cargo: '', telefono: '', email: '' }],
     observaciones: '',
+    avisos: '',
     activo: true
   });
 
@@ -218,6 +219,7 @@ const Proveedores = () => {
       emails: [{ valor: '', etiqueta: '' }],
       contactos: [{ nombre: '', cargo: '', telefono: '', email: '' }],
       observaciones: '',
+      avisos: '',
       activo: true
     });
   };
@@ -403,10 +405,14 @@ const Proveedores = () => {
                 </div>
               ))}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '1.5rem', alignItems: 'start', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '1.25rem', alignItems: 'start', marginBottom: '1.25rem' }}>
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Observaciones</label>
                 <textarea className="form-input" rows="2" value={formData.observaciones} onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })} style={{ fontSize: '0.85rem', resize: 'vertical' }} />
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Avisos</label>
+                <textarea className="form-input" rows="2" value={formData.avisos || ''} onChange={(e) => setFormData({ ...formData, avisos: e.target.value })} style={{ fontSize: '0.85rem', resize: 'vertical' }} />
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', paddingTop: '1.5rem' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.5rem 1rem', borderRadius: '8px', background: formData.activo ? 'hsl(142 76% 36% / 0.1)' : 'hsl(var(--muted))', border: '1px solid ' + (formData.activo ? 'hsl(142 76% 36% / 0.3)' : 'hsl(var(--border))'), transition: 'all 0.2s' }}>
