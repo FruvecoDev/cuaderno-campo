@@ -641,7 +641,7 @@ const Mapas = () => {
           <div style={{
             position: 'absolute',
             top: '10px',
-            right: '10px',
+            left: '50px',
             zIndex: 1000,
             display: 'flex',
             gap: '4px',
