@@ -1,7 +1,7 @@
 # PRD - Cuaderno de Campo / Agricultural Field Management App
 
 ## Original Problem Statement
-Desarrollar una aplicación de campo para el sector de agricultura que permita realizar un Cuaderno de Campo completo; Contratos, Parcelas, Mapas, Fincas, Visitas, Tareas, Cosechas, Tratamientos, Irrigaciones, Recetas y Albaranes… Dashboard, Generación de informes en pdf y Excel, panel de configuración de usuarios y permisos de aplicación. Acceso a la aplicación con usuario y login. Aplicar integraciones con IA.
+Desarrollar una aplicacion de campo para el sector de agricultura que permita realizar un Cuaderno de Campo completo; Contratos, Parcelas, Mapas, Fincas, Visitas, Tareas, Cosechas, Tratamientos, Irrigaciones, Recetas y Albaranes... Dashboard, Generacion de informes en pdf y Excel, panel de configuracion de usuarios y permisos de aplicacion. Acceso a la aplicacion con usuario y login. Aplicar integraciones con IA.
 
 ## Architecture
 - **Frontend**: React (CRA) + Shadcn UI components
@@ -17,43 +17,51 @@ Desarrollar una aplicación de campo para el sector de agricultura que permita r
 ## Completed Features
 
 ### Column Configuration (P0) - DONE (2026-04-13)
-- Generic `ColumnConfigModal` component and `useColumnConfig` hook
-- Applied to ALL 12 table-based modules: Contratos, Proveedores, Clientes, Cultivos, ArticulosExplotacion, TecnicosAplicadores, Usuarios, RRHH, Albaranes, Fitosanitarios, Agentes, Maquinaria
-- Features: Toggle column visibility, reorder columns with up/down arrows, Restaurar/Cancelar/Guardar buttons
-- **Server-side persistence**: Column config saved per user in MongoDB (`user_column_config` collection) via API endpoints `GET/PUT /api/user-config/columns/{module}`
-- localStorage used as cache with server as source of truth
-- Parcelas and Tratamientos excluded (map/detail views, no tables)
+- Generic ColumnConfigModal component and useColumnConfig hook
+- Applied to ALL 12 table-based modules
+- Server-side persistence in MongoDB per user
 
-### Code Quality Cleanup (2026-04-14)
-- **Hardcoded secrets removed**: All 12+ test files now use `os.environ.get()` for credentials
-- **Console statements removed**: 361 console.log/error/warn/debug removed from production code
-- **Hook dependencies fixed**: All 160+ `useEffect` missing dependency warnings resolved (0 warnings)
-- **Array index as key**: Fixed critical instances (chart cells, table rows) with stable keys
-- Frontend compiles with **0 errors, 0 warnings**
-- Added 3 missing items to ALL_MENU_ITEMS: Consulta SIGPAC, Comisiones Auto, Integración ERP
-- Updated all 5 permission profiles (Técnico de Campo, Gestor Administrativo, Responsable RRHH, Supervisor Completo, Solo Consulta)
-- Total: General (2), Gestión Principal (6), Actividades (7), Administración (10), Catálogos (8), Configuración (4) = 37 items
+### Code Quality Cleanup - DONE (2026-04-14)
+- Hardcoded secrets removed, 361 console.log removed, 160+ hook dependency warnings fixed
+- Frontend compiles with 0 errors, 0 warnings
 
-### Mobile UI Optimization - DONE
-- MobileBottomNav, responsive headers, KPI grids, mobile CSS layout
+### Overhaul Modal Proveedores - DONE (2026-04-14)
+- Professional tabbed modal (960px, 6 tabs)
+- Dynamic arrays (Telefonos, Emails, Contactos)
+- Nested CRUDs: Tipos Proveedor, Tipos Operacion, Formas de Pago, Tipos IVA
+- Auto-incremental codigo_proveedor, Changelog automatico
 
-### Dashboard Config Modal - DONE
-- Widget visibility/ordering, styled action buttons
+### Overhaul Modal Clientes - DONE (2026-04-14)
+- Same tabbed pattern as Proveedores (6 tabs)
+- Tipos Cliente CRUD, Tipos Operacion, Formas de Pago, Tipos IVA (dynamic with gear icons)
+- Changelog automatico
 
-### Visitas Refactoring - DONE
-- Reduced from 1921 to 447 lines, extracted subcomponents
+### Overhaul Modal Cultivos - DONE (2026-04-14)
+- Converted from inline form to professional tabbed modal (3 tabs: Datos Generales, Detalles Tecnicos, Historial)
+- Dynamic Tipos de Cultivo dropdown with gear icon management modal
+- Auto-incremental codigo_cultivo
+- Extended model: familia_botanica, nombre_cientifico, marco_plantacion, densidad_plantacion, profundidad_siembra, necesidades_riego, temperatura_optima, ph_suelo, temporada
+- Changelog automatico (cultivo_changelog collection)
+- Backend: /api/tipos-cultivo CRUD, /api/cultivos/{id}/changelog
 
-### Spanish Number Formatting - DONE
-- Contratos uses Spanish locale for EUR formatting (e.g., 4.250.000,00)
+### Formas de Pago & Tipos IVA (Shared Catalogs) - DONE (2026-04-14)
+- Dynamic CRUD for Formas de Pago and Tipos de IVA
+- Shared between Proveedores and Clientes modules
+- Backend: /api/formas-pago, /api/tipos-iva
+- Seeded defaults: 8 payment methods, 4 VAT types
+
+### Other Completed
+- Mobile UI Optimization, Dashboard Config Modal, Visitas Refactoring
+- Spanish Number Formatting, RBAC system, Delete User functionality
+- Map overlay fix, PWA optimization
 
 ## Pending/Blocked
-- **Email Notifications (Resend)**: Blocked - waiting for RESEND_API_KEY from user
-- **Weather Integration (OpenWeatherMap)**: Blocked - waiting for API key from user
+- **Email Notifications (Resend)**: Blocked - waiting for RESEND_API_KEY
+- **Weather Integration (OpenWeatherMap)**: Blocked - waiting for API key
 
 ## Upcoming Tasks
-- P0: Preparar Despliegue a Producción
-- P1: Identificación NFC para fichajes RRHH
-- P1: App móvil nativa (React Native) - PWA already optimized
+- P0: Preparar Despliegue a Produccion
+- P1: Identificacion NFC para fichajes RRHH
 
 ## Credentials
 - Admin: admin@fruveco.com / admin123
