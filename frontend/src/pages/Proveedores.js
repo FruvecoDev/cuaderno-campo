@@ -298,7 +298,7 @@ const Proveedores = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr 200px', gap: '0.75rem' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>ID Proveedor</label>
-                  <input type="text" className="form-input" value={formData.codigo_proveedor || nextCodigo} disabled style={{ fontFamily: 'monospace', fontWeight: '700', fontSize: '0.95rem', backgroundColor: 'hsl(var(--muted))', textAlign: 'center', letterSpacing: '0.05em' }} />
+                  <input type="text" className="form-input" value={formData.codigo_proveedor || nextCodigo} disabled style={{ backgroundColor: 'hsl(var(--muted))', textAlign: 'center' }} />
                 </div>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Nombre / Razon Social *</label>
