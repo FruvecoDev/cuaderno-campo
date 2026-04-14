@@ -59,6 +59,12 @@ const Proveedores = () => {
     activo: true
   });
 
+  const nextCodigo = (() => {
+    if (!proveedores.length) return '000001';
+    const maxCode = Math.max(...proveedores.map(p => parseInt(p.codigo_proveedor || '0', 10)));
+    return String(maxCode + 1).padStart(6, '0');
+  })();
+
   useEffect(() => {
     fetchProveedores();
     fetchStats();
@@ -284,7 +290,7 @@ const Proveedores = () => {
             <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 1fr', gap: '0.75rem' }}>
               <div className="form-group">
                 <label className="form-label">ID</label>
-                <input type="text" className="form-input" value={formData.codigo_proveedor || 'Auto'} disabled style={{ fontFamily: 'monospace', fontWeight: '600', backgroundColor: 'hsl(var(--muted))', textAlign: 'center' }} />
+                <input type="text" className="form-input" value={formData.codigo_proveedor || nextCodigo} disabled style={{ fontFamily: 'monospace', fontWeight: '600', backgroundColor: 'hsl(var(--muted))', textAlign: 'center' }} />
               </div>
               <div className="form-group">
                 <label className="form-label">Nombre *</label>
