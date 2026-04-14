@@ -122,7 +122,7 @@ async def create_cliente(
     if not cliente.get("codigo"):
         last_cliente = await clientes_collection.find_one(sort=[("codigo_num", -1)])
         next_num = (last_cliente.get("codigo_num", 0) if last_cliente else 0) + 1
-        cliente["codigo"] = str(next_num).zfill(4)
+        cliente["codigo"] = str(next_num).zfill(6)
         cliente["codigo_num"] = next_num
     else:
         # Extraer número del código para ordenamiento
