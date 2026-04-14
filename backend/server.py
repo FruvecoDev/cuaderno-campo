@@ -90,6 +90,11 @@ async def startup_event():
     init_scheduler()
     # Initialize RRHH routes with database
     set_rrhh_db(db)
+    # Seed tipos_cultivo if empty
+    if await db['tipos_cultivo'].count_documents({}) == 0:
+        from datetime import datetime as dt
+        defaults = ["Horticola", "Frutal", "Cereal", "Leguminosa", "Industrial", "Viticola", "Olivar", "Citrico", "Otro"]
+        await db['tipos_cultivo'].insert_many([{"nombre": n, "created_at": dt.now()} for n in defaults])
 
 @app.on_event("shutdown")
 async def shutdown_event():

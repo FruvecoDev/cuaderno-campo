@@ -27,6 +27,8 @@ documentos_proveedor_collection = db['documentos_proveedor']
 changelog_proveedor_collection = db['proveedor_changelog']
 formas_pago_collection = db['formas_pago']
 tipos_iva_collection = db['tipos_iva']
+tipos_cultivo_collection = db['tipos_cultivo']
+changelog_cultivo_collection = db['cultivo_changelog']
 
 
 async def log_proveedor_change(proveedor_id, action, user, changes=None):
@@ -509,6 +511,49 @@ async def export_proveedores_excel(
 
 
 # ============================================================================
+# TIPOS DE CULTIVO
+# ============================================================================
+
+@router.get("/tipos-cultivo")
+async def get_tipos_cultivo(current_user: dict = Depends(get_current_user)):
+    tipos = await tipos_cultivo_collection.find().sort("nombre", 1).to_list(200)
+    return {"tipos": serialize_docs(tipos)}
+
+@router.post("/tipos-cultivo")
+async def create_tipo_cultivo(data: dict, current_user: dict = Depends(RequireCreate)):
+    nombre = data.get("nombre", "").strip()
+    if not nombre:
+        raise HTTPException(status_code=400, detail="El nombre es obligatorio")
+    existing = await tipos_cultivo_collection.find_one({"nombre": {"$regex": f"^{nombre}$", "$options": "i"}})
+    if existing:
+        raise HTTPException(status_code=400, detail="Ya existe un tipo con ese nombre")
+    result = await tipos_cultivo_collection.insert_one({"nombre": nombre, "created_at": datetime.now()})
+    created = await tipos_cultivo_collection.find_one({"_id": result.inserted_id})
+    return {"success": True, "tipo": serialize_doc(created)}
+
+@router.delete("/tipos-cultivo/{tipo_id}")
+async def delete_tipo_cultivo(tipo_id: str, current_user: dict = Depends(RequireDelete)):
+    if not ObjectId.is_valid(tipo_id):
+        raise HTTPException(status_code=400, detail="ID no valido")
+    result = await tipos_cultivo_collection.delete_one({"_id": ObjectId(tipo_id)})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Tipo no encontrado")
+    return {"success": True}
+
+
+async def log_cultivo_change(cultivo_id, action, user, changes=None):
+    entry = {
+        "cultivo_id": cultivo_id,
+        "action": action,
+        "user_email": user.get("email", ""),
+        "user_name": user.get("full_name", user.get("email", "")),
+        "changes": changes or [],
+        "timestamp": datetime.now(),
+    }
+    await changelog_cultivo_collection.insert_one(entry)
+
+
+# ============================================================================
 # CULTIVOS
 # ============================================================================
 
@@ -518,11 +563,29 @@ async def create_cultivo(
     current_user: dict = Depends(RequireCreate)
 ):
     cultivo_dict = cultivo.dict()
+    
+    # Auto-generate codigo_cultivo
+    last = await cultivos_collection.find_one(
+        {"codigo_cultivo": {"$exists": True, "$ne": None}},
+        sort=[("codigo_cultivo", -1)]
+    )
+    if last and last.get("codigo_cultivo"):
+        try:
+            next_num = int(last["codigo_cultivo"]) + 1
+        except ValueError:
+            next_num = 1
+    else:
+        count = await cultivos_collection.count_documents({})
+        next_num = count + 1
+    cultivo_dict['codigo_cultivo'] = str(next_num).zfill(6)
+    
     cultivo_dict['created_at'] = datetime.now()
     cultivo_dict['updated_at'] = datetime.now()
     
     result = await cultivos_collection.insert_one(cultivo_dict)
     created = await cultivos_collection.find_one({"_id": result.inserted_id})
+    
+    await log_cultivo_change(str(result.inserted_id), "creacion", current_user, [{"field": "nombre", "old": "", "new": cultivo_dict.get("nombre", "")}])
     
     return {"success": True, "cultivo": serialize_doc(created)}
 
@@ -577,13 +640,20 @@ async def update_cultivo(
     cultivo_dict = cultivo.dict()
     cultivo_dict['updated_at'] = datetime.now()
     
+    # Get old data for diff
+    old_doc = await cultivos_collection.find_one({"_id": ObjectId(cultivo_id)})
+    if not old_doc:
+        raise HTTPException(status_code=404, detail="Cultivo not found")
+    old_clean = {k: v for k, v in old_doc.items() if k != "_id"}
+    changes = diff_dicts(old_clean, cultivo_dict)
+    
     result = await cultivos_collection.update_one(
         {"_id": ObjectId(cultivo_id)},
         {"$set": cultivo_dict}
     )
     
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Cultivo not found")
+    if changes:
+        await log_cultivo_change(cultivo_id, "modificacion", current_user, changes)
     
     updated = await cultivos_collection.find_one({"_id": ObjectId(cultivo_id)})
     return {"success": True, "cultivo": serialize_doc(updated)}
@@ -602,4 +672,12 @@ async def delete_cultivo(
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Cultivo not found")
     
+    await log_cultivo_change(cultivo_id, "eliminacion", current_user)
+    
     return {"success": True, "message": "Cultivo deleted"}
+
+
+@router.get("/cultivos/{cultivo_id}/changelog")
+async def get_cultivo_changelog(cultivo_id: str, current_user: dict = Depends(get_current_user)):
+    logs = await changelog_cultivo_collection.find({"cultivo_id": cultivo_id}).sort("timestamp", -1).to_list(200)
+    return {"changelog": serialize_docs(logs)}

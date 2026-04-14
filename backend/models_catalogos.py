@@ -100,11 +100,21 @@ class ProveedorInDB(ProveedorBase):
 # ============================================================================
 
 class CultivoBase(BaseModel):
-    nombre: str  # Ej: Tomate, Pimiento, Melón
-    variedad: Optional[str] = None  # Ej: RAF, Piquillo, Galia
-    tipo: Optional[str] = None  # Ej: Hortícola, Frutal, Cereal
-    unidad_medida: str = "kg"  # kg, toneladas, unidades
-    ciclo_cultivo: Optional[str] = None  # Corto, Medio, Largo
+    nombre: str
+    codigo_cultivo: Optional[str] = None
+    variedad: Optional[str] = None
+    tipo: Optional[str] = None
+    unidad_medida: str = "kg"
+    ciclo_cultivo: Optional[str] = None
+    temporada: Optional[str] = None
+    familia_botanica: Optional[str] = None
+    nombre_cientifico: Optional[str] = None
+    marco_plantacion: Optional[str] = None
+    densidad_plantacion: Optional[str] = None
+    profundidad_siembra: Optional[str] = None
+    necesidades_riego: Optional[str] = None
+    temperatura_optima: Optional[str] = None
+    ph_suelo: Optional[str] = None
     observaciones: Optional[str] = None
     activo: bool = True
 
