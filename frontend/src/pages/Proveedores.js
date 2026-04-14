@@ -278,111 +278,104 @@ const Proveedores = () => {
 
       {showForm && (
         <div
-          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}
+          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', backdropFilter: 'blur(4px)' }}
           onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }}
         >
-          <div className="card" style={{ maxWidth: '700px', width: '100%', maxHeight: '90vh', overflow: 'auto', position: 'relative' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>{editingId ? 'Editar' : 'Nuevo'} Proveedor</h2>
+          <div className="card" style={{ maxWidth: '900px', width: '100%', maxHeight: '92vh', overflow: 'auto', position: 'relative', padding: '2rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem', paddingBottom: '1rem', borderBottom: '2px solid hsl(var(--border))' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'hsl(var(--primary) / 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Users size={20} style={{ color: 'hsl(var(--primary))' }} /></div>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '700', letterSpacing: '-0.02em' }}>{editingId ? 'Editar' : 'Nuevo'} Proveedor</h2>
+                  <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>Completa los datos del proveedor</span>
+                </div>
+              </div>
               <button onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }} className="config-modal-close-btn"><X size={18} /></button>
             </div>
           <form onSubmit={handleSubmit}>
-            <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 1fr', gap: '0.75rem' }}>
-              <div className="form-group">
-                <label className="form-label">ID</label>
-                <input type="text" className="form-input" value={formData.codigo_proveedor || nextCodigo} disabled style={{ fontFamily: 'monospace', fontWeight: '600', backgroundColor: 'hsl(var(--muted))', textAlign: 'center' }} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Nombre *</label>
-                <input type="text" className="form-input" value={formData.nombre} onChange={(e) => setFormData({ ...formData, nombre: e.target.value })} required />
-              </div>
-              <div className="form-group">
-                <label className="form-label">CIF/NIF</label>
-                <input type="text" className="form-input" value={formData.cif_nif} onChange={(e) => setFormData({ ...formData, cif_nif: e.target.value })} />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Direccion</label>
-              <input type="text" className="form-input" value={formData.direccion} onChange={(e) => setFormData({ ...formData, direccion: e.target.value })} />
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.75rem' }}>
-              <div className="form-group">
-                <label className="form-label">Poblacion</label>
-                <input type="text" className="form-input" value={formData.poblacion} onChange={(e) => setFormData({ ...formData, poblacion: e.target.value })} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Provincia</label>
-                <ProvinciaSelect value={formData.provincia} onChange={(e) => setFormData({ ...formData, provincia: e.target.value })} testId="select-provincia-proveedor" />
-              </div>
-              <div className="form-group">
-                <label className="form-label">C.P.</label>
-                <input type="text" className="form-input" value={formData.codigo_postal} onChange={(e) => setFormData({ ...formData, codigo_postal: e.target.value })} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Pais</label>
-                <input type="text" className="form-input" value={formData.pais || ''} onChange={(e) => setFormData({ ...formData, pais: e.target.value })} placeholder="España" />
-              </div>
-            </div>
-
-            {/* Telefonos */}
-            <div className="form-group">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                <label className="form-label" style={{ margin: 0 }}>Telefonos</label>
-                <button type="button" className="btn btn-sm btn-secondary" onClick={() => setFormData({ ...formData, telefonos: [...formData.telefonos, { valor: '', etiqueta: '' }] })}><Plus size={14} /> Anadir</button>
-              </div>
-              {formData.telefonos.map((tel, idx) => (
-                <div key={`tel-${idx}`} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
-                  <input type="tel" className="form-input" placeholder="Numero" value={tel.valor} onChange={(e) => { const arr = [...formData.telefonos]; arr[idx] = { ...arr[idx], valor: e.target.value }; setFormData({ ...formData, telefonos: arr }); }} style={{ flex: 2 }} />
-                  <select className="form-input" value={tel.etiqueta} onChange={(e) => { const arr = [...formData.telefonos]; arr[idx] = { ...arr[idx], etiqueta: e.target.value }; setFormData({ ...formData, telefonos: arr }); }} style={{ flex: 1 }}><option value="">-- Tipo --</option><option value="Fijo">Fijo</option><option value="Movil">Movil</option><option value="Fax">Fax</option></select>
-                  {formData.telefonos.length > 1 && <button type="button" onClick={() => setFormData({ ...formData, telefonos: formData.telefonos.filter((_, i) => i !== idx) })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--destructive))', padding: '0.25rem' }}><X size={16} /></button>}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Datos Generales</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr 200px', gap: '0.75rem' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>ID Proveedor</label>
+                  <input type="text" className="form-input" value={formData.codigo_proveedor || nextCodigo} disabled style={{ fontFamily: 'monospace', fontWeight: '700', fontSize: '0.95rem', backgroundColor: 'hsl(var(--muted))', textAlign: 'center', letterSpacing: '0.05em' }} />
                 </div>
-              ))}
-            </div>
-
-            {/* Emails */}
-            <div className="form-group">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                <label className="form-label" style={{ margin: 0 }}>Emails</label>
-                <button type="button" className="btn btn-sm btn-secondary" onClick={() => setFormData({ ...formData, emails: [...formData.emails, { valor: '', etiqueta: '' }] })}><Plus size={14} /> Anadir</button>
-              </div>
-              {formData.emails.map((em, idx) => (
-                <div key={`em-${idx}`} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
-                  <input type="email" className="form-input" placeholder="Email" value={em.valor} onChange={(e) => { const arr = [...formData.emails]; arr[idx] = { ...arr[idx], valor: e.target.value }; setFormData({ ...formData, emails: arr }); }} style={{ flex: 2 }} />
-                  <input type="text" className="form-input" placeholder="Etiqueta (ej: Ventas, Admin)" value={em.etiqueta} onChange={(e) => { const arr = [...formData.emails]; arr[idx] = { ...arr[idx], etiqueta: e.target.value }; setFormData({ ...formData, emails: arr }); }} style={{ flex: 1 }} />
-                  {formData.emails.length > 1 && <button type="button" onClick={() => setFormData({ ...formData, emails: formData.emails.filter((_, i) => i !== idx) })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--destructive))', padding: '0.25rem' }}><X size={16} /></button>}
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Nombre / Razon Social *</label>
+                  <input type="text" className="form-input" value={formData.nombre} onChange={(e) => setFormData({ ...formData, nombre: e.target.value })} required />
                 </div>
-              ))}
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>CIF / NIF</label>
+                  <input type="text" className="form-input" value={formData.cif_nif} onChange={(e) => setFormData({ ...formData, cif_nif: e.target.value })} />
+                </div>
+              </div>
             </div>
-
-            {/* Personas de Contacto */}
-            <div className="form-group">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                <label className="form-label" style={{ margin: 0 }}>Personas de Contacto</label>
-                <button type="button" className="btn btn-sm btn-secondary" onClick={() => setFormData({ ...formData, contactos: [...formData.contactos, { nombre: '', cargo: '', telefono: '', email: '' }] })}><Plus size={14} /> Anadir</button>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Direccion</h3>
+              <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                <input type="text" className="form-input" placeholder="Calle, numero, piso..." value={formData.direccion} onChange={(e) => setFormData({ ...formData, direccion: e.target.value })} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1.5fr 100px 1fr', gap: '0.75rem' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Poblacion</label><input type="text" className="form-input" value={formData.poblacion} onChange={(e) => setFormData({ ...formData, poblacion: e.target.value })} /></div>
+                <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Provincia</label><ProvinciaSelect value={formData.provincia} onChange={(e) => setFormData({ ...formData, provincia: e.target.value })} testId="select-provincia-proveedor" /></div>
+                <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>C.P.</label><input type="text" className="form-input" value={formData.codigo_postal} onChange={(e) => setFormData({ ...formData, codigo_postal: e.target.value })} /></div>
+                <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Pais</label><input type="text" className="form-input" value={formData.pais || ''} onChange={(e) => setFormData({ ...formData, pais: e.target.value })} /></div>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.5rem' }}>
+              <div style={{ background: 'hsl(var(--muted) / 0.3)', borderRadius: '8px', padding: '1rem', border: '1px solid hsl(var(--border))' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', margin: 0 }}>Telefonos</h3>
+                  <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--primary))', fontWeight: '600', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }} onClick={() => setFormData({ ...formData, telefonos: [...formData.telefonos, { valor: '', etiqueta: '' }] })}><Plus size={14} /> Anadir</button>
+                </div>
+                {formData.telefonos.map((tel, idx) => (
+                  <div key={`tel-${idx}`} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
+                    <input type="tel" className="form-input" placeholder="Numero" value={tel.valor} onChange={(e) => { const arr = [...formData.telefonos]; arr[idx] = { ...arr[idx], valor: e.target.value }; setFormData({ ...formData, telefonos: arr }); }} style={{ flex: 2, fontSize: '0.85rem' }} />
+                    <select className="form-input" value={tel.etiqueta} onChange={(e) => { const arr = [...formData.telefonos]; arr[idx] = { ...arr[idx], etiqueta: e.target.value }; setFormData({ ...formData, telefonos: arr }); }} style={{ flex: 1, fontSize: '0.85rem' }}><option value="">Tipo</option><option value="Fijo">Fijo</option><option value="Movil">Movil</option><option value="Fax">Fax</option></select>
+                    {formData.telefonos.length > 1 && <button type="button" onClick={() => setFormData({ ...formData, telefonos: formData.telefonos.filter((_, i) => i !== idx) })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--destructive))', padding: '0.25rem', flexShrink: 0 }}><X size={15} /></button>}
+                  </div>
+                ))}
+              </div>
+              <div style={{ background: 'hsl(var(--muted) / 0.3)', borderRadius: '8px', padding: '1rem', border: '1px solid hsl(var(--border))' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', margin: 0 }}>Emails</h3>
+                  <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--primary))', fontWeight: '600', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }} onClick={() => setFormData({ ...formData, emails: [...formData.emails, { valor: '', etiqueta: '' }] })}><Plus size={14} /> Anadir</button>
+                </div>
+                {formData.emails.map((em, idx) => (
+                  <div key={`em-${idx}`} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
+                    <input type="email" className="form-input" placeholder="correo@ejemplo.com" value={em.valor} onChange={(e) => { const arr = [...formData.emails]; arr[idx] = { ...arr[idx], valor: e.target.value }; setFormData({ ...formData, emails: arr }); }} style={{ flex: 2, fontSize: '0.85rem' }} />
+                    <input type="text" className="form-input" placeholder="Dpto." value={em.etiqueta} onChange={(e) => { const arr = [...formData.emails]; arr[idx] = { ...arr[idx], etiqueta: e.target.value }; setFormData({ ...formData, emails: arr }); }} style={{ flex: 1, fontSize: '0.85rem' }} />
+                    {formData.emails.length > 1 && <button type="button" onClick={() => setFormData({ ...formData, emails: formData.emails.filter((_, i) => i !== idx) })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--destructive))', padding: '0.25rem', flexShrink: 0 }}><X size={15} /></button>}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div style={{ background: 'hsl(var(--muted) / 0.3)', borderRadius: '8px', padding: '1rem', border: '1px solid hsl(var(--border))', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', margin: 0 }}>Personas de Contacto</h3>
+                <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--primary))', fontWeight: '600', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }} onClick={() => setFormData({ ...formData, contactos: [...formData.contactos, { nombre: '', cargo: '', telefono: '', email: '' }] })}><Plus size={14} /> Anadir contacto</button>
               </div>
               {formData.contactos.map((c, idx) => (
-                <div key={`ct-${idx}`} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <input type="text" className="form-input" placeholder="Nombre" value={c.nombre} onChange={(e) => { const arr = [...formData.contactos]; arr[idx] = { ...arr[idx], nombre: e.target.value }; setFormData({ ...formData, contactos: arr }); }} style={{ flex: 1, minWidth: '120px' }} />
-                  <input type="text" className="form-input" placeholder="Cargo" value={c.cargo} onChange={(e) => { const arr = [...formData.contactos]; arr[idx] = { ...arr[idx], cargo: e.target.value }; setFormData({ ...formData, contactos: arr }); }} style={{ flex: 1, minWidth: '100px' }} />
-                  <input type="tel" className="form-input" placeholder="Telefono" value={c.telefono} onChange={(e) => { const arr = [...formData.contactos]; arr[idx] = { ...arr[idx], telefono: e.target.value }; setFormData({ ...formData, contactos: arr }); }} style={{ flex: 1, minWidth: '100px' }} />
-                  <input type="email" className="form-input" placeholder="Email" value={c.email} onChange={(e) => { const arr = [...formData.contactos]; arr[idx] = { ...arr[idx], email: e.target.value }; setFormData({ ...formData, contactos: arr }); }} style={{ flex: 1, minWidth: '120px' }} />
-                  {formData.contactos.length > 1 && <button type="button" onClick={() => setFormData({ ...formData, contactos: formData.contactos.filter((_, i) => i !== idx) })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--destructive))', padding: '0.25rem' }}><X size={16} /></button>}
+                <div key={`ct-${idx}`} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr auto', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
+                  <input type="text" className="form-input" placeholder="Nombre completo" value={c.nombre} onChange={(e) => { const arr = [...formData.contactos]; arr[idx] = { ...arr[idx], nombre: e.target.value }; setFormData({ ...formData, contactos: arr }); }} style={{ fontSize: '0.85rem' }} />
+                  <input type="text" className="form-input" placeholder="Cargo" value={c.cargo} onChange={(e) => { const arr = [...formData.contactos]; arr[idx] = { ...arr[idx], cargo: e.target.value }; setFormData({ ...formData, contactos: arr }); }} style={{ fontSize: '0.85rem' }} />
+                  <input type="tel" className="form-input" placeholder="Telefono" value={c.telefono} onChange={(e) => { const arr = [...formData.contactos]; arr[idx] = { ...arr[idx], telefono: e.target.value }; setFormData({ ...formData, contactos: arr }); }} style={{ fontSize: '0.85rem' }} />
+                  <input type="email" className="form-input" placeholder="Email" value={c.email} onChange={(e) => { const arr = [...formData.contactos]; arr[idx] = { ...arr[idx], email: e.target.value }; setFormData({ ...formData, contactos: arr }); }} style={{ fontSize: '0.85rem' }} />
+                  {formData.contactos.length > 1 && <button type="button" onClick={() => setFormData({ ...formData, contactos: formData.contactos.filter((_, i) => i !== idx) })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--destructive))', padding: '0.25rem' }}><X size={15} /></button>}
                 </div>
               ))}
             </div>
-
-            <div className="form-group">
-              <label className="form-label">Observaciones</label>
-              <textarea className="form-input" rows="2" value={formData.observaciones} onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })} />
-            </div>
-
-            <div className="form-group">
-              <label className="flex items-center gap-2">
-                <input type="checkbox" checked={formData.activo} onChange={(e) => setFormData({ ...formData, activo: e.target.checked })} />
-                <span>Activo</span>
-              </label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '1.5rem', alignItems: 'start', marginBottom: '1.25rem' }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Observaciones</label>
+                <textarea className="form-input" rows="2" value={formData.observaciones} onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })} style={{ fontSize: '0.85rem', resize: 'vertical' }} />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', paddingTop: '1.5rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.5rem 1rem', borderRadius: '8px', background: formData.activo ? 'hsl(142 76% 36% / 0.1)' : 'hsl(var(--muted))', border: '1px solid ' + (formData.activo ? 'hsl(142 76% 36% / 0.3)' : 'hsl(var(--border))'), transition: 'all 0.2s' }}>
+                  <input type="checkbox" checked={formData.activo} onChange={(e) => setFormData({ ...formData, activo: e.target.checked })} style={{ width: '16px', height: '16px' }} />
+                  <span style={{ fontWeight: '600', fontSize: '0.85rem', color: formData.activo ? 'hsl(142 76% 36%)' : 'hsl(var(--muted-foreground))' }}>{formData.activo ? 'Activo' : 'Inactivo'}</span>
+                </label>
+              </div>
             </div>
 
             <div style={{ borderTop: '1px solid hsl(var(--border))', paddingTop: '1rem', marginTop: '0.5rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
