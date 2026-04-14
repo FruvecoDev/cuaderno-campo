@@ -21,6 +21,38 @@ router = APIRouter(prefix="/api", tags=["catalogos"])
 # Collections
 proveedores_collection = db['proveedores']
 cultivos_collection = db['cultivos']
+tipos_proveedor_collection = db['tipos_proveedor']
+
+
+# ============================================================================
+# TIPOS DE PROVEEDOR
+# ============================================================================
+
+@router.get("/tipos-proveedor")
+async def get_tipos_proveedor(current_user: dict = Depends(get_current_user)):
+    tipos = await tipos_proveedor_collection.find().sort("nombre", 1).to_list(200)
+    return {"tipos": serialize_docs(tipos)}
+
+@router.post("/tipos-proveedor")
+async def create_tipo_proveedor(data: dict, current_user: dict = Depends(RequireCreate)):
+    nombre = data.get("nombre", "").strip()
+    if not nombre:
+        raise HTTPException(status_code=400, detail="El nombre es obligatorio")
+    existing = await tipos_proveedor_collection.find_one({"nombre": {"$regex": f"^{nombre}$", "$options": "i"}})
+    if existing:
+        raise HTTPException(status_code=400, detail="Ya existe un tipo con ese nombre")
+    result = await tipos_proveedor_collection.insert_one({"nombre": nombre, "created_at": datetime.now()})
+    created = await tipos_proveedor_collection.find_one({"_id": result.inserted_id})
+    return {"success": True, "tipo": serialize_doc(created)}
+
+@router.delete("/tipos-proveedor/{tipo_id}")
+async def delete_tipo_proveedor(tipo_id: str, current_user: dict = Depends(RequireDelete)):
+    if not ObjectId.is_valid(tipo_id):
+        raise HTTPException(status_code=400, detail="ID no valido")
+    result = await tipos_proveedor_collection.delete_one({"_id": ObjectId(tipo_id)})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Tipo no encontrado")
+    return {"success": True}
 
 
 # ============================================================================

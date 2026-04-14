@@ -13,6 +13,7 @@ import '../App.css';
 const DEFAULT_COLUMNS = [
   { id: 'codigo_proveedor', label: 'ID', visible: true },
   { id: 'nombre', label: 'Nombre', visible: true },
+  { id: 'tipo_proveedor', label: 'Tipo', visible: true },
   { id: 'cif_nif', label: 'CIF/NIF', visible: true },
   { id: 'telefono', label: 'Telefono', visible: true },
   { id: 'email', label: 'Email', visible: true },
@@ -38,6 +39,9 @@ const Proveedores = () => {
   const [historialData, setHistorialData] = useState(null);
   const [selectedProveedor, setSelectedProveedor] = useState(null);
   const [filtroEstado, setFiltroEstado] = useState('todos');
+  const [tiposProveedor, setTiposProveedor] = useState([]);
+  const [showTiposManager, setShowTiposManager] = useState(false);
+  const [nuevoTipo, setNuevoTipo] = useState('');
   const { t } = useTranslation();
   
   const { token } = useAuth();
@@ -47,6 +51,7 @@ const Proveedores = () => {
   
   const [formData, setFormData] = useState({
     nombre: '',
+    tipo_proveedor: 'Agricultor',
     cif_nif: '',
     direccion: '',
     poblacion: '',
@@ -69,6 +74,7 @@ const Proveedores = () => {
   useEffect(() => {
     fetchProveedores();
     fetchStats();
+    fetchTiposProveedor();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchProveedores = async () => {
@@ -92,6 +98,29 @@ const Proveedores = () => {
     } catch (error) {
 
     }
+  };
+
+  const fetchTiposProveedor = async () => {
+    try {
+      const data = await api.get('/api/tipos-proveedor');
+      setTiposProveedor(data.tipos || []);
+    } catch (error) {}
+  };
+
+  const handleAddTipo = async () => {
+    if (!nuevoTipo.trim()) return;
+    try {
+      await api.post('/api/tipos-proveedor', { nombre: nuevoTipo.trim() });
+      setNuevoTipo('');
+      fetchTiposProveedor();
+    } catch (error) {}
+  };
+
+  const handleDeleteTipo = async (tipoId) => {
+    try {
+      await api.delete(`/api/tipos-proveedor/${tipoId}`);
+      fetchTiposProveedor();
+    } catch (error) {}
   };
 
   const handleVerHistorial = async (proveedor) => {
@@ -178,6 +207,7 @@ const Proveedores = () => {
   const resetForm = () => {
     setFormData({
       nombre: '',
+      tipo_proveedor: 'Agricultor',
       cif_nif: '',
       direccion: '',
       poblacion: '',
@@ -296,7 +326,7 @@ const Proveedores = () => {
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '1.5rem' }}>
               <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Datos Generales</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr 200px', gap: '0.75rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr 170px 200px', gap: '0.75rem' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>ID Proveedor</label>
                   <input type="text" className="form-input" value={formData.codigo_proveedor || nextCodigo} disabled style={{ backgroundColor: 'hsl(var(--muted))', textAlign: 'center' }} />
@@ -304,6 +334,13 @@ const Proveedores = () => {
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Nombre / Razon Social *</label>
                   <input type="text" className="form-input" value={formData.nombre} onChange={(e) => setFormData({ ...formData, nombre: e.target.value })} required />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>Tipo Proveedor <button type="button" onClick={() => setShowTiposManager(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--primary))', padding: 0, fontSize: '0.7rem' }} title="Gestionar tipos"><Settings size={12} /></button></label>
+                  <select className="form-input" value={formData.tipo_proveedor || ''} onChange={(e) => setFormData({ ...formData, tipo_proveedor: e.target.value })}>
+                    <option value="">-- Tipo --</option>
+                    {tiposProveedor.map(t => <option key={t._id} value={t.nombre}>{t.nombre}</option>)}
+                  </select>
                 </div>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>CIF / NIF</label>
@@ -448,6 +485,7 @@ const Proveedores = () => {
                       switch (col.id) {
                         case 'codigo_proveedor': return <td key="codigo_proveedor"><code style={{ fontFamily: 'monospace', fontWeight: '600', fontSize: '0.85rem' }}>{proveedor.codigo_proveedor || '-'}</code></td>;
                         case 'nombre': return <td key="nombre" style={{ fontWeight: '600' }}>{proveedor.nombre}</td>;
+                        case 'tipo_proveedor': return <td key="tipo_proveedor"><span style={{ padding: '0.15rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', backgroundColor: 'hsl(var(--primary) / 0.1)', color: 'hsl(var(--primary))' }}>{proveedor.tipo_proveedor || '-'}</span></td>;
                         case 'cif_nif': return <td key="cif_nif">{proveedor.cif_nif || '-'}</td>;
                         case 'telefono': return <td key="telefono">{proveedor.telefonos?.length ? proveedor.telefonos.map(t => t.valor).join(', ') : proveedor.telefono || '-'}</td>;
                         case 'email': return <td key="email">{proveedor.emails?.length ? proveedor.emails.map(e => e.valor).join(', ') : proveedor.email || '-'}</td>;
@@ -604,6 +642,29 @@ const Proveedores = () => {
                   )}
                 </>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+      {showTiposManager && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, padding: '1rem', backdropFilter: 'blur(4px)' }} onClick={() => setShowTiposManager(false)}>
+          <div className="card" style={{ maxWidth: '450px', width: '100%', padding: '1.5rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '2px solid hsl(var(--border))' }}>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700' }}>Tipos de Proveedor</h3>
+              <button onClick={() => setShowTiposManager(false)} className="config-modal-close-btn"><X size={16} /></button>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+              <input type="text" className="form-input" placeholder="Nuevo tipo..." value={nuevoTipo} onChange={(e) => setNuevoTipo(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTipo())} style={{ flex: 1 }} />
+              <button type="button" className="btn btn-primary" onClick={handleAddTipo} disabled={!nuevoTipo.trim()}><Plus size={16} /></button>
+            </div>
+            <div style={{ maxHeight: '300px', overflow: 'auto' }}>
+              {tiposProveedor.map(tipo => (
+                <div key={tipo._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', borderRadius: '6px', marginBottom: '0.35rem', background: 'hsl(var(--muted) / 0.3)', border: '1px solid hsl(var(--border))' }}>
+                  <span style={{ fontSize: '0.9rem' }}>{tipo.nombre}</span>
+                  <button onClick={() => handleDeleteTipo(tipo._id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--destructive))', padding: '0.25rem' }} title="Eliminar"><Trash2 size={14} /></button>
+                </div>
+              ))}
+              {tiposProveedor.length === 0 && <p style={{ textAlign: 'center', color: 'hsl(var(--muted-foreground))', fontSize: '0.85rem', padding: '1rem 0' }}>No hay tipos definidos</p>}
             </div>
           </div>
         </div>

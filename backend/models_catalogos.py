@@ -27,6 +27,7 @@ class ContactoItem(BaseModel):
 class ProveedorBase(BaseModel):
     nombre: str
     codigo_proveedor: Optional[str] = None
+    tipo_proveedor: Optional[str] = 'Agricultor'
     cif_nif: Optional[str] = None
     direccion: Optional[str] = None
     poblacion: Optional[str] = None
