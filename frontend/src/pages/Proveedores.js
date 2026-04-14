@@ -324,7 +324,7 @@ const Proveedores = () => {
               {formData.telefonos.map((tel, idx) => (
                 <div key={`tel-${idx}`} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
                   <input type="tel" className="form-input" placeholder="Numero" value={tel.valor} onChange={(e) => { const arr = [...formData.telefonos]; arr[idx] = { ...arr[idx], valor: e.target.value }; setFormData({ ...formData, telefonos: arr }); }} style={{ flex: 2 }} />
-                  <input type="text" className="form-input" placeholder="Etiqueta (ej: Principal, Movil)" value={tel.etiqueta} onChange={(e) => { const arr = [...formData.telefonos]; arr[idx] = { ...arr[idx], etiqueta: e.target.value }; setFormData({ ...formData, telefonos: arr }); }} style={{ flex: 1 }} />
+                  <select className="form-input" value={tel.etiqueta} onChange={(e) => { const arr = [...formData.telefonos]; arr[idx] = { ...arr[idx], etiqueta: e.target.value }; setFormData({ ...formData, telefonos: arr }); }} style={{ flex: 1 }}><option value="">-- Tipo --</option><option value="Fijo">Fijo</option><option value="Movil">Movil</option><option value="Fax">Fax</option></select>
                   {formData.telefonos.length > 1 && <button type="button" onClick={() => setFormData({ ...formData, telefonos: formData.telefonos.filter((_, i) => i !== idx) })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--destructive))', padding: '0.25rem' }}><X size={16} /></button>}
                 </div>
               ))}
