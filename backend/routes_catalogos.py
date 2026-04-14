@@ -24,6 +24,37 @@ cultivos_collection = db['cultivos']
 tipos_proveedor_collection = db['tipos_proveedor']
 tipos_operacion_collection = db['tipos_operacion_proveedor']
 documentos_proveedor_collection = db['documentos_proveedor']
+changelog_proveedor_collection = db['proveedor_changelog']
+
+
+async def log_proveedor_change(proveedor_id, action, user, changes=None):
+    entry = {
+        "proveedor_id": proveedor_id,
+        "action": action,
+        "user_email": user.get("email", ""),
+        "user_name": user.get("full_name", user.get("email", "")),
+        "changes": changes or [],
+        "timestamp": datetime.now(),
+    }
+    await changelog_proveedor_collection.insert_one(entry)
+
+
+def diff_dicts(old, new, prefix=""):
+    changes = []
+    skip = {"_id", "created_at", "updated_at"}
+    all_keys = set(list(old.keys()) + list(new.keys())) - skip
+    for key in sorted(all_keys):
+        old_val = old.get(key)
+        new_val = new.get(key)
+        field = f"{prefix}{key}" if not prefix else f"{prefix}.{key}"
+        if isinstance(old_val, dict) and isinstance(new_val, dict):
+            changes.extend(diff_dicts(old_val, new_val, field))
+        elif isinstance(old_val, list) and isinstance(new_val, list):
+            if old_val != new_val:
+                changes.append({"field": field, "old": str(old_val)[:200], "new": str(new_val)[:200]})
+        elif str(old_val) != str(new_val):
+            changes.append({"field": field, "old": str(old_val or ""), "new": str(new_val or "")})
+    return changes
 
 
 # ============================================================================
@@ -145,6 +176,8 @@ async def create_proveedor(
     result = await proveedores_collection.insert_one(proveedor_dict)
     created = await proveedores_collection.find_one({"_id": result.inserted_id})
     
+    await log_proveedor_change(str(result.inserted_id), "creacion", current_user, [{"field": "nombre", "old": "", "new": proveedor_dict.get("nombre", "")}])
+    
     return {"success": True, "proveedor": serialize_doc(created)}
 
 
@@ -195,13 +228,20 @@ async def update_proveedor(
     proveedor_dict = proveedor.dict()
     proveedor_dict['updated_at'] = datetime.now()
     
+    # Get old data for diff
+    old_doc = await proveedores_collection.find_one({"_id": ObjectId(proveedor_id)})
+    if not old_doc:
+        raise HTTPException(status_code=404, detail="Proveedor not found")
+    old_clean = {k: v for k, v in old_doc.items() if k != "_id"}
+    changes = diff_dicts(old_clean, proveedor_dict)
+    
     result = await proveedores_collection.update_one(
         {"_id": ObjectId(proveedor_id)},
         {"$set": proveedor_dict}
     )
     
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Proveedor not found")
+    if changes:
+        await log_proveedor_change(proveedor_id, "modificacion", current_user, changes)
     
     updated = await proveedores_collection.find_one({"_id": ObjectId(proveedor_id)})
     return {"success": True, "proveedor": serialize_doc(updated)}
@@ -220,7 +260,15 @@ async def delete_proveedor(
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Proveedor not found")
     
+    await log_proveedor_change(proveedor_id, "eliminacion", current_user)
+    
     return {"success": True, "message": "Proveedor deleted"}
+
+
+@router.get("/proveedores/{proveedor_id}/changelog")
+async def get_proveedor_changelog(proveedor_id: str, current_user: dict = Depends(get_current_user)):
+    logs = await changelog_proveedor_collection.find({"proveedor_id": proveedor_id}).sort("timestamp", -1).to_list(200)
+    return {"changelog": serialize_docs(logs)}
 
 
 @router.get("/proveedores/stats/resumen")
