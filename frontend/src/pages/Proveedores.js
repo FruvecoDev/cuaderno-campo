@@ -206,7 +206,7 @@ const Proveedores = () => {
             onClick={() => {
               resetForm();
               setEditingId(null);
-              setShowForm(!showForm);
+              setShowForm(true);
             }}
             className="btn btn-primary"
             data-testid="btn-nuevo-proveedor"
@@ -252,8 +252,15 @@ const Proveedores = () => {
       <ColumnConfigModal show={showConfig} onClose={() => setShowConfig(false)} columns={columns} setColumns={setColumns} onSave={save} onReset={reset} />
 
       {showForm && (
-        <div className="card mb-6">
-          <h2 className="card-title">{editingId ? 'Editar' : 'Nuevo'} Proveedor</h2>
+        <div
+          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}
+          onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }}
+        >
+          <div className="card" style={{ maxWidth: '700px', width: '100%', maxHeight: '90vh', overflow: 'auto', position: 'relative' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>{editingId ? 'Editar' : 'Nuevo'} Proveedor</h2>
+              <button onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }} className="config-modal-close-btn"><X size={18} /></button>
+            </div>
           <form onSubmit={handleSubmit}>
             <div className="grid-2">
               <div className="form-group">
@@ -278,7 +285,7 @@ const Proveedores = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Dirección</label>
+              <label className="form-label">Direccion</label>
               <input
                 type="text"
                 className="form-input"
@@ -289,7 +296,7 @@ const Proveedores = () => {
 
             <div className="grid-3">
               <div className="form-group">
-                <label className="form-label">Población</label>
+                <label className="form-label">Poblacion</label>
                 <input
                   type="text"
                   className="form-input"
@@ -306,7 +313,7 @@ const Proveedores = () => {
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Código Postal</label>
+                <label className="form-label">Codigo Postal</label>
                 <input
                   type="text"
                   className="form-input"
@@ -318,7 +325,7 @@ const Proveedores = () => {
 
             <div className="grid-2">
               <div className="form-group">
-                <label className="form-label">Teléfono</label>
+                <label className="form-label">Telefono</label>
                 <input
                   type="tel"
                   className="form-input"
@@ -368,10 +375,7 @@ const Proveedores = () => {
               </label>
             </div>
 
-            <div className="flex gap-2">
-              <button type="submit" className="btn btn-primary">
-                {editingId ? 'Actualizar' : 'Crear'} Proveedor
-              </button>
+            <div style={{ borderTop: '1px solid hsl(var(--border))', paddingTop: '1rem', marginTop: '0.5rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
               <button
                 type="button"
                 className="btn btn-secondary"
@@ -383,8 +387,12 @@ const Proveedores = () => {
               >
                 Cancelar
               </button>
+              <button type="submit" className="btn btn-primary">
+                {editingId ? 'Actualizar' : 'Crear'} Proveedor
+              </button>
             </div>
           </form>
+          </div>
         </div>
       )}
 
