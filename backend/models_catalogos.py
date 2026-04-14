@@ -24,6 +24,41 @@ class ContactoItem(BaseModel):
     telefono: str = ''
     email: str = ''
 
+class DatosGestion(BaseModel):
+    forma_pago: Optional[str] = None
+    dias_pago: Optional[str] = None
+    moneda: Optional[str] = 'EUR'
+    iva: Optional[str] = None
+    irpf: Optional[str] = None
+    subcuenta: Optional[str] = None
+    subcuenta_gastos: Optional[str] = None
+    tipo_operacion: Optional[str] = None
+
+class DatosBancarios(BaseModel):
+    banco: Optional[str] = None
+    sucursal: Optional[str] = None
+    iban: Optional[str] = None
+    entidad: Optional[str] = None
+    sucursal_num: Optional[str] = None
+    dc: Optional[str] = None
+    cuenta: Optional[str] = None
+    swift_bic: Optional[str] = None
+
+class CertificacionItem(BaseModel):
+    nombre: str = ''
+    fecha_emision: Optional[str] = None
+    fecha_validez: Optional[str] = None
+    observaciones: Optional[str] = None
+
+class CentroDescargaItem(BaseModel):
+    nombre: str = ''
+    direccion: Optional[str] = None
+    poblacion: Optional[str] = None
+    provincia: Optional[str] = None
+    codigo_postal: Optional[str] = None
+    contacto: Optional[str] = None
+    telefono: Optional[str] = None
+
 class ProveedorBase(BaseModel):
     nombre: str
     codigo_proveedor: Optional[str] = None
@@ -40,6 +75,10 @@ class ProveedorBase(BaseModel):
     telefonos: Optional[List[TelefonoItem]] = []
     emails: Optional[List[EmailItem]] = []
     contactos: Optional[List[ContactoItem]] = []
+    datos_gestion: Optional[DatosGestion] = None
+    datos_bancarios: Optional[DatosBancarios] = None
+    certificaciones: Optional[List[CertificacionItem]] = []
+    centros_descarga: Optional[List[CentroDescargaItem]] = []
     observaciones: Optional[str] = None
     avisos: Optional[str] = None
     activo: bool = True

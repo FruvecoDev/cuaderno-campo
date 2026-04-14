@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, Search, Settings, X, Download, FileText, TrendingUp, Users, Eye, MapPin } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Settings, X, Download, FileText, TrendingUp, Users, Eye, MapPin, Building, CreditCard, Award, Truck } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import ProvinciaSelect from '../components/ProvinciaSelect';
@@ -42,6 +42,10 @@ const Proveedores = () => {
   const [tiposProveedor, setTiposProveedor] = useState([]);
   const [showTiposManager, setShowTiposManager] = useState(false);
   const [nuevoTipo, setNuevoTipo] = useState('');
+  const [activeTab, setActiveTab] = useState('general');
+  const [tiposOperacion, setTiposOperacion] = useState([]);
+  const [showTiposOpManager, setShowTiposOpManager] = useState(false);
+  const [nuevoTipoOp, setNuevoTipoOp] = useState('');
   const { t } = useTranslation();
   
   const { token } = useAuth();
@@ -63,6 +67,10 @@ const Proveedores = () => {
     contactos: [{ nombre: '', cargo: '', telefono: '', email: '' }],
     observaciones: '',
     avisos: '',
+    datos_gestion: { forma_pago: '', dias_pago: '', moneda: 'EUR', iva: '', irpf: '', subcuenta: '', subcuenta_gastos: '', tipo_operacion: '' },
+    datos_bancarios: { banco: '', sucursal: '', iban: '', entidad: '', sucursal_num: '', dc: '', cuenta: '', swift_bic: '' },
+    certificaciones: [],
+    centros_descarga: [],
     activo: true
   });
 
@@ -76,6 +84,7 @@ const Proveedores = () => {
     fetchProveedores();
     fetchStats();
     fetchTiposProveedor();
+    fetchTiposOperacion();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchProveedores = async () => {
@@ -122,6 +131,24 @@ const Proveedores = () => {
       await api.delete(`/api/tipos-proveedor/${tipoId}`);
       fetchTiposProveedor();
     } catch (error) {}
+  };
+
+  const fetchTiposOperacion = async () => {
+    try {
+      const data = await api.get('/api/tipos-operacion-proveedor');
+      setTiposOperacion(data.tipos || []);
+    } catch (error) {}
+  };
+  const handleAddTipoOp = async () => {
+    if (!nuevoTipoOp.trim()) return;
+    try {
+      await api.post('/api/tipos-operacion-proveedor', { nombre: nuevoTipoOp.trim() });
+      setNuevoTipoOp('');
+      fetchTiposOperacion();
+    } catch (error) {}
+  };
+  const handleDeleteTipoOp = async (id) => {
+    try { await api.delete(`/api/tipos-operacion-proveedor/${id}`); fetchTiposOperacion(); } catch (error) {}
   };
 
   const handleVerHistorial = async (proveedor) => {
@@ -183,8 +210,13 @@ const Proveedores = () => {
       telefonos: proveedor.telefonos?.length ? proveedor.telefonos : (proveedor.telefono ? [{ valor: proveedor.telefono, etiqueta: '' }] : [{ valor: '', etiqueta: '' }]),
       emails: proveedor.emails?.length ? proveedor.emails : (proveedor.email ? [{ valor: proveedor.email, etiqueta: '' }] : [{ valor: '', etiqueta: '' }]),
       contactos: proveedor.contactos?.length ? proveedor.contactos : (proveedor.persona_contacto ? [{ nombre: proveedor.persona_contacto, cargo: '', telefono: '', email: '' }] : [{ nombre: '', cargo: '', telefono: '', email: '' }]),
+      datos_gestion: proveedor.datos_gestion || { forma_pago: '', dias_pago: '', moneda: 'EUR', iva: '', irpf: '', subcuenta: '', subcuenta_gastos: '', tipo_operacion: '' },
+      datos_bancarios: proveedor.datos_bancarios || { banco: '', sucursal: '', iban: '', entidad: '', sucursal_num: '', dc: '', cuenta: '', swift_bic: '' },
+      certificaciones: proveedor.certificaciones || [],
+      centros_descarga: proveedor.centros_descarga || [],
     });
     setEditingId(proveedor._id);
+    setActiveTab('general');
     setShowForm(true);
   };
 
@@ -220,6 +252,10 @@ const Proveedores = () => {
       contactos: [{ nombre: '', cargo: '', telefono: '', email: '' }],
       observaciones: '',
       avisos: '',
+      datos_gestion: { forma_pago: '', dias_pago: '', moneda: 'EUR', iva: '', irpf: '', subcuenta: '', subcuenta_gastos: '', tipo_operacion: '' },
+      datos_bancarios: { banco: '', sucursal: '', iban: '', entidad: '', sucursal_num: '', dc: '', cuenta: '', swift_bic: '' },
+      certificaciones: [],
+      centros_descarga: [],
       activo: true
     });
   };
@@ -310,134 +346,34 @@ const Proveedores = () => {
       <ColumnConfigModal show={showConfig} onClose={() => setShowConfig(false)} columns={columns} setColumns={setColumns} onSave={save} onReset={reset} />
 
       {showForm && (
-        <div
-          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', backdropFilter: 'blur(4px)' }}
-          onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }}
-        >
-          <div className="card" style={{ maxWidth: '900px', width: '100%', maxHeight: '92vh', overflow: 'auto', position: 'relative', padding: '2rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem', paddingBottom: '1rem', borderBottom: '2px solid hsl(var(--border))' }}>
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', backdropFilter: 'blur(4px)' }} onClick={() => { setShowForm(false); setEditingId(null); resetForm(); setActiveTab('general'); }}>
+          <div className="card" style={{ maxWidth: '960px', width: '100%', maxHeight: '92vh', overflow: 'auto', position: 'relative', padding: '2rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '2px solid hsl(var(--border))' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'hsl(var(--primary) / 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Users size={20} style={{ color: 'hsl(var(--primary))' }} /></div>
-                <div>
-                  <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '700', letterSpacing: '-0.02em' }}>{editingId ? 'Editar' : 'Nuevo'} Proveedor</h2>
-                  <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>Completa los datos del proveedor</span>
-                </div>
+                <div><h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '700' }}>{editingId ? 'Editar' : 'Nuevo'} Proveedor</h2><span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>ID: {formData.codigo_proveedor || nextCodigo}</span></div>
               </div>
-              <button onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }} className="config-modal-close-btn"><X size={18} /></button>
+              <button onClick={() => { setShowForm(false); setEditingId(null); resetForm(); setActiveTab('general'); }} className="config-modal-close-btn"><X size={18} /></button>
+            </div>
+            <div style={{ display: 'flex', gap: '0', marginBottom: '1.5rem', borderBottom: '2px solid hsl(var(--border))', overflowX: 'auto' }}>
+              {[{key:'general',label:'Datos Generales',icon:<Users size={14}/>},{key:'gestion',label:'Datos Gestion',icon:<CreditCard size={14}/>},{key:'documentos',label:'Documentos',icon:<FileText size={14}/>},{key:'certificaciones',label:'Certificaciones',icon:<Award size={14}/>},{key:'centros',label:'Centros Descarga',icon:<Truck size={14}/>}].map(tab=>(<button key={tab.key} type="button" onClick={()=>setActiveTab(tab.key)} style={{display:'flex',alignItems:'center',gap:'0.4rem',padding:'0.6rem 1rem',fontSize:'0.8rem',fontWeight:activeTab===tab.key?'700':'500',color:activeTab===tab.key?'hsl(var(--primary))':'hsl(var(--muted-foreground))',background:'none',border:'none',borderBottom:activeTab===tab.key?'2px solid hsl(var(--primary))':'2px solid transparent',cursor:'pointer',whiteSpace:'nowrap',marginBottom:'-2px'}}>{tab.icon}{tab.label}</button>))}
             </div>
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Datos Generales</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr 170px 200px', gap: '0.75rem' }}>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>ID Proveedor</label>
-                  <input type="text" className="form-input" value={formData.codigo_proveedor || nextCodigo} disabled style={{ backgroundColor: 'hsl(var(--muted))', textAlign: 'center' }} />
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Nombre / Razon Social *</label>
-                  <input type="text" className="form-input" value={formData.nombre} onChange={(e) => setFormData({ ...formData, nombre: e.target.value })} required />
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>Tipo Proveedor <button type="button" onClick={() => setShowTiposManager(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--primary))', padding: 0, fontSize: '0.7rem' }} title="Gestionar tipos"><Settings size={12} /></button></label>
-                  <select className="form-input" value={formData.tipo_proveedor || ''} onChange={(e) => setFormData({ ...formData, tipo_proveedor: e.target.value })}>
-                    <option value="">-- Tipo --</option>
-                    {tiposProveedor.map(t => <option key={t._id} value={t.nombre}>{t.nombre}</option>)}
-                  </select>
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>CIF / NIF</label>
-                  <input type="text" className="form-input" value={formData.cif_nif} onChange={(e) => setFormData({ ...formData, cif_nif: e.target.value })} />
-                </div>
-              </div>
-            </div>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Direccion</h3>
-              <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                <input type="text" className="form-input" placeholder="Calle, numero, piso..." value={formData.direccion} onChange={(e) => setFormData({ ...formData, direccion: e.target.value })} />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1.5fr 100px 1fr', gap: '0.75rem' }}>
-                <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Poblacion</label><input type="text" className="form-input" value={formData.poblacion} onChange={(e) => setFormData({ ...formData, poblacion: e.target.value })} /></div>
-                <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Provincia</label>{(!formData.pais || formData.pais === 'España') ? <ProvinciaSelect value={formData.provincia} onChange={(e) => setFormData({ ...formData, provincia: e.target.value })} testId="select-provincia-proveedor" /> : <input type="text" className="form-input" placeholder="Provincia / Region" value={formData.provincia} onChange={(e) => setFormData({ ...formData, provincia: e.target.value })} />}</div>
-                <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>C.P.</label><input type="text" className="form-input" value={formData.codigo_postal} onChange={(e) => setFormData({ ...formData, codigo_postal: e.target.value })} /></div>
-                <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Pais</label><PaisSelect value={formData.pais} onChange={(e) => setFormData({ ...formData, pais: e.target.value, provincia: '' })} testId="select-pais-proveedor" /></div>
-              </div>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.5rem' }}>
-              <div style={{ background: 'hsl(var(--muted) / 0.3)', borderRadius: '8px', padding: '1rem', border: '1px solid hsl(var(--border))' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', margin: 0 }}>Telefonos</h3>
-                  <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--primary))', fontWeight: '600', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }} onClick={() => setFormData({ ...formData, telefonos: [...formData.telefonos, { valor: '', etiqueta: '' }] })}><Plus size={14} /> Anadir</button>
-                </div>
-                {formData.telefonos.map((tel, idx) => (
-                  <div key={`tel-${idx}`} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
-                    <input type="tel" className="form-input" placeholder="Numero" value={tel.valor} onChange={(e) => { const arr = [...formData.telefonos]; arr[idx] = { ...arr[idx], valor: e.target.value }; setFormData({ ...formData, telefonos: arr }); }} style={{ flex: 2, fontSize: '0.85rem' }} />
-                    <select className="form-input" value={tel.etiqueta} onChange={(e) => { const arr = [...formData.telefonos]; arr[idx] = { ...arr[idx], etiqueta: e.target.value }; setFormData({ ...formData, telefonos: arr }); }} style={{ flex: 1, fontSize: '0.85rem' }}><option value="">Tipo</option><option value="Fijo">Fijo</option><option value="Movil">Movil</option><option value="Fax">Fax</option></select>
-                    {formData.telefonos.length > 1 && <button type="button" onClick={() => setFormData({ ...formData, telefonos: formData.telefonos.filter((_, i) => i !== idx) })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--destructive))', padding: '0.25rem', flexShrink: 0 }}><X size={15} /></button>}
-                  </div>
-                ))}
-              </div>
-              <div style={{ background: 'hsl(var(--muted) / 0.3)', borderRadius: '8px', padding: '1rem', border: '1px solid hsl(var(--border))' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', margin: 0 }}>Emails</h3>
-                  <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--primary))', fontWeight: '600', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }} onClick={() => setFormData({ ...formData, emails: [...formData.emails, { valor: '', etiqueta: '' }] })}><Plus size={14} /> Anadir</button>
-                </div>
-                {formData.emails.map((em, idx) => (
-                  <div key={`em-${idx}`} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
-                    <input type="email" className="form-input" placeholder="correo@ejemplo.com" value={em.valor} onChange={(e) => { const arr = [...formData.emails]; arr[idx] = { ...arr[idx], valor: e.target.value }; setFormData({ ...formData, emails: arr }); }} style={{ flex: 2, fontSize: '0.85rem' }} />
-                    <input type="text" className="form-input" placeholder="Dpto." value={em.etiqueta} onChange={(e) => { const arr = [...formData.emails]; arr[idx] = { ...arr[idx], etiqueta: e.target.value }; setFormData({ ...formData, emails: arr }); }} style={{ flex: 1, fontSize: '0.85rem' }} />
-                    {formData.emails.length > 1 && <button type="button" onClick={() => setFormData({ ...formData, emails: formData.emails.filter((_, i) => i !== idx) })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--destructive))', padding: '0.25rem', flexShrink: 0 }}><X size={15} /></button>}
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div style={{ background: 'hsl(var(--muted) / 0.3)', borderRadius: '8px', padding: '1rem', border: '1px solid hsl(var(--border))', marginBottom: '1.5rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', margin: 0 }}>Personas de Contacto</h3>
-                <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--primary))', fontWeight: '600', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }} onClick={() => setFormData({ ...formData, contactos: [...formData.contactos, { nombre: '', cargo: '', telefono: '', email: '' }] })}><Plus size={14} /> Anadir contacto</button>
-              </div>
-              {formData.contactos.map((c, idx) => (
-                <div key={`ct-${idx}`} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr auto', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
-                  <input type="text" className="form-input" placeholder="Nombre completo" value={c.nombre} onChange={(e) => { const arr = [...formData.contactos]; arr[idx] = { ...arr[idx], nombre: e.target.value }; setFormData({ ...formData, contactos: arr }); }} style={{ fontSize: '0.85rem' }} />
-                  <input type="text" className="form-input" placeholder="Cargo" value={c.cargo} onChange={(e) => { const arr = [...formData.contactos]; arr[idx] = { ...arr[idx], cargo: e.target.value }; setFormData({ ...formData, contactos: arr }); }} style={{ fontSize: '0.85rem' }} />
-                  <input type="tel" className="form-input" placeholder="Telefono" value={c.telefono} onChange={(e) => { const arr = [...formData.contactos]; arr[idx] = { ...arr[idx], telefono: e.target.value }; setFormData({ ...formData, contactos: arr }); }} style={{ fontSize: '0.85rem' }} />
-                  <input type="email" className="form-input" placeholder="Email" value={c.email} onChange={(e) => { const arr = [...formData.contactos]; arr[idx] = { ...arr[idx], email: e.target.value }; setFormData({ ...formData, contactos: arr }); }} style={{ fontSize: '0.85rem' }} />
-                  {formData.contactos.length > 1 && <button type="button" onClick={() => setFormData({ ...formData, contactos: formData.contactos.filter((_, i) => i !== idx) })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--destructive))', padding: '0.25rem' }}><X size={15} /></button>}
-                </div>
-              ))}
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '1.25rem', alignItems: 'start', marginBottom: '1.25rem' }}>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Observaciones</label>
-                <textarea className="form-input" rows="2" value={formData.observaciones} onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })} style={{ fontSize: '0.85rem', resize: 'vertical' }} />
-              </div>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Avisos</label>
-                <textarea className="form-input" rows="2" value={formData.avisos || ''} onChange={(e) => setFormData({ ...formData, avisos: e.target.value })} style={{ fontSize: '0.85rem', resize: 'vertical' }} />
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', paddingTop: '1.5rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.5rem 1rem', borderRadius: '8px', background: formData.activo ? 'hsl(142 76% 36% / 0.1)' : 'hsl(var(--muted))', border: '1px solid ' + (formData.activo ? 'hsl(142 76% 36% / 0.3)' : 'hsl(var(--border))'), transition: 'all 0.2s' }}>
-                  <input type="checkbox" checked={formData.activo} onChange={(e) => setFormData({ ...formData, activo: e.target.checked })} style={{ width: '16px', height: '16px' }} />
-                  <span style={{ fontWeight: '600', fontSize: '0.85rem', color: formData.activo ? 'hsl(142 76% 36%)' : 'hsl(var(--muted-foreground))' }}>{formData.activo ? 'Activo' : 'Inactivo'}</span>
-                </label>
-              </div>
-            </div>
-
-            <div style={{ borderTop: '1px solid hsl(var(--border))', paddingTop: '1rem', marginTop: '0.5rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => {
-                  setShowForm(false);
-                  setEditingId(null);
-                  resetForm();
-                }}
-              >
-                Cancelar
-              </button>
-              <button type="submit" className="btn btn-primary">
-                {editingId ? 'Actualizar' : 'Crear'} Proveedor
-              </button>
-            </div>
+            {activeTab==='general'&&(<div>
+              <div style={{marginBottom:'1.5rem'}}><h3 style={{fontSize:'0.75rem',fontWeight:'700',textTransform:'uppercase',letterSpacing:'0.08em',color:'hsl(var(--muted-foreground))',marginBottom:'0.75rem'}}>Datos Generales</h3><div style={{display:'grid',gridTemplateColumns:'110px 1fr 170px 200px',gap:'0.75rem'}}><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>ID Proveedor</label><input type="text" className="form-input" value={formData.codigo_proveedor||nextCodigo} disabled style={{backgroundColor:'hsl(var(--muted))',textAlign:'center'}}/></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>Nombre / Razon Social *</label><input type="text" className="form-input" value={formData.nombre} onChange={e=>setFormData({...formData,nombre:e.target.value})} required/></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600',display:'flex',alignItems:'center',gap:'0.35rem'}}>Tipo Proveedor <button type="button" onClick={()=>setShowTiposManager(true)} style={{background:'none',border:'none',cursor:'pointer',color:'hsl(var(--primary))',padding:0}} title="Gestionar tipos"><Settings size={12}/></button></label><select className="form-input" value={formData.tipo_proveedor||''} onChange={e=>setFormData({...formData,tipo_proveedor:e.target.value})}><option value="">-- Tipo --</option>{tiposProveedor.map(t=><option key={t._id} value={t.nombre}>{t.nombre}</option>)}</select></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>CIF / NIF</label><input type="text" className="form-input" value={formData.cif_nif} onChange={e=>setFormData({...formData,cif_nif:e.target.value})}/></div></div></div>
+              <div style={{marginBottom:'1.5rem'}}><h3 style={{fontSize:'0.75rem',fontWeight:'700',textTransform:'uppercase',letterSpacing:'0.08em',color:'hsl(var(--muted-foreground))',marginBottom:'0.75rem'}}>Direccion</h3><div className="form-group" style={{marginBottom:'0.75rem'}}><input type="text" className="form-input" placeholder="Calle, numero, piso..." value={formData.direccion} onChange={e=>setFormData({...formData,direccion:e.target.value})}/></div><div style={{display:'grid',gridTemplateColumns:'1.5fr 1.5fr 100px 1fr',gap:'0.75rem'}}><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>Poblacion</label><input type="text" className="form-input" value={formData.poblacion} onChange={e=>setFormData({...formData,poblacion:e.target.value})}/></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>Provincia</label>{(!formData.pais||formData.pais==='España')?<ProvinciaSelect value={formData.provincia} onChange={e=>setFormData({...formData,provincia:e.target.value})} testId="select-provincia-proveedor"/>:<input type="text" className="form-input" placeholder="Provincia / Region" value={formData.provincia} onChange={e=>setFormData({...formData,provincia:e.target.value})}/>}</div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>C.P.</label><input type="text" className="form-input" value={formData.codigo_postal} onChange={e=>setFormData({...formData,codigo_postal:e.target.value})}/></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>Pais</label><PaisSelect value={formData.pais} onChange={e=>setFormData({...formData,pais:e.target.value,provincia:''})} testId="select-pais-proveedor"/></div></div></div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1.25rem',marginBottom:'1.5rem'}}><div style={{background:'hsl(var(--muted)/0.3)',borderRadius:'8px',padding:'1rem',border:'1px solid hsl(var(--border))'}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'0.75rem'}}><h3 style={{fontSize:'0.75rem',fontWeight:'700',textTransform:'uppercase',letterSpacing:'0.08em',color:'hsl(var(--muted-foreground))',margin:0}}>Telefonos</h3><button type="button" style={{background:'none',border:'none',cursor:'pointer',color:'hsl(var(--primary))',fontWeight:'600',fontSize:'0.8rem',display:'flex',alignItems:'center',gap:'0.25rem'}} onClick={()=>setFormData({...formData,telefonos:[...formData.telefonos,{valor:'',etiqueta:''}]})}><Plus size={14}/> Anadir</button></div>{formData.telefonos.map((tel,idx)=>(<div key={`tel-${idx}`} style={{display:'flex',gap:'0.5rem',marginBottom:'0.5rem',alignItems:'center'}}><input type="tel" className="form-input" placeholder="Numero" value={tel.valor} onChange={e=>{const arr=[...formData.telefonos];arr[idx]={...arr[idx],valor:e.target.value};setFormData({...formData,telefonos:arr});}} style={{flex:2,fontSize:'0.85rem'}}/><select className="form-input" value={tel.etiqueta} onChange={e=>{const arr=[...formData.telefonos];arr[idx]={...arr[idx],etiqueta:e.target.value};setFormData({...formData,telefonos:arr});}} style={{flex:1,fontSize:'0.85rem'}}><option value="">Tipo</option><option value="Fijo">Fijo</option><option value="Movil">Movil</option><option value="Fax">Fax</option></select>{formData.telefonos.length>1&&<button type="button" onClick={()=>setFormData({...formData,telefonos:formData.telefonos.filter((_,i)=>i!==idx)})} style={{background:'none',border:'none',cursor:'pointer',color:'hsl(var(--destructive))',padding:'0.25rem',flexShrink:0}}><X size={15}/></button>}</div>))}</div><div style={{background:'hsl(var(--muted)/0.3)',borderRadius:'8px',padding:'1rem',border:'1px solid hsl(var(--border))'}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'0.75rem'}}><h3 style={{fontSize:'0.75rem',fontWeight:'700',textTransform:'uppercase',letterSpacing:'0.08em',color:'hsl(var(--muted-foreground))',margin:0}}>Emails</h3><button type="button" style={{background:'none',border:'none',cursor:'pointer',color:'hsl(var(--primary))',fontWeight:'600',fontSize:'0.8rem',display:'flex',alignItems:'center',gap:'0.25rem'}} onClick={()=>setFormData({...formData,emails:[...formData.emails,{valor:'',etiqueta:''}]})}><Plus size={14}/> Anadir</button></div>{formData.emails.map((em,idx)=>(<div key={`em-${idx}`} style={{display:'flex',gap:'0.5rem',marginBottom:'0.5rem',alignItems:'center'}}><input type="email" className="form-input" placeholder="correo@ejemplo.com" value={em.valor} onChange={e=>{const arr=[...formData.emails];arr[idx]={...arr[idx],valor:e.target.value};setFormData({...formData,emails:arr});}} style={{flex:2,fontSize:'0.85rem'}}/><input type="text" className="form-input" placeholder="Dpto." value={em.etiqueta} onChange={e=>{const arr=[...formData.emails];arr[idx]={...arr[idx],etiqueta:e.target.value};setFormData({...formData,emails:arr});}} style={{flex:1,fontSize:'0.85rem'}}/>{formData.emails.length>1&&<button type="button" onClick={()=>setFormData({...formData,emails:formData.emails.filter((_,i)=>i!==idx)})} style={{background:'none',border:'none',cursor:'pointer',color:'hsl(var(--destructive))',padding:'0.25rem',flexShrink:0}}><X size={15}/></button>}</div>))}</div></div>
+              <div style={{background:'hsl(var(--muted)/0.3)',borderRadius:'8px',padding:'1rem',border:'1px solid hsl(var(--border))',marginBottom:'1.5rem'}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'0.75rem'}}><h3 style={{fontSize:'0.75rem',fontWeight:'700',textTransform:'uppercase',letterSpacing:'0.08em',color:'hsl(var(--muted-foreground))',margin:0}}>Personas de Contacto</h3><button type="button" style={{background:'none',border:'none',cursor:'pointer',color:'hsl(var(--primary))',fontWeight:'600',fontSize:'0.8rem',display:'flex',alignItems:'center',gap:'0.25rem'}} onClick={()=>setFormData({...formData,contactos:[...formData.contactos,{nombre:'',cargo:'',telefono:'',email:''}]})}><Plus size={14}/> Anadir contacto</button></div>{formData.contactos.map((c,idx)=>(<div key={`ct-${idx}`} style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1fr auto',gap:'0.5rem',marginBottom:'0.5rem',alignItems:'center'}}><input type="text" className="form-input" placeholder="Nombre completo" value={c.nombre} onChange={e=>{const arr=[...formData.contactos];arr[idx]={...arr[idx],nombre:e.target.value};setFormData({...formData,contactos:arr});}} style={{fontSize:'0.85rem'}}/><input type="text" className="form-input" placeholder="Cargo" value={c.cargo} onChange={e=>{const arr=[...formData.contactos];arr[idx]={...arr[idx],cargo:e.target.value};setFormData({...formData,contactos:arr});}} style={{fontSize:'0.85rem'}}/><input type="tel" className="form-input" placeholder="Telefono" value={c.telefono} onChange={e=>{const arr=[...formData.contactos];arr[idx]={...arr[idx],telefono:e.target.value};setFormData({...formData,contactos:arr});}} style={{fontSize:'0.85rem'}}/><input type="email" className="form-input" placeholder="Email" value={c.email} onChange={e=>{const arr=[...formData.contactos];arr[idx]={...arr[idx],email:e.target.value};setFormData({...formData,contactos:arr});}} style={{fontSize:'0.85rem'}}/>{formData.contactos.length>1&&<button type="button" onClick={()=>setFormData({...formData,contactos:formData.contactos.filter((_,i)=>i!==idx)})} style={{background:'none',border:'none',cursor:'pointer',color:'hsl(var(--destructive))',padding:'0.25rem'}}><X size={15}/></button>}</div>))}</div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr auto',gap:'1.25rem',alignItems:'start',marginBottom:'0.5rem'}}><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>Observaciones</label><textarea className="form-input" rows="2" value={formData.observaciones} onChange={e=>setFormData({...formData,observaciones:e.target.value})} style={{fontSize:'0.85rem',resize:'vertical'}}/></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>Avisos</label><textarea className="form-input" rows="2" value={formData.avisos||''} onChange={e=>setFormData({...formData,avisos:e.target.value})} style={{fontSize:'0.85rem',resize:'vertical'}}/></div><div style={{paddingTop:'1.5rem'}}><label style={{display:'flex',alignItems:'center',gap:'0.5rem',cursor:'pointer',padding:'0.5rem 1rem',borderRadius:'8px',background:formData.activo?'hsl(142 76% 36%/0.1)':'hsl(var(--muted))',border:'1px solid '+(formData.activo?'hsl(142 76% 36%/0.3)':'hsl(var(--border))')}}><input type="checkbox" checked={formData.activo} onChange={e=>setFormData({...formData,activo:e.target.checked})} style={{width:'16px',height:'16px'}}/><span style={{fontWeight:'600',fontSize:'0.85rem',color:formData.activo?'hsl(142 76% 36%)':'hsl(var(--muted-foreground))'}}>{formData.activo?'Activo':'Inactivo'}</span></label></div></div>
+            </div>)}
+            {activeTab==='gestion'&&(<div>
+              <div style={{marginBottom:'1.5rem'}}><h3 style={{fontSize:'0.75rem',fontWeight:'700',textTransform:'uppercase',letterSpacing:'0.08em',color:'hsl(var(--muted-foreground))',marginBottom:'0.75rem'}}>Datos Fiscales y Contables</h3><div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1fr',gap:'0.75rem',marginBottom:'0.75rem'}}><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>Forma de Pago</label><select className="form-input" value={formData.datos_gestion?.forma_pago||''} onChange={e=>setFormData({...formData,datos_gestion:{...formData.datos_gestion,forma_pago:e.target.value}})}><option value="">-- Seleccionar --</option><option value="Transferencia">Transferencia</option><option value="Cheque">Cheque</option><option value="Pagare">Pagare</option><option value="Contado">Contado</option><option value="Domiciliacion">Domiciliacion</option><option value="Tarjeta">Tarjeta</option></select></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>Dias de Pago</label><input type="text" className="form-input" placeholder="Ej: 30, 60, 90" value={formData.datos_gestion?.dias_pago||''} onChange={e=>setFormData({...formData,datos_gestion:{...formData.datos_gestion,dias_pago:e.target.value}})}/></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>Moneda</label><select className="form-input" value={formData.datos_gestion?.moneda||'EUR'} onChange={e=>setFormData({...formData,datos_gestion:{...formData.datos_gestion,moneda:e.target.value}})}><option value="EUR">EUR</option><option value="USD">USD</option><option value="GBP">GBP</option></select></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600',display:'flex',alignItems:'center',gap:'0.35rem'}}>Tipo Operacion <button type="button" onClick={()=>setShowTiposOpManager(true)} style={{background:'none',border:'none',cursor:'pointer',color:'hsl(var(--primary))',padding:0}} title="Gestionar tipos"><Settings size={12}/></button></label><select className="form-input" value={formData.datos_gestion?.tipo_operacion||''} onChange={e=>setFormData({...formData,datos_gestion:{...formData.datos_gestion,tipo_operacion:e.target.value}})}><option value="">-- Seleccionar --</option>{tiposOperacion.map(t=><option key={t._id} value={t.nombre}>{t.nombre}</option>)}</select></div></div><div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1fr',gap:'0.75rem'}}><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>IVA (%)</label><input type="text" className="form-input" placeholder="21" value={formData.datos_gestion?.iva||''} onChange={e=>setFormData({...formData,datos_gestion:{...formData.datos_gestion,iva:e.target.value}})}/></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>IRPF (%)</label><input type="text" className="form-input" placeholder="0" value={formData.datos_gestion?.irpf||''} onChange={e=>setFormData({...formData,datos_gestion:{...formData.datos_gestion,irpf:e.target.value}})}/></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>Subcuenta</label><input type="text" className="form-input" value={formData.datos_gestion?.subcuenta||''} onChange={e=>setFormData({...formData,datos_gestion:{...formData.datos_gestion,subcuenta:e.target.value}})}/></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>Subcuenta Gastos</label><input type="text" className="form-input" value={formData.datos_gestion?.subcuenta_gastos||''} onChange={e=>setFormData({...formData,datos_gestion:{...formData.datos_gestion,subcuenta_gastos:e.target.value}})}/></div></div></div>
+              <div style={{background:'hsl(var(--muted)/0.3)',borderRadius:'8px',padding:'1rem',border:'1px solid hsl(var(--border))'}}><h3 style={{fontSize:'0.75rem',fontWeight:'700',textTransform:'uppercase',letterSpacing:'0.08em',color:'hsl(var(--muted-foreground))',marginBottom:'0.75rem'}}>Datos para Transferencia</h3><div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'0.75rem',marginBottom:'0.75rem'}}><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>Banco</label><input type="text" className="form-input" value={formData.datos_bancarios?.banco||''} onChange={e=>setFormData({...formData,datos_bancarios:{...formData.datos_bancarios,banco:e.target.value}})}/></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>Sucursal</label><input type="text" className="form-input" value={formData.datos_bancarios?.sucursal||''} onChange={e=>setFormData({...formData,datos_bancarios:{...formData.datos_bancarios,sucursal:e.target.value}})}/></div></div><div className="form-group" style={{marginBottom:'0.75rem'}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>IBAN</label><input type="text" className="form-input" placeholder="ES00 0000 0000 00 0000000000" value={formData.datos_bancarios?.iban||''} onChange={e=>setFormData({...formData,datos_bancarios:{...formData.datos_bancarios,iban:e.target.value}})}/></div><div style={{display:'grid',gridTemplateColumns:'1fr 1fr 80px 1fr 1fr',gap:'0.75rem'}}><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>Entidad</label><input type="text" className="form-input" value={formData.datos_bancarios?.entidad||''} onChange={e=>setFormData({...formData,datos_bancarios:{...formData.datos_bancarios,entidad:e.target.value}})}/></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>Sucursal</label><input type="text" className="form-input" value={formData.datos_bancarios?.sucursal_num||''} onChange={e=>setFormData({...formData,datos_bancarios:{...formData.datos_bancarios,sucursal_num:e.target.value}})}/></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>D.C.</label><input type="text" className="form-input" value={formData.datos_bancarios?.dc||''} onChange={e=>setFormData({...formData,datos_bancarios:{...formData.datos_bancarios,dc:e.target.value}})}/></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>Cuenta</label><input type="text" className="form-input" value={formData.datos_bancarios?.cuenta||''} onChange={e=>setFormData({...formData,datos_bancarios:{...formData.datos_bancarios,cuenta:e.target.value}})}/></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.75rem',fontWeight:'600'}}>Swift / BIC</label><input type="text" className="form-input" value={formData.datos_bancarios?.swift_bic||''} onChange={e=>setFormData({...formData,datos_bancarios:{...formData.datos_bancarios,swift_bic:e.target.value}})}/></div></div></div>
+            </div>)}
+            {activeTab==='documentos'&&(<div style={{textAlign:'center',padding:'2rem',color:'hsl(var(--muted-foreground))'}}><FileText size={40} style={{margin:'0 auto 1rem',opacity:0.4}}/><p style={{fontSize:'0.9rem',fontWeight:'500'}}>Guarda el proveedor primero para adjuntar documentos</p><p style={{fontSize:'0.8rem'}}>Los documentos se podran subir una vez creado el registro</p></div>)}
+            {activeTab==='certificaciones'&&(<div><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1rem'}}><h3 style={{fontSize:'0.75rem',fontWeight:'700',textTransform:'uppercase',letterSpacing:'0.08em',color:'hsl(var(--muted-foreground))',margin:0}}>Certificaciones</h3><button type="button" style={{background:'none',border:'none',cursor:'pointer',color:'hsl(var(--primary))',fontWeight:'600',fontSize:'0.8rem',display:'flex',alignItems:'center',gap:'0.25rem'}} onClick={()=>setFormData({...formData,certificaciones:[...(formData.certificaciones||[]),{nombre:'',fecha_emision:'',fecha_validez:'',observaciones:''}]})}><Plus size={14}/> Anadir certificacion</button></div>{(formData.certificaciones||[]).length===0&&<div style={{textAlign:'center',padding:'2rem',color:'hsl(var(--muted-foreground))',background:'hsl(var(--muted)/0.3)',borderRadius:'8px'}}><Award size={32} style={{margin:'0 auto 0.5rem',opacity:0.4}}/><p style={{fontSize:'0.85rem'}}>Sin certificaciones. Pulse "Anadir" para incluir BRC, Global GAP, etc.</p></div>}{(formData.certificaciones||[]).map((cert,idx)=>(<div key={`cert-${idx}`} style={{display:'grid',gridTemplateColumns:'1.5fr 1fr 1fr 1.5fr auto',gap:'0.5rem',marginBottom:'0.5rem',alignItems:'center',background:'hsl(var(--muted)/0.3)',padding:'0.75rem',borderRadius:'8px',border:'1px solid hsl(var(--border))'}}><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.7rem',fontWeight:'600'}}>Certificacion</label><input type="text" className="form-input" placeholder="BRC, Global GAP..." value={cert.nombre} onChange={e=>{const arr=[...formData.certificaciones];arr[idx]={...arr[idx],nombre:e.target.value};setFormData({...formData,certificaciones:arr});}} style={{fontSize:'0.85rem'}}/></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.7rem',fontWeight:'600'}}>Fecha Emision</label><input type="date" className="form-input" value={cert.fecha_emision||''} onChange={e=>{const arr=[...formData.certificaciones];arr[idx]={...arr[idx],fecha_emision:e.target.value};setFormData({...formData,certificaciones:arr});}} style={{fontSize:'0.85rem'}}/></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.7rem',fontWeight:'600'}}>Fecha Validez</label><input type="date" className="form-input" value={cert.fecha_validez||''} onChange={e=>{const arr=[...formData.certificaciones];arr[idx]={...arr[idx],fecha_validez:e.target.value};setFormData({...formData,certificaciones:arr});}} style={{fontSize:'0.85rem'}}/></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.7rem',fontWeight:'600'}}>Notas</label><input type="text" className="form-input" placeholder="Observaciones" value={cert.observaciones||''} onChange={e=>{const arr=[...formData.certificaciones];arr[idx]={...arr[idx],observaciones:e.target.value};setFormData({...formData,certificaciones:arr});}} style={{fontSize:'0.85rem'}}/></div><button type="button" onClick={()=>setFormData({...formData,certificaciones:formData.certificaciones.filter((_,i)=>i!==idx)})} style={{background:'none',border:'none',cursor:'pointer',color:'hsl(var(--destructive))',padding:'0.25rem',marginTop:'1.2rem'}}><X size={15}/></button></div>))}</div>)}
+            {activeTab==='centros'&&(<div><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1rem'}}><h3 style={{fontSize:'0.75rem',fontWeight:'700',textTransform:'uppercase',letterSpacing:'0.08em',color:'hsl(var(--muted-foreground))',margin:0}}>Centros de Descarga</h3><button type="button" style={{background:'none',border:'none',cursor:'pointer',color:'hsl(var(--primary))',fontWeight:'600',fontSize:'0.8rem',display:'flex',alignItems:'center',gap:'0.25rem'}} onClick={()=>setFormData({...formData,centros_descarga:[...(formData.centros_descarga||[]),{nombre:'',direccion:'',poblacion:'',provincia:'',codigo_postal:'',contacto:'',telefono:''}]})}><Plus size={14}/> Anadir centro</button></div>{(formData.centros_descarga||[]).length===0&&<div style={{textAlign:'center',padding:'2rem',color:'hsl(var(--muted-foreground))',background:'hsl(var(--muted)/0.3)',borderRadius:'8px'}}><Truck size={32} style={{margin:'0 auto 0.5rem',opacity:0.4}}/><p style={{fontSize:'0.85rem'}}>Sin centros de descarga. Pulse "Anadir" para incluir centros logisticos.</p></div>}{(formData.centros_descarga||[]).map((centro,idx)=>(<div key={`cd-${idx}`} style={{background:'hsl(var(--muted)/0.3)',padding:'1rem',borderRadius:'8px',border:'1px solid hsl(var(--border))',marginBottom:'0.75rem'}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'0.5rem'}}><span style={{fontWeight:'600',fontSize:'0.8rem'}}>Centro {idx+1}</span><button type="button" onClick={()=>setFormData({...formData,centros_descarga:formData.centros_descarga.filter((_,i)=>i!==idx)})} style={{background:'none',border:'none',cursor:'pointer',color:'hsl(var(--destructive))'}}><X size={15}/></button></div><div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'0.5rem',marginBottom:'0.5rem'}}><input type="text" className="form-input" placeholder="Nombre del centro" value={centro.nombre} onChange={e=>{const arr=[...formData.centros_descarga];arr[idx]={...arr[idx],nombre:e.target.value};setFormData({...formData,centros_descarga:arr});}} style={{fontSize:'0.85rem'}}/><input type="text" className="form-input" placeholder="Direccion" value={centro.direccion||''} onChange={e=>{const arr=[...formData.centros_descarga];arr[idx]={...arr[idx],direccion:e.target.value};setFormData({...formData,centros_descarga:arr});}} style={{fontSize:'0.85rem'}}/></div><div style={{display:'grid',gridTemplateColumns:'1fr 1fr 80px 1fr 1fr',gap:'0.5rem'}}><input type="text" className="form-input" placeholder="Poblacion" value={centro.poblacion||''} onChange={e=>{const arr=[...formData.centros_descarga];arr[idx]={...arr[idx],poblacion:e.target.value};setFormData({...formData,centros_descarga:arr});}} style={{fontSize:'0.85rem'}}/><input type="text" className="form-input" placeholder="Provincia" value={centro.provincia||''} onChange={e=>{const arr=[...formData.centros_descarga];arr[idx]={...arr[idx],provincia:e.target.value};setFormData({...formData,centros_descarga:arr});}} style={{fontSize:'0.85rem'}}/><input type="text" className="form-input" placeholder="C.P." value={centro.codigo_postal||''} onChange={e=>{const arr=[...formData.centros_descarga];arr[idx]={...arr[idx],codigo_postal:e.target.value};setFormData({...formData,centros_descarga:arr});}} style={{fontSize:'0.85rem'}}/><input type="text" className="form-input" placeholder="Contacto" value={centro.contacto||''} onChange={e=>{const arr=[...formData.centros_descarga];arr[idx]={...arr[idx],contacto:e.target.value};setFormData({...formData,centros_descarga:arr});}} style={{fontSize:'0.85rem'}}/><input type="tel" className="form-input" placeholder="Telefono" value={centro.telefono||''} onChange={e=>{const arr=[...formData.centros_descarga];arr[idx]={...arr[idx],telefono:e.target.value};setFormData({...formData,centros_descarga:arr});}} style={{fontSize:'0.85rem'}}/></div></div>))}</div>)}
+            <div style={{borderTop:'1px solid hsl(var(--border))',paddingTop:'1rem',marginTop:'1.25rem',display:'flex',justifyContent:'flex-end',gap:'0.75rem'}}><button type="button" className="btn btn-secondary" onClick={()=>{setShowForm(false);setEditingId(null);resetForm();setActiveTab('general');}}>Cancelar</button><button type="submit" className="btn btn-primary">{editingId?'Actualizar':'Crear'} Proveedor</button></div>
           </form>
           </div>
         </div>
@@ -671,6 +607,28 @@ const Proveedores = () => {
                 </div>
               ))}
               {tiposProveedor.length === 0 && <p style={{ textAlign: 'center', color: 'hsl(var(--muted-foreground))', fontSize: '0.85rem', padding: '1rem 0' }}>No hay tipos definidos</p>}
+            </div>
+          </div>
+        </div>
+      )}
+      {showTiposOpManager && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, padding: '1rem', backdropFilter: 'blur(4px)' }} onClick={() => setShowTiposOpManager(false)}>
+          <div className="card" style={{ maxWidth: '450px', width: '100%', padding: '1.5rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '2px solid hsl(var(--border))' }}>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700' }}>Tipos de Operacion</h3>
+              <button onClick={() => setShowTiposOpManager(false)} className="config-modal-close-btn"><X size={16} /></button>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+              <input type="text" className="form-input" placeholder="Nuevo tipo..." value={nuevoTipoOp} onChange={(e) => setNuevoTipoOp(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTipoOp())} style={{ flex: 1 }} />
+              <button type="button" className="btn btn-primary" onClick={handleAddTipoOp} disabled={!nuevoTipoOp.trim()}><Plus size={16} /></button>
+            </div>
+            <div style={{ maxHeight: '300px', overflow: 'auto' }}>
+              {tiposOperacion.map(tipo => (
+                <div key={tipo._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', borderRadius: '6px', marginBottom: '0.35rem', background: 'hsl(var(--muted) / 0.3)', border: '1px solid hsl(var(--border))' }}>
+                  <span style={{ fontSize: '0.9rem' }}>{tipo.nombre}</span>
+                  <button onClick={() => handleDeleteTipoOp(tipo._id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--destructive))', padding: '0.25rem' }} title="Eliminar"><Trash2 size={14} /></button>
+                </div>
+              ))}
             </div>
           </div>
         </div>

@@ -22,6 +22,8 @@ router = APIRouter(prefix="/api", tags=["catalogos"])
 proveedores_collection = db['proveedores']
 cultivos_collection = db['cultivos']
 tipos_proveedor_collection = db['tipos_proveedor']
+tipos_operacion_collection = db['tipos_operacion_proveedor']
+documentos_proveedor_collection = db['documentos_proveedor']
 
 
 # ============================================================================
@@ -52,6 +54,62 @@ async def delete_tipo_proveedor(tipo_id: str, current_user: dict = Depends(Requi
     result = await tipos_proveedor_collection.delete_one({"_id": ObjectId(tipo_id)})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Tipo no encontrado")
+    return {"success": True}
+
+
+# ============================================================================
+# TIPOS DE OPERACION PROVEEDOR
+# ============================================================================
+
+@router.get("/tipos-operacion-proveedor")
+async def get_tipos_operacion(current_user: dict = Depends(get_current_user)):
+    tipos = await tipos_operacion_collection.find().sort("nombre", 1).to_list(200)
+    return {"tipos": serialize_docs(tipos)}
+
+@router.post("/tipos-operacion-proveedor")
+async def create_tipo_operacion(data: dict, current_user: dict = Depends(RequireCreate)):
+    nombre = data.get("nombre", "").strip()
+    if not nombre:
+        raise HTTPException(status_code=400, detail="El nombre es obligatorio")
+    existing = await tipos_operacion_collection.find_one({"nombre": {"$regex": f"^{nombre}$", "$options": "i"}})
+    if existing:
+        raise HTTPException(status_code=400, detail="Ya existe un tipo con ese nombre")
+    result = await tipos_operacion_collection.insert_one({"nombre": nombre, "created_at": datetime.now()})
+    created = await tipos_operacion_collection.find_one({"_id": result.inserted_id})
+    return {"success": True, "tipo": serialize_doc(created)}
+
+@router.delete("/tipos-operacion-proveedor/{tipo_id}")
+async def delete_tipo_operacion(tipo_id: str, current_user: dict = Depends(RequireDelete)):
+    if not ObjectId.is_valid(tipo_id):
+        raise HTTPException(status_code=400, detail="ID no valido")
+    result = await tipos_operacion_collection.delete_one({"_id": ObjectId(tipo_id)})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Tipo no encontrado")
+    return {"success": True}
+
+
+# ============================================================================
+# DOCUMENTOS PROVEEDOR
+# ============================================================================
+
+@router.get("/proveedores/{proveedor_id}/documentos")
+async def get_documentos_proveedor(proveedor_id: str, current_user: dict = Depends(get_current_user)):
+    docs = await documentos_proveedor_collection.find({"proveedor_id": proveedor_id}).sort("created_at", -1).to_list(200)
+    return {"documentos": serialize_docs(docs)}
+
+@router.post("/proveedores/{proveedor_id}/documentos")
+async def upload_documento_proveedor(proveedor_id: str, current_user: dict = Depends(RequireCreate)):
+    from fastapi import UploadFile, File, Form
+    # This will be handled via multipart form
+    return {"success": True}
+
+@router.delete("/proveedores/documentos/{doc_id}")
+async def delete_documento_proveedor(doc_id: str, current_user: dict = Depends(RequireDelete)):
+    if not ObjectId.is_valid(doc_id):
+        raise HTTPException(status_code=400, detail="ID no valido")
+    result = await documentos_proveedor_collection.delete_one({"_id": ObjectId(doc_id)})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Documento no encontrado")
     return {"success": True}
 
 
