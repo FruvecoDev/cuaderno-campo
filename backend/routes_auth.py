@@ -187,6 +187,23 @@ async def update_user(user_id: str, user_update: dict, current_user: dict = Depe
     return {"success": True, "user": user_response}
 
 
+@router.delete("/users/{user_id}")
+async def delete_user(user_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete user permanently (Admin only)"""
+    if current_user.get("role") != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    if not ObjectId.is_valid(user_id):
+        raise HTTPException(status_code=400, detail="Invalid user ID")
+    if user_id == current_user["_id"]:
+        raise HTTPException(status_code=400, detail="No puedes eliminar tu propio usuario")
+    result = await users_collection.delete_one({"_id": ObjectId(user_id)})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    await db["user_column_config"].delete_many({"user_id": user_id})
+    return {"success": True, "message": "Usuario eliminado permanentemente"}
+
+
+
 @router.put("/users/{user_id}/password")
 async def change_user_password(
     user_id: str, 

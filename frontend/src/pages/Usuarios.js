@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, UserX, UserCheck, Shield, Settings, X, Check, Eye, EyeOff, Key, ShoppingBag, Link, Unlink, Users, Leaf, FileText, Clipboard } from 'lucide-react';
+import { Plus, Edit2, UserX, UserCheck, Shield, Settings, X, Check, Eye, EyeOff, Key, ShoppingBag, Link, Unlink, Users, Leaf, FileText, Clipboard, Trash2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 import ColumnConfigModal from '../components/ColumnConfigModal';
@@ -267,7 +267,15 @@ const Usuarios = () => {
       await api.put(`/api/auth/users/${userId}`, { is_active: !currentStatus });
       fetchUsers();
     } catch (error) {
+    }
+  };
 
+  const handleDeleteUser = async (userId, userName) => {
+    if (!window.confirm(`¿Estás seguro de que quieres eliminar permanentemente al usuario "${userName}"? Esta acción no se puede deshacer.`)) return;
+    try {
+      await api.delete(`/api/auth/users/${userId}`);
+      fetchUsers();
+    } catch (error) {
     }
   };
 
@@ -569,6 +577,15 @@ const Usuarios = () => {
                               title={user.is_active ? t('users.deactivate') : t('users.activate')}
                             >
                               {user.is_active ? <UserX size={14} /> : <UserCheck size={14} />}
+                            </button>
+                            <button
+                              className="btn btn-sm"
+                              onClick={() => handleDeleteUser(user._id, user.full_name)}
+                              title="Eliminar usuario permanentemente"
+                              data-testid={`btn-delete-${user._id}`}
+                              style={{ backgroundColor: 'hsl(var(--destructive))', color: 'white', border: 'none' }}
+                            >
+                              <Trash2 size={14} />
                             </button>
                           </>
                         )}
