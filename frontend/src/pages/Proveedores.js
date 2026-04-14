@@ -5,6 +5,7 @@ import { Plus, Edit2, Trash2, Search, Settings, X, Download, FileText, TrendingU
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import ProvinciaSelect from '../components/ProvinciaSelect';
+import PaisSelect from '../components/PaisSelect';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
 import '../App.css';
@@ -317,9 +318,9 @@ const Proveedores = () => {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1.5fr 100px 1fr', gap: '0.75rem' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Poblacion</label><input type="text" className="form-input" value={formData.poblacion} onChange={(e) => setFormData({ ...formData, poblacion: e.target.value })} /></div>
-                <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Provincia</label><ProvinciaSelect value={formData.provincia} onChange={(e) => setFormData({ ...formData, provincia: e.target.value })} testId="select-provincia-proveedor" /></div>
+                <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Provincia</label>{(!formData.pais || formData.pais === 'España') ? <ProvinciaSelect value={formData.provincia} onChange={(e) => setFormData({ ...formData, provincia: e.target.value })} testId="select-provincia-proveedor" /> : <input type="text" className="form-input" placeholder="Provincia / Region" value={formData.provincia} onChange={(e) => setFormData({ ...formData, provincia: e.target.value })} />}</div>
                 <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>C.P.</label><input type="text" className="form-input" value={formData.codigo_postal} onChange={(e) => setFormData({ ...formData, codigo_postal: e.target.value })} /></div>
-                <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Pais</label><input type="text" className="form-input" value={formData.pais || ''} onChange={(e) => setFormData({ ...formData, pais: e.target.value })} /></div>
+                <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Pais</label><PaisSelect value={formData.pais} onChange={(e) => setFormData({ ...formData, pais: e.target.value, provincia: '' })} testId="select-pais-proveedor" /></div>
               </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.5rem' }}>
