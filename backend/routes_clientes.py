@@ -21,10 +21,95 @@ router = APIRouter(prefix="/api", tags=["clientes"])
 clientes_collection = db['clientes']
 contratos_collection = db['contratos']
 albaranes_collection = db['albaranes']
+changelog_cliente_collection = db['cliente_changelog']
+tipos_cliente_collection = db['tipos_cliente']
+tipos_operacion_cliente_collection = db['tipos_operacion_cliente']
 
 # Directorio para fotos de clientes
 UPLOAD_DIR = "/app/uploads/clientes"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+
+async def log_cliente_change(cliente_id, action, user, changes=None):
+    entry = {
+        "cliente_id": cliente_id,
+        "action": action,
+        "user_email": user.get("email", ""),
+        "user_name": user.get("full_name", user.get("email", "")),
+        "changes": changes or [],
+        "timestamp": datetime.now(),
+    }
+    await changelog_cliente_collection.insert_one(entry)
+
+
+def diff_dicts_cl(old, new, prefix=""):
+    changes = []
+    skip = {"_id", "created_at", "updated_at", "created_by"}
+    all_keys = set(list(old.keys()) + list(new.keys())) - skip
+    for key in sorted(all_keys):
+        old_val = old.get(key)
+        new_val = new.get(key)
+        field = f"{prefix}{key}" if not prefix else f"{prefix}.{key}"
+        if isinstance(old_val, dict) and isinstance(new_val, dict):
+            changes.extend(diff_dicts_cl(old_val, new_val, field))
+        elif isinstance(old_val, list) and isinstance(new_val, list):
+            if old_val != new_val:
+                changes.append({"field": field, "old": str(old_val)[:200], "new": str(new_val)[:200]})
+        elif str(old_val) != str(new_val):
+            changes.append({"field": field, "old": str(old_val or ""), "new": str(new_val or "")})
+    return changes
+
+
+# ============================================================================
+# TIPOS CLIENTE & TIPOS OPERACION
+# ============================================================================
+
+@router.get("/tipos-cliente")
+async def get_tipos_cliente_crud(current_user: dict = Depends(get_current_user)):
+    tipos = await tipos_cliente_collection.find().sort("nombre", 1).to_list(200)
+    return {"tipos": serialize_docs(tipos)}
+
+@router.post("/tipos-cliente")
+async def create_tipo_cliente(data: dict, current_user: dict = Depends(RequireCreate)):
+    nombre = data.get("nombre", "").strip()
+    if not nombre:
+        raise HTTPException(status_code=400, detail="El nombre es obligatorio")
+    result = await tipos_cliente_collection.insert_one({"nombre": nombre, "created_at": datetime.now()})
+    created = await tipos_cliente_collection.find_one({"_id": result.inserted_id})
+    return {"success": True, "tipo": serialize_doc(created)}
+
+@router.delete("/tipos-cliente/{tipo_id}")
+async def delete_tipo_cliente(tipo_id: str, current_user: dict = Depends(RequireDelete)):
+    if not ObjectId.is_valid(tipo_id):
+        raise HTTPException(status_code=400, detail="ID no valido")
+    await tipos_cliente_collection.delete_one({"_id": ObjectId(tipo_id)})
+    return {"success": True}
+
+@router.get("/tipos-operacion-cliente")
+async def get_tipos_operacion_cl(current_user: dict = Depends(get_current_user)):
+    tipos = await tipos_operacion_cliente_collection.find().sort("nombre", 1).to_list(200)
+    return {"tipos": serialize_docs(tipos)}
+
+@router.post("/tipos-operacion-cliente")
+async def create_tipo_operacion_cl(data: dict, current_user: dict = Depends(RequireCreate)):
+    nombre = data.get("nombre", "").strip()
+    if not nombre:
+        raise HTTPException(status_code=400, detail="El nombre es obligatorio")
+    result = await tipos_operacion_cliente_collection.insert_one({"nombre": nombre, "created_at": datetime.now()})
+    created = await tipos_operacion_cliente_collection.find_one({"_id": result.inserted_id})
+    return {"success": True, "tipo": serialize_doc(created)}
+
+@router.delete("/tipos-operacion-cliente/{tipo_id}")
+async def delete_tipo_operacion_cl(tipo_id: str, current_user: dict = Depends(RequireDelete)):
+    if not ObjectId.is_valid(tipo_id):
+        raise HTTPException(status_code=400, detail="ID no valido")
+    await tipos_operacion_cliente_collection.delete_one({"_id": ObjectId(tipo_id)})
+    return {"success": True}
+
+@router.get("/clientes/{cliente_id}/changelog")
+async def get_cliente_changelog(cliente_id: str, current_user: dict = Depends(get_current_user)):
+    logs = await changelog_cliente_collection.find({"cliente_id": cliente_id}).sort("timestamp", -1).to_list(200)
+    return {"changelog": serialize_docs(logs)}
 
 
 @router.post("/clientes", response_model=dict)
@@ -58,6 +143,8 @@ async def create_cliente(
     
     result = await clientes_collection.insert_one(cliente)
     created = await clientes_collection.find_one({"_id": result.inserted_id})
+    
+    await log_cliente_change(str(result.inserted_id), "creacion", current_user, [{"field": "nombre", "old": "", "new": cliente.get("nombre", "")}])
     
     return {"success": True, "data": serialize_doc(created)}
 
@@ -174,13 +261,19 @@ async def update_cliente(
     
     cliente["updated_at"] = datetime.now()
     
+    old_doc = await clientes_collection.find_one({"_id": ObjectId(cliente_id)})
+    if not old_doc:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+    old_clean = {k: v for k, v in old_doc.items() if k != "_id"}
+    changes = diff_dicts_cl(old_clean, cliente)
+    
     result = await clientes_collection.update_one(
         {"_id": ObjectId(cliente_id)},
         {"$set": cliente}
     )
     
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+    if changes:
+        await log_cliente_change(cliente_id, "modificacion", current_user, changes)
     
     updated = await clientes_collection.find_one({"_id": ObjectId(cliente_id)})
     return {"success": True, "data": serialize_doc(updated)}
