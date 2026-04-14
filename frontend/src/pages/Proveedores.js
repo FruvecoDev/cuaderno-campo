@@ -281,7 +281,11 @@ const Proveedores = () => {
               <button onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }} className="config-modal-close-btn"><X size={18} /></button>
             </div>
           <form onSubmit={handleSubmit}>
-            <div className="grid-2">
+            <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 1fr', gap: '0.75rem' }}>
+              <div className="form-group">
+                <label className="form-label">ID</label>
+                <input type="text" className="form-input" value={formData.codigo_proveedor || 'Auto'} disabled style={{ fontFamily: 'monospace', fontWeight: '600', backgroundColor: 'hsl(var(--muted))', textAlign: 'center' }} />
+              </div>
               <div className="form-group">
                 <label className="form-label">Nombre *</label>
                 <input type="text" className="form-input" value={formData.nombre} onChange={(e) => setFormData({ ...formData, nombre: e.target.value })} required />
