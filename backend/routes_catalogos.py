@@ -25,6 +25,8 @@ tipos_proveedor_collection = db['tipos_proveedor']
 tipos_operacion_collection = db['tipos_operacion_proveedor']
 documentos_proveedor_collection = db['documentos_proveedor']
 changelog_proveedor_collection = db['proveedor_changelog']
+formas_pago_collection = db['formas_pago']
+tipos_iva_collection = db['tipos_iva']
 
 
 async def log_proveedor_change(proveedor_id, action, user, changes=None):
@@ -116,6 +118,60 @@ async def delete_tipo_operacion(tipo_id: str, current_user: dict = Depends(Requi
     result = await tipos_operacion_collection.delete_one({"_id": ObjectId(tipo_id)})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Tipo no encontrado")
+    return {"success": True}
+
+
+
+# ============================================================================
+# FORMAS DE PAGO
+# ============================================================================
+
+@router.get("/formas-pago")
+async def get_formas_pago(current_user: dict = Depends(get_current_user)):
+    items = await formas_pago_collection.find().sort("nombre", 1).to_list(200)
+    return {"items": serialize_docs(items)}
+
+@router.post("/formas-pago")
+async def create_forma_pago(data: dict, current_user: dict = Depends(RequireCreate)):
+    nombre = data.get("nombre", "").strip()
+    if not nombre:
+        raise HTTPException(status_code=400, detail="El nombre es obligatorio")
+    result = await formas_pago_collection.insert_one({"nombre": nombre, "created_at": datetime.now()})
+    created = await formas_pago_collection.find_one({"_id": result.inserted_id})
+    return {"success": True, "item": serialize_doc(created)}
+
+@router.delete("/formas-pago/{item_id}")
+async def delete_forma_pago(item_id: str, current_user: dict = Depends(RequireDelete)):
+    if not ObjectId.is_valid(item_id):
+        raise HTTPException(status_code=400, detail="ID no valido")
+    await formas_pago_collection.delete_one({"_id": ObjectId(item_id)})
+    return {"success": True}
+
+
+# ============================================================================
+# TIPOS DE IVA
+# ============================================================================
+
+@router.get("/tipos-iva")
+async def get_tipos_iva(current_user: dict = Depends(get_current_user)):
+    items = await tipos_iva_collection.find().sort("valor", 1).to_list(200)
+    return {"items": serialize_docs(items)}
+
+@router.post("/tipos-iva")
+async def create_tipo_iva(data: dict, current_user: dict = Depends(RequireCreate)):
+    nombre = data.get("nombre", "").strip()
+    valor = data.get("valor", "")
+    if not nombre:
+        raise HTTPException(status_code=400, detail="El nombre es obligatorio")
+    result = await tipos_iva_collection.insert_one({"nombre": nombre, "valor": valor, "created_at": datetime.now()})
+    created = await tipos_iva_collection.find_one({"_id": result.inserted_id})
+    return {"success": True, "item": serialize_doc(created)}
+
+@router.delete("/tipos-iva/{item_id}")
+async def delete_tipo_iva(item_id: str, current_user: dict = Depends(RequireDelete)):
+    if not ObjectId.is_valid(item_id):
+        raise HTTPException(status_code=400, detail="ID no valido")
+    await tipos_iva_collection.delete_one({"_id": ObjectId(item_id)})
     return {"success": True}
 
 
