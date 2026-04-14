@@ -189,9 +189,9 @@ async def update_user(user_id: str, user_update: dict, current_user: dict = Depe
 
 @router.delete("/users/{user_id}")
 async def delete_user(user_id: str, current_user: dict = Depends(get_current_user)):
-    """Delete user permanently (Admin only)"""
-    if current_user.get("role") != UserRole.ADMIN:
-        raise HTTPException(status_code=403, detail="Admin access required")
+    """Delete user permanently (requires can_manage_users permission)"""
+    if not current_user.get("can_manage_users"):
+        raise HTTPException(status_code=403, detail="No tienes permisos para gestionar usuarios")
     if not ObjectId.is_valid(user_id):
         raise HTTPException(status_code=400, detail="Invalid user ID")
     if user_id == current_user["_id"]:
