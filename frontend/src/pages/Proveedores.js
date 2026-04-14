@@ -18,6 +18,7 @@ const DEFAULT_COLUMNS = [
   { id: 'provincia', label: 'Provincia', visible: false },
   { id: 'direccion', label: 'Direccion', visible: false },
   { id: 'codigo_postal', label: 'Codigo Postal', visible: false },
+  { id: 'pais', label: 'Pais', visible: false },
   { id: 'persona_contacto', label: 'Persona Contacto', visible: false },
   { id: 'observaciones', label: 'Observaciones', visible: false },
   { id: 'estado', label: 'Estado', visible: true },
@@ -48,10 +49,11 @@ const Proveedores = () => {
     direccion: '',
     poblacion: '',
     provincia: '',
+    pais: 'España',
     codigo_postal: '',
-    telefono: '',
-    email: '',
-    persona_contacto: '',
+    telefonos: [{ valor: '', etiqueta: '' }],
+    emails: [{ valor: '', etiqueta: '' }],
+    contactos: [{ nombre: '', cargo: '', telefono: '', email: '' }],
     observaciones: '',
     activo: true
   });
@@ -109,10 +111,19 @@ const Proveedores = () => {
     e.preventDefault();
     try {
       setError(null);
+      const payload = {
+        ...formData,
+        telefonos: formData.telefonos.filter(t => t.valor.trim()),
+        emails: formData.emails.filter(em => em.valor.trim()),
+        contactos: formData.contactos.filter(c => c.nombre.trim()),
+        telefono: formData.telefonos.find(t => t.valor.trim())?.valor || '',
+        email: formData.emails.find(em => em.valor.trim())?.valor || '',
+        persona_contacto: formData.contactos.find(c => c.nombre.trim())?.nombre || '',
+      };
       if (editingId) {
-        await api.put(`/api/proveedores/${editingId}`, formData);
+        await api.put(`/api/proveedores/${editingId}`, payload);
       } else {
-        await api.post('/api/proveedores', formData);
+        await api.post('/api/proveedores', payload);
       }
       
       setShowForm(false);
@@ -128,7 +139,13 @@ const Proveedores = () => {
   };
 
   const handleEdit = (proveedor) => {
-    setFormData(proveedor);
+    setFormData({
+      ...proveedor,
+      pais: proveedor.pais || 'España',
+      telefonos: proveedor.telefonos?.length ? proveedor.telefonos : (proveedor.telefono ? [{ valor: proveedor.telefono, etiqueta: '' }] : [{ valor: '', etiqueta: '' }]),
+      emails: proveedor.emails?.length ? proveedor.emails : (proveedor.email ? [{ valor: proveedor.email, etiqueta: '' }] : [{ valor: '', etiqueta: '' }]),
+      contactos: proveedor.contactos?.length ? proveedor.contactos : (proveedor.persona_contacto ? [{ nombre: proveedor.persona_contacto, cargo: '', telefono: '', email: '' }] : [{ nombre: '', cargo: '', telefono: '', email: '' }]),
+    });
     setEditingId(proveedor._id);
     setShowForm(true);
   };
@@ -157,10 +174,11 @@ const Proveedores = () => {
       direccion: '',
       poblacion: '',
       provincia: '',
+      pais: 'España',
       codigo_postal: '',
-      telefono: '',
-      email: '',
-      persona_contacto: '',
+      telefonos: [{ valor: '', etiqueta: '' }],
+      emails: [{ valor: '', etiqueta: '' }],
+      contactos: [{ nombre: '', cargo: '', telefono: '', email: '' }],
       observaciones: '',
       activo: true
     });
@@ -265,112 +283,93 @@ const Proveedores = () => {
             <div className="grid-2">
               <div className="form-group">
                 <label className="form-label">Nombre *</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.nombre}
-                  onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                  required
-                />
+                <input type="text" className="form-input" value={formData.nombre} onChange={(e) => setFormData({ ...formData, nombre: e.target.value })} required />
               </div>
               <div className="form-group">
                 <label className="form-label">CIF/NIF</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.cif_nif}
-                  onChange={(e) => setFormData({ ...formData, cif_nif: e.target.value })}
-                />
+                <input type="text" className="form-input" value={formData.cif_nif} onChange={(e) => setFormData({ ...formData, cif_nif: e.target.value })} />
               </div>
             </div>
 
             <div className="form-group">
               <label className="form-label">Direccion</label>
-              <input
-                type="text"
-                className="form-input"
-                value={formData.direccion}
-                onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
-              />
+              <input type="text" className="form-input" value={formData.direccion} onChange={(e) => setFormData({ ...formData, direccion: e.target.value })} />
             </div>
 
-            <div className="grid-3">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.75rem' }}>
               <div className="form-group">
                 <label className="form-label">Poblacion</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.poblacion}
-                  onChange={(e) => setFormData({ ...formData, poblacion: e.target.value })}
-                />
+                <input type="text" className="form-input" value={formData.poblacion} onChange={(e) => setFormData({ ...formData, poblacion: e.target.value })} />
               </div>
               <div className="form-group">
                 <label className="form-label">Provincia</label>
-                <ProvinciaSelect
-                  value={formData.provincia}
-                  onChange={(e) => setFormData({ ...formData, provincia: e.target.value })}
-                  testId="select-provincia-proveedor"
-                />
+                <ProvinciaSelect value={formData.provincia} onChange={(e) => setFormData({ ...formData, provincia: e.target.value })} testId="select-provincia-proveedor" />
               </div>
               <div className="form-group">
-                <label className="form-label">Codigo Postal</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.codigo_postal}
-                  onChange={(e) => setFormData({ ...formData, codigo_postal: e.target.value })}
-                />
+                <label className="form-label">C.P.</label>
+                <input type="text" className="form-input" value={formData.codigo_postal} onChange={(e) => setFormData({ ...formData, codigo_postal: e.target.value })} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Pais</label>
+                <input type="text" className="form-input" value={formData.pais || ''} onChange={(e) => setFormData({ ...formData, pais: e.target.value })} placeholder="España" />
               </div>
             </div>
 
-            <div className="grid-2">
-              <div className="form-group">
-                <label className="form-label">Telefono</label>
-                <input
-                  type="tel"
-                  className="form-input"
-                  value={formData.telefono}
-                  onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Email</label>
-                <input
-                  type="email"
-                  className="form-input"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                />
-              </div>
-            </div>
-
+            {/* Telefonos */}
             <div className="form-group">
-              <label className="form-label">Persona de Contacto</label>
-              <input
-                type="text"
-                className="form-input"
-                value={formData.persona_contacto}
-                onChange={(e) => setFormData({ ...formData, persona_contacto: e.target.value })}
-              />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <label className="form-label" style={{ margin: 0 }}>Telefonos</label>
+                <button type="button" className="btn btn-sm btn-secondary" onClick={() => setFormData({ ...formData, telefonos: [...formData.telefonos, { valor: '', etiqueta: '' }] })}><Plus size={14} /> Anadir</button>
+              </div>
+              {formData.telefonos.map((tel, idx) => (
+                <div key={`tel-${idx}`} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
+                  <input type="tel" className="form-input" placeholder="Numero" value={tel.valor} onChange={(e) => { const arr = [...formData.telefonos]; arr[idx] = { ...arr[idx], valor: e.target.value }; setFormData({ ...formData, telefonos: arr }); }} style={{ flex: 2 }} />
+                  <input type="text" className="form-input" placeholder="Etiqueta (ej: Principal, Movil)" value={tel.etiqueta} onChange={(e) => { const arr = [...formData.telefonos]; arr[idx] = { ...arr[idx], etiqueta: e.target.value }; setFormData({ ...formData, telefonos: arr }); }} style={{ flex: 1 }} />
+                  {formData.telefonos.length > 1 && <button type="button" onClick={() => setFormData({ ...formData, telefonos: formData.telefonos.filter((_, i) => i !== idx) })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--destructive))', padding: '0.25rem' }}><X size={16} /></button>}
+                </div>
+              ))}
+            </div>
+
+            {/* Emails */}
+            <div className="form-group">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <label className="form-label" style={{ margin: 0 }}>Emails</label>
+                <button type="button" className="btn btn-sm btn-secondary" onClick={() => setFormData({ ...formData, emails: [...formData.emails, { valor: '', etiqueta: '' }] })}><Plus size={14} /> Anadir</button>
+              </div>
+              {formData.emails.map((em, idx) => (
+                <div key={`em-${idx}`} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
+                  <input type="email" className="form-input" placeholder="Email" value={em.valor} onChange={(e) => { const arr = [...formData.emails]; arr[idx] = { ...arr[idx], valor: e.target.value }; setFormData({ ...formData, emails: arr }); }} style={{ flex: 2 }} />
+                  <input type="text" className="form-input" placeholder="Etiqueta (ej: Ventas, Admin)" value={em.etiqueta} onChange={(e) => { const arr = [...formData.emails]; arr[idx] = { ...arr[idx], etiqueta: e.target.value }; setFormData({ ...formData, emails: arr }); }} style={{ flex: 1 }} />
+                  {formData.emails.length > 1 && <button type="button" onClick={() => setFormData({ ...formData, emails: formData.emails.filter((_, i) => i !== idx) })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--destructive))', padding: '0.25rem' }}><X size={16} /></button>}
+                </div>
+              ))}
+            </div>
+
+            {/* Personas de Contacto */}
+            <div className="form-group">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <label className="form-label" style={{ margin: 0 }}>Personas de Contacto</label>
+                <button type="button" className="btn btn-sm btn-secondary" onClick={() => setFormData({ ...formData, contactos: [...formData.contactos, { nombre: '', cargo: '', telefono: '', email: '' }] })}><Plus size={14} /> Anadir</button>
+              </div>
+              {formData.contactos.map((c, idx) => (
+                <div key={`ct-${idx}`} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input type="text" className="form-input" placeholder="Nombre" value={c.nombre} onChange={(e) => { const arr = [...formData.contactos]; arr[idx] = { ...arr[idx], nombre: e.target.value }; setFormData({ ...formData, contactos: arr }); }} style={{ flex: 1, minWidth: '120px' }} />
+                  <input type="text" className="form-input" placeholder="Cargo" value={c.cargo} onChange={(e) => { const arr = [...formData.contactos]; arr[idx] = { ...arr[idx], cargo: e.target.value }; setFormData({ ...formData, contactos: arr }); }} style={{ flex: 1, minWidth: '100px' }} />
+                  <input type="tel" className="form-input" placeholder="Telefono" value={c.telefono} onChange={(e) => { const arr = [...formData.contactos]; arr[idx] = { ...arr[idx], telefono: e.target.value }; setFormData({ ...formData, contactos: arr }); }} style={{ flex: 1, minWidth: '100px' }} />
+                  <input type="email" className="form-input" placeholder="Email" value={c.email} onChange={(e) => { const arr = [...formData.contactos]; arr[idx] = { ...arr[idx], email: e.target.value }; setFormData({ ...formData, contactos: arr }); }} style={{ flex: 1, minWidth: '120px' }} />
+                  {formData.contactos.length > 1 && <button type="button" onClick={() => setFormData({ ...formData, contactos: formData.contactos.filter((_, i) => i !== idx) })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--destructive))', padding: '0.25rem' }}><X size={16} /></button>}
+                </div>
+              ))}
             </div>
 
             <div className="form-group">
               <label className="form-label">Observaciones</label>
-              <textarea
-                className="form-input"
-                rows="3"
-                value={formData.observaciones}
-                onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
-              />
+              <textarea className="form-input" rows="2" value={formData.observaciones} onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })} />
             </div>
 
             <div className="form-group">
               <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={formData.activo}
-                  onChange={(e) => setFormData({ ...formData, activo: e.target.checked })}
-                />
+                <input type="checkbox" checked={formData.activo} onChange={(e) => setFormData({ ...formData, activo: e.target.checked })} />
                 <span>Activo</span>
               </label>
             </div>
@@ -444,13 +443,14 @@ const Proveedores = () => {
                       switch (col.id) {
                         case 'nombre': return <td key="nombre" style={{ fontWeight: '600' }}>{proveedor.nombre}</td>;
                         case 'cif_nif': return <td key="cif_nif">{proveedor.cif_nif || '-'}</td>;
-                        case 'telefono': return <td key="telefono">{proveedor.telefono || '-'}</td>;
-                        case 'email': return <td key="email">{proveedor.email || '-'}</td>;
+                        case 'telefono': return <td key="telefono">{proveedor.telefonos?.length ? proveedor.telefonos.map(t => t.valor).join(', ') : proveedor.telefono || '-'}</td>;
+                        case 'email': return <td key="email">{proveedor.emails?.length ? proveedor.emails.map(e => e.valor).join(', ') : proveedor.email || '-'}</td>;
                         case 'poblacion': return <td key="poblacion">{proveedor.poblacion || '-'}</td>;
                         case 'provincia': return <td key="provincia">{proveedor.provincia || '-'}</td>;
                         case 'direccion': return <td key="direccion">{proveedor.direccion || '-'}</td>;
                         case 'codigo_postal': return <td key="codigo_postal">{proveedor.codigo_postal || '-'}</td>;
-                        case 'persona_contacto': return <td key="persona_contacto">{proveedor.persona_contacto || '-'}</td>;
+                        case 'pais': return <td key="pais">{proveedor.pais || '-'}</td>;
+                        case 'persona_contacto': return <td key="persona_contacto">{proveedor.contactos?.length ? proveedor.contactos.map(c => `${c.nombre}${c.cargo ? ` (${c.cargo})` : ''}`).join(', ') : proveedor.persona_contacto || '-'}</td>;
                         case 'observaciones': return <td key="observaciones" style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{proveedor.observaciones || '-'}</td>;
                         case 'estado': return <td key="estado"><span className={`badge ${proveedor.activo ? 'badge-success' : 'badge-secondary'}`}>{proveedor.activo ? 'Activo' : 'Inactivo'}</span></td>;
                         default: return null;
