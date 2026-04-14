@@ -189,7 +189,7 @@ const Mapas = () => {
         setMapZoom(12);
       }
     } catch (err) {
-      console.error('Error fetching parcelas:', err);
+
     } finally {
       setLoading(false);
     }
@@ -200,7 +200,7 @@ const Mapas = () => {
       const data = await api.get('/api/fincas');
       setFincas(data.fincas || []);
     } catch (err) {
-      console.error('Error fetching fincas:', err);
+
     }
   };
 
@@ -225,7 +225,7 @@ const Mapas = () => {
       setEditMode(false);
       setSelectedParcela(null);
     } catch (err) {
-      console.error('Error saving coords:', err);
+
       alert('Error al guardar coordenadas');
     } finally {
       setSaving(false);
@@ -276,7 +276,7 @@ const Mapas = () => {
             setMapType(originalMapType);
           }
         } catch (captureError) {
-          console.error('Error capturing map:', captureError);
+
           // Continue without image
         } finally {
           setCapturingMap(false);
@@ -310,7 +310,7 @@ const Mapas = () => {
         featureGroupRef.current.clearLayers();
       }
     } catch (err) {
-      console.error('Error saving polygon:', err);
+
       alert('Error al guardar el polígono');
     } finally {
       setSaving(false);
@@ -332,7 +332,7 @@ const Mapas = () => {
         p._id === parcela._id ? { ...p, recintos: [] } : p
       ));
     } catch (err) {
-      console.error('Error deleting polygon:', err);
+
       alert('Error al eliminar el polígono');
     }
   };
@@ -396,7 +396,7 @@ const Mapas = () => {
       
       alert('Imagen del mapa guardada correctamente');
     } catch (error) {
-      console.error('Error capturing map:', error);
+
       alert('Error al capturar la imagen del mapa');
     } finally {
       setCapturingMap(false);

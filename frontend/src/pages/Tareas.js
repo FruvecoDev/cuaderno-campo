@@ -94,14 +94,14 @@ const Tareas = () => {
     if (vista === 'calendario') {
       fetchTareasCalendario();
     }
-  }, [vista, mesCalendario, anoCalendario]);
+  }, [vista, mesCalendario, anoCalendario]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchTareas = async () => {
     try {
       const data = await api.get('/api/tareas');
       setTareas(data.tareas || []);
     } catch (err) {
-      console.error('Error fetching tareas:', err);
+
     }
     setLoading(false);
   };
@@ -111,7 +111,7 @@ const Tareas = () => {
       const data = await api.get('/api/parcelas');
       setParcelas(data.parcelas || []);
     } catch (err) {
-      console.error('Error fetching parcelas:', err);
+
     }
   };
 
@@ -120,7 +120,7 @@ const Tareas = () => {
       const data = await api.get('/api/tareas/usuarios-asignables');
       setUsuarios(data.usuarios || []);
     } catch (err) {
-      console.error('Error fetching usuarios:', err);
+
     }
   };
 
@@ -129,7 +129,7 @@ const Tareas = () => {
       const data = await api.get('/api/tareas/stats');
       setStats(data);
     } catch (err) {
-      console.error('Error fetching stats:', err);
+
     }
   };
 
@@ -138,7 +138,7 @@ const Tareas = () => {
       const data = await api.get('/api/tareas/tipos');
       setTipos(data.tipos || []);
     } catch (err) {
-      console.error('Error fetching tipos:', err);
+
     }
   };
 
@@ -147,7 +147,7 @@ const Tareas = () => {
       const data = await api.get(`/api/tareas/calendario?mes=${mesCalendario}&ano=${anoCalendario}`);
       setTareasCalendario(data.calendario || {});
     } catch (err) {
-      console.error('Error fetching calendario:', err);
+
     }
   };
 
@@ -212,7 +212,7 @@ const Tareas = () => {
         fetchStats();
       }
     } catch (err) {
-      console.error('Error saving tarea:', err);
+
     }
   };
 
@@ -257,7 +257,7 @@ const Tareas = () => {
       fetchTareas();
       fetchStats();
     } catch (err) {
-      console.error('Error deleting tarea:', err);
+
     }
   };
 
@@ -267,7 +267,7 @@ const Tareas = () => {
       fetchTareas();
       fetchStats();
     } catch (err) {
-      console.error('Error updating estado:', err);
+
     }
   };
 
@@ -276,7 +276,7 @@ const Tareas = () => {
       await api.patch(`/api/tareas/${tareaId}/subtarea/${subtareaId}?completada=${!completada}`, {});
       fetchTareas();
     } catch (err) {
-      console.error('Error toggling subtarea:', err);
+
     }
   };
 
@@ -308,7 +308,7 @@ const Tareas = () => {
       
       await api.download(`/api/tareas/export/excel?${params}`, `tareas_${new Date().toISOString().split('T')[0]}.xlsx`);
     } catch (err) {
-      console.error('Error exporting:', err);
+
     }
   };
 
@@ -452,7 +452,7 @@ const Tareas = () => {
               const url = window.URL.createObjectURL(blob);
               const a = document.createElement('a'); a.href = url; a.download = `tareas_${new Date().toISOString().slice(0,10)}.pdf`;
               a.click(); window.URL.revokeObjectURL(url);
-            } catch (err) { console.error('Export error:', err); }
+            } catch (err) { }
           }} style={{ backgroundColor: '#dc2626', color: 'white' }} data-testid="btn-export-tareas-pdf">
             <FileText size={16} /> PDF
           </button>

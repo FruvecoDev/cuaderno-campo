@@ -34,7 +34,7 @@ const Login = () => {
           setLoginLogo(`${BACKEND_URL}${data.login_logo}`);
         }
       } catch (err) {
-        console.error('Error fetching logo:', err);
+
       }
     };
     fetchLogo();

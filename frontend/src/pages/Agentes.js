@@ -103,7 +103,7 @@ const Agentes = () => {
   useEffect(() => {
     fetchAgentes();
     fetchReferencias();
-  }, [activeTab]);
+  }, [activeTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchAgentes = async () => {
     try {
@@ -136,7 +136,7 @@ const Agentes = () => {
       const parcelasData = await api.get('/api/parcelas');
       setParcelas(parcelasData.parcelas || []);
     } catch (err) {
-      console.error('Error fetching referencias:', err);
+
     }
   };
 
@@ -145,7 +145,7 @@ const Agentes = () => {
       const data = await api.get(`/api/agentes/${agenteId}/comisiones`);
       setComisiones(data.comisiones || []);
     } catch (err) {
-      console.error('Error fetching comisiones:', err);
+
     }
   };
 
@@ -225,7 +225,7 @@ const Agentes = () => {
       await api.patch(`/api/agentes/${id}/toggle-activo`);
       fetchAgentes();
     } catch (err) {
-      console.error('Error toggling status:', err);
+
     }
   };
 
@@ -299,7 +299,7 @@ const Agentes = () => {
         activa: true
       });
     } catch (err) {
-      console.error('Error adding comision:', err);
+
     }
   };
 
@@ -310,7 +310,7 @@ const Agentes = () => {
       await api.delete(`/api/comisiones/${comisionId}`);
       fetchComisiones(selectedAgente._id);
     } catch (err) {
-      console.error('Error deleting comision:', err);
+
     }
   };
 

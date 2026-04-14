@@ -342,7 +342,7 @@ function FitBounds({ zones, parcelas }) {
           map.fitBounds(bounds, { padding: [50, 50] });
         }
       } catch (e) {
-        console.debug('FitBounds skipped:', e.message);
+        
       }
     };
     
@@ -376,7 +376,7 @@ function GeolocationControl({ onLocate }) {
         alert('No se pudo obtener tu ubicación');
       });
     } catch (e) {
-      console.debug('Geolocation skipped:', e.message);
+      
     }
   };
   
@@ -477,7 +477,7 @@ const AdvancedParcelMap = ({
         alert('No se encontró la dirección');
       }
     } catch (error) {
-      console.error('Error searching address:', error);
+
       alert('Error al buscar dirección');
     }
   };
@@ -632,7 +632,7 @@ ${placemarks}
           alert('No se pudo extraer un polígono válido del archivo');
         }
       } catch (error) {
-        console.error('Error parsing file:', error);
+
         alert('Error al leer el archivo');
       }
     };

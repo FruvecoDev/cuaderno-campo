@@ -78,6 +78,7 @@ const Contratos = () => {
   const selectedCultivo = cultivos.find(c => c._id === formData.cultivo_id);
   const isGuisante = selectedCultivo?.nombre?.toLowerCase().includes('guisante');
   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchContratos(); fetchProveedores(); fetchClientes(); fetchCultivos(); fetchAgentes(); }, []);
   
   const fetchAgentes = async () => {
@@ -86,19 +87,19 @@ const Contratos = () => {
       setAgentesCompra(dataC.agentes || []);
       const dataV = await api.get('/api/agentes?tipo=venta');
       setAgentesVenta(dataV.agentes || []);
-    } catch (error) { console.error('Error fetching agentes:', error); }
+    } catch (error) { }
   };
   const fetchProveedores = async () => {
     try { const data = await api.get('/api/proveedores'); setProveedores(data.proveedores || []); }
-    catch (error) { console.error('Error fetching proveedores:', error); }
+    catch (error) { }
   };
   const fetchClientes = async () => {
     try { const data = await api.get('/api/clientes'); setClientes(data.clientes || []); }
-    catch (error) { console.error('Error fetching clientes:', error); }
+    catch (error) { }
   };
   const fetchCultivos = async () => {
     try { const data = await api.get('/api/cultivos'); setCultivos(data.cultivos || []); }
-    catch (error) { console.error('Error fetching cultivos:', error); }
+    catch (error) { }
   };
   const fetchContratos = async () => {
     try {
@@ -106,7 +107,7 @@ const Contratos = () => {
       const data = await api.get('/api/contratos');
       setContratos(data.contratos || []);
     } catch (error) {
-      console.error('Error fetching contratos:', error);
+
       setError(api.getErrorMessage(error) || t('messages.errorLoading'));
     } finally { setLoading(false); }
   };
@@ -284,14 +285,14 @@ const Contratos = () => {
       const contrato = contratos.find(c => c._id === urlId);
       if (contrato) handleEditFromUrl(contrato);
     }
-  }, [urlId, contratos]);
+  }, [urlId, contratos]); // eslint-disable-line react-hooks/exhaustive-deps
   
   useEffect(() => {
     if (location.pathname.includes('/nuevo') && !editingId && !showForm) {
       setFormData({ ...initialFormData, numero_contrato: generarNumeroContrato() });
       setShowForm(true);
     }
-  }, [location.pathname]);
+  }, [location.pathname]); // eslint-disable-line react-hooks/exhaustive-deps
   
   // Shared form props
   const formProps = {

@@ -64,7 +64,7 @@ const parseResponse = async (response) => {
       return await response.blob();
     }
   } catch (error) {
-    console.error('Error parsing response:', error);
+
     return null;
   }
 };

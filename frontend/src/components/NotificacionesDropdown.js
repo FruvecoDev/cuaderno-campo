@@ -60,7 +60,7 @@ const NotificacionesDropdown = () => {
       const data = await api.get('/api/notificaciones/count');
       setNoLeidas(data.no_leidas || 0);
     } catch (err) {
-      console.error('Error fetching notification count:', err);
+
     }
   };
 
@@ -71,7 +71,7 @@ const NotificacionesDropdown = () => {
       setNotificaciones(data.notificaciones || []);
       setNoLeidas(data.no_leidas || 0);
     } catch (err) {
-      console.error('Error fetching notifications:', err);
+
     } finally {
       setLoading(false);
     }
@@ -92,7 +92,7 @@ const NotificacionesDropdown = () => {
       );
       setNoLeidas(prev => Math.max(0, prev - 1));
     } catch (err) {
-      console.error('Error marking notification as read:', err);
+
     }
   };
 
@@ -102,7 +102,7 @@ const NotificacionesDropdown = () => {
       setNotificaciones(prev => prev.map(n => ({ ...n, leida: true })));
       setNoLeidas(0);
     } catch (err) {
-      console.error('Error marking all as read:', err);
+
     }
   };
 

@@ -77,7 +77,7 @@ const Maquinaria = () => {
   const [modalImageUrl, setModalImageUrl] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  useEffect(() => { fetchMaquinaria(); fetchStats(); }, []);
+  useEffect(() => { fetchMaquinaria(); fetchStats(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { localStorage.setItem('maquinaria_fields_config', JSON.stringify(fieldsConfig)); }, [fieldsConfig]);
 
   const fetchMaquinaria = async () => {
@@ -88,18 +88,18 @@ const Maquinaria = () => {
 
   const fetchStats = async () => {
     try { const data = await api.get('/api/maquinaria/stats/resumen'); setStats(data.stats); }
-    catch (err) { console.error('Error fetching stats:', err); }
+    catch (err) { }
   };
 
   const handleExportExcel = async () => {
     try { const params = filters.estado ? `?estado=${filters.estado}` : ''; await api.download(`/api/maquinaria/export/excel${params}`, `maquinaria_${new Date().toISOString().split('T')[0]}.xlsx`); }
-    catch (err) { console.error('Error:', err); }
+    catch (err) { }
   };
 
   const handleVerHistorial = async (item) => {
     setSelectedMaquinaria(item); setShowHistorial(true); setLoadingHistorial(true);
     try { const data = await api.get(`/api/maquinaria/${item._id}/historial`); setHistorialData(data.historial); }
-    catch (err) { console.error('Error:', err); setError('Error al cargar historial'); setTimeout(() => setError(null), 5000); }
+    catch (err) { setError('Error al cargar historial'); setTimeout(() => setError(null), 5000); }
     finally { setLoadingHistorial(false); }
   };
 
@@ -137,14 +137,14 @@ const Maquinaria = () => {
     if (!selectedImage) return;
     setUploadingImage(true);
     try { const fd = new FormData(); fd.append('file', selectedImage); await api.upload(`/api/maquinaria/${maquinariaId}/imagen-placa-ce`, fd); }
-    catch (error) { console.error('Error uploading:', error); setError('Error al subir imagen'); setTimeout(() => setError(null), 5000); }
+    catch (error) { setError('Error al subir imagen'); setTimeout(() => setError(null), 5000); }
     finally { setUploadingImage(false); }
   };
 
   const deleteImage = async (maquinariaId) => {
     if (!window.confirm('Eliminar la imagen de la placa CE?')) return;
     try { await api.delete(`/api/maquinaria/${maquinariaId}/imagen-placa-ce`); fetchMaquinaria(); }
-    catch (error) { console.error('Error:', error); setError('Error al eliminar imagen'); setTimeout(() => setError(null), 5000); }
+    catch (error) { setError('Error al eliminar imagen'); setTimeout(() => setError(null), 5000); }
   };
 
   const viewImage = (item) => {
@@ -204,7 +204,7 @@ const Maquinaria = () => {
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button className="btn btn-secondary" onClick={handleExportExcel} title="Exportar a Excel" data-testid="btn-export-excel-maquinaria"><Download size={18} /> Excel</button>
           <button className="btn btn-secondary" data-testid="btn-export-pdf-maquinaria"
-            onClick={async () => { try { await api.download('/api/maquinaria/export/pdf', `maquinaria_${new Date().toISOString().split('T')[0]}.pdf`); } catch (err) { console.error(err); } }}
+            onClick={async () => { try { await api.download('/api/maquinaria/export/pdf', `maquinaria_${new Date().toISOString().split('T')[0]}.pdf`); } catch (err) { } }}
             title="Exportar a PDF"><Download size={18} /> PDF</button>
           <button className="btn btn-secondary" onClick={() => setShowConfig(true)} title="Configurar columnas" data-testid="btn-config-maquinaria"><Settings size={18} /></button>
           <button className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setShowFieldsConfig(!showFieldsConfig)} title="Configurar campos formulario" data-testid="btn-config-fields"><Filter size={18} /></button>

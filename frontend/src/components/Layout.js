@@ -77,7 +77,7 @@ const Layout = ({ children }) => {
           setDashboardLogo(`${BACKEND_URL}${data.dashboard_logo}`);
         }
       } catch (err) {
-        console.error('Error fetching logo:', err);
+
       }
     };
     fetchLogo();

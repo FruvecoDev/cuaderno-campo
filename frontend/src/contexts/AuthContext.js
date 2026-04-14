@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
       const data = await api.get('/api/auth/me', { timeout: 10000 });
       setUser(data);
     } catch (error) {
-      console.error('Error fetching user:', error);
+
       // Only logout if it's an auth error (401/403), not network issues
       if (error.status === 401 || error.status === 403) {
         logout();

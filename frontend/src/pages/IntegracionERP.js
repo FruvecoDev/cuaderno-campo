@@ -28,7 +28,7 @@ const TabApiKeys = () => {
     try {
       const data = await api.get('/api/erp/sync/api-keys');
       setKeys(data.data || []);
-    } catch (e) { console.error(e); }
+    } catch (e) { }
     finally { setLoading(false); }
   }, []);
 
@@ -42,7 +42,7 @@ const TabApiKeys = () => {
       setShowCreate(false);
       setForm({ nombre: '', descripcion: '', permisos: ['read', 'write'] });
       fetchKeys();
-    } catch (e) { console.error(e); }
+    } catch (e) { }
   };
 
   const handleRevoke = async (id) => {
@@ -50,7 +50,7 @@ const TabApiKeys = () => {
     try {
       await api.delete(`/api/erp/sync/api-keys/${id}`);
       fetchKeys();
-    } catch (e) { console.error(e); }
+    } catch (e) { }
   };
 
   const copyKey = () => {
@@ -163,7 +163,7 @@ const TabWebhooks = () => {
     try {
       const data = await api.get('/api/erp/sync/webhooks');
       setWebhooks(data.data || []);
-    } catch (e) { console.error(e); }
+    } catch (e) { }
     finally { setLoading(false); }
   }, []);
 
@@ -176,14 +176,14 @@ const TabWebhooks = () => {
       setShowCreate(false);
       setForm({ url: '', nombre: '', eventos: ['create', 'update'], modulos: ['contratos'], activo: true });
       fetchWebhooks();
-    } catch (e) { console.error(e); }
+    } catch (e) { }
   };
 
   const handleToggle = async (id) => {
     try {
       await api.post(`/api/erp/sync/webhooks/${id}/toggle`, {});
       fetchWebhooks();
-    } catch (e) { console.error(e); }
+    } catch (e) { }
   };
 
   const handleTest = async (id) => {
@@ -201,7 +201,7 @@ const TabWebhooks = () => {
     try {
       await api.delete(`/api/erp/sync/webhooks/${id}`);
       fetchWebhooks();
-    } catch (e) { console.error(e); }
+    } catch (e) { }
   };
 
   const toggleEvento = (ev) => {
@@ -335,7 +335,7 @@ const TabExport = () => {
       try {
         const data = await api.get('/api/erp/sync/export-modules');
         setModules(data.modules || []);
-      } catch (e) { console.error(e); }
+      } catch (e) { }
       finally { setLoading(false); }
     };
     fetchModules();
@@ -352,7 +352,7 @@ const TabExport = () => {
       const url = `/api/erp/sync/export/${selectedModule}?${params.toString()}`;
       const data = await api.get(url);
       setExportData(data);
-    } catch (e) { console.error(e); }
+    } catch (e) { }
     finally { setExporting(false); }
   };
 
@@ -459,7 +459,7 @@ const TabHistorial = () => {
       ]);
       setHistory(histData.data || []);
       setStats(statsData.stats || null);
-    } catch (e) { console.error(e); }
+    } catch (e) { }
     finally { setLoading(false); }
   }, [filter]);
 

@@ -63,14 +63,14 @@ const InformesIngresos = () => {
     fetchResumen();
     fetchCampanas();
     fetchFiltrosOpciones();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   
   const fetchFiltrosOpciones = async () => {
     try {
       const data = await api.get('/api/ingresos/filtros-opciones');
       setFiltrosOpciones(data);
     } catch (error) {
-      console.error('Error fetching filtros opciones:', error);
+
     }
   };
   
@@ -79,7 +79,7 @@ const InformesIngresos = () => {
       const data = await api.get('/api/ingresos/campanas');
       setCampanas(data.campanas || []);
     } catch (error) {
-      console.error('Error fetching campanas:', error);
+
     }
   };
 
@@ -100,7 +100,7 @@ const InformesIngresos = () => {
       const data = await api.get(`/api/ingresos/resumen?${params}`);
       setResumen(data);
     } catch (error) {
-      console.error('Error:', error);
+
       setError(api.getErrorMessage(error));
     } finally {
       setLoading(false);
@@ -124,7 +124,7 @@ const InformesIngresos = () => {
       setDetalleAlbaranes(data.albaranes || []);
       setDetalleView({ tipo, valor, total: data.total });
     } catch (error) {
-      console.error('Error:', error);
+
     } finally {
       setLoadingDetalle(false);
     }
@@ -173,7 +173,7 @@ const InformesIngresos = () => {
       
       await api.download(`/api/ingresos/export/excel?${params}`, `informe_ingresos_${new Date().toISOString().slice(0,10)}.xlsx`);
     } catch (error) {
-      console.error('Error exporting Excel:', error);
+
       setError('Error al exportar a Excel');
     } finally {
       setExportingExcel(false);
@@ -192,7 +192,7 @@ const InformesIngresos = () => {
       
       await api.download(`/api/ingresos/export/pdf?${params}`, `informe_ingresos_${new Date().toISOString().slice(0,10)}.pdf`);
     } catch (error) {
-      console.error('Error exporting PDF:', error);
+
       setError('Error al exportar a PDF');
     } finally {
       setExportingPdf(false);
@@ -468,7 +468,7 @@ const InformesIngresos = () => {
                         dataKey="value"
                       >
                         {chartDataCultivos.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                          <Cell key={color} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                         ))}
                       </Pie>
                       <Tooltip formatter={(v) => formatCurrency(v)} />
@@ -725,7 +725,7 @@ const InformesIngresos = () => {
                     </thead>
                     <tbody>
                       {detalleAlbaranes.map((a, idx) => (
-                        <tr key={idx}>
+                        <tr key={item._id || idx}>
                           <td>{a.fecha}</td>
                           <td>{a.numero_albaran}</td>
                           <td>{a.cliente}</td>

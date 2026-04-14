@@ -22,8 +22,8 @@ def api_client():
 def auth_token(api_client):
     """Get authentication token"""
     response = api_client.post(f"{BASE_URL}/api/auth/login", json={
-        "email": "admin@fruveco.com",
-        "password": "admin123"
+        "email": os.environ.get("TEST_EMAIL", ""),
+        "password": os.environ.get("TEST_PASSWORD", "")
     })
     assert response.status_code == 200, f"Login failed: {response.text}"
     return response.json().get("access_token")

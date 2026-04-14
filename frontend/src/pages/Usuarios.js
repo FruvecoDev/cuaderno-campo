@@ -87,7 +87,7 @@ const Usuarios = () => {
       const data = await api.get('/api/auth/users');
       setUsers(data.users || []);
     } catch (error) {
-      console.error('Error fetching users:', error);
+
     } finally {
       setLoading(false);
     }
@@ -98,7 +98,7 @@ const Usuarios = () => {
       const data = await api.get('/api/auth/menu-items');
       setMenuItems(data.menu_items || []);
     } catch (error) {
-      console.error('Error fetching menu items:', error);
+
     }
   };
 
@@ -107,7 +107,7 @@ const Usuarios = () => {
       const data = await api.get('/api/auth/permission-profiles');
       setPermissionProfiles(data.profiles || []);
     } catch (error) {
-      console.error('Error fetching permission profiles:', error);
+
     }
   };
 
@@ -116,7 +116,7 @@ const Usuarios = () => {
       const data = await api.get('/api/auth/empleados-disponibles');
       setEmpleadosDisponibles(data.empleados || []);
     } catch (error) {
-      console.error('Error fetching empleados:', error);
+
     }
   };
 
@@ -142,7 +142,7 @@ const Usuarios = () => {
       setSelectedUserForPermissions(null);
       fetchUsers();
     } catch (error) {
-      console.error('Error saving permissions:', error);
+
       alert('Error guardando permisos');
     } finally {
       setSavingPermissions(false);
@@ -203,7 +203,7 @@ const Usuarios = () => {
       setSelectedUserForPassword(null);
       alert('Contraseña actualizada correctamente');
     } catch (error) {
-      console.error('Error changing password:', error);
+
       setPasswordError('Error al cambiar contraseña');
     } finally {
       setSavingPassword(false);
@@ -242,7 +242,7 @@ const Usuarios = () => {
       setSelectedUserForEdit(null);
       fetchUsers();
     } catch (error) {
-      console.error('Error updating user:', error);
+
       setEditError('Error al actualizar usuario');
     } finally {
       setSavingEdit(false);
@@ -257,7 +257,7 @@ const Usuarios = () => {
       fetchUsers();
       setFormData({ email: '', password: '', full_name: '', role: 'Viewer' });
     } catch (error) {
-      console.error('Error creating user:', error);
+
       alert(t('messages.errorSaving'));
     }
   };
@@ -267,7 +267,7 @@ const Usuarios = () => {
       await api.put(`/api/auth/users/${userId}`, { is_active: !currentStatus });
       fetchUsers();
     } catch (error) {
-      console.error('Error updating user:', error);
+
     }
   };
 
@@ -277,7 +277,7 @@ const Usuarios = () => {
       fetchUsers();
       setEditingUser(null);
     } catch (error) {
-      console.error('Error updating role:', error);
+
     }
   };
 
@@ -309,7 +309,7 @@ const Usuarios = () => {
       setSelectedUserForTipoOp(null);
       fetchUsers();
     } catch (error) {
-      console.error('Error saving tipo operacion:', error);
+
       alert('Error guardando tipo de operación');
     } finally {
       setSavingTipoOp(false);
@@ -336,7 +336,7 @@ const Usuarios = () => {
       const data = await api.get('/api/auth/empleados-disponibles');
       setEmpleadosDisponibles(data.empleados || []);
     } catch (error) {
-      console.error('Error fetching empleados:', error);
+
       setEmpleadosDisponibles([]);
     }
   };
@@ -353,7 +353,7 @@ const Usuarios = () => {
       setSelectedUserForVincular(null);
       fetchUsers();
     } catch (error) {
-      console.error('Error vinculando empleado:', error);
+
       alert(error.response?.data?.detail || 'Error al vincular empleado');
     } finally {
       setSavingVinculacion(false);

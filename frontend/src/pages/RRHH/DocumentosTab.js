@@ -82,7 +82,7 @@ const DocumentosTab = ({ empleados }) => {
   
   useEffect(() => {
     fetchDocumentos();
-  }, [empleadoSeleccionado, filtroFechaDesde, filtroFechaHasta, filtroTipo, filtroEstado]);
+  }, [empleadoSeleccionado, filtroFechaDesde, filtroFechaHasta, filtroTipo, filtroEstado]); // eslint-disable-line react-hooks/exhaustive-deps
   
   const fetchDocumentos = async () => {
     try {
@@ -108,7 +108,7 @@ const DocumentosTab = ({ empleados }) => {
       const data = await api.get(url);
       setDocumentos(data.documentos || []);
     } catch (err) {
-      console.error('Error:', err);
+
     } finally {
       setLoading(false);
     }
@@ -116,7 +116,6 @@ const DocumentosTab = ({ empleados }) => {
   
   const handleCrearDocumento = async () => {
     if (!empleadoSeleccionado || !nuevoDocData.nombre) {
-      console.log('Validation failed:', { empleadoSeleccionado, nombre: nuevoDocData.nombre });
       return;
     }
     
@@ -134,18 +133,14 @@ const DocumentosTab = ({ empleados }) => {
         formData.append('requiere_firma', nuevoDocData.requiere_firma.toString());
         formData.append('fecha_creacion', new Date().toISOString().split('T')[0]);
         
-        console.log('Uploading document with file...');
         const result = await api.upload('/api/rrhh/documentos/upload', formData);
-        console.log('Upload result:', result);
       } else {
         // Sin archivo, solo crear metadatos
-        console.log('Creating document without file...');
         const result = await api.post('/api/rrhh/documentos', {
           empleado_id: empleadoSeleccionado,
           ...nuevoDocData,
           fecha_creacion: new Date().toISOString().split('T')[0]
         });
-        console.log('Create result:', result);
       }
       
       setShowNuevoDoc(false);
@@ -153,7 +148,7 @@ const DocumentosTab = ({ empleados }) => {
       removeArchivoAdjunto();
       fetchDocumentos();
     } catch (err) {
-      console.error('Error creating document:', err);
+
       alert('Error al crear el documento: ' + (err.message || 'Error desconocido'));
     } finally {
       setUploading(false);
@@ -268,7 +263,7 @@ const DocumentosTab = ({ empleados }) => {
       const url = queryString ? `/api/rrhh/documentos/export/excel?${queryString}` : '/api/rrhh/documentos/export/excel';
       await api.download(url, `documentos_rrhh_${new Date().toISOString().split('T')[0]}.xlsx`);
     } catch (err) {
-      console.error('Error exporting Excel:', err);
+
       alert('Error al exportar a Excel');
     }
   };
@@ -296,7 +291,7 @@ const DocumentosTab = ({ empleados }) => {
       const url = queryString ? `/api/rrhh/documentos/export/pdf?${queryString}` : '/api/rrhh/documentos/export/pdf';
       await api.download(url, `informe_documentos_${new Date().toISOString().split('T')[0]}.pdf`);
     } catch (err) {
-      console.error('Error generating PDF:', err);
+
       alert('Error al generar el informe PDF');
     }
   };
@@ -351,7 +346,7 @@ const DocumentosTab = ({ empleados }) => {
       setFirmaGuardada(null);
       fetchDocumentos();
     } catch (err) {
-      console.error('Error:', err);
+
     }
   };
   
@@ -362,7 +357,7 @@ const DocumentosTab = ({ empleados }) => {
       await api.delete(`/api/rrhh/documentos/${docId}`);
       fetchDocumentos();
     } catch (err) {
-      console.error('Error:', err);
+
     }
   };
   

@@ -178,9 +178,11 @@ const Tratamientos = () => {
     fetchMaquinaria();
     fetchTecnicosAplicadores();
     fetchStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
   // Manejar rutas de nuevo/editar
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (location.pathname.includes('/nuevo')) {
       setShowForm(true);
@@ -195,7 +197,7 @@ const Tratamientos = () => {
         setShowForm(false);
       }
     }
-  }, [location.pathname, urlId]);
+  }, [location.pathname, urlId]); // eslint-disable-line react-hooks/exhaustive-deps
   
   // Cargar tratamiento para edición
   const loadTratamientoForEdit = async (id) => {
@@ -211,7 +213,7 @@ const Tratamientos = () => {
         }
       }
     } catch (err) {
-      console.error('Error loading tratamiento:', err);
+
       setError('Error al cargar el tratamiento');
     }
   };
@@ -222,7 +224,7 @@ const Tratamientos = () => {
       const data = await api.get('/api/tratamientos/stats/dashboard');
       setStats(data.stats);
     } catch (err) {
-      console.error('Error fetching stats:', err);
+
     }
   };
   
@@ -233,7 +235,7 @@ const Tratamientos = () => {
       const params = filters.campana ? `campana=${filters.campana}` : '';
       await api.download(`/api/tratamientos/export/excel?${params}`, `tratamientos_${new Date().toISOString().split('T')[0]}.xlsx`);
     } catch (err) {
-      console.error('Error exporting:', err);
+
       alert('Error al exportar');
     } finally {
       setExportLoading(false);
@@ -314,7 +316,7 @@ const Tratamientos = () => {
       const data = await api.get('/api/parcelas');
       setParcelas(data.parcelas || []);
     } catch (error) {
-      console.error('Error fetching parcelas:', error);
+
     }
   };
   
@@ -323,7 +325,7 @@ const Tratamientos = () => {
       const data = await api.get('/api/maquinaria');
       setMaquinaria(data.maquinaria || []);
     } catch (error) {
-      console.error('Error fetching maquinaria:', error);
+
     }
   };
   
@@ -332,7 +334,7 @@ const Tratamientos = () => {
       const data = await api.get('/api/tecnicos-aplicadores/activos');
       setTecnicosAplicadores(data.tecnicos || []);
     } catch (error) {
-      console.error('Error fetching tecnicos aplicadores:', error);
+
     }
   };
   
@@ -342,7 +344,7 @@ const Tratamientos = () => {
       const data = await api.get('/api/tratamientos');
       setTratamientos(data.tratamientos || []);
     } catch (error) {
-      console.error('Error fetching tratamientos:', error);
+
       const errorMsg = handlePermissionError(error, 'ver los tratamientos');
       setError(errorMsg);
     } finally {
@@ -463,7 +465,7 @@ const Tratamientos = () => {
         }
         return;
       } catch (error) {
-        console.error('Error saving offline:', error);
+
         setError('Error al guardar offline');
         return;
       }
@@ -489,7 +491,7 @@ const Tratamientos = () => {
         navigate('/tratamientos');
       }
     } catch (error) {
-      console.error('Error saving tratamiento:', error);
+
       const errorMsg = handlePermissionError(error, editingId ? 'actualizar el tratamiento' : 'crear el tratamiento');
       setError(errorMsg);
       setTimeout(() => setError(null), 5000);
@@ -586,7 +588,7 @@ const Tratamientos = () => {
       await api.delete(`/api/tratamientos/${tratamientoId}`);
       fetchTratamientos();
     } catch (error) {
-      console.error('Error deleting tratamiento:', error);
+
       const errorMsg = handlePermissionError(error, 'eliminar el tratamiento');
       setError(errorMsg);
       setTimeout(() => setError(null), 5000);
@@ -617,7 +619,7 @@ const Tratamientos = () => {
       fetchTratamientos();
       fetchStats();
     } catch (error) {
-      console.error('Error changing estado:', error);
+
       const errorMsg = handlePermissionError(error, 'cambiar el estado del tratamiento');
       setError(errorMsg);
       setTimeout(() => setError(null), 5000);

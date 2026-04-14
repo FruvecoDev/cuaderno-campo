@@ -63,14 +63,14 @@ const InformesGastos = () => {
     fetchResumen();
     fetchCampanas();
     fetchFiltrosOpciones();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   
   const fetchFiltrosOpciones = async () => {
     try {
       const data = await api.get('/api/gastos/filtros-opciones');
       setFiltrosOpciones(data);
     } catch (error) {
-      console.error('Error fetching filtros opciones:', error);
+
     }
   };
   
@@ -79,7 +79,7 @@ const InformesGastos = () => {
       const data = await api.get('/api/gastos/campanas');
       setCampanas(data.campanas || []);
     } catch (error) {
-      console.error('Error fetching campanas:', error);
+
     }
   };
 
@@ -100,7 +100,7 @@ const InformesGastos = () => {
       const data = await api.get(`/api/gastos/resumen?${params}`);
       setResumen(data);
     } catch (error) {
-      console.error('Error:', error);
+
       setError(api.getErrorMessage(error));
     } finally {
       setLoading(false);
@@ -124,7 +124,7 @@ const InformesGastos = () => {
       setDetalleAlbaranes(data.albaranes || []);
       setDetalleView({ tipo, valor, total: data.total_sum });
     } catch (error) {
-      console.error('Error:', error);
+
     } finally {
       setLoadingDetalle(false);
     }
@@ -171,7 +171,7 @@ const InformesGastos = () => {
       
       await api.download(`/api/gastos/export/excel?${params}`, `informe_gastos_${new Date().toISOString().slice(0,10)}.xlsx`);
     } catch (error) {
-      console.error('Error exporting Excel:', error);
+
       setError('Error al exportar a Excel');
     } finally {
       setExportingExcel(false);
@@ -188,7 +188,7 @@ const InformesGastos = () => {
       
       await api.download(`/api/gastos/export/pdf?${params}`, `informe_gastos_${new Date().toISOString().slice(0,10)}.pdf`);
     } catch (error) {
-      console.error('Error exporting PDF:', error);
+
       setError('Error al exportar a PDF');
     } finally {
       setExportingPdf(false);
@@ -492,7 +492,7 @@ const InformesGastos = () => {
                   />
                   <Bar dataKey="total" radius={[0, 4, 4, 0]}>
                     {getChartDataProveedor().map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                      <Cell key={color} fill={entry.fill} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -520,7 +520,7 @@ const InformesGastos = () => {
                     labelLine={{ strokeWidth: 1 }}
                   >
                     {getChartDataCultivo().map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                      <Cell key={color} fill={entry.fill} />
                     ))}
                   </Pie>
                   <Tooltip formatter={(value) => formatCurrency(value)} />
@@ -549,7 +549,7 @@ const InformesGastos = () => {
                   <Tooltip formatter={(value) => formatCurrency(value)} />
                   <Bar dataKey="total" radius={[4, 4, 0, 0]}>
                     {(resumen.por_parcela?.slice(0, 10) || []).map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                      <Cell key={color} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                     ))}
                   </Bar>
                 </BarChart>

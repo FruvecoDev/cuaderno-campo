@@ -22,8 +22,8 @@ class TestCombinedExportEndpoints:
         
         # Login to get auth token
         login_response = self.session.post(f"{BASE_URL}/api/auth/login", json={
-            "email": "admin@fruveco.com",
-            "password": "admin123"
+            "email": os.environ.get("TEST_EMAIL", ""),
+            "password": os.environ.get("TEST_PASSWORD", "")
         })
         assert login_response.status_code == 200, f"Login failed: {login_response.text}"
         token = login_response.json().get("access_token")

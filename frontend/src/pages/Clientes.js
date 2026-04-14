@@ -98,7 +98,7 @@ const Clientes = () => {
     fetchTipos();
     fetchProvincias();
     fetchStats();
-  }, [searchTerm, filterTipo, filterProvincia, filterActivo]);
+  }, [searchTerm, filterTipo, filterProvincia, filterActivo]); // eslint-disable-line react-hooks/exhaustive-deps
   
   const fetchClientes = async () => {
     try {
@@ -113,7 +113,7 @@ const Clientes = () => {
       const data = await api.get(`/api/clientes?${params}`);
       setClientes(data.clientes || []);
     } catch (err) {
-      console.error('Error fetching clientes:', err);
+
       const errorMsg = handlePermissionError(err, 'ver los clientes');
       setError(errorMsg);
     } finally {
@@ -126,7 +126,7 @@ const Clientes = () => {
       const data = await api.get('/api/clientes/tipos');
       setTipos(data.tipos || []);
     } catch (err) {
-      console.error('Error fetching tipos:', err);
+
     }
   };
   
@@ -135,7 +135,7 @@ const Clientes = () => {
       const data = await api.get('/api/clientes/provincias');
       setProvincias(data.provincias || []);
     } catch (err) {
-      console.error('Error fetching provincias:', err);
+
     }
   };
   
@@ -144,7 +144,7 @@ const Clientes = () => {
       const data = await api.get('/api/clientes/stats/resumen');
       setStats(data.stats);
     } catch (err) {
-      console.error('Error fetching stats:', err);
+
     }
   };
   
@@ -153,7 +153,7 @@ const Clientes = () => {
       const params = filterActivo ? `?activo=${filterActivo === 'activos'}` : '';
       await api.download(`/api/clientes/export/excel${params}`, `clientes_${new Date().toISOString().split('T')[0]}.xlsx`);
     } catch (err) {
-      console.error('Error exporting:', err);
+
       alert('Error al exportar');
     }
   };
@@ -179,7 +179,7 @@ const Clientes = () => {
         setTimeout(() => setError(null), 5000);
       }
     } catch (err) {
-      console.error('Error saving cliente:', err);
+
       setError('Error al guardar el cliente');
       setTimeout(() => setError(null), 5000);
     }
@@ -229,7 +229,7 @@ const Clientes = () => {
       const data = await api.get(`/api/clientes/${cliente._id}/resumen-ventas`);
       setResumenVentas(data);
     } catch (err) {
-      console.error('Error fetching resumen ventas:', err);
+
       setError('Error al cargar resumen de ventas');
       setTimeout(() => setError(null), 5000);
     } finally {
@@ -247,7 +247,7 @@ const Clientes = () => {
       const data = await api.get(`/api/clientes/${cliente._id}/historial`);
       setHistorialData(data.historial);
     } catch (err) {
-      console.error('Error fetching historial:', err);
+
       setError('Error al cargar el historial');
       setTimeout(() => setError(null), 5000);
     } finally {
@@ -274,7 +274,7 @@ const Clientes = () => {
         setTimeout(() => setError(null), 5000);
       }
     } catch (err) {
-      console.error('Error deleting cliente:', err);
+
       setError('Error al eliminar el cliente');
       setTimeout(() => setError(null), 5000);
     }
@@ -285,7 +285,7 @@ const Clientes = () => {
       await api.patch(`/api/clientes/${clienteId}/toggle-activo`);
       fetchClientes();
     } catch (err) {
-      console.error('Error toggling activo:', err);
+
     }
   };
   
@@ -298,7 +298,7 @@ const Clientes = () => {
       await api.upload(`/api/clientes/${clienteId}/foto`, formDataUpload);
       fetchClientes();
     } catch (err) {
-      console.error('Error uploading foto:', err);
+
     } finally {
       setUploadingFoto(false);
     }

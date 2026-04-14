@@ -19,7 +19,7 @@ const PrenominaTab = ({ empleados }) => {
   
   useEffect(() => {
     fetchPrenominas();
-  }, [mesSeleccionado, anoSeleccionado]);
+  }, [mesSeleccionado, anoSeleccionado]); // eslint-disable-line react-hooks/exhaustive-deps
   
   // Cerrar menú de exportación al hacer clic fuera
   useEffect(() => {
@@ -38,7 +38,7 @@ const PrenominaTab = ({ empleados }) => {
       const data = await api.get(`/api/rrhh/prenominas?mes=${mesSeleccionado}&ano=${anoSeleccionado}`);
       setPrenominas(data.prenominas || []);
     } catch (err) {
-      console.error('Error:', err);
+
     } finally {
       setLoading(false);
     }
@@ -57,7 +57,7 @@ const PrenominaTab = ({ empleados }) => {
       fetchPrenominas();
       setEmpleadoCalculo('');
     } catch (err) {
-      console.error('Error:', err);
+
       alert('Error al calcular prenómina: ' + api.getErrorMessage(err));
     } finally {
       setCalculandoIndividual(false);
@@ -75,7 +75,7 @@ const PrenominaTab = ({ empleados }) => {
       });
       fetchPrenominas();
     } catch (err) {
-      console.error('Error:', err);
+
       alert('Error al calcular prenóminas: ' + api.getErrorMessage(err));
     } finally {
       setCalculando(false);
@@ -91,7 +91,7 @@ const PrenominaTab = ({ empleados }) => {
       });
       fetchPrenominas();
     } catch (err) {
-      console.error('Error:', err);
+
       alert('Error al validar: ' + api.getErrorMessage(err));
     }
   };
@@ -103,7 +103,7 @@ const PrenominaTab = ({ empleados }) => {
         `prenomina_${mesSeleccionado}_${anoSeleccionado}.xlsx`
       );
     } catch (err) {
-      console.error('Error:', err);
+
       alert('Error al exportar Excel');
     }
   };
@@ -115,7 +115,7 @@ const PrenominaTab = ({ empleados }) => {
         `prenomina_${mesSeleccionado}_${anoSeleccionado}.pdf`
       );
     } catch (err) {
-      console.error('Error:', err);
+
       alert('Error al exportar PDF');
     }
   };
@@ -137,7 +137,7 @@ const PrenominaTab = ({ empleados }) => {
       a.download = `prenominas_${anoSeleccionado}_${mesSeleccionado}.csv`;
       a.click();
     } catch (err) {
-      console.error('Error:', err);
+
     }
   };
 
@@ -151,7 +151,7 @@ const PrenominaTab = ({ empleados }) => {
         `prenominas_${meses[mesSeleccionado - 1]}_${anoSeleccionado}_${formato}.csv`
       );
     } catch (err) {
-      console.error('Error:', err);
+
       alert('Error al exportar CSV: ' + (err.message || 'Error desconocido'));
     } finally {
       setExportando(false);
@@ -167,7 +167,7 @@ const PrenominaTab = ({ empleados }) => {
         `prenominas_${meses[mesSeleccionado - 1]}_${anoSeleccionado}.xlsx`
       );
     } catch (err) {
-      console.error('Error:', err);
+
       alert('Error al exportar Excel: ' + (err.message || 'Error desconocido'));
     } finally {
       setExportando(false);
@@ -231,7 +231,7 @@ const PrenominaTab = ({ empleados }) => {
               style={{ minWidth: '150px' }}
               data-testid="select-mes-prenomina"
             >
-              {meses.map((m, idx) => <option key={idx} value={idx + 1}>{m}</option>)}
+              {meses.map((m, idx) => <option key={m} value={idx + 1}>{m}</option>)}
             </select>
           </div>
           

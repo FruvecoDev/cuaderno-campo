@@ -129,7 +129,7 @@ const Irrigaciones = () => {
       const data = await api.get('/api/irrigaciones');
       setIrrigaciones(data.irrigaciones || []);
     } catch (err) {
-      console.error('Error fetching irrigaciones:', err);
+
       setError('Error al cargar irrigaciones');
     }
     setLoading(false);
@@ -140,7 +140,7 @@ const Irrigaciones = () => {
       const data = await api.get('/api/parcelas');
       setParcelas(data.parcelas || []);
     } catch (err) {
-      console.error('Error fetching parcelas:', err);
+
     }
   };
 
@@ -149,7 +149,7 @@ const Irrigaciones = () => {
       const data = await api.get('/api/irrigaciones/stats');
       setStats(data);
     } catch (err) {
-      console.error('Error fetching stats:', err);
+
     }
   };
 
@@ -158,7 +158,7 @@ const Irrigaciones = () => {
       const data = await api.get('/api/irrigaciones/sistemas');
       setSistemas(data.sistemas || []);
     } catch (err) {
-      console.error('Error fetching sistemas:', err);
+
     }
   };
 
@@ -167,7 +167,7 @@ const Irrigaciones = () => {
       const data = await api.get('/api/cultivos');
       setCultivos(data.cultivos || []);
     } catch (err) {
-      console.error('Error fetching cultivos:', err);
+
     }
   };
 
@@ -177,7 +177,7 @@ const Irrigaciones = () => {
       setHistorialData(data);
       setShowHistorial(parcelaId);
     } catch (err) {
-      console.error('Error fetching historial:', err);
+
     }
   };
 
@@ -274,7 +274,7 @@ const Irrigaciones = () => {
       fetchIrrigaciones();
       fetchStats();
     } catch (err) {
-      console.error('Error saving irrigacion:', err);
+
     }
   };
 
@@ -347,7 +347,7 @@ const Irrigaciones = () => {
       fetchIrrigaciones();
       fetchStats();
     } catch (err) {
-      console.error('Error deleting irrigacion:', err);
+
     }
   };
 
@@ -361,7 +361,7 @@ const Irrigaciones = () => {
       
       await api.download(`/api/irrigaciones/export/excel?${params}`, `irrigaciones_${new Date().toISOString().split('T')[0]}.xlsx`);
     } catch (err) {
-      console.error('Error exporting:', err);
+
     }
   };
 
@@ -375,7 +375,7 @@ const Irrigaciones = () => {
         consumo_por_ha: data.consumo_por_ha
       });
     } catch (err) {
-      console.error('Error calculando consumo:', err);
+
     }
   };
 

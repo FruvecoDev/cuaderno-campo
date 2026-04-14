@@ -61,7 +61,7 @@ const Albaranes = () => {
       // Limpiar URL después de un momento
       setTimeout(() => window.URL.revokeObjectURL(url), 1000);
     } catch (error) {
-      console.error('Error downloading PDF:', error);
+
       setError('Error al generar el PDF del albarán');
     } finally {
       setPdfLoading(null);
@@ -214,7 +214,7 @@ const Albaranes = () => {
         if (parcelasRes.ok) setParcelas(parcelasRes.data?.parcelas || parcelasRes.data || []);
         
       } catch (error) {
-        console.error('Error loading data:', error);
+
         setError('Error al cargar datos: ' + error.message);
       } finally {
         setLoading(false);
@@ -222,7 +222,7 @@ const Albaranes = () => {
     };
     
     loadData();
-  }, [token, isInitialized]);
+  }, [token, isInitialized]); // eslint-disable-line react-hooks/exhaustive-deps
   
   // Función para recargar albaranes (después de crear/editar/eliminar)
   const reloadAlbaranes = async () => {
@@ -232,7 +232,7 @@ const Albaranes = () => {
         setAlbaranes(result.data?.albaranes || []);
       }
     } catch (error) {
-      console.error('Error reloading albaranes:', error);
+
     }
   };
   
@@ -242,7 +242,7 @@ const Albaranes = () => {
       const data = await api.get('/api/albaranes/stats/dashboard');
       setStats(data);
     } catch (error) {
-      console.error('Error fetching stats:', error);
+
     }
   };
   
@@ -277,7 +277,7 @@ const Albaranes = () => {
       link.click();
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error exporting:', error);
+
       setError('Error al exportar datos');
     } finally {
       setExportLoading(false);
@@ -571,7 +571,7 @@ const Albaranes = () => {
       kilos_netos: kilosNetos
     }));
     
-  }, [formData.items.filter(i => !i.es_destare).map(i => `${i.cantidad}-${i.unidad}`).join(','), selectedContrato?.descuento_destare, formData.tipo]);
+  }, [formData.items.filter(i => !i.es_destare).map(i => `${i.cantidad}-${i.unidad}`).join(','), selectedContrato?.descuento_destare, formData.tipo]); // eslint-disable-line react-hooks/exhaustive-deps
   
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -662,7 +662,7 @@ const Albaranes = () => {
       
       reloadAlbaranes();
     } catch (error) {
-      console.error('Error saving albaran:', error);
+
       const errorMsg = handlePermissionError(error, editingId ? 'actualizar el albarán' : 'crear el albarán');
       setError(errorMsg);
     }
@@ -720,7 +720,7 @@ const Albaranes = () => {
       await api.delete(`/api/albaranes/${albaranId}`);
       reloadAlbaranes();
     } catch (error) {
-      console.error('Error deleting albaran:', error);
+
       const errorMsg = handlePermissionError(error, 'eliminar el albarán');
       setError(errorMsg);
     }

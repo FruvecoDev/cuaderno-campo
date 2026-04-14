@@ -6,7 +6,6 @@ export function register() {
       navigator.serviceWorker
         .register(swUrl)
         .then((registration) => {
-          console.log('SW registered:', registration.scope);
 
           registration.onupdatefound = () => {
             const installingWorker = registration.installing;
@@ -15,16 +14,14 @@ export function register() {
             installingWorker.onstatechange = () => {
               if (installingWorker.state === 'installed') {
                 if (navigator.serviceWorker.controller) {
-                  console.log('New content available; please refresh.');
                 } else {
-                  console.log('Content cached for offline use.');
                 }
               }
             };
           };
         })
         .catch((error) => {
-          console.error('SW registration failed:', error);
+
         });
     });
   }

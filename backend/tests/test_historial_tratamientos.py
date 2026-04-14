@@ -20,8 +20,8 @@ class TestHistorialTratamientosEndpoint:
         
         # Login to get token
         login_response = self.session.post(f"{BASE_URL}/api/auth/login", json={
-            "email": "admin@fruveco.com",
-            "password": "admin123"
+            "email": os.environ.get("TEST_EMAIL", ""),
+            "password": os.environ.get("TEST_PASSWORD", "")
         })
         assert login_response.status_code == 200, f"Login failed: {login_response.text}"
         data = login_response.json()
@@ -164,8 +164,8 @@ class TestParcelasEndpointRegression:
         self.session.headers.update({"Content-Type": "application/json"})
         
         login_response = self.session.post(f"{BASE_URL}/api/auth/login", json={
-            "email": "admin@fruveco.com",
-            "password": "admin123"
+            "email": os.environ.get("TEST_EMAIL", ""),
+            "password": os.environ.get("TEST_PASSWORD", "")
         })
         assert login_response.status_code == 200
         data = login_response.json()

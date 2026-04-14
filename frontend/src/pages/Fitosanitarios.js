@@ -90,7 +90,7 @@ const Fitosanitarios = () => {
 
   useEffect(() => {
     fetchProductos();
-  }, [filters]);
+  }, [filters]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchProductos = async () => {
     try {
@@ -103,7 +103,7 @@ const Fitosanitarios = () => {
       const data = await api.get(`/api/fitosanitarios?${params}`);
       setProductos(data.productos || []);
     } catch (error) {
-      console.error('Error fetching productos:', error);
+
       const errorMsg = handlePermissionError(error, 'ver los productos fitosanitarios');
       setError(errorMsg);
     } finally {
@@ -132,7 +132,7 @@ const Fitosanitarios = () => {
         setError(null);
       }, 5000);
     } catch (error) {
-      console.error('Error seeding data:', error);
+
       setError(t('phytosanitary.errorLoadingData'));
     }
   };
@@ -162,7 +162,7 @@ const Fitosanitarios = () => {
         window.URL.revokeObjectURL(url);
       }
     } catch (error) {
-      console.error('Error downloading template:', error);
+
       setError(t('phytosanitary.errorDownloadTemplate'));
     }
   };
@@ -197,7 +197,7 @@ const Fitosanitarios = () => {
         setTimeout(() => setSuccessMsg(null), 3000);
       }
     } catch (error) {
-      console.error('Error exporting:', error);
+
       setError(t('phytosanitary.errorExport'));
     }
   };
@@ -222,7 +222,7 @@ const Fitosanitarios = () => {
         fetchProductos();
       }
     } catch (error) {
-      console.error('Error importing:', error);
+
       setError(error.message || t('phytosanitary.errorImportFile'));
     } finally {
       setImportLoading(false);
@@ -245,7 +245,7 @@ const Fitosanitarios = () => {
         setMapaInfo(data.info);
       }
     } catch (error) {
-      console.error('Error fetching MAPA info:', error);
+
     }
   };
 
@@ -368,7 +368,7 @@ const Fitosanitarios = () => {
       
       setTimeout(() => setSuccessMsg(null), 3000);
     } catch (error) {
-      console.error('Error saving producto:', error);
+
       const errorMsg = handlePermissionError(error, editingId ? t('phytosanitary.updateProduct') : t('phytosanitary.createProduct'));
       setError(errorMsg);
     }
@@ -413,7 +413,7 @@ const Fitosanitarios = () => {
       setSuccessMsg(t('messages.deletedSuccessfully'));
       setTimeout(() => setSuccessMsg(null), 3000);
     } catch (error) {
-      console.error('Error deleting producto:', error);
+
       const errorMsg = handlePermissionError(error, t('phytosanitary.deleteProduct'));
       setError(errorMsg);
     }

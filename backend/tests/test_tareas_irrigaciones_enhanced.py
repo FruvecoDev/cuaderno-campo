@@ -16,8 +16,8 @@ BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 def auth_headers():
     """Get authentication token"""
     response = requests.post(f"{BASE_URL}/api/auth/login", json={
-        "email": "admin@fruveco.com",
-        "password": "admin123"
+        "email": os.environ.get("TEST_EMAIL", ""),
+        "password": os.environ.get("TEST_PASSWORD", "")
     })
     assert response.status_code == 200, f"Login failed: {response.text}"
     token = response.json().get("access_token")

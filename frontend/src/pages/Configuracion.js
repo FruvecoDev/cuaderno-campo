@@ -475,7 +475,7 @@ const SchedulerConfig = ({ token }) => {
         roles_notificar: ['Admin', 'Manager', 'Technician']
       });
     } catch (err) {
-      console.error('Error fetching scheduler config:', err);
+
     } finally {
       setLoading(false);
     }
@@ -486,7 +486,7 @@ const SchedulerConfig = ({ token }) => {
       const data = await api.get('/api/notificaciones/scheduler/status');
       setStatus(data);
     } catch (err) {
-      console.error('Error fetching scheduler status:', err);
+
     }
   };
 
@@ -736,7 +736,7 @@ const Configuracion = () => {
     fetchLogos();
     fetchTheme();
     fetchThemes();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchLogos = async () => {
     try {
@@ -745,7 +745,7 @@ const Configuracion = () => {
         setLogos({ login_logo: data.login_logo, dashboard_logo: data.dashboard_logo });
       }
     } catch (err) {
-      console.error('Error fetching logos:', err);
+
     }
   };
 
@@ -757,7 +757,7 @@ const Configuracion = () => {
         applyThemeToDOM(data.primary, data.accent);
       }
     } catch (err) {
-      console.error('Error fetching theme:', err);
+
     } finally {
       setLoading(false);
     }
@@ -770,7 +770,7 @@ const Configuracion = () => {
         setThemes(data.themes);
       }
     } catch (err) {
-      console.error('Error fetching themes:', err);
+
     }
   };
 

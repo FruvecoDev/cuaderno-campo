@@ -25,14 +25,13 @@ class OfflineDB {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
 
       request.onerror = () => {
-        console.error('Error opening IndexedDB:', request.error);
+
         reject(request.error);
       };
 
       request.onsuccess = () => {
         this.db = request.result;
         this.isReady = true;
-        console.log('IndexedDB initialized successfully');
         resolve(this.db);
       };
 
@@ -68,7 +67,6 @@ class OfflineDB {
           db.createObjectStore(STORES.SYNC_STATUS, { keyPath: 'key' });
         }
 
-        console.log('IndexedDB stores created');
       };
     });
   }
@@ -163,10 +161,9 @@ class OfflineDB {
         value: new Date().toISOString()
       });
 
-      console.log('Reference data cached successfully');
       return true;
     } catch (error) {
-      console.error('Error caching reference data:', error);
+
       return false;
     }
   }
@@ -205,7 +202,6 @@ class OfflineDB {
       const request = store.add(item);
 
       request.onsuccess = () => {
-        console.log(`Added ${type} to pending sync queue`);
         resolve(request.result);
       };
       request.onerror = () => reject(request.error);

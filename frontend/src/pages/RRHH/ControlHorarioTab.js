@@ -72,7 +72,7 @@ const ControlHorarioTab = ({ empleados }) => {
       setFichajesHoy(data);
       setFichajes(data.fichajes || []);
     } catch (err) {
-      console.error('Error fetching fichajes:', err);
+
     } finally {
       setLoading(false);
     }
@@ -100,7 +100,7 @@ const ControlHorarioTab = ({ empleados }) => {
         setFichajeResult(null);
       }, 2000);
     } catch (err) {
-      console.error('Error fichando:', err);
+
       setFichajeResult({ success: false, error: api.getErrorMessage(err) });
     }
   };
@@ -133,7 +133,7 @@ const ControlHorarioTab = ({ empleados }) => {
       }
     }
     if (error && error?.message !== 'No QR code found') {
-      console.error('QR Error:', error);
+
     }
   };
   
@@ -147,7 +147,7 @@ const ControlHorarioTab = ({ empleados }) => {
         setCameraActive(true);
       }
     } catch (err) {
-      console.error('Error accessing camera:', err);
+
       setScanError('No se pudo acceder a la cámara');
     }
   };
@@ -263,7 +263,7 @@ const ControlHorarioTab = ({ empleados }) => {
         `control_horario_${informeFechaDesde}_${informeFechaHasta}.xlsx`
       );
     } catch (err) {
-      console.error('Error exporting:', err);
+
       alert('Error al exportar el informe');
     }
   };
@@ -283,7 +283,7 @@ const ControlHorarioTab = ({ empleados }) => {
         `control_horario_${informeFechaDesde}_${informeFechaHasta}.pdf`
       );
     } catch (err) {
-      console.error('Error exporting:', err);
+
       alert('Error al generar el informe PDF');
     }
   };

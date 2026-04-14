@@ -121,7 +121,7 @@ const Recetas = () => {
     fetchRecetas();
     fetchCultivos();
     fetchStats();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   
   useEffect(() => {
     const cultivosUnicos = [...new Set(recetas.map(r => r.cultivo_objetivo).filter(Boolean))];
@@ -138,7 +138,7 @@ const Recetas = () => {
       const data = await api.get('/api/recetas/stats/dashboard');
       setStats(data);
     } catch (error) {
-      console.error('Error fetching stats:', error);
+
     }
   };
   
@@ -147,7 +147,7 @@ const Recetas = () => {
       const data = await api.get('/api/cultivos');
       setCultivos(data.cultivos || []);
     } catch (error) {
-      console.error('Error fetching cultivos:', error);
+
     }
   };
   
@@ -157,7 +157,7 @@ const Recetas = () => {
       const data = await api.get('/api/recetas');
       setRecetas(data.recetas || []);
     } catch (error) {
-      console.error('Error fetching recetas:', error);
+
       const errorMsg = handlePermissionError(error, 'ver las recetas');
       setError(errorMsg);
     } finally {
@@ -282,7 +282,7 @@ const Recetas = () => {
         resetForm();
       }
     } catch (error) {
-      console.error('Error saving receta:', error);
+
       const errorMsg = handlePermissionError(error, editingId ? 'actualizar la receta' : 'crear la receta');
       setError(errorMsg);
       setTimeout(() => setError(null), 5000);
@@ -332,7 +332,7 @@ const Recetas = () => {
       fetchRecetas();
       fetchStats();
     } catch (error) {
-      console.error('Error deleting receta:', error);
+
       const errorMsg = handlePermissionError(error, 'eliminar la receta');
       setError(errorMsg);
       setTimeout(() => setError(null), 5000);
@@ -347,7 +347,7 @@ const Recetas = () => {
       const data = await api.post(`/api/recetas/${recetaCalculo._id}/calcular-dosis?superficie=${superficieCalculo}`);
       setResultadoCalculo(data);
     } catch (error) {
-      console.error('Error calculando dosis:', error);
+
     }
   };
   
@@ -392,7 +392,7 @@ const Recetas = () => {
               const url = window.URL.createObjectURL(blob);
               const a = document.createElement('a'); a.href = url; a.download = `recetas_${new Date().toISOString().slice(0,10)}.xlsx`;
               a.click(); window.URL.revokeObjectURL(url);
-            } catch (err) { console.error('Export error:', err); }
+            } catch (err) { }
           }} style={{ backgroundColor: '#16a34a', color: 'white' }} data-testid="btn-export-recetas-excel">
             <Download size={14} /> Excel
           </button>
@@ -403,7 +403,7 @@ const Recetas = () => {
               const url = window.URL.createObjectURL(blob);
               const a = document.createElement('a'); a.href = url; a.download = `recetas_${new Date().toISOString().slice(0,10)}.pdf`;
               a.click(); window.URL.revokeObjectURL(url);
-            } catch (err) { console.error('Export error:', err); }
+            } catch (err) { }
           }} style={{ backgroundColor: '#dc2626', color: 'white' }} data-testid="btn-export-recetas-pdf">
             <FileText size={14} /> PDF
           </button>

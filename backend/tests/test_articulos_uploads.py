@@ -17,8 +17,8 @@ BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://campo-export-pro.pre
 def auth_token():
     """Get authentication token"""
     response = requests.post(f"{BASE_URL}/api/auth/login", json={
-        "email": "admin@fruveco.com",
-        "password": "admin123"
+        "email": os.environ.get("TEST_EMAIL", ""),
+        "password": os.environ.get("TEST_PASSWORD", "")
     })
     
     if response.status_code != 200:

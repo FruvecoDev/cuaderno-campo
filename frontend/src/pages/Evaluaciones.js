@@ -120,34 +120,34 @@ const Evaluaciones = () => {
       setShowForm(true);
       setSearchParams({});
     }
-  }, [parcelas, searchParams]);
+  }, [parcelas, searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (showForm && !editingId) initializeRespuestas();
-  }, [showForm, customPreguntas]);
+  }, [showForm, customPreguntas]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchEvaluaciones = async () => {
     try {
       setLoading(true);
       const data = await api.get('/api/evaluaciones');
       setEvaluaciones(Array.isArray(data) ? data : []);
-    } catch (error) { console.error('Error:', error); setError('Error al cargar evaluaciones'); }
+    } catch (error) { setError('Error al cargar evaluaciones'); }
     finally { setLoading(false); }
   };
 
   const fetchParcelas = async () => {
     try { const data = await api.get('/api/parcelas?limit=1000'); setParcelas(Array.isArray(data) ? data : data?.parcelas || []); }
-    catch (error) { console.error('Error:', error); }
+    catch (error) { }
   };
 
   const fetchContratos = async () => {
     try { const data = await api.get('/api/contratos?limit=1000'); setContratos(Array.isArray(data) ? data : data?.contratos || []); }
-    catch (error) { console.error('Error:', error); }
+    catch (error) { }
   };
 
   const fetchPreguntasConfig = async () => {
     try { const data = await api.get('/api/evaluaciones/config/preguntas'); setCustomPreguntas(data?.preguntas || {}); }
-    catch (error) { console.error('Error loading custom questions:', error); }
+    catch (error) { }
   };
 
   const getPreguntasSeccion = (seccion) => {
@@ -256,7 +256,7 @@ const Evaluaciones = () => {
       setEditingId(null);
       resetForm();
     } catch (error) {
-      console.error('Error saving:', error);
+
       if (error.response?.status === 403) handlePermissionError(error);
       else setError('Error al guardar la evaluacion');
       setTimeout(() => setError(null), 5000);
@@ -318,12 +318,12 @@ const Evaluaciones = () => {
     if (!canDelete) { setError('No tienes permisos para eliminar'); return; }
     if (!window.confirm(t('evaluations.confirmDelete'))) return;
     try { await api.delete(`/api/evaluaciones/${id}`); fetchEvaluaciones(); }
-    catch (error) { console.error('Error deleting:', error); setError('Error al eliminar'); setTimeout(() => setError(null), 5000); }
+    catch (error) { setError('Error al eliminar'); setTimeout(() => setError(null), 5000); }
   };
 
   const handleDownloadPDF = async (id) => {
     try { await api.download(`/api/evaluaciones/${id}/pdf`, `evaluacion_${id}.pdf`); }
-    catch (error) { console.error('Error downloading PDF:', error); }
+    catch (error) { }
   };
 
   const handleAddQuestion = async () => {
@@ -334,7 +334,7 @@ const Evaluaciones = () => {
       setNewQuestionText('');
       setNewQuestionType('texto');
       setShowAddQuestion(false);
-    } catch (error) { console.error('Error:', error); setError('Error al agregar la pregunta'); setTimeout(() => setError(null), 5000); }
+    } catch (error) { setError('Error al agregar la pregunta'); setTimeout(() => setError(null), 5000); }
   };
 
   const handleDeleteQuestion = async (preguntaId, seccion) => {
@@ -342,7 +342,7 @@ const Evaluaciones = () => {
     try {
       await api.delete(`/api/evaluaciones/config/preguntas/${preguntaId}`);
       fetchPreguntasConfig();
-    } catch (error) { console.error('Error:', error); setError('Error al eliminar la pregunta'); setTimeout(() => setError(null), 5000); }
+    } catch (error) { setError('Error al eliminar la pregunta'); setTimeout(() => setError(null), 5000); }
   };
 
   const handleDuplicateQuestion = (pregunta, seccion) => {
@@ -364,7 +364,7 @@ const Evaluaciones = () => {
     setCustomPreguntas(prev => ({ ...prev, [seccionKey]: customOnly }));
     try {
       await api.post('/api/evaluaciones/config/preguntas/reorder', { seccion: seccionKey, order: reordered.map(p => p.id) });
-    } catch (error) { console.error('Error reordering:', error); }
+    } catch (error) { }
   };
 
   const getEstadoBadge = (estado) => {
@@ -383,7 +383,7 @@ const Evaluaciones = () => {
       setError(null);
       await api.patch(`/api/evaluaciones/${evaluacionId}/estado?estado=${nuevoEstado}`);
       fetchEvaluaciones();
-    } catch (error) { console.error('Error:', error); setError('Error al cambiar estado'); setTimeout(() => setError(null), 5000); }
+    } catch (error) { setError('Error al cambiar estado'); setTimeout(() => setError(null), 5000); }
   };
 
   return (
@@ -392,10 +392,10 @@ const Evaluaciones = () => {
         <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>{t('evaluations.title')}</h1>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <button className="btn btn-secondary" data-testid="btn-export-excel-evaluaciones"
-            onClick={async () => { try { await api.download('/api/evaluaciones/export/excel', `evaluaciones_${new Date().toISOString().split('T')[0]}.xlsx`); } catch (err) { console.error(err); } }}
+            onClick={async () => { try { await api.download('/api/evaluaciones/export/excel', `evaluaciones_${new Date().toISOString().split('T')[0]}.xlsx`); } catch (err) { } }}
             title="Exportar Excel"><Download size={16} /> Excel</button>
           <button className="btn btn-secondary" data-testid="btn-export-pdf-evaluaciones"
-            onClick={async () => { try { await api.download('/api/evaluaciones/export/pdf', `evaluaciones_${new Date().toISOString().split('T')[0]}.pdf`); } catch (err) { console.error(err); } }}
+            onClick={async () => { try { await api.download('/api/evaluaciones/export/pdf', `evaluaciones_${new Date().toISOString().split('T')[0]}.pdf`); } catch (err) { } }}
             title="Exportar PDF"><FileText size={16} /> PDF</button>
           {(user?.role === 'Admin' || user?.role === 'Manager') && (
             <button className="btn btn-secondary" onClick={() => setShowAddQuestion(true)} title={t('evaluations.addCustomQuestion')}>

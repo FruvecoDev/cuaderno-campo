@@ -36,7 +36,7 @@ export const useColumnConfig = (storageKey, defaultColumns) => {
         localStorage.setItem(storageKey, JSON.stringify(merged));
       }
     }).catch(() => { /* use localStorage fallback */ });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const save = () => {
     localStorage.setItem(storageKey, JSON.stringify(columns));

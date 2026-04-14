@@ -30,7 +30,7 @@ const parseWKTPolygon = (wkt) => {
     
     return coords;
   } catch (e) {
-    console.error('Error parsing WKT:', e);
+
     return null;
   }
 };
@@ -102,7 +102,7 @@ const FitBounds = ({ coords }) => {
           const bounds = L.latLngBounds(coords);
           map.fitBounds(bounds, { padding: [50, 50], maxZoom: 18 });
         } catch (e) {
-          console.debug('FitBounds skipped:', e.message);
+          
         }
       }
     };
@@ -134,7 +134,7 @@ const FlyToLocation = ({ center, zoom }) => {
         try {
           map.flyTo(center, zoom || 16, { duration: 1.5 });
         } catch (e) {
-          console.debug('FlyTo skipped:', e.message);
+          
         }
       }
     };

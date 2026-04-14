@@ -77,7 +77,7 @@ const AsistenteIA = () => {
       const data = await api.get('/api/ai/parcelas-for-suggestions');
       setParcelas(data.parcelas || []);
     } catch (err) {
-      console.error('Error fetching parcelas:', err);
+
     }
   };
 
@@ -86,7 +86,7 @@ const AsistenteIA = () => {
       const data = await api.get('/api/ai/contratos-for-predictions');
       setContratos(data.contratos || []);
     } catch (err) {
-      console.error('Error fetching contratos:', err);
+
     }
   };
 
@@ -96,7 +96,7 @@ const AsistenteIA = () => {
       const data = await api.get('/api/ai/dashboard');
       setDashboardData(data);
     } catch (err) {
-      console.error('Error fetching AI dashboard:', err);
+
     } finally {
       setLoadingDashboard(false);
     }
@@ -110,7 +110,7 @@ const AsistenteIA = () => {
         setSelectedReport(data.report);
       }
     } catch (err) {
-      console.error('Error fetching report detail:', err);
+
     } finally {
       setLoadingReport(false);
     }
@@ -122,7 +122,7 @@ const AsistenteIA = () => {
       const data = await api.get('/api/ai/chat/sessions');
       setChatSessions(data.sessions || []);
     } catch (err) {
-      console.error('Error fetching chat sessions:', err);
+
     }
   };
 
@@ -132,7 +132,7 @@ const AsistenteIA = () => {
       const data = await api.get(`/api/ai/chat/history/${sessionId}`);
       setChatMessages(data.messages || []);
     } catch (err) {
-      console.error('Error loading chat history:', err);
+
     }
   };
 
@@ -193,7 +193,7 @@ const AsistenteIA = () => {
         startNewChat();
       }
     } catch (err) {
-      console.error('Error deleting session:', err);
+
     }
   };
 
@@ -738,7 +738,7 @@ const AsistenteIA = () => {
                             <Shield size={14} /> Precauciones:
                           </strong>
                           <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
-                            {sug.precauciones.map((p, i) => <li key={i}>{p}</li>)}
+                            {sug.precauciones.map((p, i) => <li key={`${p}-${i}`}>{p}</li>)}
                           </ul>
                         </div>
                       )}

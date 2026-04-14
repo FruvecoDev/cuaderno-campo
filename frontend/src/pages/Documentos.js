@@ -10,13 +10,14 @@ const Documentos = () => {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchDocumentos(); }, []);
   
   const fetchDocumentos = async () => {
     try {
       const data = await api.get('/api/documentos');
       setDocumentos(data.documentos || []);
-    } catch (err) { console.error(err); }
+    } catch (err) { }
     setLoading(false);
   };
   
@@ -33,7 +34,7 @@ const Documentos = () => {
       
       await api.upload('/api/documentos/upload', formData);
       fetchDocumentos();
-    } catch (err) { console.error(err); }
+    } catch (err) { }
     setUploading(false);
   };
   

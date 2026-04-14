@@ -20,8 +20,8 @@ class TestAISuggestionsEndpoints:
         
         # Login to get token
         login_response = self.session.post(f"{BASE_URL}/api/auth/login", json={
-            "email": "admin@fruveco.com",
-            "password": "admin123"
+            "email": os.environ.get("TEST_EMAIL", ""),
+            "password": os.environ.get("TEST_PASSWORD", "")
         })
         if login_response.status_code == 200:
             token = login_response.json().get("access_token")

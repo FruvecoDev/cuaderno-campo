@@ -127,7 +127,7 @@ const TecnicosAplicadores = () => {
   useEffect(() => {
     fetchTecnicos();
     fetchNiveles();
-  }, [searchTerm, filterNivel, filterActivo]);
+  }, [searchTerm, filterNivel, filterActivo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchTecnicos = async () => {
     try {
@@ -151,7 +151,7 @@ const TecnicosAplicadores = () => {
       const data = await api.get('/api/tecnicos-aplicadores/niveles');
       setNivelesCapacitacion(data.niveles || []);
     } catch (err) {
-      console.error('Error fetching niveles:', err);
+
     }
   };
 
@@ -183,11 +183,9 @@ const TecnicosAplicadores = () => {
 
   const uploadCertificado = async (tecnicoId) => {
     if (!selectedFile) {
-      console.log('No file selected for upload');
       return;
     }
     
-    console.log('Uploading certificate for tecnico:', tecnicoId);
     
     setUploading(true);
     try {
@@ -195,9 +193,8 @@ const TecnicosAplicadores = () => {
       formDataFile.append('file', selectedFile);
       
       await api.upload(`/api/tecnicos-aplicadores/${tecnicoId}/certificado`, formDataFile);
-      console.log('Certificate uploaded successfully');
     } catch (err) {
-      console.error('Error uploading certificado:', err);
+
       setError('Error al subir el certificado');
       setTimeout(() => setError(null), 5000);
     } finally {
@@ -253,7 +250,7 @@ const TecnicosAplicadores = () => {
       await api.put(`/api/tecnicos-aplicadores/${id}/toggle-activo`);
       fetchTecnicos();
     } catch (err) {
-      console.error('Error toggling activo:', err);
+
     }
   };
 
@@ -330,7 +327,7 @@ const TecnicosAplicadores = () => {
             onClick={async () => {
               try {
                 await api.download('/api/tecnicos-aplicadores/export/excel', `tecnicos_aplicadores_${new Date().toISOString().split('T')[0]}.xlsx`);
-              } catch (err) { console.error('Error exporting Excel:', err); }
+              } catch (err) { }
             }}
             title="Exportar Excel"
           >
@@ -342,7 +339,7 @@ const TecnicosAplicadores = () => {
             onClick={async () => {
               try {
                 await api.download('/api/tecnicos-aplicadores/export/pdf', `tecnicos_aplicadores_${new Date().toISOString().split('T')[0]}.pdf`);
-              } catch (err) { console.error('Error exporting PDF:', err); }
+              } catch (err) { }
             }}
             title="Exportar PDF"
           >

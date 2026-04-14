@@ -16,8 +16,8 @@ import os
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 
 # Test credentials
-TEST_EMAIL = "admin@fruveco.com"
-TEST_PASSWORD = "admin123"
+TEST_EMAIL = os.environ.get("TEST_EMAIL", "")
+TEST_PASSWORD = os.environ.get("TEST_PASSWORD", "")
 
 # Known test evaluation ID
 TEST_EVALUACION_ID = "699c840545f8bd67a001229a"

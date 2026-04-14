@@ -62,13 +62,13 @@ const DashboardAlertasWidget = () => {
 
   const fetchAlertas = async () => {
     try { const data = await api.get('/api/alertas/resumen'); setAlertas(data); }
-    catch (err) { console.error('Error fetching alerts:', err); }
+    catch (err) { }
     finally { setLoading(false); }
   };
 
   const fetchTareasExistentes = async () => {
     try { const data = await api.get('/api/alertas/tareas-existentes'); setTareasExistentes(data.tareas_existentes || []); }
-    catch (err) { console.error('Error fetching existing tasks:', err); }
+    catch (err) { }
   };
 
   const handleCrearTarea = async (item) => {
@@ -83,7 +83,7 @@ const DashboardAlertasWidget = () => {
       if (res.success) {
         fetchTareasExistentes();
       }
-    } catch (err) { console.error('Error creating task:', err); }
+    } catch (err) { }
     finally { setCreatingTask(false); }
   };
 

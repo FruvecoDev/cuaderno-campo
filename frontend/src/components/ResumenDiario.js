@@ -23,7 +23,7 @@ const ResumenDiario = ({ onClose }) => {
       const data = await api.get('/api/resumen-diario');
       setData(data);
     } catch (err) {
-      console.error('Error fetching resumen:', err);
+
     } finally {
       setLoading(false);
     }

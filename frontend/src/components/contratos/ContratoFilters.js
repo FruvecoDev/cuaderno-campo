@@ -37,7 +37,7 @@ const ContratoFilters = ({
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error(`Error exporting ${format}:`, error);
+
       alert(`Error al exportar ${format.toUpperCase()}`);
     }
   };

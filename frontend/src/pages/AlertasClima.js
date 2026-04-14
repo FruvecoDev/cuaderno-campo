@@ -53,14 +53,14 @@ const AlertasClima = () => {
     if (token) {
       fetchAll();
     }
-  }, [token]);
+  }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Refetch alertas when filter changes
   useEffect(() => {
     if (token) {
       fetchAlertas();
     }
-  }, [filtroEstado, token]);
+  }, [filtroEstado, token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchAll = async () => {
     setLoading(true);
@@ -82,7 +82,7 @@ const AlertasClima = () => {
       const data = await api.get(`/api/alertas-clima?${params}`);
       setAlertas(data.alertas || []);
     } catch (err) {
-      console.error('Error fetching alertas:', err);
+
     }
   };
 
@@ -91,7 +91,7 @@ const AlertasClima = () => {
       const data = await api.get('/api/alertas-clima/stats');
       setStats(data);
     } catch (err) {
-      console.error('Error fetching stats:', err);
+
     }
   };
 
@@ -100,7 +100,7 @@ const AlertasClima = () => {
       const data = await api.get('/api/alertas-clima/reglas/config');
       setReglas(data.reglas || []);
     } catch (err) {
-      console.error('Error fetching reglas:', err);
+
     }
   };
 

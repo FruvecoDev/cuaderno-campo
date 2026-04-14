@@ -114,7 +114,7 @@ const Fincas = () => {
       const data = await api.get('/api/fincas');
       setFincas(data.fincas || []);
     } catch (err) {
-      console.error('Error fetching fincas:', err);
+
     }
     setLoading(false);
   };
@@ -124,7 +124,7 @@ const Fincas = () => {
       const data = await api.get('/api/fincas/stats');
       setStats(data);
     } catch (err) {
-      console.error('Error fetching stats:', err);
+
     }
   };
 
@@ -135,7 +135,7 @@ const Fincas = () => {
         setProvincias(data.provincias);
       }
     } catch (err) {
-      console.error('Error fetching provincias:', err);
+
     }
   };
 
@@ -144,7 +144,7 @@ const Fincas = () => {
       const data = await api.get('/api/parcelas');
       setParcelas(data.parcelas || data || []);
     } catch (err) {
-      console.error('Error fetching parcelas:', err);
+
     }
   };
 
@@ -154,7 +154,7 @@ const Fincas = () => {
       const data = await api.get('/api/fincas/parcelas-disponibles');
       setParcelasDisponibles(data.parcelas || []);
     } catch (err) {
-      console.error('Error fetching parcelas disponibles:', err);
+
       // Fallback: filtrar manualmente
       const asignadas = fincas.flatMap(f => f.parcelas_ids || []);
       const disponibles = parcelas.filter(p => !asignadas.includes(p._id));
@@ -209,7 +209,7 @@ const Fincas = () => {
         setSigpacError(data.message || data.error || 'Error al consultar SIGPAC');
       }
     } catch (err) {
-      console.error('Error consultando SIGPAC:', err);
+
       setSigpacError('Error de conexión al servicio SIGPAC');
     }
     
@@ -299,7 +299,7 @@ const Fincas = () => {
       fetchFincas();
       fetchStats();
     } catch (err) {
-      console.error('Error saving finca:', err);
+
       alert('Error al guardar la finca');
     }
   };
@@ -350,7 +350,7 @@ const Fincas = () => {
       fetchFincas();
       fetchStats();
     } catch (err) {
-      console.error('Error deleting finca:', err);
+
     }
   };
 
@@ -362,7 +362,7 @@ const Fincas = () => {
       fetchParcelasDisponibles();
       fetchParcelas();
     } catch (err) {
-      console.error('Error asignando parcela:', err);
+
       alert(err.message || 'Error al asignar parcela');
     }
   };
@@ -377,7 +377,7 @@ const Fincas = () => {
       fetchParcelasDisponibles();
       fetchParcelas();
     } catch (err) {
-      console.error('Error desasignando parcela:', err);
+
     }
   };
 

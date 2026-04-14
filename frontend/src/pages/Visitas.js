@@ -88,6 +88,7 @@ const Visitas = () => {
   const [analyzingAll, setAnalyzingAll] = useState(false);
   const [showAnalysisModal, setShowAnalysisModal] = useState(null);
   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchVisitas(); fetchParcelas(); }, []);
   
   useEffect(() => {
@@ -108,6 +109,7 @@ const Visitas = () => {
   useEffect(() => { localStorage.setItem('visitas_fields_config', JSON.stringify(fieldsConfig)); }, [fieldsConfig]);
   useEffect(() => { localStorage.setItem('visitas_table_config', JSON.stringify(tableConfig)); }, [tableConfig]);
   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const verParam = searchParams.get('ver');
     const editarParam = searchParams.get('editar');
@@ -119,7 +121,7 @@ const Visitas = () => {
       const visita = visitas.find(v => v._id === editarParam);
       if (visita) { handleEdit(visita); searchParams.delete('editar'); setSearchParams(searchParams); }
     }
-  }, [searchParams, visitas]);
+  }, [searchParams, visitas, setSearchParams]); // eslint-disable-line react-hooks/exhaustive-deps
   
   useEffect(() => {
     if (formData.parcela_id) {
@@ -140,12 +142,12 @@ const Visitas = () => {
       const cachedParcelas = await offlineDB.getCachedParcelas();
       if (cachedParcelas && cachedParcelas.length > 0) setParcelas(cachedParcelas);
     } catch (error) {
-      console.error('Error fetching parcelas:', error);
+
       try {
         const cachedParcelas = await offlineDB.getCachedParcelas();
         if (cachedParcelas && cachedParcelas.length > 0) setParcelas(cachedParcelas);
       } catch (cacheError) {
-        console.error('Error loading from cache:', cacheError);
+
       }
     }
   };
@@ -156,7 +158,7 @@ const Visitas = () => {
       const data = await api.get('/api/visitas');
       setVisitas(data.visitas || []);
     } catch (error) {
-      console.error('Error fetching visitas:', error);
+
       const errorMsg = handlePermissionError(error, 'ver las visitas');
       setError(errorMsg);
     } finally {
@@ -196,7 +198,7 @@ const Visitas = () => {
       fetchVisitas();
       return data;
     } catch (error) {
-      console.error('Error uploading photos:', error);
+
       setUploadError(api.getErrorMessage(error));
       throw error;
     } finally {
@@ -212,7 +214,7 @@ const Visitas = () => {
       setFotos(data.fotos || []);
       fetchVisitas();
     } catch (error) {
-      console.error('Error deleting photo:', error);
+
       setUploadError(api.getErrorMessage(error));
     }
   };
@@ -232,7 +234,7 @@ const Visitas = () => {
       setShowAnalysisModal(data.analysis);
       fetchVisitas();
     } catch (error) {
-      console.error('Error analyzing photo:', error);
+
       setUploadError(api.getErrorMessage(error));
     } finally {
       setAnalyzingFoto(null);
@@ -254,7 +256,7 @@ const Visitas = () => {
         setShowAnalysisModal({ summary: true, total: data.total_analyzed, detections: [], message: 'No se detectaron plagas ni enfermedades en ninguna foto.' });
       }
     } catch (error) {
-      console.error('Error analyzing all photos:', error);
+
       setUploadError(api.getErrorMessage(error));
     } finally {
       setAnalyzingAll(false);
@@ -309,7 +311,7 @@ const Visitas = () => {
           alert('Visita guardada localmente. Se sincronizara automaticamente cuando vuelva la conexion.');
         } else { setError('Error al guardar offline: ' + result.error); }
         return;
-      } catch (error) { console.error('Error saving offline:', error); setError('Error al guardar offline'); return; }
+      } catch (error) { setError('Error al guardar offline'); return; }
     }
     
     try {
@@ -319,12 +321,12 @@ const Visitas = () => {
       if (data.success) {
         const pendingFotos = fotos.filter(f => f.pending);
         if (!editingId && pendingFotos.length > 0 && data.data?._id) {
-          try { await uploadFotos(data.data._id, pendingFotos.map(f => f.file)); } catch (uploadError) { console.error('Error uploading photos after create:', uploadError); }
+          try { await uploadFotos(data.data._id, pendingFotos.map(f => f.file)); } catch (uploadError) { }
         }
         setShowForm(false); setEditingId(null); fetchVisitas(); resetForm();
       }
     } catch (error) {
-      console.error('Error saving visita:', error);
+
       const errorMsg = handlePermissionError(error, editingId ? 'actualizar la visita' : 'crear la visita');
       setError(errorMsg); setTimeout(() => setError(null), 5000);
     }
@@ -360,7 +362,7 @@ const Visitas = () => {
       await api.delete(`/api/visitas/${visitaId}`);
       fetchVisitas();
     } catch (error) {
-      console.error('Error deleting visita:', error);
+
       const errorMsg = handlePermissionError(error, 'eliminar la visita');
       setError(errorMsg); setTimeout(() => setError(null), 5000);
     }

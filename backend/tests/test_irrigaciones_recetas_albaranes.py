@@ -14,8 +14,8 @@ if not BASE_URL:
     BASE_URL = "https://campo-export-pro.preview.emergentagent.com"
 
 # Test credentials
-TEST_EMAIL = "testadmin@agrogest.com"
-TEST_PASSWORD = "Test123!"
+TEST_EMAIL = os.environ.get("TEST_EMAIL", "")
+TEST_PASSWORD = os.environ.get("TEST_PASSWORD", "")
 
 
 @pytest.fixture(scope="module")

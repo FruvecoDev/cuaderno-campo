@@ -63,7 +63,7 @@ const Cosechas = () => {
       const data = await api.get('/api/cosechas');
       setCosechas(data.cosechas || []);
     } catch (err) {
-      console.error('Error fetching cosechas:', err);
+
     }
     setLoading(false);
   };
@@ -73,7 +73,7 @@ const Cosechas = () => {
       const data = await api.get('/api/contratos');
       setContratos(data.contratos || []);
     } catch (err) {
-      console.error('Error fetching contratos:', err);
+
     }
   };
   
@@ -82,7 +82,7 @@ const Cosechas = () => {
       const data = await api.get('/api/cosechas/stats/dashboard');
       setStats(data);
     } catch (err) {
-      console.error('Error fetching stats:', err);
+
     }
   };
   
@@ -116,7 +116,7 @@ const Cosechas = () => {
       link.click();
       URL.revokeObjectURL(url);
     } catch (err) {
-      console.error('Error exporting:', err);
+
     } finally {
       setExportLoading(false);
     }
@@ -173,7 +173,7 @@ const Cosechas = () => {
       });
       fetchCosechas();
     } catch (err) {
-      console.error('Error creating cosecha:', err);
+
     }
   };
 
@@ -204,7 +204,7 @@ const Cosechas = () => {
       });
       fetchCosechas();
     } catch (err) {
-      console.error('Error adding carga:', err);
+
     }
   };
 
@@ -216,7 +216,7 @@ const Cosechas = () => {
       await api.delete(`/api/cosechas/${cosechaId}/cargas/${idCarga}`);
       fetchCosechas();
     } catch (err) {
-      console.error('Error deleting carga:', err);
+
     }
   };
 
@@ -228,7 +228,7 @@ const Cosechas = () => {
       await api.put(`/api/cosechas/${cosechaId}/completar`);
       fetchCosechas();
     } catch (err) {
-      console.error('Error completing cosecha:', err);
+
     }
   };
 
@@ -240,7 +240,7 @@ const Cosechas = () => {
       await api.delete(`/api/cosechas/${cosechaId}`);
       fetchCosechas();
     } catch (err) {
-      console.error('Error deleting cosecha:', err);
+
     }
   };
 
@@ -316,7 +316,7 @@ const Cosechas = () => {
               const url = window.URL.createObjectURL(blob);
               const a = document.createElement('a'); a.href = url; a.download = `cosechas_${new Date().toISOString().slice(0,10)}.pdf`;
               a.click(); window.URL.revokeObjectURL(url);
-            } catch (err) { console.error('Export error:', err); }
+            } catch (err) { }
           }} style={{ backgroundColor: '#dc2626', color: 'white' }} data-testid="btn-export-cosechas-pdf">
             <FileText size={18} /> PDF
           </button>
@@ -783,7 +783,7 @@ const Cosechas = () => {
                           </thead>
                           <tbody>
                             {cosecha.planificaciones.map((p, idx) => (
-                              <tr key={idx}>
+                              <tr key={c._id || idx}>
                                 <td style={{ padding: '8px' }}>{p.fecha_planificada}</td>
                                 <td style={{ padding: '8px', textAlign: 'right' }}>{p.kilos_estimados?.toLocaleString()} kg</td>
                                 <td style={{ padding: '8px' }}>{p.observaciones || '-'}</td>

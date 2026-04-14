@@ -15,10 +15,8 @@ try {
   const token = localStorage.getItem('token');
   if (token && typeof token !== 'string') {
     localStorage.removeItem('token');
-    console.log('Invalid token format cleared');
   }
 } catch (err) {
-  console.warn('Error validating localStorage:', err);
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

@@ -26,7 +26,7 @@ const CuadernoCampo = () => {
       const data = await api.get('/api/cuaderno-campo/parcelas');
       setParcelas(data.parcelas || []);
     } catch (err) {
-      console.error('Error fetching parcelas:', err);
+
     } finally {
       setLoading(false);
     }
@@ -41,7 +41,7 @@ const CuadernoCampo = () => {
       const data = await api.get(`/api/cuaderno-campo/preview/${parcela._id}`);
       setPreview(data);
     } catch (err) {
-      console.error('Error fetching preview:', err);
+
     } finally {
       setLoadingPreview(false);
     }
@@ -57,7 +57,7 @@ const CuadernoCampo = () => {
         `cuaderno_campo_${selectedParcela.codigo_plantacion}_${new Date().toISOString().split('T')[0]}.pdf`
       );
     } catch (err) {
-      console.error('Error generating PDF:', err);
+
       alert('Error al generar el PDF');
     } finally {
       setGenerating(false);

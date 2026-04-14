@@ -264,7 +264,7 @@ const Recomendaciones = () => {
   // Fetch data on mount
   useEffect(() => {
     fetchAll();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   
   const fetchAll = async () => {
     setLoading(true);
@@ -290,7 +290,7 @@ const Recomendaciones = () => {
       const data = await api.get(`/api/recomendaciones?${params}`);
       setRecomendaciones(data.recomendaciones || []);
     } catch (err) {
-      console.error('Error fetching recomendaciones:', err);
+
     }
   };
   
@@ -299,7 +299,7 @@ const Recomendaciones = () => {
       const data = await api.get('/api/parcelas');
       setParcelas(data.parcelas || []);
     } catch (err) {
-      console.error('Error fetching parcelas:', err);
+
     }
   };
   
@@ -308,7 +308,7 @@ const Recomendaciones = () => {
       const data = await api.get('/api/contratos');
       setContratos(data.contratos || []);
     } catch (err) {
-      console.error('Error fetching contratos:', err);
+
     }
   };
   
@@ -317,7 +317,7 @@ const Recomendaciones = () => {
       const data = await api.get('/api/fitosanitarios?activo=true');
       setFitosanitarios(data.productos || []);
     } catch (err) {
-      console.error('Error fetching fitosanitarios:', err);
+
     }
   };
   
@@ -327,7 +327,7 @@ const Recomendaciones = () => {
       setTipos(data.tipos || []);
       setSubtipos(data.subtipos_tratamiento || []);
     } catch (err) {
-      console.error('Error fetching tipos:', err);
+
     }
   };
   
@@ -336,7 +336,7 @@ const Recomendaciones = () => {
       const data = await api.get('/api/recomendaciones/stats/resumen');
       setStats(data);
     } catch (err) {
-      console.error('Error fetching stats:', err);
+
     }
   };
   
@@ -345,7 +345,7 @@ const Recomendaciones = () => {
       const data = await api.get('/api/plantillas-recomendaciones');
       setPlantillas(data.plantillas || []);
     } catch (err) {
-      console.error('Error fetching plantillas:', err);
+
       setPlantillas([]);
     }
   };
@@ -394,7 +394,7 @@ const Recomendaciones = () => {
       resetPlantillaForm();
       fetchPlantillas();
     } catch (err) {
-      console.error('Error en handlePlantillaSubmit:', err);
+
       setError(err.message || 'Error desconocido');
     }
   };

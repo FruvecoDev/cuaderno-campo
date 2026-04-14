@@ -19,7 +19,7 @@ const AusenciasTab = ({ empleados }) => {
   
   useEffect(() => {
     fetchAusencias();
-  }, [filtroEstado, filtroTipo]);
+  }, [filtroEstado, filtroTipo]); // eslint-disable-line react-hooks/exhaustive-deps
   
   const fetchAusencias = async () => {
     setLoading(true);
@@ -41,7 +41,7 @@ const AusenciasTab = ({ empleados }) => {
         rechazadas: all.filter(a => a.estado === 'rechazada').length
       });
     } catch (err) {
-      console.error('Error:', err);
+
     } finally {
       setLoading(false);
     }
@@ -57,7 +57,7 @@ const AusenciasTab = ({ empleados }) => {
       });
       fetchAusencias();
     } catch (err) {
-      console.error('Error:', err);
+
       alert('Error al aprobar: ' + api.getErrorMessage(err));
     }
   };
@@ -76,7 +76,7 @@ const AusenciasTab = ({ empleados }) => {
       setComentarioRechazo('');
       fetchAusencias();
     } catch (err) {
-      console.error('Error:', err);
+
       alert('Error al rechazar: ' + api.getErrorMessage(err));
     }
   };

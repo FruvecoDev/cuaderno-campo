@@ -83,7 +83,7 @@ const RRHH = () => {
   useEffect(() => {
     fetchEmpleados();
     fetchStats();
-  }, [filterPuesto, filterActivo]);
+  }, [filterPuesto, filterActivo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchEmpleados = async () => {
     try {
@@ -94,7 +94,7 @@ const RRHH = () => {
       const data = await api.get(url);
       setEmpleados(data.empleados || []);
     } catch (err) {
-      console.error('Error fetching empleados:', err);
+
       setError('Error al cargar empleados');
     } finally {
       setLoading(false);
@@ -106,7 +106,7 @@ const RRHH = () => {
       const data = await api.get('/api/rrhh/empleados/stats');
       setEmpleadoStats(data);
     } catch (err) {
-      console.error('Error fetching stats:', err);
+
     }
   };
 
@@ -133,7 +133,7 @@ const RRHH = () => {
       fetchEmpleados();
       fetchStats();
     } catch (err) {
-      console.error('Error saving empleado:', err);
+
       setError(api.getErrorMessage(err));
     }
   };
@@ -173,7 +173,7 @@ const RRHH = () => {
       fetchEmpleados();
       fetchStats();
     } catch (err) {
-      console.error('Error deleting empleado:', err);
+
       setError(api.getErrorMessage(err));
     }
   };
@@ -186,7 +186,7 @@ const RRHH = () => {
       fetchEmpleados();
       fetchStats();
     } catch (err) {
-      console.error('Error eliminando empleado:', err);
+
       setError(api.getErrorMessage(err));
     }
   };
@@ -198,7 +198,7 @@ const RRHH = () => {
       fetchEmpleados();
       fetchStats();
     } catch (err) {
-      console.error('Error reactivando empleado:', err);
+
       setError(api.getErrorMessage(err));
     }
   };
@@ -209,7 +209,7 @@ const RRHH = () => {
       setQRData(data);
       setShowQRModal(true);
     } catch (err) {
-      console.error('Error getting QR:', err);
+
       setError(api.getErrorMessage(err));
     }
   };
@@ -220,7 +220,7 @@ const RRHH = () => {
       setEmpleadoDetalle(data.empleado);
       setShowDetalle(true);
     } catch (err) {
-      console.error('Error getting detalle:', err);
+
     }
   };
 

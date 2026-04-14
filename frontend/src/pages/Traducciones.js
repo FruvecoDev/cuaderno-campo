@@ -93,11 +93,11 @@ const Traducciones = () => {
   useEffect(() => {
     fetchCategories();
     fetchTranslations();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     fetchTranslations();
-  }, [filters]);
+  }, [filters]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchCategories = async () => {
     try {
@@ -105,7 +105,7 @@ const Traducciones = () => {
       setCategories(data.categories || []);
       setLanguages(data.languages || []);
     } catch (err) {
-      console.error('Error fetching categories:', err);
+
     }
   };
 
@@ -123,7 +123,7 @@ const Traducciones = () => {
       const data = await api.get(endpoint, { includeAuth: false });
       setTranslations(data.translations || []);
     } catch (err) {
-      console.error('Error fetching translations:', err);
+
     }
     setLoading(false);
   };
@@ -181,7 +181,7 @@ const Traducciones = () => {
         setError(data.message || data.detail);
       }
     } catch (err) {
-      console.error('Error saving translation:', err);
+
       setError(t('messages.errorSaving'));
     }
   };
@@ -213,7 +213,7 @@ const Traducciones = () => {
       fetchTranslations();
       setTimeout(() => setSuccessMsg(null), 3000);
     } catch (err) {
-      console.error('Error deleting:', err);
+
       setError(t('messages.errorDeleting'));
     }
   };
@@ -225,7 +225,7 @@ const Traducciones = () => {
       fetchTranslations();
       setTimeout(() => setSuccessMsg(null), 3000);
     } catch (err) {
-      console.error('Error approving:', err);
+
     }
   };
 
@@ -243,7 +243,7 @@ const Traducciones = () => {
       }
       setTimeout(() => { setSuccessMsg(null); setError(null); }, 5000);
     } catch (err) {
-      console.error('Error seeding:', err);
+
     }
   };
 

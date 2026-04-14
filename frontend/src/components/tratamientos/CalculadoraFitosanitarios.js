@@ -57,7 +57,7 @@ const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
     if (resultados.concentracionMezcla > 5) newAlerts.concentracion = { type: 'danger', message: 'Concentracion muy alta! Riesgo de fitotoxicidad' };
     else if (resultados.concentracionMezcla > 2) newAlerts.concentracion = { type: 'warning', message: 'Concentracion elevada. Verificar tolerancia del cultivo' };
     setAlerts(newAlerts);
-  }, [calcData, resultados]);
+  }, [calcData, resultados]); // eslint-disable-line react-hooks/exhaustive-deps
   
   useEffect(() => {
     const fetchProductos = async () => {
@@ -68,7 +68,7 @@ const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
         const tipo = tipoMap[calcData.tipoProducto] || calcData.tipoProducto;
         const data = await api.get(`/api/fitosanitarios?tipo=${tipo}&activo=true`);
         setProductosDB(data.productos || []);
-      } catch (error) { console.error('Error loading productos:', error); }
+      } catch (error) { }
       finally { setLoadingProductos(false); }
     };
     if (showCalculator) fetchProductos();

@@ -15,7 +15,6 @@ class SyncService {
       window.addEventListener('online', () => this.handleOnline());
       window.addEventListener('offline', () => this.handleOffline());
     } catch (err) {
-      console.warn('Error setting up network listeners:', err);
     }
     
     // Check notification permission on init (safely)
@@ -26,14 +25,12 @@ class SyncService {
     try {
       await this.checkNotificationPermission();
     } catch (err) {
-      console.warn('Error during sync service init:', err);
     }
   }
 
   // Check and request notification permission
   async checkNotificationPermission() {
     if (!('Notification' in window)) {
-      console.log('Este navegador no soporta notificaciones');
       return false;
     }
     
@@ -56,7 +53,7 @@ class SyncService {
       this.notificationsEnabled = permission === 'granted';
       return this.notificationsEnabled;
     } catch (error) {
-      console.error('Error requesting notification permission:', error);
+
       return false;
     }
   }
@@ -64,7 +61,6 @@ class SyncService {
   // Show a push notification
   showNotification(title, options = {}) {
     if (!this.notificationsEnabled || Notification.permission !== 'granted') {
-      console.log('Notificaciones no permitidas');
       return;
     }
     
@@ -88,7 +84,7 @@ class SyncService {
       
       return notification;
     } catch (error) {
-      console.error('Error showing notification:', error);
+
     }
   }
 
@@ -104,13 +100,11 @@ class SyncService {
       try {
         callback(event);
       } catch (err) {
-        console.warn('Error in sync listener callback:', err);
       }
     });
   }
 
   handleOnline() {
-    console.log('🟢 Connection restored');
     this.isOnline = true;
     this.notifyListeners({ type: 'online' });
     
@@ -121,17 +115,14 @@ class SyncService {
         icon: '/logo192.png'
       });
     } catch (err) {
-      console.warn('Error showing notification:', err);
     }
     
     // Auto-sync when coming back online (safely)
     this.syncPendingItems().catch(err => {
-      console.warn('Error during auto-sync:', err);
     });
   }
 
   handleOffline() {
-    console.log('🔴 Connection lost');
     this.isOnline = false;
     this.notifyListeners({ type: 'offline' });
   }
@@ -144,13 +135,11 @@ class SyncService {
   // Cache reference data from server
   async cacheReferenceData() {
     if (!this.isOnline) {
-      console.log('Cannot cache data: offline');
       return false;
     }
 
     const token = this.getToken();
     if (!token) {
-      console.log('Cannot cache data: no auth token');
       return false;
     }
 
@@ -180,7 +169,7 @@ class SyncService {
 
       return true;
     } catch (error) {
-      console.error('Error caching reference data:', error);
+
       this.notifyListeners({ type: 'error', message: 'Error al descargar datos offline' });
       return false;
     }
@@ -200,7 +189,7 @@ class SyncService {
       
       return { success: true, offlineId: id, message: 'Visita guardada localmente. Se sincronizará al reconectar.' };
     } catch (error) {
-      console.error('Error saving visita offline:', error);
+
       return { success: false, error: error.message };
     }
   }
@@ -219,7 +208,7 @@ class SyncService {
       
       return { success: true, offlineId: id, message: 'Tratamiento guardado localmente. Se sincronizará al reconectar.' };
     } catch (error) {
-      console.error('Error saving tratamiento offline:', error);
+
       return { success: false, error: error.message };
     }
   }
@@ -227,18 +216,15 @@ class SyncService {
   // Sync all pending items
   async syncPendingItems() {
     if (!this.isOnline) {
-      console.log('Cannot sync: offline');
       return { synced: 0, failed: 0 };
     }
 
     if (this.isSyncing) {
-      console.log('Sync already in progress');
       return { synced: 0, failed: 0 };
     }
 
     const token = this.getToken();
     if (!token) {
-      console.log('Cannot sync: no auth token');
       return { synced: 0, failed: 0 };
     }
 
@@ -254,7 +240,6 @@ class SyncService {
       return { synced: 0, failed: 0 };
     }
 
-    console.log(`Starting sync of ${pendingOnly.length} items`);
 
     let synced = 0;
     let failed = 0;
@@ -267,16 +252,14 @@ class SyncService {
         } else if (item.type === 'tratamiento') {
           endpoint = '/api/tratamientos';
         } else {
-          console.warn('Unknown item type:', item.type);
           continue;
         }
 
         await api.post(endpoint, item.data);
         await offlineDB.removePendingSyncItem(item.id);
         synced++;
-        console.log(`Synced ${item.type} #${item.id}`);
       } catch (error) {
-        console.error(`Error syncing ${item.type} #${item.id}:`, error);
+
         await offlineDB.updatePendingSyncItem(item.id, {
           status: item.attempts >= 2 ? 'failed' : 'pending',
           attempts: item.attempts + 1,
@@ -316,7 +299,6 @@ class SyncService {
       this.showNotification(title, { body });
     }
 
-    console.log(`Sync complete: ${synced} synced, ${failed} failed, ${remainingCount} remaining`);
     return { synced, failed, remaining: remainingCount };
   }
 

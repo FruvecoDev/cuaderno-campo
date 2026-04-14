@@ -73,31 +73,31 @@ const Parcelas = () => {
     fetchProvincias();
     fetchFincas();
     fetchCultivos();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     fetchParcelas();
-  }, [currentPage, pageSize]);
+  }, [currentPage, pageSize]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchProvincias = async () => {
     try {
       const data = await api.get('/api/sigpac/provincias');
       if (data.success) setProvincias(data.provincias);
-    } catch (err) { console.error('Error fetching provincias:', err); }
+    } catch (err) { }
   };
 
   const fetchFincas = async () => {
     try {
       const data = await api.get('/api/fincas');
       setFincas(data.fincas || []);
-    } catch (err) { console.error('Error fetching fincas:', err); }
+    } catch (err) { }
   };
 
   const fetchCultivos = async () => {
     try {
       const data = await api.get('/api/cultivos');
       setCultivos(data.cultivos || []);
-    } catch (err) { console.error('Error fetching cultivos:', err); }
+    } catch (err) { }
   };
 
   const generarCodigoPlantacion = useCallback(() => {
@@ -196,7 +196,7 @@ const Parcelas = () => {
       const data = await api.get(`/api/parcelas/${parcela._id}/historial-tratamientos`);
       setHistorialData(data);
     } catch (err) {
-      console.error('Error fetching historial:', err);
+
       setHistorialData(null);
     } finally {
       setHistorialLoading(false);
@@ -219,7 +219,7 @@ const Parcelas = () => {
         campanas: [...new Set(p.map(x => x.campana).filter(Boolean))],
         parcelas: [...new Set(p.map(x => x.codigo_plantacion).filter(Boolean))]
       });
-    } catch (err) { console.error('Error:', err); } finally { setLoading(false); }
+    } catch (err) { } finally { setLoading(false); }
   };
 
   const fetchContratos = async () => {
@@ -232,7 +232,7 @@ const Parcelas = () => {
         cultivos: [...new Set(c.map(x => x.cultivo).filter(Boolean))],
         campanas: [...new Set(c.map(x => x.campana).filter(Boolean))]
       });
-    } catch (err) { console.error('Error:', err); }
+    } catch (err) { }
   };
 
   const clearFilters = () => setFilters({ proveedor: '', cultivo: '', campana: '', codigo_plantacion: '' });

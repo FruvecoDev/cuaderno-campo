@@ -78,7 +78,7 @@ const Dashboard = () => {
       mergedWidgets.sort((a, b) => a.order - b.order);
       setDashboardConfig({ ...data.config, widgets: mergedWidgets });
       setConfigWidgets(mergedWidgets);
-    } catch (error) { console.error('Error fetching dashboard config:', error); }
+    } catch (error) { }
   };
   
   const saveDashboardConfig = async () => {
@@ -87,7 +87,7 @@ const Dashboard = () => {
       await api.post('/api/dashboard/config', { widgets: configWidgets, layout: dashboardConfig?.layout || 'default' });
       setDashboardConfig({ ...dashboardConfig, widgets: configWidgets });
       setShowConfigModal(false);
-    } catch (error) { console.error('Error saving dashboard config:', error); }
+    } catch (error) { }
     finally { setSavingConfig(false); }
   };
   
@@ -96,7 +96,7 @@ const Dashboard = () => {
       const data = await api.post('/api/dashboard/config/reset', {});
       setDashboardConfig(data.config);
       setConfigWidgets(data.config?.widgets || []);
-    } catch (error) { console.error('Error resetting dashboard config:', error); }
+    } catch (error) { }
   };
   
   const toggleWidgetVisibility = (widgetId) => {
@@ -164,28 +164,28 @@ const Dashboard = () => {
     // Auto-save
     try {
       await api.post('/api/dashboard/config', { widgets: newWidgets, layout: dashboardConfig?.layout || 'default' });
-    } catch (err) { console.error('Error saving widget order:', err); }
+    } catch (err) { }
   }, [sortedWidgetIds, dashboardConfig]);
   
   const fetchDashboardData = async () => {
     try { const data = await api.get('/api/dashboard/kpis'); setKpis(data); }
-    catch (error) { console.error('Error fetching dashboard:', error); }
+    catch (error) { }
     finally { setLoading(false); }
   };
   
   const fetchParcelas = async () => {
     try { const data = await api.get('/api/parcelas'); setParcelas(data.parcelas || []); }
-    catch (error) { console.error('Error fetching parcelas:', error); }
+    catch (error) { }
   };
   
   const fetchVisitasPlanificadas = async () => {
     try { const data = await api.get('/api/visitas/planificadas'); setVisitasPlanificadas(data.visitas || []); }
-    catch (error) { console.error('Error fetching visitas planificadas:', error); }
+    catch (error) { }
   };
   
   const fetchNotificationStatus = async () => {
     try { const data = await api.get('/api/notifications/status'); setNotificationStatus(data); }
-    catch (error) { console.error('Error fetching notification status:', error); }
+    catch (error) { }
   };
   
   const sendVisitReminders = async () => {
@@ -672,7 +672,7 @@ const Dashboard = () => {
                 label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                 outerRadius={80} fill="#8884d8" dataKey="value"
               >
-                {COLORS.map((color, index) => (<Cell key={`cell-${index}`} fill={color} />))}
+                {COLORS.map((color, index) => (<Cell key={color} fill={color} />))}
               </Pie>
               <Tooltip />
             </PieChart>

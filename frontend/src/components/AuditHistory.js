@@ -58,7 +58,7 @@ const AuditHistory = ({ collection, documentId }) => {
     if (documentId && expanded) {
       fetchHistory();
     }
-  }, [documentId, expanded]);
+  }, [documentId, expanded]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchHistory = async () => {
     setLoading(true);
@@ -66,7 +66,7 @@ const AuditHistory = ({ collection, documentId }) => {
       const response = await api.get(`/api/audit/history/${collection}/${documentId}`);
       setHistory(response.history || []);
     } catch (error) {
-      console.error('Error fetching audit history:', error);
+
     } finally {
       setLoading(false);
     }

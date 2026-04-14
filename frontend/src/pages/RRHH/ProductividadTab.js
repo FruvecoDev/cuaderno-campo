@@ -40,7 +40,7 @@ const ProductividadTab = ({ empleados }) => {
   
   useEffect(() => {
     fetchData();
-  }, [filtroEmpleado, filtroFechaDesde, filtroFechaHasta]);
+  }, [filtroEmpleado, filtroFechaDesde, filtroFechaHasta]); // eslint-disable-line react-hooks/exhaustive-deps
   
   const fetchData = async () => {
     try {
@@ -65,7 +65,7 @@ const ProductividadTab = ({ empleados }) => {
       setTiempoReal(tiempoRealData);
       setRegistros(registrosData.registros || []);
     } catch (err) {
-      console.error('Error:', err);
+
     } finally {
       setLoading(false);
     }
@@ -99,7 +99,7 @@ const ProductividadTab = ({ empleados }) => {
       resetForm();
       fetchData();
     } catch (err) {
-      console.error('Error:', err);
+
       alert('Error al guardar el registro');
     }
   };
@@ -127,7 +127,7 @@ const ProductividadTab = ({ empleados }) => {
       await api.delete(`/api/rrhh/productividad/${registroId}`);
       fetchData();
     } catch (err) {
-      console.error('Error:', err);
+
     }
   };
   

@@ -44,7 +44,7 @@ const ComisionesGeneradas = () => {
     fetchComisiones();
     fetchAgentes();
     fetchCampanas();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchComisiones = async () => {
     setLoading(true);
@@ -61,7 +61,7 @@ const ComisionesGeneradas = () => {
       setComisiones(response.comisiones || []);
       setTotales(response.totales || {});
     } catch (err) {
-      console.error('Error fetching comisiones:', err);
+
       setError('Error al cargar las comisiones');
     } finally {
       setLoading(false);
@@ -79,7 +79,7 @@ const ComisionesGeneradas = () => {
         ...(venta.agentes || []).map(a => ({...a, tipo: 'venta'}))
       ]);
     } catch (err) {
-      console.error('Error fetching agentes:', err);
+
     }
   };
 
@@ -88,7 +88,7 @@ const ComisionesGeneradas = () => {
       const response = await api.get('/api/comisiones/campanas');
       setCampanas(response.campanas || []);
     } catch (err) {
-      console.error('Error fetching campanas:', err);
+
     }
   };
 
@@ -97,7 +97,7 @@ const ComisionesGeneradas = () => {
       await api.patch(`/api/comisiones-generadas/${comisionId}/estado?estado=${nuevoEstado}`);
       fetchComisiones();
     } catch (err) {
-      console.error('Error updating estado:', err);
+
       setError('Error al actualizar el estado');
     }
   };
@@ -167,7 +167,7 @@ const ComisionesGeneradas = () => {
     if (hasActiveFilters || filters.search === '') {
       fetchComisiones();
     }
-  }, [filters.agente_id, filters.tipo_agente, filters.campana, filters.estado, filters.fecha_desde, filters.fecha_hasta]);
+  }, [filters.agente_id, filters.tipo_agente, filters.campana, filters.estado, filters.fecha_desde, filters.fecha_hasta]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Funciones de exportación
   const handleExportPDF = async () => {
@@ -195,7 +195,7 @@ const ComisionesGeneradas = () => {
       const url = window.URL.createObjectURL(blob);
       window.open(url, '_blank');
     } catch (err) {
-      console.error('Error exporting PDF:', err);
+
       setError('Error al generar el PDF');
     } finally {
       setExportLoading(false);
@@ -233,7 +233,7 @@ const ComisionesGeneradas = () => {
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      console.error('Error exporting Excel:', err);
+
       setError('Error al generar el Excel');
     } finally {
       setExportLoading(false);

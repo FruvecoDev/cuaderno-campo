@@ -129,7 +129,6 @@ const AlbaranForm = () => {
           const articulosRes = await api.get('/api/articulos/activos');
           setArticulosCatalogo(articulosRes.articulos || articulosRes || []);
         } catch (e) {
-          console.log('Articulos catalog not available');
           setArticulosCatalogo([]);
         }
         
@@ -172,7 +171,7 @@ const AlbaranForm = () => {
           }
         }
       } catch (err) {
-        console.error('Error loading data:', err);
+
         setError('Error al cargar los datos');
       } finally {
         setLoading(false);
@@ -248,7 +247,7 @@ const AlbaranForm = () => {
         kilos_netos: kilosNetos
       }));
     }
-  }, [formData.items.filter(i => !i.es_destare).map(i => `${i.cantidad}-${i.precio_unitario}`).join(','), selectedContrato]);
+  }, [formData.items.filter(i => !i.es_destare).map(i => `${i.cantidad}-${i.precio_unitario}`).join(','), selectedContrato]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle contrato selection
   const handleContratoChange = (contratoId) => {
@@ -375,7 +374,7 @@ const AlbaranForm = () => {
       window.open(url, '_blank');
       setTimeout(() => window.URL.revokeObjectURL(url), 1000);
     } catch (error) {
-      console.error('Error downloading PDF:', error);
+
       setError('Error al generar el PDF');
     } finally {
       setPdfLoading(false);
@@ -439,7 +438,7 @@ const AlbaranForm = () => {
       
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (error) {
-      console.error('Error saving albaran:', error);
+
       setError(handlePermissionError(error, isEditing ? 'actualizar' : 'crear'));
     } finally {
       setSaving(false);

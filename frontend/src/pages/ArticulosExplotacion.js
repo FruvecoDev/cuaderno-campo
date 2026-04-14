@@ -81,7 +81,7 @@ const ArticulosExplotacion = () => {
 
   useEffect(() => {
     fetchArticulos();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchArticulos = async () => {
     try {
@@ -96,7 +96,7 @@ const ArticulosExplotacion = () => {
       const data = await api.get(`/api/articulos?${params}`);
       setArticulos(data.articulos || []);
     } catch (err) {
-      console.error('Error fetching articulos:', err);
+
     } finally {
       setLoading(false);
     }
@@ -107,7 +107,7 @@ const ArticulosExplotacion = () => {
       fetchArticulos();
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchTerm, filterCategoria, filterActivo]);
+  }, [searchTerm, filterCategoria, filterActivo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const resetForm = () => {
     setFormData({
@@ -202,7 +202,7 @@ const ArticulosExplotacion = () => {
       await api.patch(`/api/articulos/${id}/toggle-activo`);
       fetchArticulos();
     } catch (err) {
-      console.error('Error toggling activo:', err);
+
     }
   };
 

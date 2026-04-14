@@ -31,7 +31,7 @@ const LiquidacionComisiones = () => {
   
   useEffect(() => {
     fetchComisiones();
-  }, [filters]);
+  }, [filters]); // eslint-disable-line react-hooks/exhaustive-deps
   
   const fetchCampanas = async () => {
     try {
@@ -40,7 +40,7 @@ const LiquidacionComisiones = () => {
         setCampanas(data.campanas || []);
       }
     } catch (error) {
-      console.error('Error fetching campanas:', error);
+
     }
   };
   
@@ -51,7 +51,7 @@ const LiquidacionComisiones = () => {
         setAgentes(data.agentes || []);
       }
     } catch (error) {
-      console.error('Error fetching agentes:', error);
+
     }
   };
   
@@ -69,7 +69,7 @@ const LiquidacionComisiones = () => {
         setTotales(data.totales || { total_comision_compra: 0, total_comision_venta: 0, total_general: 0 });
       }
     } catch (error) {
-      console.error('Error fetching comisiones:', error);
+
     } finally {
       setLoading(false);
     }
@@ -88,7 +88,7 @@ const LiquidacionComisiones = () => {
         `Liquidacion_${agenteNombre.replace(/\s+/g, '_')}_${tipoAgente}.pdf`
       );
     } catch (error) {
-      console.error('Error downloading PDF:', error);
+
       alert('Error al generar el PDF');
     } finally {
       setGeneratingPdf(null);

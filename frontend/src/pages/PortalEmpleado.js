@@ -59,7 +59,7 @@ const PortalEmpleado = () => {
     if (activeTab === 'nominas') fetchPrenominas();
     if (activeTab === 'ausencias') fetchAusencias();
     if (activeTab === 'productividad') fetchProductividad();
-  }, [activeTab, periodoProductividad]);
+  }, [activeTab, periodoProductividad]); // eslint-disable-line react-hooks/exhaustive-deps
   
   const fetchNotificaciones = async () => {
     try {
@@ -67,7 +67,7 @@ const PortalEmpleado = () => {
       setNotificaciones(data.notificaciones || []);
       setNotificacionesNoLeidas(data.no_leidas || 0);
     } catch (err) {
-      console.error('Error fetching notifications:', err);
+
     }
   };
   
@@ -76,7 +76,7 @@ const PortalEmpleado = () => {
       await api.put(`/api/portal-empleado/notificaciones/${notifId}/leer`);
       fetchNotificaciones();
     } catch (err) {
-      console.error('Error:', err);
+
     }
   };
   
@@ -85,7 +85,7 @@ const PortalEmpleado = () => {
       await api.put('/api/portal-empleado/notificaciones/leer-todas');
       fetchNotificaciones();
     } catch (err) {
-      console.error('Error:', err);
+
     }
   };
   
@@ -105,7 +105,7 @@ const PortalEmpleado = () => {
       const data = await api.get('/api/portal-empleado/mis-fichajes');
       setFichajes(data.fichajes || []);
     } catch (err) {
-      console.error('Error:', err);
+
     }
   };
   
@@ -114,7 +114,7 @@ const PortalEmpleado = () => {
       const data = await api.get('/api/portal-empleado/mis-documentos');
       setDocumentos(data.documentos || []);
     } catch (err) {
-      console.error('Error:', err);
+
     }
   };
   
@@ -123,7 +123,7 @@ const PortalEmpleado = () => {
       const data = await api.get('/api/portal-empleado/mis-prenominas');
       setPrenominas(data.prenominas || []);
     } catch (err) {
-      console.error('Error:', err);
+
     }
   };
   
@@ -132,7 +132,7 @@ const PortalEmpleado = () => {
       const data = await api.get('/api/portal-empleado/mis-ausencias');
       setAusencias(data.ausencias || []);
     } catch (err) {
-      console.error('Error:', err);
+
     }
   };
   
@@ -145,7 +145,7 @@ const PortalEmpleado = () => {
       setProductividad(prodData);
       setProductividadHoy(hoyData);
     } catch (err) {
-      console.error('Error:', err);
+
     }
   };
   

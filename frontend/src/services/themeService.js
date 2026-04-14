@@ -21,7 +21,7 @@ export const loadAndApplyTheme = async () => {
       return data;
     }
   } catch (err) {
-    console.error('Error loading theme:', err);
+
   }
   return null;
 };

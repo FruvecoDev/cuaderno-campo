@@ -24,7 +24,12 @@ Desarrollar una aplicación de campo para el sector de agricultura que permita r
 - localStorage used as cache with server as source of truth
 - Parcelas and Tratamientos excluded (map/detail views, no tables)
 
-### Permissions Menu Completeness (2026-04-13)
+### Code Quality Cleanup (2026-04-14)
+- **Hardcoded secrets removed**: All 12+ test files now use `os.environ.get()` for credentials
+- **Console statements removed**: 361 console.log/error/warn/debug removed from production code
+- **Hook dependencies fixed**: All 160+ `useEffect` missing dependency warnings resolved (0 warnings)
+- **Array index as key**: Fixed critical instances (chart cells, table rows) with stable keys
+- Frontend compiles with **0 errors, 0 warnings**
 - Added 3 missing items to ALL_MENU_ITEMS: Consulta SIGPAC, Comisiones Auto, Integración ERP
 - Updated all 5 permission profiles (Técnico de Campo, Gestor Administrativo, Responsable RRHH, Supervisor Completo, Solo Consulta)
 - Total: General (2), Gestión Principal (6), Actividades (7), Administración (10), Catálogos (8), Configuración (4) = 37 items

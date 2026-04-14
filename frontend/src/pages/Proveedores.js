@@ -59,7 +59,7 @@ const Proveedores = () => {
   useEffect(() => {
     fetchProveedores();
     fetchStats();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchProveedores = async () => {
     try {
@@ -67,7 +67,7 @@ const Proveedores = () => {
       const data = await api.get('/api/proveedores');
       setProveedores(data.proveedores || []);
     } catch (error) {
-      console.error('Error fetching proveedores:', error);
+
       const errorMsg = handlePermissionError(error, 'ver los proveedores');
       setError(errorMsg);
     } finally {
@@ -80,7 +80,7 @@ const Proveedores = () => {
       const data = await api.get('/api/proveedores/stats/resumen');
       setStats(data.stats);
     } catch (error) {
-      console.error('Error fetching stats:', error);
+
     }
   };
 
@@ -91,7 +91,7 @@ const Proveedores = () => {
       setHistorialData(data.historial);
       setShowHistorial(true);
     } catch (error) {
-      console.error('Error fetching historial:', error);
+
     }
   };
 
@@ -100,7 +100,7 @@ const Proveedores = () => {
       const params = filtroEstado !== 'todos' ? `?activo=${filtroEstado === 'activos'}` : '';
       await api.download(`/api/proveedores/export/excel${params}`, `proveedores_${new Date().toISOString().split('T')[0]}.xlsx`);
     } catch (error) {
-      console.error('Error exporting:', error);
+
       alert('Error al exportar');
     }
   };
@@ -120,7 +120,7 @@ const Proveedores = () => {
       fetchProveedores();
       resetForm();
     } catch (error) {
-      console.error('Error saving proveedor:', error);
+
       const errorMsg = handlePermissionError(error, editingId ? 'actualizar el proveedor' : 'crear el proveedor');
       setError(errorMsg);
       setTimeout(() => setError(null), 5000);
@@ -143,7 +143,7 @@ const Proveedores = () => {
       await api.delete(`/api/proveedores/${proveedorId}`);
       fetchProveedores();
     } catch (error) {
-      console.error('Error deleting proveedor:', error);
+
       const errorMsg = handlePermissionError(error, 'eliminar el proveedor');
       setError(errorMsg);
       setTimeout(() => setError(null), 5000);

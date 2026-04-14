@@ -16,7 +16,7 @@ class TestEvaluacionesAPI:
         """Setup: Login and get token"""
         login_response = requests.post(
             f"{BASE_URL}/api/auth/login",
-            json={"email": "admin@fruveco.com", "password": "admin123"}
+            json={"email": os.environ.get("TEST_EMAIL", ""), "password": os.environ.get("TEST_PASSWORD", "")}
         )
         assert login_response.status_code == 200, f"Login failed: {login_response.text}"
         self.token = login_response.json()["access_token"]
@@ -29,7 +29,7 @@ class TestEvaluacionesAPI:
         """Test admin login"""
         response = requests.post(
             f"{BASE_URL}/api/auth/login",
-            json={"email": "admin@fruveco.com", "password": "admin123"}
+            json={"email": os.environ.get("TEST_EMAIL", ""), "password": os.environ.get("TEST_PASSWORD", "")}
         )
         assert response.status_code == 200
         data = response.json()
@@ -223,7 +223,7 @@ class TestEvaluacionesConfig:
         """Setup: Login and get token"""
         login_response = requests.post(
             f"{BASE_URL}/api/auth/login",
-            json={"email": "admin@fruveco.com", "password": "admin123"}
+            json={"email": os.environ.get("TEST_EMAIL", ""), "password": os.environ.get("TEST_PASSWORD", "")}
         )
         assert login_response.status_code == 200
         self.token = login_response.json()["access_token"]

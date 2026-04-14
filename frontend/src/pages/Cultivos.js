@@ -44,7 +44,7 @@ const Cultivos = () => {
 
   useEffect(() => {
     fetchCultivos();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchCultivos = async () => {
     try {
@@ -52,7 +52,7 @@ const Cultivos = () => {
       const data = await api.get('/api/cultivos');
       setCultivos(data.cultivos || []);
     } catch (error) {
-      console.error('Error fetching cultivos:', error);
+
       const errorMsg = handlePermissionError(error, 'ver los cultivos');
       setError(errorMsg);
     } finally {
@@ -75,7 +75,7 @@ const Cultivos = () => {
       fetchCultivos();
       resetForm();
     } catch (error) {
-      console.error('Error saving cultivo:', error);
+
       const errorMsg = handlePermissionError(error, editingId ? 'actualizar el cultivo' : 'crear el cultivo');
       setError(errorMsg);
       setTimeout(() => setError(null), 5000);
@@ -98,7 +98,7 @@ const Cultivos = () => {
       await api.delete(`/api/cultivos/${cultivoId}`);
       fetchCultivos();
     } catch (error) {
-      console.error('Error deleting cultivo:', error);
+
       const errorMsg = handlePermissionError(error, 'eliminar el cultivo');
       setError(errorMsg);
       setTimeout(() => setError(null), 5000);

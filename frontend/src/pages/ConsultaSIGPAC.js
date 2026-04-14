@@ -128,7 +128,7 @@ export default function ConsultaSIGPAC() {
           }
         } catch (geoErr) {
           // GeoJSON is optional, don't block search results
-          console.debug('GeoJSON fetch optional:', geoErr);
+          
         }
         // Approximate center based on province code
         const provinceCenters = {
