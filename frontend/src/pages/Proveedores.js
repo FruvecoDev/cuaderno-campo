@@ -10,6 +10,7 @@ import { useColumnConfig } from '../hooks/useColumnConfig';
 import '../App.css';
 
 const DEFAULT_COLUMNS = [
+  { id: 'codigo_proveedor', label: 'ID', visible: true },
   { id: 'nombre', label: 'Nombre', visible: true },
   { id: 'cif_nif', label: 'CIF/NIF', visible: true },
   { id: 'telefono', label: 'Telefono', visible: true },
@@ -441,6 +442,7 @@ const Proveedores = () => {
                   <tr key={proveedor._id}>
                     {visibleColumns.map(col => {
                       switch (col.id) {
+                        case 'codigo_proveedor': return <td key="codigo_proveedor"><code style={{ fontFamily: 'monospace', fontWeight: '600', fontSize: '0.85rem' }}>{proveedor.codigo_proveedor || '-'}</code></td>;
                         case 'nombre': return <td key="nombre" style={{ fontWeight: '600' }}>{proveedor.nombre}</td>;
                         case 'cif_nif': return <td key="cif_nif">{proveedor.cif_nif || '-'}</td>;
                         case 'telefono': return <td key="telefono">{proveedor.telefonos?.length ? proveedor.telefonos.map(t => t.valor).join(', ') : proveedor.telefono || '-'}</td>;

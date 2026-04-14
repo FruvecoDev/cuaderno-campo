@@ -33,6 +33,22 @@ async def create_proveedor(
     current_user: dict = Depends(RequireCreate)
 ):
     proveedor_dict = proveedor.dict()
+    
+    # Auto-generate codigo_proveedor
+    last = await proveedores_collection.find_one(
+        {"codigo_proveedor": {"$exists": True, "$ne": None}},
+        sort=[("codigo_proveedor", -1)]
+    )
+    if last and last.get("codigo_proveedor"):
+        try:
+            next_num = int(last["codigo_proveedor"]) + 1
+        except ValueError:
+            next_num = 1
+    else:
+        count = await proveedores_collection.count_documents({})
+        next_num = count + 1
+    proveedor_dict['codigo_proveedor'] = str(next_num).zfill(6)
+    
     proveedor_dict['created_at'] = datetime.now()
     proveedor_dict['updated_at'] = datetime.now()
     
