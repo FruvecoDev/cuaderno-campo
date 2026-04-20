@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, PlusCircle, MinusCircle, Package, Printer, Check, Download, AlertTriangle, Search, X } from 'lucide-react';
+import { ArrowLeft, PlusCircle, MinusCircle, Package, Printer, Check, Download, AlertTriangle, Search, X, FileText } from 'lucide-react';
 import { usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
@@ -456,9 +456,9 @@ const AlbaranForm = () => {
 
   if (loading) {
     return (
-      <div className="page-container" data-testid="albaran-form-page">
-        <div className="loading-container">
-          <div className="spinner"></div>
+      <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} data-testid="albaran-form-page">
+        <div className="card" style={{ padding: '3rem', borderRadius: '12px', textAlign: 'center' }}>
+          <div className="spinner" style={{ margin: '0 auto 1rem' }}></div>
           <p>Cargando...</p>
         </div>
       </div>
@@ -466,68 +466,37 @@ const AlbaranForm = () => {
   }
 
   return (
-    <div className="page-container" data-testid="albaran-form-page">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-4">
-          <button
-            className="btn btn-outline"
-            onClick={() => navigate('/albaranes')}
-            data-testid="btn-volver"
-          >
-            <ArrowLeft size={16} style={{ marginRight: '0.5rem' }} />
-            Volver
-          </button>
-          <div>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: '600' }}>
-              {isEditing ? 'Editar Albarán' : 'Nuevo Albarán'}
-            </h1>
+    <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', backdropFilter: 'blur(4px)' }} onClick={() => navigate('/albaranes')}>
+      <div className="card" style={{ maxWidth: '960px', width: '100%', height: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative', padding: '2rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()} data-testid="albaran-form-page">
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '2px solid hsl(var(--border))' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'hsl(var(--primary) / 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FileText size={20} style={{ color: 'hsl(var(--primary))' }} /></div>
+            <div>
+              <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '700' }}>{isEditing ? 'Editar' : 'Nuevo'} Albaran</h2>
+              <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>{isEditing ? `ID: ${id.slice(-8).toUpperCase()}` : 'Total: ' + calculateGrandTotal().toLocaleString('es-ES', { minimumFractionDigits: 2 }) + ' EUR'}</span>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             {isEditing && (
-              <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }}>
-                ID: {id.slice(-8).toUpperCase()}
-              </p>
+              <button type="button" className="btn btn-secondary" onClick={downloadPdf} disabled={pdfLoading} style={{ fontSize: '0.8rem' }}>
+                {pdfLoading ? <Download size={14} className="animate-spin" /> : <Printer size={14} />}
+                {pdfLoading ? ' Generando...' : ' PDF'}
+              </button>
             )}
+            <button onClick={() => navigate('/albaranes')} className="config-modal-close-btn"><X size={18} /></button>
           </div>
         </div>
-        
-        {isEditing && (
-          <button
-            className="btn btn-secondary"
-            onClick={downloadPdf}
-            disabled={pdfLoading}
-            data-testid="btn-imprimir-header"
-          >
-            {pdfLoading ? (
-              <Download size={16} className="animate-spin" style={{ marginRight: '0.5rem' }} />
-            ) : (
-              <Printer size={16} style={{ marginRight: '0.5rem' }} />
-            )}
-            {pdfLoading ? 'Generando...' : 'Imprimir PDF'}
-          </button>
-        )}
-      </div>
 
-      {/* Messages */}
-      {error && (
-        <div className="alert alert-error mb-4" data-testid="error-message">
-          {error}
-          <button onClick={() => setError(null)} style={{ marginLeft: 'auto' }}>×</button>
-        </div>
-      )}
-      
-      {successMessage && (
-        <div className="alert alert-success mb-4" data-testid="success-message">
-          {successMessage}
-        </div>
-      )}
+        {/* Messages */}
+        {error && <div style={{ backgroundColor: 'hsl(var(--destructive) / 0.1)', border: '1px solid hsl(var(--destructive))', padding: '0.5rem 1rem', borderRadius: '6px', marginBottom: '0.75rem', fontSize: '0.85rem', color: 'hsl(var(--destructive))' }}>{error}</div>}
+        {successMessage && <div style={{ backgroundColor: 'hsl(142 76% 36% / 0.1)', border: '1px solid hsl(142 76% 36% / 0.3)', padding: '0.5rem 1rem', borderRadius: '6px', marginBottom: '0.75rem', fontSize: '0.85rem', color: 'hsl(142 76% 36%)' }}>{successMessage}</div>}
 
       {/* Form */}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} style={{ flex: 1, overflow: 'auto', minHeight: 0, paddingRight: '0.5rem' }}>
         {/* Sección 1: Tipo y Fecha */}
-        <div className="card mb-4">
-          <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem' }}>
-            1. Datos Generales
-          </h3>
+        <div style={{ marginBottom: '1.25rem' }}>
+          <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Datos Generales</h3>
           
           <div className="grid-3">
             <div className="form-group">
@@ -568,9 +537,9 @@ const AlbaranForm = () => {
         </div>
 
         {/* Sección 2: Proveedor/Cliente y Contrato */}
-        <div className="card mb-4">
-          <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem' }}>
-            2. {formData.tipo === 'Albarán de venta' ? 'Cliente' : 'Proveedor'} y Contrato
+        <div style={{ marginBottom: '1.25rem' }}>
+          <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>
+            {formData.tipo === 'Albarán de venta' ? 'Cliente' : 'Proveedor'} y Contrato
           </h3>
           
           <div className="grid-3 mb-4">
@@ -700,9 +669,9 @@ const AlbaranForm = () => {
         </div>
 
         {/* Sección 3: Líneas del Albarán */}
-        <div className="card mb-4">
-          <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem' }}>
-            3. Líneas del Albarán
+        <div style={{ marginBottom: '1.25rem' }}>
+          <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>
+            Lineas del Albaran
           </h3>
             
             <div className="table-container overflow-visible" style={{ marginTop: '0.5rem' }}>
@@ -1107,53 +1076,20 @@ const AlbaranForm = () => {
         </div>
 
         {/* Action buttons */}
-        <div className="flex gap-2">
-          <button 
-            type="submit" 
-            className="btn btn-primary" 
-            disabled={saving}
-            data-testid="btn-guardar"
-          >
-            {saving ? (
-              <>
-                <Download size={16} className="animate-spin" style={{ marginRight: '0.5rem' }} />
-                Guardando...
-              </>
-            ) : (
-              <>
-                <Check size={16} style={{ marginRight: '0.5rem' }} />
-                {isEditing ? 'Actualizar Albarán' : 'Guardar Albarán'}
-              </>
-            )}
-          </button>
-          
+        <div style={{ borderTop: '1px solid hsl(var(--border))', paddingTop: '1rem', marginTop: '1.25rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+          <button type="button" className="btn btn-secondary" onClick={() => navigate('/albaranes')}>Cancelar</button>
           {isEditing && (
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={downloadPdf}
-              disabled={pdfLoading}
-              data-testid="btn-imprimir"
-            >
-              {pdfLoading ? (
-                <Download size={16} className="animate-spin" style={{ marginRight: '0.5rem' }} />
-              ) : (
-                <Printer size={16} style={{ marginRight: '0.5rem' }} />
-              )}
-              {pdfLoading ? 'Generando...' : 'Imprimir'}
+            <button type="button" className="btn btn-secondary" onClick={downloadPdf} disabled={pdfLoading}>
+              {pdfLoading ? <Download size={14} className="animate-spin" /> : <Printer size={14} />}
+              {pdfLoading ? ' Generando...' : ' Imprimir'}
             </button>
           )}
-          
-          <button
-            type="button"
-            className="btn btn-outline"
-            onClick={() => navigate('/albaranes')}
-            data-testid="btn-cancelar"
-          >
-            Cancelar
+          <button type="submit" className="btn btn-primary" disabled={saving} data-testid="btn-guardar">
+            {saving ? 'Guardando...' : (isEditing ? 'Actualizar' : 'Crear') + ' Albaran'}
           </button>
         </div>
       </form>
+      </div>
     </div>
   );
 };
