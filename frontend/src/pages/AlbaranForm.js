@@ -34,6 +34,18 @@ const AlbaranForm = () => {
   // Article search state
   const [articuloSearch, setArticuloSearch] = useState({});
   const [activeSearchIndex, setActiveSearchIndex] = useState(null);
+
+  // Guisante / Tenderometria
+  const isGuisante = selectedContrato?.cultivo?.toLowerCase().includes('guisante');
+  const preciosCalidad = selectedContrato?.precios_calidad || [];
+
+  const getPrecioByTenderometria = (tenderometria) => {
+    if (!tenderometria || !preciosCalidad.length) return null;
+    const val = parseFloat(tenderometria);
+    if (isNaN(val)) return null;
+    const rango = preciosCalidad.find(pc => val >= (parseFloat(pc.min_tenderometria) || 0) && val <= (parseFloat(pc.max_tenderometria) || 999));
+    return rango ? parseFloat(rango.precio) : null;
+  };
   
   // Form data
   const [formData, setFormData] = useState({
@@ -281,7 +293,8 @@ const AlbaranForm = () => {
           unidad: 'kg',
           precio_unitario: contrato.precio || '',
           descuento: 0,
-          total: 0
+          total: 0,
+          tenderometria: ''
         }]
       }));
     } else {
@@ -301,6 +314,14 @@ const AlbaranForm = () => {
     setFormData(prev => {
       const newItems = [...prev.items];
       newItems[index] = { ...newItems[index], [field]: value };
+      
+      // Auto-calculate price from tenderometria for Guisante
+      if (field === 'tenderometria' && isGuisante && preciosCalidad.length > 0) {
+        const precioTend = getPrecioByTenderometria(value);
+        if (precioTend !== null) {
+          newItems[index].precio_unitario = precioTend;
+        }
+      }
       
       const cantidad = parseFloat(newItems[index].cantidad) || 0;
       const precio = parseFloat(newItems[index].precio_unitario) || 0;
@@ -323,7 +344,8 @@ const AlbaranForm = () => {
         unidad: 'kg',
         precio_unitario: selectedContrato?.precio || '',
         descuento: 0,
-        total: 0
+        total: 0,
+        tenderometria: ''
       }]
     }));
   };
@@ -656,7 +678,7 @@ const AlbaranForm = () => {
                   <p style={{ fontWeight: '500', margin: '0.25rem 0 0 0' }}>{selectedContrato.cultivo || '-'}</p>
                 </div>
                 <div>
-                  <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Campaña</span>
+                  <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Campana</span>
                   <p style={{ fontWeight: '500', margin: '0.25rem 0 0 0' }}>{formData.campana || '-'}</p>
                 </div>
                 <div>
@@ -664,6 +686,20 @@ const AlbaranForm = () => {
                   <p style={{ fontWeight: '500', margin: '0.25rem 0 0 0' }}>{selectedContrato.precio ? `${selectedContrato.precio} €/kg` : '-'}</p>
                 </div>
               </div>
+              {isGuisante && preciosCalidad.length > 0 && (
+                <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: '#e3f2fd', borderRadius: '6px', border: '1px solid #1a5276' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#1a5276', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Precios por Tenderometria (Guisante)</span>
+                  <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                    {preciosCalidad.map((pc, idx) => (
+                      <div key={idx} style={{ background: 'white', padding: '0.35rem 0.75rem', borderRadius: '6px', fontSize: '0.8rem', border: '1px solid #90caf9' }}>
+                        <span style={{ fontWeight: '600', color: '#1a5276' }}>{pc.min_tenderometria}-{pc.max_tenderometria}</span>
+                        <span style={{ margin: '0 0.35rem', color: '#64748b' }}>&rarr;</span>
+                        <span style={{ fontWeight: '700', color: '#16a34a' }}>{parseFloat(pc.precio).toFixed(2)} €/kg</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -678,9 +714,10 @@ const AlbaranForm = () => {
               <table style={{ overflow: 'visible' }}>
                 <thead>
                   <tr>
-                    <th style={{ minWidth: '250px' }}>Artículo / Descripción</th>
+                    <th style={{ minWidth: '250px' }}>Articulo / Descripcion</th>
                     <th style={{ width: '120px' }}>Cantidad</th>
                     <th style={{ width: '110px' }}>Unidad</th>
+                    {isGuisante && preciosCalidad.length > 0 && <th style={{ width: '110px' }}>Tend.</th>}
                     <th style={{ width: '100px' }}>Precio Unit.</th>
                     <th style={{ width: '100px' }}>Dto %</th>
                     <th style={{ width: '120px' }}>Total</th>
@@ -923,6 +960,35 @@ const AlbaranForm = () => {
                           </select>
                         )}
                       </td>
+                      {isGuisante && preciosCalidad.length > 0 && (
+                        <td>
+                          {item.es_destare ? (
+                            <input type="text" className="form-input" value="-" disabled style={{ textAlign: 'center', backgroundColor: '#fef2f2', color: '#9ca3af' }} />
+                          ) : (
+                            <div>
+                              <input
+                                type="number"
+                                step="1"
+                                min="0"
+                                className="form-input"
+                                value={item.tenderometria || ''}
+                                onChange={(e) => updateItemTotal(index, 'tenderometria', e.target.value)}
+                                placeholder="Ej: 95"
+                                style={{ textAlign: 'center', fontSize: '0.85rem' }}
+                                data-testid={`item-tenderometria-${index}`}
+                              />
+                              {item.tenderometria && (() => {
+                                const precio = getPrecioByTenderometria(item.tenderometria);
+                                return precio !== null ? (
+                                  <div style={{ fontSize: '0.65rem', color: '#16a34a', fontWeight: '600', textAlign: 'center', marginTop: '2px' }}>{precio.toFixed(2)} €/kg</div>
+                                ) : (
+                                  <div style={{ fontSize: '0.65rem', color: '#dc2626', fontWeight: '600', textAlign: 'center', marginTop: '2px' }}>Fuera de rango</div>
+                                );
+                              })()}
+                            </div>
+                          )}
+                        </td>
+                      )}
                       <td>
                         {item.es_destare ? (
                           <input
@@ -941,6 +1007,8 @@ const AlbaranForm = () => {
                             value={item.precio_unitario}
                             onChange={(e) => updateItemTotal(index, 'precio_unitario', e.target.value)}
                             placeholder="0.00"
+                            readOnly={isGuisante && preciosCalidad.length > 0 && !!item.tenderometria}
+                            style={isGuisante && preciosCalidad.length > 0 && item.tenderometria ? { backgroundColor: '#f0fdf4', fontWeight: '600', color: '#16a34a' } : {}}
                             data-testid={`item-precio-${index}`}
                           />
                         )}
