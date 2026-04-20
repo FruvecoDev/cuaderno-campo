@@ -709,365 +709,139 @@ const AlbaranForm = () => {
           <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>
             Lineas del Albaran
           </h3>
-            
-            <div className="table-container" style={{ marginTop: '0.5rem', overflow: 'visible' }}>
-              <table style={{ overflow: 'visible' }}>
-                <thead>
-                  <tr>
-                    <th style={{ minWidth: '200px' }}>Articulo / Descripcion</th>
-                    <th style={{ minWidth: '110px' }}>Cantidad</th>
-                    <th style={{ minWidth: '80px' }}>Unidad</th>
-                    {isGuisante && preciosCalidad.length > 0 && <th style={{ minWidth: '100px' }}>Tend.</th>}
-                    <th style={{ minWidth: '110px' }}>Precio Unit.</th>
-                    <th style={{ minWidth: '80px' }}>Dto %</th>
-                    <th style={{ minWidth: '120px' }}>Total</th>
-                    <th style={{ width: '40px' }}></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {formData.items.map((item, index) => (
-                    <tr key={index} style={item.es_destare ? { backgroundColor: '#fef2f2' } : {}}>
-                      <td style={{ overflow: 'visible', position: 'relative' }}>
-                        {item.es_destare ? (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#dc2626' }}>
-                            <AlertTriangle size={16} />
-                            <span style={{ fontWeight: '500' }}>{item.descripcion}</span>
-                          </div>
-                        ) : (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', position: 'relative' }}>
+
+          {formData.items.map((item, index) => (
+            <div key={index} style={{
+              background: item.es_destare ? '#fef2f2' : 'hsl(var(--muted) / 0.15)',
+              border: '1px solid ' + (item.es_destare ? '#fca5a5' : 'hsl(var(--border))'),
+              borderRadius: '10px',
+              padding: '1rem',
+              marginBottom: '0.75rem',
+              position: 'relative'
+            }}>
+              {item.es_destare ? (
+                /* Destare row */
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#dc2626', marginBottom: '0.5rem' }}>
+                    <AlertTriangle size={16} />
+                    <span style={{ fontWeight: '600', fontSize: '0.85rem' }}>{item.descripcion}</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: isGuisante && preciosCalidad.length > 0 ? '1fr 80px 100px 120px 80px 140px' : '1fr 80px 120px 80px 140px', gap: '0.5rem', alignItems: 'center' }}>
+                    <div><label style={{ fontSize: '0.65rem', fontWeight: '600', color: '#dc2626', textTransform: 'uppercase' }}>Cantidad</label><input type="text" className="form-input" value={formatCantidad(item.cantidad)} readOnly style={{ textAlign: 'right', backgroundColor: '#fef2f2', color: '#dc2626', fontWeight: '600' }} /></div>
+                    <div><label style={{ fontSize: '0.65rem', fontWeight: '600', color: '#dc2626', textTransform: 'uppercase' }}>Ud.</label><span style={{ display: 'block', padding: '0.5rem', color: '#dc2626', fontWeight: '500' }}>kg</span></div>
+                    {isGuisante && preciosCalidad.length > 0 && <div><label style={{ fontSize: '0.65rem', fontWeight: '600', color: '#9ca3af', textTransform: 'uppercase' }}>Tend.</label><span style={{ display: 'block', padding: '0.5rem', color: '#9ca3af' }}>-</span></div>}
+                    <div><label style={{ fontSize: '0.65rem', fontWeight: '600', color: '#dc2626', textTransform: 'uppercase' }}>Precio</label><input type="text" className="form-input" value={`${(item.precio_unitario || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`} readOnly style={{ backgroundColor: '#fef2f2', color: '#dc2626' }} /></div>
+                    <div><label style={{ fontSize: '0.65rem', fontWeight: '600', color: '#9ca3af', textTransform: 'uppercase' }}>Dto %</label><span style={{ display: 'block', padding: '0.5rem', color: '#9ca3af', textAlign: 'center' }}>-</span></div>
+                    <div><label style={{ fontSize: '0.65rem', fontWeight: '600', color: '#dc2626', textTransform: 'uppercase' }}>Total</label><input type="text" className="form-input" value={`${calculateItemTotal(item).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`} readOnly style={{ textAlign: 'right', backgroundColor: '#fef2f2', color: '#dc2626', fontWeight: '700' }} /></div>
+                  </div>
+                </div>
+              ) : (
+                /* Normal line item */
+                <div>
+                  {/* Row 1: Articulo/Descripcion full width + search */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                    <div>
+                      <label style={{ fontSize: '0.65rem', fontWeight: '700', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem', display: 'block' }}>Articulo / Descripcion</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={item.descripcion}
+                        onChange={(e) => updateItemTotal(index, 'descripcion', e.target.value)}
+                        placeholder="Descripcion del articulo..."
+                        style={{ fontSize: '0.9rem', fontWeight: '500' }}
+                        data-testid={`item-descripcion-${index}`}
+                      />
+                      {articulosCatalogo.length > 0 && (
+                        <div style={{ position: 'relative', marginTop: '0.35rem' }} data-article-search="true">
+                          <div style={{ position: 'relative' }}>
+                            <Search size={14} style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--muted-foreground))' }} />
                             <input
                               type="text"
                               className="form-input"
-                              value={item.descripcion}
-                              onChange={(e) => updateItemTotal(index, 'descripcion', e.target.value)}
-                              placeholder="Descripción del artículo..."
-                              style={{ fontSize: '0.875rem', fontWeight: '500' }}
-                              data-testid={`item-descripcion-${index}`}
+                              placeholder="Buscar articulo en catalogo..."
+                              value={articuloSearch[index] || ''}
+                              onChange={(e) => { setArticuloSearch(prev => ({ ...prev, [index]: e.target.value })); setActiveSearchIndex(index); }}
+                              onFocus={() => setActiveSearchIndex(index)}
+                              style={{ fontSize: '0.8rem', paddingLeft: '28px', backgroundColor: item.articulo_id ? '#f0fdf4' : 'white' }}
+                              data-testid={`item-buscar-articulo-${index}`}
                             />
-                            {articulosCatalogo.length > 0 && (
-                              <div style={{ position: 'relative' }} data-article-search="true" ref={el => { if (el) el._searchRef = el; }}>
-                                <div style={{ position: 'relative' }}>
-                                  <Search size={14} style={{ 
-                                    position: 'absolute', 
-                                    left: '8px', 
-                                    top: '50%', 
-                                    transform: 'translateY(-50%)',
-                                    color: 'hsl(var(--muted-foreground))'
-                                  }} />
-                                  <input
-                                    type="text"
-                                    className="form-input"
-                                    placeholder="Buscar artículo..."
-                                    value={articuloSearch[index] || ''}
-                                    onChange={(e) => {
-                                      setArticuloSearch(prev => ({ ...prev, [index]: e.target.value }));
-                                      setActiveSearchIndex(index);
-                                    }}
-                                    onFocus={(e) => {
-                                      setActiveSearchIndex(index);
-                                      // Store position for fixed dropdown
-                                      const rect = e.target.getBoundingClientRect();
-                                      e.target.dataset.dropdownTop = rect.bottom;
-                                      e.target.dataset.dropdownLeft = rect.left;
-                                      e.target.dataset.dropdownWidth = rect.width;
-                                    }}
-                                    style={{ 
-                                      fontSize: '0.8rem', 
-                                      paddingLeft: '28px',
-                                      backgroundColor: item.articulo_id ? '#f0fdf4' : 'white'
-                                    }}
-                                    data-testid={`item-buscar-articulo-${index}`}
-                                  />
-                                  {articuloSearch[index] && (
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setArticuloSearch(prev => ({ ...prev, [index]: '' }));
-                                        setActiveSearchIndex(null);
-                                      }}
-                                      style={{
-                                        position: 'absolute',
-                                        right: '8px',
-                                        top: '50%',
-                                        transform: 'translateY(-50%)',
-                                        background: 'none',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        padding: '2px',
-                                        color: 'hsl(var(--muted-foreground))'
-                                      }}
-                                    >
-                                      <X size={14} />
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                            {activeSearchIndex === index && articulosCatalogo.length > 0 && (() => {
-                              const searchEl = document.querySelector(`[data-testid="item-buscar-articulo-${index}"]`);
-                              const rect = searchEl?.getBoundingClientRect();
-                              return rect ? (
-                                <div style={{
-                                  position: 'fixed',
-                                  top: rect.bottom + 2,
-                                  left: rect.left,
-                                  width: rect.width,
-                                  backgroundColor: 'white',
-                                  border: '1px solid hsl(var(--border))',
-                                  borderRadius: '6px',
-                                  boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
-                                  maxHeight: '250px',
-                                  overflowY: 'auto',
-                                  zIndex: 1200
-                                }}>
-                                    {(() => {
-                                      const searchTerm = (articuloSearch[index] || '').toLowerCase();
-                                      const filteredArticulos = articulosCatalogo.filter(art => 
-                                        art.codigo?.toLowerCase().includes(searchTerm) ||
-                                        art.nombre?.toLowerCase().includes(searchTerm) ||
-                                        art.categoria?.toLowerCase().includes(searchTerm)
-                                      );
-                                      
-                                      // Agrupar por categoría
-                                      const grouped = filteredArticulos.reduce((acc, art) => {
-                                        const cat = art.categoria || 'General';
-                                        if (!acc[cat]) acc[cat] = [];
-                                        acc[cat].push(art);
-                                        return acc;
-                                      }, {});
-                                      
-                                      if (filteredArticulos.length === 0) {
-                                        return (
-                                          <div style={{ padding: '12px', textAlign: 'center', color: 'hsl(var(--muted-foreground))' }}>
-                                            No se encontraron artículos
-                                          </div>
-                                        );
-                                      }
-                                      
-                                      return Object.entries(grouped).map(([categoria, arts]) => (
-                                        <div key={categoria}>
-                                          <div style={{ 
-                                            padding: '6px 12px', 
-                                            backgroundColor: 'hsl(var(--muted))',
-                                            fontSize: '0.7rem',
-                                            fontWeight: '600',
-                                            textTransform: 'uppercase',
-                                            color: 'hsl(var(--muted-foreground))',
-                                            position: 'sticky',
-                                            top: 0
-                                          }}>
-                                            {categoria}
-                                          </div>
-                                          {arts.map(art => (
-                                            <div
-                                              key={art._id}
-                                              onClick={() => {
-                                                handleArticuloSelect(index, art._id);
-                                                setArticuloSearch(prev => ({ ...prev, [index]: art.nombre }));
-                                                setActiveSearchIndex(null);
-                                              }}
-                                              style={{
-                                                padding: '8px 12px',
-                                                cursor: 'pointer',
-                                                borderBottom: '1px solid hsl(var(--border))',
-                                                transition: 'background-color 0.15s'
-                                              }}
-                                              onMouseEnter={(e) => e.target.style.backgroundColor = 'hsl(var(--primary) / 0.1)'}
-                                              onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                                              data-testid={`articulo-option-${art._id}`}
-                                            >
-                                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <div>
-                                                  <span style={{ fontWeight: '500', fontSize: '0.85rem' }}>{art.nombre}</span>
-                                                  <span style={{ 
-                                                    marginLeft: '8px', 
-                                                    fontSize: '0.75rem', 
-                                                    color: 'hsl(var(--muted-foreground))',
-                                                    backgroundColor: 'hsl(var(--muted))',
-                                                    padding: '1px 6px',
-                                                    borderRadius: '4px'
-                                                  }}>
-                                                    {art.codigo}
-                                                  </span>
-                                                </div>
-                                                <span style={{ fontWeight: '600', color: 'hsl(var(--primary))', fontSize: '0.85rem' }}>
-                                                  {(art.precio_unitario || 0).toFixed(2)} €/{art.unidad_medida || 'ud'}
-                                                </span>
-                                              </div>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      ));
-                                    })()}
-                                  </div>
-                                ) : null;
-                            })()}
-                            {item.articulo_id && (
-                              <div style={{ 
-                                fontSize: '0.7rem', 
-                                color: '#16a34a',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '4px'
-                              }}>
-                                <Check size={12} />
-                                Artículo seleccionado del catálogo
-                              </div>
+                            {articuloSearch[index] && (
+                              <button type="button" onClick={() => { setArticuloSearch(prev => ({ ...prev, [index]: '' })); setActiveSearchIndex(null); }} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: 'hsl(var(--muted-foreground))' }}><X size={14} /></button>
                             )}
                           </div>
-                        )}
-                      </td>
-                      <td>
-                        {item.es_destare ? (
-                          <input
-                            type="text"
-                            className="form-input"
-                            value={formatCantidad(item.cantidad)}
-                            readOnly
-                            style={{ textAlign: 'right', backgroundColor: '#fef2f2', color: '#dc2626', fontWeight: '500' }}
-                          />
-                        ) : (
-                          <input
-                            type="text"
-                            className="form-input"
-                            value={formatCantidad(item.cantidad)}
-                            onChange={(e) => {
-                              const rawValue = e.target.value.replace(/[^\d.,]/g, '');
-                              const numValue = Math.round(parseSpanishNumber(rawValue));
-                              updateItemTotal(index, 'cantidad', numValue || rawValue);
-                            }}
-                            placeholder="0"
-                            style={{ textAlign: 'right' }}
-                            data-testid={`item-cantidad-${index}`}
-                          />
-                        )}
-                      </td>
-                      <td>
-                        {item.es_destare ? (
-                          <span style={{ color: '#dc2626' }}>kg</span>
-                        ) : (
-                          <select
-                            className="form-select"
-                            value={item.unidad}
-                            onChange={(e) => updateItemTotal(index, 'unidad', e.target.value)}
-                            style={{ minWidth: '90px', width: '100%' }}
-                            data-testid={`item-unidad-${index}`}
-                          >
-                            <option value="kg">kg</option>
-                            <option value="ud">ud</option>
-                            <option value="l">l</option>
-                            <option value="m">m</option>
-                          </select>
-                        )}
-                      </td>
-                      {isGuisante && preciosCalidad.length > 0 && (
-                        <td>
-                          {item.es_destare ? (
-                            <input type="text" className="form-input" value="-" disabled style={{ textAlign: 'center', backgroundColor: '#fef2f2', color: '#9ca3af' }} />
-                          ) : (
-                            <div>
-                              <input
-                                type="number"
-                                step="1"
-                                min="0"
-                                className="form-input"
-                                value={item.tenderometria || ''}
-                                onChange={(e) => updateItemTotal(index, 'tenderometria', e.target.value)}
-                                placeholder="Ej: 95"
-                                style={{ textAlign: 'center', fontSize: '0.85rem' }}
-                                data-testid={`item-tenderometria-${index}`}
-                              />
-                              {item.tenderometria && (() => {
-                                const precio = getPrecioByTenderometria(item.tenderometria);
-                                return precio !== null ? (
-                                  <div style={{ fontSize: '0.65rem', color: '#16a34a', fontWeight: '600', textAlign: 'center', marginTop: '2px' }}>{precio.toFixed(2)} €/kg</div>
-                                ) : (
-                                  <div style={{ fontSize: '0.65rem', color: '#dc2626', fontWeight: '600', textAlign: 'center', marginTop: '2px' }}>Fuera de rango</div>
-                                );
-                              })()}
-                            </div>
-                          )}
-                        </td>
+                        </div>
                       )}
-                      <td>
-                        {item.es_destare ? (
-                          <input
-                            type="text"
-                            className="form-input"
-                            value={`${(item.precio_unitario || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`}
-                            readOnly
-                            style={{ backgroundColor: '#fef2f2', color: '#dc2626' }}
-                          />
-                        ) : (
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            className="form-input"
-                            value={item.precio_unitario}
-                            onChange={(e) => updateItemTotal(index, 'precio_unitario', e.target.value)}
-                            placeholder="0.00"
-                            readOnly={isGuisante && preciosCalidad.length > 0 && !!item.tenderometria}
-                            style={isGuisante && preciosCalidad.length > 0 && item.tenderometria ? { backgroundColor: '#f0fdf4', fontWeight: '600', color: '#16a34a' } : {}}
-                            data-testid={`item-precio-${index}`}
-                          />
-                        )}
-                      </td>
-                      <td>
-                        {item.es_destare ? (
-                          <input
-                            type="text"
-                            className="form-input"
-                            value="-"
-                            disabled
-                            style={{ textAlign: 'center', backgroundColor: '#fef2f2', color: '#9ca3af', minWidth: '70px' }}
-                          />
-                        ) : (
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            max="100"
-                            className="form-input"
-                            value={item.descuento || ''}
-                            onChange={(e) => updateItemTotal(index, 'descuento', parseFloat(e.target.value) || 0)}
-                            placeholder="0"
-                            style={{ textAlign: 'center', minWidth: '70px' }}
-                            data-testid={`item-dto-${index}`}
-                          />
-                        )}
-                      </td>
-                      <td>
-                        <input
-                          type="text"
-                          className="form-input"
-                          value={`${calculateItemTotal(item).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`}
-                          disabled
-                          style={{ 
-                            textAlign: 'right', 
-                            fontWeight: '500',
-                            backgroundColor: item.es_destare ? '#fef2f2' : '#f5f5f5',
-                            color: item.es_destare ? '#dc2626' : 'inherit'
-                          }}
-                        />
-                      </td>
-                      <td>
-                        {!item.es_destare && formData.items.filter(i => !i.es_destare).length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeItem(index)}
-                            className="btn btn-sm btn-danger"
-                            style={{ padding: '0.25rem' }}
-                          >
-                            <MinusCircle size={16} />
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      {activeSearchIndex === index && articulosCatalogo.length > 0 && (() => {
+                        const searchEl = document.querySelector(`[data-testid="item-buscar-articulo-${index}"]`);
+                        const rect = searchEl?.getBoundingClientRect();
+                        return rect ? (
+                          <div style={{ position: 'fixed', top: rect.bottom + 2, left: rect.left, width: rect.width, backgroundColor: 'white', border: '1px solid hsl(var(--border))', borderRadius: '6px', boxShadow: '0 8px 24px rgba(0,0,0,0.2)', maxHeight: '250px', overflowY: 'auto', zIndex: 1200 }}>
+                            {(() => {
+                              const searchTerm = (articuloSearch[index] || '').toLowerCase();
+                              const filteredArticulos = articulosCatalogo.filter(art => art.codigo?.toLowerCase().includes(searchTerm) || art.nombre?.toLowerCase().includes(searchTerm) || art.categoria?.toLowerCase().includes(searchTerm));
+                              const grouped = filteredArticulos.reduce((acc, art) => { const cat = art.categoria || 'General'; if (!acc[cat]) acc[cat] = []; acc[cat].push(art); return acc; }, {});
+                              if (filteredArticulos.length === 0) return <div style={{ padding: '12px', textAlign: 'center', color: 'hsl(var(--muted-foreground))' }}>No se encontraron articulos</div>;
+                              return Object.entries(grouped).map(([categoria, arts]) => (
+                                <div key={categoria}>
+                                  <div style={{ padding: '6px 12px', backgroundColor: 'hsl(var(--muted))', fontSize: '0.7rem', fontWeight: '600', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))', position: 'sticky', top: 0 }}>{categoria}</div>
+                                  {arts.map(art => (
+                                    <div key={art._id} onClick={() => { handleArticuloSelect(index, art._id); setArticuloSearch(prev => ({ ...prev, [index]: art.nombre })); setActiveSearchIndex(null); }} style={{ padding: '8px 12px', cursor: 'pointer', borderBottom: '1px solid hsl(var(--border))', transition: 'background-color 0.15s' }} onMouseEnter={(e) => e.target.style.backgroundColor = 'hsl(var(--primary) / 0.1)'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'} data-testid={`articulo-option-${art._id}`}>
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <div><span style={{ fontWeight: '500', fontSize: '0.85rem' }}>{art.nombre}</span><span style={{ marginLeft: '8px', fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', backgroundColor: 'hsl(var(--muted))', padding: '1px 6px', borderRadius: '4px' }}>{art.codigo}</span></div>
+                                        <span style={{ fontWeight: '600', color: 'hsl(var(--primary))', fontSize: '0.85rem' }}>{(art.precio_unitario || 0).toFixed(2)} €/{art.unidad_medida || 'ud'}</span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ));
+                            })()}
+                          </div>
+                        ) : null;
+                      })()}
+                      {item.articulo_id && <div style={{ fontSize: '0.7rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '0.25rem' }}><Check size={12} /> Articulo seleccionado del catalogo</div>}
+                    </div>
+                    {formData.items.filter(i => !i.es_destare).length > 1 && (
+                      <div style={{ paddingTop: '1.2rem' }}>
+                        <button type="button" onClick={() => removeItem(index)} style={{ background: 'hsl(var(--destructive) / 0.1)', border: '1px solid hsl(var(--destructive) / 0.3)', borderRadius: '6px', cursor: 'pointer', padding: '0.4rem', color: 'hsl(var(--destructive))' }} title="Eliminar linea"><MinusCircle size={16} /></button>
+                      </div>
+                    )}
+                  </div>
+                  {/* Row 2: Numeric fields */}
+                  <div style={{ display: 'grid', gridTemplateColumns: isGuisante && preciosCalidad.length > 0 ? '1fr 80px 110px 120px 80px 150px' : '1fr 80px 120px 80px 150px', gap: '0.5rem', alignItems: 'start' }}>
+                    <div>
+                      <label style={{ fontSize: '0.65rem', fontWeight: '700', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cantidad</label>
+                      <input type="text" className="form-input" value={formatCantidad(item.cantidad)} onChange={(e) => { const rawValue = e.target.value.replace(/[^\d.,]/g, ''); const numValue = Math.round(parseSpanishNumber(rawValue)); updateItemTotal(index, 'cantidad', numValue || rawValue); }} placeholder="0" style={{ textAlign: 'right', fontSize: '0.9rem', fontWeight: '600' }} data-testid={`item-cantidad-${index}`} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.65rem', fontWeight: '700', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Unidad</label>
+                      <select className="form-select" value={item.unidad} onChange={(e) => updateItemTotal(index, 'unidad', e.target.value)} style={{ width: '100%' }} data-testid={`item-unidad-${index}`}>
+                        <option value="kg">kg</option><option value="ud">ud</option><option value="l">l</option><option value="m">m</option>
+                      </select>
+                    </div>
+                    {isGuisante && preciosCalidad.length > 0 && (
+                      <div>
+                        <label style={{ fontSize: '0.65rem', fontWeight: '700', color: '#1a5276', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tenderom.</label>
+                        <input type="number" step="1" min="0" className="form-input" value={item.tenderometria || ''} onChange={(e) => updateItemTotal(index, 'tenderometria', e.target.value)} placeholder="Ej: 95" style={{ textAlign: 'center', fontSize: '0.9rem', fontWeight: '600' }} data-testid={`item-tenderometria-${index}`} />
+                        {item.tenderometria && (() => { const precio = getPrecioByTenderometria(item.tenderometria); return precio !== null ? <div style={{ fontSize: '0.7rem', color: '#16a34a', fontWeight: '600', textAlign: 'center', marginTop: '2px' }}>{precio.toFixed(2)} €/kg</div> : <div style={{ fontSize: '0.7rem', color: '#dc2626', fontWeight: '600', textAlign: 'center', marginTop: '2px' }}>Fuera de rango</div>; })()}
+                      </div>
+                    )}
+                    <div>
+                      <label style={{ fontSize: '0.65rem', fontWeight: '700', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Precio Unit.</label>
+                      <input type="number" step="0.01" min="0" className="form-input" value={item.precio_unitario} onChange={(e) => updateItemTotal(index, 'precio_unitario', e.target.value)} placeholder="0.00" readOnly={isGuisante && preciosCalidad.length > 0 && !!item.tenderometria} style={isGuisante && preciosCalidad.length > 0 && item.tenderometria ? { backgroundColor: '#f0fdf4', fontWeight: '700', color: '#16a34a', fontSize: '0.9rem' } : { fontSize: '0.9rem', fontWeight: '600' }} data-testid={`item-precio-${index}`} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.65rem', fontWeight: '700', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Dto %</label>
+                      <input type="number" step="0.01" min="0" max="100" className="form-input" value={item.descuento || ''} onChange={(e) => updateItemTotal(index, 'descuento', parseFloat(e.target.value) || 0)} placeholder="0" style={{ textAlign: 'center', fontSize: '0.9rem' }} data-testid={`item-dto-${index}`} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.65rem', fontWeight: '700', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total</label>
+                      <input type="text" className="form-input" value={`${calculateItemTotal(item).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`} disabled style={{ textAlign: 'right', fontWeight: '700', fontSize: '0.9rem', backgroundColor: '#f5f5f5' }} />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
+          ))}
             
             {/* Resumen de Cálculo */}
             {formData.kilos_destare > 0 && (
