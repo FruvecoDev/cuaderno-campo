@@ -319,7 +319,7 @@ const AlbaranForm = () => {
       if (field === 'tenderometria' && isGuisante && preciosCalidad.length > 0) {
         const precioTend = getPrecioByTenderometria(value);
         if (precioTend !== null) {
-          newItems[index].precio_unitario = precioTend;
+          newItems[index].precio_unitario = Math.round(precioTend * 100) / 100;
         }
       }
       
@@ -489,7 +489,7 @@ const AlbaranForm = () => {
 
   return (
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', backdropFilter: 'blur(4px)' }} onClick={() => navigate('/albaranes')}>
-      <div className="card" style={{ maxWidth: '960px', width: '100%', height: '85vh', display: 'flex', flexDirection: 'column', position: 'relative', padding: '2rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()} data-testid="albaran-form-page">
+      <div className="card" style={{ maxWidth: '1100px', width: '100%', height: '85vh', display: 'flex', flexDirection: 'column', position: 'relative', padding: '2rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()} data-testid="albaran-form-page">
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '2px solid hsl(var(--border))' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -714,14 +714,14 @@ const AlbaranForm = () => {
               <table style={{ overflow: 'visible' }}>
                 <thead>
                   <tr>
-                    <th style={{ minWidth: '250px' }}>Articulo / Descripcion</th>
-                    <th style={{ width: '120px' }}>Cantidad</th>
-                    <th style={{ width: '110px' }}>Unidad</th>
-                    {isGuisante && preciosCalidad.length > 0 && <th style={{ width: '110px' }}>Tend.</th>}
-                    <th style={{ width: '100px' }}>Precio Unit.</th>
-                    <th style={{ width: '100px' }}>Dto %</th>
-                    <th style={{ width: '120px' }}>Total</th>
-                    <th style={{ width: '50px' }}></th>
+                    <th style={{ minWidth: '200px' }}>Articulo / Descripcion</th>
+                    <th style={{ minWidth: '110px' }}>Cantidad</th>
+                    <th style={{ minWidth: '80px' }}>Unidad</th>
+                    {isGuisante && preciosCalidad.length > 0 && <th style={{ minWidth: '100px' }}>Tend.</th>}
+                    <th style={{ minWidth: '110px' }}>Precio Unit.</th>
+                    <th style={{ minWidth: '80px' }}>Dto %</th>
+                    <th style={{ minWidth: '120px' }}>Total</th>
+                    <th style={{ width: '40px' }}></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1020,7 +1020,7 @@ const AlbaranForm = () => {
                             className="form-input"
                             value="-"
                             disabled
-                            style={{ textAlign: 'center', backgroundColor: '#fef2f2', color: '#9ca3af', minWidth: '90px' }}
+                            style={{ textAlign: 'center', backgroundColor: '#fef2f2', color: '#9ca3af', minWidth: '70px' }}
                           />
                         ) : (
                           <input
@@ -1032,7 +1032,7 @@ const AlbaranForm = () => {
                             value={item.descuento || ''}
                             onChange={(e) => updateItemTotal(index, 'descuento', parseFloat(e.target.value) || 0)}
                             placeholder="0"
-                            style={{ textAlign: 'center', minWidth: '90px' }}
+                            style={{ textAlign: 'center', minWidth: '70px' }}
                             data-testid={`item-dto-${index}`}
                           />
                         )}
