@@ -467,7 +467,7 @@ const AlbaranForm = () => {
 
   return (
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', backdropFilter: 'blur(4px)' }} onClick={() => navigate('/albaranes')}>
-      <div className="card" style={{ maxWidth: '960px', width: '100%', height: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative', padding: '2rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()} data-testid="albaran-form-page">
+      <div className="card" style={{ maxWidth: '960px', width: '100%', height: '85vh', display: 'flex', flexDirection: 'column', position: 'relative', padding: '2rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()} data-testid="albaran-form-page">
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '2px solid hsl(var(--border))' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -674,8 +674,8 @@ const AlbaranForm = () => {
             Lineas del Albaran
           </h3>
             
-            <div className="table-container overflow-visible" style={{ marginTop: '0.5rem' }}>
-              <table>
+            <div className="table-container" style={{ marginTop: '0.5rem', overflow: 'visible' }}>
+              <table style={{ overflow: 'visible' }}>
                 <thead>
                   <tr>
                     <th style={{ minWidth: '250px' }}>Artículo / Descripción</th>
@@ -708,7 +708,7 @@ const AlbaranForm = () => {
                               data-testid={`item-descripcion-${index}`}
                             />
                             {articulosCatalogo.length > 0 && (
-                              <div style={{ position: 'relative' }} data-article-search="true">
+                              <div style={{ position: 'relative' }} data-article-search="true" ref={el => { if (el) el._searchRef = el; }}>
                                 <div style={{ position: 'relative' }}>
                                   <Search size={14} style={{ 
                                     position: 'absolute', 
@@ -726,7 +726,14 @@ const AlbaranForm = () => {
                                       setArticuloSearch(prev => ({ ...prev, [index]: e.target.value }));
                                       setActiveSearchIndex(index);
                                     }}
-                                    onFocus={() => setActiveSearchIndex(index)}
+                                    onFocus={(e) => {
+                                      setActiveSearchIndex(index);
+                                      // Store position for fixed dropdown
+                                      const rect = e.target.getBoundingClientRect();
+                                      e.target.dataset.dropdownTop = rect.bottom;
+                                      e.target.dataset.dropdownLeft = rect.left;
+                                      e.target.dataset.dropdownWidth = rect.width;
+                                    }}
                                     style={{ 
                                       fontSize: '0.8rem', 
                                       paddingLeft: '28px',
@@ -757,20 +764,25 @@ const AlbaranForm = () => {
                                     </button>
                                   )}
                                 </div>
-                                {activeSearchIndex === index && (
-                                  <div style={{
-                                    position: 'absolute',
-                                    top: '100%',
-                                    left: 0,
-                                    right: 0,
-                                    backgroundColor: 'white',
-                                    border: '1px solid hsl(var(--border))',
-                                    borderRadius: '6px',
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                                    maxHeight: '250px',
-                                    overflowY: 'auto',
-                                    zIndex: 100
-                                  }}>
+                              </div>
+                            )}
+                            {activeSearchIndex === index && articulosCatalogo.length > 0 && (() => {
+                              const searchEl = document.querySelector(`[data-testid="item-buscar-articulo-${index}"]`);
+                              const rect = searchEl?.getBoundingClientRect();
+                              return rect ? (
+                                <div style={{
+                                  position: 'fixed',
+                                  top: rect.bottom + 2,
+                                  left: rect.left,
+                                  width: rect.width,
+                                  backgroundColor: 'white',
+                                  border: '1px solid hsl(var(--border))',
+                                  borderRadius: '6px',
+                                  boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+                                  maxHeight: '250px',
+                                  overflowY: 'auto',
+                                  zIndex: 1200
+                                }}>
                                     {(() => {
                                       const searchTerm = (articuloSearch[index] || '').toLowerCase();
                                       const filteredArticulos = articulosCatalogo.filter(art => 
@@ -851,9 +863,8 @@ const AlbaranForm = () => {
                                       ));
                                     })()}
                                   </div>
-                                )}
-                              </div>
-                            )}
+                                ) : null;
+                            })()}
                             {item.articulo_id && (
                               <div style={{ 
                                 fontSize: '0.7rem', 
