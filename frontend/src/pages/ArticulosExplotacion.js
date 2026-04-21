@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, Filter, Search, X, Package, Check, XCircle, DollarSign, Settings } from 'lucide-react';
+import { Plus, Edit2, Trash2, Filter, Search, X, Package, Check, XCircle, DollarSign, Settings, Eye } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
@@ -51,6 +51,7 @@ const ArticulosExplotacion = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [modalTab, setModalTab] = useState('general');
   const [error, setError] = useState(null);
   const { token } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
@@ -182,6 +183,7 @@ const ArticulosExplotacion = () => {
       activo: articulo.activo !== false
     });
     setShowForm(true);
+    setModalTab('general');
   };
 
   const handleDelete = async (id) => {
@@ -242,7 +244,7 @@ const ArticulosExplotacion = () => {
           {canCreate && (
             <PermissionButton
               className="btn btn-primary"
-              onClick={() => { resetForm(); setEditingId(null); setShowForm(true); }}
+              onClick={() => { resetForm(); setEditingId(null); setModalTab('general'); setShowForm(true); }}
               action="create"
               data-testid="btn-nuevo-articulo"
             >
@@ -318,181 +320,72 @@ const ArticulosExplotacion = () => {
         </div>
       )}
 
-      {/* Formulario */}
+      {/* Modal Formulario */}
       {showForm && (
-        <div className="card" style={{ marginBottom: '1.5rem' }}>
-          <h2 className="card-title">
-            {editingId ? 'Editar Artículo' : 'Nuevo Artículo'}
-          </h2>
-          <form onSubmit={handleSubmit}>
-            <div className="grid-3">
-              <div className="form-group">
-                <label className="form-label">
-                  Código {editingId ? '' : <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', fontWeight: 'normal' }}>(Auto-generado)</span>}
-                </label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={editingId ? formData.codigo : 'Se generará automáticamente'}
-                  onChange={(e) => editingId && setFormData({...formData, codigo: e.target.value.toUpperCase()})}
-                  placeholder="Auto-generado"
-                  readOnly={!editingId}
-                  disabled={!editingId}
-                  style={!editingId ? { backgroundColor: 'hsl(var(--muted))', color: 'hsl(var(--muted-foreground))' } : {}}
-                  data-testid="input-codigo"
-                />
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', backdropFilter: 'blur(4px)' }} onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }}>
+          <div className="card" style={{ maxWidth: '960px', width: '100%', height: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative', padding: '2rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '2px solid hsl(var(--border))' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'hsl(var(--primary) / 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Package size={20} style={{ color: 'hsl(var(--primary))' }} /></div>
+                <div><h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '700' }}>{editingId ? 'Editar' : 'Nuevo'} Articulo</h2><span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>{formData.codigo || 'Auto-generado'} {formData.nombre && `- ${formData.nombre}`}</span></div>
               </div>
-              <div className="form-group">
-                <label className="form-label">Nombre <span style={{ color: 'red' }}>*</span></label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.nombre}
-                  onChange={(e) => setFormData({...formData, nombre: e.target.value})}
-                  placeholder="Nombre del artículo"
-                  required
-                  data-testid="input-nombre"
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Categoría</label>
-                <select
-                  className="form-select"
-                  value={formData.categoria}
-                  onChange={(e) => setFormData({...formData, categoria: e.target.value})}
-                  data-testid="select-categoria"
-                >
-                  <option value="General">General</option>
-                  {CATEGORIAS.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-              </div>
+              <button onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }} className="config-modal-close-btn"><X size={18} /></button>
             </div>
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: '0', marginBottom: '1.5rem', borderBottom: '2px solid hsl(var(--border))' }}>
+              {[
+                { key: 'general', label: 'Datos Generales', icon: <Package size={14} /> },
+                { key: 'stock', label: 'Stock y Precios', icon: <DollarSign size={14} /> }
+              ].map(tab => (
+                <button key={tab.key} type="button" onClick={() => setModalTab(tab.key)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1rem', fontSize: '0.8rem', fontWeight: modalTab === tab.key ? '700' : '500', color: modalTab === tab.key ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))', background: 'none', border: 'none', borderBottom: modalTab === tab.key ? '2px solid hsl(var(--primary))' : '2px solid transparent', cursor: 'pointer', whiteSpace: 'nowrap', marginBottom: '-2px' }}>{tab.icon}{tab.label}</button>
+              ))}
+            </div>
+            {/* Form */}
+            <form onSubmit={handleSubmit} style={{ flex: 1, overflow: 'auto', minHeight: 0, paddingRight: '1rem' }}>
+              {modalTab === 'general' && (<div>
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Identificacion</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr 1fr', gap: '0.75rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Codigo</label><input type="text" className="form-input" value={editingId ? formData.codigo : 'Auto'} readOnly disabled style={{ backgroundColor: 'hsl(var(--muted))', textAlign: 'center' }} data-testid="input-codigo" /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Nombre *</label><input type="text" className="form-input" value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} required placeholder="Nombre del articulo" data-testid="input-nombre" /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Categoria</label><select className="form-select" value={formData.categoria} onChange={(e) => setFormData({...formData, categoria: e.target.value})} data-testid="select-categoria"><option value="General">General</option>{CATEGORIAS.map(cat => <option key={cat} value={cat}>{cat}</option>)}</select></div>
+                  </div>
+                </div>
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Detalles</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Unidad de Medida</label><select className="form-select" value={formData.unidad_medida} onChange={(e) => setFormData({...formData, unidad_medida: e.target.value})}>{UNIDADES.map(u => <option key={u} value={u}>{u}</option>)}</select></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Proveedor Habitual</label><input type="text" className="form-input" value={formData.proveedor_habitual} onChange={(e) => setFormData({...formData, proveedor_habitual: e.target.value})} placeholder="Nombre del proveedor" /></div>
+                  </div>
+                </div>
+                <div className="form-group"><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Descripcion</label><textarea className="form-input" rows="2" value={formData.descripcion} onChange={(e) => setFormData({...formData, descripcion: e.target.value})} style={{ fontSize: '0.85rem', resize: 'vertical' }} placeholder="Descripcion del articulo..." /></div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '1.25rem', alignItems: 'start' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Observaciones</label><textarea className="form-input" rows="2" value={formData.observaciones} onChange={(e) => setFormData({...formData, observaciones: e.target.value})} style={{ fontSize: '0.85rem', resize: 'vertical' }} /></div>
+                  <div style={{ paddingTop: '1.5rem' }}><label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.5rem 1rem', borderRadius: '8px', background: formData.activo ? 'hsl(142 76% 36%/0.1)' : 'hsl(var(--muted))', border: '1px solid ' + (formData.activo ? 'hsl(142 76% 36%/0.3)' : 'hsl(var(--border))') }}><input type="checkbox" checked={formData.activo} onChange={(e) => setFormData({...formData, activo: e.target.checked})} style={{ width: '16px', height: '16px' }} /><span style={{ fontWeight: '600', fontSize: '0.85rem', color: formData.activo ? 'hsl(142 76% 36%)' : 'hsl(var(--muted-foreground))' }}>{formData.activo ? 'Activo' : 'Inactivo'}</span></label></div>
+                </div>
+              </div>)}
 
-            <div className="form-group">
-              <label className="form-label">Descripción</label>
-              <textarea
-                className="form-input"
-                rows={2}
-                value={formData.descripcion}
-                onChange={(e) => setFormData({...formData, descripcion: e.target.value})}
-                placeholder="Descripción del artículo..."
-              />
-            </div>
+              {modalTab === 'stock' && (<div>
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Precios</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Precio Unitario (EUR)</label><input type="number" step="0.01" min="0" className="form-input" value={formData.precio_unitario} onChange={(e) => setFormData({...formData, precio_unitario: e.target.value})} placeholder="0.00" style={{ fontWeight: '600' }} /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>IVA (%)</label><select className="form-select" value={formData.iva} onChange={(e) => setFormData({...formData, iva: e.target.value})}><option value="0">0%</option><option value="4">4%</option><option value="10">10%</option><option value="21">21%</option></select></div>
+                  </div>
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Control de Stock</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Stock Actual</label><input type="number" step="0.01" min="0" className="form-input" value={formData.stock_actual} onChange={(e) => setFormData({...formData, stock_actual: e.target.value})} placeholder="Cantidad en stock" style={{ fontWeight: '600' }} /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Stock Minimo (alerta)</label><input type="number" step="0.01" min="0" className="form-input" value={formData.stock_minimo} onChange={(e) => setFormData({...formData, stock_minimo: e.target.value})} placeholder="Alerta stock bajo" /></div>
+                  </div>
+                </div>
+              </div>)}
 
-            <div className="grid-4">
-              <div className="form-group">
-                <label className="form-label">Unidad de Medida</label>
-                <select
-                  className="form-select"
-                  value={formData.unidad_medida}
-                  onChange={(e) => setFormData({...formData, unidad_medida: e.target.value})}
-                >
-                  {UNIDADES.map(u => (
-                    <option key={u} value={u}>{u}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Precio Unitario (€)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  className="form-input"
-                  value={formData.precio_unitario}
-                  onChange={(e) => setFormData({...formData, precio_unitario: e.target.value})}
-                  placeholder="0.00"
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">IVA (%)</label>
-                <select
-                  className="form-select"
-                  value={formData.iva}
-                  onChange={(e) => setFormData({...formData, iva: e.target.value})}
-                >
-                  <option value="0">0%</option>
-                  <option value="4">4%</option>
-                  <option value="10">10%</option>
-                  <option value="21">21%</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Proveedor Habitual</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.proveedor_habitual}
-                  onChange={(e) => setFormData({...formData, proveedor_habitual: e.target.value})}
-                  placeholder="Nombre del proveedor"
-                />
-              </div>
-            </div>
-
-            <div className="grid-3">
-              <div className="form-group">
-                <label className="form-label">Stock Actual</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  className="form-input"
-                  value={formData.stock_actual}
-                  onChange={(e) => setFormData({...formData, stock_actual: e.target.value})}
-                  placeholder="Cantidad en stock"
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Stock Mínimo</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  className="form-input"
-                  value={formData.stock_minimo}
-                  onChange={(e) => setFormData({...formData, stock_minimo: e.target.value})}
-                  placeholder="Alerta stock bajo"
-                />
-              </div>
-              <div className="form-group" style={{ display: 'flex', alignItems: 'center', paddingTop: '1.75rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={formData.activo}
-                    onChange={(e) => setFormData({...formData, activo: e.target.checked})}
-                    style={{ width: '18px', height: '18px' }}
-                  />
-                  <span>Artículo Activo</span>
-                </label>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Observaciones</label>
-              <textarea
-                className="form-input"
-                rows={2}
-                value={formData.observaciones}
-                onChange={(e) => setFormData({...formData, observaciones: e.target.value})}
-                placeholder="Notas adicionales..."
-              />
-            </div>
-
-            <div className="flex gap-2">
-              <button type="submit" className="btn btn-primary" data-testid="btn-guardar">
-                {editingId ? 'Actualizar' : 'Guardar'}
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }}
-              >
-                Cancelar
-              </button>
-            </div>
-          </form>
+              <div style={{ borderTop: '1px solid hsl(var(--border))', paddingTop: '1rem', marginTop: '1.25rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}><button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }}>Cancelar</button><button type="submit" className="btn btn-primary" data-testid="btn-guardar">{editingId ? 'Actualizar' : 'Crear'} Articulo</button></div>
+            </form>
+          </div>
         </div>
       )}
 
