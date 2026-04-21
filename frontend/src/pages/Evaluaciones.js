@@ -482,6 +482,7 @@ const Evaluaciones = () => {
               handleDeleteQuestion={handleDeleteQuestion}
               setNewQuestionSection={setNewQuestionSection}
               setShowAddQuestion={setShowAddQuestion}
+              fetchPreguntasConfig={fetchPreguntasConfig}
               user={user}
             />
           </div>

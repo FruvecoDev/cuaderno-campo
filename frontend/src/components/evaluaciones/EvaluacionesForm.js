@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Trash2, Save, ChevronDown, ChevronUp, Copy, GripVertical, X } from 'lucide-react';
+import { Plus, Trash2, Save, ChevronDown, ChevronUp, Copy, GripVertical, X, Edit2, Check } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -67,10 +67,42 @@ const EvaluacionesForm = ({
   handleDeleteQuestion,
   setNewQuestionSection,
   setShowAddQuestion,
+  fetchPreguntasConfig,
   user,
 }) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = React.useState('general');
+  // Inline add question
+  const [addingToSection, setAddingToSection] = React.useState(null);
+  const [inlineText, setInlineText] = React.useState('');
+  const [inlineType, setInlineType] = React.useState('texto');
+  // Inline edit question
+  const [editingQuestion, setEditingQuestion] = React.useState(null);
+  const [editText, setEditText] = React.useState('');
+  const [editType, setEditType] = React.useState('texto');
+
+  const handleInlineAdd = async (seccionKey) => {
+    if (!inlineText.trim()) return;
+    try {
+      const api = (await import('../../services/api')).default;
+      await api.post('/api/evaluaciones/config/preguntas', { seccion: seccionKey, pregunta: inlineText.trim(), tipo: inlineType });
+      setAddingToSection(null);
+      setInlineText('');
+      setInlineType('texto');
+      if (fetchPreguntasConfig) fetchPreguntasConfig();
+    } catch (e) {}
+  };
+
+  const handleInlineEdit = async (preguntaId) => {
+    if (!editText.trim()) return;
+    try {
+      const api = (await import('../../services/api')).default;
+      await api.put(`/api/evaluaciones/config/preguntas/${preguntaId}`, { pregunta: editText.trim(), tipo: editType });
+      setEditingQuestion(null);
+      setEditText('');
+      if (fetchPreguntasConfig) fetchPreguntasConfig();
+    } catch (e) {}
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -168,10 +200,20 @@ const EvaluacionesForm = ({
                 <button type="button" onClick={() => toggleSection(seccion.key)} style={{ width: '100%', padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: isExpanded ? 'hsl(var(--primary) / 0.1)' : 'hsl(var(--muted) / 0.3)', border: 'none', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem' }}>
                   <span>{seccion.label} ({preguntas.length})</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    {(user?.role === 'Admin' || user?.role === 'Manager') && <button type="button" onClick={(e) => { e.stopPropagation(); setNewQuestionSection(seccion.key); setShowAddQuestion(true); }} style={{ padding: '0.15rem 0.4rem', borderRadius: '4px', backgroundColor: 'hsl(var(--primary))', color: 'white', border: 'none', cursor: 'pointer', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.2rem' }}><Plus size={12} /></button>}
+                    {(user?.role === 'Admin' || user?.role === 'Manager') && <button type="button" onClick={(e) => { e.stopPropagation(); setAddingToSection(addingToSection === seccion.key ? null : seccion.key); setInlineText(''); setInlineType('texto'); }} style={{ padding: '0.15rem 0.4rem', borderRadius: '4px', backgroundColor: addingToSection === seccion.key ? 'hsl(var(--destructive))' : 'hsl(var(--primary))', color: 'white', border: 'none', cursor: 'pointer', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.2rem' }} title="Anadir pregunta">{addingToSection === seccion.key ? <X size={12} /> : <Plus size={12} />}</button>}
                     {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                   </div>
                 </button>
+                {/* Inline Add Question Form */}
+                {addingToSection === seccion.key && (
+                  <div style={{ padding: '0.75rem', backgroundColor: 'hsl(var(--primary) / 0.05)', borderBottom: '1px solid hsl(var(--border))' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px auto', gap: '0.5rem', alignItems: 'end' }}>
+                      <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '600' }}>Nueva pregunta</label><input type="text" className="form-input" value={inlineText} onChange={(e) => setInlineText(e.target.value)} placeholder="Escribe la pregunta..." onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleInlineAdd(seccion.key))} autoFocus /></div>
+                      <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '600' }}>Tipo</label><select className="form-select" value={inlineType} onChange={(e) => setInlineType(e.target.value)}><option value="texto">Texto</option><option value="si_no">Si/No</option><option value="numero">Numero</option><option value="fecha">Fecha</option></select></div>
+                      <button type="button" className="btn btn-primary btn-sm" onClick={() => handleInlineAdd(seccion.key)} disabled={!inlineText.trim()} style={{ marginBottom: 0 }}><Check size={14} /> Anadir</button>
+                    </div>
+                  </div>
+                )}
                 {isExpanded && (
                   <div style={{ padding: '0.75rem' }}>
                     {preguntas.length === 0 ? <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.85rem' }}>{t('evaluations.noQuestions')}</p> : (
@@ -180,16 +222,31 @@ const EvaluacionesForm = ({
                           {preguntas.map((pregunta, idx) => {
                             const isCustom = pregunta.id.startsWith('custom_');
                             const canDrag = (user?.role === 'Admin' || user?.role === 'Manager');
+                            const isEditing = editingQuestion === pregunta.id;
                             return (
                               <SortableQuestion key={pregunta.id} pregunta={pregunta} idx={idx} isCustom={isCustom} canDrag={canDrag}>
                                 <div style={{ flex: 1 }}>
-                                  <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: '500', fontSize: '0.85rem' }}>{idx + 1}. {pregunta.pregunta}{isCustom && <span style={{ fontSize: '0.7rem', color: 'hsl(var(--primary))', marginLeft: '0.5rem' }}>({t('evaluations.custom')})</span>}</label>
-                                  {renderCampoRespuesta(pregunta)}
+                                  {isEditing ? (
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 110px auto auto', gap: '0.4rem', alignItems: 'end' }}>
+                                      <input type="text" className="form-input" value={editText} onChange={(e) => setEditText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleInlineEdit(pregunta.id))} autoFocus style={{ fontSize: '0.85rem' }} />
+                                      <select className="form-select" value={editType} onChange={(e) => setEditType(e.target.value)} style={{ fontSize: '0.8rem' }}><option value="texto">Texto</option><option value="si_no">Si/No</option><option value="numero">Numero</option><option value="fecha">Fecha</option></select>
+                                      <button type="button" onClick={() => handleInlineEdit(pregunta.id)} style={{ padding: '0.3rem', borderRadius: '4px', backgroundColor: 'hsl(142 76% 36%)', color: 'white', border: 'none', cursor: 'pointer' }} title="Guardar"><Check size={14} /></button>
+                                      <button type="button" onClick={() => setEditingQuestion(null)} style={{ padding: '0.3rem', borderRadius: '4px', backgroundColor: 'hsl(var(--muted))', color: 'hsl(var(--muted-foreground))', border: '1px solid hsl(var(--border))', cursor: 'pointer' }} title="Cancelar"><X size={14} /></button>
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: '500', fontSize: '0.85rem' }}>{idx + 1}. {pregunta.pregunta}{isCustom && <span style={{ fontSize: '0.7rem', color: 'hsl(var(--primary))', marginLeft: '0.5rem' }}>(personalizada)</span>}</label>
+                                      {renderCampoRespuesta(pregunta)}
+                                    </>
+                                  )}
                                 </div>
-                                <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0 }}>
-                                  {(user?.role === 'Admin' || user?.role === 'Manager') && <button type="button" onClick={() => handleDuplicateQuestion(pregunta, seccion.key)} style={{ padding: '0.25rem', borderRadius: '4px', backgroundColor: 'hsl(var(--primary) / 0.1)', color: 'hsl(var(--primary))', border: '1px solid hsl(var(--primary) / 0.3)', cursor: 'pointer' }} title={t('evaluations.duplicateQuestion')}><Copy size={14} /></button>}
-                                  {isCustom && user?.role === 'Admin' && <button type="button" onClick={() => handleDeleteQuestion(pregunta.id, seccion.key)} style={{ padding: '0.25rem', borderRadius: '4px', backgroundColor: 'hsl(var(--destructive) / 0.1)', color: 'hsl(var(--destructive))', border: '1px solid hsl(var(--destructive) / 0.3)', cursor: 'pointer' }} title={t('evaluations.deleteQuestion')}><Trash2 size={14} /></button>}
-                                </div>
+                                {!isEditing && (
+                                  <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0 }}>
+                                    {isCustom && (user?.role === 'Admin' || user?.role === 'Manager') && <button type="button" onClick={() => { setEditingQuestion(pregunta.id); setEditText(pregunta.pregunta); setEditType(pregunta.tipo); }} style={{ padding: '0.25rem', borderRadius: '4px', backgroundColor: 'hsl(38 92% 50% / 0.1)', color: 'hsl(38 92% 50%)', border: '1px solid hsl(38 92% 50% / 0.3)', cursor: 'pointer' }} title="Editar pregunta"><Edit2 size={14} /></button>}
+                                    {(user?.role === 'Admin' || user?.role === 'Manager') && <button type="button" onClick={() => handleDuplicateQuestion(pregunta, seccion.key)} style={{ padding: '0.25rem', borderRadius: '4px', backgroundColor: 'hsl(var(--primary) / 0.1)', color: 'hsl(var(--primary))', border: '1px solid hsl(var(--primary) / 0.3)', cursor: 'pointer' }} title="Duplicar"><Copy size={14} /></button>}
+                                    {isCustom && user?.role === 'Admin' && <button type="button" onClick={() => handleDeleteQuestion(pregunta.id, seccion.key)} style={{ padding: '0.25rem', borderRadius: '4px', backgroundColor: 'hsl(var(--destructive) / 0.1)', color: 'hsl(var(--destructive))', border: '1px solid hsl(var(--destructive) / 0.3)', cursor: 'pointer' }} title="Eliminar"><Trash2 size={14} /></button>}
+                                  </div>
+                                )}
                               </SortableQuestion>
                             );
                           })}

@@ -372,50 +372,80 @@ async def delete_pregunta_config(
 @router.put("/evaluaciones/config/preguntas/reorder")
 async def reorder_preguntas(
     seccion: str,
-    orden: list,  # Lista de IDs de preguntas en el nuevo orden
+    orden: list,
     current_user: dict = Depends(RequireEdit)
 ):
-    """
-    Reordena las preguntas personalizadas de una sección.
-    Solo afecta a preguntas custom, las preguntas default mantienen su orden original.
-    """
+    """Reordena las preguntas personalizadas."""
     secciones_validas = list(PREGUNTAS_DEFAULT.keys())
     if seccion not in secciones_validas:
-        raise HTTPException(status_code=400, detail=f"Sección inválida. Opciones: {secciones_validas}")
-    
-    # Obtener configuración actual
+        raise HTTPException(status_code=400, detail=f"Seccion invalida")
     config = await evaluaciones_config_collection.find_one({"tipo": "preguntas"})
     if not config:
         return {"success": True, "message": "No hay preguntas personalizadas para reordenar"}
-    
     secciones = config.get("secciones", {})
     preguntas_seccion = secciones.get(seccion, [])
-    
-    # Filtrar solo preguntas custom que están en el nuevo orden
     custom_preguntas = [p for p in preguntas_seccion if p.get("id", "").startswith("custom_")]
-    
-    # Crear diccionario para acceso rápido
     preguntas_dict = {p["id"]: p for p in custom_preguntas}
-    
-    # Reordenar según el nuevo orden (solo IDs que existen)
     nuevas_preguntas = []
     for pregunta_id in orden:
         if pregunta_id in preguntas_dict:
             nuevas_preguntas.append(preguntas_dict[pregunta_id])
-    
-    # Añadir cualquier pregunta que no estaba en el orden (por seguridad)
     ids_en_orden = set(orden)
     for p in custom_preguntas:
         if p["id"] not in ids_en_orden:
             nuevas_preguntas.append(p)
-    
-    # Actualizar en la base de datos
     await evaluaciones_config_collection.update_one(
         {"tipo": "preguntas"},
         {"$set": {f"secciones.{seccion}": nuevas_preguntas}}
     )
-    
     return {"success": True, "message": "Orden actualizado", "preguntas": nuevas_preguntas}
+
+
+@router.put("/evaluaciones/config/preguntas/{pregunta_id}")
+async def update_pregunta_config(
+    pregunta_id: str,
+    data: dict,
+    current_user: dict = Depends(RequireEdit)
+):
+    """Editar pregunta personalizada"""
+    if current_user.get("role") not in ["Admin", "Manager"]:
+        raise HTTPException(status_code=403, detail="Solo Admin/Manager puede editar preguntas")
+    if not pregunta_id.startswith("custom_"):
+        raise HTTPException(status_code=400, detail="Solo se pueden editar preguntas personalizadas")
+    
+    nueva_pregunta = data.get("pregunta", "").strip()
+    nuevo_tipo = data.get("tipo", "texto")
+    if not nueva_pregunta:
+        raise HTTPException(status_code=400, detail="La pregunta no puede estar vacia")
+    
+    config = await evaluaciones_config_collection.find_one({"tipo": "preguntas"})
+    if not config:
+        raise HTTPException(status_code=404, detail="Configuracion no encontrada")
+    
+    updated = False
+    secciones = config.get("secciones", {})
+    for seccion_key, preguntas in secciones.items():
+        for i, p in enumerate(preguntas):
+            if p.get("id") == pregunta_id:
+                secciones[seccion_key][i]["pregunta"] = nueva_pregunta
+                secciones[seccion_key][i]["tipo"] = nuevo_tipo
+                updated = True
+                break
+        if updated:
+            break
+    
+    if not updated:
+        raise HTTPException(status_code=404, detail="Pregunta no encontrada")
+    
+    await evaluaciones_config_collection.update_one(
+        {"tipo": "preguntas"},
+        {"$set": {"secciones": secciones}}
+    )
+    
+    return {"success": True, "message": "Pregunta actualizada"}
+
+
+
 
 
 
