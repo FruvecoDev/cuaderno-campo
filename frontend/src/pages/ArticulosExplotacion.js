@@ -72,6 +72,9 @@ const ArticulosExplotacion = () => {
   const [filterCategoria, setFilterCategoria] = useState('');
   const [filterActivo, setFilterActivo] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [categoriasDinamicas, setCategoriasDinamicas] = useState([]);
+  const [showCategoriasManager, setShowCategoriasManager] = useState(false);
+  const [nuevaCategoria, setNuevaCategoria] = useState('');
   
   // Formulario
   const [formData, setFormData] = useState({
@@ -91,7 +94,23 @@ const ArticulosExplotacion = () => {
 
   useEffect(() => {
     fetchArticulos();
+    fetchCategorias();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fetchCategorias = async () => {
+    try { const d = await api.get('/api/categorias-articulo'); setCategoriasDinamicas(d.categorias || []); } catch (e) {}
+  };
+  const handleAddCategoria = async () => {
+    if (!nuevaCategoria.trim()) return;
+    try { await api.post('/api/categorias-articulo', { nombre: nuevaCategoria.trim() }); setNuevaCategoria(''); fetchCategorias(); } catch (e) {}
+  };
+  const handleDeleteCategoria = async (id) => {
+    try { await api.delete(`/api/categorias-articulo/${id}`); fetchCategorias(); } catch (e) {}
+  };
+
+  const allCategorias = categoriasDinamicas.length > 0
+    ? categoriasDinamicas.map(c => c.nombre)
+    : CATEGORIAS;
 
   const fetchArticulos = async () => {
     try {
@@ -298,7 +317,7 @@ const ArticulosExplotacion = () => {
                 onChange={(e) => setFilterCategoria(e.target.value)}
               >
                 <option value="">-- Todas --</option>
-                {CATEGORIAS.map(cat => (
+                {allCategorias.map(cat => (
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>
@@ -358,7 +377,7 @@ const ArticulosExplotacion = () => {
                   <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr 1fr', gap: '0.75rem' }}>
                     <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Codigo</label><input type="text" className="form-input" value={formData.codigo || nextCodigo} readOnly disabled style={{ backgroundColor: 'hsl(var(--muted))', textAlign: 'center' }} data-testid="input-codigo" /></div>
                     <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Nombre *</label><input type="text" className="form-input" value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} required placeholder="Nombre del articulo" data-testid="input-nombre" /></div>
-                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Categoria</label><select className="form-select" value={formData.categoria} onChange={(e) => setFormData({...formData, categoria: e.target.value})} data-testid="select-categoria"><option value="General">General</option>{CATEGORIAS.map(cat => <option key={cat} value={cat}>{cat}</option>)}</select></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>Categoria <button type="button" onClick={() => setShowCategoriasManager(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--primary))', padding: 0 }} title="Gestionar categorias"><Settings size={12} /></button></label><select className="form-select" value={formData.categoria} onChange={(e) => setFormData({...formData, categoria: e.target.value})} data-testid="select-categoria"><option value="General">General</option>{allCategorias.map(cat => <option key={cat} value={cat}>{cat}</option>)}</select></div>
                   </div>
                 </div>
                 <div style={{ marginBottom: '1.5rem' }}>
@@ -394,6 +413,31 @@ const ArticulosExplotacion = () => {
 
               <div style={{ borderTop: '1px solid hsl(var(--border))', paddingTop: '1rem', marginTop: '1.25rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}><button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }}>Cancelar</button><button type="submit" className="btn btn-primary" data-testid="btn-guardar">{editingId ? 'Actualizar' : 'Crear'} Articulo</button></div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Categorias Manager Modal */}
+      {showCategoriasManager && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, padding: '1rem', backdropFilter: 'blur(4px)' }} onClick={() => setShowCategoriasManager(false)}>
+          <div className="card" style={{ maxWidth: '450px', width: '100%', padding: '1.5rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '2px solid hsl(var(--border))' }}>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700' }}>Categorias de Articulo</h3>
+              <button onClick={() => setShowCategoriasManager(false)} className="config-modal-close-btn"><X size={16} /></button>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+              <input type="text" className="form-input" placeholder="Nueva categoria..." value={nuevaCategoria} onChange={(e) => setNuevaCategoria(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCategoria())} style={{ flex: 1 }} data-testid="input-nueva-categoria" />
+              <button type="button" className="btn btn-primary" onClick={handleAddCategoria} disabled={!nuevaCategoria.trim()} data-testid="btn-add-categoria"><Plus size={16} /></button>
+            </div>
+            <div style={{ maxHeight: '300px', overflow: 'auto' }}>
+              {categoriasDinamicas.map(cat => (
+                <div key={cat._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', borderRadius: '6px', marginBottom: '0.35rem', background: 'hsl(var(--muted) / 0.3)', border: '1px solid hsl(var(--border))' }}>
+                  <span style={{ fontSize: '0.9rem' }}>{cat.nombre}</span>
+                  <button onClick={() => handleDeleteCategoria(cat._id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--destructive))', padding: '0.25rem' }}><Trash2 size={14} /></button>
+                </div>
+              ))}
+              {categoriasDinamicas.length === 0 && <p style={{ textAlign: 'center', color: 'hsl(var(--muted-foreground))', fontSize: '0.85rem', padding: '1rem 0' }}>No hay categorias definidas</p>}
+            </div>
           </div>
         </div>
       )}

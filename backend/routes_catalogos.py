@@ -29,6 +29,7 @@ formas_pago_collection = db['formas_pago']
 tipos_iva_collection = db['tipos_iva']
 tipos_cultivo_collection = db['tipos_cultivo']
 changelog_cultivo_collection = db['cultivo_changelog']
+categorias_articulo_collection = db['categorias_articulo']
 
 
 async def log_proveedor_change(proveedor_id, action, user, changes=None):
@@ -551,6 +552,37 @@ async def log_cultivo_change(cultivo_id, action, user, changes=None):
         "timestamp": datetime.now(),
     }
     await changelog_cultivo_collection.insert_one(entry)
+
+
+# ============================================================================
+# CATEGORIAS DE ARTICULO
+# ============================================================================
+
+@router.get("/categorias-articulo")
+async def get_categorias_articulo(current_user: dict = Depends(get_current_user)):
+    cats = await categorias_articulo_collection.find().sort("nombre", 1).to_list(200)
+    return {"categorias": serialize_docs(cats)}
+
+@router.post("/categorias-articulo")
+async def create_categoria_articulo(data: dict, current_user: dict = Depends(RequireCreate)):
+    nombre = data.get("nombre", "").strip()
+    if not nombre:
+        raise HTTPException(status_code=400, detail="El nombre es obligatorio")
+    existing = await categorias_articulo_collection.find_one({"nombre": {"$regex": f"^{nombre}$", "$options": "i"}})
+    if existing:
+        raise HTTPException(status_code=400, detail="Ya existe una categoria con ese nombre")
+    result = await categorias_articulo_collection.insert_one({"nombre": nombre, "created_at": datetime.now()})
+    created = await categorias_articulo_collection.find_one({"_id": result.inserted_id})
+    return {"success": True, "categoria": serialize_doc(created)}
+
+@router.delete("/categorias-articulo/{cat_id}")
+async def delete_categoria_articulo(cat_id: str, current_user: dict = Depends(RequireDelete)):
+    if not ObjectId.is_valid(cat_id):
+        raise HTTPException(status_code=400, detail="ID no valido")
+    result = await categorias_articulo_collection.delete_one({"_id": ObjectId(cat_id)})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Categoria no encontrada")
+    return {"success": True}
 
 
 # ============================================================================

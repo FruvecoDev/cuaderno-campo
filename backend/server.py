@@ -95,6 +95,11 @@ async def startup_event():
         from datetime import datetime as dt
         defaults = ["Horticola", "Frutal", "Cereal", "Leguminosa", "Industrial", "Viticola", "Olivar", "Citrico", "Otro"]
         await db['tipos_cultivo'].insert_many([{"nombre": n, "created_at": dt.now()} for n in defaults])
+    # Seed categorias_articulo if empty
+    if await db['categorias_articulo'].count_documents({}) == 0:
+        from datetime import datetime as dt
+        cats = ["Fertilizantes", "Fitosanitarios", "Semillas", "Materiales", "Maquinaria", "Servicios", "Combustibles", "Envases", "Otros"]
+        await db['categorias_articulo'].insert_many([{"nombre": n, "created_at": dt.now()} for n in cats])
 
 @app.on_event("shutdown")
 async def shutdown_event():
