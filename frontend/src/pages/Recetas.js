@@ -694,7 +694,7 @@ const Recetas = () => {
                         const filtered = plagasUnicas.filter(p => p.toLowerCase().includes(term)).slice(0, 8);
                         if (filtered.length === 0) return null;
                         return (
-                          <div style={{ position: 'absolute', bottom: '100%', left: 0, right: 0, backgroundColor: 'white', border: '1px solid hsl(var(--border))', borderRadius: '6px', boxShadow: '0 -4px 16px rgba(0,0,0,0.12)', maxHeight: '180px', overflowY: 'auto', zIndex: 1200 }}>
+                          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: 'white', border: '1px solid hsl(var(--border))', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,0.12)', maxHeight: '180px', overflowY: 'auto', zIndex: 1200 }}>
                             {filtered.map(p => (
                               <div key={p} onClick={() => { setNuevoProducto({...nuevoProducto, objetivo: p}); setSearchObjetivo(p); setShowObjetivoDropdown(false); }} style={{ padding: '0.4rem 0.75rem', cursor: 'pointer', borderBottom: '1px solid hsl(var(--border) / 0.5)', fontSize: '0.85rem' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'hsl(var(--primary) / 0.08)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                                 {p}
