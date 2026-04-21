@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { Plus, Download, Settings, X, Filter, CheckCircle, Wrench, AlertTriangle, Cog, Eye } from 'lucide-react';
+import { Plus, Download, Settings, X, Filter, CheckCircle, Wrench, AlertTriangle, Cog, Eye, Upload, Trash2 } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import MaquinariaTable from '../components/maquinaria/MaquinariaTable';
@@ -48,6 +48,7 @@ const Maquinaria = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [maqModalTab, setMaqModalTab] = useState('general');
   const [error, setError] = useState(null);
   const { token } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
@@ -187,7 +188,7 @@ const Maquinaria = () => {
       else if (url.startsWith('/app/uploads/')) url = `${BACKEND_URL}/api/uploads${url.replace('/app/uploads', '')}`;
       setImagePreview(url);
     } else { setImagePreview(null); }
-    setSelectedImage(null); setShowForm(true);
+    setSelectedImage(null); setShowForm(true); setMaqModalTab('general');
   };
 
   const handleDelete = async (id) => {
@@ -208,7 +209,7 @@ const Maquinaria = () => {
             title="Exportar a PDF"><Download size={18} /> PDF</button>
           <button className="btn btn-secondary" onClick={() => setShowConfig(true)} title="Configurar columnas" data-testid="btn-config-maquinaria"><Settings size={18} /></button>
           <button className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setShowFieldsConfig(!showFieldsConfig)} title="Configurar campos formulario" data-testid="btn-config-fields"><Filter size={18} /></button>
-          <PermissionButton permission="create" onClick={() => setShowForm(!showForm)} className="btn btn-primary" data-testid="btn-nueva-maquinaria"><Plus size={18} /> Nueva Maquinaria</PermissionButton>
+          <PermissionButton permission="create" onClick={() => { resetForm(); setMaqModalTab('general'); setShowForm(true); }} className="btn btn-primary" data-testid="btn-nueva-maquinaria"><Plus size={18} /> Nueva Maquinaria</PermissionButton>
         </div>
       </div>
 
@@ -269,17 +270,94 @@ const Maquinaria = () => {
         {hasActiveFilters && <p style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Mostrando {filteredMaquinaria.length} de {maquinaria.length}</p>}
       </div>
 
-      {/* Form */}
+      {/* Form - Modal */}
       {showForm && (
-        <MaquinariaForm
-          formData={formData} setFormData={setFormData} editingId={editingId} onSubmit={handleSubmit}
-          onCancel={() => { setEditingId(null); setShowForm(false); resetForm(); }}
-          fieldsConfig={fieldsConfig} TIPOS_MAQUINARIA={TIPOS_MAQUINARIA} ESTADOS_MAQUINARIA={ESTADOS_MAQUINARIA}
-          uploadingImage={uploadingImage} imagePreview={imagePreview} selectedImage={selectedImage}
-          setSelectedImage={setSelectedImage} setImagePreview={setImagePreview}
-          isDragging={isDragging} setIsDragging={setIsDragging}
-          handleImageSelect={handleImageSelect} deleteImage={deleteImage}
-        />
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', backdropFilter: 'blur(4px)' }} onClick={() => { setEditingId(null); setShowForm(false); resetForm(); }}>
+          <div className="card" style={{ maxWidth: '960px', width: '100%', height: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative', padding: '2rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()} data-testid="maquinaria-form">
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '2px solid hsl(var(--border))' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'hsl(var(--primary) / 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Cog size={20} style={{ color: 'hsl(var(--primary))' }} /></div>
+                <div><h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '700' }}>{editingId ? 'Editar' : 'Nueva'} Maquinaria</h2><span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>{formData.nombre || 'Sin nombre'} {formData.marca && `- ${formData.marca}`}</span></div>
+              </div>
+              <button onClick={() => { setEditingId(null); setShowForm(false); resetForm(); }} className="config-modal-close-btn"><X size={18} /></button>
+            </div>
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: '0', marginBottom: '1.5rem', borderBottom: '2px solid hsl(var(--border))' }}>
+              {[
+                { key: 'general', label: 'Datos Generales', icon: <Cog size={14} /> },
+                { key: 'mantenimiento', label: 'ITV y Mantenimiento', icon: <Wrench size={14} /> },
+                { key: 'imagen', label: 'Placa CE', icon: <Eye size={14} /> }
+              ].map(tab => (
+                <button key={tab.key} type="button" onClick={() => setMaqModalTab(tab.key)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1rem', fontSize: '0.8rem', fontWeight: maqModalTab === tab.key ? '700' : '500', color: maqModalTab === tab.key ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))', background: 'none', border: 'none', borderBottom: maqModalTab === tab.key ? '2px solid hsl(var(--primary))' : '2px solid transparent', cursor: 'pointer', whiteSpace: 'nowrap', marginBottom: '-2px' }}>{tab.icon}{tab.label}</button>
+              ))}
+            </div>
+            {/* Form */}
+            <form onSubmit={handleSubmit} style={{ flex: 1, overflow: 'auto', minHeight: 0, paddingRight: '1rem' }}>
+              {maqModalTab === 'general' && (<div>
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Identificacion</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Nombre *</label><input type="text" className="form-input" value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} required placeholder="Ej: Tractor principal" data-testid="input-nombre" /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Tipo *</label><select className="form-select" value={formData.tipo} onChange={(e) => setFormData({...formData, tipo: e.target.value})} required data-testid="select-tipo">{TIPOS_MAQUINARIA.map(t => <option key={t} value={t}>{t}</option>)}</select></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Estado</label><select className="form-select" value={formData.estado} onChange={(e) => setFormData({...formData, estado: e.target.value})} data-testid="select-estado">{ESTADOS_MAQUINARIA.map(e => <option key={e} value={e}>{e}</option>)}</select></div>
+                  </div>
+                </div>
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Especificaciones</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Marca</label><input type="text" className="form-input" value={formData.marca} onChange={(e) => setFormData({...formData, marca: e.target.value})} placeholder="Ej: John Deere" data-testid="input-marca" /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Modelo</label><input type="text" className="form-input" value={formData.modelo} onChange={(e) => setFormData({...formData, modelo: e.target.value})} placeholder="Ej: 6150M" data-testid="input-modelo" /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Matricula</label><input type="text" className="form-input" value={formData.matricula} onChange={(e) => setFormData({...formData, matricula: e.target.value})} placeholder="Ej: 1234-ABC" data-testid="input-matricula" /></div>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginTop: '0.75rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>N. Serie</label><input type="text" className="form-input" value={formData.num_serie} onChange={(e) => setFormData({...formData, num_serie: e.target.value})} data-testid="input-num-serie" /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Ano Fabricacion</label><input type="number" min="1900" max={new Date().getFullYear() + 1} className="form-input" value={formData.año_fabricacion} onChange={(e) => setFormData({...formData, año_fabricacion: e.target.value})} placeholder="2020" data-testid="input-año" /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Capacidad</label><input type="text" className="form-input" value={formData.capacidad} onChange={(e) => setFormData({...formData, capacidad: e.target.value})} placeholder="Ej: 1000L, 150CV" data-testid="input-capacidad" /></div>
+                  </div>
+                </div>
+                <div className="form-group"><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Observaciones</label><textarea className="form-input" rows="2" value={formData.observaciones} onChange={(e) => setFormData({...formData, observaciones: e.target.value})} style={{ fontSize: '0.85rem', resize: 'vertical' }} data-testid="textarea-observaciones" /></div>
+              </div>)}
+
+              {maqModalTab === 'mantenimiento' && (<div>
+                <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>ITV y Mantenimiento</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Fecha Proxima ITV</label><input type="date" className="form-input" value={formData.fecha_proxima_itv || ''} onChange={(e) => setFormData({...formData, fecha_proxima_itv: e.target.value})} data-testid="input-fecha-itv" /></div>
+                  <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Fecha Ultimo Mantenimiento</label><input type="date" className="form-input" value={formData.fecha_ultimo_mantenimiento || ''} onChange={(e) => setFormData({...formData, fecha_ultimo_mantenimiento: e.target.value})} data-testid="input-fecha-mantenimiento" /></div>
+                  <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Intervalo Mantenimiento (dias)</label><input type="number" min="1" className="form-input" value={formData.intervalo_mantenimiento_dias || ''} onChange={(e) => setFormData({...formData, intervalo_mantenimiento_dias: e.target.value ? parseInt(e.target.value) : ''})} placeholder="Ej: 180" data-testid="input-intervalo-mantenimiento" /></div>
+                </div>
+              </div>)}
+
+              {maqModalTab === 'imagen' && (<div>
+                <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Imagen Placa CE</h3>
+                <div
+                  style={{ border: isDragging ? '2px solid hsl(var(--primary))' : '2px dashed hsl(var(--border))', borderRadius: '8px', padding: '1.5rem', backgroundColor: isDragging ? 'hsl(var(--primary) / 0.1)' : 'hsl(var(--muted) / 0.3)', transition: 'all 0.2s ease', textAlign: 'center' }}
+                  onDragEnter={(e) => { e.preventDefault(); setIsDragging(true); }} onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }} onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); setIsDragging(false); handleImageSelect({ target: { files: e.dataTransfer.files } }); }}
+                >
+                  {imagePreview ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+                      <img src={imagePreview} alt="Placa CE" style={{ maxWidth: '300px', maxHeight: '200px', objectFit: 'contain', borderRadius: '8px', border: '1px solid hsl(var(--border))' }} />
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <label className="btn btn-sm btn-secondary" style={{ cursor: 'pointer' }}><Upload size={14} /> Cambiar<input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImageSelect} style={{ display: 'none' }} /></label>
+                        {selectedImage && <button type="button" className="btn btn-sm btn-secondary" onClick={() => { setSelectedImage(null); setImagePreview(null); }}><X size={14} /> Quitar</button>}
+                        {editingId && !selectedImage && <button type="button" className="btn btn-sm btn-error" onClick={() => deleteImage(editingId)}><Trash2 size={14} /> Eliminar</button>}
+                      </div>
+                    </div>
+                  ) : (
+                    <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '2rem' }}>
+                      <Upload size={40} style={{ color: 'hsl(var(--muted-foreground))', opacity: 0.5 }} />
+                      <span style={{ fontSize: '0.9rem', color: 'hsl(var(--muted-foreground))' }}>Arrastra una imagen o haz clic para seleccionar</span>
+                      <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>JPEG, PNG o WEBP (max. 10MB)</span>
+                      <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImageSelect} style={{ display: 'none' }} data-testid="input-imagen-placa" />
+                    </label>
+                  )}
+                </div>
+              </div>)}
+
+              <div style={{ borderTop: '1px solid hsl(var(--border))', paddingTop: '1rem', marginTop: '1.25rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}><button type="button" className="btn btn-secondary" onClick={() => { setEditingId(null); setShowForm(false); resetForm(); }}>Cancelar</button><button type="submit" className="btn btn-primary" disabled={uploadingImage} data-testid="btn-guardar">{uploadingImage ? 'Subiendo...' : (editingId ? 'Actualizar' : 'Crear')} Maquinaria</button></div>
+            </form>
+          </div>
+        </div>
       )}
 
       {/* Image Modal */}
