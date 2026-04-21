@@ -52,6 +52,15 @@ const ArticulosExplotacion = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [modalTab, setModalTab] = useState('general');
+
+  const nextCodigo = (() => {
+    if (!articulos.length) return 'ART-000001';
+    const nums = articulos.map(a => {
+      const m = (a.codigo || '').match(/(\d+)$/);
+      return m ? parseInt(m[1], 10) : 0;
+    });
+    return 'ART-' + String(Math.max(...nums) + 1).padStart(6, '0');
+  })();
   const [error, setError] = useState(null);
   const { token } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
@@ -328,7 +337,7 @@ const ArticulosExplotacion = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '2px solid hsl(var(--border))' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'hsl(var(--primary) / 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Package size={20} style={{ color: 'hsl(var(--primary))' }} /></div>
-                <div><h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '700' }}>{editingId ? 'Editar' : 'Nuevo'} Articulo</h2><span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>{formData.codigo || 'Auto-generado'} {formData.nombre && `- ${formData.nombre}`}</span></div>
+                <div><h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '700' }}>{editingId ? 'Editar' : 'Nuevo'} Articulo</h2><span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>{formData.codigo || nextCodigo} {formData.nombre && `- ${formData.nombre}`}</span></div>
               </div>
               <button onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }} className="config-modal-close-btn"><X size={18} /></button>
             </div>
@@ -347,7 +356,7 @@ const ArticulosExplotacion = () => {
                 <div style={{ marginBottom: '1.5rem' }}>
                   <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Identificacion</h3>
                   <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr 1fr', gap: '0.75rem' }}>
-                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Codigo</label><input type="text" className="form-input" value={editingId ? formData.codigo : 'Auto'} readOnly disabled style={{ backgroundColor: 'hsl(var(--muted))', textAlign: 'center' }} data-testid="input-codigo" /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Codigo</label><input type="text" className="form-input" value={formData.codigo || nextCodigo} readOnly disabled style={{ backgroundColor: 'hsl(var(--muted))', textAlign: 'center' }} data-testid="input-codigo" /></div>
                     <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Nombre *</label><input type="text" className="form-input" value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} required placeholder="Nombre del articulo" data-testid="input-nombre" /></div>
                     <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Categoria</label><select className="form-select" value={formData.categoria} onChange={(e) => setFormData({...formData, categoria: e.target.value})} data-testid="select-categoria"><option value="General">General</option>{CATEGORIAS.map(cat => <option key={cat} value={cat}>{cat}</option>)}</select></div>
                   </div>
