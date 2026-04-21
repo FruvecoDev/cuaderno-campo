@@ -13,6 +13,7 @@ const Cosechas = () => {
   const [contratos, setContratos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [activeModalTab, setActiveModalTab] = useState('general');
   const [showCargaForm, setShowCargaForm] = useState(null);
   const [expandedCosecha, setExpandedCosecha] = useState(null);
   
@@ -322,7 +323,7 @@ const Cosechas = () => {
           </button>
           <button 
             className="btn btn-primary" 
-            onClick={() => setShowForm(!showForm)}
+            onClick={() => { setActiveModalTab('general'); setShowForm(!showForm); }}
             data-testid="btn-nueva-cosecha"
           >
             <Plus size={18} style={{ marginRight: '0.5rem' }} />
@@ -472,127 +473,80 @@ const Cosechas = () => {
         </div>
       )}
 
-      {/* Formulario Nueva Cosecha */}
+      {/* Formulario Nueva Cosecha - Modal */}
       {showForm && (
-        <div className="card mb-6" data-testid="form-nueva-cosecha">
-          <h3 style={{ fontWeight: '600', marginBottom: '1rem' }}>Nueva Cosecha</h3>
-          <form onSubmit={handleCreateCosecha}>
-            {/* Selección de Contrato */}
-            <div className="form-group">
-              <label className="form-label">Contrato *</label>
-              <select
-                className="form-select"
-                value={formData.contrato_id}
-                onChange={(e) => setFormData({ ...formData, contrato_id: e.target.value })}
-                required
-                data-testid="select-contrato"
-              >
-                <option value="">Seleccionar contrato...</option>
-                {contratos.map(c => (
-                  <option key={c._id} value={c._id}>
-                    {c.proveedor} - {c.cultivo} ({c.campana}) - {c.precio}€/kg
-                  </option>
-                ))}
-              </select>
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', backdropFilter: 'blur(4px)' }} onClick={() => setShowForm(false)}>
+          <div className="card" style={{ maxWidth: '960px', width: '100%', height: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative', padding: '2rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()} data-testid="form-nueva-cosecha">
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '2px solid hsl(var(--border))' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'hsl(142 76% 36% / 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Package size={20} style={{ color: 'hsl(142 76% 36%)' }} /></div>
+                <div><h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '700' }}>Nueva Cosecha</h2><span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>{selectedContrato ? `${selectedContrato.proveedor} - ${selectedContrato.cultivo}` : 'Selecciona un contrato'}</span></div>
+              </div>
+              <button onClick={() => setShowForm(false)} className="config-modal-close-btn"><X size={18} /></button>
             </div>
-
-            {/* Info del contrato seleccionado */}
-            {selectedContrato && (
-              <div style={{
-                backgroundColor: '#f8f9fa',
-                padding: '1rem',
-                borderRadius: '8px',
-                marginBottom: '1rem',
-                border: '1px solid #e9ecef'
-              }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
-                  <div>
-                    <small style={{ color: '#6c757d' }}>Proveedor</small>
-                    <div style={{ fontWeight: '600' }}>{selectedContrato.proveedor}</div>
-                  </div>
-                  <div>
-                    <small style={{ color: '#6c757d' }}>Cultivo</small>
-                    <div style={{ fontWeight: '600' }}>{selectedContrato.cultivo} {selectedContrato.variedad && `(${selectedContrato.variedad})`}</div>
-                  </div>
-                  <div>
-                    <small style={{ color: '#6c757d' }}>Campaña</small>
-                    <div style={{ fontWeight: '600' }}>{selectedContrato.campana}</div>
-                  </div>
-                  <div>
-                    <small style={{ color: '#6c757d' }}>Precio</small>
-                    <div style={{ fontWeight: '600', color: '#2d5a27' }}>{selectedContrato.precio} €/kg</div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Planificaciones */}
-            <div style={{ marginBottom: '1rem' }}>
-              <div className="flex justify-between items-center mb-2">
-                <label className="form-label" style={{ margin: 0 }}>Planificación de Recolección</label>
-                <button 
-                  type="button" 
-                  className="btn btn-sm btn-secondary"
-                  onClick={addPlanificacion}
-                >
-                  <Plus size={14} /> Añadir fecha
-                </button>
-              </div>
-              
-              {formData.planificaciones.map((plan, idx) => (
-                <div key={idx} style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr 2fr auto',
-                  gap: '0.5rem',
-                  marginBottom: '0.5rem',
-                  alignItems: 'end'
-                }}>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <input
-                      type="date"
-                      className="form-input"
-                      value={plan.fecha_planificada}
-                      onChange={(e) => updatePlanificacion(idx, 'fecha_planificada', e.target.value)}
-                      placeholder="Fecha"
-                    />
-                  </div>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={plan.kilos_estimados}
-                      onChange={(e) => updatePlanificacion(idx, 'kilos_estimados', e.target.value)}
-                      placeholder="Kilos estimados"
-                    />
-                  </div>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={plan.observaciones}
-                      onChange={(e) => updatePlanificacion(idx, 'observaciones', e.target.value)}
-                      placeholder="Observaciones"
-                    />
-                  </div>
-                  {formData.planificaciones.length > 1 && (
-                    <button
-                      type="button"
-                      className="btn btn-sm"
-                      style={{ backgroundColor: '#fee2e2', color: '#dc2626' }}
-                      onClick={() => removePlanificacion(idx)}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  )}
-                </div>
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: '0', marginBottom: '1.5rem', borderBottom: '2px solid hsl(var(--border))' }}>
+              {[
+                { key: 'general', label: 'Datos Generales', icon: <Package size={14} /> },
+                { key: 'planificacion', label: 'Planificacion', icon: <Clock size={14} /> }
+              ].map(tab => (
+                <button key={tab.key} type="button" onClick={() => setActiveModalTab(tab.key)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1rem', fontSize: '0.8rem', fontWeight: activeModalTab === tab.key ? '700' : '500', color: activeModalTab === tab.key ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))', background: 'none', border: 'none', borderBottom: activeModalTab === tab.key ? '2px solid hsl(var(--primary))' : '2px solid transparent', cursor: 'pointer', whiteSpace: 'nowrap', marginBottom: '-2px' }}>{tab.icon}{tab.label}</button>
               ))}
             </div>
+            {/* Form */}
+            <form onSubmit={handleCreateCosecha} style={{ flex: 1, overflow: 'auto', minHeight: 0, paddingRight: '1rem' }}>
+              {activeModalTab === 'general' && (<div>
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Contrato Asociado</h3>
+                  <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                    <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Contrato *</label>
+                    <select className="form-select" value={formData.contrato_id} onChange={(e) => setFormData({ ...formData, contrato_id: e.target.value })} required data-testid="select-contrato">
+                      <option value="">Seleccionar contrato...</option>
+                      {contratos.map(c => (
+                        <option key={c._id} value={c._id}>{c.numero_contrato || ''} | {c.proveedor} - {c.cultivo} ({c.campana}) - {c.precio}€/kg</option>
+                      ))}
+                    </select>
+                  </div>
+                  {selectedContrato && (
+                    <div style={{ backgroundColor: 'hsl(var(--primary) / 0.05)', border: '1px solid hsl(var(--primary) / 0.2)', borderRadius: '8px', padding: '1rem' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '1rem' }}>
+                        <div><span style={{ fontSize: '0.7rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase' }}>Proveedor</span><p style={{ fontWeight: '600', margin: '0.25rem 0 0 0', fontSize: '0.9rem' }}>{selectedContrato.proveedor}</p></div>
+                        <div><span style={{ fontSize: '0.7rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase' }}>Cultivo</span><p style={{ fontWeight: '600', margin: '0.25rem 0 0 0', fontSize: '0.9rem' }}>{selectedContrato.cultivo} {selectedContrato.variedad && `(${selectedContrato.variedad})`}</p></div>
+                        <div><span style={{ fontSize: '0.7rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase' }}>Campana</span><p style={{ fontWeight: '600', margin: '0.25rem 0 0 0', fontSize: '0.9rem' }}>{selectedContrato.campana}</p></div>
+                        <div><span style={{ fontSize: '0.7rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase' }}>Precio</span><p style={{ fontWeight: '700', margin: '0.25rem 0 0 0', fontSize: '0.9rem', color: 'hsl(142 76% 36%)' }}>{selectedContrato.precio} €/kg</p></div>
+                      </div>
+                      {selectedContrato.cantidad && (
+                        <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid hsl(var(--border))' }}>
+                          <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>Cantidad contratada: <strong>{parseFloat(selectedContrato.cantidad).toLocaleString('es-ES')} kg</strong></span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>)}
 
-            <div className="flex gap-2">
-              <button type="submit" className="btn btn-primary">Crear Cosecha</button>
-              <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>Cancelar</button>
-            </div>
-          </form>
+              {activeModalTab === 'planificacion' && (<div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', margin: 0 }}>Planificacion de Recoleccion ({formData.planificaciones.length})</h3>
+                  <button type="button" className="btn btn-sm btn-secondary" onClick={addPlanificacion}><Plus size={14} /> Anadir fecha</button>
+                </div>
+                {formData.planificaciones.map((plan, idx) => (
+                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: '180px 160px 1fr auto', gap: '0.75rem', marginBottom: '0.75rem', alignItems: 'start', padding: '0.75rem', background: 'hsl(var(--muted) / 0.15)', borderRadius: '8px', border: '1px solid hsl(var(--border))' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '600', textTransform: 'uppercase' }}>Fecha</label><input type="date" className="form-input" value={plan.fecha_planificada} onChange={(e) => updatePlanificacion(idx, 'fecha_planificada', e.target.value)} /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '600', textTransform: 'uppercase' }}>Kilos Estimados</label><input type="number" className="form-input" value={plan.kilos_estimados} onChange={(e) => updatePlanificacion(idx, 'kilos_estimados', e.target.value)} placeholder="0" style={{ textAlign: 'right', fontWeight: '600' }} /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '600', textTransform: 'uppercase' }}>Observaciones</label><input type="text" className="form-input" value={plan.observaciones} onChange={(e) => updatePlanificacion(idx, 'observaciones', e.target.value)} placeholder="Observaciones..." /></div>
+                    {formData.planificaciones.length > 1 && (
+                      <div style={{ paddingTop: '1.3rem' }}><button type="button" onClick={() => removePlanificacion(idx)} style={{ background: 'hsl(var(--destructive) / 0.1)', border: '1px solid hsl(var(--destructive) / 0.3)', borderRadius: '6px', cursor: 'pointer', padding: '0.4rem', color: 'hsl(var(--destructive))' }}><Trash2 size={14} /></button></div>
+                    )}
+                  </div>
+                ))}
+                {formData.planificaciones.length === 0 && <div style={{ textAlign: 'center', padding: '2rem', color: 'hsl(var(--muted-foreground))', background: 'hsl(var(--muted)/0.3)', borderRadius: '8px' }}><Clock size={32} style={{ margin: '0 auto 0.5rem', opacity: 0.4 }} /><p style={{ fontSize: '0.85rem' }}>Anadir al menos una fecha de planificacion</p></div>}
+              </div>)}
+
+              <div style={{ borderTop: '1px solid hsl(var(--border))', paddingTop: '1rem', marginTop: '1.25rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}><button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>Cancelar</button><button type="submit" className="btn btn-primary" data-testid="btn-crear-cosecha">Crear Cosecha</button></div>
+            </form>
+          </div>
         </div>
       )}
 
