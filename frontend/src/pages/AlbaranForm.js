@@ -726,7 +726,7 @@ const AlbaranForm = () => {
                     <AlertTriangle size={16} />
                     <span style={{ fontWeight: '600', fontSize: '0.85rem' }}>{item.descripcion}</span>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: isGuisante && preciosCalidad.length > 0 ? '1fr 80px 100px 120px 80px 140px' : '1fr 80px 120px 80px 140px', gap: '0.5rem', alignItems: 'center' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: isGuisante && preciosCalidad.length > 0 ? '140px 80px 100px 120px 80px 140px' : '140px 80px 120px 80px 140px', gap: '0.5rem', alignItems: 'center' }}>
                     <div><label style={{ fontSize: '0.65rem', fontWeight: '600', color: '#dc2626', textTransform: 'uppercase' }}>Cantidad</label><input type="text" className="form-input" value={formatCantidad(item.cantidad)} readOnly style={{ textAlign: 'right', backgroundColor: '#fef2f2', color: '#dc2626', fontWeight: '600' }} /></div>
                     <div><label style={{ fontSize: '0.65rem', fontWeight: '600', color: '#dc2626', textTransform: 'uppercase' }}>Ud.</label><span style={{ display: 'block', padding: '0.5rem', color: '#dc2626', fontWeight: '500' }}>kg</span></div>
                     {isGuisante && preciosCalidad.length > 0 && <div><label style={{ fontSize: '0.65rem', fontWeight: '600', color: '#9ca3af', textTransform: 'uppercase' }}>Tend.</label><span style={{ display: 'block', padding: '0.5rem', color: '#9ca3af' }}>-</span></div>}
@@ -807,7 +807,7 @@ const AlbaranForm = () => {
                     )}
                   </div>
                   {/* Row 2: Numeric fields */}
-                  <div style={{ display: 'grid', gridTemplateColumns: isGuisante && preciosCalidad.length > 0 ? '1fr 80px 110px 120px 80px 150px' : '1fr 80px 120px 80px 150px', gap: '0.5rem', alignItems: 'start' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: isGuisante && preciosCalidad.length > 0 ? '140px 80px 110px 120px 80px 150px' : '140px 80px 120px 80px 150px', gap: '0.5rem', alignItems: 'start' }}>
                     <div>
                       <label style={{ fontSize: '0.65rem', fontWeight: '700', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cantidad</label>
                       <input type="text" className="form-input" value={formatCantidad(item.cantidad)} onChange={(e) => { const rawValue = e.target.value.replace(/[^\d.,]/g, ''); const numValue = Math.round(parseSpanishNumber(rawValue)); updateItemTotal(index, 'cantidad', numValue || rawValue); }} placeholder="0" style={{ textAlign: 'right', fontSize: '0.9rem', fontWeight: '600' }} data-testid={`item-cantidad-${index}`} />
