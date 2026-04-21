@@ -383,7 +383,7 @@ const Visitas = () => {
           </button>
           <PermissionButton
             permission="create"
-            onClick={() => setShowForm(!showForm)}
+            onClick={() => { resetForm(); setEditingId(null); setShowForm(true); }}
             className="btn btn-primary"
             data-testid="btn-nueva-visita"
           >
@@ -413,19 +413,23 @@ const Visitas = () => {
       />
       
       {showForm && (
-        <VisitasForm
-          editingId={editingId} formData={formData} setFormData={setFormData}
-          fieldsConfig={fieldsConfig} handleSubmit={handleSubmit} handleCancelEdit={handleCancelEdit}
-          parcelas={parcelas} parcelaSearch={parcelaSearch} setParcelaSearch={setParcelaSearch}
-          parcelaFilterOptions={parcelaFilterOptions} selectedParcelaInfo={selectedParcelaInfo}
-          cuestionarioPlagas={cuestionarioPlagas} setCuestionarioPlagas={setCuestionarioPlagas}
-          fotos={fotos} fileInputRef={fileInputRef}
-          uploadingFotos={uploadingFotos} uploadError={uploadError}
-          handleFileSelect={handleFileSelect} deleteFoto={deleteFoto}
-          analyzeFoto={analyzeFoto} analyzeAllFotos={analyzeAllFotos}
-          analyzingFoto={analyzingFoto} analyzingAll={analyzingAll}
-          setShowAnalysisModal={setShowAnalysisModal}
-        />
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', backdropFilter: 'blur(4px)' }} onClick={handleCancelEdit}>
+          <div className="card" style={{ maxWidth: '960px', width: '100%', height: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative', padding: '0', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()}>
+            <VisitasForm
+              editingId={editingId} formData={formData} setFormData={setFormData}
+              fieldsConfig={fieldsConfig} handleSubmit={handleSubmit} handleCancelEdit={handleCancelEdit}
+              parcelas={parcelas} parcelaSearch={parcelaSearch} setParcelaSearch={setParcelaSearch}
+              parcelaFilterOptions={parcelaFilterOptions} selectedParcelaInfo={selectedParcelaInfo}
+              cuestionarioPlagas={cuestionarioPlagas} setCuestionarioPlagas={setCuestionarioPlagas}
+              fotos={fotos} fileInputRef={fileInputRef}
+              uploadingFotos={uploadingFotos} uploadError={uploadError}
+              handleFileSelect={handleFileSelect} deleteFoto={deleteFoto}
+              analyzeFoto={analyzeFoto} analyzeAllFotos={analyzeAllFotos}
+              analyzingFoto={analyzingFoto} analyzingAll={analyzingAll}
+              setShowAnalysisModal={setShowAnalysisModal}
+            />
+          </div>
+        </div>
       )}
       
       <VisitasTable
