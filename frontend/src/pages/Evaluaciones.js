@@ -402,7 +402,7 @@ const Evaluaciones = () => {
               <Settings size={18} />
             </button>
           )}
-          <PermissionButton permission="create" onClick={() => { resetForm(); setShowForm(!showForm); }} className="btn btn-primary" data-testid="btn-nueva-evaluacion">
+          <PermissionButton permission="create" onClick={() => { resetForm(); setEditingId(null); setShowForm(true); }} className="btn btn-primary" data-testid="btn-nueva-evaluacion">
             <Plus size={18} /> {t('evaluations.newEvaluation')}
           </PermissionButton>
         </div>
@@ -456,32 +456,36 @@ const Evaluaciones = () => {
       )}
 
       {showForm && (
-        <EvaluacionesForm
-          formData={formData}
-          setFormData={setFormData}
-          editingId={editingId}
-          respuestas={respuestas}
-          handleRespuestaChange={handleRespuestaChange}
-          handleSubmit={handleSubmit}
-          onCancel={() => { setShowForm(false); setEditingId(null); resetForm(); }}
-          parcelas={parcelas}
-          filteredParcelas={filteredParcelas}
-          parcelaSearch={parcelaSearch}
-          setParcelaSearch={setParcelaSearch}
-          parcelaFilterOptions={parcelaFilterOptions}
-          selectedParcelaInfo={selectedParcelaInfo}
-          handleParcelaSelect={handleParcelaSelect}
-          expandedSections={expandedSections}
-          toggleSection={toggleSection}
-          SECCIONES={SECCIONES}
-          getPreguntasSeccion={getPreguntasSeccion}
-          handleDragEnd={handleDragEnd}
-          handleDuplicateQuestion={handleDuplicateQuestion}
-          handleDeleteQuestion={handleDeleteQuestion}
-          setNewQuestionSection={setNewQuestionSection}
-          setShowAddQuestion={setShowAddQuestion}
-          user={user}
-        />
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', backdropFilter: 'blur(4px)' }} onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }}>
+          <div className="card" style={{ maxWidth: '960px', width: '100%', height: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative', padding: '0', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()}>
+            <EvaluacionesForm
+              formData={formData}
+              setFormData={setFormData}
+              editingId={editingId}
+              respuestas={respuestas}
+              handleRespuestaChange={handleRespuestaChange}
+              handleSubmit={handleSubmit}
+              onCancel={() => { setShowForm(false); setEditingId(null); resetForm(); }}
+              parcelas={parcelas}
+              filteredParcelas={filteredParcelas}
+              parcelaSearch={parcelaSearch}
+              setParcelaSearch={setParcelaSearch}
+              parcelaFilterOptions={parcelaFilterOptions}
+              selectedParcelaInfo={selectedParcelaInfo}
+              handleParcelaSelect={handleParcelaSelect}
+              expandedSections={expandedSections}
+              toggleSection={toggleSection}
+              SECCIONES={SECCIONES}
+              getPreguntasSeccion={getPreguntasSeccion}
+              handleDragEnd={handleDragEnd}
+              handleDuplicateQuestion={handleDuplicateQuestion}
+              handleDeleteQuestion={handleDeleteQuestion}
+              setNewQuestionSection={setNewQuestionSection}
+              setShowAddQuestion={setShowAddQuestion}
+              user={user}
+            />
+          </div>
+        </div>
       )}
 
       <EvaluacionesTable
