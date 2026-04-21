@@ -116,6 +116,7 @@ const Recetas = () => {
   
   // Modal de detalle
   const [viewingReceta, setViewingReceta] = useState(null);
+  const [activeModalTab, setActiveModalTab] = useState('general');
   
   useEffect(() => {
     fetchRecetas();
@@ -307,6 +308,7 @@ const Recetas = () => {
       activa: receta.activa !== false
     });
     setShowForm(true);
+    setActiveModalTab('general');
   };
   
   const handleCancelEdit = () => {
@@ -379,7 +381,7 @@ const Recetas = () => {
           </button>
           <PermissionButton
             permission="create"
-            onClick={() => { resetForm(); setShowForm(!showForm); }}
+            onClick={() => { resetForm(); setActiveModalTab('general'); setShowForm(!showForm); }}
             className="btn btn-primary"
             data-testid="btn-nueva-receta"
           >
@@ -548,276 +550,110 @@ const Recetas = () => {
         )}
       </div>
       
-      {/* Formulario */}
+      {/* Formulario Modal */}
       {showForm && (
-        <div className="card mb-6" data-testid="receta-form">
-          <h2 className="card-title">{editingId ? 'Editar Receta' : 'Nueva Receta'}</h2>
-          <form onSubmit={handleSubmit}>
-            {/* Datos básicos */}
-            <div className="grid-2" style={{ marginBottom: '1.5rem' }}>
-              <div className="form-group">
-                <label className="form-label">Nombre de la Receta *</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  value={formData.nombre} 
-                  onChange={(e) => setFormData({...formData, nombre: e.target.value})} 
-                  required 
-                  placeholder="Ej: Tratamiento anti-pulgón primaveral"
-                  data-testid="input-nombre" 
-                />
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', backdropFilter: 'blur(4px)' }} onClick={handleCancelEdit}>
+          <div className="card" style={{ maxWidth: '960px', width: '100%', height: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative', padding: '2rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()} data-testid="receta-form">
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '2px solid hsl(var(--border))' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'hsl(var(--primary) / 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Beaker size={20} style={{ color: 'hsl(var(--primary))' }} /></div>
+                <div><h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '700' }}>{editingId ? 'Editar' : 'Nueva'} Receta</h2><span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>{formData.nombre || 'Sin nombre'}</span></div>
               </div>
-              <div className="form-group">
-                <label className="form-label">Cultivo Objetivo *</label>
-                <select 
-                  className="form-select" 
-                  value={formData.cultivo_objetivo} 
-                  onChange={(e) => setFormData({...formData, cultivo_objetivo: e.target.value})} 
-                  required 
-                  data-testid="select-cultivo"
-                >
-                  <option value="">Seleccionar cultivo...</option>
-                  {cultivos.map(c => <option key={c._id} value={c.nombre}>{c.nombre}</option>)}
-                  {formData.cultivo_objetivo && !cultivos.find(c => c.nombre === formData.cultivo_objetivo) && (
-                    <option value={formData.cultivo_objetivo}>{formData.cultivo_objetivo}</option>
-                  )}
-                </select>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Tipo de Tratamiento</label>
-                <select 
-                  className="form-select" 
-                  value={formData.tipo_tratamiento} 
-                  onChange={(e) => setFormData({...formData, tipo_tratamiento: e.target.value})}
-                  data-testid="select-tipo"
-                >
-                  {TIPOS_TRATAMIENTO.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Objetivo (Plaga/Enfermedad)</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  value={formData.objetivo_tratamiento} 
-                  onChange={(e) => setFormData({...formData, objetivo_tratamiento: e.target.value})} 
-                  placeholder="Ej: Pulgón negro, Oídio..."
-                  data-testid="input-objetivo" 
-                />
-              </div>
+              <button onClick={handleCancelEdit} className="config-modal-close-btn"><X size={18} /></button>
             </div>
-            
-            {/* Sección de productos */}
-            <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'hsl(var(--muted) / 0.3)', borderRadius: '0.5rem' }}>
-              <h3 style={{ fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Package size={18} /> Productos Fitosanitarios
-              </h3>
-              
-              {/* Lista de productos añadidos */}
-              {formData.productos.length > 0 && (
-                <div style={{ marginBottom: '1rem' }}>
-                  <table style={{ width: '100%', fontSize: '0.875rem' }}>
-                    <thead>
-                      <tr>
-                        <th style={{ textAlign: 'left', padding: '0.5rem' }}>Producto</th>
-                        <th style={{ textAlign: 'left', padding: '0.5rem' }}>Materia Activa</th>
-                        <th style={{ textAlign: 'right', padding: '0.5rem' }}>Dosis</th>
-                        <th style={{ textAlign: 'right', padding: '0.5rem' }}>P.S.</th>
-                        <th style={{ padding: '0.5rem' }}></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {formData.productos.map((p, i) => (
-                        <tr key={i} style={{ backgroundColor: 'white' }}>
-                          <td style={{ padding: '0.5rem', fontWeight: '500' }}>{p.nombre_comercial}</td>
-                          <td style={{ padding: '0.5rem' }}>{p.materia_activa}</td>
-                          <td style={{ padding: '0.5rem', textAlign: 'right' }}>{p.dosis} {p.unidad}</td>
-                          <td style={{ padding: '0.5rem', textAlign: 'right' }}>{p.plazo_seguridad || 0}d</td>
-                          <td style={{ padding: '0.5rem', textAlign: 'center' }}>
-                            <button type="button" className="btn btn-sm btn-error" onClick={() => removeProducto(i)}>
-                              <X size={14} />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-              
-              {/* Formulario para añadir producto */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.75rem', alignItems: 'end' }}>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.75rem' }}>Nombre Comercial *</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    value={nuevoProducto.nombre_comercial}
-                    onChange={(e) => setNuevoProducto({...nuevoProducto, nombre_comercial: e.target.value})}
-                    placeholder="Ej: Confidor"
-                    data-testid="input-producto-nombre"
-                  />
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.75rem' }}>Materia Activa *</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    value={nuevoProducto.materia_activa}
-                    onChange={(e) => setNuevoProducto({...nuevoProducto, materia_activa: e.target.value})}
-                    placeholder="Ej: Imidacloprid"
-                    data-testid="input-producto-materia"
-                  />
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.75rem' }}>Dosis *</label>
-                  <input 
-                    type="number" 
-                    step="0.01"
-                    className="form-input" 
-                    value={nuevoProducto.dosis}
-                    onChange={(e) => setNuevoProducto({...nuevoProducto, dosis: e.target.value})}
-                    placeholder="0.5"
-                    data-testid="input-producto-dosis"
-                  />
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.75rem' }}>Unidad</label>
-                  <select 
-                    className="form-select" 
-                    value={nuevoProducto.unidad}
-                    onChange={(e) => setNuevoProducto({...nuevoProducto, unidad: e.target.value})}
-                    data-testid="select-producto-unidad"
-                  >
-                    {UNIDADES_DOSIS.map(u => <option key={u} value={u}>{u}</option>)}
-                  </select>
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.75rem' }}>P.S. (días)</label>
-                  <input 
-                    type="number" 
-                    min="0"
-                    className="form-input" 
-                    value={nuevoProducto.plazo_seguridad}
-                    onChange={(e) => setNuevoProducto({...nuevoProducto, plazo_seguridad: e.target.value})}
-                    placeholder="14"
-                    data-testid="input-producto-ps"
-                  />
-                </div>
-                <button 
-                  type="button" 
-                  className="btn btn-secondary"
-                  onClick={addProducto}
-                  data-testid="btn-add-producto"
-                >
-                  <Plus size={16} /> Añadir
-                </button>
-              </div>
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: '0', marginBottom: '1.5rem', borderBottom: '2px solid hsl(var(--border))' }}>
+              {[
+                { key: 'general', label: 'Datos Generales', icon: <FileText size={14} /> },
+                { key: 'productos', label: 'Productos', icon: <Package size={14} /> },
+                { key: 'aplicacion', label: 'Aplicacion', icon: <Beaker size={14} /> }
+              ].map(tab => (
+                <button key={tab.key} type="button" onClick={() => setActiveModalTab(tab.key)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1rem', fontSize: '0.8rem', fontWeight: activeModalTab === tab.key ? '700' : '500', color: activeModalTab === tab.key ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))', background: 'none', border: 'none', borderBottom: activeModalTab === tab.key ? '2px solid hsl(var(--primary))' : '2px solid transparent', cursor: 'pointer', whiteSpace: 'nowrap', marginBottom: '-2px' }}>{tab.icon}{tab.label}</button>
+              ))}
             </div>
-            
-            {/* Información adicional */}
-            <div className="grid-2" style={{ marginBottom: '1rem' }}>
-              <div className="form-group">
-                <label className="form-label">Plazo de Seguridad Máximo (días)</label>
-                <input 
-                  type="number" 
-                  min="0" 
-                  className="form-input" 
-                  value={formData.plazo_seguridad} 
-                  onChange={(e) => setFormData({...formData, plazo_seguridad: e.target.value})} 
-                  data-testid="input-plazo" 
-                />
-                <small style={{ color: 'hsl(var(--muted-foreground))' }}>Se calcula automáticamente del máximo de los productos</small>
-              </div>
-              <div className="form-group">
-                <label className="form-label">EPP Requerido</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  value={formData.ppe_requerido} 
-                  onChange={(e) => setFormData({...formData, ppe_requerido: e.target.value})} 
-                  placeholder="Guantes, mascarilla, gafas..."
-                  data-testid="input-epp" 
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Época de Aplicación</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  value={formData.epoca_aplicacion} 
-                  onChange={(e) => setFormData({...formData, epoca_aplicacion: e.target.value})} 
-                  placeholder="Ej: Primavera, antes de floración..."
-                  data-testid="input-epoca" 
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Condiciones de Aplicación</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  value={formData.condiciones_aplicacion} 
-                  onChange={(e) => setFormData({...formData, condiciones_aplicacion: e.target.value})} 
-                  placeholder="Ej: Temp. < 25°C, sin viento..."
-                  data-testid="input-condiciones" 
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Intervalo entre Aplicaciones (días)</label>
-                <input 
-                  type="number" 
-                  min="0"
-                  className="form-input" 
-                  value={formData.intervalo_aplicaciones} 
-                  onChange={(e) => setFormData({...formData, intervalo_aplicaciones: e.target.value})} 
-                  data-testid="input-intervalo" 
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Máx. Aplicaciones/Campaña</label>
-                <input 
-                  type="number" 
-                  min="1"
-                  className="form-input" 
-                  value={formData.max_aplicaciones} 
-                  onChange={(e) => setFormData({...formData, max_aplicaciones: e.target.value})} 
-                  data-testid="input-max-aplicaciones" 
-                />
-              </div>
-            </div>
-            
-            <div className="form-group">
-              <label className="form-label">Instrucciones de Aplicación</label>
-              <textarea 
-                className="form-textarea" 
-                rows="3" 
-                value={formData.instrucciones} 
-                onChange={(e) => setFormData({...formData, instrucciones: e.target.value})} 
-                placeholder="Método de aplicación, precauciones, observaciones..."
-                data-testid="textarea-instrucciones" 
-              />
-            </div>
-            
-            <div className="form-group">
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input 
-                  type="checkbox" 
-                  checked={formData.activa}
-                  onChange={(e) => setFormData({...formData, activa: e.target.checked})}
-                  style={{ width: '18px', height: '18px' }}
-                  data-testid="checkbox-activa"
-                />
-                <span>Receta activa</span>
-              </label>
-            </div>
-            
-            <div className="flex gap-2">
-              <button type="submit" className="btn btn-primary" data-testid="btn-guardar">
-                {editingId ? 'Actualizar' : 'Guardar'} Receta
-              </button>
-              <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>Cancelar</button>
-            </div>
-          </form>
+            {/* Form */}
+            <form onSubmit={handleSubmit} style={{ flex: 1, overflow: 'auto', minHeight: 0, paddingRight: '1rem' }}>
+              {activeModalTab === 'general' && (<div>
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Identificacion</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Nombre de la Receta *</label><input type="text" className="form-input" value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} required placeholder="Ej: Tratamiento anti-pulgon primaveral" data-testid="input-nombre" /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Cultivo Objetivo *</label><select className="form-select" value={formData.cultivo_objetivo} onChange={(e) => setFormData({...formData, cultivo_objetivo: e.target.value})} required data-testid="select-cultivo"><option value="">Seleccionar cultivo...</option>{cultivos.map(c => <option key={c._id} value={c.nombre}>{c.nombre}</option>)}{formData.cultivo_objetivo && !cultivos.find(c => c.nombre === formData.cultivo_objetivo) && <option value={formData.cultivo_objetivo}>{formData.cultivo_objetivo}</option>}</select></div>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.75rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Tipo de Tratamiento</label><select className="form-select" value={formData.tipo_tratamiento} onChange={(e) => setFormData({...formData, tipo_tratamiento: e.target.value})} data-testid="select-tipo">{TIPOS_TRATAMIENTO.map(t => <option key={t} value={t}>{t}</option>)}</select></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Objetivo (Plaga/Enfermedad)</label><input type="text" className="form-input" value={formData.objetivo_tratamiento} onChange={(e) => setFormData({...formData, objetivo_tratamiento: e.target.value})} placeholder="Ej: Pulgon negro, Oidio..." data-testid="input-objetivo" /></div>
+                  </div>
+                </div>
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Condiciones</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Epoca de Aplicacion</label><input type="text" className="form-input" value={formData.epoca_aplicacion} onChange={(e) => setFormData({...formData, epoca_aplicacion: e.target.value})} placeholder="Ej: Primavera, antes de floracion..." data-testid="input-epoca" /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Condiciones de Aplicacion</label><input type="text" className="form-input" value={formData.condiciones_aplicacion} onChange={(e) => setFormData({...formData, condiciones_aplicacion: e.target.value})} placeholder="Ej: Temp. < 25C, sin viento..." data-testid="input-condiciones" /></div>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.75rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>EPP Requerido</label><input type="text" className="form-input" value={formData.ppe_requerido} onChange={(e) => setFormData({...formData, ppe_requerido: e.target.value})} placeholder="Guantes, mascarilla, gafas..." data-testid="input-epp" /></div>
+                    <div style={{ paddingTop: '1.5rem' }}><label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.5rem 1rem', borderRadius: '8px', background: formData.activa ? 'hsl(142 76% 36%/0.1)' : 'hsl(var(--muted))', border: '1px solid ' + (formData.activa ? 'hsl(142 76% 36%/0.3)' : 'hsl(var(--border))') }}><input type="checkbox" checked={formData.activa} onChange={(e) => setFormData({...formData, activa: e.target.checked})} style={{ width: '16px', height: '16px' }} data-testid="checkbox-activa" /><span style={{ fontWeight: '600', fontSize: '0.85rem', color: formData.activa ? 'hsl(142 76% 36%)' : 'hsl(var(--muted-foreground))' }}>{formData.activa ? 'Activa' : 'Inactiva'}</span></label></div>
+                  </div>
+                </div>
+              </div>)}
+
+              {activeModalTab === 'productos' && (<div>
+                <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Productos Fitosanitarios ({formData.productos.length})</h3>
+                {formData.productos.length > 0 && (
+                  <div style={{ marginBottom: '1rem' }}>
+                    {formData.productos.map((p, i) => (
+                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', borderRadius: '8px', marginBottom: '0.5rem', background: 'white', border: '1px solid hsl(var(--border))' }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                            <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>{p.nombre_comercial}</span>
+                            <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>{p.materia_activa}</span>
+                            {p.num_registro && <span style={{ fontSize: '0.75rem', padding: '0.1rem 0.4rem', borderRadius: '4px', background: 'hsl(var(--muted))', color: 'hsl(var(--muted-foreground))' }}>Reg: {p.num_registro}</span>}
+                          </div>
+                          <div style={{ display: 'flex', gap: '1rem', marginTop: '0.25rem', fontSize: '0.8rem' }}>
+                            <span style={{ fontWeight: '600', color: 'hsl(var(--primary))' }}>{p.dosis} {p.unidad}</span>
+                            {p.plazo_seguridad > 0 && <span style={{ color: 'hsl(38 92% 50%)' }}>P.S. {p.plazo_seguridad} dias</span>}
+                            {p.objetivo && <span style={{ color: 'hsl(var(--muted-foreground))' }}>{p.objetivo}</span>}
+                          </div>
+                        </div>
+                        <button type="button" onClick={() => removeProducto(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--destructive))', padding: '0.25rem' }}><X size={16} /></button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div style={{ background: 'hsl(var(--muted)/0.3)', borderRadius: '8px', padding: '1rem', border: '1px solid hsl(var(--border))' }}>
+                  <h4 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Anadir Producto</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Nombre Comercial *</label><input type="text" className="form-input" value={nuevoProducto.nombre_comercial} onChange={(e) => setNuevoProducto({...nuevoProducto, nombre_comercial: e.target.value})} placeholder="Ej: Confidor" data-testid="input-producto-nombre" /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Materia Activa *</label><input type="text" className="form-input" value={nuevoProducto.materia_activa} onChange={(e) => setNuevoProducto({...nuevoProducto, materia_activa: e.target.value})} placeholder="Ej: Imidacloprid" data-testid="input-producto-materia" /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>N. Registro</label><input type="text" className="form-input" value={nuevoProducto.num_registro} onChange={(e) => setNuevoProducto({...nuevoProducto, num_registro: e.target.value})} placeholder="Ej: ES-00123" /></div>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 1fr auto', gap: '0.75rem', alignItems: 'end' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Objetivo</label><input type="text" className="form-input" value={nuevoProducto.objetivo} onChange={(e) => setNuevoProducto({...nuevoProducto, objetivo: e.target.value})} placeholder="Pulgon, Oidio..." /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Dosis *</label><input type="number" step="0.01" className="form-input" value={nuevoProducto.dosis} onChange={(e) => setNuevoProducto({...nuevoProducto, dosis: e.target.value})} placeholder="0.5" data-testid="input-producto-dosis" /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Unidad</label><select className="form-select" value={nuevoProducto.unidad} onChange={(e) => setNuevoProducto({...nuevoProducto, unidad: e.target.value})} data-testid="select-producto-unidad">{UNIDADES_DOSIS.map(u => <option key={u} value={u}>{u}</option>)}</select></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>P.S. (dias)</label><input type="number" min="0" className="form-input" value={nuevoProducto.plazo_seguridad} onChange={(e) => setNuevoProducto({...nuevoProducto, plazo_seguridad: e.target.value})} placeholder="14" data-testid="input-producto-ps" /></div>
+                    <button type="button" className="btn btn-primary" onClick={addProducto} data-testid="btn-add-producto" style={{ marginBottom: '0' }}><Plus size={16} /> Anadir</button>
+                  </div>
+                </div>
+              </div>)}
+
+              {activeModalTab === 'aplicacion' && (<div>
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Parametros de Aplicacion</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Plazo Seguridad Max. (dias)</label><input type="number" min="0" className="form-input" value={formData.plazo_seguridad} onChange={(e) => setFormData({...formData, plazo_seguridad: e.target.value})} data-testid="input-plazo" /><span style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))' }}>Auto-calculado del maximo de productos</span></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Intervalo entre Aplicaciones (dias)</label><input type="number" min="0" className="form-input" value={formData.intervalo_aplicaciones} onChange={(e) => setFormData({...formData, intervalo_aplicaciones: e.target.value})} data-testid="input-intervalo" /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Max. Aplicaciones/Campana</label><input type="number" min="1" className="form-input" value={formData.max_aplicaciones} onChange={(e) => setFormData({...formData, max_aplicaciones: e.target.value})} data-testid="input-max-aplicaciones" /></div>
+                  </div>
+                </div>
+                <div className="form-group"><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Instrucciones de Aplicacion</label><textarea className="form-input" rows="4" value={formData.instrucciones} onChange={(e) => setFormData({...formData, instrucciones: e.target.value})} placeholder="Metodo de aplicacion, precauciones, observaciones..." style={{ fontSize: '0.85rem', resize: 'vertical' }} data-testid="textarea-instrucciones" /></div>
+              </div>)}
+
+              <div style={{ borderTop: '1px solid hsl(var(--border))', paddingTop: '1rem', marginTop: '1.25rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}><button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>Cancelar</button><button type="submit" className="btn btn-primary" data-testid="btn-guardar">{editingId ? 'Actualizar' : 'Crear'} Receta</button></div>
+            </form>
+          </div>
         </div>
       )}
       
