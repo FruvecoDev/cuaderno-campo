@@ -117,6 +117,14 @@ const Recetas = () => {
   // Modal de detalle
   const [viewingReceta, setViewingReceta] = useState(null);
   const [activeModalTab, setActiveModalTab] = useState('general');
+
+  // Fitosanitarios catalog search
+  const [fitosanitarios, setFitosanitarios] = useState([]);
+  const [searchNombreComercial, setSearchNombreComercial] = useState('');
+  const [showNombreDropdown, setShowNombreDropdown] = useState(false);
+  const [plagasUnicas, setPlagasUnicas] = useState([]);
+  const [searchObjetivo, setSearchObjetivo] = useState('');
+  const [showObjetivoDropdown, setShowObjetivoDropdown] = useState(false);
   
   useEffect(() => {
     fetchRecetas();
@@ -142,6 +150,28 @@ const Recetas = () => {
 
     }
   };
+
+  const fetchFitosanitarios = async (search) => {
+    try {
+      const url = search ? `/api/fitosanitarios?search=${encodeURIComponent(search)}` : '/api/fitosanitarios';
+      const data = await api.get(url);
+      const prods = data.productos || [];
+      setFitosanitarios(prods);
+      const plagas = [...new Set(prods.flatMap(p => p.plagas_objetivo || []).filter(Boolean))].sort();
+      setPlagasUnicas(plagas);
+    } catch (error) {}
+  };
+
+  useEffect(() => { fetchFitosanitarios(''); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (!e.target.closest('[data-nombre-search]')) setShowNombreDropdown(false);
+      if (!e.target.closest('[data-objetivo-search]')) setShowObjetivoDropdown(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
   
   const fetchCultivos = async () => {
     try {
@@ -625,12 +655,55 @@ const Recetas = () => {
                 <div style={{ background: 'hsl(var(--muted)/0.3)', borderRadius: '8px', padding: '1rem', border: '1px solid hsl(var(--border))' }}>
                   <h4 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Anadir Producto</h4>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Nombre Comercial *</label><input type="text" className="form-input" value={nuevoProducto.nombre_comercial} onChange={(e) => setNuevoProducto({...nuevoProducto, nombre_comercial: e.target.value})} placeholder="Ej: Confidor" data-testid="input-producto-nombre" /></div>
+                    {/* Nombre Comercial - Searchable */}
+                    <div className="form-group" style={{ marginBottom: 0, position: 'relative' }} data-nombre-search="true">
+                      <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Nombre Comercial *</label>
+                      <input type="text" className="form-input" value={nuevoProducto.nombre_comercial} onChange={(e) => { setNuevoProducto({...nuevoProducto, nombre_comercial: e.target.value}); setSearchNombreComercial(e.target.value); setShowNombreDropdown(true); }} onFocus={() => setShowNombreDropdown(true)} placeholder="Buscar producto..." data-testid="input-producto-nombre" autoComplete="off" />
+                      {showNombreDropdown && searchNombreComercial.length > 0 && (() => {
+                        const filtered = fitosanitarios.filter(f => f.nombre_comercial?.toLowerCase().includes(searchNombreComercial.toLowerCase())).slice(0, 8);
+                        if (filtered.length === 0) return null;
+                        return (
+                          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: 'white', border: '1px solid hsl(var(--border))', borderRadius: '6px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', maxHeight: '200px', overflowY: 'auto', zIndex: 1200 }}>
+                            {filtered.map(f => (
+                              <div key={f._id} onClick={() => {
+                                setNuevoProducto({...nuevoProducto, nombre_comercial: f.nombre_comercial, materia_activa: f.materia_activa || '', num_registro: f.numero_registro || '', dosis: f.dosis_min ? String(f.dosis_min) : '', unidad: f.unidad_dosis || 'L/ha', plazo_seguridad: f.plazo_seguridad ? String(f.plazo_seguridad) : ''});
+                                setSearchNombreComercial(f.nombre_comercial);
+                                setShowNombreDropdown(false);
+                              }} style={{ padding: '0.5rem 0.75rem', cursor: 'pointer', borderBottom: '1px solid hsl(var(--border) / 0.5)', fontSize: '0.85rem' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'hsl(var(--primary) / 0.08)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                                <div style={{ fontWeight: '600' }}>{f.nombre_comercial}</div>
+                                <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', display: 'flex', gap: '0.5rem' }}>
+                                  <span>{f.materia_activa}</span>
+                                  {f.tipo && <span style={{ padding: '0 0.3rem', background: 'hsl(var(--muted))', borderRadius: '3px' }}>{f.tipo}</span>}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
+                    </div>
                     <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Materia Activa *</label><input type="text" className="form-input" value={nuevoProducto.materia_activa} onChange={(e) => setNuevoProducto({...nuevoProducto, materia_activa: e.target.value})} placeholder="Ej: Imidacloprid" data-testid="input-producto-materia" /></div>
                     <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>N. Registro</label><input type="text" className="form-input" value={nuevoProducto.num_registro} onChange={(e) => setNuevoProducto({...nuevoProducto, num_registro: e.target.value})} placeholder="Ej: ES-00123" /></div>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 1fr auto', gap: '0.75rem', alignItems: 'end' }}>
-                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Objetivo</label><input type="text" className="form-input" value={nuevoProducto.objetivo} onChange={(e) => setNuevoProducto({...nuevoProducto, objetivo: e.target.value})} placeholder="Pulgon, Oidio..." /></div>
+                    {/* Objetivo - Searchable */}
+                    <div className="form-group" style={{ marginBottom: 0, position: 'relative' }} data-objetivo-search="true">
+                      <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Objetivo</label>
+                      <input type="text" className="form-input" value={nuevoProducto.objetivo} onChange={(e) => { setNuevoProducto({...nuevoProducto, objetivo: e.target.value}); setSearchObjetivo(e.target.value); setShowObjetivoDropdown(true); }} onFocus={() => setShowObjetivoDropdown(true)} placeholder="Buscar plaga..." autoComplete="off" />
+                      {showObjetivoDropdown && (() => {
+                        const term = searchObjetivo.toLowerCase();
+                        const filtered = plagasUnicas.filter(p => p.toLowerCase().includes(term)).slice(0, 8);
+                        if (filtered.length === 0) return null;
+                        return (
+                          <div style={{ position: 'absolute', bottom: '100%', left: 0, right: 0, backgroundColor: 'white', border: '1px solid hsl(var(--border))', borderRadius: '6px', boxShadow: '0 -4px 16px rgba(0,0,0,0.12)', maxHeight: '180px', overflowY: 'auto', zIndex: 1200 }}>
+                            {filtered.map(p => (
+                              <div key={p} onClick={() => { setNuevoProducto({...nuevoProducto, objetivo: p}); setSearchObjetivo(p); setShowObjetivoDropdown(false); }} style={{ padding: '0.4rem 0.75rem', cursor: 'pointer', borderBottom: '1px solid hsl(var(--border) / 0.5)', fontSize: '0.85rem' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'hsl(var(--primary) / 0.08)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                                {p}
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
+                    </div>
                     <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Dosis *</label><input type="number" step="0.01" className="form-input" value={nuevoProducto.dosis} onChange={(e) => setNuevoProducto({...nuevoProducto, dosis: e.target.value})} placeholder="0.5" data-testid="input-producto-dosis" /></div>
                     <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Unidad</label><select className="form-select" value={nuevoProducto.unidad} onChange={(e) => setNuevoProducto({...nuevoProducto, unidad: e.target.value})} data-testid="select-producto-unidad">{UNIDADES_DOSIS.map(u => <option key={u} value={u}>{u}</option>)}</select></div>
                     <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>P.S. (dias)</label><input type="number" min="0" className="form-input" value={nuevoProducto.plazo_seguridad} onChange={(e) => setNuevoProducto({...nuevoProducto, plazo_seguridad: e.target.value})} placeholder="14" data-testid="input-producto-ps" /></div>
