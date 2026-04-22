@@ -96,6 +96,6 @@ export const BulkCheckboxCell = ({ id, selected, onToggle }) => (
   </td>
 );
 
-export const bulkDeleteApi = async (module, ids) => {
-  return await api.post(`/api/bulk-delete/${module}`, { ids: Array.from(ids) });
+export const bulkDeleteApi = async (module, ids, extra = {}) => {
+  return await api.post(`/api/bulk-delete/${module}`, { ids: Array.from(ids), ...extra });
 };

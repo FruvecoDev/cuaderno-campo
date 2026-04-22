@@ -58,8 +58,21 @@ async def bulk_delete(module: str, data: dict, current_user: dict = Depends(get_
 
     result = await collection.delete_many({"_id": {"$in": object_ids}})
 
+    # Cascada opcional: al borrar albaranes, eliminar tambien sus ACM huerfanos
+    cascaded_acm = 0
+    if module == "albaranes" and data.get("cascade_acm"):
+        albaran_id_strings = [str(oid) for oid in object_ids]
+        acm_result = await db["comisiones_generadas"].delete_many(
+            {"albaran_id": {"$in": albaran_id_strings}}
+        )
+        cascaded_acm = acm_result.deleted_count
+
     return {
         "success": True,
         "deleted_count": result.deleted_count,
-        "message": f"{result.deleted_count} registros eliminados de {module}"
+        "cascaded_acm": cascaded_acm,
+        "message": (
+            f"{result.deleted_count} registros eliminados de {module}"
+            + (f"; {cascaded_acm} ACM asociados eliminados" if cascaded_acm else "")
+        ),
     }

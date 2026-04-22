@@ -907,13 +907,18 @@ const Albaranes = () => {
   // Bulk select (sobre filas visibles en la pagina)
   const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(paginatedAlbaranes);
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [cascadeAcm, setCascadeAcm] = useState(true);
   const handleBulkDelete = async () => {
     setBulkDeleting(true);
     try {
-      await bulkDeleteApi('albaranes', selectedIds);
+      const res = await bulkDeleteApi('albaranes', selectedIds, { cascade_acm: cascadeAcm });
+      const r = res?.data ?? res;
       const deleted = new Set(selectedIds);
       setAlbaranes(prev => prev.filter(a => !deleted.has(a._id)));
       clearSelection();
+      if (r?.cascaded_acm) {
+        window.alert(`${r.deleted_count} albaranes eliminados. ${r.cascaded_acm} albaranes de comisión asociados también eliminados.`);
+      }
     } catch (err) {
       window.alert('Error al eliminar masivamente');
     } finally {
@@ -1200,12 +1205,33 @@ const Albaranes = () => {
           </div>
         )}
         {canBulkDelete && (
-          <BulkActionBar
-            selectedCount={selectedIds.size}
-            onClear={clearSelection}
-            onDelete={handleBulkDelete}
-            deleting={bulkDeleting}
-          />
+          <>
+            <BulkActionBar
+              selectedCount={selectedIds.size}
+              onClear={clearSelection}
+              onDelete={handleBulkDelete}
+              deleting={bulkDeleting}
+            />
+            {selectedIds.size > 0 && (
+              <label
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                  fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))',
+                  marginBottom: '0.75rem', cursor: 'pointer', userSelect: 'none',
+                }}
+                title="Si está marcado, al borrar los albaranes también se eliminan sus albaranes de comisión asociados (manteniendo integridad)."
+              >
+                <input
+                  type="checkbox"
+                  checked={cascadeAcm}
+                  onChange={(e) => setCascadeAcm(e.target.checked)}
+                  data-testid="chk-cascade-acm"
+                  style={{ width: '14px', height: '14px', cursor: 'pointer' }}
+                />
+                Borrar también los <b>albaranes de comisión asociados</b> (recomendado)
+              </label>
+            )}
+          </>
         )}
         {loading ? (
           <p>Cargando albaranes...</p>
