@@ -9,6 +9,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../utils/permissions';
 import TabbedModal from '../components/TabbedModal';
+import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
 import '../App.css';
 
 
@@ -26,7 +27,7 @@ const ESTADO_COLORS = {
 };
 
 const Tareas = () => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const { t } = useTranslation();
   const { canCreate, canEdit, canDelete } = usePermissions();
   const [tareas, setTareas] = useState([]);
@@ -176,6 +177,28 @@ const Tareas = () => {
 
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
   const activeFiltersCount = Object.values(filters).filter(v => v !== '').length;
+
+  // Bulk delete
+  const canBulkDelete = !!user?.can_bulk_delete;
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredTareas);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const handleBulkDelete = async () => {
+    setBulkDeleting(true);
+    try {
+      const res = await bulkDeleteApi('tareas', selectedIds);
+      const r = res?.data ?? res;
+      const deleted = new Set(selectedIds);
+      setTareas(prev => prev.filter(x => !deleted.has(x._id)));
+      clearSelection();
+      if (r?.deleted_count != null) {
+        window.alert(`${r.deleted_count} tarea${r.deleted_count > 1 ? 's' : ''} eliminada${r.deleted_count > 1 ? 's' : ''}.`);
+      }
+    } catch (err) {
+      window.alert(err?.response?.data?.detail || 'Error al eliminar masivamente');
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
 
   // Filtrar parcelas para el selector
   const filteredParcelas = useMemo(() => {
@@ -862,21 +885,52 @@ const Tareas = () => {
             <p className="text-muted">{t('common.noData', 'No hay tareas')}</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {canBulkDelete && (
+                <>
+                  <BulkActionBar
+                    selectedCount={selectedIds.size}
+                    onDelete={handleBulkDelete}
+                    onClear={clearSelection}
+                    deleting={bulkDeleting}
+                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))' }}>
+                    <input
+                      type="checkbox"
+                      checked={allSelected}
+                      ref={el => { if (el) el.indeterminate = someSelected; }}
+                      onChange={toggleAll}
+                      style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                      data-testid="bulk-select-all"
+                    />
+                    <span>Seleccionar todas ({filteredTareas.length})</span>
+                  </div>
+                </>
+              )}
               {filteredTareas.map(tarea => (
                 <div 
                   key={tarea._id} 
                   style={{ 
-                    border: '1px solid #e5e7eb',
+                    border: selectedIds.has(tarea._id) ? '1px solid hsl(var(--primary) / 0.4)' : '1px solid #e5e7eb',
                     borderRadius: '8px',
                     padding: '1rem',
                     borderLeftWidth: '4px',
                     borderLeftColor: PRIORIDAD_COLORS[tarea.prioridad]?.text || '#9ca3af',
+                    backgroundColor: selectedIds.has(tarea._id) ? 'hsl(var(--primary) / 0.04)' : undefined,
                     transition: 'box-shadow 0.2s'
                   }}
                   className="hover-shadow"
                   data-testid={`tarea-item-${tarea._id}`}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
+                    {canBulkDelete && (
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(tarea._id)}
+                        onChange={() => toggleOne(tarea._id)}
+                        style={{ width: '18px', height: '18px', cursor: 'pointer', marginTop: '4px' }}
+                        data-testid={`bulk-select-${tarea._id}`}
+                      />
+                    )}
                     <div style={{ flex: 1 }}>
                       {/* Badges */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>

@@ -9,6 +9,7 @@ import offlineDB from '../services/offlineDB';
 import api, { BACKEND_URL } from '../services/api';
 import CalculadoraFitosanitarios from '../components/tratamientos/CalculadoraFitosanitarios';
 import TabbedModal from '../components/TabbedModal';
+import { useBulkSelect, bulkDeleteApi } from '../components/BulkActions';
 import TratamientosKPIs from '../components/tratamientos/TratamientosKPIs';
 import TratamientosFilters from '../components/tratamientos/TratamientosFilters';
 import TratamientosTable from '../components/tratamientos/TratamientosTable';
@@ -86,7 +87,7 @@ const Tratamientos = () => {
   const [activeTab, setActiveTab] = useState('general');
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState(null);
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   
@@ -362,6 +363,28 @@ const Tratamientos = () => {
     }
     return true;
   });
+
+  // Bulk delete
+  const canBulkDelete = !!user?.can_bulk_delete;
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredTratamientos);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const handleBulkDelete = async () => {
+    setBulkDeleting(true);
+    try {
+      const res = await bulkDeleteApi('tratamientos', selectedIds);
+      const r = res?.data ?? res;
+      const deleted = new Set(selectedIds);
+      setTratamientos(prev => prev.filter(x => !deleted.has(x._id)));
+      clearSelection();
+      if (r?.deleted_count != null) {
+        window.alert(`${r.deleted_count} tratamiento${r.deleted_count > 1 ? 's' : ''} eliminado${r.deleted_count > 1 ? 's' : ''}.`);
+      }
+    } catch (err) {
+      window.alert(err?.response?.data?.detail || 'Error al eliminar masivamente');
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
   
   const clearFilters = () => {
     setFilters({ proveedor: '', cultivo: '', campana: '', tipo_tratamiento: '' });
@@ -1308,6 +1331,15 @@ const Tratamientos = () => {
         handleEdit={handleEdit}
         handleDelete={handleDelete}
         handleChangeEstado={handleChangeEstado}
+        canBulkDelete={canBulkDelete}
+        selectedIds={selectedIds}
+        onToggleOne={toggleOne}
+        onToggleAll={toggleAll}
+        allSelected={allSelected}
+        someSelected={someSelected}
+        onBulkDelete={handleBulkDelete}
+        onClearSelection={clearSelection}
+        bulkDeleting={bulkDeleting}
       />
     </div>
   );

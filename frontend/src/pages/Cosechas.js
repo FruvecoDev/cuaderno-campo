@@ -3,11 +3,12 @@ import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, Edit2, Package, TrendingUp, TrendingDown, Check, ChevronDown, ChevronUp, X, Download, Target, Scale, DollarSign, Clock, CheckCircle, Loader2, Leaf, FileText } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 
 const Cosechas = () => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const { t } = useTranslation();
   const [cosechas, setCosechas] = useState([]);
   const [contratos, setContratos] = useState([]);
@@ -141,6 +142,28 @@ const Cosechas = () => {
     proveedores: [...new Set(cosechas.map(c => c.proveedor).filter(Boolean))].sort(),
     cultivos: [...new Set(cosechas.map(c => c.cultivo).filter(Boolean))].sort()
   }), [cosechas]);
+
+  // Bulk delete
+  const canBulkDelete = !!user?.can_bulk_delete;
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredCosechas);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const handleBulkDelete = async () => {
+    setBulkDeleting(true);
+    try {
+      const res = await bulkDeleteApi('cosechas', selectedIds);
+      const r = res?.data ?? res;
+      const deleted = new Set(selectedIds);
+      setCosechas(prev => prev.filter(x => !deleted.has(x._id)));
+      clearSelection();
+      if (r?.deleted_count != null) {
+        window.alert(`${r.deleted_count} cosecha${r.deleted_count > 1 ? 's' : ''} eliminada${r.deleted_count > 1 ? 's' : ''}.`);
+      }
+    } catch (err) {
+      window.alert(err?.response?.data?.detail || 'Error al eliminar masivamente');
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
 
   // Generar ID de carga automático
   const generateCargaId = () => {
@@ -631,11 +654,32 @@ const Cosechas = () => {
           <p className="text-muted">No hay cosechas registradas</p>
         ) : (
           <div>
+            {canBulkDelete && (
+              <>
+                <BulkActionBar
+                  selectedCount={selectedIds.size}
+                  onDelete={handleBulkDelete}
+                  onClear={clearSelection}
+                  deleting={bulkDeleting}
+                />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0.75rem', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))' }}>
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    ref={el => { if (el) el.indeterminate = someSelected; }}
+                    onChange={toggleAll}
+                    style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                    data-testid="bulk-select-all"
+                  />
+                  <span>Seleccionar todas las visibles ({filteredCosechas.length})</span>
+                </div>
+              </>
+            )}
             {filteredCosechas.map(cosecha => (
               <div 
                 key={cosecha._id} 
                 className="card mb-4"
-                style={{ border: '1px solid #e5e7eb' }}
+                style={{ border: '1px solid #e5e7eb', ...(selectedIds.has(cosecha._id) ? { backgroundColor: 'hsl(var(--primary) / 0.05)', borderColor: 'hsl(var(--primary) / 0.3)' } : {}) }}
                 data-testid={`cosecha-${cosecha._id}`}
               >
                 {/* Cabecera de la cosecha */}
@@ -649,6 +693,16 @@ const Cosechas = () => {
                   onClick={() => setExpandedCosecha(expandedCosecha === cosecha._id ? null : cosecha._id)}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    {canBulkDelete && (
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(cosecha._id)}
+                        onChange={(e) => { e.stopPropagation(); toggleOne(cosecha._id); }}
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                        data-testid={`bulk-select-${cosecha._id}`}
+                      />
+                    )}
                     <Package size={24} style={{ color: '#2d5a27' }} />
                     <div>
                       <div style={{ fontWeight: '600' }}>

@@ -9,6 +9,7 @@ import {
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
+import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
 import '../App.css';
 
 
@@ -37,7 +38,7 @@ const Irrigaciones = () => {
   const [historialData, setHistorialData] = useState(null);
   const [showCalculadora, setShowCalculadora] = useState(false);
   
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   
@@ -214,6 +215,28 @@ const Irrigaciones = () => {
       search: '', sistema: '', parcela_id: '', estado: '',
       fecha_desde: '', fecha_hasta: '', cultivo: ''
     });
+  };
+
+  // Bulk delete
+  const canBulkDelete = !!user?.can_bulk_delete;
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredIrrigaciones);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const handleBulkDelete = async () => {
+    setBulkDeleting(true);
+    try {
+      const res = await bulkDeleteApi('irrigaciones', selectedIds);
+      const r = res?.data ?? res;
+      const deleted = new Set(selectedIds);
+      setIrrigaciones(prev => prev.filter(x => !deleted.has(x._id)));
+      clearSelection();
+      if (r?.deleted_count != null) {
+        window.alert(`${r.deleted_count} irrigación${r.deleted_count > 1 ? 'es' : ''} eliminada${r.deleted_count > 1 ? 's' : ''}.`);
+      }
+    } catch (err) {
+      window.alert(err?.response?.data?.detail || 'Error al eliminar masivamente');
+    } finally {
+      setBulkDeleting(false);
+    }
   };
 
   // Función para manejar el cambio de parcela en el filtro
@@ -971,9 +994,24 @@ const Irrigaciones = () => {
             <p className="text-muted">{t('common.noData', 'No hay datos')}</p>
           ) : (
             <div className="table-container">
+              {canBulkDelete && (
+                <BulkActionBar
+                  selectedCount={selectedIds.size}
+                  onDelete={handleBulkDelete}
+                  onClear={clearSelection}
+                  deleting={bulkDeleting}
+                />
+              )}
               <table data-testid="irrigaciones-table">
                 <thead>
                   <tr>
+                    {canBulkDelete && (
+                      <BulkCheckboxHeader
+                        allSelected={allSelected}
+                        someSelected={someSelected}
+                        onToggle={toggleAll}
+                      />
+                    )}
                     {fieldsConfig.fecha && <th>Fecha</th>}
                     {fieldsConfig.parcela_id && <th>Parcela</th>}
                     <th>Cultivo</th>
@@ -993,7 +1031,14 @@ const Irrigaciones = () => {
                     const cultivoNombre = parcelaInfo?.cultivo || irrig.cultivo || '-';
                     
                     return (
-                    <tr key={irrig._id}>
+                    <tr key={irrig._id} style={selectedIds.has(irrig._id) ? { backgroundColor: 'hsl(var(--primary) / 0.05)' } : undefined}>
+                      {canBulkDelete && (
+                        <BulkCheckboxCell
+                          id={irrig._id}
+                          selected={selectedIds.has(irrig._id)}
+                          onToggle={toggleOne}
+                        />
+                      )}
                       {fieldsConfig.fecha && <td>{irrig.fecha}</td>}
                       {fieldsConfig.parcela_id && (
                         <td>

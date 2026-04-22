@@ -106,6 +106,20 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - Endpoint `/api/bulk-delete/visitas` ya soportado en routes_bulk.py.
 - Verificado: 25 visitas, selección múltiple, barra de acciones y confirmación funcionando.
 
+### Bulk Delete: Roll-out a todos los módulos - DONE (2026-04-22)
+- Integración completa del patrón `useBulkSelect + BulkActionBar + bulkDeleteApi` en los 5 módulos restantes:
+  - **Recetas.js**: tabla inline, columna de checkboxes
+  - **Irrigaciones.js**: tabla inline, columna de checkboxes
+  - **Tratamientos.js**: componente externo TratamientosTable.js ampliado con props bulk
+  - **Cosechas.js**: layout de cards, checkbox insertado en el header de cada card (junto al icono Package)
+  - **Tareas.js**: layout de cards, checkbox a la izquierda del contenido de cada card
+- Todos los módulos muestran la barra "N seleccionados — Deseleccionar / Eliminar (N)" con modal de confirmación
+- Endpoints `/api/bulk-delete/{modulo}` ya soportados (routes_bulk.py ALLOWED_COLLECTIONS)
+- Filas/cards seleccionadas resaltadas en azul claro
+- Verificado con Playwright: todos renderizan checkbox header + bar al seleccionar
+- Incidencias durante rollout: 2 ediciones search_replace corrompieron archivos (Recetas/Irrigaciones) al inyectar contenido duplicado al final. Se limpiaron con sed y se repitieron los inserts con patrones más pequeños.
+- **Módulos ya integrados previamente**: Albaranes, Maquinaria, Parcelas, Clientes, Proveedores, Contratos, Visitas (7 más). Total: 12 módulos con bulk delete.
+
 ### Albaranes de Comision Module - DONE (2026-04-22)
 - Auto-generates ACMs from purchase/sale albaranes (routes_albaranes_comision.py)
 - Factura-Resumen PDF, Historico Liquidaciones, cross-linking to contracts & albaranes

@@ -52,7 +52,7 @@ const Recetas = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState(null);
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   
@@ -209,6 +209,28 @@ const Recetas = () => {
   
   const clearFilters = () => {
     setFilters({ cultivo_objetivo: '', tipo_tratamiento: '', nombre: '', activa: '' });
+  };
+
+  // Bulk delete
+  const canBulkDelete = !!user?.can_bulk_delete;
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredRecetas);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const handleBulkDelete = async () => {
+    setBulkDeleting(true);
+    try {
+      const res = await bulkDeleteApi('recetas', selectedIds);
+      const r = res?.data ?? res;
+      const deleted = new Set(selectedIds);
+      setRecetas(prev => prev.filter(x => !deleted.has(x._id)));
+      clearSelection();
+      if (r?.deleted_count != null) {
+        window.alert(`${r.deleted_count} receta${r.deleted_count > 1 ? 's' : ''} eliminada${r.deleted_count > 1 ? 's' : ''}.`);
+      }
+    } catch (err) {
+      window.alert(err?.response?.data?.detail || 'Error al eliminar masivamente');
+    } finally {
+      setBulkDeleting(false);
+    }
   };
   
   const toggleFieldConfig = (field) => {
@@ -740,9 +762,24 @@ const Recetas = () => {
           <p className="text-muted">{hasActiveFilters ? 'No hay recetas que coincidan con los filtros' : 'No hay recetas registradas'}</p>
         ) : (
           <div className="table-container">
+            {canBulkDelete && (
+              <BulkActionBar
+                selectedCount={selectedIds.size}
+                onDelete={handleBulkDelete}
+                onClear={clearSelection}
+                deleting={bulkDeleting}
+              />
+            )}
             <table data-testid="recetas-table">
               <thead>
                 <tr>
+                  {canBulkDelete && (
+                    <BulkCheckboxHeader
+                      allSelected={allSelected}
+                      someSelected={someSelected}
+                      onToggle={toggleAll}
+                    />
+                  )}
                   {fieldsConfig.nombre && <th>Nombre</th>}
                   {fieldsConfig.cultivo_objetivo && <th>Cultivo</th>}
                   {fieldsConfig.tipo_tratamiento && <th>Tipo</th>}
@@ -754,7 +791,14 @@ const Recetas = () => {
               </thead>
               <tbody>
                 {filteredRecetas.map((receta) => (
-                  <tr key={receta._id}>
+                  <tr key={receta._id} style={selectedIds.has(receta._id) ? { backgroundColor: 'hsl(var(--primary) / 0.05)' } : undefined}>
+                    {canBulkDelete && (
+                      <BulkCheckboxCell
+                        id={receta._id}
+                        selected={selectedIds.has(receta._id)}
+                        onToggle={toggleOne}
+                      />
+                    )}
                     {fieldsConfig.nombre && (
                       <td>
                         <span className="font-semibold" style={{ cursor: 'pointer', color: 'hsl(var(--primary))' }} onClick={() => setViewingReceta(receta)}>

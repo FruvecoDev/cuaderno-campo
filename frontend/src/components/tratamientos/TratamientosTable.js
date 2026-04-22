@@ -1,13 +1,31 @@
 import React from 'react';
 import { Edit2, Trash2, CheckCircle, XCircle, PlayCircle } from 'lucide-react';
+import { BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell } from '../BulkActions';
 
 const TratamientosTable = ({
   tratamientos, loading, hasActiveFilters, tableConfig, canEdit, canDelete,
-  handleEdit, handleDelete, handleChangeEstado
+  handleEdit, handleDelete, handleChangeEstado,
+  canBulkDelete = false,
+  selectedIds = new Set(),
+  onToggleOne,
+  onToggleAll,
+  allSelected = false,
+  someSelected = false,
+  onBulkDelete,
+  onClearSelection,
+  bulkDeleting = false,
 }) => {
   return (
     <div className="card">
       <h2 className="card-title">Lista de Tratamientos ({tratamientos.length})</h2>
+      {canBulkDelete && selectedIds.size > 0 && (
+        <BulkActionBar
+          selectedCount={selectedIds.size}
+          onDelete={onBulkDelete}
+          onClear={onClearSelection}
+          deleting={bulkDeleting}
+        />
+      )}
       {loading ? (
         <p>Cargando tratamientos...</p>
       ) : tratamientos.length === 0 ? (
@@ -17,6 +35,13 @@ const TratamientosTable = ({
           <table data-testid="tratamientos-table">
             <thead>
               <tr>
+                {canBulkDelete && (
+                  <BulkCheckboxHeader
+                    allSelected={allSelected}
+                    someSelected={someSelected}
+                    onToggle={onToggleAll}
+                  />
+                )}
                 {tableConfig.tipo && <th>Tipo</th>}
                 {tableConfig.subtipo && <th>Subtipo</th>}
                 {tableConfig.metodo && <th>Metodo</th>}
@@ -33,7 +58,14 @@ const TratamientosTable = ({
             </thead>
             <tbody>
               {tratamientos.map((t) => (
-                <tr key={t._id}>
+                <tr key={t._id} style={selectedIds.has(t._id) ? { backgroundColor: 'hsl(var(--primary) / 0.05)' } : undefined}>
+                  {canBulkDelete && (
+                    <BulkCheckboxCell
+                      id={t._id}
+                      selected={selectedIds.has(t._id)}
+                      onToggle={onToggleOne}
+                    />
+                  )}
                   {tableConfig.tipo && <td className="font-semibold">{t.tipo_tratamiento}</td>}
                   {tableConfig.subtipo && <td>{t.subtipo || '—'}</td>}
                   {tableConfig.metodo && <td>{t.metodo_aplicacion}</td>}
