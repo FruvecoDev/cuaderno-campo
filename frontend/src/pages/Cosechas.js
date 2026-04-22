@@ -795,7 +795,7 @@ const Cosechas = () => {
                           </thead>
                           <tbody>
                             {cosecha.planificaciones.map((p, idx) => (
-                              <tr key={c._id || idx}>
+                              <tr key={p._id || idx}>
                                 <td style={{ padding: '8px' }}>{p.fecha_planificada}</td>
                                 <td style={{ padding: '8px', textAlign: 'right' }}>{p.kilos_estimados?.toLocaleString()} kg</td>
                                 <td style={{ padding: '8px' }}>{p.observaciones || '-'}</td>

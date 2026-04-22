@@ -680,13 +680,12 @@ const Usuarios = () => {
                           className={`btn btn-sm ${selectedProfile === profile.id ? 'btn-primary' : 'btn-secondary'}`}
                           style={{
                             display: 'flex',
-                            alignItems: 'center',
+                            alignItems: 'flex-start',
                             gap: '0.5rem',
                             padding: '0.75rem',
                             textAlign: 'left',
                             height: 'auto',
-                            flexDirection: 'column',
-                            alignItems: 'flex-start'
+                            flexDirection: 'column'
                           }}
                           title={profile.description}
                           data-testid={`profile-${profile.id}`}

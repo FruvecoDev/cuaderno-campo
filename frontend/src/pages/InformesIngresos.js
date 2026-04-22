@@ -725,7 +725,7 @@ const InformesIngresos = () => {
                     </thead>
                     <tbody>
                       {detalleAlbaranes.map((a, idx) => (
-                        <tr key={item._id || idx}>
+                        <tr key={a._id || idx}>
                           <td>{a.fecha}</td>
                           <td>{a.numero_albaran}</td>
                           <td>{a.cliente}</td>
