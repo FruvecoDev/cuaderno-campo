@@ -494,6 +494,35 @@ const ComisionesGeneradas = () => {
         )}
       </div>
 
+      {/* Banner de periodo filtrado */}
+      {(filters.fecha_desde || filters.fecha_hasta) && (
+        <div
+          data-testid="periodo-banner"
+          style={{
+            marginBottom: '1rem',
+            padding: '0.65rem 1rem',
+            background: 'hsl(var(--primary) / 0.08)',
+            border: '1px solid hsl(var(--primary) / 0.25)',
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.6rem',
+            fontSize: '0.85rem',
+            color: 'hsl(var(--primary))',
+            fontWeight: '600'
+          }}
+        >
+          <Calendar size={16} />
+          <span>
+            Comisiones del periodo:
+            {' '}
+            {filters.fecha_desde ? new Date(filters.fecha_desde).toLocaleDateString('es-ES') : '—'}
+            {' → '}
+            {filters.fecha_hasta ? new Date(filters.fecha_hasta).toLocaleDateString('es-ES') : 'Hoy'}
+          </span>
+        </div>
+      )}
+
       {loading ? (
         <div className="card" style={{ padding: '2rem', textAlign: 'center' }}>
           <p>Cargando comisiones...</p>
@@ -535,7 +564,7 @@ const ComisionesGeneradas = () => {
                       </span>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1.75rem' }}>
                     <div style={{ textAlign: 'right' }}>
                       <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Kilos Netos</div>
                       <div style={{ fontSize: '1.1rem', fontWeight: '600' }}>{formatKilos(grupo.totales.kilos_netos)} kg</div>
@@ -545,8 +574,12 @@ const ComisionesGeneradas = () => {
                       <div style={{ fontSize: '1.1rem', fontWeight: '600', color: '#f59e0b' }}>€{formatNumber(grupo.totales.comision_pendiente)}</div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Total</div>
-                      <div style={{ fontSize: '1.1rem', fontWeight: '600', color: '#8b5cf6' }}>€{formatNumber(grupo.totales.comision_total)}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Pagadas</div>
+                      <div style={{ fontSize: '1.1rem', fontWeight: '600', color: '#10b981' }}>€{formatNumber(grupo.totales.comision_pagada)}</div>
+                    </div>
+                    <div style={{ textAlign: 'right', paddingLeft: '0.75rem', borderLeft: '2px solid hsl(var(--border))' }}>
+                      <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', fontWeight: '600' }}>Comisión Total</div>
+                      <div style={{ fontSize: '1.25rem', fontWeight: '700', color: '#8b5cf6' }}>€{formatNumber(grupo.totales.comision_total)}</div>
                     </div>
                     {expandedAgente === grupo.agente_id ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                   </div>
