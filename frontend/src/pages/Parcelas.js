@@ -336,8 +336,8 @@ const Parcelas = () => {
   const handleGenerateCuaderno = async (parcelaId, campana) => {
     setGeneratingCuaderno(parcelaId);
     try {
-      await api.post(`/api/cuaderno-campo/generar/${parcelaId}`, { campana });
-      fetchParcelas();
+      const url = campana ? `/api/cuaderno-campo/generar/${parcelaId}?campana=${encodeURIComponent(campana)}` : `/api/cuaderno-campo/generar/${parcelaId}`;
+      await api.download(url, `cuaderno_campo_${parcelaId}.pdf`);
     } catch (err) { alert('Error: ' + api.getErrorMessage(err)); } finally { setGeneratingCuaderno(null); }
   };
 
