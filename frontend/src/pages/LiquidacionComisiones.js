@@ -117,17 +117,17 @@ const LiquidacionComisiones = () => {
       <div className="stats-grid mb-6" data-testid="comisiones-kpis">
         <div className="stat-card">
           <div className="stat-label">Comisiones Compra</div>
-          <div className="stat-value" style={{ color: '#1565c0' }}>€{totales.total_comision_compra.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</div>
+          <div className="stat-value" style={{ color: '#1565c0' }}>€{totales.total_comision_compra.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</div>
           <div className="text-sm text-muted">Total agentes compra</div>
         </div>
         <div className="stat-card">
           <div className="stat-label">Comisiones Venta</div>
-          <div className="stat-value" style={{ color: '#2e7d32' }}>€{totales.total_comision_venta.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</div>
+          <div className="stat-value" style={{ color: '#2e7d32' }}>€{totales.total_comision_venta.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</div>
           <div className="text-sm text-muted">Total agentes venta</div>
         </div>
         <div className="stat-card">
           <div className="stat-label">Total General</div>
-          <div className="stat-value" style={{ color: '#d32f2f' }}>€{totales.total_general.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</div>
+          <div className="stat-value" style={{ color: '#d32f2f' }}>€{totales.total_general.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</div>
           <div className="text-sm text-muted">Suma comisiones</div>
         </div>
         <div className="stat-card">
@@ -260,7 +260,7 @@ const LiquidacionComisiones = () => {
                     <div style={{ textAlign: 'right', marginRight: '1rem' }}>
                       <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Total Comisión</div>
                       <div style={{ fontSize: '1.25rem', fontWeight: '700', color: agente.tipo === 'compra' ? '#1565c0' : '#2e7d32' }}>
-                        €{agente.total_comision.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                        €{agente.total_comision.toLocaleString('de-DE', { minimumFractionDigits: 2 })}
                       </div>
                     </div>
                     <button
@@ -295,11 +295,11 @@ const LiquidacionComisiones = () => {
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Total Kg</div>
-                    <div style={{ fontSize: '1.1rem', fontWeight: '600' }}>{agente.total_kg?.toLocaleString('es-ES') || 0}</div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: '600' }}>{agente.total_kg?.toLocaleString('de-DE') || 0}</div>
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>Importe Albaranes</div>
-                    <div style={{ fontSize: '1.1rem', fontWeight: '600' }}>€{agente.total_importe_albaranes?.toLocaleString('es-ES', { minimumFractionDigits: 2 }) || '0.00'}</div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: '600' }}>€{agente.total_importe_albaranes?.toLocaleString('de-DE', { minimumFractionDigits: 2 }) || '0.00'}</div>
                   </div>
                 </div>
                 
@@ -330,9 +330,9 @@ const LiquidacionComisiones = () => {
                           <td>{albaran.campana}</td>
                           <td>{albaran.proveedor || albaran.cliente || '-'}</td>
                           <td>{albaran.cultivo}</td>
-                          <td style={{ textAlign: 'right' }}>{albaran.cantidad_kg?.toLocaleString('es-ES')}</td>
+                          <td style={{ textAlign: 'right' }}>{albaran.cantidad_kg?.toLocaleString('de-DE')}</td>
                           <td style={{ textAlign: 'right' }}>{albaran.precio_kg?.toFixed(4)}</td>
-                          <td style={{ textAlign: 'right' }}>{albaran.importe_albaran?.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</td>
+                          <td style={{ textAlign: 'right' }}>{albaran.importe_albaran?.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
                           <td>
                             <span style={{
                               padding: '0.125rem 0.375rem',
@@ -345,7 +345,7 @@ const LiquidacionComisiones = () => {
                             </span>
                           </td>
                           <td style={{ textAlign: 'right', fontWeight: '600', color: '#2e7d32' }}>
-                            {albaran.importe_comision?.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                            {albaran.importe_comision?.toLocaleString('de-DE', { minimumFractionDigits: 2 })}
                           </td>
                         </tr>
                       ))}

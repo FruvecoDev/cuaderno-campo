@@ -85,7 +85,11 @@ async def get_resumen_comisiones(
             date_filter["$gte"] = fecha_desde
         if fecha_hasta:
             date_filter["$lte"] = fecha_hasta
-        albaran_query["fecha"] = date_filter
+        # El campo real es 'fecha_albaran' (formato actual). Mantenemos compat con 'fecha'.
+        albaran_query["$or"] = [
+            {"fecha_albaran": date_filter},
+            {"fecha": date_filter}
+        ]
     if campana:
         albaran_query["campana"] = campana
     
@@ -105,6 +109,17 @@ async def get_resumen_comisiones(
     # Get all agents for name lookup
     agentes = await agentes_collection.find({}).to_list(100)
     agentes_map = {str(a["_id"]): a for a in agentes}
+
+    # Fallback: recoger nombres desde las comisiones_generadas previas
+    # (por si el agente fue eliminado pero aun existen comisiones historicas con su nombre)
+    try:
+        comisiones_historicas = db['comisiones_generadas']
+        async for c in comisiones_historicas.find({}, {"_id": 0, "agente_id": 1, "agente_nombre": 1}):
+            aid = c.get("agente_id")
+            if aid and aid not in agentes_map and c.get("agente_nombre"):
+                agentes_map[aid] = {"nombre": c["agente_nombre"]}
+    except Exception:
+        pass
     
     # Group commissions by agent from albaranes
     comisiones_compra = defaultdict(lambda: {
@@ -134,20 +149,35 @@ async def get_resumen_comisiones(
         
         contrato = contratos[contrato_id]
         
-        # Calcular cantidad total del albarán (suma de items)
-        cantidad_kg = 0
-        for item in albaran.get("items", []):
-            cantidad_kg += item.get("cantidad", 0) or 0
+        # Calcular cantidad (kilos netos) del albaran.
+        # Preferir kilos_netos del albaran (formato actual).
+        # Fallback: sumar cantidad de items no-destare (formato antiguo).
+        cantidad_kg = float(albaran.get("kilos_netos") or 0)
+        if cantidad_kg <= 0:
+            cantidad_kg = sum(
+                (item.get("cantidad") or 0)
+                for item in albaran.get("items", [])
+                if not item.get("es_destare")
+            )
         
         importe_albaran = albaran.get("total_albaran", 0) or 0
         
         # Calcular precio promedio por kg
         precio_kg = importe_albaran / cantidad_kg if cantidad_kg > 0 else 0
         
-        albaran_tipo = albaran.get("tipo", "Entrada")  # Entrada=compra, Salida=venta
+        # Determinar tipo del albaran.
+        # Formato actual: tipo_albaran = "Compra" | "Venta"
+        # Formato antiguo: tipo = "Entrada" | "Salida"
+        tipo_albaran_val = (albaran.get("tipo_albaran") or albaran.get("tipo") or "").strip()
+        if tipo_albaran_val in ("Compra", "Entrada", "Albarán de compra", "Albaran de compra"):
+            albaran_tipo = "Entrada"
+        elif tipo_albaran_val in ("Venta", "Salida", "Albarán de venta", "Albaran de venta"):
+            albaran_tipo = "Salida"
+        else:
+            albaran_tipo = "Entrada"  # default compra
         
         # Determinar número de albarán
-        albaran_numero = f"ALB-{str(albaran.get('_id', ''))[-6:]}"
+        albaran_numero = albaran.get("numero_albaran") or f"ALB-{str(albaran.get('_id', ''))[-6:]}"
         
         # Comisión de compra (tipo Entrada)
         if albaran_tipo == "Entrada":
@@ -164,7 +194,7 @@ async def get_resumen_comisiones(
                     comisiones_compra[agente_compra_id]["albaranes"].append({
                         "albaran_id": str(albaran["_id"]),
                         "numero": albaran_numero,
-                        "fecha": albaran.get("fecha", ""),
+                        "fecha": albaran.get("fecha_albaran") or albaran.get("fecha") or "",
                         "contrato_numero": f"{contrato.get('serie', 'MP')}-{contrato.get('año', '')}-{str(contrato.get('numero', '')).zfill(3)}",
                         "contrato_id": contrato_id,
                         "campana": albaran.get("campana") or contrato.get("campana"),
@@ -196,7 +226,7 @@ async def get_resumen_comisiones(
                     comisiones_venta[agente_venta_id]["albaranes"].append({
                         "albaran_id": str(albaran["_id"]),
                         "numero": albaran_numero,
-                        "fecha": albaran.get("fecha", ""),
+                        "fecha": albaran.get("fecha_albaran") or albaran.get("fecha") or "",
                         "contrato_numero": f"{contrato.get('serie', 'MP')}-{contrato.get('año', '')}-{str(contrato.get('numero', '')).zfill(3)}",
                         "contrato_id": contrato_id,
                         "campana": albaran.get("campana") or contrato.get("campana"),
@@ -389,7 +419,7 @@ async def generate_liquidacion_pdf(
         
         lineas.append({
             "albaran_numero": f"ALB-{str(albaran.get('_id', ''))[-6:]}",
-            "fecha": albaran.get("fecha", ""),
+            "fecha": albaran.get("fecha_albaran") or albaran.get("fecha") or "",
             "contrato_numero": f"{contrato.get('serie', 'MP')}-{contrato.get('año', '')}-{str(contrato.get('numero', '')).zfill(3)}",
             "campana": albaran.get("campana") or contrato.get("campana", ""),
             "proveedor_cliente": albaran.get("proveedor") if tipo_agente == 'compra' else albaran.get("cliente"),
