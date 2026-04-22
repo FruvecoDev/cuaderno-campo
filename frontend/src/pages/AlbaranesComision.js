@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import api, { BACKEND_URL } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -253,8 +254,40 @@ const AlbaranesComision = () => {
         </td>
       );
       case 'partner': return <td>{partnerName}</td>;
-      case 'origen': return <td style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>{acm.numero_albaran || '-'}</td>;
-      case 'contrato': return <td style={{ fontSize: '0.8rem', fontWeight: '500' }}>{acm.contrato_numero || '—'}</td>;
+      case 'origen': return (
+        <td style={{ fontSize: '0.75rem' }}>
+          {acm.numero_albaran ? (
+            <Link
+              to={`/albaranes?search=${encodeURIComponent(acm.numero_albaran)}`}
+              title="Ver albarán origen"
+              style={{ color: '#2563eb', textDecoration: 'none', fontWeight: '500' }}
+              onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+              onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+            >
+              {acm.numero_albaran}
+            </Link>
+          ) : (
+            <span style={{ color: 'hsl(var(--muted-foreground))' }}>-</span>
+          )}
+        </td>
+      );
+      case 'contrato': return (
+        <td style={{ fontSize: '0.8rem', fontWeight: '500' }}>
+          {acm.contrato_numero ? (
+            <Link
+              to={`/contratos?search=${encodeURIComponent(acm.contrato_numero)}`}
+              title="Ver contrato asociado"
+              style={{ color: '#2563eb', textDecoration: 'none' }}
+              onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+              onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+            >
+              {acm.contrato_numero}
+            </Link>
+          ) : (
+            <span style={{ color: 'hsl(var(--muted-foreground))' }}>—</span>
+          )}
+        </td>
+      );
       case 'cultivo': return <td>{acm.cultivo || '-'}</td>;
       case 'kg': return <td style={{ textAlign: 'right' }}>{formatKg(acm.kilos_netos)}</td>;
       case 'precio': return <td style={{ textAlign: 'right' }}>{formatNumber(acm.precio_kg, 4)}</td>;

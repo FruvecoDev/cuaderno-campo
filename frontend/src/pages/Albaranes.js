@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, Filter, Settings, X, FileSpreadsheet, FileText, Download, TrendingUp, TrendingDown, ArrowUpDown, Printer, Calendar } from 'lucide-react';
@@ -100,6 +100,15 @@ const Albaranes = () => {
     fecha_desde: '',
     fecha_hasta: ''
   });
+  const [searchNumero, setSearchNumero] = useState('');
+
+  // Leer query-param "search" (p.ej. al venir desde Albaranes de Comisión)
+  const [searchParams] = useSearchParams();
+  useEffect(() => {
+    const q = searchParams.get('search');
+    if (q) setSearchNumero(q);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   // Filtros para buscar contratos en el formulario
   const [contratoSearch, setContratoSearch] = useState({
@@ -836,6 +845,12 @@ const Albaranes = () => {
       const fechaAlbaran = a.fecha ? a.fecha.split('T')[0] : '';
       if (fechaAlbaran > filters.fecha_hasta) return false;
     }
+    // Busqueda rapida por numero_albaran (viene por URL desde otras paginas)
+    if (searchNumero) {
+      const q = searchNumero.toLowerCase();
+      const num = (a.numero_albaran || '').toLowerCase();
+      if (!num.includes(q)) return false;
+    }
     return true;
   });
   
@@ -1086,6 +1101,19 @@ const Albaranes = () => {
       {/* Tabla */}
       <div className="card">
         <h2 className="card-title">Lista de Albaranes ({filteredAlbaranes.length})</h2>
+        {searchNumero && (
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.35rem 0.75rem', background: 'hsl(var(--primary)/0.1)', border: '1px solid hsl(var(--primary)/0.25)', borderRadius: '999px', fontSize: '0.8rem', color: 'hsl(var(--primary))', marginBottom: '0.75rem', fontWeight: '500' }}>
+            Filtro por número: <b>{searchNumero}</b>
+            <button
+              type="button"
+              onClick={() => setSearchNumero('')}
+              title="Quitar filtro"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--primary))', padding: 0, display: 'inline-flex' }}
+            >
+              <X size={14} />
+            </button>
+          </div>
+        )}
         {loading ? (
           <p>Cargando albaranes...</p>
         ) : filteredAlbaranes.length === 0 ? (

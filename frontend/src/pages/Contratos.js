@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { Plus, Settings, Search, X, FileText, Eye, Trash2, Edit2, Download, Users, CreditCard, Package, Truck } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
@@ -60,6 +61,17 @@ const Contratos = () => {
   const [filters, setFilters] = useState({ search: '', proveedor: '', cultivo: '', campana: '', tipo: '', fecha_desde: '', fecha_hasta: '' });
   const [showFilters, setShowFilters] = useState(false);
   const { columns, setColumns, showConfig, setShowConfig, save, reset, visibleColumns } = useColumnConfig('contratos_col_config', DEFAULT_COLUMNS);
+
+  // Leer query-param "search" (p.ej. al venir desde Albaranes de Comisión)
+  const [searchParams] = useSearchParams();
+  useEffect(() => {
+    const q = searchParams.get('search');
+    if (q) {
+      setFilters(prev => ({ ...prev, search: q }));
+      setShowFilters(true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const initialFormData = {
     numero_contrato: '', tipo: puedeCompra ? 'Compra' : 'Venta', campana: '2025/26', procedencia: 'Campo',
