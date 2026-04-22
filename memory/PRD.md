@@ -95,6 +95,12 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - **Tareas.js** + **Tratamientos.js** migrated as proof-of-concept; remaining modules (Irrigaciones, Proveedores, Clientes, Cultivos, Técnicos, Cosechas, Recetas) can adopt incrementally
 - Saves ~50 lines per module on migration; future UX improvements happen once in the shared component
 
+### Contratos: Bulk Delete - DONE (2026-04-22)
+- Contratos.js ahora usa `useBulkSelect` + `BulkActionBar` + `bulkDeleteApi('contratos')` del mismo patrón que Albaranes.
+- ContratoTable.js acepta props bulk (canBulkDelete, selectedIds, onToggleOne, onToggleAll, allSelected, someSelected) y renderiza BulkCheckboxHeader + BulkCheckboxCell en primera columna cuando canBulkDelete.
+- Filas seleccionadas resaltadas sutilmente. Modal de confirmación con mensaje "Se eliminarán N registros".
+- Protegido por permiso backend `can_bulk_delete` (ya existente en rbac_guards y /api/bulk-delete/{module}).
+
 ### Albaranes de Comision Module - DONE (2026-04-22)
 - Auto-generates ACMs from purchase/sale albaranes (routes_albaranes_comision.py)
 - Factura-Resumen PDF, Historico Liquidaciones, cross-linking to contracts & albaranes

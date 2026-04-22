@@ -9,6 +9,7 @@ import ContratoFilters from '../components/contratos/ContratoFilters';
 import ContratoTable from '../components/contratos/ContratoTable';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
+import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
 import '../App.css';
 
 const parseFormattedNumber = (value) => {
@@ -45,13 +46,14 @@ const Contratos = () => {
   const [generatingCuaderno, setGeneratingCuaderno] = useState(null);
   const [activeTab, setActiveTab] = useState('general');
   const [auditHistory, setAuditHistory] = useState([]);
-  const { token, canDoOperacion } = useAuth();
+  const { token, canDoOperacion, user } = useAuth();
   const { canCreate, canEdit, canDelete, canExport } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   const { t } = useTranslation();
 
   const puedeCompra = canDoOperacion('compra');
   const puedeVenta = canDoOperacion('venta');
+  const canBulkDelete = !!user?.can_bulk_delete;
 
   const [proveedores, setProveedores] = useState([]);
   const [clientes, setClientes] = useState([]);
@@ -148,6 +150,27 @@ const Contratos = () => {
       return true;
     });
   }, [contratos, filters]);
+
+  // Bulk delete (seleccion multiple sobre filteredContratos)
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredContratos);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const handleBulkDelete = async () => {
+    setBulkDeleting(true);
+    try {
+      const res = await bulkDeleteApi('contratos', selectedIds);
+      const r = res?.data ?? res;
+      const deleted = new Set(selectedIds);
+      setContratos(prev => prev.filter(c => !deleted.has(c._id)));
+      clearSelection();
+      if (r?.deleted_count != null) {
+        window.alert(`${r.deleted_count} contrato${r.deleted_count > 1 ? 's' : ''} eliminado${r.deleted_count > 1 ? 's' : ''}.`);
+      }
+    } catch (err) {
+      window.alert(err?.response?.data?.detail || 'Error al eliminar masivamente');
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
 
   const addPrecioTenderometria = () => {
     setFormData({ ...formData, precios_calidad: [...(formData.precios_calidad || []), { min_tenderometria: '', max_tenderometria: '', precio: '' }] });
@@ -458,15 +481,31 @@ const Contratos = () => {
         ) : contratos.length === 0 ? (
           <p className="text-muted">{t('common.noData')}</p>
         ) : (
-          <ContratoTable
-            contratos={filteredContratos}
-            puedeCompra={puedeCompra} puedeVenta={puedeVenta}
-            canEdit={canEdit} canDelete={canDelete}
-            onEdit={handleEdit} onDelete={handleDelete}
-            onGenerateCuaderno={handleGenerateCuaderno}
-            generatingCuaderno={generatingCuaderno}
-            columnConfig={columns}
-          />
+          <>
+            {canBulkDelete && (
+              <BulkActionBar
+                selectedCount={selectedIds.size}
+                onDelete={handleBulkDelete}
+                onClear={clearSelection}
+                deleting={bulkDeleting}
+              />
+            )}
+            <ContratoTable
+              contratos={filteredContratos}
+              puedeCompra={puedeCompra} puedeVenta={puedeVenta}
+              canEdit={canEdit} canDelete={canDelete}
+              onEdit={handleEdit} onDelete={handleDelete}
+              onGenerateCuaderno={handleGenerateCuaderno}
+              generatingCuaderno={generatingCuaderno}
+              columnConfig={columns}
+              canBulkDelete={canBulkDelete}
+              selectedIds={selectedIds}
+              onToggleOne={toggleOne}
+              onToggleAll={toggleAll}
+              allSelected={allSelected}
+              someSelected={someSelected}
+            />
+          </>
         )}
       </div>
     </div>

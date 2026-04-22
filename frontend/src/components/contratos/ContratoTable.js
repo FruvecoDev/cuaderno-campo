@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Edit2, Trash2, BookOpen, Loader2, FileSpreadsheet } from 'lucide-react';
+import { BulkCheckboxHeader, BulkCheckboxCell } from '../BulkActions';
 
 const formatES = (num, decimals = 2) => {
   if (num == null) return '-';
@@ -71,7 +72,13 @@ const ContratoTable = ({
   onDelete,
   onGenerateCuaderno,
   generatingCuaderno,
-  columnConfig
+  columnConfig,
+  canBulkDelete = false,
+  selectedIds = new Set(),
+  onToggleOne,
+  onToggleAll,
+  allSelected = false,
+  someSelected = false,
 }) => {
   const { t } = useTranslation();
 
@@ -102,6 +109,13 @@ const ContratoTable = ({
       <table data-testid="contratos-table">
         <thead>
           <tr>
+            {canBulkDelete && (
+              <BulkCheckboxHeader
+                allSelected={allSelected}
+                someSelected={someSelected}
+                onToggle={onToggleAll}
+              />
+            )}
             {visibleColumns.map(col => (
               <th key={col.id}>{HEADER_LABELS[col.id] || col.label}</th>
             ))}
@@ -110,7 +124,14 @@ const ContratoTable = ({
         </thead>
         <tbody>
           {visibleContratos.map((contrato) => (
-            <tr key={contrato._id}>
+            <tr key={contrato._id} style={selectedIds.has(contrato._id) ? { backgroundColor: 'hsl(var(--primary) / 0.05)' } : undefined}>
+              {canBulkDelete && (
+                <BulkCheckboxCell
+                  id={contrato._id}
+                  selected={selectedIds.has(contrato._id)}
+                  onToggle={onToggleOne}
+                />
+              )}
               {visibleColumns.map(col => {
                 const renderer = COLUMN_RENDERERS[col.id];
                 return renderer ? renderer(contrato) : null;
