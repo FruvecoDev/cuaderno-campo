@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Plus, Map as MapIcon, Eye, Settings, Upload } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { usePermissions } from '../utils/permissions';
+import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
 import GeoImportModal from '../components/GeoImportModal';
 import { ParcelasFilters } from '../components/parcelas/ParcelasFilters';
 import { ParcelasGeneralMap } from '../components/parcelas/ParcelasGeneralMap';
@@ -28,6 +30,7 @@ const Parcelas = () => {
   const [zones, setZones] = useState([]);
   const [showGeneralMap, setShowGeneralMap] = useState(false);
   const { token } = useAuth();
+  const { canBulkDelete } = usePermissions();
   const navigate = useNavigate();
 
   const [generatingCuaderno, setGeneratingCuaderno] = useState(null);
@@ -250,6 +253,14 @@ const Parcelas = () => {
     return true;
   });
 
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredParcelas);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const handleBulkDelete = async () => {
+    if (!window.confirm(`Eliminar ${selectedIds.size} parcela${selectedIds.size > 1 ? 's' : ''} seleccionada${selectedIds.size > 1 ? 's' : ''}?`)) return;
+    setBulkDeleting(true);
+    try { await bulkDeleteApi('parcelas', selectedIds); clearSelection(); fetchParcelas(); } catch (e) {} finally { setBulkDeleting(false); }
+  };
+
   const handleZonesChanged = useCallback((newZones) => {
     setZones(newZones);
   }, []);
@@ -404,6 +415,9 @@ const Parcelas = () => {
         fieldsConfig={fieldsConfig} contratos={contratos} handleEdit={handleEdit}
         handleDelete={handleDelete} handleGenerateCuaderno={handleGenerateCuaderno}
         generatingCuaderno={generatingCuaderno} fetchHistorialTratamientos={fetchHistorialTratamientos}
+        canBulkDelete={canBulkDelete} selectedIds={selectedIds} toggleOne={toggleOne}
+        toggleAll={toggleAll} allSelected={allSelected} someSelected={someSelected}
+        clearSelection={clearSelection} bulkDeleting={bulkDeleting} handleBulkDelete={handleBulkDelete}
       />
 
       <Pagination

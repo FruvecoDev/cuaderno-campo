@@ -1,10 +1,13 @@
 import React from 'react';
 import { Edit2, Trash2, ClipboardCheck, History, Calendar, BookOpen, Loader2, MapIcon, Eye, CheckCircle, AlertCircle } from 'lucide-react';
+import { BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell } from '../BulkActions';
 
 export const ParcelasTable = ({
   filteredParcelas, loading, hasActiveFilters, fieldsConfig,
   contratos, handleEdit, handleDelete, handleGenerateCuaderno,
-  generatingCuaderno, fetchHistorialTratamientos
+  generatingCuaderno, fetchHistorialTratamientos,
+  canBulkDelete, selectedIds, toggleOne, toggleAll, allSelected, someSelected,
+  clearSelection, bulkDeleting, handleBulkDelete
 }) => {
   const getContratoInfo = (contratoId) => {
     const contrato = contratos.find(c => c._id === contratoId);
@@ -18,10 +21,12 @@ export const ParcelasTable = ({
         <p className="text-muted">{hasActiveFilters ? 'No hay parcelas que coincidan con los filtros' : 'No hay parcelas registradas'}</p>
       ) : (
         <div className="table-container">
+          {canBulkDelete && <BulkActionBar selectedCount={selectedIds.size} onDelete={handleBulkDelete} onClear={clearSelection} deleting={bulkDeleting} />}
           <table data-testid="parcelas-table">
             <thead>
               <tr>
-                {fieldsConfig.codigo_plantacion ? <th>Código</th> : null}
+                {canBulkDelete && <BulkCheckboxHeader allSelected={allSelected} someSelected={someSelected} onToggle={toggleAll} />}
+                {fieldsConfig.codigo_plantacion ? <th>Codigo</th> : null}
                 {fieldsConfig.proveedor ? <th>Proveedor</th> : null}
                 {fieldsConfig.finca ? <th>Finca</th> : null}
                 {fieldsConfig.cultivo ? <th>Cultivo</th> : null}
@@ -36,7 +41,8 @@ export const ParcelasTable = ({
             </thead>
             <tbody>
               {filteredParcelas.map((p) => (
-                <tr key={p._id} data-parcela-id={p._id} style={{ transition: 'background-color 0.3s' }}>
+                <tr key={p._id} data-parcela-id={p._id} style={{ transition: 'background-color 0.3s', backgroundColor: selectedIds?.has(p._id) ? 'hsl(var(--primary) / 0.05)' : undefined }}>
+                  {canBulkDelete && <BulkCheckboxCell id={p._id} selected={selectedIds?.has(p._id)} onToggle={toggleOne} />}
                   {fieldsConfig.codigo_plantacion ? (
                     <td>
                       <span style={{ 
