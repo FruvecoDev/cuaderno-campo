@@ -40,12 +40,6 @@ const Cultivos = () => {
   const { canCreate, canEdit, canDelete, canBulkDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   const { columns, setColumns, showConfig, setShowConfig, save, reset, visibleColumns } = useColumnConfig('cultivos_col_config', DEFAULT_COLUMNS);
-  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredCultivos);
-  const [bulkDeleting, setBulkDeleting] = React.useState(false);
-  const handleBulkDelete = async () => {
-    setBulkDeleting(true);
-    try { await bulkDeleteApi('cultivos', selectedIds); clearSelection(); fetchCultivos(); } catch (e) {} finally { setBulkDeleting(false); }
-  };
 
   const initialFormData = {
     nombre: '',
@@ -194,6 +188,13 @@ const Cultivos = () => {
       (filtroEstado === 'inactivos' && c.activo === false);
     return matchesSearch && matchesEstado;
   });
+
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredCultivos);
+  const [bulkDeleting, setBulkDeleting] = React.useState(false);
+  const handleBulkDelete = async () => {
+    setBulkDeleting(true);
+    try { await bulkDeleteApi('cultivos', selectedIds); clearSelection(); fetchCultivos(); } catch (e) {} finally { setBulkDeleting(false); }
+  };
 
   return (
     <div data-testid="cultivos-page">
