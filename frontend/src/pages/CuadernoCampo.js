@@ -82,17 +82,24 @@ const CuadernoCampo = () => {
 
   // Filter parcelas
   const filteredParcelas = parcelas.filter(p => {
-    if (searchTerm && !p.codigo_plantacion?.toLowerCase().includes(searchTerm.toLowerCase())) {
-      return false;
-    }
-    if (filterCultivo && p.cultivo !== filterCultivo) {
-      return false;
+    if (filterCultivo && p.cultivo !== filterCultivo) return false;
+    if (searchTerm) {
+      const s = searchTerm.toLowerCase();
+      const contrato = getContratoForParcela(p);
+      const matchParcela = p.codigo_plantacion?.toLowerCase().includes(s);
+      const matchCultivo = p.cultivo?.toLowerCase().includes(s);
+      const matchProveedor = p.proveedor?.toLowerCase().includes(s);
+      const matchContrato = contrato?.numero_contrato?.toLowerCase().includes(s);
+      const matchContratoProveedor = contrato?.proveedor?.toLowerCase().includes(s);
+      const matchContratoCliente = contrato?.cliente?.toLowerCase().includes(s);
+      if (!matchParcela && !matchCultivo && !matchProveedor && !matchContrato && !matchContratoProveedor && !matchContratoCliente) return false;
     }
     return true;
   });
 
-  // Get unique cultivos
-  const cultivosUnicos = [...new Set(parcelas.map(p => p.cultivo).filter(Boolean))];
+  // Get unique cultivos and proveedores
+  const cultivosUnicos = [...new Set(parcelas.map(p => p.cultivo).filter(Boolean))].sort();
+  const proveedoresUnicos = [...new Set(contratos.map(c => c.proveedor || c.cliente).filter(Boolean))].sort();
 
   if (loading) {
     return (
@@ -136,7 +143,7 @@ const CuadernoCampo = () => {
               <input
                 type="text"
                 className="form-input"
-                placeholder="Buscar parcela..."
+                placeholder="Buscar parcela, contrato, proveedor..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{ paddingLeft: '35px' }}
