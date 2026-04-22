@@ -29,6 +29,7 @@ ALLOWED_COLLECTIONS = {
     "fincas": "fincas",
     "empleados": "empleados",
     "tecnicos": "tecnicos_aplicadores",
+    "albaranes_comision": "comisiones_generadas",
 }
 
 

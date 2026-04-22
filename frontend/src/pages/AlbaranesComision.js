@@ -6,13 +6,16 @@ import {
   FileText, Search, Download, RotateCw, Euro, Package,
   TrendingUp, Users, Filter, Calendar, Loader2, Receipt, X, CheckCircle,
   History, Clock, User as UserIcon, ArrowUp, ArrowDown, ArrowUpDown,
+  ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
 } from 'lucide-react';
 import { formatEuro, formatKg, formatNumber } from '../utils/format';
 import { ColumnSettings, useColumnConfig } from '../components/ColumnSettings';
+import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
 import '../App.css';
 
 const AlbaranesComision = () => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+  const canBulkDelete = !!user?.can_bulk_delete;
   const [albaranes, setAlbaranes] = useState([]);
   const [totales, setTotales] = useState({ count: 0, kilos_netos: 0, importe_total: 0, pendiente: 0, pagada: 0 });
   const [loading, setLoading] = useState(true);
@@ -265,6 +268,36 @@ const AlbaranesComision = () => {
     return sortList(historico, sortHist, HIST_SORT_MAP);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [historico, sortHist]);
+
+  // Paginacion
+  const [pageSize, setPageSize] = useState(25);
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(filteredAlbaranes.length / pageSize));
+  useEffect(() => {
+    if (page > totalPages) setPage(1);
+  }, [totalPages, page]);
+  const pageStart = (page - 1) * pageSize;
+  const pageEnd = Math.min(pageStart + pageSize, filteredAlbaranes.length);
+  const paginatedAlbaranes = useMemo(
+    () => filteredAlbaranes.slice(pageStart, pageEnd),
+    [filteredAlbaranes, pageStart, pageEnd]
+  );
+
+  // Bulk select (aplica a elementos visibles en la pagina actual)
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(paginatedAlbaranes);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const handleBulkDelete = async () => {
+    setBulkDeleting(true);
+    try {
+      await bulkDeleteApi('albaranes_comision', selectedIds);
+      clearSelection();
+      await fetchAlbaranes();
+    } catch (err) {
+      window.alert('Error al eliminar masivamente');
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
 
   // ------- Configuracion de columnas persistida en localStorage -------
   const DEFAULT_COLS_ACM = [
@@ -592,10 +625,25 @@ const AlbaranesComision = () => {
 
       {/* Tabla */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0.5rem 0.75rem', borderBottom: '1px solid hsl(var(--border))', background: 'hsl(var(--muted)/0.3)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', borderBottom: '1px solid hsl(var(--border))', background: 'hsl(var(--muted)/0.3)', gap: '1rem', flexWrap: 'wrap' }}>
+          <div style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
+            {filteredAlbaranes.length > 0 ? (
+              <>Mostrando <b>{pageStart + 1}-{pageEnd}</b> de <b>{filteredAlbaranes.length}</b></>
+            ) : ''}
+          </div>
           <ColumnSettings columns={colsAcm} onChange={setColsAcm} onReset={resetColsAcm} testId="column-settings-acm" />
         </div>
-        <div className="table-container" style={{ maxHeight: '65vh', overflow: 'auto' }}>
+        {canBulkDelete && (
+          <div style={{ padding: '0.5rem 0.75rem 0' }}>
+            <BulkActionBar
+              selectedCount={selectedIds.size}
+              onClear={clearSelection}
+              onDelete={handleBulkDelete}
+              deleting={bulkDeleting}
+            />
+          </div>
+        )}
+        <div className="table-container" style={{ maxHeight: '60vh', overflow: 'auto' }}>
           {loading ? (
             <div style={{ padding: '2rem', textAlign: 'center' }}><Loader2 className="animate-spin" /></div>
           ) : filteredAlbaranes.length === 0 ? (
@@ -606,6 +654,9 @@ const AlbaranesComision = () => {
             <table style={{ fontSize: '0.85rem', width: '100%' }}>
               <thead>
                 <tr style={{ background: 'hsl(var(--muted))', position: 'sticky', top: 0, zIndex: 2 }}>
+                  {canBulkDelete && (
+                    <BulkCheckboxHeader allSelected={allSelected} someSelected={someSelected} onToggle={toggleAll} />
+                  )}
                   {colsAcm.filter(c => c.visible !== false).map(c => {
                     const align = ['kg', 'precio', 'comision', 'importe'].includes(c.key) ? 'right' : 'left';
                     const isSortable = c.key !== 'acciones';
@@ -623,8 +674,11 @@ const AlbaranesComision = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredAlbaranes.map((acm) => (
+                {paginatedAlbaranes.map((acm) => (
                   <tr key={acm._id} data-testid={`acm-row-${acm._id}`}>
+                    {canBulkDelete && (
+                      <BulkCheckboxCell id={acm._id} selected={selectedIds.has(acm._id)} onToggle={toggleOne} />
+                    )}
                     {colsAcm.filter(c => c.visible !== false).map(c => (
                       <React.Fragment key={c.key}>{renderAcmCell(acm, c.key)}</React.Fragment>
                     ))}
@@ -634,6 +688,46 @@ const AlbaranesComision = () => {
             </table>
           )}
         </div>
+        {/* Pagination footer */}
+        {filteredAlbaranes.length > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', borderTop: '1px solid hsl(var(--border))', background: 'hsl(var(--muted)/0.2)', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
+              <span>Filas por página:</span>
+              <select
+                value={pageSize}
+                onChange={(e) => { setPageSize(parseInt(e.target.value, 10)); setPage(1); }}
+                data-testid="select-page-size"
+                style={{
+                  padding: '0.25rem 0.4rem',
+                  borderRadius: '6px',
+                  border: '1px solid hsl(var(--border))',
+                  background: 'white',
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                }}
+              >
+                {[10, 25, 50, 100, 200].map(n => <option key={n} value={n}>{n}</option>)}
+              </select>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+              <button type="button" className="btn btn-sm btn-secondary" onClick={() => setPage(1)} disabled={page === 1} title="Primera" data-testid="pag-first">
+                <ChevronsLeft size={14} />
+              </button>
+              <button type="button" className="btn btn-sm btn-secondary" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} title="Anterior" data-testid="pag-prev">
+                <ChevronLeft size={14} />
+              </button>
+              <span style={{ fontSize: '0.8rem', padding: '0 0.5rem', whiteSpace: 'nowrap' }}>
+                Página <b>{page}</b> / {totalPages}
+              </span>
+              <button type="button" className="btn btn-sm btn-secondary" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} title="Siguiente" data-testid="pag-next">
+                <ChevronRight size={14} />
+              </button>
+              <button type="button" className="btn btn-sm btn-secondary" onClick={() => setPage(totalPages)} disabled={page === totalPages} title="Última" data-testid="pag-last">
+                <ChevronsRight size={14} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       </>)}
