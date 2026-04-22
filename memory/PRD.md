@@ -60,6 +60,22 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - Drag-and-drop certificate upload preserved inside dedicated tab
 - Auto-calculated Fecha Validez (cert + 10 years) shown in Vigencia section
 
+### Overhaul Modal Irrigaciones - DONE (2026-04-22)
+- Converted "Nuevo Riego" inline form to professional tabbed modal (960px, 85vh)
+- 5 tabs: General, Volumen y Coste, Datos Tecnicos, Planificacion, Observaciones
+- Header with droplet icon and dynamic subtitle (cultivo + sistema)
+- Standard footer with Cancelar / Crear Riego buttons
+- Verified visually - all tabs render correctly
+
+### Albaranes de Comision Module - DONE (2026-04-22)
+- Auto-generates ACMs from purchase/sale albaranes (routes_albaranes_comision.py)
+- Factura-Resumen PDF, Historico Liquidaciones, cross-linking to contracts & albaranes
+- Reusable ColumnSettings.js (drag-and-drop, numeric position inputs, visibility toggles)
+- Albaranes: column sorting, pagination, bulk delete with cascade to ACMs
+- Contratos <-> Albaranes traceability via URL query filters
+- Centralized numeric formatters: frontend utils/format.js + backend utils/formatters.py
+- ComisionesGeneradas/Liquidaciones: Liquidar Pendientes bulk action, collapsible cards
+
 ## Pending/Blocked
 - **Email Notifications (Resend)**: Blocked - waiting for RESEND_API_KEY
 - **Weather Integration (OpenWeatherMap)**: Blocked - waiting for API key
