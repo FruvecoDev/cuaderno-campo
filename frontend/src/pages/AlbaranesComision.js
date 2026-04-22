@@ -3,7 +3,7 @@ import api, { BACKEND_URL } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import {
   FileText, Search, Download, RotateCw, Euro, Package,
-  TrendingUp, Users, Filter, Calendar, Loader2, Receipt, X,
+  TrendingUp, Users, Filter, Calendar, Loader2, Receipt, X, CheckCircle,
 } from 'lucide-react';
 import { formatEuro, formatKg, formatNumber } from '../utils/format';
 import '../App.css';
@@ -138,6 +138,38 @@ const AlbaranesComision = () => {
       window.alert('Error al generar la factura-resumen');
     } finally {
       setGeneratingResumen(false);
+    }
+  };
+
+  const [closingResumen, setClosingResumen] = useState(false);
+  const handleMarcarTodoPagado = async () => {
+    if (!resumenForm.agente_id) {
+      window.alert('Selecciona un agente');
+      return;
+    }
+    const agenteNombre = agentesDisponibles.find(x => x.id === resumenForm.agente_id)?.nombre || 'agente';
+    const periodoTxt = (resumenForm.fecha_desde || resumenForm.fecha_hasta)
+      ? ` del periodo ${resumenForm.fecha_desde || '—'} → ${resumenForm.fecha_hasta || 'Hoy'}`
+      : ' (todas las pendientes del histórico)';
+    if (!window.confirm(`¿Marcar como PAGADAS todas las comisiones pendientes de "${agenteNombre}"${periodoTxt}?\n\nEsta acción liquida contablemente todas las ACM pendientes del periodo.`)) {
+      return;
+    }
+    setClosingResumen(true);
+    try {
+      const params = new URLSearchParams();
+      if (resumenForm.fecha_desde) params.append('fecha_desde', resumenForm.fecha_desde);
+      if (resumenForm.fecha_hasta) params.append('fecha_hasta', resumenForm.fecha_hasta);
+      const qs = params.toString() ? `?${params.toString()}` : '';
+      const res = await api.post(`/api/comisiones-generadas/liquidar-agente/${resumenForm.agente_id}${qs}`);
+      const n = res?.liquidadas ?? res?.data?.liquidadas ?? 0;
+      const imp = res?.importe_total ?? res?.data?.importe_total ?? 0;
+      window.alert(`Liquidadas ${n} ACM del agente "${agenteNombre}". Importe total: ${formatEuro(imp)}`);
+      await fetchAlbaranes();
+      setShowResumenModal(false);
+    } catch (err) {
+      window.alert('Error al marcar como pagadas');
+    } finally {
+      setClosingResumen(false);
     }
   };
 
@@ -386,14 +418,41 @@ const AlbaranesComision = () => {
               <small style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.75rem' }}>
                 Tip: deja ambas fechas vacías para incluir todo el histórico del agente.
               </small>
-              <div style={{ borderTop: '1px solid hsl(var(--border))', paddingTop: '1rem', marginTop: '0.5rem', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowResumenModal(false)} data-testid="btn-cancelar-resumen">
-                  Cancelar
+              <div style={{ borderTop: '1px solid hsl(var(--border))', paddingTop: '1rem', marginTop: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="btn btn-sm"
+                  onClick={handleMarcarTodoPagado}
+                  disabled={closingResumen || generatingResumen || !resumenForm.agente_id}
+                  data-testid="btn-marcar-todo-pagado"
+                  style={{
+                    background: '#10b981',
+                    color: 'white',
+                    border: 'none',
+                    padding: '0.5rem 0.8rem',
+                    borderRadius: '8px',
+                    fontWeight: '600',
+                    fontSize: '0.8rem',
+                    cursor: (closingResumen || !resumenForm.agente_id) ? 'not-allowed' : 'pointer',
+                    opacity: (!resumenForm.agente_id) ? 0.6 : 1,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                  }}
+                  title="Marcar como pagadas todas las ACM pendientes del agente en el periodo"
+                >
+                  {closingResumen ? <Loader2 className="animate-spin" size={14} /> : <CheckCircle size={14} />}
+                  {closingResumen ? ' Liquidando...' : ' Marcar todo como pagado'}
                 </button>
-                <button type="submit" className="btn btn-primary" disabled={generatingResumen} data-testid="btn-descargar-resumen">
-                  {generatingResumen ? <Loader2 className="animate-spin" size={14} /> : <Download size={14} />}
-                  {generatingResumen ? ' Generando...' : ' Descargar PDF'}
-                </button>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowResumenModal(false)} data-testid="btn-cancelar-resumen">
+                    Cancelar
+                  </button>
+                  <button type="submit" className="btn btn-primary" disabled={generatingResumen} data-testid="btn-descargar-resumen">
+                    {generatingResumen ? <Loader2 className="animate-spin" size={14} /> : <Download size={14} />}
+                    {generatingResumen ? ' Generando...' : ' Descargar PDF'}
+                  </button>
+                </div>
               </div>
             </form>
           </div>
