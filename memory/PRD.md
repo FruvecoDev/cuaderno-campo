@@ -108,6 +108,15 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - Mismo patrón que Albaranes — data-testid: `select-page-size-contratos`, `pag-first-contratos`, `pag-prev-contratos`, `pag-next-contratos`, `pag-last-contratos`
 - Footer solo se muestra cuando filteredContratos.length > 0
 
+### Paginación: Roll-out a todos los módulos - DONE (2026-04-22)
+- Creado componente reutilizable `/app/frontend/src/components/PaginationFooter.js` (~100 lines) + hook `usePagination(items, defaultPageSize)`
+- Integrado en los 6 módulos restantes: **Visitas, Tratamientos, Cosechas, Tareas, Irrigaciones, Recetas**
+- Todos los módulos ahora paginan automáticamente (pageSize default 25) y `useBulkSelect` opera sobre la página visible
+- `PaginationFooter` retorna `null` cuando totalItems === 0 para no ocupar espacio en estado vacío
+- data-testids consistentes: `pagination-footer-{modulo}`, `select-page-size-{modulo}`, `pag-first/prev/next/last-{modulo}`
+- Verificado con Playwright en todos: footer presente, controles funcionales, labels correctos ("visitas", "tratamientos", "cosechas", "tareas", "irrigaciones", "recetas")
+- **Total con paginación**: 8 módulos (Albaranes + Contratos + los 6 nuevos)
+
 ### Visitas: Bulk Delete - DONE (2026-04-22)
 - Visitas.js + VisitasTable.js integrados con el mismo patrón. Nueva prop `bulkBar` en VisitasTable para renderizar la BulkActionBar dentro de la card (encima de la tabla) manteniendo cohesión visual.
 - Endpoint `/api/bulk-delete/visitas` ya soportado en routes_bulk.py.

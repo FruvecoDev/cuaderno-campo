@@ -10,6 +10,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
+import PaginationFooter, { usePagination } from '../components/PaginationFooter';
 import '../App.css';
 
 
@@ -217,9 +218,12 @@ const Irrigaciones = () => {
     });
   };
 
+  // Paginación
+  const { page, pageSize, totalPages, totalItems, pageStart, pageEnd, paginatedItems: paginatedIrrigaciones, setPage, setPageSize } = usePagination(filteredIrrigaciones, 25);
+
   // Bulk delete
   const canBulkDelete = !!user?.can_bulk_delete;
-  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredIrrigaciones);
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(paginatedIrrigaciones);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const handleBulkDelete = async () => {
     setBulkDeleting(true);
@@ -1025,7 +1029,7 @@ const Irrigaciones = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredIrrigaciones.map(irrig => {
+                  {paginatedIrrigaciones.map(irrig => {
                     // Obtener el cultivo de la parcela
                     const parcelaInfo = parcelas.find(p => p._id === irrig.parcela_id);
                     const cultivoNombre = parcelaInfo?.cultivo || irrig.cultivo || '-';
@@ -1095,6 +1099,12 @@ const Irrigaciones = () => {
                   })}
                 </tbody>
               </table>
+              <PaginationFooter
+                totalItems={totalItems} page={page} pageSize={pageSize}
+                totalPages={totalPages} pageStart={pageStart} pageEnd={pageEnd}
+                onPageChange={setPage} onPageSizeChange={setPageSize}
+                itemLabel="irrigaciones" testIdSuffix="irrigaciones"
+              />
             </div>
           )}
         </div>

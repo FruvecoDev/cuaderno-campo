@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, Edit2, Package, TrendingUp, TrendingDown, Check, ChevronDown, ChevronUp, X, Download, Target, Scale, DollarSign, Clock, CheckCircle, Loader2, Leaf, FileText } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
+import PaginationFooter, { usePagination } from '../components/PaginationFooter';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 
@@ -143,9 +144,12 @@ const Cosechas = () => {
     cultivos: [...new Set(cosechas.map(c => c.cultivo).filter(Boolean))].sort()
   }), [cosechas]);
 
+  // Paginación
+  const { page, pageSize, totalPages, totalItems, pageStart, pageEnd, paginatedItems: paginatedCosechas, setPage, setPageSize } = usePagination(filteredCosechas, 25);
+
   // Bulk delete
   const canBulkDelete = !!user?.can_bulk_delete;
-  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredCosechas);
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(paginatedCosechas);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const handleBulkDelete = async () => {
     setBulkDeleting(true);
@@ -671,11 +675,11 @@ const Cosechas = () => {
                     style={{ width: '16px', height: '16px', cursor: 'pointer' }}
                     data-testid="bulk-select-all"
                   />
-                  <span>Seleccionar todas las visibles ({filteredCosechas.length})</span>
+                  <span>Seleccionar todas las visibles ({paginatedCosechas.length})</span>
                 </div>
               </>
             )}
-            {filteredCosechas.map(cosecha => (
+            {paginatedCosechas.map(cosecha => (
               <div 
                 key={cosecha._id} 
                 className="card mb-4"
@@ -1067,6 +1071,12 @@ const Cosechas = () => {
                 )}
               </div>
             ))}
+            <PaginationFooter
+              totalItems={totalItems} page={page} pageSize={pageSize}
+              totalPages={totalPages} pageStart={pageStart} pageEnd={pageEnd}
+              onPageChange={setPage} onPageSizeChange={setPageSize}
+              itemLabel="cosechas" testIdSuffix="cosechas"
+            />
           </div>
         )}
       </div>

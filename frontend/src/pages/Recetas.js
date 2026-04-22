@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, Filter, Settings, X, FileText, Beaker, Calculator, ChevronDown, ChevronUp, CheckCircle, XCircle, AlertTriangle, Package, Download } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
+import PaginationFooter, { usePagination } from '../components/PaginationFooter';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
@@ -211,9 +212,12 @@ const Recetas = () => {
     setFilters({ cultivo_objetivo: '', tipo_tratamiento: '', nombre: '', activa: '' });
   };
 
+  // Paginación
+  const { page, pageSize, totalPages, totalItems, pageStart, pageEnd, paginatedItems: paginatedRecetas, setPage, setPageSize } = usePagination(filteredRecetas, 25);
+
   // Bulk delete
   const canBulkDelete = !!user?.can_bulk_delete;
-  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredRecetas);
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(paginatedRecetas);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const handleBulkDelete = async () => {
     setBulkDeleting(true);
@@ -790,7 +794,7 @@ const Recetas = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredRecetas.map((receta) => (
+                {paginatedRecetas.map((receta) => (
                   <tr key={receta._id} style={selectedIds.has(receta._id) ? { backgroundColor: 'hsl(var(--primary) / 0.05)' } : undefined}>
                     {canBulkDelete && (
                       <BulkCheckboxCell
@@ -899,6 +903,12 @@ const Recetas = () => {
                 ))}
               </tbody>
             </table>
+            <PaginationFooter
+              totalItems={totalItems} page={page} pageSize={pageSize}
+              totalPages={totalPages} pageStart={pageStart} pageEnd={pageEnd}
+              onPageChange={setPage} onPageSizeChange={setPageSize}
+              itemLabel="recetas" testIdSuffix="recetas"
+            />
           </div>
         )}
       </div>

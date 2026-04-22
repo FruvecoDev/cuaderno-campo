@@ -13,6 +13,7 @@ import { VisitasTable } from '../components/visitas/VisitasTable';
 import { VisitasDetailModal } from '../components/visitas/VisitasDetailModal';
 import { VisitasAnalysisModal } from '../components/visitas/VisitasAnalysisModal';
 import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
+import PaginationFooter, { usePagination } from '../components/PaginationFooter';
 import '../App.css';
 
 // Default configs
@@ -278,9 +279,12 @@ const Visitas = () => {
   const toggleTableConfig = (field) => { setTableConfig(prev => ({ ...prev, [field]: !prev[field] })); };
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
 
-  // Bulk delete (seleccion multiple sobre filteredVisitas)
+  // Paginación
+  const { page, pageSize, totalPages, totalItems, pageStart, pageEnd, paginatedItems: paginatedVisitas, setPage, setPageSize } = usePagination(filteredVisitas, 25);
+
+  // Bulk delete (seleccion multiple sobre la pagina visible)
   const canBulkDelete = !!user?.can_bulk_delete;
-  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredVisitas);
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(paginatedVisitas);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const handleBulkDelete = async () => {
     setBulkDeleting(true);
@@ -456,7 +460,7 @@ const Visitas = () => {
       )}
       
       <VisitasTable
-        filteredVisitas={filteredVisitas} loading={loading} hasActiveFilters={hasActiveFilters}
+        filteredVisitas={paginatedVisitas} loading={loading} hasActiveFilters={hasActiveFilters}
         tableConfig={tableConfig} canEdit={canEdit} canDelete={canDelete}
         handleEdit={handleEdit} handleDelete={handleDelete} setViewingVisita={setViewingVisita}
         canBulkDelete={canBulkDelete}
@@ -473,6 +477,12 @@ const Visitas = () => {
             deleting={bulkDeleting}
           />
         ) : null}
+      />
+      <PaginationFooter
+        totalItems={totalItems} page={page} pageSize={pageSize}
+        totalPages={totalPages} pageStart={pageStart} pageEnd={pageEnd}
+        onPageChange={setPage} onPageSizeChange={setPageSize}
+        itemLabel="visitas" testIdSuffix="visitas"
       />
       
       <VisitasDetailModal

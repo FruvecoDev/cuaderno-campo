@@ -10,6 +10,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../utils/permissions';
 import TabbedModal from '../components/TabbedModal';
 import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
+import PaginationFooter, { usePagination } from '../components/PaginationFooter';
 import '../App.css';
 
 
@@ -178,9 +179,12 @@ const Tareas = () => {
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
   const activeFiltersCount = Object.values(filters).filter(v => v !== '').length;
 
+  // Paginación
+  const { page, pageSize, totalPages, totalItems, pageStart, pageEnd, paginatedItems: paginatedTareas, setPage, setPageSize } = usePagination(filteredTareas, 25);
+
   // Bulk delete
   const canBulkDelete = !!user?.can_bulk_delete;
-  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredTareas);
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(paginatedTareas);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const handleBulkDelete = async () => {
     setBulkDeleting(true);
@@ -902,11 +906,11 @@ const Tareas = () => {
                       style={{ width: '16px', height: '16px', cursor: 'pointer' }}
                       data-testid="bulk-select-all"
                     />
-                    <span>Seleccionar todas ({filteredTareas.length})</span>
+                    <span>Seleccionar todas ({paginatedTareas.length})</span>
                   </div>
                 </>
               )}
-              {filteredTareas.map(tarea => (
+              {paginatedTareas.map(tarea => (
                 <div 
                   key={tarea._id} 
                   style={{ 
@@ -1071,6 +1075,12 @@ const Tareas = () => {
                   </div>
                 </div>
               ))}
+              <PaginationFooter
+                totalItems={totalItems} page={page} pageSize={pageSize}
+                totalPages={totalPages} pageStart={pageStart} pageEnd={pageEnd}
+                onPageChange={setPage} onPageSizeChange={setPageSize}
+                itemLabel="tareas" testIdSuffix="tareas"
+              />
             </div>
           )}
         </div>

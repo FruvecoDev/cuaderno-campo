@@ -10,6 +10,7 @@ import api, { BACKEND_URL } from '../services/api';
 import CalculadoraFitosanitarios from '../components/tratamientos/CalculadoraFitosanitarios';
 import TabbedModal from '../components/TabbedModal';
 import { useBulkSelect, bulkDeleteApi } from '../components/BulkActions';
+import PaginationFooter, { usePagination } from '../components/PaginationFooter';
 import TratamientosKPIs from '../components/tratamientos/TratamientosKPIs';
 import TratamientosFilters from '../components/tratamientos/TratamientosFilters';
 import TratamientosTable from '../components/tratamientos/TratamientosTable';
@@ -364,9 +365,12 @@ const Tratamientos = () => {
     return true;
   });
 
+  // Paginación
+  const { page, pageSize, totalPages, totalItems, pageStart, pageEnd, paginatedItems: paginatedTratamientos, setPage, setPageSize } = usePagination(filteredTratamientos, 25);
+
   // Bulk delete
   const canBulkDelete = !!user?.can_bulk_delete;
-  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredTratamientos);
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(paginatedTratamientos);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const handleBulkDelete = async () => {
     setBulkDeleting(true);
@@ -1322,7 +1326,7 @@ const Tratamientos = () => {
       )}
       
       <TratamientosTable
-        tratamientos={filteredTratamientos}
+        tratamientos={paginatedTratamientos}
         loading={loading}
         hasActiveFilters={hasActiveFilters}
         tableConfig={tableConfig}
@@ -1340,6 +1344,12 @@ const Tratamientos = () => {
         onBulkDelete={handleBulkDelete}
         onClearSelection={clearSelection}
         bulkDeleting={bulkDeleting}
+      />
+      <PaginationFooter
+        totalItems={totalItems} page={page} pageSize={pageSize}
+        totalPages={totalPages} pageStart={pageStart} pageEnd={pageEnd}
+        onPageChange={setPage} onPageSizeChange={setPageSize}
+        itemLabel="tratamientos" testIdSuffix="tratamientos"
       />
     </div>
   );
