@@ -32,6 +32,7 @@ import DashboardContratosWidget from '../components/dashboard/DashboardContratos
 import DashboardMapWidget from '../components/dashboard/DashboardMapWidget';
 import DashboardExportWidget from '../components/dashboard/DashboardExportWidget';
 import DashboardAlertasWidget from '../components/dashboard/DashboardAlertasWidget';
+import DashboardProximosRiegosWidget from '../components/dashboard/DashboardProximosRiegosWidget';
 
 const Dashboard = () => {
   const [kpis, setKpis] = useState(null);
@@ -133,7 +134,7 @@ const Dashboard = () => {
   
   const sortedWidgetIds = useMemo(() => {
     if (!dashboardConfig?.widgets) {
-      return ['kpis_principales', 'productividad', 'centro_exportacion', 'alertas_avisos', 'resumen_fincas', 'proximas_cosechas', 'contratos_activos', 'graficos_cultivos', 'mapa_parcelas', 'calendario', 'actividad_reciente'];
+      return ['kpis_principales', 'productividad', 'centro_exportacion', 'alertas_avisos', 'proximos_riegos', 'resumen_fincas', 'proximas_cosechas', 'contratos_activos', 'graficos_cultivos', 'mapa_parcelas', 'calendario', 'actividad_reciente'];
     }
     return [...dashboardConfig.widgets].sort((a, b) => a.order - b.order).map(w => w.widget_id);
   }, [dashboardConfig]);
@@ -389,6 +390,13 @@ const Dashboard = () => {
       {isWidgetVisible('alertas_avisos') && (
         <SortableDashboardWidget id="alertas_avisos" isEditMode={isEditMode}>
           <DashboardAlertasWidget />
+        </SortableDashboardWidget>
+      )}
+
+      {/* Proximos Riegos Planificados */}
+      {isWidgetVisible('proximos_riegos') && (
+        <SortableDashboardWidget id="proximos_riegos" isEditMode={isEditMode}>
+          <DashboardProximosRiegosWidget />
         </SortableDashboardWidget>
       )}
       

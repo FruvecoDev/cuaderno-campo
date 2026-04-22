@@ -41,7 +41,8 @@ DEFAULT_WIDGETS = [
     {"widget_id": "calendario", "visible": True, "order": 9, "name": "Calendario", "description": "Eventos y actividades programadas"},
     {"widget_id": "actividad_reciente", "visible": True, "order": 10, "name": "Actividad Reciente", "description": "Últimas visitas y tratamientos"},
     {"widget_id": "centro_exportacion", "visible": True, "order": 11, "name": "Centro de Exportación", "description": "Exportación combinada de múltiples módulos en PDF/Excel"},
-    {"widget_id": "alertas_avisos", "visible": True, "order": 12, "name": "Alertas y Avisos", "description": "Alertas de certificados de técnicos y mantenimiento de maquinaria"}
+    {"widget_id": "alertas_avisos", "visible": True, "order": 12, "name": "Alertas y Avisos", "description": "Alertas de certificados de técnicos y mantenimiento de maquinaria"},
+    {"widget_id": "proximos_riegos", "visible": True, "order": 13, "name": "Próximos Riegos Planificados", "description": "Riegos planificados para los próximos 7 días con alertas de inminentes (24h)"}
 ]
 
 

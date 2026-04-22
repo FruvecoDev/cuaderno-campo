@@ -67,6 +67,15 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - Standard footer with Cancelar / Crear Riego buttons
 - Verified visually - all tabs render correctly
 
+### Dashboard Widget "Proximos Riegos" - DONE (2026-04-22)
+- New widget `DashboardProximosRiegosWidget.js` registered in dashboard config system
+- Backend: added `proximos_riegos` to DEFAULT_WIDGETS (routes_dashboard.py, order 13)
+- Consumes existing endpoint `/api/irrigaciones/planificadas?dias=7`
+- 3 urgency tiers: Inminente (<=24h red) / Pronto (<=72h amber) / Programado (green)
+- Badge "N en 24h" when there are imminent irrigations
+- Clickable cards navigate to filtered /irrigaciones by parcela
+- Empty state with CTA "Planificar riego"
+
 ### Albaranes de Comision Module - DONE (2026-04-22)
 - Auto-generates ACMs from purchase/sale albaranes (routes_albaranes_comision.py)
 - Factura-Resumen PDF, Historico Liquidaciones, cross-linking to contracts & albaranes
