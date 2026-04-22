@@ -337,10 +337,20 @@ async def generate_liquidacion_pdf(
     from weasyprint import HTML, CSS
     from io import BytesIO
     
-    # Get agent info
-    agente = await agentes_collection.find_one({"_id": ObjectId(agente_id)})
+    # Get agent info (fallback: buscar en comisiones_generadas si fue eliminado)
+    agente = None
+    if ObjectId.is_valid(agente_id):
+        agente = await agentes_collection.find_one({"_id": ObjectId(agente_id)})
     if not agente:
-        raise HTTPException(status_code=404, detail="Agente no encontrado")
+        # fallback: nombre desde comisiones historicas
+        hist = await db['comisiones_generadas'].find_one(
+            {"agente_id": agente_id},
+            {"_id": 0, "agente_nombre": 1}
+        )
+        if hist and hist.get("agente_nombre"):
+            agente = {"nombre": hist["agente_nombre"]}
+        else:
+            agente = {"nombre": "Agente desconocido"}
     
     # Build query for albaranes
     albaran_query = {"contrato_id": {"$exists": True, "$nin": [None, ""]}}
@@ -352,13 +362,25 @@ async def generate_liquidacion_pdf(
             date_filter["$gte"] = fecha_desde
         if fecha_hasta:
             date_filter["$lte"] = fecha_hasta
-        albaran_query["fecha"] = date_filter
+        # campo real es 'fecha_albaran' (formato actual)
+        albaran_query["$or"] = [
+            {"fecha_albaran": date_filter},
+            {"fecha": date_filter}
+        ]
     
-    # Filter by tipo
+    # Filter by tipo (soporta formato nuevo 'tipo_albaran' y antiguo 'tipo')
     if tipo_agente == 'compra':
-        albaran_query["tipo"] = "Entrada"
+        albaran_query["$and"] = [{"$or": [
+            {"tipo_albaran": "Compra"},
+            {"tipo": "Entrada"},
+            {"tipo": "Albarán de compra"},
+        ]}]
     else:
-        albaran_query["tipo"] = "Salida"
+        albaran_query["$and"] = [{"$or": [
+            {"tipo_albaran": "Venta"},
+            {"tipo": "Salida"},
+            {"tipo": "Albarán de venta"},
+        ]}]
     
     albaranes = await albaranes_collection.find(albaran_query).to_list(1000)
     
@@ -385,8 +407,14 @@ async def generate_liquidacion_pdf(
         
         contrato = contratos_map.get(contrato_id, {})
         
-        # Calculate quantities from items
-        cantidad_kg = sum(item.get("cantidad", 0) or 0 for item in albaran.get("items", []))
+        # Calcular cantidad (kilos netos). Preferir campo kilos_netos del albaran.
+        cantidad_kg = float(albaran.get("kilos_netos") or 0)
+        if cantidad_kg <= 0:
+            cantidad_kg = sum(
+                (item.get("cantidad") or 0)
+                for item in albaran.get("items", [])
+                if not item.get("es_destare")
+            )
         importe = albaran.get("total_albaran", 0) or 0
         precio_kg = importe / cantidad_kg if cantidad_kg > 0 else 0
         
