@@ -84,7 +84,7 @@ const AlbaranForm = () => {
     if (num === null || num === undefined || num === '') return '';
     const n = parseFloat(num);
     if (isNaN(n)) return '';
-    return n.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    return n.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
   };
 
   // Format quantity without decimals
@@ -92,7 +92,7 @@ const AlbaranForm = () => {
     if (num === null || num === undefined || num === '') return '';
     const n = parseFloat(num);
     if (isNaN(n)) return '';
-    return Math.round(n).toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    return Math.round(n).toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   };
 
   // Parse Spanish number input to float
@@ -496,7 +496,7 @@ const AlbaranForm = () => {
             <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'hsl(var(--primary) / 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FileText size={20} style={{ color: 'hsl(var(--primary))' }} /></div>
             <div>
               <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '700' }}>{isEditing ? 'Editar' : 'Nuevo'} Albaran</h2>
-              <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>{isEditing ? `ID: ${id.slice(-8).toUpperCase()}` : 'Total: ' + calculateGrandTotal().toLocaleString('es-ES', { minimumFractionDigits: 2 }) + ' EUR'}</span>
+              <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>{isEditing ? `ID: ${id.slice(-8).toUpperCase()}` : 'Total: ' + calculateGrandTotal().toLocaleString('de-DE', { minimumFractionDigits: 2 }) + ' EUR'}</span>
             </div>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
@@ -550,7 +550,7 @@ const AlbaranForm = () => {
               <input 
                 type="text" 
                 className="form-input" 
-                value={`${calculateGrandTotal().toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`} 
+                value={`${calculateGrandTotal().toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`} 
                 disabled
                 style={{ backgroundColor: '#f0fdf4', fontWeight: '600', color: '#166534' }}
               />
@@ -730,9 +730,9 @@ const AlbaranForm = () => {
                     <div><label style={{ fontSize: '0.65rem', fontWeight: '600', color: '#dc2626', textTransform: 'uppercase' }}>Cantidad</label><input type="text" className="form-input" value={formatCantidad(item.cantidad)} readOnly style={{ textAlign: 'right', backgroundColor: '#fef2f2', color: '#dc2626', fontWeight: '600' }} /></div>
                     <div><label style={{ fontSize: '0.65rem', fontWeight: '600', color: '#dc2626', textTransform: 'uppercase' }}>Ud.</label><span style={{ display: 'block', padding: '0.5rem', color: '#dc2626', fontWeight: '500' }}>kg</span></div>
                     {isGuisante && preciosCalidad.length > 0 && <div><label style={{ fontSize: '0.65rem', fontWeight: '600', color: '#9ca3af', textTransform: 'uppercase' }}>Tend.</label><span style={{ display: 'block', padding: '0.5rem', color: '#9ca3af' }}>-</span></div>}
-                    <div><label style={{ fontSize: '0.65rem', fontWeight: '600', color: '#dc2626', textTransform: 'uppercase' }}>Precio</label><input type="text" className="form-input" value={`${(item.precio_unitario || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`} readOnly style={{ backgroundColor: '#fef2f2', color: '#dc2626' }} /></div>
+                    <div><label style={{ fontSize: '0.65rem', fontWeight: '600', color: '#dc2626', textTransform: 'uppercase' }}>Precio</label><input type="text" className="form-input" value={`${(item.precio_unitario || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`} readOnly style={{ backgroundColor: '#fef2f2', color: '#dc2626' }} /></div>
                     <div><label style={{ fontSize: '0.65rem', fontWeight: '600', color: '#9ca3af', textTransform: 'uppercase' }}>Dto %</label><span style={{ display: 'block', padding: '0.5rem', color: '#9ca3af', textAlign: 'center' }}>-</span></div>
-                    <div><label style={{ fontSize: '0.65rem', fontWeight: '600', color: '#dc2626', textTransform: 'uppercase' }}>Total</label><input type="text" className="form-input" value={`${calculateItemTotal(item).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`} readOnly style={{ textAlign: 'right', backgroundColor: '#fef2f2', color: '#dc2626', fontWeight: '700' }} /></div>
+                    <div><label style={{ fontSize: '0.65rem', fontWeight: '600', color: '#dc2626', textTransform: 'uppercase' }}>Total</label><input type="text" className="form-input" value={`${calculateItemTotal(item).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`} readOnly style={{ textAlign: 'right', backgroundColor: '#fef2f2', color: '#dc2626', fontWeight: '700' }} /></div>
                   </div>
                 </div>
               ) : (
@@ -835,7 +835,7 @@ const AlbaranForm = () => {
                     </div>
                     <div>
                       <label style={{ fontSize: '0.65rem', fontWeight: '700', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total</label>
-                      <input type="text" className="form-input" value={`${calculateItemTotal(item).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`} disabled style={{ textAlign: 'right', fontWeight: '700', fontSize: '0.9rem', backgroundColor: '#f5f5f5' }} />
+                      <input type="text" className="form-input" value={`${calculateItemTotal(item).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`} disabled style={{ textAlign: 'right', fontWeight: '700', fontSize: '0.9rem', backgroundColor: '#f5f5f5' }} />
                     </div>
                   </div>
                 </div>
@@ -880,7 +880,7 @@ const AlbaranForm = () => {
                       {(() => {
                         const itemsSinDestare = formData.items.filter(item => !item.es_destare);
                         const precio = itemsSinDestare[0]?.precio_unitario || 0;
-                        return `${parseFloat(precio).toLocaleString('es-ES', { minimumFractionDigits: 2 })} €/kg`;
+                        return `${parseFloat(precio).toLocaleString('de-DE', { minimumFractionDigits: 2 })} €/kg`;
                       })()}
                     </p>
                   </div>
@@ -897,7 +897,7 @@ const AlbaranForm = () => {
                   <div style={{ borderLeft: '2px solid #86efac', paddingLeft: '0.75rem' }}>
                     <span style={{ fontSize: '0.75rem', color: '#166534' }}>Total Albarán</span>
                     <p style={{ fontWeight: '700', margin: '0.25rem 0 0 0', fontSize: '1.1rem', color: '#166534' }}>
-                      {calculateGrandTotal().toLocaleString('es-ES', { minimumFractionDigits: 2 })} €
+                      {calculateGrandTotal().toLocaleString('de-DE', { minimumFractionDigits: 2 })} €
                     </p>
                     <span style={{ fontSize: '0.65rem', color: '#6b7280' }}>(Líneas - Destare)</span>
                   </div>

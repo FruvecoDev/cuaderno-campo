@@ -32,7 +32,7 @@ const fieldLabels = {
 
 const formatValue = (value) => {
   if (value === null || value === undefined || value === '') return '(vacío)';
-  if (typeof value === 'number') return value.toLocaleString('es-ES');
+  if (typeof value === 'number') return value.toLocaleString('de-DE');
   return String(value);
 };
 

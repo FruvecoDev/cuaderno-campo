@@ -388,7 +388,7 @@ const Cosechas = () => {
             </div>
             <div className="stat-content">
               <p className="stat-value" style={{ fontSize: '1rem' }}>
-                {stats.importe_total?.toLocaleString('es-ES')}€
+                {stats.importe_total?.toLocaleString('de-DE')}€
               </p>
               <p className="stat-label">Importe Total</p>
             </div>
@@ -462,7 +462,7 @@ const Cosechas = () => {
                       ))}
                     </Pie>
                     <Tooltip 
-                      formatter={(value) => [`${value?.toLocaleString('es-ES')}€`, 'Importe']}
+                      formatter={(value) => [`${value?.toLocaleString('de-DE')}€`, 'Importe']}
                       contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
                     />
                   </PieChart>
@@ -518,7 +518,7 @@ const Cosechas = () => {
                       </div>
                       {selectedContrato.cantidad && (
                         <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid hsl(var(--border))' }}>
-                          <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>Cantidad contratada: <strong>{parseFloat(selectedContrato.cantidad).toLocaleString('es-ES')} kg</strong></span>
+                          <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>Cantidad contratada: <strong>{parseFloat(selectedContrato.cantidad).toLocaleString('de-DE')} kg</strong></span>
                         </div>
                       )}
                     </div>
@@ -671,7 +671,7 @@ const Cosechas = () => {
                     <div style={{ textAlign: 'right' }}>
                       <div style={{ fontSize: '0.75rem', color: '#6c757d' }}>Importe Neto</div>
                       <div style={{ fontWeight: '700', fontSize: '1.25rem', color: '#1e8449' }}>
-                        {(cosecha.importe_neto || 0).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                        {(cosecha.importe_neto || 0).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
                       </div>
                     </div>
                     {expandedCosecha === cosecha._id ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
@@ -716,7 +716,7 @@ const Cosechas = () => {
                       <div>
                         <div style={{ fontSize: '0.75rem', color: '#6c757d' }}>Importe Descuentos</div>
                         <div style={{ fontWeight: '600', color: '#dc2626' }}>
-                          -{(cosecha.importe_descuentos || 0).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                          -{(cosecha.importe_descuentos || 0).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
                         </div>
                       </div>
                     </div>
@@ -963,7 +963,7 @@ const Cosechas = () => {
                                   fontWeight: '600',
                                   color: carga.es_descuento ? '#dc2626' : '#1e8449'
                                 }}>
-                                  {carga.importe?.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                                  {carga.importe?.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
                                 </td>
                                 <td style={{ padding: '8px' }}>{carga.num_albaran || '-'}</td>
                                 <td style={{ padding: '8px', textAlign: 'center' }}>

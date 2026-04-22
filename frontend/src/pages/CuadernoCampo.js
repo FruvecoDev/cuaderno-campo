@@ -312,7 +312,7 @@ const CuadernoCampo = () => {
                         <span style={{ fontWeight: '600' }}>{contrato.numero_contrato}</span>
                         <span>{contrato.tipo === 'Compra' ? contrato.proveedor : contrato.cliente}</span>
                         <span style={{ fontWeight: '700', color: 'hsl(142 76% 36%)' }}>{contrato.precio} €/kg</span>
-                        {contrato.cantidad && <span>{parseFloat(contrato.cantidad).toLocaleString('es-ES')} kg</span>}
+                        {contrato.cantidad && <span>{parseFloat(contrato.cantidad).toLocaleString('de-DE')} kg</span>}
                       </div>
                     </div>
                   );

@@ -4,7 +4,7 @@ import { Edit2, Trash2, BookOpen, Loader2 } from 'lucide-react';
 
 const formatES = (num, decimals = 2) => {
   if (num == null) return '-';
-  return Number(num).toLocaleString('es-ES', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  return Number(num).toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 };
 
 const COLUMN_RENDERERS = {

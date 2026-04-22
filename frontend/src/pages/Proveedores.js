@@ -576,7 +576,7 @@ const Proveedores = () => {
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
                     <div className="card" style={{ padding: '1rem', textAlign: 'center', background: 'hsl(var(--muted) / 0.3)' }}>
                       <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'hsl(var(--primary))' }}>
-                        {historialData.total_compras?.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' }) || '0 €'}
+                        {historialData.total_compras?.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' }) || '0 €'}
                       </div>
                       <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Total Compras</div>
                     </div>
@@ -604,7 +604,7 @@ const Proveedores = () => {
                               <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>{g.fecha}</div>
                             </div>
                             <div style={{ fontWeight: '600', color: 'hsl(var(--primary))' }}>
-                              {g.importe?.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                              {g.importe?.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
                             </div>
                           </div>
                         ))}
@@ -621,7 +621,7 @@ const Proveedores = () => {
                               <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>{a.fecha}</div>
                             </div>
                             <div style={{ fontWeight: '600', color: 'hsl(142 76% 36%)' }}>
-                              {a.total?.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' }) || '-'}
+                              {a.total?.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' }) || '-'}
                             </div>
                           </div>
                         ))}

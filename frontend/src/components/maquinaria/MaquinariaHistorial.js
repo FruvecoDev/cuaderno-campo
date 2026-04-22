@@ -120,7 +120,7 @@ const MaquinariaHistorial = ({
                           <div style={{ fontWeight: '500' }}>{m.tipo || 'Mantenimiento'}</div>
                           <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>{m.fecha ? new Date(m.fecha).toLocaleDateString('es-ES') : '-'}</div>
                         </div>
-                        {m.coste && <div style={{ fontWeight: '600', color: 'hsl(var(--primary))' }}>{m.coste.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}</div>}
+                        {m.coste && <div style={{ fontWeight: '600', color: 'hsl(var(--primary))' }}>{m.coste.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</div>}
                       </div>
                     ))}
                   </div>

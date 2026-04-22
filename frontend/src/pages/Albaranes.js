@@ -77,7 +77,7 @@ const Albaranes = () => {
     if (value === '' || value === null || value === undefined) return '';
     const num = parseFloat(String(value).replace(/\./g, '').replace(',', '.'));
     if (isNaN(num)) return value;
-    return num.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    return num.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
   };
   
   const parseNumberES = (value) => {
@@ -937,7 +937,7 @@ const Albaranes = () => {
             </div>
             <div className="stat-content">
               <p className="stat-value" style={{ fontSize: '1.2rem' }}>
-                {stats.total_entradas?.toLocaleString('es-ES', { minimumFractionDigits: 2 })}€
+                {stats.total_entradas?.toLocaleString('de-DE', { minimumFractionDigits: 2 })}€
               </p>
               <p className="stat-label">Total Compras</p>
             </div>
@@ -1112,7 +1112,7 @@ const Albaranes = () => {
                         case 'cultivo': return <td key="cultivo">{albaran.cultivo || '-'}</td>;
                         case 'parcela': return <td key="parcela">{albaran.parcela_codigo || '-'}</td>;
                         case 'items': return <td key="items">{albaran.items?.length || 0} lineas</td>;
-                        case 'total': return <td key="total" style={{ fontWeight: '600', color: '#166534' }}>{(albaran.total_albaran || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} &euro;</td>;
+                        case 'total': return <td key="total" style={{ fontWeight: '600', color: '#166534' }}>{(albaran.total_albaran || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} &euro;</td>;
                         case 'observaciones': return <td key="observaciones" style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{albaran.observaciones || '-'}</td>;
                         default: return null;
                       }
