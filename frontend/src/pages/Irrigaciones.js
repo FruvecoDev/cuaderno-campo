@@ -3,7 +3,8 @@ import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { 
   Plus, Edit2, Trash2, Filter, Settings, X, Droplets, Search,
-  Download, Calendar, Clock, History, Calculator, BarChart3
+  Download, Calendar, Clock, History, Calculator, BarChart3,
+  MapPin, Gauge, FileText
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { usePermissions, usePermissionError } from '../utils/permissions';
@@ -26,6 +27,7 @@ const Irrigaciones = () => {
   const [parcelas, setParcelas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [activeTab, setActiveTab] = useState('general');
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState(null);
   const [stats, setStats] = useState(null);
@@ -723,135 +725,239 @@ const Irrigaciones = () => {
         </div>
       )}
 
-      {/* Formulario */}
+      {/* Formulario Modal */}
       {showForm && (
-        <div className="card mb-4">
-          <h2 className="card-title">{editingId ? 'Editar Riego' : 'Nuevo Riego'}</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="grid-4">
-              <div className="form-group">
-                <label className="form-label">Parcela *</label>
-                <select className="form-select" value={formData.parcela_id} onChange={(e) => handleParcelaChange(e.target.value)} required data-testid="select-parcela">
-                  <option value="">Seleccionar...</option>
-                  {parcelas.map(p => (
-                    <option key={p._id} value={p._id}>{p.codigo_plantacion} - {p.cultivo} ({p.superficie_total} ha)</option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Cultivo</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  value={formData.cultivo} 
-                  readOnly 
-                  style={{ backgroundColor: 'hsl(var(--muted) / 0.3)', cursor: 'not-allowed' }}
-                  placeholder="Se rellena automáticamente"
-                  data-testid="input-cultivo"
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Sistema *</label>
-                <select className="form-select" value={formData.sistema} onChange={(e) => setFormData({...formData, sistema: e.target.value})} required data-testid="select-sistema">
-                  {sistemas.map(s => <option key={s.id} value={s.nombre}>{s.nombre}</option>)}
-                </select>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Fecha *</label>
-                <input type="date" className="form-input" value={formData.fecha} onChange={(e) => setFormData({...formData, fecha: e.target.value})} required data-testid="input-fecha" />
-              </div>
-            </div>
-            
-            <div className="grid-4">
-              <div className="form-group">
-                <label className="form-label">Estado</label>
-                <select className="form-select" value={formData.estado} onChange={(e) => setFormData({...formData, estado: e.target.value})} data-testid="select-estado">
-                  <option value="planificado">Planificado</option>
-                  <option value="en_curso">En Curso</option>
-                  <option value="completado">Completado</option>
-                  <option value="cancelado">Cancelado</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid-4">
-              <div className="form-group">
-                <label className="form-label">Duración (horas) *</label>
-                <input type="number" step="0.1" className="form-input" value={formData.duracion} onChange={(e) => setFormData({...formData, duracion: e.target.value})} required data-testid="input-duracion" />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Volumen (m³) *</label>
-                <input type="number" step="0.1" className="form-input" value={formData.volumen} onChange={(e) => setFormData({...formData, volumen: e.target.value})} required data-testid="input-volumen" />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Coste (€)</label>
-                <input type="number" step="0.01" className="form-input" value={formData.coste} onChange={(e) => setFormData({...formData, coste: e.target.value})} data-testid="input-coste" />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Fuente de Agua</label>
-                <select className="form-select" value={formData.fuente_agua} onChange={(e) => setFormData({...formData, fuente_agua: e.target.value})} data-testid="select-fuente-agua">
-                  <option value="">Seleccionar...</option>
-                  <option value="Pozo">Pozo</option>
-                  <option value="Embalse">Embalse</option>
-                  <option value="Red">Red municipal</option>
-                  <option value="Canal">Canal</option>
-                  <option value="Balsa">Balsa</option>
-                  <option value="Rio">Río</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid-4">
-              <div className="form-group">
-                <label className="form-label">Hora Inicio</label>
-                <input type="time" className="form-input" value={formData.hora_inicio} onChange={(e) => setFormData({...formData, hora_inicio: e.target.value})} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Hora Fin</label>
-                <input type="time" className="form-input" value={formData.hora_fin} onChange={(e) => setFormData({...formData, hora_fin: e.target.value})} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Caudal (L/h)</label>
-                <input type="number" step="0.1" className="form-input" value={formData.caudal} onChange={(e) => setFormData({...formData, caudal: e.target.value})} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Presión (bar)</label>
-                <input type="number" step="0.1" className="form-input" value={formData.presion} onChange={(e) => setFormData({...formData, presion: e.target.value})} />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Observaciones</label>
-              <textarea className="form-textarea" rows={2} value={formData.observaciones} onChange={(e) => setFormData({...formData, observaciones: e.target.value})} />
-            </div>
-
-            <div className="flex items-center gap-4 mb-4">
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <input 
-                  type="checkbox" 
-                  checked={formData.es_planificada}
-                  onChange={(e) => setFormData({...formData, es_planificada: e.target.checked, estado: e.target.checked ? 'planificado' : 'completado'})}
-                />
-                Es riego planificado (futuro)
-              </label>
-              {formData.es_planificada && (
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">Fecha Planificada</label>
-                  <input 
-                    type="date" 
-                    className="form-input"
-                    value={formData.fecha_planificada}
-                    onChange={(e) => setFormData({...formData, fecha_planificada: e.target.value})}
-                  />
+        <div
+          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', backdropFilter: 'blur(4px)' }}
+          onClick={() => { setShowForm(false); setEditingId(null); resetForm(); setActiveTab('general'); }}
+        >
+          <div
+            className="card"
+            style={{ maxWidth: '960px', width: '100%', height: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '2rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '2px solid hsl(var(--border))' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'hsl(210, 80%, 50% / 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Droplets size={20} style={{ color: 'hsl(210, 80%, 50%)' }} />
                 </div>
-              )}
+                <div>
+                  <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '700' }}>{editingId ? 'Editar' : 'Nuevo'} Riego</h2>
+                  <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
+                    {formData.cultivo ? `${formData.cultivo} — ${formData.sistema}` : 'Registro de irrigación de la parcela'}
+                  </span>
+                </div>
+              </div>
+              <button type="button" onClick={() => { setShowForm(false); setEditingId(null); resetForm(); setActiveTab('general'); }} className="config-modal-close-btn" data-testid="btn-close-modal-riego">
+                <X size={18} />
+              </button>
             </div>
 
-            <div className="flex gap-2">
-              <button type="submit" className="btn btn-primary" data-testid="btn-guardar-riego">{editingId ? 'Guardar' : 'Crear'}</button>
-              <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }}>Cancelar</button>
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: 0, marginBottom: '1.5rem', borderBottom: '2px solid hsl(var(--border))' }}>
+              {[
+                { key: 'general', label: 'General', icon: <MapPin size={14} /> },
+                { key: 'volumen', label: 'Volumen y Coste', icon: <Droplets size={14} /> },
+                { key: 'tecnico', label: 'Datos Técnicos', icon: <Gauge size={14} /> },
+                { key: 'planificacion', label: 'Planificación', icon: <Calendar size={14} /> },
+                { key: 'observaciones', label: 'Observaciones', icon: <FileText size={14} /> },
+              ].map(tab => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveTab(tab.key)}
+                  data-testid={`tab-${tab.key}`}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1rem', fontSize: '0.8rem', fontWeight: activeTab === tab.key ? '700' : '500', color: activeTab === tab.key ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))', background: 'none', border: 'none', borderBottom: activeTab === tab.key ? '2px solid hsl(var(--primary))' : '2px solid transparent', cursor: 'pointer', whiteSpace: 'nowrap', marginBottom: '-2px' }}
+                >
+                  {tab.icon}{tab.label}
+                </button>
+              ))}
             </div>
-          </form>
+
+            <form onSubmit={handleSubmit} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+              <div style={{ flex: 1, overflow: 'auto', paddingRight: '1rem' }}>
+
+                {/* TAB: General */}
+                {activeTab === 'general' && (
+                  <div>
+                    <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Parcela y Sistema</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Parcela *</label>
+                        <select className="form-input" value={formData.parcela_id} onChange={(e) => handleParcelaChange(e.target.value)} required data-testid="select-parcela">
+                          <option value="">Seleccionar...</option>
+                          {parcelas.map(p => (
+                            <option key={p._id} value={p._id}>{p.codigo_plantacion} - {p.cultivo} ({p.superficie_total} ha)</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Cultivo</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={formData.cultivo}
+                          readOnly
+                          style={{ backgroundColor: 'hsl(var(--muted) / 0.3)', cursor: 'not-allowed' }}
+                          placeholder="Se rellena automáticamente"
+                          data-testid="input-cultivo"
+                        />
+                      </div>
+                    </div>
+
+                    <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Datos del Riego</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Sistema *</label>
+                        <select className="form-input" value={formData.sistema} onChange={(e) => setFormData({ ...formData, sistema: e.target.value })} required data-testid="select-sistema">
+                          {sistemas.map(s => <option key={s.id} value={s.nombre}>{s.nombre}</option>)}
+                        </select>
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Fecha *</label>
+                        <input type="date" className="form-input" value={formData.fecha} onChange={(e) => setFormData({ ...formData, fecha: e.target.value })} required data-testid="input-fecha" />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Estado</label>
+                        <select className="form-input" value={formData.estado} onChange={(e) => setFormData({ ...formData, estado: e.target.value })} data-testid="select-estado">
+                          <option value="planificado">Planificado</option>
+                          <option value="en_curso">En Curso</option>
+                          <option value="completado">Completado</option>
+                          <option value="cancelado">Cancelado</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB: Volumen y Coste */}
+                {activeTab === 'volumen' && (
+                  <div>
+                    <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Cantidades</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Duración (horas) *</label>
+                        <input type="number" step="0.1" className="form-input" value={formData.duracion} onChange={(e) => setFormData({ ...formData, duracion: e.target.value })} required data-testid="input-duracion" />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Volumen (m³) *</label>
+                        <input type="number" step="0.1" className="form-input" value={formData.volumen} onChange={(e) => setFormData({ ...formData, volumen: e.target.value })} required data-testid="input-volumen" />
+                      </div>
+                    </div>
+                    <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Coste y Origen del agua</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Coste (€)</label>
+                        <input type="number" step="0.01" className="form-input" value={formData.coste} onChange={(e) => setFormData({ ...formData, coste: e.target.value })} data-testid="input-coste" />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Fuente de Agua</label>
+                        <select className="form-input" value={formData.fuente_agua} onChange={(e) => setFormData({ ...formData, fuente_agua: e.target.value })} data-testid="select-fuente-agua">
+                          <option value="">Seleccionar...</option>
+                          <option value="Pozo">Pozo</option>
+                          <option value="Embalse">Embalse</option>
+                          <option value="Red">Red municipal</option>
+                          <option value="Canal">Canal</option>
+                          <option value="Balsa">Balsa</option>
+                          <option value="Rio">Río</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB: Datos Técnicos */}
+                {activeTab === 'tecnico' && (
+                  <div>
+                    <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Horarios</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Hora Inicio</label>
+                        <input type="time" className="form-input" value={formData.hora_inicio} onChange={(e) => setFormData({ ...formData, hora_inicio: e.target.value })} />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Hora Fin</label>
+                        <input type="time" className="form-input" value={formData.hora_fin} onChange={(e) => setFormData({ ...formData, hora_fin: e.target.value })} />
+                      </div>
+                    </div>
+                    <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Caudal y Presión</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Caudal (L/h)</label>
+                        <input type="number" step="0.1" className="form-input" value={formData.caudal} onChange={(e) => setFormData({ ...formData, caudal: e.target.value })} />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Presión (bar)</label>
+                        <input type="number" step="0.1" className="form-input" value={formData.presion} onChange={(e) => setFormData({ ...formData, presion: e.target.value })} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB: Planificación */}
+                {activeTab === 'planificacion' && (
+                  <div>
+                    <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Planificación futura</h3>
+                    <div style={{ background: 'hsl(var(--muted) / 0.3)', padding: '1rem', borderRadius: '8px', border: '1px solid hsl(var(--border))' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={formData.es_planificada}
+                          onChange={(e) => setFormData({ ...formData, es_planificada: e.target.checked, estado: e.target.checked ? 'planificado' : 'completado' })}
+                          style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                        />
+                        <span style={{ fontSize: '0.9rem', fontWeight: '600' }}>Es un riego planificado (futuro)</span>
+                      </label>
+                      {formData.es_planificada && (
+                        <div className="form-group" style={{ marginTop: '1rem', marginBottom: 0 }}>
+                          <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Fecha Planificada</label>
+                          <input
+                            type="date"
+                            className="form-input"
+                            value={formData.fecha_planificada}
+                            onChange={(e) => setFormData({ ...formData, fecha_planificada: e.target.value })}
+                            style={{ maxWidth: '260px' }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <small style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.75rem', display: 'block', marginTop: '0.75rem' }}>
+                      <Calendar size={11} style={{ display: 'inline', marginRight: '0.25rem' }} />
+                      Los riegos planificados aparecerán en el calendario agrícola y generarán recordatorios.
+                    </small>
+                  </div>
+                )}
+
+                {/* TAB: Observaciones */}
+                {activeTab === 'observaciones' && (
+                  <div>
+                    <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Notas del riego</h3>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <textarea
+                        className="form-input"
+                        rows={10}
+                        value={formData.observaciones}
+                        onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+                        placeholder="Condiciones meteorológicas, incidencias, revisiones del sistema..."
+                        style={{ fontSize: '0.85rem', resize: 'vertical' }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div style={{ borderTop: '1px solid hsl(var(--border))', paddingTop: '1rem', marginTop: '1.25rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null); resetForm(); setActiveTab('general'); }} data-testid="btn-cancelar-riego">
+                  Cancelar
+                </button>
+                <button type="submit" className="btn btn-primary" data-testid="btn-guardar-riego">
+                  {editingId ? 'Actualizar' : 'Crear'} Riego
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
