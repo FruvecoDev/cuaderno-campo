@@ -394,6 +394,7 @@ const Tratamientos = () => {
     // Validar solo parcelas_ids (obligatorio)
     if (formData.parcelas_ids.length === 0) {
       setError('Debe seleccionar al menos una Parcela');
+      setActiveTab('parcelas');
       setTimeout(() => setError(null), 5000);
       return;
     }
@@ -849,6 +850,12 @@ const Tratamientos = () => {
 
           <form onSubmit={handleSubmit} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
             <div style={{ flex: 1, overflow: 'auto', paddingRight: '1rem' }}>
+
+            {error && (
+              <div data-testid="modal-error-banner" style={{ marginBottom: '1rem', padding: '0.75rem 1rem', borderRadius: '8px', backgroundColor: 'hsl(var(--destructive) / 0.1)', border: '1px solid hsl(var(--destructive) / 0.4)', color: 'hsl(var(--destructive))', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.88rem', fontWeight: '500' }}>
+                <AlertTriangle size={16} /> {error}
+              </div>
+            )}
 
             {/* TAB: General */}
             {activeTab === 'general' && (<>

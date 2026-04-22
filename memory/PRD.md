@@ -76,6 +76,13 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - Clickable cards navigate to filtered /irrigaciones by parcela
 - Empty state with CTA "Planificar riego"
 
+### Modal Standardization Batch 2 - DONE (2026-04-22)
+- **Tareas.js**: inline form converted to tabbed modal (960px, 85vh). 4 tabs: General, Parcelas y Descripción, Subtareas, Costes.
+- **Tratamientos.js**: inline full-page form (`isFormMode` URL-based flow at /tratamientos/nuevo and /tratamientos/editar/:id) ELIMINATED. Now uses single tabbed modal (960px, 85vh) on /tratamientos. 4 tabs: General, Parcelas, Producto y Dosis, Aplicación. Deleted ~490 lines of duplicated full-page form. `handleNewTratamiento`, `handleEdit`, `handleCancelEdit` no longer navigate. Legacy URL /tratamientos/editar/:id still auto-opens edit modal via useEffect for bookmarks.
+- Error banner rendered INSIDE modal (not behind overlay); auto-switches to Parcelas tab when parcelas validation fails.
+- **Cosechas.js** and **Recetas.js**: already used the modal tabbed pattern (no changes needed).
+- Tested with testing agent - 100% pass on frontend critical flows.
+
 ### Albaranes de Comision Module - DONE (2026-04-22)
 - Auto-generates ACMs from purchase/sale albaranes (routes_albaranes_comision.py)
 - Factura-Resumen PDF, Historico Liquidaciones, cross-linking to contracts & albaranes
