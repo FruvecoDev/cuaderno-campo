@@ -468,7 +468,7 @@ const InformesIngresos = () => {
                         dataKey="value"
                       >
                         {chartDataCultivos.map((entry, index) => (
-                          <Cell key={color} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                          <Cell key={`cell-cult-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                         ))}
                       </Pie>
                       <Tooltip formatter={(v) => formatCurrency(v)} />

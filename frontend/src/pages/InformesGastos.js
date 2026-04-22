@@ -254,6 +254,7 @@ const InformesGastos = () => {
               onClick={() => setViewMode('table')}
               style={{ borderRadius: 0 }}
               title="Vista tabla"
+              data-testid="btn-view-table"
             >
               <FileSpreadsheet size={16} />
             </button>
@@ -262,6 +263,7 @@ const InformesGastos = () => {
               onClick={() => setViewMode('chart')}
               style={{ borderRadius: 0 }}
               title="Vista gráficos"
+              data-testid="btn-view-chart"
             >
               <PieChart size={16} />
             </button>
@@ -492,7 +494,7 @@ const InformesGastos = () => {
                   />
                   <Bar dataKey="total" radius={[0, 4, 4, 0]}>
                     {getChartDataProveedor().map((entry, index) => (
-                      <Cell key={color} fill={entry.fill} />
+                      <Cell key={`cell-prov-${index}`} fill={entry.fill} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -520,7 +522,7 @@ const InformesGastos = () => {
                     labelLine={{ strokeWidth: 1 }}
                   >
                     {getChartDataCultivo().map((entry, index) => (
-                      <Cell key={color} fill={entry.fill} />
+                      <Cell key={`cell-cult-${index}`} fill={entry.fill} />
                     ))}
                   </Pie>
                   <Tooltip formatter={(value) => formatCurrency(value)} />
@@ -549,7 +551,7 @@ const InformesGastos = () => {
                   <Tooltip formatter={(value) => formatCurrency(value)} />
                   <Bar dataKey="total" radius={[4, 4, 0, 0]}>
                     {(resumen.por_parcela?.slice(0, 10) || []).map((entry, index) => (
-                      <Cell key={color} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                      <Cell key={`cell-parc-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                     ))}
                   </Bar>
                 </BarChart>
