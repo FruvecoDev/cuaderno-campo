@@ -1,5 +1,21 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { X, AlertTriangle } from 'lucide-react';
+
+// Animaciones del modal (inyectadas una sola vez)
+if (typeof document !== 'undefined' && !document.getElementById('tabbed-modal-animations')) {
+  const style = document.createElement('style');
+  style.id = 'tabbed-modal-animations';
+  style.textContent = `
+@keyframes tabbed-modal-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes tabbed-modal-scale-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.tabbed-modal-overlay { animation: tabbed-modal-fade-in 160ms ease-out; }
+.tabbed-modal-card    { animation: tabbed-modal-scale-in 200ms cubic-bezier(0.16, 1, 0.3, 1); }
+`;
+  document.head.appendChild(style);
+}
 
 /**
  * Modal tabbed genérico — shell estándar de la app.
@@ -40,10 +56,24 @@ const TabbedModal = ({
   maxWidth = 960,
   children,
 }) => {
-  // Cierre con ESC
+  const formRef = useRef(null);
+
+  // Cierre con ESC y atajo Ctrl/Cmd+S para guardar
   useEffect(() => {
     if (!open) return undefined;
-    const handler = (e) => { if (e.key === 'Escape') onClose && onClose(); };
+    const handler = (e) => {
+      if (e.key === 'Escape') { onClose && onClose(); return; }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
+        e.preventDefault();
+        if (formRef.current) {
+          if (typeof formRef.current.requestSubmit === 'function') {
+            formRef.current.requestSubmit();
+          } else {
+            formRef.current.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+          }
+        }
+      }
+    };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [open, onClose]);
@@ -57,6 +87,7 @@ const TabbedModal = ({
   return (
     <div
       data-testid={`${testIdPrefix}-modal-overlay`}
+      className="tabbed-modal-overlay"
       style={{
         position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -65,7 +96,7 @@ const TabbedModal = ({
       onClick={() => onClose && onClose()}
     >
       <div
-        className="card"
+        className="card tabbed-modal-card"
         data-testid={`${testIdPrefix}-modal`}
         style={{
           maxWidth: typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth,
@@ -137,6 +168,7 @@ const TabbedModal = ({
 
         {/* Form / Content */}
         <form
+          ref={formRef}
           onSubmit={onSubmit}
           style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}
         >

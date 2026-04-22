@@ -84,12 +84,15 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - Tested with testing agent - 100% pass on frontend critical flows.
 
 ### Generic TabbedModal Component - DONE (2026-04-22)
-- New reusable shell `/app/frontend/src/components/TabbedModal.js` (~160 lines)
+- New reusable shell `/app/frontend/src/components/TabbedModal.js` (~200 lines)
 - Consolidates: overlay + backdrop blur + card (960px/85vh) + header (icon+title+subtitle+close) + tabs row + error banner + form + footer
 - Props: open, onClose, icon, iconColor/iconBg, title, subtitle, tabs, activeTab, onTabChange, onSubmit, footer, error, testIdPrefix, maxWidth
-- Adds **ESC key** to close modal (new UX polish applied to all modules using it)
+- UX polish (auto-applied to all adopting modules):
+  - **ESC key** closes modal
+  - **Ctrl/Cmd+S** shortcut triggers form submit
+  - **Entrance animations**: overlay fade-in (160ms) + card scale-in (200ms cubic-bezier)
 - **Tareas.js** + **Tratamientos.js** migrated as proof-of-concept; remaining modules (Irrigaciones, Proveedores, Clientes, Cultivos, Técnicos, Cosechas, Recetas) can adopt incrementally
-- Saves ~50 lines per module on migration; future UX improvements (animations, a11y) happen once in the shared component
+- Saves ~50 lines per module on migration; future UX improvements happen once in the shared component
 
 ### Albaranes de Comision Module - DONE (2026-04-22)
 - Auto-generates ACMs from purchase/sale albaranes (routes_albaranes_comision.py)
