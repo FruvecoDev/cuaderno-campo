@@ -17,6 +17,21 @@ if (typeof document !== 'undefined' && !document.getElementById('tabbed-modal-an
   document.head.appendChild(style);
 }
 
+// Estilo compartido para las <kbd> del footer
+const kbdStyle = {
+  display: 'inline-block',
+  padding: '0.1rem 0.4rem',
+  border: '1px solid hsl(var(--border))',
+  borderBottomWidth: '2px',
+  borderRadius: '4px',
+  backgroundColor: 'hsl(var(--muted) / 0.4)',
+  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, monospace',
+  fontSize: '0.7rem',
+  fontWeight: '600',
+  lineHeight: 1,
+  color: 'hsl(var(--foreground))',
+};
+
 /**
  * Modal tabbed genérico — shell estándar de la app.
  *
@@ -54,9 +69,12 @@ const TabbedModal = ({
   error = null,
   testIdPrefix = 'modal',
   maxWidth = 960,
+  showShortcutHints = true,
   children,
 }) => {
   const formRef = useRef(null);
+  const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
+  const saveKey = isMac ? '⌘' : 'Ctrl';
 
   // Cierre con ESC y atajo Ctrl/Cmd+S para guardar
   useEffect(() => {
@@ -194,10 +212,28 @@ const TabbedModal = ({
           {/* Footer fijo */}
           {footer && (
             <div style={{
-              display: 'flex', justifyContent: 'flex-end', gap: '0.5rem',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem',
               paddingTop: '1rem', borderTop: '1px solid hsl(var(--border))', marginTop: '1rem',
             }}>
-              {footer}
+              <div data-testid={`${testIdPrefix}-modal-shortcut-hints`} style={{
+                display: showShortcutHints ? 'flex' : 'none',
+                alignItems: 'center', gap: '0.75rem',
+                fontSize: '0.72rem', color: 'hsl(var(--muted-foreground))',
+                userSelect: 'none', flexWrap: 'wrap',
+              }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <kbd style={kbdStyle}>{saveKey}</kbd>
+                  <kbd style={kbdStyle}>S</kbd>
+                  <span>guardar</span>
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <kbd style={kbdStyle}>Esc</kbd>
+                  <span>cerrar</span>
+                </span>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {footer}
+              </div>
             </div>
           )}
         </form>

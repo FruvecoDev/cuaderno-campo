@@ -84,13 +84,14 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - Tested with testing agent - 100% pass on frontend critical flows.
 
 ### Generic TabbedModal Component - DONE (2026-04-22)
-- New reusable shell `/app/frontend/src/components/TabbedModal.js` (~200 lines)
+- New reusable shell `/app/frontend/src/components/TabbedModal.js` (~230 lines)
 - Consolidates: overlay + backdrop blur + card (960px/85vh) + header (icon+title+subtitle+close) + tabs row + error banner + form + footer
-- Props: open, onClose, icon, iconColor/iconBg, title, subtitle, tabs, activeTab, onTabChange, onSubmit, footer, error, testIdPrefix, maxWidth
+- Props: open, onClose, icon, iconColor/iconBg, title, subtitle, tabs, activeTab, onTabChange, onSubmit, footer, error, testIdPrefix, maxWidth, showShortcutHints
 - UX polish (auto-applied to all adopting modules):
   - **ESC key** closes modal
   - **Ctrl/Cmd+S** shortcut triggers form submit
   - **Entrance animations**: overlay fade-in (160ms) + card scale-in (200ms cubic-bezier)
+  - **Shortcut hints** rendered in footer (left side): `<kbd>⌘|Ctrl</kbd> <kbd>S</kbd> guardar · <kbd>Esc</kbd> cerrar`. Auto-detects Mac vs Windows/Linux.
 - **Tareas.js** + **Tratamientos.js** migrated as proof-of-concept; remaining modules (Irrigaciones, Proveedores, Clientes, Cultivos, Técnicos, Cosechas, Recetas) can adopt incrementally
 - Saves ~50 lines per module on migration; future UX improvements happen once in the shared component
 
