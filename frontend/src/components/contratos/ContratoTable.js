@@ -1,6 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Edit2, Trash2, BookOpen, Loader2 } from 'lucide-react';
+import { Edit2, Trash2, BookOpen, Loader2, FileSpreadsheet } from 'lucide-react';
 
 const formatES = (num, decimals = 2) => {
   if (num == null) return '-';
@@ -8,7 +9,29 @@ const formatES = (num, decimals = 2) => {
 };
 
 const COLUMN_RENDERERS = {
-  numero: (c) => <td key="numero" className="font-semibold">{c.serie}-{c.ano}-{String(c.numero).padStart(3, '0')}</td>,
+  numero: (c) => {
+    const numeroContrato = c.numero_contrato || `${c.serie}-${c.ano}-${String(c.numero).padStart(3, '0')}`;
+    return (
+      <td key="numero" className="font-semibold">
+        <Link
+          to={`/albaranes?search=${encodeURIComponent(numeroContrato)}`}
+          title="Ver albaranes de este contrato"
+          style={{
+            color: '#2563eb',
+            textDecoration: 'none',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.3rem'
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+          onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+        >
+          <FileSpreadsheet size={12} style={{ opacity: 0.7 }} />
+          {numeroContrato}
+        </Link>
+      </td>
+    );
+  },
   tipo: (c) => (
     <td key="tipo">
       <span style={{

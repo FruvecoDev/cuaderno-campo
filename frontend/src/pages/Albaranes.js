@@ -845,11 +845,12 @@ const Albaranes = () => {
       const fechaAlbaran = a.fecha ? a.fecha.split('T')[0] : '';
       if (fechaAlbaran > filters.fecha_hasta) return false;
     }
-    // Busqueda rapida por numero_albaran (viene por URL desde otras paginas)
+    // Busqueda rapida por numero_albaran o numero_contrato (URL externa)
     if (searchNumero) {
       const q = searchNumero.toLowerCase();
       const num = (a.numero_albaran || '').toLowerCase();
-      if (!num.includes(q)) return false;
+      const numContrato = (a.numero_contrato || '').toLowerCase();
+      if (!num.includes(q) && !numContrato.includes(q)) return false;
     }
     return true;
   });
