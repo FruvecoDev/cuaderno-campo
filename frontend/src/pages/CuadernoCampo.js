@@ -16,9 +16,11 @@ const CuadernoCampo = () => {
   const [generating, setGenerating] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCultivo, setFilterCultivo] = useState('');
+  const [contratos, setContratos] = useState([]);
 
   useEffect(() => {
     fetchParcelas();
+    fetchContratos();
   }, []);
 
   const fetchParcelas = async () => {
@@ -26,10 +28,24 @@ const CuadernoCampo = () => {
       const data = await api.get('/api/cuaderno-campo/parcelas');
       setParcelas(data.parcelas || []);
     } catch (err) {
-
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchContratos = async () => {
+    try {
+      const data = await api.get('/api/contratos');
+      setContratos(data.contratos || []);
+    } catch (err) {}
+  };
+
+  const getContratoForParcela = (parcela) => {
+    return contratos.find(c =>
+      c.cultivo && parcela.cultivo &&
+      c.cultivo.toLowerCase() === parcela.cultivo.toLowerCase() &&
+      (!c.campana || !parcela.campana || c.campana === parcela.campana)
+    );
   };
 
   const handleSelectParcela = async (parcela) => {
@@ -148,7 +164,9 @@ const CuadernoCampo = () => {
                 No se encontraron parcelas
               </p>
             ) : (
-              filteredParcelas.map(p => (
+              filteredParcelas.map(p => {
+                const contrato = getContratoForParcela(p);
+                return (
                 <div
                   key={p._id}
                   onClick={() => handleSelectParcela(p)}
@@ -168,14 +186,23 @@ const CuadernoCampo = () => {
                   data-testid={`parcela-item-${p._id}`}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
+                    <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>{p.codigo_plantacion}</div>
-                      <div style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                         <Leaf size={12} style={{ color: 'hsl(var(--primary))' }} />
                         {p.cultivo || 'Sin cultivo'}
-                        <span>•</span>
+                        <span>·</span>
                         {p.superficie_total} ha
+                        {p.campana && <><span>·</span><Calendar size={12} />{p.campana}</>}
                       </div>
+                      {contrato && (
+                        <div style={{ fontSize: '0.75rem', marginTop: '0.3rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'hsl(var(--primary))' }}>
+                          <FileText size={11} />
+                          <span style={{ fontWeight: '600' }}>{contrato.numero_contrato}</span>
+                          <span style={{ color: 'hsl(var(--muted-foreground))' }}>· {contrato.proveedor || contrato.cliente}</span>
+                          <span style={{ fontWeight: '600' }}>{contrato.precio} €/kg</span>
+                        </div>
+                      )}
                     </div>
                     {selectedParcela?._id === p._id && (
                       <div style={{ 
@@ -186,14 +213,16 @@ const CuadernoCampo = () => {
                         height: '24px',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        flexShrink: 0
                       }}>
                         ✓
                       </div>
                     )}
                   </div>
                 </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
@@ -233,11 +262,26 @@ const CuadernoCampo = () => {
                 <h3 style={{ margin: '0 0 0.5rem', fontWeight: '600' }}>
                   {preview.parcela.codigo_plantacion}
                 </h3>
-                <div style={{ display: 'flex', gap: '1rem', fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
+                <div style={{ display: 'flex', gap: '1rem', fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))', flexWrap: 'wrap' }}>
                   <span><Leaf size={14} style={{ display: 'inline', marginRight: '4px' }} />{preview.parcela.cultivo || 'Sin cultivo'}</span>
                   <span>{preview.parcela.superficie_total} ha</span>
                   {preview.parcela.campana && <span><Calendar size={14} style={{ display: 'inline', marginRight: '4px' }} />{preview.parcela.campana}</span>}
                 </div>
+                {selectedParcela && (() => {
+                  const contrato = getContratoForParcela(selectedParcela);
+                  if (!contrato) return null;
+                  return (
+                    <div style={{ marginTop: '0.75rem', padding: '0.6rem 0.75rem', background: 'hsl(var(--primary) / 0.08)', borderRadius: '6px', border: '1px solid hsl(var(--primary) / 0.2)' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'hsl(var(--primary))', textTransform: 'uppercase', marginBottom: '0.3rem' }}>Contrato Asociado</div>
+                      <div style={{ display: 'flex', gap: '1rem', fontSize: '0.85rem', flexWrap: 'wrap' }}>
+                        <span style={{ fontWeight: '600' }}>{contrato.numero_contrato}</span>
+                        <span>{contrato.tipo === 'Compra' ? contrato.proveedor : contrato.cliente}</span>
+                        <span style={{ fontWeight: '700', color: 'hsl(142 76% 36%)' }}>{contrato.precio} €/kg</span>
+                        {contrato.cantidad && <span>{parseFloat(contrato.cantidad).toLocaleString('es-ES')} kg</span>}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Summary Stats */}
