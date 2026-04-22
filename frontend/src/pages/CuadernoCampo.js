@@ -107,7 +107,6 @@ const CuadernoCampo = () => {
   const [bulkDeleting, setBulkDeleting] = useState(false);
 
   const handleBulkDelete = async () => {
-    if (!window.confirm(`Eliminar ${selectedIds.size} parcela${selectedIds.size > 1 ? 's' : ''} seleccionada${selectedIds.size > 1 ? 's' : ''}?`)) return;
     setBulkDeleting(true);
     try {
       await bulkDeleteApi('parcelas', selectedIds);

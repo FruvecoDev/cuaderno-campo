@@ -175,7 +175,6 @@ const Agentes = () => {
   const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredAgentes);
   const [bulkDeleting, setBulkDeleting] = React.useState(false);
   const handleBulkDelete = async () => {
-    if (!window.confirm(`Eliminar ${selectedIds.size} agente${selectedIds.size > 1 ? 's' : ''} seleccionado${selectedIds.size > 1 ? 's' : ''}?`)) return;
     setBulkDeleting(true);
     try { await bulkDeleteApi('agentes', selectedIds); clearSelection(); fetchAgentes(); } catch (e) {} finally { setBulkDeleting(false); }
   };

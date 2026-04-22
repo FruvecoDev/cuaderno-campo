@@ -116,7 +116,6 @@ const Clientes = () => {
   const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(clientes);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const handleBulkDelete = async () => {
-    if (!window.confirm(`Eliminar ${selectedIds.size} cliente${selectedIds.size > 1 ? 's' : ''} seleccionado${selectedIds.size > 1 ? 's' : ''}?`)) return;
     setBulkDeleting(true);
     try { await bulkDeleteApi('clientes', selectedIds); clearSelection(); fetchClientes(); } catch (e) {} finally { setBulkDeleting(false); }
   };

@@ -43,7 +43,6 @@ const Cultivos = () => {
   const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredCultivos);
   const [bulkDeleting, setBulkDeleting] = React.useState(false);
   const handleBulkDelete = async () => {
-    if (!window.confirm(`Eliminar ${selectedIds.size} cultivo${selectedIds.size > 1 ? 's' : ''} seleccionado${selectedIds.size > 1 ? 's' : ''}?`)) return;
     setBulkDeleting(true);
     try { await bulkDeleteApi('cultivos', selectedIds); clearSelection(); fetchCultivos(); } catch (e) {} finally { setBulkDeleting(false); }
   };

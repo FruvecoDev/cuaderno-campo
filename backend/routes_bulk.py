@@ -6,7 +6,7 @@ from bson import ObjectId
 from rbac_guards import get_current_user
 from database import db
 
-router = APIRouter(tags=["bulk-operations"])
+router = APIRouter(prefix="/api", tags=["bulk-operations"])
 
 ALLOWED_COLLECTIONS = {
     "parcelas": "parcelas",

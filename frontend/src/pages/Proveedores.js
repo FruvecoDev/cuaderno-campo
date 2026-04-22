@@ -296,7 +296,6 @@ const Proveedores = () => {
   const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredProveedores);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const handleBulkDelete = async () => {
-    if (!window.confirm(`Eliminar ${selectedIds.size} proveedor${selectedIds.size > 1 ? 'es' : ''} seleccionado${selectedIds.size > 1 ? 's' : ''}?`)) return;
     setBulkDeleting(true);
     try { await bulkDeleteApi('proveedores', selectedIds); clearSelection(); fetchProveedores(); } catch (e) {} finally { setBulkDeleting(false); }
   };
