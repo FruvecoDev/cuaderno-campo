@@ -286,11 +286,21 @@ const AlbaranesComision = () => {
   // Bulk select (aplica a elementos visibles en la pagina actual)
   const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(paginatedAlbaranes);
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [regenerateAfterDelete, setRegenerateAfterDelete] = useState(false);
   const handleBulkDelete = async () => {
     setBulkDeleting(true);
     try {
       await bulkDeleteApi('albaranes_comision', selectedIds);
       clearSelection();
+      if (regenerateAfterDelete) {
+        try {
+          const res = await api.post('/api/albaranes-comision/regenerar?solo_faltantes=true');
+          const r = res?.data ?? res;
+          window.alert(`Eliminación masiva completada.\nRegenerados automáticamente: ${r.creados ?? 0} albarán(es) de comisión.`);
+        } catch {
+          window.alert('Eliminación completada, pero hubo un error al regenerar.');
+        }
+      }
       await fetchAlbaranes();
     } catch (err) {
       window.alert('Error al eliminar masivamente');
@@ -641,6 +651,25 @@ const AlbaranesComision = () => {
               onDelete={handleBulkDelete}
               deleting={bulkDeleting}
             />
+            {selectedIds.size > 0 && (
+              <label
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                  fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))',
+                  marginBottom: '0.5rem', cursor: 'pointer', userSelect: 'none',
+                }}
+                title="Tras borrar, llama automáticamente a Regenerar para recrear los ACM desde los albaranes origen existentes"
+              >
+                <input
+                  type="checkbox"
+                  checked={regenerateAfterDelete}
+                  onChange={(e) => setRegenerateAfterDelete(e.target.checked)}
+                  data-testid="chk-regenerate-after-delete"
+                  style={{ width: '14px', height: '14px', cursor: 'pointer' }}
+                />
+                Regenerar automáticamente desde los albaranes tras eliminar
+              </label>
+            )}
           </div>
         )}
         <div className="table-container" style={{ maxHeight: '60vh', overflow: 'auto' }}>
