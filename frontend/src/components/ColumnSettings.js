@@ -45,6 +45,21 @@ export const ColumnSettings = ({ columns, onChange, onReset, testId = 'column-se
     onChange(next);
   };
 
+  const setPosition = (idx, targetPos) => {
+    // targetPos: 1-based
+    const total = columns.length;
+    let pos = parseInt(targetPos, 10);
+    if (Number.isNaN(pos)) return;
+    if (pos < 1) pos = 1;
+    if (pos > total) pos = total;
+    const newIdx = pos - 1;
+    if (newIdx === idx) return;
+    const next = [...columns];
+    const [item] = next.splice(idx, 1);
+    next.splice(newIdx, 0, item);
+    onChange(next);
+  };
+
   const visibleCount = columns.filter((c) => c.visible !== false).length;
 
   return (
@@ -76,7 +91,7 @@ export const ColumnSettings = ({ columns, onChange, onReset, testId = 'column-se
             top: 'calc(100% + 4px)',
             right: 0,
             zIndex: 200,
-            minWidth: '280px',
+            minWidth: '320px',
             maxHeight: '360px',
             overflowY: 'auto',
             background: 'white',
@@ -125,6 +140,27 @@ export const ColumnSettings = ({ columns, onChange, onReset, testId = 'column-se
                 onMouseEnter={(e) => (e.currentTarget.style.background = 'hsl(var(--muted)/0.6)')}
                 onMouseLeave={(e) => (e.currentTarget.style.background = isVisible ? 'transparent' : 'hsl(var(--muted)/0.4)')}
               >
+                <input
+                  type="number"
+                  min={1}
+                  max={columns.length}
+                  value={idx + 1}
+                  onChange={(e) => setPosition(idx, e.target.value)}
+                  title="Escribe la posición exacta de esta columna"
+                  style={{
+                    width: '38px',
+                    textAlign: 'center',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    color: 'hsl(var(--muted-foreground))',
+                    background: 'hsl(var(--muted))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '4px',
+                    padding: '0.1rem 0.15rem',
+                    MozAppearance: 'textfield',
+                  }}
+                  onClick={(e) => e.target.select()}
+                />
                 <button
                   type="button"
                   onClick={() => toggleVisible(c.key)}
