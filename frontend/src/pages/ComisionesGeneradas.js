@@ -37,7 +37,6 @@ const ComisionesGeneradas = () => {
   // Estado para expandir detalles (Set para multi-expand)
   const [expandedAgente, setExpandedAgente] = useState(null); // single (retrocompat)
   const [expandedIds, setExpandedIds] = useState(new Set());
-  const [quickSearchAgente, setQuickSearchAgente] = useState('');
   
   // Vista: 'lista' o 'agrupado'
   const [vista, setVista] = useState('agrupado');
@@ -177,14 +176,10 @@ const ComisionesGeneradas = () => {
     return Object.values(grouped);
   }, [filteredComisiones]);
 
-  // Filtrado rapido por nombre + orden por comision desc
+  // Orden por comisión total desc (ya filtradas por el buscador principal)
   const comisionesPorAgenteVisible = useMemo(() => {
-    const q = quickSearchAgente.trim().toLowerCase();
-    const list = q
-      ? comisionesPorAgente.filter(a => (a.agente_nombre || '').toLowerCase().includes(q))
-      : comisionesPorAgente;
-    return [...list].sort((a, b) => (b.totales?.comision_total || 0) - (a.totales?.comision_total || 0));
-  }, [comisionesPorAgente, quickSearchAgente]);
+    return [...comisionesPorAgente].sort((a, b) => (b.totales?.comision_total || 0) - (a.totales?.comision_total || 0));
+  }, [comisionesPorAgente]);
 
   const toggleExpand = (id) => {
     setExpandedIds(prev => {
@@ -584,18 +579,6 @@ const ComisionesGeneradas = () => {
               <span style={{ fontWeight: '400', color: 'hsl(var(--muted-foreground))' }}>({comisionesPorAgenteVisible.length})</span>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-              <div style={{ position: 'relative' }}>
-                <Search size={14} style={{ position: 'absolute', left: '0.6rem', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--muted-foreground))' }} />
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Buscar agente..."
-                  value={quickSearchAgente}
-                  onChange={(e) => setQuickSearchAgente(e.target.value)}
-                  style={{ paddingLeft: '2rem', width: '220px', fontSize: '0.85rem' }}
-                  data-testid="quick-search-agente-cg"
-                />
-              </div>
               <button type="button" className="btn btn-secondary btn-sm" onClick={expandAllAgentes} data-testid="btn-expandir-todo-cg">
                 <ChevronsDown size={14} /> Expandir todo
               </button>
@@ -608,7 +591,7 @@ const ComisionesGeneradas = () => {
           {comisionesPorAgenteVisible.length === 0 ? (
             <div className="card" style={{ padding: '2rem', textAlign: 'center' }}>
               <p style={{ color: 'hsl(var(--muted-foreground))' }}>
-                {comisionesPorAgente.length === 0 ? 'No hay comisiones generadas' : 'Ningún agente coincide con la búsqueda rápida'}
+                {comisionesPorAgente.length === 0 ? 'No hay comisiones generadas' : 'Ningún agente coincide con la búsqueda'}
               </p>
             </div>
           ) : (
