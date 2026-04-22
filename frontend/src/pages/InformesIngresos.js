@@ -439,13 +439,31 @@ const InformesIngresos = () => {
               <div className="card">
                 <h3 className="card-title">Ingresos por Cliente</h3>
                 {chartDataClientes.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={chartDataClientes} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" tickFormatter={(v) => `€${(v/1000).toFixed(0)}k`} />
-                      <YAxis dataKey="name" type="category" width={100} style={{ fontSize: '11px' }} />
-                      <Tooltip formatter={(v) => formatCurrency(v)} />
-                      <Bar dataKey="value" fill="#16a34a" />
+                  <ResponsiveContainer width="100%" height={340}>
+                    <BarChart data={chartDataClientes} layout="vertical" margin={{ top: 5, right: 24, left: 8, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis
+                        type="number"
+                        tickFormatter={(v) => `${(v/1000).toFixed(0)}k€`}
+                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                        axisLine={{ stroke: 'hsl(var(--border))' }}
+                      />
+                      <YAxis
+                        dataKey="name"
+                        type="category"
+                        width={180}
+                        tick={{ fontSize: 11, fill: 'hsl(var(--foreground))' }}
+                        tickFormatter={(v) => (v?.length > 22 ? v.slice(0, 20) + '…' : v)}
+                        axisLine={false}
+                        tickLine={false}
+                        interval={0}
+                      />
+                      <Tooltip
+                        formatter={(v) => formatCurrency(v)}
+                        labelStyle={{ fontWeight: 600 }}
+                        contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))', fontSize: '0.8rem' }}
+                      />
+                      <Bar dataKey="value" fill="#16a34a" radius={[0, 4, 4, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
@@ -456,23 +474,37 @@ const InformesIngresos = () => {
               <div className="card">
                 <h3 className="card-title">Distribución por Cultivo</h3>
                 {chartDataCultivos.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <RechartsPieChart>
+                  <ResponsiveContainer width="100%" height={340}>
+                    <RechartsPieChart margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
                       <Pie
                         data={chartDataCultivos}
-                        cx="50%"
+                        cx="38%"
                         cy="50%"
                         labelLine={false}
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                        outerRadius={80}
+                        label={({ percent }) => (percent >= 0.04 ? `${(percent * 100).toFixed(0)}%` : '')}
+                        outerRadius={110}
+                        innerRadius={45}
+                        paddingAngle={1}
                         dataKey="value"
+                        style={{ fontSize: 11, fontWeight: 600, fill: '#fff' }}
                       >
                         {chartDataCultivos.map((entry, index) => (
-                          <Cell key={`cell-cult-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                          <Cell key={`cell-cult-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} stroke="#fff" strokeWidth={1.5} />
                         ))}
                       </Pie>
-                      <Tooltip formatter={(v) => formatCurrency(v)} />
-                      <Legend />
+                      <Tooltip
+                        formatter={(v) => formatCurrency(v)}
+                        contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))', fontSize: '0.8rem' }}
+                      />
+                      <Legend
+                        layout="vertical"
+                        verticalAlign="middle"
+                        align="right"
+                        iconType="circle"
+                        iconSize={9}
+                        wrapperStyle={{ fontSize: '0.72rem', lineHeight: '1.4', paddingLeft: '0.5rem', maxWidth: '44%' }}
+                        formatter={(value) => (value?.length > 24 ? value.slice(0, 22) + '…' : value)}
+                      />
                     </RechartsPieChart>
                   </ResponsiveContainer>
                 ) : (

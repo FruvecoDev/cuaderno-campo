@@ -482,15 +482,30 @@ const InformesGastos = () => {
               <Building2 size={18} style={{ color: '#7c3aed' }} />
               Gastos por Proveedor
             </h3>
-            <div style={{ height: '300px' }}>
+            <div style={{ height: '340px' }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={getChartDataProveedor()} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" tickFormatter={(v) => `${(v/1000).toFixed(0)}k€`} />
-                  <YAxis dataKey="name" type="category" width={100} tick={{ fontSize: 11 }} />
-                  <Tooltip 
+                <BarChart data={getChartDataProveedor()} layout="vertical" margin={{ top: 5, right: 24, left: 8, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis
+                    type="number"
+                    tickFormatter={(v) => `${(v/1000).toFixed(0)}k€`}
+                    tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                    axisLine={{ stroke: 'hsl(var(--border))' }}
+                  />
+                  <YAxis
+                    dataKey="name"
+                    type="category"
+                    width={180}
+                    tick={{ fontSize: 11, fill: 'hsl(var(--foreground))' }}
+                    tickFormatter={(v) => (v?.length > 22 ? v.slice(0, 20) + '…' : v)}
+                    axisLine={false}
+                    tickLine={false}
+                    interval={0}
+                  />
+                  <Tooltip
                     formatter={(value) => formatCurrency(value)}
-                    labelStyle={{ fontWeight: 600 }}
+                    labelStyle={{ fontWeight: 600, color: 'hsl(var(--foreground))' }}
+                    contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))', fontSize: '0.8rem' }}
                   />
                   <Bar dataKey="total" radius={[0, 4, 4, 0]}>
                     {getChartDataProveedor().map((entry, index) => (
@@ -508,25 +523,39 @@ const InformesGastos = () => {
               <Leaf size={18} style={{ color: '#ea580c' }} />
               Distribución por Cultivo
             </h3>
-            <div style={{ height: '300px' }}>
+            <div style={{ height: '340px' }}>
               <ResponsiveContainer width="100%" height="100%">
-                <RechartsPieChart>
+                <RechartsPieChart margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
                   <Pie
                     data={getChartDataCultivo()}
                     dataKey="total"
                     nameKey="name"
-                    cx="50%"
+                    cx="38%"
                     cy="50%"
-                    outerRadius={100}
-                    label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-                    labelLine={{ strokeWidth: 1 }}
+                    outerRadius={110}
+                    innerRadius={45}
+                    paddingAngle={1}
+                    label={({ percent }) => (percent >= 0.04 ? `${(percent * 100).toFixed(0)}%` : '')}
+                    labelLine={false}
+                    style={{ fontSize: 11, fontWeight: 600, fill: '#fff' }}
                   >
                     {getChartDataCultivo().map((entry, index) => (
-                      <Cell key={`cell-cult-${index}`} fill={entry.fill} />
+                      <Cell key={`cell-cult-${index}`} fill={entry.fill} stroke="#fff" strokeWidth={1.5} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => formatCurrency(value)} />
-                  <Legend />
+                  <Tooltip
+                    formatter={(value) => formatCurrency(value)}
+                    contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))', fontSize: '0.8rem' }}
+                  />
+                  <Legend
+                    layout="vertical"
+                    verticalAlign="middle"
+                    align="right"
+                    iconType="circle"
+                    iconSize={9}
+                    wrapperStyle={{ fontSize: '0.72rem', lineHeight: '1.4', paddingLeft: '0.5rem', maxWidth: '44%' }}
+                    formatter={(value) => (value?.length > 24 ? value.slice(0, 22) + '…' : value)}
+                  />
                 </RechartsPieChart>
               </ResponsiveContainer>
             </div>
@@ -538,17 +567,38 @@ const InformesGastos = () => {
               <MapPin size={18} style={{ color: '#059669' }} />
               Gastos por Parcela (Top 10)
             </h3>
-            <div style={{ height: '250px' }}>
+            <div style={{ height: '320px' }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={resumen.por_parcela?.slice(0, 10).map((item, idx) => ({
-                  name: item.parcela.length > 12 ? item.parcela.slice(0, 12) + '...' : item.parcela,
-                  total: item.total,
-                  fill: CHART_COLORS[idx % CHART_COLORS.length]
-                })) || []}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                  <YAxis tickFormatter={(v) => `${(v/1000).toFixed(0)}k€`} />
-                  <Tooltip formatter={(value) => formatCurrency(value)} />
+                <BarChart
+                  data={resumen.por_parcela?.slice(0, 10).map((item, idx) => ({
+                    name: item.parcela || 'Sin parcela',
+                    total: item.total,
+                    fill: CHART_COLORS[idx % CHART_COLORS.length]
+                  })) || []}
+                  margin={{ top: 5, right: 24, left: 8, bottom: 64 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 11, fill: 'hsl(var(--foreground))' }}
+                    tickFormatter={(v) => (v?.length > 18 ? v.slice(0, 16) + '…' : v)}
+                    interval={0}
+                    angle={-25}
+                    textAnchor="end"
+                    height={70}
+                    axisLine={{ stroke: 'hsl(var(--border))' }}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tickFormatter={(v) => `${(v/1000).toFixed(0)}k€`}
+                    tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    formatter={(value) => formatCurrency(value)}
+                    contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))', fontSize: '0.8rem' }}
+                  />
                   <Bar dataKey="total" radius={[4, 4, 0, 0]}>
                     {(resumen.por_parcela?.slice(0, 10) || []).map((entry, index) => (
                       <Cell key={`cell-parc-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />

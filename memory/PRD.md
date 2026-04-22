@@ -155,3 +155,13 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 
 ## Credentials
 - Admin: admin@fruveco.com / admin123
+
+### ESLint Strict Config + Bug Hunt - DONE (2026-04-22)
+- Nuevo /app/frontend/eslint.config.js (ESLint 9 flat config) con no-undef: error
+- Detectó y corregidos 4 bugs latentes: Albaranes dead code, Cosechas/InformesIngresos key={var_inexistente}, Usuarios alignItems duplicado
+
+### Charts Visual Polish (Informes Gastos + Ingresos) - DONE (2026-04-22)
+- Pie charts convertidos en donuts con porcentajes blancos dentro de slices
+- Leyenda vertical a la derecha con iconos circulares y nombres truncados
+- Bar charts: width Y axis 180px, truncado inteligente, ticks rotados en parcelas
+- Tooltips estilo profesional uniforme
