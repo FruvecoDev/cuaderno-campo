@@ -211,6 +211,7 @@ const AlbaranesComision = () => {
     { key: 'tipo', label: 'Tipo', visible: true },
     { key: 'partner', label: 'Proveedor / Cliente', visible: true },
     { key: 'origen', label: 'Albarán origen', visible: true },
+    { key: 'contrato', label: 'Contrato', visible: true },
     { key: 'cultivo', label: 'Cultivo', visible: true },
     { key: 'kg', label: 'Kg Netos', visible: true },
     { key: 'precio', label: 'Precio €/kg', visible: true },
@@ -253,6 +254,7 @@ const AlbaranesComision = () => {
       );
       case 'partner': return <td>{partnerName}</td>;
       case 'origen': return <td style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>{acm.numero_albaran || '-'}</td>;
+      case 'contrato': return <td style={{ fontSize: '0.8rem', fontWeight: '500' }}>{acm.contrato_numero || '—'}</td>;
       case 'cultivo': return <td>{acm.cultivo || '-'}</td>;
       case 'kg': return <td style={{ textAlign: 'right' }}>{formatKg(acm.kilos_netos)}</td>;
       case 'precio': return <td style={{ textAlign: 'right' }}>{formatNumber(acm.precio_kg, 4)}</td>;

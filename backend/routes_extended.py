@@ -512,6 +512,11 @@ async def create_albaran(
                     "albaran_id": albaran_id,
                     "numero_albaran": numero_albaran,
                     "contrato_id": albaran.contrato_id,
+                    "contrato_numero": (
+                        contrato.get("numero_contrato")
+                        or contrato.get("numero")
+                        or contrato.get("codigo")
+                    ),
                     "agente_id": agente_id,
                     "agente_nombre": agente_nombre,
                     "tipo_agente": tipo_agente,

@@ -145,10 +145,29 @@ async def list_albaranes_comision(
 
     cursor = comisiones_collection.find(query).sort("fecha_albaran", -1)
     docs: List[dict] = []
+    contratos_cache: dict = {}
     async for doc in cursor:
         numero = await _ensure_numero_acm(doc)  # idempotente: asigna si falta
         if numero:
             doc["numero_albaran_comision"] = numero
+        # Resolver contrato_numero si aun no esta poblado
+        if not doc.get("contrato_numero") and doc.get("contrato_id"):
+            cid = doc["contrato_id"]
+            if cid not in contratos_cache:
+                contratos_cache[cid] = None
+                if ObjectId.is_valid(cid):
+                    cdoc = await contratos_collection.find_one(
+                        {"_id": ObjectId(cid)},
+                        {"_id": 0, "numero_contrato": 1, "numero": 1, "codigo": 1}
+                    )
+                    if cdoc:
+                        contratos_cache[cid] = (
+                            cdoc.get("numero_contrato")
+                            or cdoc.get("numero")
+                            or cdoc.get("codigo")
+                        )
+            if contratos_cache.get(cid):
+                doc["contrato_numero"] = contratos_cache[cid]
         docs.append(serialize_doc(doc))
 
     # Totales
@@ -336,7 +355,11 @@ async def regenerar_albaranes_comision(
                 "albaran_id": albaran_id,
                 "numero_albaran": numero_albaran,
                 "contrato_id": contrato_id,
-                "contrato_numero": contrato.get("numero") or contrato.get("codigo"),
+                "contrato_numero": (
+                    contrato.get("numero_contrato")
+                    or contrato.get("numero")
+                    or contrato.get("codigo")
+                ),
                 "agente_id": agente_id,
                 "agente_nombre": agente_nombre,
                 "tipo_agente": tipo_agente,
@@ -385,6 +408,19 @@ async def albaran_comision_pdf(
 
     numero_acm = await _ensure_numero_acm(doc)
     doc["numero_albaran_comision"] = numero_acm
+
+    # Resolver contrato_numero si no está poblado
+    if not doc.get("contrato_numero") and doc.get("contrato_id") and ObjectId.is_valid(doc["contrato_id"]):
+        cdoc = await contratos_collection.find_one(
+            {"_id": ObjectId(doc["contrato_id"])},
+            {"_id": 0, "numero_contrato": 1, "numero": 1, "codigo": 1}
+        )
+        if cdoc:
+            doc["contrato_numero"] = (
+                cdoc.get("numero_contrato")
+                or cdoc.get("numero")
+                or cdoc.get("codigo")
+            )
 
     buf = io.BytesIO()
     pdf = SimpleDocTemplate(
