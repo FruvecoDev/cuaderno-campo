@@ -101,6 +101,13 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - Filas seleccionadas resaltadas sutilmente. Modal de confirmación con mensaje "Se eliminarán N registros".
 - Protegido por permiso backend `can_bulk_delete` (ya existente en rbac_guards y /api/bulk-delete/{module}).
 
+### Contratos: Paginación - DONE (2026-04-22)
+- Footer con paginación completa: "Mostrando X-Y de Total · Filas: selector (10/25/50/100/200)"
+- Botones Primera (««), Anterior (‹), indicador "Página N / Total", Siguiente (›), Última (»»)
+- `pageSize` default 25. `useBulkSelect` ahora opera sobre la página visible (paginatedContratos)
+- Mismo patrón que Albaranes — data-testid: `select-page-size-contratos`, `pag-first-contratos`, `pag-prev-contratos`, `pag-next-contratos`, `pag-last-contratos`
+- Footer solo se muestra cuando filteredContratos.length > 0
+
 ### Visitas: Bulk Delete - DONE (2026-04-22)
 - Visitas.js + VisitasTable.js integrados con el mismo patrón. Nueva prop `bulkBar` en VisitasTable para renderizar la BulkActionBar dentro de la card (encima de la tabla) manteniendo cohesión visual.
 - Endpoint `/api/bulk-delete/visitas` ya soportado en routes_bulk.py.
