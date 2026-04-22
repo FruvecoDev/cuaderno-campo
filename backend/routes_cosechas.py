@@ -10,6 +10,8 @@ from typing import Optional
 from bson import ObjectId
 from datetime import datetime
 
+from utils.formatters import format_number_es
+
 from models import CosechaCreate, CargaCosechaCreate
 from database import (
     cosechas_collection, contratos_collection,
@@ -548,9 +550,9 @@ async def export_cosechas_pdf(
         total_cargas += n_cargas
         table_data.append([
             c.get("proveedor", "")[:25], c.get("cultivo", "")[:20], c.get("campana", ""),
-            f"{kg_estimados:,.0f}", f"{kg_reales:,.0f}", str(n_cargas), c.get("estado", "planificada")
+            format_number_es(kg_estimados, 0), format_number_es(kg_reales, 0), str(n_cargas), c.get("estado", "planificada")
         ])
-    table_data.append(["TOTAL", "", "", f"{total_estimado:,.0f}", f"{total_real:,.0f}", str(total_cargas), ""])
+    table_data.append(["TOTAL", "", "", format_number_es(total_estimado, 0), format_number_es(total_real, 0), str(total_cargas), ""])
     
     col_widths = [50*mm, 35*mm, 25*mm, 30*mm, 30*mm, 20*mm, 25*mm]
     doc_table = Table(table_data, colWidths=col_widths)

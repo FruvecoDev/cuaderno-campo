@@ -280,16 +280,7 @@ async def regenerar_numeros_contratos(
 # EXPORT FUNCTIONS - PDF & EXCEL
 # ============================================================================
 
-def format_number_es(value: float, decimals: int = 2) -> str:
-    """Formatea un número al estilo español con punto de miles y coma decimal"""
-    if value is None:
-        return "0"
-    if decimals == 0:
-        formatted = f"{value:,.0f}"
-    else:
-        formatted = f"{value:,.{decimals}f}"
-    formatted = formatted.replace(",", "X").replace(".", ",").replace("X", ".")
-    return formatted
+from utils.formatters import format_number_es  # noqa: E402
 
 
 @router.get("/contratos/export/pdf")

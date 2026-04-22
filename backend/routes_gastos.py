@@ -7,6 +7,7 @@ from database import (
     albaranes_collection, contratos_collection, serialize_doc, serialize_docs, db
 )
 from rbac_guards import RequireAlbaranesAccess, get_current_user
+from utils.formatters import format_number_es
 
 router = APIRouter(prefix="/api/gastos", tags=["gastos"])
 
@@ -802,7 +803,7 @@ async def export_gastos_pdf(
     
     # Generate HTML
     def format_currency(val):
-        return f"{val:,.2f} €".replace(",", "X").replace(".", ",").replace("X", ".")
+        return f"{format_number_es(val, 2)} €"
     
     def format_percent(val, total):
         if total == 0:

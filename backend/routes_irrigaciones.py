@@ -9,6 +9,8 @@ from bson import ObjectId
 from datetime import datetime, timedelta
 import io
 
+from utils.formatters import format_number_es
+
 from models_tratamientos import IrrigacionCreate
 from database import (
     irrigaciones_collection, parcelas_collection, 
@@ -557,10 +559,10 @@ async def export_irrigaciones_pdf(
             i.get("fecha_fin", "")[:10] if i.get("fecha_fin") else "",
             i.get("tipo_riego", "")[:15], f"{i.get('caudal', '')}",
             f"{i.get('duracion_horas', '')} h",
-            f"{vol:,.0f}",
+            format_number_es(vol, 0),
             i.get("parcela_codigo", "")[:15], i.get("campana", "")
         ])
-    table_data.append(["TOTAL", "", "", "", "", f"{total_vol:,.0f}", "", ""])
+    table_data.append(["TOTAL", "", "", "", "", format_number_es(total_vol, 0), "", ""])
 
     col_widths = [25*mm, 25*mm, 25*mm, 20*mm, 20*mm, 25*mm, 30*mm, 22*mm]
     doc_table = Table(table_data, colWidths=col_widths)

@@ -8,6 +8,8 @@ from datetime import datetime
 from bson import ObjectId
 import io
 
+from utils.formatters import format_number_es
+
 router = APIRouter(prefix="/api/rrhh", tags=["RRHH - Prenóminas"])
 
 db = None
@@ -745,9 +747,9 @@ async def export_prenominas_excel_masivo(mes: int, ano: int):
     ws['A3'].font = Font(bold=True)
     total_bruto = sum(item["prenomina"].get("importe_bruto", 0) for item in prenominas)
     total_neto = sum(item["prenomina"].get("importe_neto", 0) for item in prenominas)
-    ws['C3'] = f"Total Bruto: {total_bruto:,.2f} €"
+    ws['C3'] = f"Total Bruto: {format_number_es(total_bruto)} €"
     ws['C3'].font = Font(bold=True, color="2E7D32")
-    ws['F3'] = f"Total Neto: {total_neto:,.2f} €"
+    ws['F3'] = f"Total Neto: {format_number_es(total_neto)} €"
     ws['F3'].font = Font(bold=True, color="2E7D32")
     ws['I3'] = f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}"
     

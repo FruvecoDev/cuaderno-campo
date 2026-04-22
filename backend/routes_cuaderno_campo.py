@@ -11,6 +11,8 @@ from typing import Optional
 from bson import ObjectId
 from io import BytesIO
 
+from utils.formatters import format_number_es
+
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -325,10 +327,10 @@ def create_cosechas_table(cosechas: list, styles) -> list:
         
         data.append([
             c.get('fecha_inicio') or '-',
-            f"{kg_est:,.0f}",
-            f"{kg_real:,.0f}",
+            format_number_es(kg_est, 0),
+            format_number_es(kg_real, 0),
             rendimiento,
-            f"{importe:,.2f} €",
+            f"{format_number_es(importe, 2)} €",
             estado[:10] if estado else '-'
         ])
     
@@ -348,7 +350,7 @@ def create_cosechas_table(cosechas: list, styles) -> list:
     
     elements.append(table)
     elements.append(Paragraph(
-        f'Total cosechado: {total_kg:,.0f} kg | Importe total: {total_importe:,.2f} €', 
+        f'Total cosechado: {format_number_es(total_kg, 0)} kg | Importe total: {format_number_es(total_importe, 2)} €',
         styles['SmallText']
     ))
     
@@ -365,7 +367,7 @@ def create_resumen_section(data: dict, styles) -> list:
         ['Tratamientos', str(data['num_tratamientos']), f"Realizados: {data['tratamientos_realizados']}"],
         ['Riegos', str(data['num_riegos']), f"Volumen: {data['volumen_total']:.0f} m³"],
         ['Visitas', str(data['num_visitas']), ''],
-        ['Cosechas', str(data['num_cosechas']), f"Total: {data['kg_total']:,.0f} kg"],
+        ['Cosechas', str(data['num_cosechas']), f"Total: {format_number_es(data['kg_total'], 0)} kg"],
     ]
     
     table = Table(resumen_data, colWidths=[5*cm, 3*cm, 7*cm])

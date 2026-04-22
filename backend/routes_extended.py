@@ -1282,8 +1282,9 @@ async def export_comisiones_pdf(
     elements.append(Spacer(1, 10*mm))
     
     # Función para formatear números
+    from utils.formatters import format_number_es as _fmt
     def fmt_num(num, decimals=2):
-        return f"{(num or 0):,.{decimals}f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        return _fmt(num, decimals)
     
     # Crear tabla por cada agente
     for agente_nombre, comisiones_agente in comisiones_por_agente.items():
@@ -1568,21 +1569,7 @@ async def export_comisiones_excel(
 # ALBARANES PDF
 # ============================================================================
 
-def format_number_spanish(value, decimals=2):
-    """Formatea un número al estilo español (. miles, , decimales)"""
-    if value is None:
-        return "0"
-    try:
-        num = float(value)
-        if decimals == 0:
-            formatted = f"{num:,.0f}"
-        else:
-            formatted = f"{num:,.{decimals}f}"
-        # Convertir formato americano a español
-        formatted = formatted.replace(",", "X").replace(".", ",").replace("X", ".")
-        return formatted
-    except (ValueError, TypeError):
-        return str(value)
+from utils.formatters import format_number_es as format_number_spanish  # noqa: E402
 
 
 @router.get("/albaranes/{albaran_id}/pdf")
