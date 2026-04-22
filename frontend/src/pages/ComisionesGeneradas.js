@@ -241,11 +241,12 @@ const ComisionesGeneradas = () => {
   };
 
   const formatNumber = (num) => {
-    return (num || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    // Forzamos agrupamiento desde el primer millar (es-ES no agrupa 4 digitos por defecto)
+    return (num || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
   const formatKilos = (num) => {
-    return (num || 0).toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    return (num || 0).toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   };
 
   const getEstadoBadge = (estado) => {
