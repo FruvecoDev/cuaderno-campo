@@ -603,18 +603,28 @@ async def get_albaran(
 @router.delete("/albaranes/{albaran_id}")
 async def delete_albaran(
     albaran_id: str,
+    cascade_acm: bool = True,
     current_user: dict = Depends(RequireDelete),
     _access: dict = Depends(RequireAlbaranesAccess)
 ):
     if not ObjectId.is_valid(albaran_id):
         raise HTTPException(status_code=400, detail="Invalid ID")
-    
+
     result = await albaranes_collection.delete_one({"_id": ObjectId(albaran_id)})
-    
+
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Albaran not found")
-    
-    return {"success": True, "message": "Albaran deleted"}
+
+    cascaded_acm = 0
+    if cascade_acm:
+        acm_result = await comisiones_collection.delete_many({"albaran_id": albaran_id})
+        cascaded_acm = acm_result.deleted_count
+
+    return {
+        "success": True,
+        "message": "Albaran deleted",
+        "cascaded_acm": cascaded_acm,
+    }
 
 
 @router.put("/albaranes/{albaran_id}")

@@ -722,16 +722,25 @@ const Albaranes = () => {
       setError('No tienes permisos para eliminar albaranes');
       return;
     }
-    
+
     if (!window.confirm('¿Estás seguro de que quieres eliminar este albarán?')) {
       return;
     }
-    
+    // Preguntar si tambien debe borrar su albaran de comision asociado
+    const cascade = window.confirm(
+      '¿Eliminar también su ALBARÁN DE COMISIÓN asociado (si existe)?\n\n'
+      + 'Pulsa "Aceptar" para eliminar en cascada (recomendado para mantener integridad).\n'
+      + 'Pulsa "Cancelar" para eliminar SOLO el albarán (puede dejar ACM huérfano).'
+    );
+
     try {
-      await api.delete(`/api/albaranes/${albaranId}`);
+      const res = await api.delete(`/api/albaranes/${albaranId}?cascade_acm=${cascade}`);
+      const r = res?.data ?? res;
+      if (r?.cascaded_acm) {
+        window.alert(`Albarán eliminado. ${r.cascaded_acm} albarán(es) de comisión asociado(s) también eliminado(s).`);
+      }
       reloadAlbaranes();
     } catch (error) {
-
       const errorMsg = handlePermissionError(error, 'eliminar el albarán');
       setError(errorMsg);
     }
