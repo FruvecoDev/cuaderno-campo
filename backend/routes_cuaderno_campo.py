@@ -386,6 +386,39 @@ def create_resumen_section(data: dict, styles) -> list:
     return elements
 
 
+@router.post("/contratos/{contrato_id}/cuaderno")
+async def generar_cuaderno_from_contrato(
+    contrato_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Generate Cuaderno de Campo from a contrato - finds linked parcelas and generates PDF."""
+    try:
+        contrato = await contratos_collection.find_one({"_id": ObjectId(contrato_id)})
+    except Exception:
+        raise HTTPException(status_code=400, detail="ID de contrato invalido")
+    if not contrato:
+        raise HTTPException(status_code=404, detail="Contrato no encontrado")
+
+    # Find parcelas linked to this contrato's proveedor + cultivo + campana
+    query = {}
+    if contrato.get("proveedor"):
+        query["proveedor"] = contrato["proveedor"]
+    if contrato.get("cultivo"):
+        query["cultivo"] = contrato["cultivo"]
+    if contrato.get("campana"):
+        query["campana"] = contrato["campana"]
+
+    parcelas = await parcelas_collection.find(query).to_list(100)
+    if not parcelas:
+        raise HTTPException(status_code=404, detail="No se encontraron parcelas asociadas a este contrato. Crea primero una parcela con el mismo proveedor, cultivo y campana.")
+
+    parcela_id = str(parcelas[0]["_id"])
+    campana = contrato.get("campana")
+
+    # Call existing generation function directly
+    return await generar_cuaderno_campo(parcela_id, campana, current_user)
+
+
 @router.get("/cuaderno-campo/parcelas")
 async def get_parcelas_for_cuaderno(
     current_user: dict = Depends(get_current_user)

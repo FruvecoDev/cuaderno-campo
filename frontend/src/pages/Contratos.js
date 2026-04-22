@@ -246,8 +246,7 @@ const Contratos = () => {
     setGeneratingCuaderno(contratoId);
     setError(null);
     try {
-      const data = await api.post(`/api/contratos/${contratoId}/cuaderno`, {});
-      if (data.success && data.download_url) window.open(data.download_url, '_blank');
+      await api.downloadWithPost(`/api/contratos/${contratoId}/cuaderno`, {}, `cuaderno_campo_${contratoId}.pdf`);
     } catch (error) {
       setError(api.getErrorMessage(error) || t('fieldNotebook.errorGenerating'));
       setTimeout(() => setError(null), 5000);
