@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import {
   FileText, Search, Download, RotateCw, Euro, Package,
   TrendingUp, Users, Filter, Calendar, Loader2, Receipt, X, CheckCircle,
-  History, Clock, User as UserIcon,
+  History, Clock, User as UserIcon, ArrowUp, ArrowDown, ArrowUpDown,
 } from 'lucide-react';
 import { formatEuro, formatKg, formatNumber } from '../utils/format';
 import { ColumnSettings, useColumnConfig } from '../components/ColumnSettings';
@@ -202,7 +202,69 @@ const AlbaranesComision = () => {
     }
   };
 
-  const filteredAlbaranes = useMemo(() => albaranes, [albaranes]);
+  // Sorting state
+  const [sortAcm, setSortAcm] = useState({ key: null, dir: 'asc' });
+  const [sortHist, setSortHist] = useState({ key: 'fecha', dir: 'desc' });
+
+  const toggleSort = (current, setCurrent, key) => {
+    setCurrent((prev) => {
+      if (prev.key === key) {
+        if (prev.dir === 'asc') return { key, dir: 'desc' };
+        return { key: null, dir: 'asc' };
+      }
+      return { key, dir: 'asc' };
+    });
+  };
+
+  // Mapa de extractores de valor para ordenar cada columna
+  const ACM_SORT_MAP = {
+    numero: (a) => a.numero_albaran_comision || '',
+    fecha: (a) => a.fecha_albaran || '',
+    agente: (a) => (a.agente_nombre || '').toLowerCase(),
+    tipo: (a) => a.tipo_agente || '',
+    partner: (a) => ((a.proveedor_nombre || a.cliente_nombre) || '').toLowerCase(),
+    origen: (a) => a.numero_albaran || '',
+    contrato: (a) => a.contrato_numero || '',
+    cultivo: (a) => (a.cultivo || '').toLowerCase(),
+    kg: (a) => Number(a.kilos_netos || 0),
+    precio: (a) => Number(a.precio_kg || 0),
+    comision: (a) => Number(a.comision_valor || 0),
+    importe: (a) => Number(a.comision_importe || 0),
+    estado: (a) => a.estado || '',
+  };
+  const HIST_SORT_MAP = {
+    fecha: (h) => new Date(h.fecha_liquidacion || 0).getTime(),
+    agente: (h) => (h.agente_nombre || '').toLowerCase(),
+    tipo: (h) => h.tipo_agente || '',
+    periodo: (h) => h.fecha_desde || h.fecha_hasta || '',
+    num_acm: (h) => Number(h.num_acm || 0),
+    importe: (h) => Number(h.importe_total || 0),
+    usuario: (h) => (h.usuario || '').toLowerCase(),
+  };
+
+  const sortList = (list, sort, map) => {
+    if (!sort.key || !map[sort.key]) return list;
+    const extractor = map[sort.key];
+    const mult = sort.dir === 'asc' ? 1 : -1;
+    return [...list].sort((a, b) => {
+      const va = extractor(a);
+      const vb = extractor(b);
+      if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * mult;
+      if (va < vb) return -1 * mult;
+      if (va > vb) return 1 * mult;
+      return 0;
+    });
+  };
+
+  const filteredAlbaranes = useMemo(() => {
+    return sortList(albaranes, sortAcm, ACM_SORT_MAP);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [albaranes, sortAcm]);
+
+  const sortedHistorico = useMemo(() => {
+    return sortList(historico, sortHist, HIST_SORT_MAP);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [historico, sortHist]);
 
   // ------- Configuracion de columnas persistida en localStorage -------
   const DEFAULT_COLS_ACM = [
@@ -233,6 +295,37 @@ const AlbaranesComision = () => {
   ];
   const [colsAcm, setColsAcm, resetColsAcm] = useColumnConfig('acm.cols.albaranes', DEFAULT_COLS_ACM);
   const [colsHist, setColsHist, resetColsHist] = useColumnConfig('acm.cols.historico', DEFAULT_COLS_HIST);
+
+  // Componente auxiliar: cabecera clicable para ordenar
+  const SortHeader = ({ sortKey, sort, onToggle, align, children, isSortable = true }) => {
+    const active = sort.key === sortKey;
+    const Arrow = !active ? ArrowUpDown : (sort.dir === 'asc' ? ArrowUp : ArrowDown);
+    const alignStyle = align === 'right' ? { textAlign: 'right' } : {};
+    return (
+      <th
+        style={{
+          ...alignStyle,
+          cursor: isSortable ? 'pointer' : 'default',
+          userSelect: 'none',
+          whiteSpace: 'nowrap',
+        }}
+        onClick={isSortable ? onToggle : undefined}
+      >
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', justifyContent: align === 'right' ? 'flex-end' : 'flex-start', width: '100%' }}>
+          {children}
+          {isSortable && (
+            <Arrow
+              size={12}
+              style={{
+                color: active ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))',
+                opacity: active ? 1 : 0.5,
+              }}
+            />
+          )}
+        </span>
+      </th>
+    );
+  };
 
   const renderAcmCell = (acm, key) => {
     const partnerName = acm.proveedor_nombre || acm.cliente_nombre || '-';
@@ -513,12 +606,20 @@ const AlbaranesComision = () => {
             <table style={{ fontSize: '0.85rem', width: '100%' }}>
               <thead>
                 <tr style={{ background: 'hsl(var(--muted))', position: 'sticky', top: 0, zIndex: 2 }}>
-                  {colsAcm.filter(c => c.visible !== false).map(c => (
-                    <th
-                      key={c.key}
-                      style={{ textAlign: ['kg', 'precio', 'comision', 'importe'].includes(c.key) ? 'right' : 'left' }}
-                    >{c.label}</th>
-                  ))}
+                  {colsAcm.filter(c => c.visible !== false).map(c => {
+                    const align = ['kg', 'precio', 'comision', 'importe'].includes(c.key) ? 'right' : 'left';
+                    const isSortable = c.key !== 'acciones';
+                    return (
+                      <SortHeader
+                        key={c.key}
+                        sortKey={c.key}
+                        sort={sortAcm}
+                        onToggle={() => toggleSort(sortAcm, setSortAcm, c.key)}
+                        align={align}
+                        isSortable={isSortable}
+                      >{c.label}</SortHeader>
+                    );
+                  })}
                 </tr>
               </thead>
               <tbody>
@@ -565,16 +666,24 @@ const AlbaranesComision = () => {
                 <table style={{ fontSize: '0.85rem', width: '100%' }}>
                   <thead>
                     <tr style={{ background: 'hsl(var(--muted))', position: 'sticky', top: 0, zIndex: 2 }}>
-                      {colsHist.filter(c => c.visible !== false).map(c => (
-                        <th
-                          key={c.key}
-                          style={{ textAlign: ['num_acm', 'importe'].includes(c.key) ? 'right' : 'left' }}
-                        >{c.label}</th>
-                      ))}
+                      {colsHist.filter(c => c.visible !== false).map(c => {
+                        const align = ['num_acm', 'importe'].includes(c.key) ? 'right' : 'left';
+                        const isSortable = c.key !== 'acm_ids';
+                        return (
+                          <SortHeader
+                            key={c.key}
+                            sortKey={c.key}
+                            sort={sortHist}
+                            onToggle={() => toggleSort(sortHist, setSortHist, c.key)}
+                            align={align}
+                            isSortable={isSortable}
+                          >{c.label}</SortHeader>
+                        );
+                      })}
                     </tr>
                   </thead>
                   <tbody>
-                    {historico.map((h) => (
+                    {sortedHistorico.map((h) => (
                       <tr key={h._id} data-testid={`hist-row-${h._id}`}>
                         {colsHist.filter(c => c.visible !== false).map(c => (
                           <React.Fragment key={c.key}>{renderHistCell(h, c.key)}</React.Fragment>
