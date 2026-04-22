@@ -55,6 +55,11 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - Spanish Number Formatting, RBAC system, Delete User functionality
 - Map overlay fix, PWA optimization
 
+### Overhaul Modal TecnicosAplicadores - DONE (2026-04-22)
+- Converted inline form to professional tabbed modal (960px) with 3 tabs: Datos Personales, Datos Profesionales, Certificado
+- Drag-and-drop certificate upload preserved inside dedicated tab
+- Auto-calculated Fecha Validez (cert + 10 years) shown in Vigencia section
+
 ## Pending/Blocked
 - **Email Notifications (Resend)**: Blocked - waiting for RESEND_API_KEY
 - **Weather Integration (OpenWeatherMap)**: Blocked - waiting for API key

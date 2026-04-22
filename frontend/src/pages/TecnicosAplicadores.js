@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { 
   Plus, Edit2, Trash2, Search, UserCheck, Upload, X, 
   AlertTriangle, CheckCircle, XCircle, FileImage, Calendar,
-  Award, CreditCard, Eye, Download, FileText, Settings
+  Award, CreditCard, Eye, Download, FileText, Settings, User, Briefcase
 } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
@@ -37,6 +37,7 @@ const TecnicosAplicadores = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [nivelesCapacitacion, setNivelesCapacitacion] = useState([]);
+  const [activeTab, setActiveTab] = useState('personales');
   
   // Filtros
   const [searchTerm, setSearchTerm] = useState('');
@@ -236,6 +237,7 @@ const TecnicosAplicadores = () => {
     }
     setSelectedFile(null);
     setShowForm(true);
+    setActiveTab('personales');
   };
 
   const handleDelete = async (id) => {
@@ -275,6 +277,8 @@ const TecnicosAplicadores = () => {
     setEditingId(null);
     setShowForm(false);
     setSelectedFile(null);
+    setFilePreview(null);
+    setActiveTab('personales');
   };
 
   // Calcular fecha de validez (10 años después)
@@ -422,212 +426,283 @@ const TecnicosAplicadores = () => {
         </div>
       </div>
 
-      {/* Formulario */}
+      {/* Formulario Modal */}
       {showForm && (
-        <div className="card mb-6" style={{ border: '2px solid hsl(var(--primary))' }}>
-          <div className="flex justify-between items-center mb-4">
-            <h3 style={{ fontWeight: '600' }}>
-              {editingId ? 'Editar Técnico Aplicador' : 'Nuevo Técnico Aplicador'}
-            </h3>
-            <button className="btn btn-sm btn-secondary" onClick={resetForm}>
-              <X size={16} />
-            </button>
-          </div>
-          
-          <form onSubmit={handleSubmit}>
-            <div className="grid-3">
-              <div className="form-group">
-                <label className="form-label">Nombre *</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.nombre}
-                  onChange={(e) => setFormData({...formData, nombre: e.target.value})}
-                  required
-                  data-testid="input-nombre"
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Apellidos *</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.apellidos}
-                  onChange={(e) => setFormData({...formData, apellidos: e.target.value})}
-                  required
-                  data-testid="input-apellidos"
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">D.N.I. *</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.dni}
-                  onChange={(e) => setFormData({...formData, dni: e.target.value})}
-                  required
-                  placeholder="12345678A"
-                  data-testid="input-dni"
-                />
-              </div>
-            </div>
-            
-            <div className="grid-3">
-              <div className="form-group">
-                <label className="form-label">Nivel de Capacitación *</label>
-                <select
-                  className="form-select"
-                  value={formData.nivel_capacitacion}
-                  onChange={(e) => setFormData({...formData, nivel_capacitacion: e.target.value})}
-                  required
-                  data-testid="select-nivel"
-                >
-                  <option value="">Seleccionar...</option>
-                  {nivelesCapacitacion.map(nivel => (
-                    <option key={nivel} value={nivel}>{nivel}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Nº Carnet *</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.num_carnet}
-                  onChange={(e) => setFormData({...formData, num_carnet: e.target.value})}
-                  required
-                  data-testid="input-carnet"
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Fecha Certificación *</label>
-                <input
-                  type="date"
-                  className="form-input"
-                  value={formData.fecha_certificacion}
-                  onChange={(e) => setFormData({...formData, fecha_certificacion: e.target.value})}
-                  required
-                  data-testid="input-fecha-cert"
-                />
-              </div>
-            </div>
-            
-            <div className="grid-2">
-              <div className="form-group">
-                <label className="form-label">Fecha Validez (calculada automáticamente)</label>
-                <input
-                  type="date"
-                  className="form-input"
-                  value={calcularFechaValidez(formData.fecha_certificacion)}
-                  disabled
-                  style={{ backgroundColor: 'hsl(var(--muted))' }}
-                />
-                <small style={{ color: 'hsl(var(--muted-foreground))' }}>
-                  10 años después de la fecha de certificación
-                </small>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Imagen Certificado</label>
-                <div 
-                  style={{ 
-                    border: isDragging ? '2px solid hsl(var(--primary))' : '2px dashed hsl(var(--border))', 
-                    borderRadius: '8px', 
-                    padding: '1rem',
-                    backgroundColor: isDragging ? 'hsl(var(--primary) / 0.1)' : 'hsl(var(--muted) / 0.3)',
-                    transition: 'all 0.2s ease',
-                    minHeight: '120px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                  onDragEnter={handleDragEnter}
-                  onDragLeave={handleDragLeave}
-                  onDragOver={handleDragOver}
-                  onDrop={handleDrop}
-                >
-                  {(selectedFile || filePreview) ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                      {filePreview && !filePreview.endsWith('.pdf') ? (
-                        <img 
-                          src={filePreview} 
-                          alt="Preview" 
-                          style={{ maxWidth: '150px', maxHeight: '100px', objectFit: 'contain', borderRadius: '4px' }} 
-                        />
-                      ) : (
-                        <div style={{ padding: '0.5rem', backgroundColor: 'hsl(var(--muted))', borderRadius: '4px' }}>
-                          📄 PDF
-                        </div>
-                      )}
-                      {selectedFile && (
-                        <span style={{ fontSize: '0.75rem', color: 'hsl(var(--primary))' }}>
-                          Nueva imagen: {selectedFile.name}
-                        </span>
-                      )}
-                      {!selectedFile && editingId && (
-                        <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
-                          Imagen actual
-                        </span>
-                      )}
-                      <label className="btn btn-sm btn-secondary" style={{ cursor: 'pointer' }}>
-                        Cambiar
-                        <input
-                          type="file"
-                          accept="image/jpeg,image/png,image/webp,application/pdf"
-                          onChange={handleFileSelect}
-                          style={{ display: 'none' }}
-                        />
-                      </label>
-                    </div>
-                  ) : (
-                    <label style={{ cursor: 'pointer', textAlign: 'center', width: '100%' }}>
-                      <div style={{ marginBottom: '0.5rem' }}>
-                        <Upload size={28} style={{ color: isDragging ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }} />
-                      </div>
-                      <span style={{ 
-                        fontSize: '0.875rem', 
-                        color: isDragging ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))',
-                        fontWeight: isDragging ? '600' : '400',
-                        display: 'block'
-                      }}>
-                        {isDragging ? 'Suelta el archivo aquí' : 'Arrastra o haz clic'}
-                      </span>
-                      <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginTop: '0.25rem' }}>
-                        JPG, PNG, WEBP o PDF (máx. 10MB)
-                      </span>
-                      <input
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp,application/pdf"
-                        onChange={handleFileSelect}
-                        style={{ display: 'none' }}
-                        data-testid="input-certificado"
-                      />
-                    </label>
-                  )}
+        <div
+          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', backdropFilter: 'blur(4px)' }}
+          onClick={resetForm}
+        >
+          <div
+            className="card"
+            style={{ maxWidth: '960px', width: '100%', height: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative', padding: '2rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '2px solid hsl(var(--border))' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'hsl(var(--primary) / 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <UserCheck size={20} style={{ color: 'hsl(var(--primary))' }} />
+                </div>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '700' }}>{editingId ? 'Editar' : 'Nuevo'} Técnico Aplicador</h2>
+                  <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
+                    {formData.nombre || formData.apellidos ? `${formData.nombre} ${formData.apellidos}` : 'Datos personales y profesionales del técnico'}
+                  </span>
                 </div>
               </div>
-            </div>
-            
-            <div className="form-group">
-              <label className="form-label">Observaciones</label>
-              <textarea
-                className="form-input"
-                value={formData.observaciones}
-                onChange={(e) => setFormData({...formData, observaciones: e.target.value})}
-                rows={2}
-                data-testid="input-observaciones"
-              />
-            </div>
-            
-            <div className="flex gap-2">
-              <button type="submit" className="btn btn-primary" disabled={uploading}>
-                {uploading ? 'Subiendo...' : (editingId ? 'Actualizar' : 'Crear')} Técnico
-              </button>
-              <button type="button" className="btn btn-secondary" onClick={resetForm}>
-                Cancelar
+              <button type="button" onClick={resetForm} className="config-modal-close-btn" data-testid="btn-close-modal-tecnico">
+                <X size={18} />
               </button>
             </div>
-          </form>
+
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: '0', marginBottom: '1.5rem', borderBottom: '2px solid hsl(var(--border))' }}>
+              {[
+                { key: 'personales', label: 'Datos Personales', icon: <User size={14} /> },
+                { key: 'profesionales', label: 'Datos Profesionales', icon: <Briefcase size={14} /> },
+                { key: 'certificado', label: 'Certificado', icon: <Award size={14} /> },
+              ].map(tab => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveTab(tab.key)}
+                  data-testid={`tab-${tab.key}`}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1rem', fontSize: '0.8rem', fontWeight: activeTab === tab.key ? '700' : '500', color: activeTab === tab.key ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))', background: 'none', border: 'none', borderBottom: activeTab === tab.key ? '2px solid hsl(var(--primary))' : '2px solid transparent', cursor: 'pointer', whiteSpace: 'nowrap', marginBottom: '-2px' }}
+                >
+                  {tab.icon}{tab.label}
+                </button>
+              ))}
+            </div>
+
+            <form onSubmit={handleSubmit} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+              <div style={{ flex: 1, overflow: 'auto', paddingRight: '1rem' }}>
+
+                {/* TAB: Datos Personales */}
+                {activeTab === 'personales' && (
+                  <div>
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Identificación</h3>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 200px', gap: '0.75rem' }}>
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                          <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Nombre *</label>
+                          <input
+                            type="text"
+                            className="form-input"
+                            value={formData.nombre}
+                            onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                            required
+                            data-testid="input-nombre"
+                          />
+                        </div>
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                          <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Apellidos *</label>
+                          <input
+                            type="text"
+                            className="form-input"
+                            value={formData.apellidos}
+                            onChange={(e) => setFormData({ ...formData, apellidos: e.target.value })}
+                            required
+                            data-testid="input-apellidos"
+                          />
+                        </div>
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                          <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>D.N.I. *</label>
+                          <input
+                            type="text"
+                            className="form-input"
+                            value={formData.dni}
+                            onChange={(e) => setFormData({ ...formData, dni: e.target.value })}
+                            required
+                            placeholder="12345678A"
+                            data-testid="input-dni"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Observaciones</h3>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <textarea
+                          className="form-input"
+                          value={formData.observaciones}
+                          onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+                          rows={4}
+                          placeholder="Notas adicionales sobre el técnico..."
+                          style={{ fontSize: '0.85rem', resize: 'vertical' }}
+                          data-testid="input-observaciones"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB: Datos Profesionales */}
+                {activeTab === 'profesionales' && (
+                  <div>
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Capacitación</h3>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                          <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Nivel de Capacitación *</label>
+                          <select
+                            className="form-input"
+                            value={formData.nivel_capacitacion}
+                            onChange={(e) => setFormData({ ...formData, nivel_capacitacion: e.target.value })}
+                            required
+                            data-testid="select-nivel"
+                          >
+                            <option value="">Seleccionar...</option>
+                            {nivelesCapacitacion.map(nivel => (
+                              <option key={nivel} value={nivel}>{nivel}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                          <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Nº Carnet *</label>
+                          <input
+                            type="text"
+                            className="form-input"
+                            value={formData.num_carnet}
+                            onChange={(e) => setFormData({ ...formData, num_carnet: e.target.value })}
+                            required
+                            data-testid="input-carnet"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ background: 'hsl(var(--muted)/0.3)', borderRadius: '8px', padding: '1rem', border: '1px solid hsl(var(--border))' }}>
+                      <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Vigencia</h3>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                          <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Fecha Certificación *</label>
+                          <input
+                            type="date"
+                            className="form-input"
+                            value={formData.fecha_certificacion}
+                            onChange={(e) => setFormData({ ...formData, fecha_certificacion: e.target.value })}
+                            required
+                            data-testid="input-fecha-cert"
+                          />
+                        </div>
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                          <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Fecha Validez (auto)</label>
+                          <input
+                            type="date"
+                            className="form-input"
+                            value={calcularFechaValidez(formData.fecha_certificacion)}
+                            disabled
+                            style={{ backgroundColor: 'hsl(var(--muted))' }}
+                          />
+                        </div>
+                      </div>
+                      <small style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.75rem', display: 'block', marginTop: '0.5rem' }}>
+                        <Calendar size={11} style={{ display: 'inline', marginRight: '0.25rem' }} />
+                        La fecha de validez se calcula automáticamente (10 años después de la certificación)
+                      </small>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB: Certificado */}
+                {activeTab === 'certificado' && (
+                  <div>
+                    <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Imagen del Carnet / Certificado</h3>
+                    <div
+                      style={{
+                        border: isDragging ? '2px solid hsl(var(--primary))' : '2px dashed hsl(var(--border))',
+                        borderRadius: '10px',
+                        padding: '2rem',
+                        backgroundColor: isDragging ? 'hsl(var(--primary) / 0.1)' : 'hsl(var(--muted) / 0.3)',
+                        transition: 'all 0.2s ease',
+                        minHeight: '280px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                      onDragEnter={handleDragEnter}
+                      onDragLeave={handleDragLeave}
+                      onDragOver={handleDragOver}
+                      onDrop={handleDrop}
+                    >
+                      {(selectedFile || filePreview) ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+                          {filePreview && !filePreview.endsWith('.pdf') ? (
+                            <img
+                              src={filePreview}
+                              alt="Preview"
+                              style={{ maxWidth: '320px', maxHeight: '200px', objectFit: 'contain', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
+                            />
+                          ) : (
+                            <div style={{ padding: '1.5rem', backgroundColor: 'hsl(var(--muted))', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                              <FileText size={32} style={{ color: 'hsl(var(--primary))' }} />
+                              <span style={{ fontWeight: '600' }}>PDF</span>
+                            </div>
+                          )}
+                          {selectedFile && (
+                            <span style={{ fontSize: '0.8rem', color: 'hsl(var(--primary))', fontWeight: '600' }}>
+                              Nuevo archivo: {selectedFile.name}
+                            </span>
+                          )}
+                          {!selectedFile && editingId && (
+                            <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
+                              Imagen actualmente guardada
+                            </span>
+                          )}
+                          <label className="btn btn-sm btn-secondary" style={{ cursor: 'pointer' }}>
+                            <Upload size={14} style={{ marginRight: '0.35rem' }} /> Cambiar archivo
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp,application/pdf"
+                              onChange={handleFileSelect}
+                              style={{ display: 'none' }}
+                            />
+                          </label>
+                        </div>
+                      ) : (
+                        <label style={{ cursor: 'pointer', textAlign: 'center', width: '100%' }}>
+                          <div style={{ marginBottom: '0.75rem' }}>
+                            <Upload size={48} style={{ color: isDragging ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }} />
+                          </div>
+                          <span style={{
+                            fontSize: '1rem',
+                            color: isDragging ? 'hsl(var(--primary))' : 'hsl(var(--foreground))',
+                            fontWeight: '600',
+                            display: 'block',
+                            marginBottom: '0.35rem'
+                          }}>
+                            {isDragging ? 'Suelta el archivo aquí' : 'Arrastra o haz clic para subir'}
+                          </span>
+                          <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'block' }}>
+                            JPG, PNG, WEBP o PDF — máximo 10 MB
+                          </span>
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp,application/pdf"
+                            onChange={handleFileSelect}
+                            style={{ display: 'none' }}
+                            data-testid="input-certificado"
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div style={{ borderTop: '1px solid hsl(var(--border))', paddingTop: '1rem', marginTop: '1.25rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+                <button type="button" className="btn btn-secondary" onClick={resetForm} data-testid="btn-cancelar-tecnico">
+                  Cancelar
+                </button>
+                <button type="submit" className="btn btn-primary" disabled={uploading} data-testid="btn-guardar-tecnico">
+                  {uploading ? 'Subiendo...' : (editingId ? 'Actualizar' : 'Crear')} Técnico
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
