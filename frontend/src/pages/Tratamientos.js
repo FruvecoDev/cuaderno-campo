@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Info, Filter, Settings, X, Calculator, AlertTriangle, RotateCcw, Beaker, Droplets, Ruler, Bug, Database, ChevronDown, WifiOff, Download, TrendingUp, CheckCircle, Clock, Leaf, ArrowLeft, XCircle, PlayCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, Info, Filter, Settings, X, Calculator, AlertTriangle, RotateCcw, Beaker, Droplets, Ruler, Bug, Database, ChevronDown, WifiOff, Download, TrendingUp, CheckCircle, Clock, Leaf, ArrowLeft, XCircle, PlayCircle, MapPin, Cog, Calendar as CalendarIcon, FileText } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import syncService from '../services/syncService';
@@ -82,6 +82,7 @@ const Tratamientos = () => {
   const [tratamientos, setTratamientos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [activeTab, setActiveTab] = useState('general');
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState(null);
   const { token } = useAuth();
@@ -181,21 +182,16 @@ const Tratamientos = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
-  // Manejar rutas de nuevo/editar
+  // Soporte legacy: si alguien aterriza en /tratamientos/editar/:id, cargar para editar en el modal
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (location.pathname.includes('/nuevo')) {
-      setShowForm(true);
+    if (location.pathname.includes('/editar/') && urlId) {
+      loadTratamientoForEdit(urlId);
+    } else if (location.pathname.includes('/nuevo')) {
       setEditingId(null);
       resetForm();
-    } else if (location.pathname.includes('/editar/') && urlId) {
-      // Cargar tratamiento para edición
-      loadTratamientoForEdit(urlId);
-    } else {
-      // En la lista principal, cerrar formulario
-      if (showForm && !editingId) {
-        setShowForm(false);
-      }
+      setActiveTab('general');
+      setShowForm(true);
     }
   }, [location.pathname, urlId]); // eslint-disable-line react-hooks/exhaustive-deps
   
@@ -485,10 +481,9 @@ const Tratamientos = () => {
       if (data.success) {
         setShowForm(false);
         setEditingId(null);
+        setActiveTab('general');
         fetchTratamientos();
         resetForm();
-        // Navegar de vuelta a la lista después de guardar
-        navigate('/tratamientos');
       }
     } catch (error) {
 
@@ -522,19 +517,15 @@ const Tratamientos = () => {
       producto_plazo_seguridad: tratamiento.producto_plazo_seguridad || ''
     });
     setSelectedParcelas(tratamiento.parcelas_ids || []);
+    setActiveTab('general');
     setShowForm(true);
-    
-    // Navegar a la ruta de edición si no se está saltando la navegación
-    if (!skipNavigation) {
-      navigate(`/tratamientos/editar/${tratamiento._id}`);
-    }
   };
   
   // Función para abrir nuevo tratamiento
   const handleNewTratamiento = () => {
     resetForm();
+    setActiveTab('general');
     setShowForm(true);
-    navigate('/tratamientos/nuevo');
   };
   
   const resetForm = () => {
@@ -567,9 +558,8 @@ const Tratamientos = () => {
   const handleCancelEdit = () => {
     setEditingId(null);
     setShowForm(false);
+    setActiveTab('general');
     resetForm();
-    // Volver a la lista
-    navigate('/tratamientos');
   };
   
   const handleDelete = async (tratamientoId) => {
@@ -638,494 +628,6 @@ const Tratamientos = () => {
     });
   }, [parcelas, parcelaSearch]);
   
-  // Si estamos en modo formulario (página de nuevo/editar), mostrar solo el formulario
-  if (isFormMode) {
-    return (
-      <div data-testid="tratamientos-form-page">
-        {/* Header con botón de volver */}
-        <div className="flex justify-between items-center mb-6">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <button 
-              className="btn btn-secondary"
-              onClick={handleCancelEdit}
-              data-testid="btn-volver-lista"
-            >
-              <ArrowLeft size={18} />
-              Volver a la lista
-            </button>
-            <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>
-              {editingId ? 'Editar Tratamiento' : 'Nuevo Tratamiento'}
-            </h1>
-          </div>
-        </div>
-        
-        {error && (
-          <div className="alert alert-error" style={{ marginBottom: '1rem' }}>
-            {error}
-          </div>
-        )}
-        
-        {/* Formulario */}
-        <div className="card" style={{ marginBottom: '1.5rem' }}>
-          <div className="card-header">
-            <h3 className="card-title">{editingId ? 'Editar Tratamiento' : 'Crear Tratamiento'}</h3>
-            <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Info size={14} />
-              Modelo simplificado: Solo selecciona las Parcelas. El Contrato, Cultivo y Campaña se heredan automáticamente de la primera parcela seleccionada.
-            </p>
-          </div>
-          <form onSubmit={handleSubmit} style={{ padding: '1rem' }}>
-            <div className="grid-3">
-              {fieldsConfig.tipo_tratamiento && (
-                <div className="form-group">
-                  <label className="form-label">Tipo de Tratamiento *</label>
-                  <select
-                    className="form-select"
-                    value={formData.tipo_tratamiento}
-                    onChange={(e) => setFormData({...formData, tipo_tratamiento: e.target.value})}
-                    required
-                    data-testid="select-tipo-tratamiento"
-                  >
-                    <option value="FITOSANITARIOS">Fitosanitarios</option>
-                    <option value="FERTILIZACION">Fertilización</option>
-                    <option value="OTROS">Otros</option>
-                  </select>
-                </div>
-              )}
-              
-              {fieldsConfig.subtipo && (
-                <div className="form-group">
-                  <label className="form-label">Subtipo</label>
-                  <select
-                    className="form-select"
-                    value={formData.subtipo}
-                    onChange={(e) => setFormData({...formData, subtipo: e.target.value})}
-                    data-testid="select-subtipo"
-                  >
-                    {formData.tipo_tratamiento === 'FITOSANITARIOS' && (
-                      <>
-                        <option value="Insecticida">Insecticida</option>
-                        <option value="Fungicida">Fungicida</option>
-                        <option value="Herbicida">Herbicida</option>
-                        <option value="Acaricida">Acaricida</option>
-                        <option value="Nematicida">Nematicida</option>
-                        <option value="Otro">Otro</option>
-                      </>
-                    )}
-                    {formData.tipo_tratamiento === 'FERTILIZACION' && (
-                      <>
-                        <option value="Foliar">Foliar</option>
-                        <option value="Fertirriego">Fertirriego</option>
-                        <option value="Granulado">Granulado</option>
-                        <option value="Enmienda">Enmienda</option>
-                      </>
-                    )}
-                    {formData.tipo_tratamiento === 'OTROS' && (
-                      <>
-                        <option value="Bioestimulante">Bioestimulante</option>
-                        <option value="Fitorregulador">Fitorregulador</option>
-                        <option value="Coadyuvante">Coadyuvante</option>
-                      </>
-                    )}
-                  </select>
-                </div>
-              )}
-              
-              {fieldsConfig.metodo_aplicacion && (
-                <div className="form-group">
-                  <label className="form-label">Método de Aplicación *</label>
-                  <select
-                    className="form-select"
-                    value={formData.metodo_aplicacion}
-                    onChange={(e) => setFormData({...formData, metodo_aplicacion: e.target.value})}
-                    required
-                    data-testid="select-metodo-aplicacion"
-                  >
-                    <option value="Pulverización">Pulverización</option>
-                    <option value="Nebulización">Nebulización</option>
-                    <option value="Espolvoreo">Espolvoreo</option>
-                    <option value="Fertirrigación">Fertirrigación</option>
-                    <option value="Inyección al suelo">Inyección al suelo</option>
-                    <option value="Aplicación granular">Aplicación granular</option>
-                    <option value="Tratamiento de semillas">Tratamiento de semillas</option>
-                    <option value="Cebo">Cebo</option>
-                  </select>
-                </div>
-              )}
-            </div>
-            
-            {/* Nº Aplicación */}
-            {fieldsConfig.aplicacion_numero && (
-              <div className="form-group" style={{ maxWidth: '200px', marginBottom: '1rem' }}>
-                <label className="form-label">Nº Aplicación *</label>
-                <input
-                  type="number"
-                  min="1"
-                  className="form-input"
-                  value={formData.aplicacion_numero}
-                  onChange={(e) => setFormData({...formData, aplicacion_numero: parseInt(e.target.value)})}
-                  required
-                  data-testid="input-aplicacion-numero"
-                />
-              </div>
-            )}
-            
-            {/* Selector de Parcelas */}
-            <div className="form-group" style={{ marginBottom: '1rem' }}>
-              <label className="form-label">Parcelas a Tratar * (Obligatorio - selecciona una o varias)</label>
-              
-              {/* Filtros de búsqueda de parcelas */}
-              <div style={{ 
-                backgroundColor: 'hsl(var(--muted))', 
-                padding: '1rem', 
-                borderRadius: '0.5rem', 
-                marginBottom: '0.75rem' 
-              }}>
-                <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>
-                  Buscar parcelas por:
-                </p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
-                  <div>
-                    <label style={{ fontSize: '0.75rem', fontWeight: '500' }}>Proveedor</label>
-                    <select
-                      className="form-select"
-                      value={parcelaSearch.proveedor}
-                      onChange={(e) => setParcelaSearch({...parcelaSearch, proveedor: e.target.value})}
-                      style={{ fontSize: '0.875rem' }}
-                      data-testid="parcela-search-proveedor"
-                    >
-                      <option value="">Todos</option>
-                      {parcelaFilterOptions.proveedores.map(p => (
-                        <option key={p} value={p}>{p}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label style={{ fontSize: '0.75rem', fontWeight: '500' }}>Cultivo</label>
-                    <select
-                      className="form-select"
-                      value={parcelaSearch.cultivo}
-                      onChange={(e) => setParcelaSearch({...parcelaSearch, cultivo: e.target.value})}
-                      style={{ fontSize: '0.875rem' }}
-                      data-testid="parcela-search-cultivo"
-                    >
-                      <option value="">Todos</option>
-                      {parcelaFilterOptions.cultivos.map(c => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label style={{ fontSize: '0.75rem', fontWeight: '500' }}>Campaña</label>
-                    <select
-                      className="form-select"
-                      value={parcelaSearch.campana}
-                      onChange={(e) => setParcelaSearch({...parcelaSearch, campana: e.target.value})}
-                      style={{ fontSize: '0.875rem' }}
-                      data-testid="parcela-search-campana"
-                    >
-                      <option value="">Todas</option>
-                      {parcelaFilterOptions.campanas.map(c => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                {(parcelaSearch.proveedor || parcelaSearch.cultivo || parcelaSearch.campana) && (
-                  <button
-                    type="button"
-                    onClick={() => setParcelaSearch({ proveedor: '', cultivo: '', campana: '' })}
-                    style={{ 
-                      marginTop: '0.5rem', 
-                      fontSize: '0.75rem', 
-                      color: 'hsl(var(--primary))',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      textDecoration: 'underline'
-                    }}
-                  >
-                    Limpiar filtros
-                  </button>
-                )}
-              </div>
-              
-              {/* Lista de parcelas con checkboxes */}
-              <div style={{ 
-                maxHeight: '250px', 
-                overflowY: 'auto', 
-                border: '1px solid hsl(var(--border))', 
-                borderRadius: '0.5rem',
-                padding: '0.5rem'
-              }}>
-                {filteredParcelas.length === 0 ? (
-                  <p style={{ textAlign: 'center', color: 'hsl(var(--muted-foreground))', padding: '1rem' }}>
-                    No hay parcelas disponibles
-                  </p>
-                ) : (
-                  filteredParcelas.map(parcela => (
-                    <label 
-                      key={parcela._id} 
-                      style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        padding: '0.5rem',
-                        borderBottom: '1px solid hsl(var(--border) / 0.5)',
-                        cursor: 'pointer',
-                        backgroundColor: selectedParcelas.includes(parcela._id) ? 'hsl(var(--primary) / 0.1)' : 'transparent'
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedParcelas.includes(parcela._id)}
-                        onChange={() => handleParcelaSelection(parcela._id)}
-                        style={{ marginRight: '0.75rem' }}
-                        data-testid={`checkbox-parcela-${parcela._id}`}
-                      />
-                      <span style={{ fontSize: '0.875rem' }}>
-                        <strong>{parcela.codigo_plantacion}</strong> - {parcela.proveedor} - {parcela.cultivo} ({parcela.variedad || 'Sin variedad'}) - {parcela.superficie_total || 0} ha
-                      </span>
-                    </label>
-                  ))
-                )}
-              </div>
-              <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginTop: '0.5rem' }}>
-                {selectedParcelas.length} parcela(s) seleccionada(s)
-              </p>
-            </div>
-            
-            {/* Mostrar información heredada de la primera parcela seleccionada */}
-            {selectedParcelasInfo && (
-              <div className="card" style={{ backgroundColor: 'hsl(var(--primary) / 0.1)', marginBottom: '1.5rem', padding: '1rem', border: '1px solid hsl(var(--primary) / 0.3)' }}>
-                <h4 style={{ marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '600' }}>Datos heredados (de la primera parcela):</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.5rem', fontSize: '0.875rem' }}>
-                  <div><strong>Proveedor:</strong> {selectedParcelasInfo.proveedor}</div>
-                  <div><strong>Cultivo:</strong> {selectedParcelasInfo.cultivo}</div>
-                  <div><strong>Campaña:</strong> {selectedParcelasInfo.campana}</div>
-                  <div><strong>Finca:</strong> {selectedParcelasInfo.finca}</div>
-                  <div style={{ gridColumn: 'span 2', marginTop: '0.5rem', padding: '0.5rem', backgroundColor: 'hsl(var(--background))', borderRadius: '4px' }}>
-                    <strong>Superficie Total Seleccionada:</strong>{' '}
-                    <span style={{ color: 'hsl(var(--primary))', fontWeight: '600' }}>
-                      {selectedParcelas.reduce((total, parcelaId) => {
-                        const parcela = parcelas.find(p => p._id === parcelaId);
-                        return total + (parseFloat(parcela?.superficie_total) || 0);
-                      }, 0).toFixed(2)} ha
-                    </span>
-                    <span style={{ color: 'hsl(var(--muted-foreground))', marginLeft: '0.5rem' }}>
-                      ({selectedParcelas.length} parcela{selectedParcelas.length > 1 ? 's' : ''})
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Calculadora de Fitosanitarios */}
-            <CalculadoraFitosanitarios 
-              onApplyToForm={(values) => {
-                setFormData(prev => ({
-                  ...prev,
-                  superficie_aplicacion: values.superficie_aplicacion || prev.superficie_aplicacion,
-                  caldo_superficie: values.caldo_superficie || prev.caldo_superficie,
-                  producto_fitosanitario_id: values.producto_fitosanitario_id || prev.producto_fitosanitario_id,
-                  producto_fitosanitario_nombre: values.producto_fitosanitario_nombre || prev.producto_fitosanitario_nombre,
-                  producto_fitosanitario_dosis: values.producto_fitosanitario_dosis || prev.producto_fitosanitario_dosis,
-                  producto_fitosanitario_unidad: values.producto_fitosanitario_unidad || prev.producto_fitosanitario_unidad,
-                  producto_materia_activa: values.producto_materia_activa || prev.producto_materia_activa,
-                  producto_plazo_seguridad: values.producto_plazo_seguridad || prev.producto_plazo_seguridad
-                }));
-              }}
-            />
-            
-            {/* Datos técnicos */}
-            <div className="grid-2">
-              {fieldsConfig.superficie_aplicacion && (
-                <div className="form-group">
-                  <label className="form-label">Superficie a Tratar (ha) *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    className="form-input"
-                    value={formData.superficie_aplicacion}
-                    onChange={(e) => setFormData({...formData, superficie_aplicacion: e.target.value})}
-                    required
-                    data-testid="input-superficie-aplicacion"
-                  />
-                  {selectedParcelas.length > 0 && !editingId && (
-                    <small style={{ color: 'hsl(var(--muted-foreground))' }}>
-                      Autocompletado desde parcelas ({selectedParcelas.length} seleccionadas) - Puedes modificarlo si no tratas toda la superficie
-                    </small>
-                  )}
-                </div>
-              )}
-              
-              {fieldsConfig.caldo_superficie && (
-                <div className="form-group">
-                  <label className="form-label">Caldo por Superficie (L/ha) *</label>
-                  <input
-                    type="number"
-                    step="1"
-                    min="0"
-                    className="form-input"
-                    value={formData.caldo_superficie}
-                    onChange={(e) => setFormData({...formData, caldo_superficie: e.target.value})}
-                    placeholder="Litros por hectárea"
-                    required
-                    data-testid="input-caldo-superficie"
-                  />
-                </div>
-              )}
-            </div>
-            
-            {/* Fechas */}
-            <div className="grid-2" style={{ marginTop: '1rem' }}>
-              {fieldsConfig.fecha_tratamiento && (
-                <div className="form-group">
-                  <label className="form-label">Fecha Tratamiento</label>
-                  <input
-                    type="date"
-                    className="form-input"
-                    value={formData.fecha_tratamiento}
-                    onChange={(e) => setFormData({...formData, fecha_tratamiento: e.target.value})}
-                    data-testid="input-fecha-tratamiento"
-                  />
-                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
-                    Fecha cuando se crea o planifica el tratamiento
-                  </small>
-                </div>
-              )}
-              
-              {fieldsConfig.fecha_aplicacion && (
-                <div className="form-group">
-                  <label className="form-label">Fecha Aplicación</label>
-                  <input
-                    type="date"
-                    className="form-input"
-                    value={formData.fecha_aplicacion}
-                    onChange={(e) => setFormData({...formData, fecha_aplicacion: e.target.value})}
-                    data-testid="input-fecha-aplicacion"
-                  />
-                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
-                    Fecha cuando se realiza la aplicación (aplicador y máquina)
-                  </small>
-                </div>
-              )}
-            </div>
-            
-            {/* Aplicador y Máquina */}
-            <div className="grid-2" style={{ marginTop: '1rem' }}>
-              {fieldsConfig.aplicador_nombre && (
-                <div className="form-group">
-                  <label className="form-label">Técnico Aplicador</label>
-                  <select
-                    className="form-select"
-                    value={formData.tecnico_aplicador_id}
-                    onChange={(e) => {
-                      const selectedId = e.target.value;
-                      const selectedTecnico = tecnicosAplicadores.find(t => t._id === selectedId);
-                      setFormData({
-                        ...formData, 
-                        tecnico_aplicador_id: selectedId,
-                        aplicador_nombre: selectedTecnico ? selectedTecnico.nombre_completo : ''
-                      });
-                    }}
-                    data-testid="select-aplicador"
-                  >
-                    <option value="">-- Seleccionar técnico aplicador --</option>
-                    {tecnicosAplicadores.map(tecnico => (
-                      <option key={tecnico._id} value={tecnico._id}>
-                        {tecnico.nombre_completo} - {tecnico.nivel_capacitacion} ({tecnico.num_carnet})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              
-              {fieldsConfig.maquina_nombre && (
-                <div className="form-group">
-                  <label className="form-label">Maquinaria</label>
-                  <select
-                    className="form-select"
-                    value={formData.maquina_id}
-                    onChange={(e) => {
-                      const selectedMaquina = maquinaria.find(m => m._id === e.target.value);
-                      setFormData({
-                        ...formData,
-                        maquina_id: e.target.value,
-                        maquina_nombre: selectedMaquina ? `${selectedMaquina.tipo} - ${selectedMaquina.marca} ${selectedMaquina.modelo}` : ''
-                      });
-                    }}
-                    data-testid="select-maquina"
-                  >
-                    <option value="">-- Seleccionar maquinaria --</option>
-                    {maquinaria.map(m => (
-                      <option key={m._id} value={m._id}>
-                        {m.tipo} - {m.marca} {m.modelo} ({m.matricula || 'Sin matrícula'})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-            </div>
-            
-            {/* Producto Fitosanitario */}
-            {(formData.producto_fitosanitario_nombre || formData.producto_fitosanitario_dosis) && (
-              <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: 'hsl(var(--muted))', borderRadius: '0.5rem' }}>
-                <h4 style={{ marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '600' }}>Producto Fitosanitario (desde calculadora)</h4>
-                <div className="grid-3">
-                  <div>
-                    <label className="form-label" style={{ fontSize: '0.75rem' }}>Nombre Producto</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={formData.producto_fitosanitario_nombre}
-                      readOnly
-                      style={{ backgroundColor: 'hsl(var(--background))' }}
-                    />
-                  </div>
-                  <div>
-                    <label className="form-label" style={{ fontSize: '0.75rem' }}>Dosis</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={`${formData.producto_fitosanitario_dosis} ${formData.producto_fitosanitario_unidad}`}
-                      readOnly
-                      style={{ backgroundColor: 'hsl(var(--background))' }}
-                    />
-                  </div>
-                  <div>
-                    <label className="form-label" style={{ fontSize: '0.75rem' }}>Materia Activa</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={formData.producto_materia_activa || '-'}
-                      readOnly
-                      style={{ backgroundColor: 'hsl(var(--background))' }}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Botones */}
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', justifyContent: 'flex-end' }}>
-              <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>
-                Cancelar
-              </button>
-              <PermissionButton 
-                type="submit" 
-                permission={editingId ? 'edit' : 'create'} 
-                className="btn btn-primary"
-                data-testid="btn-submit-tratamiento"
-              >
-                {editingId ? 'Actualizar' : 'Crear'} Tratamiento
-              </PermissionButton>
-            </div>
-          </form>
-        </div>
-      </div>
-    );
-  }
   
   // Vista de lista (cuando no estamos en modo formulario)
   return (
@@ -1297,9 +799,59 @@ const Tratamientos = () => {
       </div>
       
       {showForm && (
-        <div className="card mb-6" data-testid="tratamiento-form">
-          <h2 className="card-title">{editingId ? 'Editar Tratamiento' : 'Crear Tratamiento'}</h2>
-          <form onSubmit={handleSubmit}>
+        <div
+          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', backdropFilter: 'blur(4px)' }}
+          onClick={() => handleCancelEdit()}
+        >
+          <div
+            className="card"
+            data-testid="tratamiento-form"
+            style={{ maxWidth: '960px', width: '100%', height: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '2rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '2px solid hsl(var(--border))' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'hsl(142, 76%, 36% / 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Beaker size={20} style={{ color: 'hsl(142, 76%, 36%)' }} />
+                </div>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '700' }}>{editingId ? 'Editar' : 'Crear'} Tratamiento</h2>
+                  <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
+                    {formData.tipo_tratamiento ? `${formData.tipo_tratamiento}${formData.subtipo ? ' - ' + formData.subtipo : ''}` : 'Registro fitosanitario / nutrición'}
+                  </span>
+                </div>
+              </div>
+              <button type="button" onClick={() => handleCancelEdit()} className="config-modal-close-btn" data-testid="btn-close-modal-tratamiento">
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: 0, marginBottom: '1.5rem', borderBottom: '2px solid hsl(var(--border))', overflowX: 'auto' }}>
+              {[
+                { key: 'general', label: 'General', icon: <FileText size={14} /> },
+                { key: 'parcelas', label: 'Parcelas', icon: <MapPin size={14} /> },
+                { key: 'producto', label: 'Producto y Dosis', icon: <Droplets size={14} /> },
+                { key: 'aplicacion', label: 'Aplicación', icon: <Cog size={14} /> },
+              ].map(tab => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveTab(tab.key)}
+                  data-testid={`tab-${tab.key}`}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1rem', fontSize: '0.8rem', fontWeight: activeTab === tab.key ? '700' : '500', color: activeTab === tab.key ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))', background: 'none', border: 'none', borderBottom: activeTab === tab.key ? '2px solid hsl(var(--primary))' : '2px solid transparent', cursor: 'pointer', whiteSpace: 'nowrap', marginBottom: '-2px' }}
+                >
+                  {tab.icon}{tab.label}
+                </button>
+              ))}
+            </div>
+
+          <form onSubmit={handleSubmit} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+            <div style={{ flex: 1, overflow: 'auto', paddingRight: '1rem' }}>
+
+            {/* TAB: General */}
+            {activeTab === 'general' && (<>
             {/* Información del modelo simplificado */}
             <div className="card" style={{ backgroundColor: 'hsl(var(--muted))', marginBottom: '1.5rem', padding: '1rem' }}>
               <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
@@ -1381,7 +933,10 @@ const Tratamientos = () => {
                 />
               </div>
             )}
-            
+            </>)}
+
+            {/* TAB: Parcelas */}
+            {activeTab === 'parcelas' && (<>
             {/* Selección de parcelas (múltiple) CON BÚSQUEDA - SIEMPRE VISIBLE */}
             <div className="form-group">
               <label className="form-label">Parcelas a Tratar * (Obligatorio - selecciona una o varias)</label>
@@ -1551,7 +1106,10 @@ const Tratamientos = () => {
                 </div>
               </div>
             )}
-            
+            </>)}
+
+            {/* TAB: Producto y Dosis */}
+            {activeTab === 'producto' && (<>
             {/* Calculadora de Fitosanitarios */}
             <CalculadoraFitosanitarios 
               onApplyToForm={(values) => {
@@ -1687,7 +1245,10 @@ const Tratamientos = () => {
                 </div>
               )}
             </div>
-            
+            </>)}
+
+            {/* TAB: Aplicación */}
+            {activeTab === 'aplicacion' && (<>
             {/* Aplicador y Máquina */}
             <div className="grid-2">
               {fieldsConfig.aplicador_nombre && (
@@ -1752,20 +1313,19 @@ const Tratamientos = () => {
                 </div>
               )}
             </div>
-            
-            <div className="flex gap-2">
+            </>)}
+
+            </div>
+
+            {/* Footer fijo */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', paddingTop: '1rem', borderTop: '1px solid hsl(var(--border))', marginTop: '1rem' }}>
+              <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>Cancelar</button>
               <button type="submit" className="btn btn-primary" data-testid="btn-guardar-tratamiento">
                 {editingId ? 'Actualizar Tratamiento' : 'Guardar Tratamiento'}
               </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={handleCancelEdit}
-              >
-                Cancelar
-              </button>
             </div>
           </form>
+          </div>
         </div>
       )}
       

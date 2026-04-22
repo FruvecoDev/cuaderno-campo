@@ -1,0 +1,39 @@
+{
+  "summary": "Frontend testing of modal tabbed refactor for Tareas + Tratamientos (Fruveco). All critical flows PASS: modal open/close, 4 tabs render in both modules, CRUD on Tareas works (create + edit), Tratamientos modal opens on /tratamientos WITHOUT navigating to /tratamientos/nuevo, X button and overlay click cancel without navigation, listado regression OK, Cosechas/Recetas regression OK.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Crear Tratamiento (FITOSANITARIOS) - guardado mínimo",
+        "issue": "Al guardar con sólo tipo+método+superficie+caldo+fecha el modal NO se cierra y NO muestra mensaje de error visible en pantalla. Probablemente falta validar parcelas y/o técnico aplicador (FITOSANITARIOS los requiere) pero el feedback al usuario es silencioso. Recomendación: mostrar toast/error inline cuando la validación falla en handleSubmit de Tratamientos.",
+        "affected_selectors": ["btn-guardar-tratamiento"]
+      }
+    ],
+    "design_issues": [
+      {
+        "screen": "Tareas / Tratamientos / Cosechas / Recetas",
+        "issues": [
+          "Múltiples warnings de hidratación de React: 'In HTML, <span> cannot be a child of <select>/<option>/<tr>/<tbody>' provenientes de los wrappers `data-ve-dynamic` de la instrumentación. No bloquean funcionalidad pero contaminan la consola en TODAS las páginas y pueden indicar issues con SSR/hidratación si se prerendea. Probablemente provienen de la herramienta de edición visual y no del código fuente directo."
+        ]
+      }
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "[OPCIONAL] Agregar feedback visible (toast o mensaje inline) cuando handleSubmit de Tratamientos falla por validación (ej. faltan parcelas o técnico para fitosanitarios). Hoy el modal queda abierto sin pista para el usuario."
+  ],
+  "critical_code_review_comments": [
+    "Tratamientos.js (~1400 líneas) y Tareas.js (>1000 líneas) están por encima del umbral recomendado de 700 líneas; conviene extraer cada pestaña del modal a sub-componentes (TabGeneral, TabParcelas, TabProducto, TabAplicacion) para mejorar mantenibilidad y reducir re-renders.",
+    "El select-maquina en pestaña Aplicación de Tratamientos sólo se renderiza condicionalmente (no visible aún tras elegir tipo=FITOSANITARIOS y método=Pulverización en la prueba). Verificar si la condición de visibilidad es correcta o si falta dependencia (técnico/proveedor).",
+    "Los wrappers <span data-ve-dynamic> generan warnings de hidratación al envolver <option>, <th>, <tr>, <td>. Si provienen del código fuente directo, romper la regla DOM puede causar reorder en hidratación; revisar si se puede usar React.Fragment en su lugar."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (solicitado solo frontend)", "frontend": "100% en flujos críticos"},
+  "test_credentials": "admin@fruveco.com / admin123",
+  "seed_data_creation": "Creada Tarea TEST_Tarea_Modal_Auto y luego renombrada a TEST_Tarea_Modal_Auto_EDITED via flujo de edición. No se logró persistir tratamiento (validación silenciosa).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Refactor de Tareas y Tratamientos a modal tabbed validado E2E. Cambio crítico: btn-nuevo-tratamiento ahora abre modal en /tratamientos en lugar de navegar a /tratamientos/nuevo - confirmado. Cierre via X y overlay no navegan. CRUD de Tareas funciona end-to-end (crear y editar verificados). El único hallazgo menor es que crear tratamiento mínimo no muestra error visible al fallar validación; el modal queda abierto sin feedback. Cosechas y Recetas (que ya tenían modal tabbed) siguen funcionando como regresión. Múltiples warnings de hidratación React en consola por wrappers de instrumentación visual, no son bugs reales del código de la app.",
+  "rca of the issue": "Tratamiento no se guarda con datos mínimos: handleSubmit probablemente devuelve early return cuando no hay parcelas seleccionadas o técnico aplicador (requeridos para FITOSANITARIOS). El usuario no recibe feedback visual. Mitigación: añadir un setError/toast en el catch o en las validaciones tempranas dentro de handleSubmit en Tratamientos.js."
+}

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { 
   Plus, Edit2, Trash2, X, Search, Calendar, Filter, Download, FileText,
   ChevronLeft, ChevronRight, Clock, User, Flag, CheckSquare, 
-  Square, ChevronDown, ChevronUp, ClipboardList
+  Square, ChevronDown, ChevronUp, ClipboardList, MapPin, Euro
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../utils/permissions';
@@ -33,6 +33,7 @@ const Tareas = () => {
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [activeTab, setActiveTab] = useState('general');
   const [editingId, setEditingId] = useState(null);
   const [stats, setStats] = useState(null);
   const [tipos, setTipos] = useState([]);
@@ -602,11 +603,62 @@ const Tareas = () => {
         </div>
       )}
 
-      {/* Formulario */}
+      {/* Formulario - Modal tabbed profesional */}
       {showForm && (
-        <div className="card mb-4">
-          <h2 className="card-title">{editingId ? 'Editar Tarea' : 'Nueva Tarea'}</h2>
-          <form onSubmit={handleSubmit}>
+        <div
+          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', backdropFilter: 'blur(4px)' }}
+          onClick={() => { setShowForm(false); setEditingId(null); resetForm(); setActiveTab('general'); }}
+        >
+          <div
+            className="card"
+            style={{ maxWidth: '960px', width: '100%', height: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '2rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '2px solid hsl(var(--border))' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'hsl(var(--primary) / 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ClipboardList size={20} style={{ color: 'hsl(var(--primary))' }} />
+                </div>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '700' }}>{editingId ? 'Editar' : 'Nueva'} Tarea</h2>
+                  <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
+                    {formData.nombre ? `${formData.nombre} — ${formData.prioridad}` : 'Gestión de tareas y subtareas'}
+                  </span>
+                </div>
+              </div>
+              <button type="button" onClick={() => { setShowForm(false); setEditingId(null); resetForm(); setActiveTab('general'); }} className="config-modal-close-btn" data-testid="btn-close-modal-tarea">
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: 0, marginBottom: '1.5rem', borderBottom: '2px solid hsl(var(--border))' }}>
+              {[
+                { key: 'general', label: 'General', icon: <ClipboardList size={14} /> },
+                { key: 'parcelas', label: 'Parcelas y Descripción', icon: <MapPin size={14} /> },
+                { key: 'subtareas', label: 'Subtareas', icon: <CheckSquare size={14} /> },
+                { key: 'costes', label: 'Costes', icon: <Euro size={14} /> },
+              ].map(tab => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveTab(tab.key)}
+                  data-testid={`tab-${tab.key}`}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1rem', fontSize: '0.8rem', fontWeight: activeTab === tab.key ? '700' : '500', color: activeTab === tab.key ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))', background: 'none', border: 'none', borderBottom: activeTab === tab.key ? '2px solid hsl(var(--primary))' : '2px solid transparent', cursor: 'pointer', whiteSpace: 'nowrap', marginBottom: '-2px' }}
+                >
+                  {tab.icon}{tab.label}
+                </button>
+              ))}
+            </div>
+
+          <form onSubmit={handleSubmit} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+            <div style={{ flex: 1, overflow: 'auto', paddingRight: '1rem' }}>
+
+            {/* TAB: General */}
+            {activeTab === 'general' && (
+            <div>
+            <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Datos básicos</h3>
             <div className="grid-4">
               <div className="form-group" style={{ gridColumn: 'span 2' }}>
                 <label className="form-label">Nombre *</label>
@@ -634,6 +686,7 @@ const Tareas = () => {
               </div>
             </div>
 
+            <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', margin: '1.25rem 0 0.75rem' }}>Estado y planificación</h3>
             <div className="grid-4">
               <div className="form-group">
                 <label className="form-label">Estado</label>
@@ -660,7 +713,13 @@ const Tareas = () => {
                 <input type="date" className="form-input" value={formData.fecha_vencimiento} onChange={(e) => setFormData({...formData, fecha_vencimiento: e.target.value})} data-testid="input-fecha-vencimiento" />
               </div>
             </div>
+            </div>
+            )}
 
+            {/* TAB: Parcelas y Descripción */}
+            {activeTab === 'parcelas' && (
+            <div>
+            <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Parcelas y descripción</h3>
             <div className="grid-2">
               <div className="form-group">
                 <label className="form-label">Parcelas asignadas</label>
@@ -755,16 +814,17 @@ const Tareas = () => {
               </div>
               <div className="form-group">
                 <label className="form-label">Descripción</label>
-                <textarea className="form-textarea" rows={3} value={formData.descripcion} onChange={(e) => setFormData({...formData, descripcion: e.target.value})} data-testid="textarea-descripcion" />
+                <textarea className="form-textarea" rows={8} value={formData.descripcion} onChange={(e) => setFormData({...formData, descripcion: e.target.value})} data-testid="textarea-descripcion" />
               </div>
             </div>
+            </div>
+            )}
 
-            {/* Subtareas */}
+            {/* TAB: Subtareas */}
+            {activeTab === 'subtareas' && (
+            <div>
+            <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Subtareas / Checklist</h3>
             <div style={{ padding: '1rem', backgroundColor: '#f9fafb', borderRadius: '8px', marginBottom: '1rem' }}>
-              <h4 style={{ fontWeight: '600', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <CheckSquare size={16} />
-                Subtareas / Checklist
-              </h4>
               <div className="flex gap-2 mb-2">
                 <input
                   className="form-input"
@@ -778,7 +838,7 @@ const Tareas = () => {
                   <Plus size={16} />
                 </button>
               </div>
-              {formData.subtareas.length > 0 && (
+              {formData.subtareas.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   {formData.subtareas.map(st => (
                     <div key={st.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem', backgroundColor: 'white', borderRadius: '4px' }}>
@@ -790,10 +850,18 @@ const Tareas = () => {
                     </div>
                   ))}
                 </div>
+              ) : (
+                <p style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', margin: 0 }}>Sin subtareas. Añade una para comenzar.</p>
               )}
             </div>
+            </div>
+            )}
 
-            <div className="grid-2 mb-4">
+            {/* TAB: Costes */}
+            {activeTab === 'costes' && (
+            <div>
+            <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Costes asociados</h3>
+            <div className="grid-2">
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Coste Estimado (€)</label>
                 <input type="number" step="0.01" className="form-input" value={formData.coste_estimado} onChange={(e) => setFormData({...formData, coste_estimado: parseFloat(e.target.value) || 0})} />
@@ -803,12 +871,18 @@ const Tareas = () => {
                 <input type="number" step="0.01" className="form-input" value={formData.coste_real} onChange={(e) => setFormData({...formData, coste_real: parseFloat(e.target.value) || 0})} />
               </div>
             </div>
+            </div>
+            )}
 
-            <div className="flex gap-2">
-              <button type="submit" className="btn btn-primary" data-testid="btn-guardar-tarea">{editingId ? 'Guardar' : 'Crear'}</button>
-              <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }}>Cancelar</button>
+            </div>
+
+            {/* Footer fijo */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', paddingTop: '1rem', borderTop: '1px solid hsl(var(--border))', marginTop: '1rem' }}>
+              <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null); resetForm(); setActiveTab('general'); }}>Cancelar</button>
+              <button type="submit" className="btn btn-primary" data-testid="btn-guardar-tarea">{editingId ? 'Guardar' : 'Crear Tarea'}</button>
             </div>
           </form>
+          </div>
         </div>
       )}
 
