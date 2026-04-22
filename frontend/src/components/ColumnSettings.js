@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Settings2, Eye, EyeOff, ArrowUp, ArrowDown, RotateCcw } from 'lucide-react';
+import { Settings2, Eye, EyeOff, ArrowUp, ArrowDown, RotateCcw, GripVertical } from 'lucide-react';
 
 /**
  * ColumnSettings
@@ -59,6 +59,36 @@ export const ColumnSettings = ({ columns, onChange, onReset, testId = 'column-se
     next.splice(newIdx, 0, item);
     onChange(next);
   };
+
+  // Drag & drop state
+  const [dragIdx, setDragIdx] = useState(null);
+  const [dragOverIdx, setDragOverIdx] = useState(null);
+
+  const onDragStart = (e, idx) => {
+    setDragIdx(idx);
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', String(idx)); } catch { /* ignore */ }
+  };
+  const onDragOver = (e, idx) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverIdx !== idx) setDragOverIdx(idx);
+  };
+  const onDragLeave = () => setDragOverIdx(null);
+  const onDrop = (e, targetIdx) => {
+    e.preventDefault();
+    if (dragIdx === null || dragIdx === targetIdx) {
+      setDragIdx(null); setDragOverIdx(null);
+      return;
+    }
+    const next = [...columns];
+    const [item] = next.splice(dragIdx, 1);
+    next.splice(targetIdx, 0, item);
+    onChange(next);
+    setDragIdx(null);
+    setDragOverIdx(null);
+  };
+  const onDragEnd = () => { setDragIdx(null); setDragOverIdx(null); };
 
   const visibleCount = columns.filter((c) => c.visible !== false).length;
 
@@ -127,19 +157,49 @@ export const ColumnSettings = ({ columns, onChange, onReset, testId = 'column-se
           </div>
           {columns.map((c, idx) => {
             const isVisible = c.visible !== false;
+            const isDragging = dragIdx === idx;
+            const isDragTarget = dragOverIdx === idx && dragIdx !== null && dragIdx !== idx;
             return (
               <div
                 key={c.key}
+                draggable
+                onDragStart={(e) => onDragStart(e, idx)}
+                onDragOver={(e) => onDragOver(e, idx)}
+                onDragLeave={onDragLeave}
+                onDrop={(e) => onDrop(e, idx)}
+                onDragEnd={onDragEnd}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '0.25rem',
                   padding: '0.25rem 0.35rem',
                   borderRadius: '6px',
-                  background: isVisible ? 'transparent' : 'hsl(var(--muted)/0.4)',
-                  opacity: isVisible ? 1 : 0.7,
+                  background: isDragTarget
+                    ? 'hsl(var(--primary)/0.15)'
+                    : (isVisible ? 'transparent' : 'hsl(var(--muted)/0.4)'),
+                  opacity: isDragging ? 0.4 : (isVisible ? 1 : 0.7),
+                  borderTop: isDragTarget && dragIdx > idx ? '2px solid hsl(var(--primary))' : '2px solid transparent',
+                  borderBottom: isDragTarget && dragIdx < idx ? '2px solid hsl(var(--primary))' : '2px solid transparent',
+                  transition: 'background 0.15s',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'hsl(var(--muted)/0.6)')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = isVisible ? 'transparent' : 'hsl(var(--muted)/0.4)')}
+                onMouseEnter={(e) => {
+                  if (!isDragTarget) e.currentTarget.style.background = 'hsl(var(--muted)/0.6)';
+                }}
+                onMouseLeave={(e) => {
+                  if (!isDragTarget) {
+                    e.currentTarget.style.background = isVisible ? 'transparent' : 'hsl(var(--muted)/0.4)';
+                  }
+                }}
               >
+                <span
+                  title="Arrastrar para reordenar"
+                  style={{
+                    cursor: 'grab',
+                    color: 'hsl(var(--muted-foreground))',
+                    display: 'inline-flex',
+                    padding: '0.1rem',
+                  }}
+                >
+                  <GripVertical size={13} />
+                </span>
                 <input
                   type="number"
                   min={1}
