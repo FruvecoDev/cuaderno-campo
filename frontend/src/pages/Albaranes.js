@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, Filter, Settings, X, FileSpreadsheet, FileText, Download, TrendingUp, TrendingDown, ArrowUpDown, Printer, Calendar } from 'lucide-react';
+import { Plus, Edit2, Trash2, Filter, Settings, X, FileSpreadsheet, FileText, Download, TrendingUp, TrendingDown, ArrowUpDown, ArrowUp, ArrowDown, Printer, Calendar, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
+import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
 import '../App.css';
 
 const DEFAULT_COLUMNS = [
@@ -29,8 +30,9 @@ const Albaranes = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
-  const { token, canDoOperacion } = useAuth();
+  const { token, canDoOperacion, user } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
+  const canBulkDelete = !!user?.can_bulk_delete;
   const { handlePermissionError } = usePermissionError();
   const { t } = useTranslation();
   const { columns, setColumns, showConfig, setShowConfig, save, reset, visibleColumns } = useColumnConfig('albaranes_col_config', DEFAULT_COLUMNS);
@@ -854,6 +856,88 @@ const Albaranes = () => {
     }
     return true;
   });
+
+  // Ordenacion por columna
+  const [sort, setSort] = useState({ key: null, dir: 'asc' });
+  const SORT_MAP = {
+    numero: (a) => (a.numero_albaran || '').toLowerCase(),
+    tipo: (a) => a.tipo || '',
+    fecha: (a) => a.fecha || '',
+    contrato: (a) => {
+      const c = contratos.find(c => c._id === a.contrato_id);
+      return (c?.numero_contrato || a.contrato_id || '').toLowerCase();
+    },
+    proveedor: (a) => ((a.tipo === 'Albarán de venta' ? a.cliente : a.proveedor) || '').toLowerCase(),
+    cultivo: (a) => (a.cultivo || '').toLowerCase(),
+    parcela: (a) => (a.parcela_codigo || '').toLowerCase(),
+    items: (a) => (a.items?.length || 0),
+    total: (a) => Number(a.total_albaran || 0),
+    observaciones: (a) => (a.observaciones || '').toLowerCase(),
+  };
+  const toggleSort = (key) => {
+    setSort((prev) => {
+      if (prev.key === key) {
+        if (prev.dir === 'asc') return { key, dir: 'desc' };
+        return { key: null, dir: 'asc' };
+      }
+      return { key, dir: 'asc' };
+    });
+  };
+  const sortedAlbaranes = useMemo(() => {
+    if (!sort.key || !SORT_MAP[sort.key]) return filteredAlbaranes;
+    const ext = SORT_MAP[sort.key];
+    const mult = sort.dir === 'asc' ? 1 : -1;
+    return [...filteredAlbaranes].sort((a, b) => {
+      const va = ext(a); const vb = ext(b);
+      if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * mult;
+      if (va < vb) return -1 * mult; if (va > vb) return 1 * mult; return 0;
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filteredAlbaranes, sort]);
+
+  // Paginacion
+  const [pageSize, setPageSize] = useState(25);
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(sortedAlbaranes.length / pageSize));
+  useEffect(() => { if (page > totalPages) setPage(1); }, [totalPages, page]);
+  const pageStart = (page - 1) * pageSize;
+  const pageEnd = Math.min(pageStart + pageSize, sortedAlbaranes.length);
+  const paginatedAlbaranes = useMemo(() => sortedAlbaranes.slice(pageStart, pageEnd), [sortedAlbaranes, pageStart, pageEnd]);
+
+  // Bulk select (sobre filas visibles en la pagina)
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(paginatedAlbaranes);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const handleBulkDelete = async () => {
+    setBulkDeleting(true);
+    try {
+      await bulkDeleteApi('albaranes', selectedIds);
+      const deleted = new Set(selectedIds);
+      setAlbaranes(prev => prev.filter(a => !deleted.has(a._id)));
+      clearSelection();
+    } catch (err) {
+      window.alert('Error al eliminar masivamente');
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
+
+  // Cabecera ordenable (helper inline)
+  const SortHeader = ({ sortKey, align, children, isSortable = true }) => {
+    const active = sort.key === sortKey;
+    const Arrow = !active ? ArrowUpDown : (sort.dir === 'asc' ? ArrowUp : ArrowDown);
+    const alignStyle = align === 'right' ? { textAlign: 'right' } : {};
+    return (
+      <th
+        style={{ ...alignStyle, cursor: isSortable ? 'pointer' : 'default', userSelect: 'none', whiteSpace: 'nowrap' }}
+        onClick={isSortable ? () => toggleSort(sortKey) : undefined}
+      >
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+          {children}
+          {isSortable && <Arrow size={12} style={{ color: active ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))', opacity: active ? 1 : 0.5 }} />}
+        </span>
+      </th>
+    );
+  };
   
   const hasActiveFilters = filters.tipo || filters.contrato_id || filters.proveedor || filters.cultivo || filters.fecha_desde || filters.fecha_hasta;
 
@@ -1101,7 +1185,7 @@ const Albaranes = () => {
 
       {/* Tabla */}
       <div className="card">
-        <h2 className="card-title">Lista de Albaranes ({filteredAlbaranes.length})</h2>
+        <h2 className="card-title">Lista de Albaranes ({sortedAlbaranes.length})</h2>
         {searchNumero && (
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.35rem 0.75rem', background: 'hsl(var(--primary)/0.1)', border: '1px solid hsl(var(--primary)/0.25)', borderRadius: '999px', fontSize: '0.8rem', color: 'hsl(var(--primary))', marginBottom: '0.75rem', fontWeight: '500' }}>
             Filtro por número: <b>{searchNumero}</b>
@@ -1115,25 +1199,45 @@ const Albaranes = () => {
             </button>
           </div>
         )}
+        {canBulkDelete && (
+          <BulkActionBar
+            selectedCount={selectedIds.size}
+            onClear={clearSelection}
+            onDelete={handleBulkDelete}
+            deleting={bulkDeleting}
+          />
+        )}
         {loading ? (
           <p>Cargando albaranes...</p>
-        ) : filteredAlbaranes.length === 0 ? (
+        ) : sortedAlbaranes.length === 0 ? (
           <p className="text-muted">No hay albaranes registrados.</p>
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table className="table" data-testid="albaranes-table">
               <thead>
                 <tr>
-                  {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
+                  {canBulkDelete && (
+                    <BulkCheckboxHeader allSelected={allSelected} someSelected={someSelected} onToggle={toggleAll} />
+                  )}
+                  {visibleColumns.map(col => (
+                    <SortHeader
+                      key={col.id}
+                      sortKey={col.id}
+                      align={col.id === 'total' ? 'right' : 'left'}
+                    >{col.label}</SortHeader>
+                  ))}
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredAlbaranes.map((albaran, index) => (
+                {paginatedAlbaranes.map((albaran, index) => (
                   <tr key={albaran._id}>
+                    {canBulkDelete && (
+                      <BulkCheckboxCell id={albaran._id} selected={selectedIds.has(albaran._id)} onToggle={toggleOne} />
+                    )}
                     {visibleColumns.map(col => {
                       switch (col.id) {
-                        case 'numero': return <td key="numero"><code style={{ fontSize: '0.8rem' }}>ALB-{String(index + 1).padStart(4, '0')}</code></td>;
+                        case 'numero': return <td key="numero"><code style={{ fontSize: '0.8rem' }}>{albaran.numero_albaran || `ALB-${String(pageStart + index + 1).padStart(4, '0')}`}</code></td>;
                         case 'tipo': return <td key="tipo"><span style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', backgroundColor: albaran.tipo === 'Albarán de compra' ? '#dcfce7' : '#fee2e2', color: albaran.tipo === 'Albarán de compra' ? '#166534' : '#991b1b' }}>{albaran.tipo}</span></td>;
                         case 'fecha': return <td key="fecha">{albaran.fecha ? new Date(albaran.fecha).toLocaleDateString('es-ES') : '-'}</td>;
                         case 'contrato': return <td key="contrato">{albaran.contrato_id ? <code style={{ fontSize: '0.75rem' }}>{contratos.find(c => c._id === albaran.contrato_id)?.numero_contrato || albaran.contrato_id.slice(-6)}</code> : '-'}</td>;
@@ -1183,6 +1287,42 @@ const Albaranes = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+        {/* Pagination footer */}
+        {sortedAlbaranes.length > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.25rem', marginTop: '0.75rem', borderTop: '1px solid hsl(var(--border))', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', flexWrap: 'wrap' }}>
+              <span>Mostrando <b>{pageStart + 1}-{pageEnd}</b> de <b>{sortedAlbaranes.length}</b></span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                Filas:
+                <select
+                  value={pageSize}
+                  onChange={(e) => { setPageSize(parseInt(e.target.value, 10)); setPage(1); }}
+                  data-testid="select-page-size-alb"
+                  style={{ padding: '0.2rem 0.35rem', borderRadius: '6px', border: '1px solid hsl(var(--border))', background: 'white', fontSize: '0.8rem', cursor: 'pointer' }}
+                >
+                  {[10, 25, 50, 100, 200].map(n => <option key={n} value={n}>{n}</option>)}
+                </select>
+              </span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+              <button type="button" className="btn btn-sm btn-secondary" onClick={() => setPage(1)} disabled={page === 1} title="Primera" data-testid="pag-first-alb">
+                <ChevronsLeft size={14} />
+              </button>
+              <button type="button" className="btn btn-sm btn-secondary" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} title="Anterior" data-testid="pag-prev-alb">
+                <ChevronLeft size={14} />
+              </button>
+              <span style={{ fontSize: '0.8rem', padding: '0 0.5rem', whiteSpace: 'nowrap' }}>
+                Página <b>{page}</b> / {totalPages}
+              </span>
+              <button type="button" className="btn btn-sm btn-secondary" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} title="Siguiente" data-testid="pag-next-alb">
+                <ChevronRight size={14} />
+              </button>
+              <button type="button" className="btn btn-sm btn-secondary" onClick={() => setPage(totalPages)} disabled={page === totalPages} title="Última" data-testid="pag-last-alb">
+                <ChevronsRight size={14} />
+              </button>
+            </div>
           </div>
         )}
       </div>
