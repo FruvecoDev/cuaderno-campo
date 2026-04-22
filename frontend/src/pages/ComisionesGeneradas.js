@@ -130,10 +130,22 @@ const ComisionesGeneradas = () => {
     }
   };
 
-  // Agrupar comisiones por agente
+  // Filtrar comisiones por busqueda (agente / proveedor / cliente / cultivo)
+  const filteredComisiones = useMemo(() => {
+    if (!filters.search) return comisiones;
+    const searchLower = filters.search.toLowerCase();
+    return comisiones.filter(c =>
+      c.agente_nombre?.toLowerCase().includes(searchLower) ||
+      c.proveedor_nombre?.toLowerCase().includes(searchLower) ||
+      c.cliente_nombre?.toLowerCase().includes(searchLower) ||
+      c.cultivo?.toLowerCase().includes(searchLower)
+    );
+  }, [comisiones, filters.search]);
+
+  // Agrupar comisiones por agente (usa comisiones YA filtradas por buscador principal)
   const comisionesPorAgente = useMemo(() => {
     const grouped = {};
-    comisiones.forEach(c => {
+    filteredComisiones.forEach(c => {
       const key = c.agente_id;
       if (!grouped[key]) {
         grouped[key] = {
@@ -163,7 +175,7 @@ const ComisionesGeneradas = () => {
       grouped[key].totales.comision_total += c.comision_importe || 0;
     });
     return Object.values(grouped);
-  }, [comisiones]);
+  }, [filteredComisiones]);
 
   // Filtrado rapido por nombre + orden por comision desc
   const comisionesPorAgenteVisible = useMemo(() => {
@@ -183,18 +195,6 @@ const ComisionesGeneradas = () => {
   };
   const expandAllAgentes = () => setExpandedIds(new Set(comisionesPorAgenteVisible.map(g => g.agente_id)));
   const collapseAllAgentes = () => setExpandedIds(new Set());
-
-  // Filtrar comisiones por búsqueda
-  const filteredComisiones = useMemo(() => {
-    if (!filters.search) return comisiones;
-    const searchLower = filters.search.toLowerCase();
-    return comisiones.filter(c => 
-      c.agente_nombre?.toLowerCase().includes(searchLower) ||
-      c.proveedor_nombre?.toLowerCase().includes(searchLower) ||
-      c.cliente_nombre?.toLowerCase().includes(searchLower) ||
-      c.cultivo?.toLowerCase().includes(searchLower)
-    );
-  }, [comisiones, filters.search]);
 
   const clearFilters = () => {
     setFilters({
