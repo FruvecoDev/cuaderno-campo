@@ -8,6 +8,7 @@ import ProvinciaSelect from '../components/ProvinciaSelect';
 import PaisSelect from '../components/PaisSelect';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
+import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
 import '../App.css';
 
 const DEFAULT_COLUMNS = [
@@ -48,6 +49,7 @@ const Agentes = () => {
   const canCreate = user?.can_create || user?.role === 'Admin';
   const canEdit = user?.can_edit || user?.role === 'Admin';
   const canDelete = user?.can_delete || user?.role === 'Admin';
+  const canBulkDelete = user?.can_bulk_delete || user?.role === 'Admin';
 
   const initialFormData = {
     tipo: 'Compra', nombre: '', razon_social: '', denominacion: '', nif: '',
@@ -169,6 +171,14 @@ const Agentes = () => {
     const matchesEstado = filterActivo === 'todos' || (filterActivo === 'activos' && a.activo !== false) || (filterActivo === 'inactivos' && a.activo === false);
     return matchesSearch && matchesEstado;
   });
+
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredAgentes);
+  const [bulkDeleting, setBulkDeleting] = React.useState(false);
+  const handleBulkDelete = async () => {
+    if (!window.confirm(`Eliminar ${selectedIds.size} agente${selectedIds.size > 1 ? 's' : ''} seleccionado${selectedIds.size > 1 ? 's' : ''}?`)) return;
+    setBulkDeleting(true);
+    try { await bulkDeleteApi('agentes', selectedIds); clearSelection(); fetchAgentes(); } catch (e) {} finally { setBulkDeleting(false); }
+  };
 
   return (
     <div data-testid="agentes-page">
@@ -343,11 +353,13 @@ const Agentes = () => {
         </div>
         {loading ? <p>Cargando...</p> : filteredAgentes.length === 0 ? <p className="text-muted">No hay agentes de {listTab.toLowerCase()} registrados</p> : (
           <div style={{ overflowX: 'auto' }}>
+            {canBulkDelete && <BulkActionBar selectedCount={selectedIds.size} onDelete={handleBulkDelete} onClear={clearSelection} deleting={bulkDeleting} />}
             <table>
-              <thead><tr>{visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}<th>Acciones</th></tr></thead>
+              <thead><tr>{canBulkDelete && <BulkCheckboxHeader allSelected={allSelected} someSelected={someSelected} onToggle={toggleAll} />}{visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}<th>Acciones</th></tr></thead>
               <tbody>
                 {filteredAgentes.map(agente => (
                   <tr key={agente._id}>
+                    {canBulkDelete && <BulkCheckboxCell id={agente._id} selected={selectedIds.has(agente._id)} onToggle={toggleOne} />}
                     {visibleColumns.map(col => {
                       switch (col.id) {
                         case 'codigo': return <td key="codigo"><code style={{ fontFamily: 'monospace', fontWeight: '600', fontSize: '0.85rem' }}>{agente.codigo || '-'}</code></td>;

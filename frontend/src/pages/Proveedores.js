@@ -3,6 +3,7 @@ import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, Search, Settings, X, Download, FileText, TrendingUp, Users, Eye, MapPin, Building, CreditCard, Award, Truck } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
+import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
 import { useAuth } from '../contexts/AuthContext';
 import ProvinciaSelect from '../components/ProvinciaSelect';
 import PaisSelect from '../components/PaisSelect';
@@ -56,7 +57,7 @@ const Proveedores = () => {
   const { t } = useTranslation();
   
   const { token } = useAuth();
-  const { canCreate, canEdit, canDelete } = usePermissions();
+  const { canCreate, canEdit, canDelete, canBulkDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   const { columns, setColumns, showConfig, setShowConfig, save, reset, visibleColumns } = useColumnConfig('proveedores_col_config', DEFAULT_COLUMNS);
   
@@ -292,6 +293,14 @@ const Proveedores = () => {
     return matchesSearch && matchesEstado;
   });
 
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredProveedores);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const handleBulkDelete = async () => {
+    if (!window.confirm(`Eliminar ${selectedIds.size} proveedor${selectedIds.size > 1 ? 'es' : ''} seleccionado${selectedIds.size > 1 ? 's' : ''}?`)) return;
+    setBulkDeleting(true);
+    try { await bulkDeleteApi('proveedores', selectedIds); clearSelection(); fetchProveedores(); } catch (e) {} finally { setBulkDeleting(false); }
+  };
+
   // Column config handled by useColumnConfig hook
 
   return (
@@ -452,9 +461,11 @@ const Proveedores = () => {
           <p className="text-muted">No hay proveedores registrados</p>
         ) : (
           <div style={{ overflowX: 'auto' }}>
+            {canBulkDelete && <BulkActionBar selectedCount={selectedIds.size} onDelete={handleBulkDelete} onClear={clearSelection} deleting={bulkDeleting} />}
             <table>
               <thead>
                 <tr>
+                  {canBulkDelete && <BulkCheckboxHeader allSelected={allSelected} someSelected={someSelected} onToggle={toggleAll} />}
                   {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
                   {(canEdit || canDelete) ? <th>Acciones</th> : null}
                 </tr>
@@ -462,6 +473,7 @@ const Proveedores = () => {
               <tbody>
                 {filteredProveedores.map((proveedor) => (
                   <tr key={proveedor._id}>
+                    {canBulkDelete && <BulkCheckboxCell id={proveedor._id} selected={selectedIds.has(proveedor._id)} onToggle={toggleOne} />}
                     {visibleColumns.map(col => {
                       switch (col.id) {
                         case 'codigo_proveedor': return <td key="codigo_proveedor"><code style={{ fontFamily: 'monospace', fontWeight: '600', fontSize: '0.85rem' }}>{proveedor.codigo_proveedor || '-'}</code></td>;

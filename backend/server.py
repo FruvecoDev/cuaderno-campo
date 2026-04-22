@@ -48,6 +48,7 @@ from routes_comisiones import router as comisiones_router
 from routes_config import router as config_router
 from routes_recomendaciones import router as recomendaciones_router
 from routes_plantillas_recomendaciones import router as plantillas_recomendaciones_router
+from routes_bulk import router as bulk_router
 from routes_alertas_clima import router as alertas_clima_router
 from routes_notificaciones import router as notificaciones_router
 from routes_resumen_diario import router as resumen_diario_router
@@ -164,6 +165,7 @@ app.include_router(sigpac_router)
 app.include_router(exports_router)
 app.include_router(alertas_router)
 app.include_router(user_config_router)
+app.include_router(bulk_router)
 
 # Mount static files for uploaded images
 uploads_dir = "/app/uploads"

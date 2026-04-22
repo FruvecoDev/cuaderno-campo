@@ -17,8 +17,9 @@ export const usePermissions = () => {
     canEdit: hasPermission('edit'),
     canDelete: hasPermission('delete'),
     canExport: hasPermission('export'),
+    canBulkDelete: hasPermission('bulk_delete'),
     canManageUsers: user?.can_manage_users === true,
-    canViewCosts: user?.can_view_costs !== false, // Default true for backward compatibility
+    canViewCosts: user?.can_view_costs !== false,
     user,
     hasPermission
   };

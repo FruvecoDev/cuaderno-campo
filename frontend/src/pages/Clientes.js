@@ -3,6 +3,7 @@ import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, Search, X, Upload, User, Phone, Mail, MapPin, Building, Globe, TrendingUp, FileText, Package, Eye, Settings, Download, Users, CreditCard, Award, Truck } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
+import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
 import { useAuth } from '../contexts/AuthContext';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import ProvinciaSelect from '../components/ProvinciaSelect';
@@ -71,7 +72,7 @@ const Clientes = () => {
   const [nuevoTipoIva, setNuevoTipoIva] = useState({ nombre: '', valor: '' });
   
   const { token } = useAuth();
-  const { canCreate, canEdit, canDelete } = usePermissions();
+  const { canCreate, canEdit, canDelete, canBulkDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   const { t } = useTranslation();
   const { columns, setColumns, showConfig, setShowConfig, save, reset, visibleColumns } = useColumnConfig('clientes_col_config', DEFAULT_COLUMNS);
@@ -111,6 +112,14 @@ const Clientes = () => {
   };
   
   const [formData, setFormData] = useState(initialFormData);
+
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(clientes);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const handleBulkDelete = async () => {
+    if (!window.confirm(`Eliminar ${selectedIds.size} cliente${selectedIds.size > 1 ? 's' : ''} seleccionado${selectedIds.size > 1 ? 's' : ''}?`)) return;
+    setBulkDeleting(true);
+    try { await bulkDeleteApi('clientes', selectedIds); clearSelection(); fetchClientes(); } catch (e) {} finally { setBulkDeleting(false); }
+  };
 
   const nextCodigo = (() => {
     if (!clientes.length) return '000001';
@@ -597,9 +606,11 @@ const Clientes = () => {
           <p className="text-muted">{t('common.noData')}</p>
         ) : (
           <div className="table-container">
+            {canBulkDelete && <BulkActionBar selectedCount={selectedIds.size} onDelete={handleBulkDelete} onClear={clearSelection} deleting={bulkDeleting} />}
             <table data-testid="clientes-table">
               <thead>
                 <tr>
+                  {canBulkDelete && <BulkCheckboxHeader allSelected={allSelected} someSelected={someSelected} onToggle={toggleAll} />}
                   {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
                   <th>{t('common.actions')}</th>
                 </tr>
@@ -607,6 +618,7 @@ const Clientes = () => {
               <tbody>
                 {clientes.map((cliente) => (
                   <tr key={cliente._id}>
+                    {canBulkDelete && <BulkCheckboxCell id={cliente._id} selected={selectedIds.has(cliente._id)} onToggle={toggleOne} />}
                     {visibleColumns.map(col => {
                       switch (col.id) {
                         case 'codigo': return <td key="codigo"><code style={{ fontFamily: 'monospace', fontWeight: '600', fontSize: '0.85rem' }}>{cliente.codigo || '-'}</code></td>;

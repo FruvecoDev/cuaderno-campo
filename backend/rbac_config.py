@@ -8,11 +8,11 @@ from models_auth import UserRole
 # Permission matrix by role
 PERMISSIONS_MATRIX = {
     UserRole.ADMIN: {
-        # Full access to everything
         "can_create": True,
         "can_edit": True,
         "can_delete": True,
         "can_export": True,
+        "can_bulk_delete": True,
         "can_manage_users": True,
         "can_view_costs": True,
         "modules_access": [
@@ -22,11 +22,11 @@ PERMISSIONS_MATRIX = {
         ]
     },
     UserRole.MANAGER: {
-        # Can create, edit, export but not delete
         "can_create": True,
         "can_edit": True,
         "can_delete": False,
         "can_export": True,
+        "can_bulk_delete": False,
         "can_manage_users": False,
         "can_view_costs": True,
         "modules_access": [
@@ -36,11 +36,11 @@ PERMISSIONS_MATRIX = {
         ]
     },
     UserRole.TECHNICIAN: {
-        # Can create and edit field operations but not contracts or delete
         "can_create": True,
         "can_edit": True,
         "can_delete": False,
         "can_export": False,
+        "can_bulk_delete": False,
         "can_manage_users": False,
         "can_view_costs": False,
         "modules_access": [
@@ -50,11 +50,11 @@ PERMISSIONS_MATRIX = {
         ]
     },
     UserRole.VIEWER: {
-        # Read-only access, can export reports
         "can_create": False,
         "can_edit": False,
         "can_delete": False,
         "can_export": True,
+        "can_bulk_delete": False,
         "can_manage_users": False,
         "can_view_costs": False,
         "modules_access": [

@@ -3,13 +3,15 @@ import api from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { FileText, Download, Loader2, Search, Leaf, MapPin, Calendar, Package, Droplets, Eye, ClipboardList, TrendingUp } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { usePermissions } from '../utils/permissions';
+import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
 import '../App.css';
 
 const CuadernoCampo = () => {
   const { t } = useTranslation();
   const { token } = useAuth();
-  const [parcelas, setParcelas] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { canBulkDelete } = usePermissions();
+  const [parcelas, setParcelas] = useState([]);  const [loading, setLoading] = useState(true);
   const [selectedParcela, setSelectedParcela] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
@@ -101,6 +103,19 @@ const CuadernoCampo = () => {
   const cultivosUnicos = [...new Set(parcelas.map(p => p.cultivo).filter(Boolean))].sort();
   const proveedoresUnicos = [...new Set(contratos.map(c => c.proveedor || c.cliente).filter(Boolean))].sort();
 
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredParcelas);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+
+  const handleBulkDelete = async () => {
+    if (!window.confirm(`Eliminar ${selectedIds.size} parcela${selectedIds.size > 1 ? 's' : ''} seleccionada${selectedIds.size > 1 ? 's' : ''}?`)) return;
+    setBulkDeleting(true);
+    try {
+      await bulkDeleteApi('parcelas', selectedIds);
+      clearSelection();
+      fetchParcelas();
+    } catch (err) {} finally { setBulkDeleting(false); }
+  };
+
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
@@ -164,8 +179,17 @@ const CuadernoCampo = () => {
             </select>
           </div>
 
+          {/* Bulk Actions */}
+          {canBulkDelete && <BulkActionBar selectedCount={selectedIds.size} onDelete={handleBulkDelete} onClear={clearSelection} deleting={bulkDeleting} />}
+
           {/* Parcelas List */}
           <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+            {canBulkDelete && filteredParcelas.length > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 0.75rem', marginBottom: '0.5rem', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
+                <input type="checkbox" checked={allSelected} ref={el => { if (el) el.indeterminate = someSelected; }} onChange={toggleAll} style={{ width: '15px', height: '15px', cursor: 'pointer' }} data-testid="bulk-select-all" />
+                <span>Seleccionar todo</span>
+              </div>
+            )}
             {filteredParcelas.length === 0 ? (
               <p style={{ textAlign: 'center', color: 'hsl(var(--muted-foreground))', padding: '2rem' }}>
                 No se encontraron parcelas
@@ -193,6 +217,11 @@ const CuadernoCampo = () => {
                   data-testid={`parcela-item-${p._id}`}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    {canBulkDelete && (
+                      <div style={{ marginRight: '0.5rem', flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
+                        <input type="checkbox" checked={selectedIds.has(p._id)} onChange={() => toggleOne(p._id)} style={{ width: '15px', height: '15px', cursor: 'pointer' }} data-testid={`bulk-select-${p._id}`} />
+                      </div>
+                    )}
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>{p.codigo_plantacion}</div>
                       <div style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>

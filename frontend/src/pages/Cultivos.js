@@ -3,6 +3,7 @@ import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, Search, Settings, X, Download, Leaf, Eye, Droplets, Thermometer, Sprout } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
+import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
 import { useAuth } from '../contexts/AuthContext';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
@@ -36,9 +37,16 @@ const Cultivos = () => {
   const { t } = useTranslation();
   
   const { token } = useAuth();
-  const { canCreate, canEdit, canDelete } = usePermissions();
+  const { canCreate, canEdit, canDelete, canBulkDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   const { columns, setColumns, showConfig, setShowConfig, save, reset, visibleColumns } = useColumnConfig('cultivos_col_config', DEFAULT_COLUMNS);
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredCultivos);
+  const [bulkDeleting, setBulkDeleting] = React.useState(false);
+  const handleBulkDelete = async () => {
+    if (!window.confirm(`Eliminar ${selectedIds.size} cultivo${selectedIds.size > 1 ? 's' : ''} seleccionado${selectedIds.size > 1 ? 's' : ''}?`)) return;
+    setBulkDeleting(true);
+    try { await bulkDeleteApi('cultivos', selectedIds); clearSelection(); fetchCultivos(); } catch (e) {} finally { setBulkDeleting(false); }
+  };
 
   const initialFormData = {
     nombre: '',
@@ -365,10 +373,13 @@ const Cultivos = () => {
         ) : filteredCultivos.length === 0 ? (
           <p className="text-muted">No hay cultivos registrados</p>
         ) : (
+          <>
+          {canBulkDelete && <BulkActionBar selectedCount={selectedIds.size} onDelete={handleBulkDelete} onClear={clearSelection} deleting={bulkDeleting} />}
           <div style={{ overflowX: 'auto' }}>
             <table>
               <thead>
                 <tr>
+                  {canBulkDelete && <BulkCheckboxHeader allSelected={allSelected} someSelected={someSelected} onToggle={toggleAll} />}
                   {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
                   {(canEdit || canDelete) ? <th>Acciones</th> : null}
                 </tr>
@@ -376,6 +387,7 @@ const Cultivos = () => {
               <tbody>
                 {filteredCultivos.map((cultivo) => (
                   <tr key={cultivo._id}>
+                    {canBulkDelete && <BulkCheckboxCell id={cultivo._id} selected={selectedIds.has(cultivo._id)} onToggle={toggleOne} />}
                     {visibleColumns.map(col => {
                       switch (col.id) {
                         case 'codigo_cultivo': return <td key="codigo_cultivo"><code style={{ fontFamily: 'monospace', fontWeight: '600', fontSize: '0.85rem' }}>{cultivo.codigo_cultivo || '-'}</code></td>;
@@ -411,6 +423,7 @@ const Cultivos = () => {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
     </div>
