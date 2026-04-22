@@ -7,6 +7,7 @@ import {
   History, Clock, User as UserIcon,
 } from 'lucide-react';
 import { formatEuro, formatKg, formatNumber } from '../utils/format';
+import { ColumnSettings, useColumnConfig } from '../components/ColumnSettings';
 import '../App.css';
 
 const AlbaranesComision = () => {
@@ -202,6 +203,125 @@ const AlbaranesComision = () => {
 
   const filteredAlbaranes = useMemo(() => albaranes, [albaranes]);
 
+  // ------- Configuracion de columnas persistida en localStorage -------
+  const DEFAULT_COLS_ACM = [
+    { key: 'numero', label: 'Nº ACM', visible: true },
+    { key: 'fecha', label: 'Fecha', visible: true },
+    { key: 'agente', label: 'Agente', visible: true },
+    { key: 'tipo', label: 'Tipo', visible: true },
+    { key: 'partner', label: 'Proveedor / Cliente', visible: true },
+    { key: 'origen', label: 'Albarán origen', visible: true },
+    { key: 'cultivo', label: 'Cultivo', visible: true },
+    { key: 'kg', label: 'Kg Netos', visible: true },
+    { key: 'precio', label: 'Precio €/kg', visible: true },
+    { key: 'comision', label: 'Comisión', visible: true },
+    { key: 'importe', label: 'Importe', visible: true },
+    { key: 'estado', label: 'Estado', visible: true },
+    { key: 'acciones', label: 'Acciones', visible: true },
+  ];
+  const DEFAULT_COLS_HIST = [
+    { key: 'fecha', label: 'Fecha Liquidación', visible: true },
+    { key: 'agente', label: 'Agente', visible: true },
+    { key: 'tipo', label: 'Tipo', visible: true },
+    { key: 'periodo', label: 'Periodo', visible: true },
+    { key: 'num_acm', label: 'Nº ACM', visible: true },
+    { key: 'importe', label: 'Importe Liquidado', visible: true },
+    { key: 'usuario', label: 'Usuario', visible: true },
+    { key: 'acm_ids', label: 'Nº ACM incluidos', visible: true },
+  ];
+  const [colsAcm, setColsAcm, resetColsAcm] = useColumnConfig('acm.cols.albaranes', DEFAULT_COLS_ACM);
+  const [colsHist, setColsHist, resetColsHist] = useColumnConfig('acm.cols.historico', DEFAULT_COLS_HIST);
+
+  const renderAcmCell = (acm, key) => {
+    const partnerName = acm.proveedor_nombre || acm.cliente_nombre || '-';
+    const comisionLabel = acm.comision_tipo === 'porcentaje'
+      ? `${acm.comision_valor}%`
+      : `${acm.comision_valor} €/kg`;
+    const estadoColor = { pendiente: '#f59e0b', pagada: '#10b981', anulada: '#ef4444' }[acm.estado] || '#6b7280';
+    switch (key) {
+      case 'numero': return <td style={{ fontWeight: '600', color: '#2563eb' }}>{acm.numero_albaran_comision || '-'}</td>;
+      case 'fecha': return <td>{acm.fecha_albaran || '-'}</td>;
+      case 'agente': return <td>{acm.agente_nombre}</td>;
+      case 'tipo': return (
+        <td>
+          <span style={{
+            padding: '0.125rem 0.4rem', borderRadius: '4px', fontSize: '0.7rem',
+            backgroundColor: acm.tipo_agente === 'compra' ? '#dbeafe' : '#d1fae5',
+            color: acm.tipo_agente === 'compra' ? '#1e40af' : '#065f46',
+          }}>{acm.tipo_agente === 'compra' ? 'Compra' : 'Venta'}</span>
+        </td>
+      );
+      case 'partner': return <td>{partnerName}</td>;
+      case 'origen': return <td style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>{acm.numero_albaran || '-'}</td>;
+      case 'cultivo': return <td>{acm.cultivo || '-'}</td>;
+      case 'kg': return <td style={{ textAlign: 'right' }}>{formatKg(acm.kilos_netos)}</td>;
+      case 'precio': return <td style={{ textAlign: 'right' }}>{formatNumber(acm.precio_kg, 4)}</td>;
+      case 'comision': return <td style={{ textAlign: 'right' }}>{comisionLabel}</td>;
+      case 'importe': return <td style={{ textAlign: 'right', fontWeight: '700', color: '#065f46' }}>{formatEuro(acm.comision_importe)}</td>;
+      case 'estado': return (
+        <td>
+          <span style={{
+            padding: '0.125rem 0.5rem', borderRadius: '999px', fontSize: '0.7rem',
+            backgroundColor: `${estadoColor}22`, color: estadoColor, fontWeight: '600', textTransform: 'capitalize',
+          }}>{acm.estado}</span>
+        </td>
+      );
+      case 'acciones': return (
+        <td>
+          <button
+            type="button"
+            className="btn btn-sm btn-primary"
+            onClick={() => downloadPdf(acm)}
+            disabled={downloadingId === acm._id}
+            data-testid={`btn-pdf-${acm._id}`}
+            title="Descargar PDF"
+          >
+            {downloadingId === acm._id ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+          </button>
+        </td>
+      );
+      default: return <td>-</td>;
+    }
+  };
+
+  const renderHistCell = (h, key) => {
+    const fecha = h.fecha_liquidacion ? new Date(h.fecha_liquidacion).toLocaleString('es-ES') : '-';
+    const periodo = (h.fecha_desde || h.fecha_hasta)
+      ? `${h.fecha_desde || '—'} → ${h.fecha_hasta || 'Hoy'}`
+      : 'Todo el histórico';
+    const nums = Array.isArray(h.numeros_acm) ? h.numeros_acm : [];
+    const numsDisplay = nums.slice(0, 5).join(', ') + (nums.length > 5 ? ` +${nums.length - 5}` : '');
+    switch (key) {
+      case 'fecha': return <td style={{ whiteSpace: 'nowrap' }}>{fecha}</td>;
+      case 'agente': return <td style={{ fontWeight: '600' }}>{h.agente_nombre}</td>;
+      case 'tipo': return (
+        <td>
+          <span style={{
+            padding: '0.125rem 0.4rem', borderRadius: '4px', fontSize: '0.7rem',
+            backgroundColor: h.tipo_agente === 'compra' ? '#dbeafe' : '#d1fae5',
+            color: h.tipo_agente === 'compra' ? '#1e40af' : '#065f46',
+          }}>{h.tipo_agente === 'compra' ? 'Compra' : (h.tipo_agente === 'venta' ? 'Venta' : '-')}</span>
+        </td>
+      );
+      case 'periodo': return <td style={{ fontSize: '0.8rem' }}>{periodo}</td>;
+      case 'num_acm': return <td style={{ textAlign: 'right', fontWeight: '600' }}>{h.num_acm}</td>;
+      case 'importe': return <td style={{ textAlign: 'right', fontWeight: '700', color: '#065f46' }}>{formatEuro(h.importe_total)}</td>;
+      case 'usuario': return (
+        <td style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+            <UserIcon size={11} />{h.usuario}
+          </span>
+        </td>
+      );
+      case 'acm_ids': return (
+        <td style={{ fontSize: '0.7rem', color: '#6b7280', maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={nums.join(', ')}>
+          {numsDisplay || '—'}
+        </td>
+      );
+      default: return <td>-</td>;
+    }
+  };
+
   const kpiCard = (icon, value, label, color) => (
     <div className="card" style={{ textAlign: 'center', padding: '1.25rem' }}>
       <div style={{ color, marginBottom: '0.35rem' }}>{icon}</div>
@@ -344,6 +464,9 @@ const AlbaranesComision = () => {
 
       {/* Tabla */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0.5rem 0.75rem', borderBottom: '1px solid hsl(var(--border))', background: 'hsl(var(--muted)/0.3)' }}>
+          <ColumnSettings columns={colsAcm} onChange={setColsAcm} onReset={resetColsAcm} testId="column-settings-acm" />
+        </div>
         <div className="table-container" style={{ maxHeight: '65vh', overflow: 'auto' }}>
           {loading ? (
             <div style={{ padding: '2rem', textAlign: 'center' }}><Loader2 className="animate-spin" /></div>
@@ -355,68 +478,22 @@ const AlbaranesComision = () => {
             <table style={{ fontSize: '0.85rem', width: '100%' }}>
               <thead>
                 <tr style={{ background: 'hsl(var(--muted))', position: 'sticky', top: 0, zIndex: 2 }}>
-                  <th>Nº ACM</th>
-                  <th>Fecha</th>
-                  <th>Agente</th>
-                  <th>Tipo</th>
-                  <th>Proveedor / Cliente</th>
-                  <th>Albarán origen</th>
-                  <th>Cultivo</th>
-                  <th style={{ textAlign: 'right' }}>Kg Netos</th>
-                  <th style={{ textAlign: 'right' }}>Precio €/kg</th>
-                  <th style={{ textAlign: 'right' }}>Comisión</th>
-                  <th style={{ textAlign: 'right' }}>Importe</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
+                  {colsAcm.filter(c => c.visible !== false).map(c => (
+                    <th
+                      key={c.key}
+                      style={{ textAlign: ['kg', 'precio', 'comision', 'importe'].includes(c.key) ? 'right' : 'left' }}
+                    >{c.label}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {filteredAlbaranes.map((acm) => {
-                  const partnerName = acm.proveedor_nombre || acm.cliente_nombre || '-';
-                  const comisionLabel = acm.comision_tipo === 'porcentaje'
-                    ? `${acm.comision_valor}%`
-                    : `${acm.comision_valor} €/kg`;
-                  const estadoColor = { pendiente: '#f59e0b', pagada: '#10b981', anulada: '#ef4444' }[acm.estado] || '#6b7280';
-                  return (
-                    <tr key={acm._id} data-testid={`acm-row-${acm._id}`}>
-                      <td style={{ fontWeight: '600', color: '#2563eb' }}>{acm.numero_albaran_comision || '-'}</td>
-                      <td>{acm.fecha_albaran || '-'}</td>
-                      <td>{acm.agente_nombre}</td>
-                      <td>
-                        <span style={{
-                          padding: '0.125rem 0.4rem', borderRadius: '4px', fontSize: '0.7rem',
-                          backgroundColor: acm.tipo_agente === 'compra' ? '#dbeafe' : '#d1fae5',
-                          color: acm.tipo_agente === 'compra' ? '#1e40af' : '#065f46',
-                        }}>{acm.tipo_agente === 'compra' ? 'Compra' : 'Venta'}</span>
-                      </td>
-                      <td>{partnerName}</td>
-                      <td style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>{acm.numero_albaran || '-'}</td>
-                      <td>{acm.cultivo || '-'}</td>
-                      <td style={{ textAlign: 'right' }}>{formatKg(acm.kilos_netos)}</td>
-                      <td style={{ textAlign: 'right' }}>{formatNumber(acm.precio_kg, 4)}</td>
-                      <td style={{ textAlign: 'right' }}>{comisionLabel}</td>
-                      <td style={{ textAlign: 'right', fontWeight: '700', color: '#065f46' }}>{formatEuro(acm.comision_importe)}</td>
-                      <td>
-                        <span style={{
-                          padding: '0.125rem 0.5rem', borderRadius: '999px', fontSize: '0.7rem',
-                          backgroundColor: `${estadoColor}22`, color: estadoColor, fontWeight: '600', textTransform: 'capitalize',
-                        }}>{acm.estado}</span>
-                      </td>
-                      <td>
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-primary"
-                          onClick={() => downloadPdf(acm)}
-                          disabled={downloadingId === acm._id}
-                          data-testid={`btn-pdf-${acm._id}`}
-                          title="Descargar PDF"
-                        >
-                          {downloadingId === acm._id ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {filteredAlbaranes.map((acm) => (
+                  <tr key={acm._id} data-testid={`acm-row-${acm._id}`}>
+                    {colsAcm.filter(c => c.visible !== false).map(c => (
+                      <React.Fragment key={c.key}>{renderAcmCell(acm, c.key)}</React.Fragment>
+                    ))}
+                  </tr>
+                ))}
               </tbody>
             </table>
           )}
@@ -435,6 +512,9 @@ const AlbaranesComision = () => {
           </div>
 
           <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0.5rem 0.75rem', borderBottom: '1px solid hsl(var(--border))', background: 'hsl(var(--muted)/0.3)' }}>
+              <ColumnSettings columns={colsHist} onChange={setColsHist} onReset={resetColsHist} testId="column-settings-hist" />
+            </div>
             <div className="table-container" style={{ maxHeight: '65vh', overflow: 'auto' }}>
               {loadingHistorico ? (
                 <div style={{ padding: '2rem', textAlign: 'center' }}><Loader2 className="animate-spin" /></div>
@@ -450,51 +530,22 @@ const AlbaranesComision = () => {
                 <table style={{ fontSize: '0.85rem', width: '100%' }}>
                   <thead>
                     <tr style={{ background: 'hsl(var(--muted))', position: 'sticky', top: 0, zIndex: 2 }}>
-                      <th>Fecha Liquidación</th>
-                      <th>Agente</th>
-                      <th>Tipo</th>
-                      <th>Periodo</th>
-                      <th style={{ textAlign: 'right' }}>Nº ACM</th>
-                      <th style={{ textAlign: 'right' }}>Importe Liquidado</th>
-                      <th>Usuario</th>
-                      <th>Nº ACM incluidos</th>
+                      {colsHist.filter(c => c.visible !== false).map(c => (
+                        <th
+                          key={c.key}
+                          style={{ textAlign: ['num_acm', 'importe'].includes(c.key) ? 'right' : 'left' }}
+                        >{c.label}</th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {historico.map((h) => {
-                      const fecha = h.fecha_liquidacion
-                        ? new Date(h.fecha_liquidacion).toLocaleString('es-ES')
-                        : '-';
-                      const periodo = (h.fecha_desde || h.fecha_hasta)
-                        ? `${h.fecha_desde || '—'} → ${h.fecha_hasta || 'Hoy'}`
-                        : 'Todo el histórico';
-                      const nums = Array.isArray(h.numeros_acm) ? h.numeros_acm : [];
-                      const numsDisplay = nums.slice(0, 5).join(', ') + (nums.length > 5 ? ` +${nums.length - 5}` : '');
-                      return (
-                        <tr key={h._id} data-testid={`hist-row-${h._id}`}>
-                          <td style={{ whiteSpace: 'nowrap' }}>{fecha}</td>
-                          <td style={{ fontWeight: '600' }}>{h.agente_nombre}</td>
-                          <td>
-                            <span style={{
-                              padding: '0.125rem 0.4rem', borderRadius: '4px', fontSize: '0.7rem',
-                              backgroundColor: h.tipo_agente === 'compra' ? '#dbeafe' : '#d1fae5',
-                              color: h.tipo_agente === 'compra' ? '#1e40af' : '#065f46',
-                            }}>{h.tipo_agente === 'compra' ? 'Compra' : (h.tipo_agente === 'venta' ? 'Venta' : '-')}</span>
-                          </td>
-                          <td style={{ fontSize: '0.8rem' }}>{periodo}</td>
-                          <td style={{ textAlign: 'right', fontWeight: '600' }}>{h.num_acm}</td>
-                          <td style={{ textAlign: 'right', fontWeight: '700', color: '#065f46' }}>{formatEuro(h.importe_total)}</td>
-                          <td style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                              <UserIcon size={11} />{h.usuario}
-                            </span>
-                          </td>
-                          <td style={{ fontSize: '0.7rem', color: '#6b7280', maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={nums.join(', ')}>
-                            {numsDisplay || '—'}
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {historico.map((h) => (
+                      <tr key={h._id} data-testid={`hist-row-${h._id}`}>
+                        {colsHist.filter(c => c.visible !== false).map(c => (
+                          <React.Fragment key={c.key}>{renderHistCell(h, c.key)}</React.Fragment>
+                        ))}
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               )}
