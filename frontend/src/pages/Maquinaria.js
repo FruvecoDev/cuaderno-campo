@@ -3,6 +3,7 @@ import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { Plus, Download, Settings, X, Filter, CheckCircle, Wrench, AlertTriangle, Cog, Eye, Upload, Trash2 } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
+import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
 import { useAuth } from '../contexts/AuthContext';
 import MaquinariaTable from '../components/maquinaria/MaquinariaTable';
 import MaquinariaForm from '../components/maquinaria/MaquinariaForm';
@@ -51,7 +52,7 @@ const Maquinaria = () => {
   const [maqModalTab, setMaqModalTab] = useState('general');
   const [error, setError] = useState(null);
   const { token } = useAuth();
-  const { canCreate, canEdit, canDelete } = usePermissions();
+  const { canCreate, canEdit, canDelete, canBulkDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   const { columns, setColumns, showConfig, setShowConfig, save, reset, visibleColumns } = useColumnConfig('maquinaria_col_config', DEFAULT_COLUMNS);
 
@@ -114,6 +115,13 @@ const Maquinaria = () => {
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
   const tiposUnicos = [...new Set(maquinaria.map(m => m.tipo).filter(Boolean))];
   const estadosUnicos = [...new Set(maquinaria.map(m => m.estado).filter(Boolean))];
+
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredMaquinaria);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const handleBulkDelete = async () => {
+    setBulkDeleting(true);
+    try { await bulkDeleteApi('maquinaria', selectedIds); clearSelection(); fetchMaquinaria(); } catch (e) {} finally { setBulkDeleting(false); }
+  };
 
   const getEstadoBadgeClass = (estado) => {
     switch (estado) {
@@ -376,6 +384,9 @@ const Maquinaria = () => {
         visibleColumns={visibleColumns} canEdit={canEdit} canDelete={canDelete}
         getEstadoBadgeClass={getEstadoBadgeClass} onViewImage={viewImage}
         onViewHistorial={handleVerHistorial} onEdit={handleEdit} onDelete={handleDelete}
+        canBulkDelete={canBulkDelete} selectedIds={selectedIds} toggleOne={toggleOne}
+        toggleAll={toggleAll} allSelected={allSelected} someSelected={someSelected}
+        clearSelection={clearSelection} bulkDeleting={bulkDeleting} handleBulkDelete={handleBulkDelete}
       />
 
       {/* Historial Modal */}

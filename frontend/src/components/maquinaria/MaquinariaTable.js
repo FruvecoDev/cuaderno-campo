@@ -1,5 +1,6 @@
 import React from 'react';
 import { Cog, Edit2, Trash2, Eye } from 'lucide-react';
+import { BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell } from '../BulkActions';
 
 const MaquinariaTable = ({
   maquinaria,
@@ -13,6 +14,8 @@ const MaquinariaTable = ({
   onViewHistorial,
   onEdit,
   onDelete,
+  canBulkDelete, selectedIds, toggleOne, toggleAll, allSelected, someSelected,
+  clearSelection, bulkDeleting, handleBulkDelete,
 }) => {
   return (
     <div className="card">
@@ -26,9 +29,11 @@ const MaquinariaTable = ({
         <p className="text-muted">{hasActiveFilters ? 'No hay maquinaria que coincida con los filtros' : 'No hay maquinaria registrada.'}</p>
       ) : (
         <div className="table-container">
+          {canBulkDelete && <BulkActionBar selectedCount={selectedIds.size} onDelete={handleBulkDelete} onClear={clearSelection} deleting={bulkDeleting} />}
           <table data-testid="maquinaria-table">
             <thead>
               <tr>
+                {canBulkDelete && <BulkCheckboxHeader allSelected={allSelected} someSelected={someSelected} onToggle={toggleAll} />}
                 {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
                 {(canEdit || canDelete) ? <th>Acciones</th> : null}
               </tr>
@@ -36,6 +41,7 @@ const MaquinariaTable = ({
             <tbody>
               {maquinaria.map((item) => (
                 <tr key={item._id}>
+                  {canBulkDelete && <BulkCheckboxCell id={item._id} selected={selectedIds?.has(item._id)} onToggle={toggleOne} />}
                   {visibleColumns.map(col => {
                     switch (col.id) {
                       case 'nombre': return <td key="nombre" className="font-semibold">{item.nombre}</td>;
