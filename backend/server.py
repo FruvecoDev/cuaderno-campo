@@ -45,6 +45,7 @@ from routes_articulos import router as articulos_router
 from routes_agentes import router as agentes_router
 from routes_clientes import router as clientes_router
 from routes_comisiones import router as comisiones_router
+from routes_albaranes_comision import router as albaranes_comision_router
 from routes_config import router as config_router
 from routes_recomendaciones import router as recomendaciones_router
 from routes_plantillas_recomendaciones import router as plantillas_recomendaciones_router
@@ -138,6 +139,7 @@ app.include_router(articulos_router)
 app.include_router(agentes_router)
 app.include_router(clientes_router)
 app.include_router(comisiones_router)
+app.include_router(albaranes_comision_router)
 app.include_router(config_router)
 app.include_router(recomendaciones_router)
 app.include_router(plantillas_recomendaciones_router)

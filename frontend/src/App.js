@@ -33,6 +33,7 @@ import Agentes from './pages/Agentes';
 import Clientes from './pages/Clientes';
 import LiquidacionComisiones from './pages/LiquidacionComisiones';
 import ComisionesGeneradas from './pages/ComisionesGeneradas';
+import AlbaranesComision from './pages/AlbaranesComision';
 import Configuracion from './pages/Configuracion';
 import Recomendaciones from './pages/Recomendaciones';
 import AlertasClima from './pages/AlertasClima';
@@ -248,6 +249,12 @@ function App() {
         <Route path="/comisiones-generadas" element={
           <ProtectedRoute>
             <Layout><ComisionesGeneradas /></Layout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/albaranes-comision" element={
+          <ProtectedRoute>
+            <Layout><AlbaranesComision /></Layout>
           </ProtectedRoute>
         } />
         

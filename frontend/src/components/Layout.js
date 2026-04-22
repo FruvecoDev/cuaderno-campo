@@ -161,6 +161,7 @@ const Layout = ({ children }) => {
       { path: '/informes-ingresos', label: 'Informes Ingresos', icon: TrendingUp, module: 'albaranes', operacion: 'venta' },
       { path: '/liquidacion-comisiones', label: 'Liquidación Comisiones', icon: TrendingUp, module: 'contratos' },
       { path: '/comisiones-generadas', label: 'Comisiones Auto', icon: DollarSign, module: 'contratos' },
+      { path: '/albaranes-comision', label: 'Albaranes de Comisión', icon: FileText, module: 'contratos' },
     ]},
     { section: t('nav.catalogs'), items: [
       { path: '/proveedores', label: t('nav.providers'), icon: Package, operacion: 'compra' },

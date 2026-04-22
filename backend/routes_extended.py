@@ -502,8 +502,13 @@ async def create_albaran(
                 # Generar número de albarán
                 numero_albaran = f"ALB-{albaran_id[-6:].upper()}"
                 
+                # Generar número auto-incremental ACM-XXXXXX para el albarán de comisión
+                from routes_albaranes_comision import _next_numero_acm
+                numero_acm = await _next_numero_acm()
+                
                 # Crear registro de comisión
                 comision_record = {
+                    "numero_albaran_comision": numero_acm,
                     "albaran_id": albaran_id,
                     "numero_albaran": numero_albaran,
                     "contrato_id": albaran.contrato_id,
