@@ -7,6 +7,7 @@ import {
   Award, CreditCard, Eye, Download, FileText, Settings
 } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
+import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 import ColumnConfigModal from '../components/ColumnConfigModal';
@@ -26,7 +27,7 @@ const DEFAULT_COLUMNS = [
 const TecnicosAplicadores = () => {
   const { t } = useTranslation();
   const { token } = useAuth();
-  const { canCreate, canEdit, canDelete } = usePermissions();
+  const { canCreate, canEdit, canDelete, canBulkDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   const { columns, setColumns, showConfig, setShowConfig, save, reset, visibleColumns } = useColumnConfig('tecnicos_col_config', DEFAULT_COLUMNS);
   
@@ -39,6 +40,13 @@ const TecnicosAplicadores = () => {
   
   // Filtros
   const [searchTerm, setSearchTerm] = useState('');
+
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(tecnicos);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const handleBulkDelete = async () => {
+    setBulkDeleting(true);
+    try { await bulkDeleteApi('tecnicos', selectedIds); clearSelection(); fetchTecnicos(); } catch (e) {} finally { setBulkDeleting(false); }
+  };
   const [filterNivel, setFilterNivel] = useState('');
   const [filterActivo, setFilterActivo] = useState('');
   
@@ -635,9 +643,11 @@ const TecnicosAplicadores = () => {
           <p style={{ color: 'hsl(var(--muted-foreground))' }}>No hay técnicos aplicadores registrados.</p>
         ) : (
           <div style={{ overflowX: 'auto' }}>
+            {canBulkDelete && <BulkActionBar selectedCount={selectedIds.size} onDelete={handleBulkDelete} onClear={clearSelection} deleting={bulkDeleting} />}
             <table className="data-table">
               <thead>
                 <tr>
+                  {canBulkDelete && <BulkCheckboxHeader allSelected={allSelected} someSelected={someSelected} onToggle={toggleAll} />}
                   {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
                   <th>Cert.</th>
                   <th>Acciones</th>
@@ -648,6 +658,7 @@ const TecnicosAplicadores = () => {
                   const estado = getEstadoBadge(tecnico);
                   return (
                     <tr key={tecnico._id}>
+                      {canBulkDelete && <BulkCheckboxCell id={tecnico._id} selected={selectedIds.has(tecnico._id)} onToggle={toggleOne} />}
                       {visibleColumns.map(col => {
                         switch (col.id) {
                           case 'nombre_completo': return <td key="nombre_completo" style={{ fontWeight: '500' }}>{tecnico.nombre} {tecnico.apellidos}</td>;
