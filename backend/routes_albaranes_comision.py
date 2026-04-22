@@ -169,6 +169,23 @@ async def list_albaranes_comision(
     }
 
 
+@router.get("/resumen-pdf")
+async def factura_resumen_pdf_route(
+    agente_id: str = Query(..., description="Agente a facturar"),
+    fecha_desde: Optional[str] = Query(None),
+    fecha_hasta: Optional[str] = Query(None),
+    estado: Optional[str] = Query(None),
+    current_user: dict = Depends(RequireAlbaranesAccess),
+):
+    return await factura_resumen_pdf(
+        agente_id=agente_id,
+        fecha_desde=fecha_desde,
+        fecha_hasta=fecha_hasta,
+        estado=estado,
+        current_user=current_user,
+    )
+
+
 @router.get("/{acm_id}")
 async def get_albaran_comision(
     acm_id: str,
@@ -549,5 +566,172 @@ async def albaran_comision_pdf(
         media_type="application/pdf",
         headers={
             "Content-Disposition": f'inline; filename="albaran_comision_{numero_acm}.pdf"'
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
+# Factura-Resumen mensual (agrupada por agente + periodo)
+# ---------------------------------------------------------------------------
+
+async def factura_resumen_pdf(
+    agente_id: str = Query(..., description="Agente a facturar"),
+    fecha_desde: Optional[str] = Query(None, description="YYYY-MM-DD"),
+    fecha_hasta: Optional[str] = Query(None, description="YYYY-MM-DD"),
+    estado: Optional[str] = Query(None, description="pendiente / pagada / anulada"),
+    current_user: dict = Depends(RequireAlbaranesAccess),
+):
+    """
+    Factura-resumen de un agente en un periodo:
+    un único PDF con todas las líneas ACM agrupadas.
+    """
+    query: dict = {"agente_id": agente_id}
+    if fecha_desde or fecha_hasta:
+        date_filter: dict = {}
+        if fecha_desde:
+            date_filter["$gte"] = fecha_desde
+        if fecha_hasta:
+            date_filter["$lte"] = fecha_hasta
+        query["fecha_albaran"] = date_filter
+    if estado:
+        query["estado"] = estado
+
+    cursor = comisiones_collection.find(query).sort("fecha_albaran", 1)
+    rows: List[dict] = []
+    async for doc in cursor:
+        numero = await _ensure_numero_acm(doc)
+        if numero:
+            doc["numero_albaran_comision"] = numero
+        rows.append(doc)
+
+    if not rows:
+        raise HTTPException(status_code=404, detail="No hay albaranes de comisión en este periodo")
+
+    agente_nombre = rows[0].get("agente_nombre") or "Agente"
+    tipo_agente = rows[0].get("tipo_agente") or ""
+    total_kilos = sum(float(r.get("kilos_netos") or 0) for r in rows)
+    total_importe = sum(float(r.get("comision_importe") or 0) for r in rows)
+
+    buf = io.BytesIO()
+    pdf = SimpleDocTemplate(
+        buf,
+        pagesize=A4,
+        topMargin=15 * mm,
+        bottomMargin=15 * mm,
+        leftMargin=15 * mm,
+        rightMargin=15 * mm,
+        title=f"Factura Resumen {agente_nombre}",
+    )
+    styles = getSampleStyleSheet()
+    title = ParagraphStyle(
+        "fr_title", parent=styles["Heading1"], fontSize=16,
+        textColor=colors.HexColor("#1e40af"), spaceAfter=2,
+    )
+    subtitle = ParagraphStyle(
+        "fr_sub", parent=styles["Normal"], fontSize=9,
+        textColor=colors.HexColor("#6b7280"),
+    )
+
+    elements: list = []
+    elements.append(Paragraph("FACTURA RESUMEN DE COMISIONES", title))
+    periodo_label = (
+        f"{fecha_desde or '—'} → {fecha_hasta or 'Hoy'}"
+        if (fecha_desde or fecha_hasta) else "Todo el histórico"
+    )
+    elements.append(Paragraph(
+        f"<b>Agente:</b> {agente_nombre} &nbsp;&nbsp; "
+        f"<b>Tipo:</b> {tipo_agente.capitalize()} &nbsp;&nbsp; "
+        f"<b>Periodo:</b> {periodo_label} &nbsp;&nbsp; "
+        f"<b>Líneas:</b> {len(rows)}",
+        subtitle,
+    ))
+    elements.append(Spacer(1, 10))
+
+    # Tabla de lineas
+    header = [
+        "Nº ACM", "Fecha", "Albarán origen", "Cultivo",
+        "Kg Netos", "€/kg", "Comisión", "Importe (€)", "Estado",
+    ]
+    data = [header]
+    for r in rows:
+        comision_lbl = (
+            f"{format_number_es(r.get('comision_valor') or 0)} %"
+            if r.get("comision_tipo") == "porcentaje"
+            else f"{format_number_es(r.get('comision_valor') or 0, 4)} €/kg"
+        )
+        data.append([
+            r.get("numero_albaran_comision") or "-",
+            r.get("fecha_albaran") or "-",
+            r.get("numero_albaran") or "-",
+            (r.get("cultivo") or "-")[:14],
+            format_number_es(r.get("kilos_netos") or 0, 0),
+            format_number_es(r.get("precio_kg") or 0, 4),
+            comision_lbl,
+            format_number_es(r.get("comision_importe") or 0, 2),
+            (r.get("estado") or "-").capitalize(),
+        ])
+
+    # Fila total
+    data.append([
+        "", "", "", "TOTAL",
+        format_number_es(total_kilos, 0), "", "",
+        format_number_es(total_importe, 2), "",
+    ])
+
+    col_widths = [24*mm, 21*mm, 24*mm, 24*mm, 20*mm, 15*mm, 20*mm, 22*mm, 20*mm]
+    table = Table(data, colWidths=col_widths, repeatRows=1)
+    table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1e40af")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, 0), 8.5),
+        ("FONTSIZE", (0, 1), (-1, -1), 8),
+        ("GRID", (0, 0), (-1, -1), 0.3, colors.HexColor("#d1d5db")),
+        ("ALIGN", (4, 1), (7, -1), "RIGHT"),
+        ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -2), [colors.white, colors.HexColor("#f9fafb")]),
+        # Fila total
+        ("BACKGROUND", (0, -1), (-1, -1), colors.HexColor("#d1fae5")),
+        ("FONTNAME", (0, -1), (-1, -1), "Helvetica-Bold"),
+        ("TEXTCOLOR", (0, -1), (-1, -1), colors.HexColor("#065f46")),
+        ("LINEABOVE", (0, -1), (-1, -1), 1.2, colors.HexColor("#065f46")),
+    ]))
+    elements.append(table)
+
+    elements.append(Spacer(1, 14))
+    # Cuadro total destacado
+    total_box = Table([[
+        Paragraph("<b>TOTAL A LIQUIDAR AL AGENTE</b>", styles["Normal"]),
+        Paragraph(
+            f"<b>{format_number_es(total_importe, 2)} €</b>",
+            ParagraphStyle("tb", parent=styles["Normal"], alignment=2, fontSize=15),
+        ),
+    ]], colWidths=[130 * mm, 60 * mm])
+    total_box.setStyle(TableStyle([
+        ("BOX", (0, 0), (-1, -1), 1.2, colors.HexColor("#065f46")),
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#d1fae5")),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 12),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+        ("TOPPADDING", (0, 0), (-1, -1), 10),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+    ]))
+    elements.append(total_box)
+
+    elements.append(Spacer(1, 10))
+    elements.append(Paragraph(
+        f"Documento generado el {datetime.now().strftime('%d/%m/%Y %H:%M')}",
+        subtitle,
+    ))
+
+    pdf.build(elements)
+    buf.seek(0)
+    safe_nombre = "".join(ch if ch.isalnum() else "_" for ch in agente_nombre)[:40]
+    return StreamingResponse(
+        buf,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'inline; filename="factura_resumen_{safe_nombre}_{fecha_desde or "inicio"}_{fecha_hasta or "hoy"}.pdf"'
         },
     )

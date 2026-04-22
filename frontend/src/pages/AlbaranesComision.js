@@ -3,7 +3,7 @@ import api, { BACKEND_URL } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import {
   FileText, Search, Download, RotateCw, Euro, Package,
-  TrendingUp, Users, Filter, Calendar, Loader2,
+  TrendingUp, Users, Filter, Calendar, Loader2, Receipt, X,
 } from 'lucide-react';
 import { formatEuro, formatKg, formatNumber } from '../utils/format';
 import '../App.css';
@@ -24,6 +24,22 @@ const AlbaranesComision = () => {
     fecha_hasta: '',
   });
   const [search, setSearch] = useState('');
+
+  // Modal factura-resumen
+  const [showResumenModal, setShowResumenModal] = useState(false);
+  const [resumenForm, setResumenForm] = useState({ agente_id: '', fecha_desde: '', fecha_hasta: '' });
+  const [generatingResumen, setGeneratingResumen] = useState(false);
+
+  // Lista unica de agentes a partir de los ACM cargados (para selector)
+  const agentesDisponibles = useMemo(() => {
+    const map = new Map();
+    albaranes.forEach(a => {
+      if (a.agente_id && !map.has(a.agente_id)) {
+        map.set(a.agente_id, { id: a.agente_id, nombre: a.agente_nombre || 'Agente', tipo: a.tipo_agente });
+      }
+    });
+    return Array.from(map.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
+  }, [albaranes]);
 
   const fetchAlbaranes = useCallback(async () => {
     setLoading(true);
@@ -87,6 +103,44 @@ const AlbaranesComision = () => {
     }
   };
 
+  const handleGenerarResumen = async (e) => {
+    e.preventDefault();
+    if (!resumenForm.agente_id) {
+      window.alert('Selecciona un agente');
+      return;
+    }
+    setGeneratingResumen(true);
+    try {
+      const params = new URLSearchParams({ agente_id: resumenForm.agente_id });
+      if (resumenForm.fecha_desde) params.append('fecha_desde', resumenForm.fecha_desde);
+      if (resumenForm.fecha_hasta) params.append('fecha_hasta', resumenForm.fecha_hasta);
+      const resp = await fetch(`${BACKEND_URL}/api/albaranes-comision/resumen-pdf?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!resp.ok) {
+        const data = await resp.json().catch(() => ({}));
+        window.alert(data.detail || 'No hay albaranes de comisión en este periodo');
+        return;
+      }
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const agenteNombre = agentesDisponibles.find(x => x.id === resumenForm.agente_id)?.nombre || 'agente';
+      const safeName = agenteNombre.replace(/[^a-z0-9]/gi, '_');
+      a.href = url;
+      a.download = `factura_resumen_${safeName}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      setShowResumenModal(false);
+    } catch (err) {
+      window.alert('Error al generar la factura-resumen');
+    } finally {
+      setGeneratingResumen(false);
+    }
+  };
+
   const filteredAlbaranes = useMemo(() => albaranes, [albaranes]);
 
   const kpiCard = (icon, value, label, color) => (
@@ -109,15 +163,32 @@ const AlbaranesComision = () => {
             Documentos de comisión generados automáticamente para cada albarán con agente comisionista.
           </p>
         </div>
-        <button
-          className="btn btn-secondary"
-          onClick={handleRegenerar}
-          disabled={regenerating}
-          data-testid="btn-regenerar-acm"
-        >
-          {regenerating ? <Loader2 className="animate-spin" size={16} /> : <RotateCw size={16} />}
-          {regenerating ? ' Regenerando...' : ' Regenerar desde albaranes'}
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              setResumenForm({
+                agente_id: agentesDisponibles[0]?.id || '',
+                fecha_desde: filters.fecha_desde,
+                fecha_hasta: filters.fecha_hasta,
+              });
+              setShowResumenModal(true);
+            }}
+            data-testid="btn-factura-resumen"
+            title="Generar factura-resumen mensual para un agente"
+          >
+            <Receipt size={16} style={{ marginRight: '0.35rem' }} /> Factura-Resumen
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={handleRegenerar}
+            disabled={regenerating}
+            data-testid="btn-regenerar-acm"
+          >
+            {regenerating ? <Loader2 className="animate-spin" size={16} /> : <RotateCw size={16} />}
+            {regenerating ? ' Regenerando...' : ' Regenerar desde albaranes'}
+          </button>
+        </div>
       </div>
 
       {/* KPIs */}
@@ -253,6 +324,81 @@ const AlbaranesComision = () => {
           )}
         </div>
       </div>
+
+      {/* Modal Factura-Resumen */}
+      {showResumenModal && (
+        <div
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', backdropFilter: 'blur(4px)' }}
+          onClick={() => setShowResumenModal(false)}
+        >
+          <div
+            className="card"
+            style={{ maxWidth: '520px', width: '100%', padding: '1.5rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '2px solid hsl(var(--border))' }}>
+              <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Receipt size={20} style={{ color: '#2563eb' }} /> Factura-Resumen de Comisiones
+              </h2>
+              <button type="button" onClick={() => setShowResumenModal(false)} className="config-modal-close-btn" data-testid="btn-close-resumen">
+                <X size={18} />
+              </button>
+            </div>
+            <p style={{ fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))', marginTop: 0 }}>
+              Genera un único PDF con todas las comisiones del agente en el periodo indicado (útil para contabilidad mensual).
+            </p>
+            <form onSubmit={handleGenerarResumen} style={{ display: 'grid', gap: '0.75rem', marginTop: '0.75rem' }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Agente *</label>
+                <select
+                  className="form-input"
+                  value={resumenForm.agente_id}
+                  onChange={(e) => setResumenForm({ ...resumenForm, agente_id: e.target.value })}
+                  required
+                  data-testid="select-resumen-agente"
+                >
+                  <option value="">Seleccionar agente...</option>
+                  {agentesDisponibles.map(a => (
+                    <option key={a.id} value={a.id}>{a.nombre} — {a.tipo}</option>
+                  ))}
+                </select>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Desde</label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    value={resumenForm.fecha_desde}
+                    onChange={(e) => setResumenForm({ ...resumenForm, fecha_desde: e.target.value })}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Hasta</label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    value={resumenForm.fecha_hasta}
+                    onChange={(e) => setResumenForm({ ...resumenForm, fecha_hasta: e.target.value })}
+                  />
+                </div>
+              </div>
+              <small style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.75rem' }}>
+                Tip: deja ambas fechas vacías para incluir todo el histórico del agente.
+              </small>
+              <div style={{ borderTop: '1px solid hsl(var(--border))', paddingTop: '1rem', marginTop: '0.5rem', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowResumenModal(false)} data-testid="btn-cancelar-resumen">
+                  Cancelar
+                </button>
+                <button type="submit" className="btn btn-primary" disabled={generatingResumen} data-testid="btn-descargar-resumen">
+                  {generatingResumen ? <Loader2 className="animate-spin" size={14} /> : <Download size={14} />}
+                  {generatingResumen ? ' Generando...' : ' Descargar PDF'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
