@@ -1125,10 +1125,31 @@ async def liquidar_pendientes_agente(
             fecha_query["$lte"] = fecha_hasta
         query["fecha_albaran"] = fecha_query
 
-    # Sumar importe antes de actualizar para devolver feedback
+    # Recolectar info antes de actualizar para devolver feedback e
+    # historico de liquidaciones.
     importe_total = 0.0
-    async for c in comisiones_collection.find(query, {"_id": 0, "comision_importe": 1}):
+    ids_afectados: list = []
+    numeros_acm: list = []
+    agente_nombre = None
+    tipo_agente = None
+    async for c in comisiones_collection.find(
+        query,
+        {
+            "_id": 1,
+            "comision_importe": 1,
+            "numero_albaran_comision": 1,
+            "agente_nombre": 1,
+            "tipo_agente": 1,
+        },
+    ):
         importe_total += float(c.get("comision_importe") or 0)
+        ids_afectados.append(str(c["_id"]))
+        if c.get("numero_albaran_comision"):
+            numeros_acm.append(c["numero_albaran_comision"])
+        if not agente_nombre and c.get("agente_nombre"):
+            agente_nombre = c["agente_nombre"]
+        if not tipo_agente and c.get("tipo_agente"):
+            tipo_agente = c["tipo_agente"]
 
     result = await comisiones_collection.update_many(
         query,
@@ -1141,10 +1162,64 @@ async def liquidar_pendientes_agente(
         }
     )
 
+    # Registrar en el historico solo si hay algo liquidado
+    if result.modified_count > 0:
+        liquidaciones_hist = db["liquidaciones_historico"]
+        await liquidaciones_hist.insert_one({
+            "agente_id": agente_id,
+            "agente_nombre": agente_nombre or "Agente",
+            "tipo_agente": tipo_agente,
+            "fecha_liquidacion": datetime.now(),
+            "fecha_desde": fecha_desde,
+            "fecha_hasta": fecha_hasta,
+            "num_acm": result.modified_count,
+            "numeros_acm": numeros_acm,
+            "ids_comisiones": ids_afectados,
+            "importe_total": round(importe_total, 2),
+            "usuario": current_user.get("email", "unknown"),
+        })
+
     return {
         "success": True,
         "liquidadas": result.modified_count,
         "importe_total": round(importe_total, 2)
+    }
+
+
+@router.get("/comisiones-generadas/liquidaciones-historico")
+async def listar_liquidaciones_historico(
+    agente_id: Optional[str] = None,
+    fecha_desde: Optional[str] = None,
+    fecha_hasta: Optional[str] = None,
+    current_user: dict = Depends(RequireAlbaranesAccess)
+):
+    """Histórico de liquidaciones realizadas a agentes (trazabilidad contable)."""
+    liquidaciones_hist = db["liquidaciones_historico"]
+    query: dict = {}
+    if agente_id:
+        query["agente_id"] = agente_id
+    if fecha_desde or fecha_hasta:
+        rng: dict = {}
+        if fecha_desde:
+            from datetime import datetime as _dt
+            rng["$gte"] = _dt.fromisoformat(fecha_desde)
+        if fecha_hasta:
+            from datetime import datetime as _dt
+            rng["$lte"] = _dt.fromisoformat(fecha_hasta + "T23:59:59")
+        query["fecha_liquidacion"] = rng
+    cursor = liquidaciones_hist.find(query).sort("fecha_liquidacion", -1)
+    items = []
+    async for d in cursor:
+        items.append(serialize_doc(d))
+    total_importe = sum(float(i.get("importe_total") or 0) for i in items)
+    total_acm = sum(int(i.get("num_acm") or 0) for i in items)
+    return {
+        "liquidaciones": items,
+        "totales": {
+            "count": len(items),
+            "importe_total": round(total_importe, 2),
+            "num_acm_total": total_acm,
+        },
     }
 
 

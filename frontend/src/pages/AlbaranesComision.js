@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import {
   FileText, Search, Download, RotateCw, Euro, Package,
   TrendingUp, Users, Filter, Calendar, Loader2, Receipt, X, CheckCircle,
+  History, Clock, User as UserIcon,
 } from 'lucide-react';
 import { formatEuro, formatKg, formatNumber } from '../utils/format';
 import '../App.css';
@@ -29,6 +30,12 @@ const AlbaranesComision = () => {
   const [showResumenModal, setShowResumenModal] = useState(false);
   const [resumenForm, setResumenForm] = useState({ agente_id: '', fecha_desde: '', fecha_hasta: '' });
   const [generatingResumen, setGeneratingResumen] = useState(false);
+
+  // Vista / historico liquidaciones
+  const [activeTab, setActiveTab] = useState('albaranes'); // albaranes | historico
+  const [historico, setHistorico] = useState([]);
+  const [historicoTotales, setHistoricoTotales] = useState({ count: 0, importe_total: 0, num_acm_total: 0 });
+  const [loadingHistorico, setLoadingHistorico] = useState(false);
 
   // Lista unica de agentes a partir de los ACM cargados (para selector)
   const agentesDisponibles = useMemo(() => {
@@ -64,6 +71,25 @@ const AlbaranesComision = () => {
   useEffect(() => {
     fetchAlbaranes();
   }, [fetchAlbaranes]);
+
+  const fetchHistorico = useCallback(async () => {
+    setLoadingHistorico(true);
+    try {
+      const res = await api.get('/api/comisiones-generadas/liquidaciones-historico');
+      setHistorico(res.liquidaciones || []);
+      setHistoricoTotales(res.totales || { count: 0, importe_total: 0, num_acm_total: 0 });
+    } catch (err) {
+      console.error('Error cargando histórico de liquidaciones', err);
+    } finally {
+      setLoadingHistorico(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'historico') {
+      fetchHistorico();
+    }
+  }, [activeTab, fetchHistorico]);
 
   const handleRegenerar = async () => {
     if (!window.confirm('¿Generar automáticamente los albaranes de comisión que falten para los albaranes existentes? No se modifican los ya pagados.')) return;
@@ -165,6 +191,7 @@ const AlbaranesComision = () => {
       const imp = res?.importe_total ?? res?.data?.importe_total ?? 0;
       window.alert(`Liquidadas ${n} ACM del agente "${agenteNombre}". Importe total: ${formatEuro(imp)}`);
       await fetchAlbaranes();
+      await fetchHistorico();
       setShowResumenModal(false);
     } catch (err) {
       window.alert('Error al marcar como pagadas');
@@ -223,6 +250,45 @@ const AlbaranesComision = () => {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: 0, borderBottom: '2px solid hsl(var(--border))', marginBottom: '1.25rem' }}>
+        <button
+          type="button"
+          onClick={() => setActiveTab('albaranes')}
+          data-testid="tab-albaranes"
+          style={{
+            display: 'flex', alignItems: 'center', gap: '0.4rem',
+            padding: '0.65rem 1.1rem', fontSize: '0.85rem',
+            fontWeight: activeTab === 'albaranes' ? '700' : '500',
+            color: activeTab === 'albaranes' ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))',
+            background: 'none', border: 'none',
+            borderBottom: activeTab === 'albaranes' ? '2px solid hsl(var(--primary))' : '2px solid transparent',
+            cursor: 'pointer', marginBottom: '-2px',
+          }}
+        >
+          <FileText size={14} /> Albaranes de Comisión
+          <span style={{ fontSize: '0.7rem', fontWeight: '500', color: 'hsl(var(--muted-foreground))' }}>({totales.count})</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('historico')}
+          data-testid="tab-historico"
+          style={{
+            display: 'flex', alignItems: 'center', gap: '0.4rem',
+            padding: '0.65rem 1.1rem', fontSize: '0.85rem',
+            fontWeight: activeTab === 'historico' ? '700' : '500',
+            color: activeTab === 'historico' ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))',
+            background: 'none', border: 'none',
+            borderBottom: activeTab === 'historico' ? '2px solid hsl(var(--primary))' : '2px solid transparent',
+            cursor: 'pointer', marginBottom: '-2px',
+          }}
+        >
+          <History size={14} /> Histórico Liquidaciones
+          <span style={{ fontSize: '0.7rem', fontWeight: '500', color: 'hsl(var(--muted-foreground))' }}>({historicoTotales.count})</span>
+        </button>
+      </div>
+
+      {activeTab === 'albaranes' && (<>
       {/* KPIs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem', marginBottom: '1.25rem' }}>
         {kpiCard(<FileText size={22} />, totales.count, 'Nº Albaranes de Comisión', '#2563eb')}
@@ -356,6 +422,86 @@ const AlbaranesComision = () => {
           )}
         </div>
       </div>
+
+      </>)}
+
+      {activeTab === 'historico' && (
+        <div>
+          {/* KPIs Histórico */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '1.25rem' }}>
+            {kpiCard(<History size={22} />, historicoTotales.count, 'Liquidaciones Registradas', '#2563eb')}
+            {kpiCard(<CheckCircle size={22} />, historicoTotales.num_acm_total, 'ACM Liquidadas (Total)', '#10b981')}
+            {kpiCard(<Euro size={22} />, formatEuro(historicoTotales.importe_total), 'Importe Liquidado (Total)', '#8b5cf6')}
+          </div>
+
+          <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+            <div className="table-container" style={{ maxHeight: '65vh', overflow: 'auto' }}>
+              {loadingHistorico ? (
+                <div style={{ padding: '2rem', textAlign: 'center' }}><Loader2 className="animate-spin" /></div>
+              ) : historico.length === 0 ? (
+                <div style={{ padding: '3rem', textAlign: 'center', color: 'hsl(var(--muted-foreground))' }}>
+                  <Clock size={42} style={{ marginBottom: '0.75rem', opacity: 0.5 }} />
+                  <div style={{ fontWeight: '600', marginBottom: '0.3rem' }}>Aún no hay liquidaciones registradas</div>
+                  <div style={{ fontSize: '0.85rem' }}>
+                    El historial se llena automáticamente cada vez que pulses <b>"Marcar todo como pagado"</b> en la factura-resumen de un agente o <b>"Liquidar Pendientes"</b> en Comisiones Auto.
+                  </div>
+                </div>
+              ) : (
+                <table style={{ fontSize: '0.85rem', width: '100%' }}>
+                  <thead>
+                    <tr style={{ background: 'hsl(var(--muted))', position: 'sticky', top: 0, zIndex: 2 }}>
+                      <th>Fecha Liquidación</th>
+                      <th>Agente</th>
+                      <th>Tipo</th>
+                      <th>Periodo</th>
+                      <th style={{ textAlign: 'right' }}>Nº ACM</th>
+                      <th style={{ textAlign: 'right' }}>Importe Liquidado</th>
+                      <th>Usuario</th>
+                      <th>Nº ACM incluidos</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {historico.map((h) => {
+                      const fecha = h.fecha_liquidacion
+                        ? new Date(h.fecha_liquidacion).toLocaleString('es-ES')
+                        : '-';
+                      const periodo = (h.fecha_desde || h.fecha_hasta)
+                        ? `${h.fecha_desde || '—'} → ${h.fecha_hasta || 'Hoy'}`
+                        : 'Todo el histórico';
+                      const nums = Array.isArray(h.numeros_acm) ? h.numeros_acm : [];
+                      const numsDisplay = nums.slice(0, 5).join(', ') + (nums.length > 5 ? ` +${nums.length - 5}` : '');
+                      return (
+                        <tr key={h._id} data-testid={`hist-row-${h._id}`}>
+                          <td style={{ whiteSpace: 'nowrap' }}>{fecha}</td>
+                          <td style={{ fontWeight: '600' }}>{h.agente_nombre}</td>
+                          <td>
+                            <span style={{
+                              padding: '0.125rem 0.4rem', borderRadius: '4px', fontSize: '0.7rem',
+                              backgroundColor: h.tipo_agente === 'compra' ? '#dbeafe' : '#d1fae5',
+                              color: h.tipo_agente === 'compra' ? '#1e40af' : '#065f46',
+                            }}>{h.tipo_agente === 'compra' ? 'Compra' : (h.tipo_agente === 'venta' ? 'Venta' : '-')}</span>
+                          </td>
+                          <td style={{ fontSize: '0.8rem' }}>{periodo}</td>
+                          <td style={{ textAlign: 'right', fontWeight: '600' }}>{h.num_acm}</td>
+                          <td style={{ textAlign: 'right', fontWeight: '700', color: '#065f46' }}>{formatEuro(h.importe_total)}</td>
+                          <td style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                              <UserIcon size={11} />{h.usuario}
+                            </span>
+                          </td>
+                          <td style={{ fontSize: '0.7rem', color: '#6b7280', maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={nums.join(', ')}>
+                            {numsDisplay || '—'}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal Factura-Resumen */}
       {showResumenModal && (
