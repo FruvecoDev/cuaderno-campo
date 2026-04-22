@@ -1099,6 +1099,50 @@ async def update_comision_estado(
     return {"success": True, "data": serialize_doc(updated)}
 
 
+@router.post("/comisiones-generadas/liquidar-agente/{agente_id}")
+async def liquidar_pendientes_agente(
+    agente_id: str,
+    fecha_desde: Optional[str] = None,
+    fecha_hasta: Optional[str] = None,
+    current_user: dict = Depends(RequireEdit)
+):
+    """
+    Marca como 'pagada' todas las comisiones 'pendiente' de un agente.
+    Opcionalmente acota por fecha_albaran (fecha_desde / fecha_hasta) para
+    liquidar solo las del periodo indicado.
+    """
+    query = {"agente_id": agente_id, "estado": "pendiente"}
+    if fecha_desde or fecha_hasta:
+        fecha_query = {}
+        if fecha_desde:
+            fecha_query["$gte"] = fecha_desde
+        if fecha_hasta:
+            fecha_query["$lte"] = fecha_hasta
+        query["fecha_albaran"] = fecha_query
+
+    # Sumar importe antes de actualizar para devolver feedback
+    importe_total = 0.0
+    async for c in comisiones_collection.find(query, {"_id": 0, "comision_importe": 1}):
+        importe_total += float(c.get("comision_importe") or 0)
+
+    result = await comisiones_collection.update_many(
+        query,
+        {
+            "$set": {
+                "estado": "pagada",
+                "updated_at": datetime.now(),
+                "updated_by": current_user.get("email", "unknown")
+            }
+        }
+    )
+
+    return {
+        "success": True,
+        "liquidadas": result.modified_count,
+        "importe_total": round(importe_total, 2)
+    }
+
+
 @router.delete("/comisiones-generadas/{comision_id}")
 async def delete_comision_generada(
     comision_id: str,

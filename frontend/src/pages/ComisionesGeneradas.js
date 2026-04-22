@@ -102,6 +102,32 @@ const ComisionesGeneradas = () => {
     }
   };
 
+  const [liquidandoAgenteId, setLiquidandoAgenteId] = useState(null);
+  const handleLiquidarAgente = async (agente) => {
+    const periodoTxt = (filters.fecha_desde || filters.fecha_hasta)
+      ? ` del periodo ${filters.fecha_desde || '—'} → ${filters.fecha_hasta || 'Hoy'}`
+      : '';
+    if (!window.confirm(`¿Marcar como PAGADAS todas las comisiones pendientes de "${agente.agente_nombre}"${periodoTxt}?\n\nEsta acción se puede revertir comisión a comisión.`)) {
+      return;
+    }
+    setLiquidandoAgenteId(agente.agente_id);
+    try {
+      const params = new URLSearchParams();
+      if (filters.fecha_desde) params.append('fecha_desde', filters.fecha_desde);
+      if (filters.fecha_hasta) params.append('fecha_hasta', filters.fecha_hasta);
+      const qs = params.toString() ? `?${params.toString()}` : '';
+      const res = await api.post(`/api/comisiones-generadas/liquidar-agente/${agente.agente_id}${qs}`);
+      const n = res?.liquidadas ?? res?.data?.liquidadas ?? 0;
+      const imp = res?.importe_total ?? res?.data?.importe_total ?? 0;
+      await fetchComisiones();
+      window.alert(`Liquidadas ${n} comisión(es) del agente "${agente.agente_nombre}". Importe total: €${(imp).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+    } catch (err) {
+      setError('Error al liquidar las comisiones del agente');
+    } finally {
+      setLiquidandoAgenteId(null);
+    }
+  };
+
   // Agrupar comisiones por agente
   const comisionesPorAgente = useMemo(() => {
     const grouped = {};
@@ -581,6 +607,34 @@ const ComisionesGeneradas = () => {
                       <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', fontWeight: '600' }}>Comisión Total</div>
                       <div style={{ fontSize: '1.25rem', fontWeight: '700', color: '#8b5cf6' }}>€{formatNumber(grupo.totales.comision_total)}</div>
                     </div>
+                    {grupo.totales.comision_pendiente > 0 && (
+                      <button
+                        type="button"
+                        data-testid={`btn-liquidar-${grupo.agente_id}`}
+                        onClick={(e) => { e.stopPropagation(); handleLiquidarAgente(grupo); }}
+                        disabled={liquidandoAgenteId === grupo.agente_id}
+                        title="Marcar todas las pendientes como pagadas"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                          padding: '0.5rem 0.9rem',
+                          fontSize: '0.8rem',
+                          fontWeight: '600',
+                          background: liquidandoAgenteId === grupo.agente_id ? '#a7f3d0' : '#10b981',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          cursor: liquidandoAgenteId === grupo.agente_id ? 'not-allowed' : 'pointer',
+                          boxShadow: '0 2px 4px rgba(16,185,129,0.3)',
+                          whiteSpace: 'nowrap',
+                          transition: 'background 0.2s'
+                        }}
+                      >
+                        <Check size={14} />
+                        {liquidandoAgenteId === grupo.agente_id ? 'Liquidando...' : 'Liquidar Pendientes'}
+                      </button>
+                    )}
                     {expandedAgente === grupo.agente_id ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                   </div>
                 </div>
