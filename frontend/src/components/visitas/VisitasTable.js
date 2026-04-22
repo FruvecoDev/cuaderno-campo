@@ -1,14 +1,23 @@
 import React from 'react';
 import { Edit2, Trash2, Camera } from 'lucide-react';
+import { BulkCheckboxHeader, BulkCheckboxCell } from '../BulkActions';
 
 export const VisitasTable = ({
   filteredVisitas, loading, hasActiveFilters,
   tableConfig, canEdit, canDelete,
-  handleEdit, handleDelete, setViewingVisita
+  handleEdit, handleDelete, setViewingVisita,
+  canBulkDelete = false,
+  selectedIds = new Set(),
+  onToggleOne,
+  onToggleAll,
+  allSelected = false,
+  someSelected = false,
+  bulkBar = null,
 }) => {
   return (
     <div className="card">
       <h2 className="card-title">Lista de Visitas ({filteredVisitas.length})</h2>
+      {bulkBar}
       {loading ? (
         <p>Cargando visitas...</p>
       ) : filteredVisitas.length === 0 ? (
@@ -18,6 +27,13 @@ export const VisitasTable = ({
           <table data-testid="visitas-table">
             <thead>
               <tr>
+                {canBulkDelete && (
+                  <BulkCheckboxHeader
+                    allSelected={allSelected}
+                    someSelected={someSelected}
+                    onToggle={onToggleAll}
+                  />
+                )}
                 {tableConfig.objetivo ? <th>Objetivo</th> : null}
                 {tableConfig.parcela ? <th>Parcela</th> : null}
                 {tableConfig.proveedor ? <th>Proveedor</th> : null}
@@ -30,7 +46,14 @@ export const VisitasTable = ({
             </thead>
             <tbody>
               {filteredVisitas.map((visita) => (
-                <tr key={visita._id}>
+                <tr key={visita._id} style={selectedIds.has(visita._id) ? { backgroundColor: 'hsl(var(--primary) / 0.05)' } : undefined}>
+                  {canBulkDelete && (
+                    <BulkCheckboxCell
+                      id={visita._id}
+                      selected={selectedIds.has(visita._id)}
+                      onToggle={onToggleOne}
+                    />
+                  )}
                   {tableConfig.objetivo ? (
                     <td className="font-semibold">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

@@ -101,6 +101,11 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - Filas seleccionadas resaltadas sutilmente. Modal de confirmación con mensaje "Se eliminarán N registros".
 - Protegido por permiso backend `can_bulk_delete` (ya existente en rbac_guards y /api/bulk-delete/{module}).
 
+### Visitas: Bulk Delete - DONE (2026-04-22)
+- Visitas.js + VisitasTable.js integrados con el mismo patrón. Nueva prop `bulkBar` en VisitasTable para renderizar la BulkActionBar dentro de la card (encima de la tabla) manteniendo cohesión visual.
+- Endpoint `/api/bulk-delete/visitas` ya soportado en routes_bulk.py.
+- Verificado: 25 visitas, selección múltiple, barra de acciones y confirmación funcionando.
+
 ### Albaranes de Comision Module - DONE (2026-04-22)
 - Auto-generates ACMs from purchase/sale albaranes (routes_albaranes_comision.py)
 - Factura-Resumen PDF, Historico Liquidaciones, cross-linking to contracts & albaranes

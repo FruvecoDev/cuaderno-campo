@@ -12,6 +12,7 @@ import { VisitasForm } from '../components/visitas/VisitasForm';
 import { VisitasTable } from '../components/visitas/VisitasTable';
 import { VisitasDetailModal } from '../components/visitas/VisitasDetailModal';
 import { VisitasAnalysisModal } from '../components/visitas/VisitasAnalysisModal';
+import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
 import '../App.css';
 
 // Default configs
@@ -42,7 +43,7 @@ const Visitas = () => {
   const [editingId, setEditingId] = useState(null);
   const [viewingVisita, setViewingVisita] = useState(null);
   const [error, setError] = useState(null);
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   
@@ -276,6 +277,28 @@ const Visitas = () => {
   const toggleFieldConfig = (field) => { setFieldsConfig(prev => ({ ...prev, [field]: !prev[field] })); };
   const toggleTableConfig = (field) => { setTableConfig(prev => ({ ...prev, [field]: !prev[field] })); };
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
+
+  // Bulk delete (seleccion multiple sobre filteredVisitas)
+  const canBulkDelete = !!user?.can_bulk_delete;
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredVisitas);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const handleBulkDelete = async () => {
+    setBulkDeleting(true);
+    try {
+      const res = await bulkDeleteApi('visitas', selectedIds);
+      const r = res?.data ?? res;
+      const deleted = new Set(selectedIds);
+      setVisitas(prev => prev.filter(v => !deleted.has(v._id)));
+      clearSelection();
+      if (r?.deleted_count != null) {
+        window.alert(`${r.deleted_count} visita${r.deleted_count > 1 ? 's' : ''} eliminada${r.deleted_count > 1 ? 's' : ''}.`);
+      }
+    } catch (err) {
+      window.alert(err?.response?.data?.detail || 'Error al eliminar masivamente');
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
   
   const resetForm = () => {
     setFormData({ objetivo: 'Control Rutinario', fecha_visita: new Date().toISOString().split('T')[0], fecha_planificada: '', parcela_id: '', observaciones: '' });
@@ -436,6 +459,20 @@ const Visitas = () => {
         filteredVisitas={filteredVisitas} loading={loading} hasActiveFilters={hasActiveFilters}
         tableConfig={tableConfig} canEdit={canEdit} canDelete={canDelete}
         handleEdit={handleEdit} handleDelete={handleDelete} setViewingVisita={setViewingVisita}
+        canBulkDelete={canBulkDelete}
+        selectedIds={selectedIds}
+        onToggleOne={toggleOne}
+        onToggleAll={toggleAll}
+        allSelected={allSelected}
+        someSelected={someSelected}
+        bulkBar={canBulkDelete && selectedIds.size > 0 ? (
+          <BulkActionBar
+            selectedCount={selectedIds.size}
+            onDelete={handleBulkDelete}
+            onClear={clearSelection}
+            deleting={bulkDeleting}
+          />
+        ) : null}
       />
       
       <VisitasDetailModal
