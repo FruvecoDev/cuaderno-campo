@@ -8,6 +8,7 @@ import syncService from '../services/syncService';
 import offlineDB from '../services/offlineDB';
 import api, { BACKEND_URL } from '../services/api';
 import CalculadoraFitosanitarios from '../components/tratamientos/CalculadoraFitosanitarios';
+import TabbedModal from '../components/TabbedModal';
 import TratamientosKPIs from '../components/tratamientos/TratamientosKPIs';
 import TratamientosFilters from '../components/tratamientos/TratamientosFilters';
 import TratamientosTable from '../components/tratamientos/TratamientosTable';
@@ -800,62 +801,34 @@ const Tratamientos = () => {
       </div>
       
       {showForm && (
-        <div
-          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', backdropFilter: 'blur(4px)' }}
-          onClick={() => handleCancelEdit()}
-        >
-          <div
-            className="card"
-            data-testid="tratamiento-form"
-            style={{ maxWidth: '960px', width: '100%', height: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '2rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '2px solid hsl(var(--border))' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'hsl(142, 76%, 36% / 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Beaker size={20} style={{ color: 'hsl(142, 76%, 36%)' }} />
-                </div>
-                <div>
-                  <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '700' }}>{editingId ? 'Editar' : 'Crear'} Tratamiento</h2>
-                  <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
-                    {formData.tipo_tratamiento ? `${formData.tipo_tratamiento}${formData.subtipo ? ' - ' + formData.subtipo : ''}` : 'Registro fitosanitario / nutrición'}
-                  </span>
-                </div>
-              </div>
-              <button type="button" onClick={() => handleCancelEdit()} className="config-modal-close-btn" data-testid="btn-close-modal-tratamiento">
-                <X size={18} />
+        <TabbedModal
+          open={showForm}
+          onClose={() => handleCancelEdit()}
+          icon={<Beaker size={20} />}
+          iconColor="hsl(142, 76%, 36%)"
+          iconBg="hsl(142, 76%, 36% / 0.1)"
+          title={`${editingId ? 'Editar' : 'Crear'} Tratamiento`}
+          subtitle={formData.tipo_tratamiento ? `${formData.tipo_tratamiento}${formData.subtipo ? ' - ' + formData.subtipo : ''}` : 'Registro fitosanitario / nutrición'}
+          tabs={[
+            { key: 'general', label: 'General', icon: <FileText size={14} /> },
+            { key: 'parcelas', label: 'Parcelas', icon: <MapPin size={14} /> },
+            { key: 'producto', label: 'Producto y Dosis', icon: <Droplets size={14} /> },
+            { key: 'aplicacion', label: 'Aplicación', icon: <Cog size={14} /> },
+          ]}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          onSubmit={handleSubmit}
+          error={error}
+          testIdPrefix="tratamiento"
+          footer={
+            <>
+              <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>Cancelar</button>
+              <button type="submit" className="btn btn-primary" data-testid="btn-guardar-tratamiento">
+                {editingId ? 'Actualizar Tratamiento' : 'Guardar Tratamiento'}
               </button>
-            </div>
-
-            {/* Tabs */}
-            <div style={{ display: 'flex', gap: 0, marginBottom: '1.5rem', borderBottom: '2px solid hsl(var(--border))', overflowX: 'auto' }}>
-              {[
-                { key: 'general', label: 'General', icon: <FileText size={14} /> },
-                { key: 'parcelas', label: 'Parcelas', icon: <MapPin size={14} /> },
-                { key: 'producto', label: 'Producto y Dosis', icon: <Droplets size={14} /> },
-                { key: 'aplicacion', label: 'Aplicación', icon: <Cog size={14} /> },
-              ].map(tab => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => setActiveTab(tab.key)}
-                  data-testid={`tab-${tab.key}`}
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1rem', fontSize: '0.8rem', fontWeight: activeTab === tab.key ? '700' : '500', color: activeTab === tab.key ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))', background: 'none', border: 'none', borderBottom: activeTab === tab.key ? '2px solid hsl(var(--primary))' : '2px solid transparent', cursor: 'pointer', whiteSpace: 'nowrap', marginBottom: '-2px' }}
-                >
-                  {tab.icon}{tab.label}
-                </button>
-              ))}
-            </div>
-
-          <form onSubmit={handleSubmit} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-            <div style={{ flex: 1, overflow: 'auto', paddingRight: '1rem' }}>
-
-            {error && (
-              <div data-testid="modal-error-banner" style={{ marginBottom: '1rem', padding: '0.75rem 1rem', borderRadius: '8px', backgroundColor: 'hsl(var(--destructive) / 0.1)', border: '1px solid hsl(var(--destructive) / 0.4)', color: 'hsl(var(--destructive))', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.88rem', fontWeight: '500' }}>
-                <AlertTriangle size={16} /> {error}
-              </div>
-            )}
+            </>
+          }
+        >
 
             {/* TAB: General */}
             {activeTab === 'general' && (<>
@@ -1322,18 +1295,7 @@ const Tratamientos = () => {
             </div>
             </>)}
 
-            </div>
-
-            {/* Footer fijo */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', paddingTop: '1rem', borderTop: '1px solid hsl(var(--border))', marginTop: '1rem' }}>
-              <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>Cancelar</button>
-              <button type="submit" className="btn btn-primary" data-testid="btn-guardar-tratamiento">
-                {editingId ? 'Actualizar Tratamiento' : 'Guardar Tratamiento'}
-              </button>
-            </div>
-          </form>
-          </div>
-        </div>
+        </TabbedModal>
       )}
       
       <TratamientosTable

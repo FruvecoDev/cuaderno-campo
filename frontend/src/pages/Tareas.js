@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../utils/permissions';
+import TabbedModal from '../components/TabbedModal';
 import '../App.css';
 
 
@@ -604,56 +605,31 @@ const Tareas = () => {
       )}
 
       {/* Formulario - Modal tabbed profesional */}
-      {showForm && (
-        <div
-          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', backdropFilter: 'blur(4px)' }}
-          onClick={() => { setShowForm(false); setEditingId(null); resetForm(); setActiveTab('general'); }}
-        >
-          <div
-            className="card"
-            style={{ maxWidth: '960px', width: '100%', height: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '2rem', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '2px solid hsl(var(--border))' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'hsl(var(--primary) / 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ClipboardList size={20} style={{ color: 'hsl(var(--primary))' }} />
-                </div>
-                <div>
-                  <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '700' }}>{editingId ? 'Editar' : 'Nueva'} Tarea</h2>
-                  <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
-                    {formData.nombre ? `${formData.nombre} — ${formData.prioridad}` : 'Gestión de tareas y subtareas'}
-                  </span>
-                </div>
-              </div>
-              <button type="button" onClick={() => { setShowForm(false); setEditingId(null); resetForm(); setActiveTab('general'); }} className="config-modal-close-btn" data-testid="btn-close-modal-tarea">
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Tabs */}
-            <div style={{ display: 'flex', gap: 0, marginBottom: '1.5rem', borderBottom: '2px solid hsl(var(--border))' }}>
-              {[
-                { key: 'general', label: 'General', icon: <ClipboardList size={14} /> },
-                { key: 'parcelas', label: 'Parcelas y Descripción', icon: <MapPin size={14} /> },
-                { key: 'subtareas', label: 'Subtareas', icon: <CheckSquare size={14} /> },
-                { key: 'costes', label: 'Costes', icon: <Euro size={14} /> },
-              ].map(tab => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => setActiveTab(tab.key)}
-                  data-testid={`tab-${tab.key}`}
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1rem', fontSize: '0.8rem', fontWeight: activeTab === tab.key ? '700' : '500', color: activeTab === tab.key ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))', background: 'none', border: 'none', borderBottom: activeTab === tab.key ? '2px solid hsl(var(--primary))' : '2px solid transparent', cursor: 'pointer', whiteSpace: 'nowrap', marginBottom: '-2px' }}
-                >
-                  {tab.icon}{tab.label}
-                </button>
-              ))}
-            </div>
-
-          <form onSubmit={handleSubmit} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-            <div style={{ flex: 1, overflow: 'auto', paddingRight: '1rem' }}>
+      <TabbedModal
+        open={showForm}
+        onClose={() => { setShowForm(false); setEditingId(null); resetForm(); setActiveTab('general'); }}
+        icon={<ClipboardList size={20} />}
+        iconColor="hsl(var(--primary))"
+        iconBg="hsl(var(--primary) / 0.1)"
+        title={`${editingId ? 'Editar' : 'Nueva'} Tarea`}
+        subtitle={formData.nombre ? `${formData.nombre} — ${formData.prioridad}` : 'Gestión de tareas y subtareas'}
+        tabs={[
+          { key: 'general', label: 'General', icon: <ClipboardList size={14} /> },
+          { key: 'parcelas', label: 'Parcelas y Descripción', icon: <MapPin size={14} /> },
+          { key: 'subtareas', label: 'Subtareas', icon: <CheckSquare size={14} /> },
+          { key: 'costes', label: 'Costes', icon: <Euro size={14} /> },
+        ]}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onSubmit={handleSubmit}
+        testIdPrefix="tarea"
+        footer={
+          <>
+            <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null); resetForm(); setActiveTab('general'); }}>Cancelar</button>
+            <button type="submit" className="btn btn-primary" data-testid="btn-guardar-tarea">{editingId ? 'Guardar' : 'Crear Tarea'}</button>
+          </>
+        }
+      >
 
             {/* TAB: General */}
             {activeTab === 'general' && (
@@ -874,17 +850,7 @@ const Tareas = () => {
             </div>
             )}
 
-            </div>
-
-            {/* Footer fijo */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', paddingTop: '1rem', borderTop: '1px solid hsl(var(--border))', marginTop: '1rem' }}>
-              <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null); resetForm(); setActiveTab('general'); }}>Cancelar</button>
-              <button type="submit" className="btn btn-primary" data-testid="btn-guardar-tarea">{editingId ? 'Guardar' : 'Crear Tarea'}</button>
-            </div>
-          </form>
-          </div>
-        </div>
-      )}
+      </TabbedModal>
 
       {/* Vista */}
       {vista === 'calendario' ? renderCalendario() : (
