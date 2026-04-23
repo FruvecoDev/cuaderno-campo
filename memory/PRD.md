@@ -165,3 +165,12 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - Leyenda vertical a la derecha con iconos circulares y nombres truncados
 - Bar charts: width Y axis 180px, truncado inteligente, ticks rotados en parcelas
 - Tooltips estilo profesional uniforme
+
+### Playwright Visual Smoke Tests for Charts - DONE (2026-02-XX)
+- Nuevo /app/tests/e2e/charts-visual.spec.ts (4 tests, 100% pasando, ~31s)
+- Valida render de .recharts-wrapper + SVG con boundingBox > 0 en Dashboard, Informes Gastos e Informes Ingresos
+- Detecta fallos silenciosos de Recharts (props inválidos) que ESLint no puede capturar
+- Incluye assertion inteligente: pasa cuando hay "No hay datos" (empty state) vs fallo real de render
+- Monitorea errores de consola relacionados con charts en las 3 páginas
+- Script npm: `cd /app/tests && npm run test:charts`
+

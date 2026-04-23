@@ -4,7 +4,8 @@
   "description": "E2E tests for Farm Hub application",
   "scripts": {
     "test": "playwright test",
-    "test:headed": "playwright test --headed"
+    "test:headed": "playwright test --headed",
+    "test:charts": "playwright test charts-visual.spec.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.42.0"
