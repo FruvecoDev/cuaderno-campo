@@ -1,79 +1,103 @@
 # Integración con Sentry (monitoreo de errores)
 
 Sentry captura automáticamente los errores que ocurren en la aplicación en
-producción. Está **completamente desactivado por defecto** — la app funciona
-idéntica sin él.
+producción — tanto en el **frontend React** como en el **backend FastAPI**.
+Está **completamente desactivado por defecto** — la app funciona idéntica sin él.
 
-## 🚀 Activación en 4 pasos (5 minutos)
+## 🚀 Activación en 6 pasos (10 minutos)
 
 ### 1. Crear cuenta gratuita
 - Ve a <https://sentry.io/signup/>.
-- El plan **Developer** es gratis (5.000 errores/mes, suficiente para esta app).
+- Plan **Developer**: gratis, 5.000 errores/mes (más que suficiente para esta app).
 
-### 2. Crear un proyecto
-- En el panel de Sentry: **Projects → Create Project**.
-- Plataforma: **React**.
+### 2. Crear proyecto para el FRONTEND
+- **Projects → Create Project** → Platform **React**.
 - Nombre sugerido: `campo-export-pro-frontend`.
-- Click en **Create Project**.
+- **Settings → Client Keys (DSN)** → copia la URL del DSN.
 
-### 3. Copiar el DSN
-- Dentro del proyecto → **Settings → Client Keys (DSN)**.
-- Copia la URL que aparece, con formato:
-  ```
-  https://xxxxxxxxxxxxxxxx@o000000.ingest.sentry.io/0000000
-  ```
+### 3. Crear proyecto para el BACKEND
+- **Projects → Create Project** → Platform **Python / FastAPI**.
+- Nombre sugerido: `campo-export-pro-backend`.
+- **Settings → Client Keys (DSN)** → copia la URL del DSN (será **distinta** a la del frontend).
 
-### 4. Pegarlo en la app
-Abre `/app/frontend/.env` y pega el DSN:
-
+### 4. Pegar DSN del FRONTEND
+Abre `/app/frontend/.env` y pega:
 ```bash
 REACT_APP_SENTRY_DSN=https://xxxxxxxxxxxxxxxx@o000000.ingest.sentry.io/0000000
 ```
 
-Reinicia el frontend:
+### 5. Pegar DSN del BACKEND
+Abre `/app/backend/.env` y pega:
 ```bash
-sudo supervisorctl restart frontend
+SENTRY_DSN_BACKEND=https://yyyyyyyyyyyyyyyy@o000000.ingest.sentry.io/1111111
 ```
 
-¡Listo! A partir de ahora todos los errores aparecerán en tu dashboard de Sentry.
+### 6. Reiniciar ambos servicios
+```bash
+sudo supervisorctl restart frontend backend
+```
+
+¡Listo! Los dos proyectos recibirán errores de cada capa.
+
+---
 
 ## 🔒 Qué captura
 
-- **Errores de renderizado** de React (pantalla en blanco, etc.)
-- **Excepciones no manejadas** (`throw` sin catch)
-- **Promesas rechazadas** (`Promise.reject`)
-- **Todos los `console.error`** de la app (los 221+ que ya añadimos en los catches)
+### Frontend (React)
+- Errores de renderizado de React (pantalla en blanco, etc.)
+- Excepciones no manejadas (`throw` sin catch)
+- Promesas rechazadas (`Promise.reject`)
+- **Todos los `console.error`** (los 221+ de los catches)
+
+### Backend (FastAPI)
+- Excepciones no manejadas en cualquier endpoint
+- Respuestas **HTTP 5xx** (errores de servidor)
+- Errores en background tasks
+- Errores de conexión a MongoDB, APIs externas (SIGPAC, OpenWeatherMap, etc.)
 
 ## 🛡️ Qué NO se envía (privacidad)
 
-- Headers HTTP (para no filtrar el JWT)
-- Cookies
-- IP del usuario (`sendDefaultPii: false`)
-- Performance traces (no se recopilan métricas de velocidad)
-- Session replays (no se graba la pantalla del trabajador)
+- **Tokens JWT / cookies / API keys** (stripped en `before_send`)
+- IPs de usuarios (`send_default_pii: false`)
+- Performance traces (no hay overhead)
+- Session replay (no se graba la pantalla del trabajador)
 
 ## 🧪 Probar que funciona
 
-1. Añade temporalmente un botón en cualquier página:
-   ```jsx
-   <button onClick={() => { throw new Error("Test Sentry"); }}>
-     Test
-   </button>
-   ```
-2. Haz click → error aparece en Sentry en ~10 segundos.
-3. Elimina el botón.
+### Frontend
+```jsx
+<button onClick={() => { throw new Error("Test Sentry Frontend"); }}>Test</button>
+```
+
+### Backend
+Añade temporalmente en cualquier router:
+```python
+@router.get("/sentry-debug")
+async def sentry_debug():
+    1 / 0  # ZeroDivisionError
+```
+Luego `curl $BACKEND_URL/api/sentry-debug` y verifica en Sentry.
+
+Elimina los tests tras confirmar.
 
 ## 💤 Desactivar temporalmente
 
-Vacía la variable en `.env`:
+Vacía las variables en `.env`:
 ```bash
+# frontend/.env
 REACT_APP_SENTRY_DSN=
+# backend/.env
+SENTRY_DSN_BACKEND=
 ```
-La app no enviará nada más a Sentry y el bundle de producción incluso evitará
-inicializar el SDK (ver `/app/frontend/src/instrument.js`).
+Reinicia y la app deja de enviar.
 
-## 📦 Bundle size
+## 📦 Bundle size / overhead
 
-Impacto en producción: **~40 KB gzipped** (mínimo). Se evitan las integraciones
-pesadas (performance, replay). Si en el futuro quieres tracing distribuido,
-actívalo cambiando `tracesSampleRate: 0.1` en `instrument.js`.
+- **Frontend**: +40 KB gzipped SOLO si DSN activo.
+- **Backend**: overhead negligible (<1 ms por request cuando está activo).
+
+## 🧩 Arquitectura
+
+- Frontend: `/app/frontend/src/instrument.js` (init) + `App.js` (ErrorBoundary).
+- Backend: `/app/backend/sentry_init.py` (init) invocado desde `server.py` **antes** de crear el FastAPI instance.
+

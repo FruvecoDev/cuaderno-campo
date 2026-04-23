@@ -226,15 +226,27 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - Reemplazados por combinación de `_id`/contenido + índice → keys estables que preservan estado entre renders.
 
 ### Sentry Error Monitoring Integration - DONE (2026-02-XX)
+**Frontend (React):**
 - Nuevo `/app/frontend/src/instrument.js`: SDK de Sentry inicializado solo si `REACT_APP_SENTRY_DSN` está seteado (gracefully no-op sin DSN)
 - Configuración minimal: sin performance tracing, sin session replay, sin PII (`sendDefaultPii: false`, headers/cookies stripped en `beforeSend`)
 - CaptureConsole integration: captura automáticamente los 221+ `console.error` de los catch blocks sin tocar ningún archivo
 - Import como primera línea en `index.js` (hooks del runtime antes de React)
 - `<SentryErrorBoundary>` envuelve la App con fallback UI elegante en español para errores de renderizado (solo activo si DSN configurado)
 - Env var `REACT_APP_SENTRY_DSN=` añadida vacía en `/app/frontend/.env`
-- Documentación completa en `/app/docs/SENTRY_SETUP.md` (crear cuenta → copiar DSN → pegar → reiniciar, 5 min)
 - Bundle impact: +40KB gzipped solo si DSN activo
-- Validación: pre-deploy 4/4 verde, 5/5 Playwright, 0 ESLint errors, DSN vacío no afecta la app
+
+**Backend (FastAPI):**
+- Nuevo `/app/backend/sentry_init.py`: init con StarletteIntegration + FastApiIntegration
+- Llamado desde `server.py` ANTES de crear la instancia FastAPI (para instrumentar middleware correctamente)
+- Mismo enfoque minimal: sin tracing (traces_sample_rate=0), sin profiling, sin PII
+- `before_send` strippa headers `Authorization`, `Cookie`, `X-API-Key` (evita leak de JWT)
+- Captura excepciones no manejadas + respuestas HTTP 5xx automáticamente
+- Env var `SENTRY_DSN_BACKEND=` vacía en `/app/backend/.env`
+- `sentry-sdk==2.58.0` añadido a `requirements.txt`
+
+**Documentación:**
+- `/app/docs/SENTRY_SETUP.md` actualizado con instrucciones para ambos proyectos (frontend+backend) — 10 min para activar full-stack
+- Validación: pre-deploy 4/4 verde, 5/5 Playwright, backend arranca limpio, DSN vacío en ambos lados = no-op completo
 
 
 

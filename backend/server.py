@@ -13,6 +13,12 @@ import os
 # Load environment
 load_dotenv()
 
+# Initialize Sentry BEFORE creating the FastAPI instance so that
+# Starlette/FastAPI middleware gets properly instrumented.
+# Gracefully no-ops when SENTRY_DSN_BACKEND is empty.
+from sentry_init import init_sentry_backend
+init_sentry_backend()
+
 # Import routes - Core modules (refactored)
 from routes_contratos import router as contratos_router
 from routes_parcelas import router as parcelas_router
