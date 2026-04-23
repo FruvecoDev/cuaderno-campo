@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { AXIS_TICK, AXIS_LABEL_TICK, TOOLTIP_STYLE, LEGEND_STYLE, truncTick, percentLabelRenderer } from '../utils/chartStyles';
 import { TrendingUp, MapPin, FileText, Sprout, Euro, Calendar as CalendarIcon, Bell, Layers, Satellite, ChevronLeft, ChevronRight, Mail, Send, CheckCircle, AlertCircle, Eye, Edit2, Home, AlertTriangle, Building2, Wheat, Droplets, Clock, Package, FileSignature, ShoppingCart, TrendingDown, ClipboardList, Users, Settings, X, GripVertical, RotateCcw, Save, ChevronUp, ChevronDown, ArrowUp, ArrowDown, Move } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -655,13 +656,13 @@ const Dashboard = () => {
           <div className="card">
             <h2 className="card-title">{t('dashboard.charts.surfaceByCrop')}</h2>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={cultivoData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="name" style={{ fontSize: '12px' }} />
-                <YAxis style={{ fontSize: '12px' }} />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="superficie" fill="hsl(var(--chart-1))" name={`${t('parcels.surface')} (ha)`} />
+              <BarChart data={cultivoData} margin={{ top: 5, right: 16, left: 0, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis dataKey="name" tick={AXIS_LABEL_TICK} tickFormatter={(v) => truncTick(v, 14)} axisLine={{ stroke: 'hsl(var(--border))' }} tickLine={false} interval={0} />
+                <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: 'hsl(var(--muted) / 0.4)' }} />
+                <Legend wrapperStyle={{ fontSize: '0.75rem' }} iconType="circle" iconSize={9} />
+                <Bar dataKey="superficie" fill="hsl(var(--chart-1))" name={`${t('parcels.surface')} (ha)`} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -669,20 +670,30 @@ const Dashboard = () => {
         <div className="card">
           <h2 className="card-title">{t('dashboard.charts.costDistribution')}</h2>
           <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
+            <PieChart margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
               <Pie
                 data={[
                   { name: t('dashboard.charts.treatmentsCosts'), value: kpis.costes.tratamientos },
                   { name: t('dashboard.charts.irrigationCosts'), value: kpis.costes.riegos },
                   { name: t('dashboard.charts.tasksCosts'), value: kpis.costes.tareas }
                 ]}
-                cx="50%" cy="50%" labelLine={false}
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                outerRadius={80} fill="#8884d8" dataKey="value"
+                cx="40%" cy="50%"
+                labelLine={false}
+                label={percentLabelRenderer(0.04)}
+                outerRadius={100} innerRadius={42} paddingAngle={2}
+                dataKey="value"
               >
-                {COLORS.map((color, index) => (<Cell key={color} fill={color} />))}
+                {COLORS.slice(0, 3).map((color, index) => (
+                  <Cell key={`cell-cost-${index}`} fill={color} stroke="#fff" strokeWidth={1.5} />
+                ))}
               </Pie>
-              <Tooltip />
+              <Tooltip contentStyle={TOOLTIP_STYLE} />
+              <Legend
+                layout="vertical" verticalAlign="middle" align="right"
+                iconType="circle" iconSize={9}
+                wrapperStyle={LEGEND_STYLE}
+                formatter={(value) => truncTick(value, 22)}
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
