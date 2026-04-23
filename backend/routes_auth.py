@@ -432,8 +432,8 @@ async def initialize_admin():
     admin_permissions = get_role_permissions(UserRole.ADMIN)
     
     admin_data = {
-        "email": "admin@agrogest.com",
-        "full_name": "Administrator",
+        "email": "admin@fruveco.com",
+        "full_name": "Administrador FRUVECO",
         "role": UserRole.ADMIN,
         "hashed_password": get_password_hash("admin123"),
         "is_active": True,
@@ -448,7 +448,7 @@ async def initialize_admin():
         "success": True,
         "message": "Admin user created",
         "credentials": {
-            "email": "admin@agrogest.com",
+            "email": "admin@fruveco.com",
             "password": "admin123",
             "note": "Please change password after first login"
         }
