@@ -452,7 +452,7 @@ const PortalEmpleado = () => {
               ) : (
                 <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                   {dashboard.fichajes_hoy?.map((f, idx) => (
-                    <div key={idx} style={{
+                    <div key={f._id || `fh-${idx}-${f.hora || ''}`} style={{
                       padding: '0.75rem 1.25rem',
                       borderRadius: '0.5rem',
                       background: f.tipo === 'entrada' ? 'hsl(142 76% 36% / 0.1)' : 'hsl(0 84% 60% / 0.1)',
@@ -478,7 +478,7 @@ const PortalEmpleado = () => {
               </div>
               <div style={{ padding: '1rem' }}>
                 {dashboard.proximas_ausencias.map((a, idx) => (
-                  <div key={idx} style={{
+                  <div key={a._id || `pa-${idx}-${a.fecha_inicio || ''}`} style={{
                     padding: '0.75rem',
                     borderRadius: '0.5rem',
                     background: 'hsl(var(--muted) / 0.3)',
@@ -824,7 +824,7 @@ const PortalEmpleado = () => {
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
                       {productividad.ranking.top_3.map((emp, idx) => (
-                        <div key={idx} style={{ 
+                        <div key={emp._id || emp.empleado_id || `top-${idx}`} style={{ 
                           textAlign: 'center', 
                           padding: '1rem', 
                           background: 'hsl(var(--muted))', 

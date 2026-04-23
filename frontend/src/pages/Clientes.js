@@ -807,14 +807,14 @@ const Clientes = () => {
                           </thead>
                           <tbody>
                             {resumenVentas.ventas_por_campana.map((venta, idx) => (
-                              <tr key={idx}>
+                              <tr key={`vpc-${venta.campana || idx}`}>
                                 <td className="font-semibold">{venta.campana}</td>
                                 <td>{venta.num_contratos}</td>
                                 <td>
                                   <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
                                     {venta.cultivos?.filter(c => c).map((cultivo, cidx) => (
                                       <span
-                                        key={cidx}
+                                        key={`cu-${venta.campana || idx}-${cultivo}-${cidx}`}
                                         style={{
                                           padding: '0.125rem 0.5rem',
                                           borderRadius: '4px',

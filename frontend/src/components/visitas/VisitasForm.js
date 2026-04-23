@@ -169,7 +169,7 @@ const FotosSection = ({
               const analysis = foto.ai_analysis;
               const severityStyle = hasAnalysis && analysis.detected ? getSeverityColor(analysis.severity) : null;
               return (
-                <div key={index} style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: hasAnalysis && analysis.detected ? `2px solid ${severityStyle?.border}` : '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--muted))' }}>
+                <div key={foto._id || foto.url || `foto-${index}`} style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: hasAnalysis && analysis.detected ? `2px solid ${severityStyle?.border}` : '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--muted))' }}>
                   <div style={{ aspectRatio: '1', position: 'relative' }}>
                     <img src={foto.pending ? foto.preview : `${BACKEND_URL}${foto.url}`} alt={foto.filename || `Foto ${index + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; }} />
                     {foto.pending && <div style={{ position: 'absolute', top: '4px', left: '4px', backgroundColor: 'hsl(38 92% 50%)', color: 'white', fontSize: '0.6rem', padding: '2px 4px', borderRadius: '4px' }}>Pendiente</div>}

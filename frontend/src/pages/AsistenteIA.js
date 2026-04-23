@@ -663,7 +663,7 @@ const AsistenteIA = () => {
 
               {suggestions.suggestions?.sugerencias?.map((sug, idx) => (
                 <div 
-                  key={idx} 
+                  key={`sug-${idx}-${(sug.titulo || '').slice(0, 20)}`} 
                   className="card" 
                   style={{ 
                     marginBottom: '0.75rem',
@@ -931,7 +931,7 @@ const AsistenteIA = () => {
                   </h4>
                   <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
                     {prediction.prediction?.factores_positivos?.map((f, i) => (
-                      <li key={i} style={{ marginBottom: '0.25rem' }}>{f}</li>
+                      <li key={`fp-${i}-${String(f).slice(0, 20)}`} style={{ marginBottom: '0.25rem' }}>{f}</li>
                     ))}
                   </ul>
                 </div>
@@ -1001,7 +1001,7 @@ const AsistenteIA = () => {
                   </h4>
                   <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
                     {prediction.prediction.recomendaciones.map((r, i) => (
-                      <li key={i} style={{ marginBottom: '0.25rem' }}>{r}</li>
+                      <li key={`rec-${i}-${String(r).slice(0, 20)}`} style={{ marginBottom: '0.25rem' }}>{r}</li>
                     ))}
                   </ul>
                 </div>
@@ -1129,7 +1129,7 @@ const AsistenteIA = () => {
                   <h4 style={{ fontWeight: '600', marginBottom: '1rem' }}>Datos Clave</h4>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.75rem' }}>
                     {contractSummary.summary.datos_clave.map((d, i) => (
-                      <div key={i} style={{
+                      <div key={`dc-${i}-${d.concepto || ''}`} style={{
                         padding: '0.75rem',
                         backgroundColor: d.estado === 'OK' ? '#f0fdf4' : d.estado === 'Alerta' ? '#fef9c3' : '#fef2f2',
                         border: `1px solid ${d.estado === 'OK' ? '#bbf7d0' : d.estado === 'Alerta' ? '#fde68a' : '#fecaca'}`,
@@ -1234,7 +1234,7 @@ const AsistenteIA = () => {
                     </h4>
                     <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
                       {contractSummary.summary.puntos_fuertes.map((p, i) => (
-                        <li key={i} style={{ marginBottom: '0.25rem' }}>{p}</li>
+                        <li key={`pf-${i}-${String(p).slice(0, 20)}`} style={{ marginBottom: '0.25rem' }}>{p}</li>
                       ))}
                     </ul>
                   </div>
@@ -1246,7 +1246,7 @@ const AsistenteIA = () => {
                     </h4>
                     <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
                       {contractSummary.summary.riesgos.map((r, i) => (
-                        <li key={i} style={{ marginBottom: '0.25rem' }}>{r}</li>
+                        <li key={`ri-${i}-${String(r).slice(0, 20)}`} style={{ marginBottom: '0.25rem' }}>{r}</li>
                       ))}
                     </ul>
                   </div>
@@ -1261,7 +1261,7 @@ const AsistenteIA = () => {
                   </h4>
                   <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
                     {contractSummary.summary.recomendaciones.map((r, i) => (
-                      <li key={i} style={{ marginBottom: '0.25rem' }}>{r}</li>
+                      <li key={`cr-${i}-${String(r).slice(0, 20)}`} style={{ marginBottom: '0.25rem' }}>{r}</li>
                     ))}
                   </ul>
                 </div>
@@ -1275,7 +1275,7 @@ const AsistenteIA = () => {
                   </h4>
                   <ol style={{ margin: 0, paddingLeft: '1.25rem' }}>
                     {contractSummary.summary.proximos_pasos.map((p, i) => (
-                      <li key={i} style={{ marginBottom: '0.25rem' }}>{p}</li>
+                      <li key={`pp-${i}-${String(p).slice(0, 20)}`} style={{ marginBottom: '0.25rem' }}>{p}</li>
                     ))}
                   </ol>
                 </div>
@@ -1518,7 +1518,7 @@ const AsistenteIA = () => {
                       'Que opinas del estado de mis parcelas?'
                     ].map((q, i) => (
                       <button
-                        key={i}
+                        key={`sugq-${i}-${q.slice(0, 15)}`}
                         onClick={() => { setChatInput(q); }}
                         style={{
                           padding: '6px 12px', borderRadius: '20px', border: '1px solid #0891b2',

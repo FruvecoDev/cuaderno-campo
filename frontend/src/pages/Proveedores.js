@@ -412,7 +412,7 @@ const Proveedores = () => {
                     </div>
                     <span style={{fontSize:'0.75rem',color:'hsl(var(--muted-foreground))'}}>{new Date(entry.timestamp).toLocaleString('es-ES')}</span>
                   </div>
-                  {entry.changes&&entry.changes.length>0&&<div style={{marginTop:'0.4rem'}}>{entry.changes.map((ch,ci)=>(<div key={ci} style={{fontSize:'0.8rem',padding:'0.2rem 0',display:'flex',gap:'0.5rem',flexWrap:'wrap'}}><span style={{fontWeight:'600',minWidth:'120px'}}>{ch.field}:</span>{ch.old&&<span style={{color:'hsl(var(--destructive))',textDecoration:'line-through'}}>{ch.old.substring(0,80)}</span>}<span style={{color:'hsl(142 76% 36%)'}}>{ch.new?.substring(0,80)}</span></div>))}</div>}
+                  {entry.changes&&entry.changes.length>0&&<div style={{marginTop:'0.4rem'}}>{entry.changes.map((ch,ci)=>(<div key={`ch-${ci}-${ch.field||''}`} style={{fontSize:'0.8rem',padding:'0.2rem 0',display:'flex',gap:'0.5rem',flexWrap:'wrap'}}><span style={{fontWeight:'600',minWidth:'120px'}}>{ch.field}:</span>{ch.old&&<span style={{color:'hsl(var(--destructive))',textDecoration:'line-through'}}>{ch.old.substring(0,80)}</span>}<span style={{color:'hsl(142 76% 36%)'}}>{ch.new?.substring(0,80)}</span></div>))}</div>}
                 </div>))}
               </div>}
             </div>)}

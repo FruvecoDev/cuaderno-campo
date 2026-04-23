@@ -216,5 +216,18 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 
 **Validación:** 4/4 pasos del pre-deploy-check PASS, 5/5 Playwright, 17/17 backend NFC, ESLint 0 errors.
 
+### Code Quality Sweep Round 2 - DONE (2026-02-XX)
+**Production console silencer:**
+- /app/frontend/src/index.js: en build de producción se silencian `console.log/info/warn/debug` (evita leaks e ruido a usuarios finales). `console.error` se mantiene activo para que Sentry/devtools muestren errores reales.
+- Resuelve el conflicto del reporte previo: en dev los 221 console.error añadidos siguen ayudando al debug; en producción todo queda limpio.
+
+**Array-index keys en 6 archivos nuevos:**
+- AsistenteIA.js (11 cambios: sugerencias, factores riesgo, factores positivos, recomendaciones, datos_clave, puntos_fuertes, riesgos, próximos pasos, preguntas sugeridas)
+- Clientes.js (2), Proveedores.js (1), PortalEmpleado.js (3), VisitasForm.js (1), VisitasDetailModal.js (1)
+- Reemplazados por combinación de `_id`/contenido + índice → keys estables que preservan estado entre renders.
+
+**Validación:** build producción OK, 5/5 Playwright, ESLint 0 errors.
+
+
 
 

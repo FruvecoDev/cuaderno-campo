@@ -117,7 +117,7 @@ export const VisitasDetailModal = ({
               }}>
                 {viewingVisita.fotos.map((foto, index) => (
                   <div 
-                    key={index}
+                    key={foto._id || foto.url || `vf-${index}`}
                     style={{
                       position: 'relative', aspectRatio: '1', borderRadius: '0.5rem',
                       overflow: 'hidden', border: '1px solid hsl(var(--border))', cursor: 'pointer'
