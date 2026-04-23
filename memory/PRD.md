@@ -222,11 +222,19 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - Resuelve el conflicto del reporte previo: en dev los 221 console.error añadidos siguen ayudando al debug; en producción todo queda limpio.
 
 **Array-index keys en 6 archivos nuevos:**
-- AsistenteIA.js (11 cambios: sugerencias, factores riesgo, factores positivos, recomendaciones, datos_clave, puntos_fuertes, riesgos, próximos pasos, preguntas sugeridas)
-- Clientes.js (2), Proveedores.js (1), PortalEmpleado.js (3), VisitasForm.js (1), VisitasDetailModal.js (1)
+- AsistenteIA.js (11 cambios), Clientes.js (2), Proveedores.js (1), PortalEmpleado.js (3), VisitasForm.js (1), VisitasDetailModal.js (1)
 - Reemplazados por combinación de `_id`/contenido + índice → keys estables que preservan estado entre renders.
 
-**Validación:** build producción OK, 5/5 Playwright, ESLint 0 errors.
+### Sentry Error Monitoring Integration - DONE (2026-02-XX)
+- Nuevo `/app/frontend/src/instrument.js`: SDK de Sentry inicializado solo si `REACT_APP_SENTRY_DSN` está seteado (gracefully no-op sin DSN)
+- Configuración minimal: sin performance tracing, sin session replay, sin PII (`sendDefaultPii: false`, headers/cookies stripped en `beforeSend`)
+- CaptureConsole integration: captura automáticamente los 221+ `console.error` de los catch blocks sin tocar ningún archivo
+- Import como primera línea en `index.js` (hooks del runtime antes de React)
+- `<SentryErrorBoundary>` envuelve la App con fallback UI elegante en español para errores de renderizado (solo activo si DSN configurado)
+- Env var `REACT_APP_SENTRY_DSN=` añadida vacía en `/app/frontend/.env`
+- Documentación completa en `/app/docs/SENTRY_SETUP.md` (crear cuenta → copiar DSN → pegar → reiniciar, 5 min)
+- Bundle impact: +40KB gzipped solo si DSN activo
+- Validación: pre-deploy 4/4 verde, 5/5 Playwright, 0 ESLint errors, DSN vacío no afecta la app
 
 
 

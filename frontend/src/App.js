@@ -44,6 +44,34 @@ import CuadernoCampo from './pages/CuadernoCampo';
 import IntegracionERP from './pages/IntegracionERP';
 import ConsultaSIGPAC from './pages/ConsultaSIGPAC';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
+import { SentryErrorBoundary, isSentryEnabled } from './instrument';
+
+function AppErrorFallback({ resetError }) {
+  return (
+    <div style={{
+      minHeight: '100vh', display: 'flex', alignItems: 'center',
+      justifyContent: 'center', padding: '2rem', textAlign: 'center',
+      background: 'hsl(var(--background))', color: 'hsl(var(--foreground))'
+    }} data-testid="app-error-fallback">
+      <div style={{ maxWidth: '480px' }}>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.75rem' }}>
+          Algo ha ido mal
+        </h1>
+        <p style={{ fontSize: '0.9rem', color: 'hsl(var(--muted-foreground))', marginBottom: '1.5rem' }}>
+          Se ha producido un error inesperado. El equipo técnico ha sido notificado.
+          Puedes intentar recargar la aplicación.
+        </p>
+        <button
+          onClick={() => { resetError(); window.location.reload(); }}
+          className="btn btn-primary"
+          data-testid="app-error-reload"
+        >
+          Recargar aplicación
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   return (
@@ -328,4 +356,15 @@ function App() {
   );
 }
 
-export default App;
+// Wrap the app with Sentry's ErrorBoundary only when Sentry is configured.
+// Without a DSN, it's a pass-through to keep dev UX untouched.
+function AppWithBoundary() {
+  if (!isSentryEnabled) return <App />;
+  return (
+    <SentryErrorBoundary fallback={AppErrorFallback} showDialog={false}>
+      <App />
+    </SentryErrorBoundary>
+  );
+}
+
+export default AppWithBoundary;

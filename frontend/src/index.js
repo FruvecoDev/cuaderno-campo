@@ -1,3 +1,8 @@
+// Sentry MUST be initialized before any other imports so it can hook the
+// runtime before React (and error sources) load. Gracefully no-ops when
+// REACT_APP_SENTRY_DSN is empty (see ./instrument.js for details).
+import './instrument';
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
