@@ -478,15 +478,26 @@ const InformesIngresos = () => {
                     <RechartsPieChart margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
                       <Pie
                         data={chartDataCultivos}
-                        cx="38%"
+                        cx="40%"
                         cy="50%"
                         labelLine={false}
-                        label={({ percent }) => (percent >= 0.04 ? `${(percent * 100).toFixed(0)}%` : '')}
+                        label={(props) => {
+                          const { cx: cX, cy: cY, midAngle, innerRadius: iR, outerRadius: oR, percent } = props;
+                          if (percent < 0.04) return null;
+                          const RADIAN = Math.PI / 180;
+                          const radius = iR + (oR - iR) * 0.6;
+                          const x = cX + radius * Math.cos(-midAngle * RADIAN);
+                          const y = cY + radius * Math.sin(-midAngle * RADIAN);
+                          return (
+                            <text x={x} y={y} fill="#fff" textAnchor="middle" dominantBaseline="central" style={{ fontSize: 11, fontWeight: 700, pointerEvents: 'none' }}>
+                              {`${(percent * 100).toFixed(0)}%`}
+                            </text>
+                          );
+                        }}
                         outerRadius={110}
                         innerRadius={45}
                         paddingAngle={1}
                         dataKey="value"
-                        style={{ fontSize: 11, fontWeight: 600, fill: '#fff' }}
                       >
                         {chartDataCultivos.map((entry, index) => (
                           <Cell key={`cell-cult-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} stroke="#fff" strokeWidth={1.5} />
