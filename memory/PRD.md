@@ -180,4 +180,10 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - /app/docs/PRE_DEPLOY_CHECKLIST.md: documentación de uso + troubleshooting
 - Validado end-to-end: los 4 pasos pasan verde localmente contra el backend real
 
+### Production Readiness Audit - DONE (2026-02-XX)
+- Auditoría completa con deployment_agent: PASS verde en todas las categorías
+- Bug corregido: /api/auth/init-admin creaba admin con email `admin@agrogest.com`, ahora usa `admin@fruveco.com` (coincide con test_credentials.md y pantalla de login)
+- Sin hardcoded URLs / secrets, env vars correctas, CORS OK, supervisor config válido, MongoDB via env
+- App LISTA para "Deploy to Production" en Emergent
+
 
