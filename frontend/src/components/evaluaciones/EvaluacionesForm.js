@@ -90,7 +90,7 @@ const EvaluacionesForm = ({
       setInlineText('');
       setInlineType('texto');
       if (fetchPreguntasConfig) fetchPreguntasConfig();
-    } catch (e) {}
+    } catch (e) { console.error('[EvaluacionesForm.js]', e); }
   };
 
   const handleInlineEdit = async (preguntaId) => {
@@ -101,7 +101,7 @@ const EvaluacionesForm = ({
       setEditingQuestion(null);
       setEditText('');
       if (fetchPreguntasConfig) fetchPreguntasConfig();
-    } catch (e) {}
+    } catch (e) { console.error('[EvaluacionesForm.js]', e); }
   };
 
   const sensors = useSensors(

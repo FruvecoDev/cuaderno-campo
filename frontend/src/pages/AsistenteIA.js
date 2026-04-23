@@ -76,18 +76,14 @@ const AsistenteIA = () => {
     try {
       const data = await api.get('/api/ai/parcelas-for-suggestions');
       setParcelas(data.parcelas || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[AsistenteIA.js]', err); }
   };
 
   const fetchContratos = async () => {
     try {
       const data = await api.get('/api/ai/contratos-for-predictions');
       setContratos(data.contratos || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[AsistenteIA.js]', err); }
   };
 
   const fetchDashboard = async () => {
@@ -95,9 +91,7 @@ const AsistenteIA = () => {
     try {
       const data = await api.get('/api/ai/dashboard');
       setDashboardData(data);
-    } catch (err) {
-
-    } finally {
+    } catch (err) { console.error('[AsistenteIA.js]', err); } finally {
       setLoadingDashboard(false);
     }
   };
@@ -109,9 +103,7 @@ const AsistenteIA = () => {
       if (data.success) {
         setSelectedReport(data.report);
       }
-    } catch (err) {
-
-    } finally {
+    } catch (err) { console.error('[AsistenteIA.js]', err); } finally {
       setLoadingReport(false);
     }
   };
@@ -121,9 +113,7 @@ const AsistenteIA = () => {
     try {
       const data = await api.get('/api/ai/chat/sessions');
       setChatSessions(data.sessions || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[AsistenteIA.js]', err); }
   };
 
   const loadChatSession = async (sessionId) => {
@@ -131,9 +121,7 @@ const AsistenteIA = () => {
     try {
       const data = await api.get(`/api/ai/chat/history/${sessionId}`);
       setChatMessages(data.messages || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[AsistenteIA.js]', err); }
   };
 
   const startNewChat = () => {
@@ -192,9 +180,7 @@ const AsistenteIA = () => {
       if (currentSessionId === sessionId) {
         startNewChat();
       }
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[AsistenteIA.js]', err); }
   };
 
   // Auto-scroll chat

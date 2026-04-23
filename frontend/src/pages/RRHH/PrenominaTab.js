@@ -37,9 +37,7 @@ const PrenominaTab = ({ empleados }) => {
     try {
       const data = await api.get(`/api/rrhh/prenominas?mes=${mesSeleccionado}&ano=${anoSeleccionado}`);
       setPrenominas(data.prenominas || []);
-    } catch (err) {
-
-    } finally {
+    } catch (err) { console.error('[PrenominaTab.js]', err); } finally {
       setLoading(false);
     }
   };
@@ -136,9 +134,7 @@ const PrenominaTab = ({ empleados }) => {
       a.href = url;
       a.download = `prenominas_${anoSeleccionado}_${mesSeleccionado}.csv`;
       a.click();
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[PrenominaTab.js]', err); }
   };
 
   // Nuevas funciones de exportación masiva

@@ -364,7 +364,7 @@ const Evaluaciones = () => {
     setCustomPreguntas(prev => ({ ...prev, [seccionKey]: customOnly }));
     try {
       await api.post('/api/evaluaciones/config/preguntas/reorder', { seccion: seccionKey, order: reordered.map(p => p.id) });
-    } catch (error) { }
+    } catch (error) { console.error('[Evaluaciones.js]', error); }
   };
 
   const getEstadoBadge = (estado) => {
@@ -392,10 +392,10 @@ const Evaluaciones = () => {
         <h1 style={{ fontSize: '2rem', fontWeight: '600' }}>{t('evaluations.title')}</h1>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <button className="btn btn-secondary" data-testid="btn-export-excel-evaluaciones"
-            onClick={async () => { try { await api.download('/api/evaluaciones/export/excel', `evaluaciones_${new Date().toISOString().split('T')[0]}.xlsx`); } catch (err) { } }}
+            onClick={async () => { try { await api.download('/api/evaluaciones/export/excel', `evaluaciones_${new Date().toISOString().split('T')[0]}.xlsx`); } catch (err) { console.error('[Evaluaciones.js]', err); } }}
             title="Exportar Excel"><Download size={16} /> Excel</button>
           <button className="btn btn-secondary" data-testid="btn-export-pdf-evaluaciones"
-            onClick={async () => { try { await api.download('/api/evaluaciones/export/pdf', `evaluaciones_${new Date().toISOString().split('T')[0]}.pdf`); } catch (err) { } }}
+            onClick={async () => { try { await api.download('/api/evaluaciones/export/pdf', `evaluaciones_${new Date().toISOString().split('T')[0]}.pdf`); } catch (err) { console.error('[Evaluaciones.js]', err); } }}
             title="Exportar PDF"><FileText size={16} /> PDF</button>
           {(user?.role === 'Admin' || user?.role === 'Manager') && (
             <button className="btn btn-secondary" onClick={() => setShowAddQuestion(true)} title={t('evaluations.addCustomQuestion')}>

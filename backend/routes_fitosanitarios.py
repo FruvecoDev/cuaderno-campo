@@ -623,7 +623,7 @@ async def sync_with_mapa(
             
             return {
                 "success": True,
-                "message": f"Sincronización completada",
+                "message": "Sincronización completada",
                 "inserted": inserted,
                 "updated": updated,
                 "total_encontrados": len(productos_encontrados)

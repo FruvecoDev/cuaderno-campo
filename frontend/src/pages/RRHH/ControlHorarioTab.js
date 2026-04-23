@@ -71,9 +71,7 @@ const ControlHorarioTab = ({ empleados }) => {
       const data = await api.get('/api/rrhh/fichajes/hoy');
       setFichajesHoy(data);
       setFichajes(data.fichajes || []);
-    } catch (err) {
-
-    } finally {
+    } catch (err) { console.error('[ControlHorarioTab.js]', err); } finally {
       setLoading(false);
     }
   };

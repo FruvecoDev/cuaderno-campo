@@ -99,11 +99,11 @@ const Contratos = () => {
       setAgentesCompra(dataC.agentes || []);
       const dataV = await api.get('/api/agentes?tipo=venta');
       setAgentesVenta(dataV.agentes || []);
-    } catch (error) {}
+    } catch (error) { console.error('[Contratos.js]', error); }
   };
-  const fetchProveedores = async () => { try { const data = await api.get('/api/proveedores'); setProveedores(data.proveedores || []); } catch (error) {} };
-  const fetchClientes = async () => { try { const data = await api.get('/api/clientes'); setClientes(data.clientes || []); } catch (error) {} };
-  const fetchCultivos = async () => { try { const data = await api.get('/api/cultivos'); setCultivos(data.cultivos || []); } catch (error) {} };
+  const fetchProveedores = async () => { try { const data = await api.get('/api/proveedores'); setProveedores(data.proveedores || []); } catch (error) { console.error('[Contratos.js]', error); } };
+  const fetchClientes = async () => { try { const data = await api.get('/api/clientes'); setClientes(data.clientes || []); } catch (error) { console.error('[Contratos.js]', error); } };
+  const fetchCultivos = async () => { try { const data = await api.get('/api/cultivos'); setCultivos(data.cultivos || []); } catch (error) { console.error('[Contratos.js]', error); } };
   const fetchContratos = async () => {
     try { setLoading(true); const data = await api.get('/api/contratos'); setContratos(data.contratos || []); }
     catch (error) { setError(api.getErrorMessage(error) || t('messages.errorLoading')); }

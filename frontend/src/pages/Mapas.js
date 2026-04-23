@@ -188,9 +188,7 @@ const Mapas = () => {
         }
         setMapZoom(12);
       }
-    } catch (err) {
-
-    } finally {
+    } catch (err) { console.error('[Mapas.js]', err); } finally {
       setLoading(false);
     }
   };
@@ -199,9 +197,7 @@ const Mapas = () => {
     try {
       const data = await api.get('/api/fincas');
       setFincas(data.fincas || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Mapas.js]', err); }
   };
 
   const handleSaveCoords = async () => {

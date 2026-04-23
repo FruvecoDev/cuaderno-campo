@@ -66,27 +66,21 @@ const PortalEmpleado = () => {
       const data = await api.get('/api/portal-empleado/mis-notificaciones');
       setNotificaciones(data.notificaciones || []);
       setNotificacionesNoLeidas(data.no_leidas || 0);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[PortalEmpleado.js]', err); }
   };
   
   const handleMarcarLeida = async (notifId) => {
     try {
       await api.put(`/api/portal-empleado/notificaciones/${notifId}/leer`);
       fetchNotificaciones();
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[PortalEmpleado.js]', err); }
   };
   
   const handleMarcarTodasLeidas = async () => {
     try {
       await api.put('/api/portal-empleado/notificaciones/leer-todas');
       fetchNotificaciones();
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[PortalEmpleado.js]', err); }
   };
   
   const fetchDashboard = async () => {
@@ -104,36 +98,28 @@ const PortalEmpleado = () => {
     try {
       const data = await api.get('/api/portal-empleado/mis-fichajes');
       setFichajes(data.fichajes || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[PortalEmpleado.js]', err); }
   };
   
   const fetchDocumentos = async () => {
     try {
       const data = await api.get('/api/portal-empleado/mis-documentos');
       setDocumentos(data.documentos || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[PortalEmpleado.js]', err); }
   };
   
   const fetchPrenominas = async () => {
     try {
       const data = await api.get('/api/portal-empleado/mis-prenominas');
       setPrenominas(data.prenominas || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[PortalEmpleado.js]', err); }
   };
   
   const fetchAusencias = async () => {
     try {
       const data = await api.get('/api/portal-empleado/mis-ausencias');
       setAusencias(data.ausencias || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[PortalEmpleado.js]', err); }
   };
   
   const fetchProductividad = async () => {
@@ -144,9 +130,7 @@ const PortalEmpleado = () => {
       ]);
       setProductividad(prodData);
       setProductividadHoy(hoyData);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[PortalEmpleado.js]', err); }
   };
   
   const handleFichar = async (tipo) => {

@@ -20,9 +20,7 @@ export const loadAndApplyTheme = async () => {
       applyThemeToDOM(data.primary, data.accent);
       return data;
     }
-  } catch (err) {
-
-  }
+  } catch (err) { console.error('[themeService.js]', err); }
   return null;
 };
 

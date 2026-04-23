@@ -101,9 +101,7 @@ const FitBounds = ({ coords }) => {
         try {
           const bounds = L.latLngBounds(coords);
           map.fitBounds(bounds, { padding: [50, 50], maxZoom: 18 });
-        } catch (e) {
-          
-        }
+        } catch (e) { console.error('[MapaSigpac.js]', e); }
       }
     };
     
@@ -133,9 +131,7 @@ const FlyToLocation = ({ center, zoom }) => {
       if (center) {
         try {
           map.flyTo(center, zoom || 16, { duration: 1.5 });
-        } catch (e) {
-          
-        }
+        } catch (e) { console.error('[MapaSigpac.js]', e); }
       }
     };
     

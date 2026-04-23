@@ -33,9 +33,7 @@ const Login = () => {
         if (data.success && data.login_logo) {
           setLoginLogo(`${BACKEND_URL}${data.login_logo}`);
         }
-      } catch (err) {
-
-      }
+      } catch (err) { console.error('[Login.js]', err); }
     };
     fetchLogo();
   }, []);

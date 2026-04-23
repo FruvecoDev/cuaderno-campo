@@ -46,7 +46,7 @@ const TecnicosAplicadores = () => {
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const handleBulkDelete = async () => {
     setBulkDeleting(true);
-    try { await bulkDeleteApi('tecnicos', selectedIds); clearSelection(); fetchTecnicos(); } catch (e) {} finally { setBulkDeleting(false); }
+    try { await bulkDeleteApi('tecnicos', selectedIds); clearSelection(); fetchTecnicos(); } catch (e) { console.error('[TecnicosAplicadores.js]', e); } finally { setBulkDeleting(false); }
   };
   const [filterNivel, setFilterNivel] = useState('');
   const [filterActivo, setFilterActivo] = useState('');
@@ -159,9 +159,7 @@ const TecnicosAplicadores = () => {
     try {
       const data = await api.get('/api/tecnicos-aplicadores/niveles');
       setNivelesCapacitacion(data.niveles || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[TecnicosAplicadores.js]', err); }
   };
 
   const handleSubmit = async (e) => {
@@ -259,9 +257,7 @@ const TecnicosAplicadores = () => {
     try {
       await api.put(`/api/tecnicos-aplicadores/${id}/toggle-activo`);
       fetchTecnicos();
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[TecnicosAplicadores.js]', err); }
   };
 
   const resetForm = () => {
@@ -339,7 +335,7 @@ const TecnicosAplicadores = () => {
             onClick={async () => {
               try {
                 await api.download('/api/tecnicos-aplicadores/export/excel', `tecnicos_aplicadores_${new Date().toISOString().split('T')[0]}.xlsx`);
-              } catch (err) { }
+              } catch (err) { console.error('[TecnicosAplicadores.js]', err); }
             }}
             title="Exportar Excel"
           >
@@ -351,7 +347,7 @@ const TecnicosAplicadores = () => {
             onClick={async () => {
               try {
                 await api.download('/api/tecnicos-aplicadores/export/pdf', `tecnicos_aplicadores_${new Date().toISOString().split('T')[0]}.pdf`);
-              } catch (err) { }
+              } catch (err) { console.error('[TecnicosAplicadores.js]', err); }
             }}
             title="Exportar PDF"
           >

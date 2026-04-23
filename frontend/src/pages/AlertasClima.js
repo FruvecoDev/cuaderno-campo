@@ -81,27 +81,21 @@ const AlertasClima = () => {
       
       const data = await api.get(`/api/alertas-clima?${params}`);
       setAlertas(data.alertas || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[AlertasClima.js]', err); }
   };
 
   const fetchStats = async () => {
     try {
       const data = await api.get('/api/alertas-clima/stats');
       setStats(data);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[AlertasClima.js]', err); }
   };
 
   const fetchReglas = async () => {
     try {
       const data = await api.get('/api/alertas-clima/reglas/config');
       setReglas(data.reglas || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[AlertasClima.js]', err); }
   };
 
   const handleVerificarTodas = async () => {

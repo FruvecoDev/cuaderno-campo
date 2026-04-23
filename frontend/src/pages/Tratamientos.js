@@ -223,7 +223,7 @@ const Tratamientos = () => {
       const data = await api.get('/api/tratamientos/stats/dashboard');
       setStats(data.stats);
     } catch (err) {
-
+      console.error('[Tratamientos.js]', err);
     }
   };
   
@@ -315,7 +315,7 @@ const Tratamientos = () => {
       const data = await api.get('/api/parcelas');
       setParcelas(data.parcelas || []);
     } catch (error) {
-
+      console.error('[Tratamientos.js]', error);
     }
   };
   
@@ -324,7 +324,7 @@ const Tratamientos = () => {
       const data = await api.get('/api/maquinaria');
       setMaquinaria(data.maquinaria || []);
     } catch (error) {
-
+      console.error('[Tratamientos.js]', error);
     }
   };
   
@@ -333,7 +333,7 @@ const Tratamientos = () => {
       const data = await api.get('/api/tecnicos-aplicadores/activos');
       setTecnicosAplicadores(data.tecnicos || []);
     } catch (error) {
-
+      console.error('[Tratamientos.js]', error);
     }
   };
   

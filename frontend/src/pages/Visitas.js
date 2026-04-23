@@ -149,7 +149,7 @@ const Visitas = () => {
         const cachedParcelas = await offlineDB.getCachedParcelas();
         if (cachedParcelas && cachedParcelas.length > 0) setParcelas(cachedParcelas);
       } catch (cacheError) {
-
+        console.error('[Visitas.js]', cacheError);
       }
     }
   };
@@ -348,7 +348,7 @@ const Visitas = () => {
       if (data.success) {
         const pendingFotos = fotos.filter(f => f.pending);
         if (!editingId && pendingFotos.length > 0 && data.data?._id) {
-          try { await uploadFotos(data.data._id, pendingFotos.map(f => f.file)); } catch (uploadError) { }
+          try { await uploadFotos(data.data._id, pendingFotos.map(f => f.file)); } catch (uploadError) { console.error('[Visitas.js]', uploadError); }
         }
         setShowForm(false); setEditingId(null); fetchVisitas(); resetForm();
       }

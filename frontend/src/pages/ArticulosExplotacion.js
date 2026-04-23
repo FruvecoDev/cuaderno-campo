@@ -99,14 +99,14 @@ const ArticulosExplotacion = () => {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchCategorias = async () => {
-    try { const d = await api.get('/api/categorias-articulo'); setCategoriasDinamicas(d.categorias || []); } catch (e) {}
+    try { const d = await api.get('/api/categorias-articulo'); setCategoriasDinamicas(d.categorias || []); } catch (e) { console.error('[ArticulosExplotacion.js]', e); }
   };
   const handleAddCategoria = async () => {
     if (!nuevaCategoria.trim()) return;
-    try { await api.post('/api/categorias-articulo', { nombre: nuevaCategoria.trim() }); setNuevaCategoria(''); fetchCategorias(); } catch (e) {}
+    try { await api.post('/api/categorias-articulo', { nombre: nuevaCategoria.trim() }); setNuevaCategoria(''); fetchCategorias(); } catch (e) { console.error('[ArticulosExplotacion.js]', e); }
   };
   const handleDeleteCategoria = async (id) => {
-    try { await api.delete(`/api/categorias-articulo/${id}`); fetchCategorias(); } catch (e) {}
+    try { await api.delete(`/api/categorias-articulo/${id}`); fetchCategorias(); } catch (e) { console.error('[ArticulosExplotacion.js]', e); }
   };
 
   const allCategorias = categoriasDinamicas.length > 0
@@ -125,9 +125,7 @@ const ArticulosExplotacion = () => {
       
       const data = await api.get(`/api/articulos?${params}`);
       setArticulos(data.articulos || []);
-    } catch (err) {
-
-    } finally {
+    } catch (err) { console.error('[ArticulosExplotacion.js]', err); } finally {
       setLoading(false);
     }
   };
@@ -232,9 +230,7 @@ const ArticulosExplotacion = () => {
     try {
       await api.patch(`/api/articulos/${id}/toggle-activo`);
       fetchArticulos();
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[ArticulosExplotacion.js]', err); }
   };
 
   const getCategoriaColor = (categoria) => {

@@ -68,7 +68,7 @@ const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
         const tipo = tipoMap[calcData.tipoProducto] || calcData.tipoProducto;
         const data = await api.get(`/api/fitosanitarios?tipo=${tipo}&activo=true`);
         setProductosDB(data.productos || []);
-      } catch (error) { }
+      } catch (error) { console.error('[CalculadoraFitosanitarios.js]', error); }
       finally { setLoadingProductos(false); }
     };
     if (showCalculator) fetchProductos();

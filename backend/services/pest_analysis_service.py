@@ -151,7 +151,7 @@ async def analyze_image_base64(image_base64: str, crop_type: Optional[str] = Non
         # Initialize chat with GPT-4o Vision
         chat = LlmChat(
             api_key=EMERGENT_LLM_KEY,
-            session_id=f"pest-analysis-base64",
+            session_id="pest-analysis-base64",
             system_message=SYSTEM_PROMPT
         ).with_model("openai", "gpt-4o")
         

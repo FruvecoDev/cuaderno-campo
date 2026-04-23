@@ -43,9 +43,7 @@ const LiquidacionComisiones = () => {
       if (data.success) {
         setCampanas(data.campanas || []);
       }
-    } catch (error) {
-
-    }
+    } catch (error) { console.error('[LiquidacionComisiones.js]', error); }
   };
   
   const fetchAgentes = async () => {
@@ -54,9 +52,7 @@ const LiquidacionComisiones = () => {
       if (data.success) {
         setAgentes(data.agentes || []);
       }
-    } catch (error) {
-
-    }
+    } catch (error) { console.error('[LiquidacionComisiones.js]', error); }
   };
   
   const fetchComisiones = async () => {
@@ -72,9 +68,7 @@ const LiquidacionComisiones = () => {
         setComisiones(data.comisiones || []);
         setTotales(data.totales || { total_comision_compra: 0, total_comision_venta: 0, total_general: 0 });
       }
-    } catch (error) {
-
-    } finally {
+    } catch (error) { console.error('[LiquidacionComisiones.js]', error); } finally {
       setLoading(false);
     }
   };

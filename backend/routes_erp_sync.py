@@ -246,7 +246,7 @@ async def test_webhook(webhook_id: str, current_user: dict = Depends(get_current
             )
         status = resp.status_code
         success = 200 <= status < 300
-    except Exception as e:
+    except Exception:
         status = 0
         success = False
     

@@ -69,18 +69,14 @@ const InformesIngresos = () => {
     try {
       const data = await api.get('/api/ingresos/filtros-opciones');
       setFiltrosOpciones(data);
-    } catch (error) {
-
-    }
+    } catch (error) { console.error('[InformesIngresos.js]', error); }
   };
   
   const fetchCampanas = async () => {
     try {
       const data = await api.get('/api/ingresos/campanas');
       setCampanas(data.campanas || []);
-    } catch (error) {
-
-    }
+    } catch (error) { console.error('[InformesIngresos.js]', error); }
   };
 
   const fetchResumen = async () => {
@@ -123,9 +119,7 @@ const InformesIngresos = () => {
       const data = await api.get(`/api/ingresos/detalle-albaranes?${params}`);
       setDetalleAlbaranes(data.albaranes || []);
       setDetalleView({ tipo, valor, total: data.total });
-    } catch (error) {
-
-    } finally {
+    } catch (error) { console.error('[InformesIngresos.js]', error); } finally {
       setLoadingDetalle(false);
     }
   };

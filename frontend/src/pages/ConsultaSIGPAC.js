@@ -36,7 +36,7 @@ const FitBoundsHelper = ({ bounds }) => {
   const map = useMap();
   useEffect(() => {
     if (bounds && map) {
-      try { map.fitBounds(bounds, { padding: [40, 40], maxZoom: 18 }); } catch (e) {}
+      try { map.fitBounds(bounds, { padding: [40, 40], maxZoom: 18 }); } catch (e) { console.error('[ConsultaSIGPAC.js]', e); }
     }
   }, [bounds, map]);
   return null;
@@ -47,7 +47,7 @@ const FlyToHelper = ({ center, zoom }) => {
   const map = useMap();
   useEffect(() => {
     if (center && map) {
-      try { map.flyTo(center, zoom || 16, { duration: 1.5 }); } catch (e) {}
+      try { map.flyTo(center, zoom || 16, { duration: 1.5 }); } catch (e) { console.error('[ConsultaSIGPAC.js]', e); }
     }
   }, [center, zoom, map]);
   return null;

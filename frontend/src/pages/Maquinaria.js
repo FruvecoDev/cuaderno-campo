@@ -120,7 +120,7 @@ const Maquinaria = () => {
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const handleBulkDelete = async () => {
     setBulkDeleting(true);
-    try { await bulkDeleteApi('maquinaria', selectedIds); clearSelection(); fetchMaquinaria(); } catch (e) {} finally { setBulkDeleting(false); }
+    try { await bulkDeleteApi('maquinaria', selectedIds); clearSelection(); fetchMaquinaria(); } catch (e) { console.error('[Maquinaria.js]', e); } finally { setBulkDeleting(false); }
   };
 
   const getEstadoBadgeClass = (estado) => {
@@ -213,7 +213,7 @@ const Maquinaria = () => {
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button className="btn btn-secondary" onClick={handleExportExcel} title="Exportar a Excel" data-testid="btn-export-excel-maquinaria"><Download size={18} /> Excel</button>
           <button className="btn btn-secondary" data-testid="btn-export-pdf-maquinaria"
-            onClick={async () => { try { await api.download('/api/maquinaria/export/pdf', `maquinaria_${new Date().toISOString().split('T')[0]}.pdf`); } catch (err) { } }}
+            onClick={async () => { try { await api.download('/api/maquinaria/export/pdf', `maquinaria_${new Date().toISOString().split('T')[0]}.pdf`); } catch (err) { console.error('[Maquinaria.js]', err); } }}
             title="Exportar a PDF"><Download size={18} /> PDF</button>
           <button className="btn btn-secondary" onClick={() => setShowConfig(true)} title="Configurar columnas" data-testid="btn-config-maquinaria"><Settings size={18} /></button>
           <button className={`btn ${showFieldsConfig ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setShowFieldsConfig(!showFieldsConfig)} title="Configurar campos formulario" data-testid="btn-config-fields"><Filter size={18} /></button>

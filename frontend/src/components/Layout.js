@@ -76,9 +76,7 @@ const Layout = ({ children }) => {
         if (data.success && data.dashboard_logo) {
           setDashboardLogo(`${BACKEND_URL}${data.dashboard_logo}`);
         }
-      } catch (err) {
-
-      }
+      } catch (err) { console.error('[Layout.js]', err); }
     };
     fetchLogo();
   }, []);

@@ -474,9 +474,7 @@ const SchedulerConfig = ({ token }) => {
         notificar_email: false,
         roles_notificar: ['Admin', 'Manager', 'Technician']
       });
-    } catch (err) {
-
-    } finally {
+    } catch (err) { console.error('[Configuracion.js]', err); } finally {
       setLoading(false);
     }
   };
@@ -485,9 +483,7 @@ const SchedulerConfig = ({ token }) => {
     try {
       const data = await api.get('/api/notificaciones/scheduler/status');
       setStatus(data);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Configuracion.js]', err); }
   };
 
   const handleSave = async () => {
@@ -744,9 +740,7 @@ const Configuracion = () => {
       if (data.success) {
         setLogos({ login_logo: data.login_logo, dashboard_logo: data.dashboard_logo });
       }
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Configuracion.js]', err); }
   };
 
   const fetchTheme = async () => {
@@ -756,9 +750,7 @@ const Configuracion = () => {
         setCurrentTheme(data);
         applyThemeToDOM(data.primary, data.accent);
       }
-    } catch (err) {
-
-    } finally {
+    } catch (err) { console.error('[Configuracion.js]', err); } finally {
       setLoading(false);
     }
   };
@@ -769,9 +761,7 @@ const Configuracion = () => {
       if (data.success) {
         setThemes(data.themes);
       }
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Configuracion.js]', err); }
   };
 
   const applyThemeToDOM = (primary, accent) => {

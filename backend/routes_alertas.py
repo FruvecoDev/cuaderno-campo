@@ -24,7 +24,7 @@ async def get_alertas_resumen(current_user: dict = Depends(get_current_user)):
 
     # --- Técnicos: certificados vencidos o próximos a vencer ---
     tecnicos = await tecnicos_collection.find(
-        {"fecha_validez": {"$exists": True, "$ne": None, "$ne": ""}},
+        {"fecha_validez": {"$exists": True, "$nin": [None, ""]}},
         {"_id": 0, "nombre": 1, "apellidos": 1, "num_carnet": 1, "fecha_validez": 1, "nivel_capacitacion": 1, "activo": 1}
     ).to_list(500)
 
@@ -58,8 +58,8 @@ async def get_alertas_resumen(current_user: dict = Depends(get_current_user)):
     # --- Maquinaria: ITV vencida o próxima ---
     maquinaria_list = await maquinaria_collection.find(
         {"$or": [
-            {"fecha_proxima_itv": {"$exists": True, "$ne": None, "$ne": ""}},
-            {"fecha_ultimo_mantenimiento": {"$exists": True, "$ne": None, "$ne": ""}}
+            {"fecha_proxima_itv": {"$exists": True, "$nin": [None, ""]}},
+            {"fecha_ultimo_mantenimiento": {"$exists": True, "$nin": [None, ""]}}
         ]},
         {"_id": 0, "nombre": 1, "tipo": 1, "matricula": 1, "estado": 1,
          "fecha_proxima_itv": 1, "fecha_ultimo_mantenimiento": 1, "intervalo_mantenimiento_dias": 1}

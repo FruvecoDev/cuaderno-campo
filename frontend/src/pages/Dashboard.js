@@ -80,7 +80,7 @@ const Dashboard = () => {
       mergedWidgets.sort((a, b) => a.order - b.order);
       setDashboardConfig({ ...data.config, widgets: mergedWidgets });
       setConfigWidgets(mergedWidgets);
-    } catch (error) { }
+    } catch (error) { console.error('[Dashboard.js]', error); }
   };
   
   const saveDashboardConfig = async () => {
@@ -89,7 +89,7 @@ const Dashboard = () => {
       await api.post('/api/dashboard/config', { widgets: configWidgets, layout: dashboardConfig?.layout || 'default' });
       setDashboardConfig({ ...dashboardConfig, widgets: configWidgets });
       setShowConfigModal(false);
-    } catch (error) { }
+    } catch (error) { console.error('[Dashboard.js]', error); }
     finally { setSavingConfig(false); }
   };
   
@@ -98,7 +98,7 @@ const Dashboard = () => {
       const data = await api.post('/api/dashboard/config/reset', {});
       setDashboardConfig(data.config);
       setConfigWidgets(data.config?.widgets || []);
-    } catch (error) { }
+    } catch (error) { console.error('[Dashboard.js]', error); }
   };
   
   const toggleWidgetVisibility = (widgetId) => {
@@ -166,7 +166,7 @@ const Dashboard = () => {
     // Auto-save
     try {
       await api.post('/api/dashboard/config', { widgets: newWidgets, layout: dashboardConfig?.layout || 'default' });
-    } catch (err) { }
+    } catch (err) { console.error('[Dashboard.js]', err); }
   }, [sortedWidgetIds, dashboardConfig]);
   
   const fetchDashboardData = async () => {
@@ -433,7 +433,7 @@ const Dashboard = () => {
                 const esUrgente = diasRestantes <= 3 && diasRestantes >= 0;
                 const esProxima = diasRestantes <= 7 && diasRestantes > 3;
                 return (
-                  <div key={idx} style={{
+                  <div key={cosecha._id || cosecha.id || `cos-${cosecha.fecha_planificada}-${idx}`} style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem',
                     backgroundColor: esUrgente ? '#fff3e0' : esProxima ? '#fffde7' : 'hsl(var(--muted))',
                     borderRadius: '8px', borderLeft: `4px solid ${esUrgente ? '#f57c00' : esProxima ? '#fbc02d' : '#4caf50'}`
@@ -479,7 +479,7 @@ const Dashboard = () => {
               </h4>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                 {kpis.fincas_recoleccion_semana.map((f, idx) => (
-                  <div key={idx} style={{ backgroundColor: '#e8f5e9', padding: '0.4rem 0.75rem', borderRadius: '6px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div key={f._id || `finca-rec-${f.denominacion}-${idx}`} style={{ backgroundColor: '#e8f5e9', padding: '0.4rem 0.75rem', borderRadius: '6px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <span style={{ fontWeight: '600', color: '#2d5a27' }}>{f.denominacion}</span>
                     <span style={{ color: '#666' }}>({f.hectareas} ha)</span>
                   </div>
@@ -512,7 +512,7 @@ const Dashboard = () => {
                 const esUrgente = diasRestantes !== null && diasRestantes <= 2 && diasRestantes >= 0;
                 const prioridadAlta = trat.prioridad === 'alta' || trat.prioridad === 'urgente';
                 return (
-                  <div key={idx} style={{
+                  <div key={trat._id || trat.id || `trat-${trat.fecha_tratamiento}-${idx}`} style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem',
                     backgroundColor: esVencido ? '#ffebee' : esUrgente || prioridadAlta ? '#fff3e0' : 'hsl(var(--muted))',
                     borderRadius: '8px', borderLeft: `4px solid ${esVencido ? '#c62828' : esUrgente || prioridadAlta ? '#f57c00' : '#1976d2'}`
@@ -609,7 +609,7 @@ const Dashboard = () => {
                 const esHoy = diasRestantes === 0;
                 const esManana = diasRestantes === 1;
                 return (
-                  <div key={idx} style={{
+                  <div key={visita.id || visita._id || `vp-${visita.fecha}-${idx}`} style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem',
                     backgroundColor: esHoy ? '#e0f2f1' : esManana ? '#e8f5e9' : 'hsl(var(--muted))',
                     borderRadius: '8px', borderLeft: `4px solid ${esHoy ? '#00897b' : esManana ? '#43a047' : '#90a4ae'}`
@@ -745,7 +745,7 @@ const Dashboard = () => {
                 const esProxima = diasRestantes <= 7 && diasRestantes > 2;
                 const esVencida = diasRestantes < 0;
                 return (
-                  <div key={idx} style={{
+                  <div key={visita._id || visita.id || `vp2-${visita.fecha_planificada}-${idx}`} style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem',
                     backgroundColor: esVencida ? '#fecaca' : esUrgente ? '#fee2e2' : esProxima ? '#fff3e0' : 'hsl(var(--muted))',
                     borderRadius: '8px', borderLeft: `4px solid ${esVencida ? '#991b1b' : esUrgente ? '#dc2626' : esProxima ? '#f57c00' : '#2d5a27'}`
@@ -846,7 +846,7 @@ const Dashboard = () => {
             {kpis.actividad_reciente.visitas.length > 0 ? (
               <div>
                 {kpis.actividad_reciente.visitas.slice(0, 5).map((visita, idx) => (
-                  <div key={idx} style={{ padding: '0.75rem 0', borderBottom: '1px solid hsl(var(--border))' }}>
+                  <div key={visita._id || visita.id || `av-${visita.created_at}-${idx}`} style={{ padding: '0.75rem 0', borderBottom: '1px solid hsl(var(--border))' }}>
                     <div className="font-semibold">{visita.objetivo}</div>
                     <div className="text-sm text-muted">{visita.proveedor} - {visita.cultivo}</div>
                     <div className="text-xs text-muted">{new Date(visita.created_at).toLocaleDateString()}</div>
@@ -860,7 +860,7 @@ const Dashboard = () => {
             {kpis.actividad_reciente.tratamientos.length > 0 ? (
               <div>
                 {kpis.actividad_reciente.tratamientos.slice(0, 5).map((trat, idx) => (
-                  <div key={idx} style={{ padding: '0.75rem 0', borderBottom: '1px solid hsl(var(--border))' }}>
+                  <div key={trat._id || trat.id || `at-${trat.created_at}-${idx}`} style={{ padding: '0.75rem 0', borderBottom: '1px solid hsl(var(--border))' }}>
                     <div className="font-semibold">{trat.tipo_tratamiento}</div>
                     <div className="text-sm text-muted">{trat.metodo_aplicacion} - {trat.superficie_aplicacion} ha</div>
                     <div className="text-xs text-muted">{new Date(trat.created_at).toLocaleDateString()}</div>

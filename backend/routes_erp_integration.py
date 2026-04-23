@@ -468,7 +468,7 @@ async def crear_proveedor_erp(
     if existing:
         raise HTTPException(
             status_code=409,
-            detail=f"Ya existe un proveedor con esta referencia o CIF/NIF"
+            detail="Ya existe un proveedor con esta referencia o CIF/NIF"
         )
     
     proveedor_doc = proveedor.dict()
@@ -531,7 +531,7 @@ async def crear_cliente_erp(
     if existing:
         raise HTTPException(
             status_code=409,
-            detail=f"Ya existe un cliente con esta referencia o CIF/NIF"
+            detail="Ya existe un cliente con esta referencia o CIF/NIF"
         )
     
     cliente_doc = cliente.dict()

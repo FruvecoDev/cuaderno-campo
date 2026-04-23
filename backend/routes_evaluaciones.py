@@ -378,7 +378,7 @@ async def reorder_preguntas(
     """Reordena las preguntas personalizadas."""
     secciones_validas = list(PREGUNTAS_DEFAULT.keys())
     if seccion not in secciones_validas:
-        raise HTTPException(status_code=400, detail=f"Seccion invalida")
+        raise HTTPException(status_code=400, detail="Seccion invalida")
     config = await evaluaciones_config_collection.find_one({"tipo": "preguntas"})
     if not config:
         return {"success": True, "message": "No hay preguntas personalizadas para reordenar"}
@@ -1303,7 +1303,7 @@ async def generate_evaluacion_pdf(
             """
         elif lat_parcela and lng_parcela:
             # Si solo hay coordenadas puntuales, mostrar un marcador
-            svg_point = f'''
+            svg_point = '''
             <svg width="300" height="200" viewBox="0 0 300 200" style="border: 2px solid #ddd; border-radius: 8px; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);">
                 <defs>
                     <pattern id="grid2" width="20" height="20" patternUnits="userSpaceOnUse">
@@ -1485,7 +1485,7 @@ async def generate_evaluacion_pdf(
         # Cuestionario de Plagas y Enfermedades si existe
         cuestionario_plagas = visita.get('cuestionario_plagas', {})
         if cuestionario_plagas:
-            html_content += f"""
+            html_content += """
         <div class="section">
             <div class="section-title section-title-blue">CUESTIONARIO PLAGAS Y ENFERMEDADES</div>
             <div class="section-content">

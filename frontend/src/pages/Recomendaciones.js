@@ -289,36 +289,28 @@ const Recomendaciones = () => {
       
       const data = await api.get(`/api/recomendaciones?${params}`);
       setRecomendaciones(data.recomendaciones || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Recomendaciones.js]', err); }
   };
   
   const fetchParcelas = async () => {
     try {
       const data = await api.get('/api/parcelas');
       setParcelas(data.parcelas || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Recomendaciones.js]', err); }
   };
   
   const fetchContratos = async () => {
     try {
       const data = await api.get('/api/contratos');
       setContratos(data.contratos || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Recomendaciones.js]', err); }
   };
   
   const fetchFitosanitarios = async () => {
     try {
       const data = await api.get('/api/fitosanitarios?activo=true');
       setFitosanitarios(data.productos || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Recomendaciones.js]', err); }
   };
   
   const fetchTipos = async () => {
@@ -326,18 +318,14 @@ const Recomendaciones = () => {
       const data = await api.get('/api/recomendaciones/config/tipos');
       setTipos(data.tipos || []);
       setSubtipos(data.subtipos_tratamiento || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Recomendaciones.js]', err); }
   };
   
   const fetchStats = async () => {
     try {
       const data = await api.get('/api/recomendaciones/stats/resumen');
       setStats(data);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Recomendaciones.js]', err); }
   };
   
   const fetchPlantillas = async () => {

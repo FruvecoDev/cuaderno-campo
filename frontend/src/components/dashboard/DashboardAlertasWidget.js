@@ -83,7 +83,7 @@ const DashboardAlertasWidget = () => {
       if (res.success) {
         fetchTareasExistentes();
       }
-    } catch (err) { }
+    } catch (err) { console.error('[DashboardAlertasWidget.js]', err); }
     finally { setCreatingTask(false); }
   };
 

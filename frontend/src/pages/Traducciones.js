@@ -105,7 +105,7 @@ const Traducciones = () => {
       setCategories(data.categories || []);
       setLanguages(data.languages || []);
     } catch (err) {
-
+      console.error('[Traducciones.js]', err);
     }
   };
 
@@ -123,7 +123,7 @@ const Traducciones = () => {
       const data = await api.get(endpoint, { includeAuth: false });
       setTranslations(data.translations || []);
     } catch (err) {
-
+      console.error('[Traducciones.js]', err);
     }
     setLoading(false);
   };
@@ -225,7 +225,7 @@ const Traducciones = () => {
       fetchTranslations();
       setTimeout(() => setSuccessMsg(null), 3000);
     } catch (err) {
-
+      console.error('[Traducciones.js]', err);
     }
   };
 
@@ -243,7 +243,7 @@ const Traducciones = () => {
       }
       setTimeout(() => { setSuccessMsg(null); setError(null); }, 5000);
     } catch (err) {
-
+      console.error('[Traducciones.js]', err);
     }
   };
 

@@ -104,9 +104,7 @@ const Tareas = () => {
     try {
       const data = await api.get('/api/tareas');
       setTareas(data.tareas || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Tareas.js]', err); }
     setLoading(false);
   };
 
@@ -114,45 +112,35 @@ const Tareas = () => {
     try {
       const data = await api.get('/api/parcelas');
       setParcelas(data.parcelas || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Tareas.js]', err); }
   };
 
   const fetchUsuarios = async () => {
     try {
       const data = await api.get('/api/tareas/usuarios-asignables');
       setUsuarios(data.usuarios || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Tareas.js]', err); }
   };
 
   const fetchStats = async () => {
     try {
       const data = await api.get('/api/tareas/stats');
       setStats(data);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Tareas.js]', err); }
   };
 
   const fetchTipos = async () => {
     try {
       const data = await api.get('/api/tareas/tipos');
       setTipos(data.tipos || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Tareas.js]', err); }
   };
 
   const fetchTareasCalendario = async () => {
     try {
       const data = await api.get(`/api/tareas/calendario?mes=${mesCalendario}&ano=${anoCalendario}`);
       setTareasCalendario(data.calendario || {});
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Tareas.js]', err); }
   };
 
   // Filtrar tareas
@@ -240,9 +228,7 @@ const Tareas = () => {
         fetchTareas();
         fetchStats();
       }
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Tareas.js]', err); }
   };
 
   const resetForm = () => {
@@ -285,9 +271,7 @@ const Tareas = () => {
       await api.delete(`/api/tareas/${id}`);
       fetchTareas();
       fetchStats();
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Tareas.js]', err); }
   };
 
   const handleEstadoChange = async (id, nuevoEstado) => {
@@ -295,18 +279,14 @@ const Tareas = () => {
       await api.patch(`/api/tareas/${id}/estado?estado=${nuevoEstado}`, {});
       fetchTareas();
       fetchStats();
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Tareas.js]', err); }
   };
 
   const handleToggleSubtarea = async (tareaId, subtareaId, completada) => {
     try {
       await api.patch(`/api/tareas/${tareaId}/subtarea/${subtareaId}?completada=${!completada}`, {});
       fetchTareas();
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Tareas.js]', err); }
   };
 
   const addSubtarea = () => {
@@ -336,9 +316,7 @@ const Tareas = () => {
       if (filters.prioridad) params.append('prioridad', filters.prioridad);
       
       await api.download(`/api/tareas/export/excel?${params}`, `tareas_${new Date().toISOString().split('T')[0]}.xlsx`);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Tareas.js]', err); }
   };
 
   // Calendario helpers
@@ -481,7 +459,7 @@ const Tareas = () => {
               const url = window.URL.createObjectURL(blob);
               const a = document.createElement('a'); a.href = url; a.download = `tareas_${new Date().toISOString().slice(0,10)}.pdf`;
               a.click(); window.URL.revokeObjectURL(url);
-            } catch (err) { }
+            } catch (err) { console.error('[Tareas.js]', err); }
           }} style={{ backgroundColor: '#dc2626', color: 'white' }} data-testid="btn-export-tareas-pdf">
             <FileText size={16} /> PDF
           </button>

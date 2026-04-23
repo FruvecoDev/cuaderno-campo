@@ -341,9 +341,7 @@ function FitBounds({ zones, parcelas }) {
           const bounds = L.latLngBounds(allCoords);
           map.fitBounds(bounds, { padding: [50, 50] });
         }
-      } catch (e) {
-        
-      }
+      } catch (e) { console.error('[AdvancedParcelMap.js]', e); }
     };
     
     const timeoutId = setTimeout(fitBounds, 100);
@@ -375,9 +373,7 @@ function GeolocationControl({ onLocate }) {
       map.on('locationerror', () => {
         alert('No se pudo obtener tu ubicación');
       });
-    } catch (e) {
-      
-    }
+    } catch (e) { console.error('[AdvancedParcelMap.js]', e); }
   };
   
   return (

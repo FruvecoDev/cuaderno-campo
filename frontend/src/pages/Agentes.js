@@ -86,7 +86,7 @@ const Agentes = () => {
       setContratos(cData.contratos || []);
       setCultivos(cuData.cultivos || []);
       setParcelas(pData.parcelas || []);
-    } catch (err) {}
+    } catch (err) { console.error('[Agentes.js]', err); }
   };
 
   const fetchComisiones = async (agenteId) => {
@@ -138,7 +138,7 @@ const Agentes = () => {
   };
 
   const handleToggleActivo = async (id) => {
-    try { await api.patch(`/api/agentes/${id}/toggle-activo`); fetchAgentes(); } catch (err) {}
+    try { await api.patch(`/api/agentes/${id}/toggle-activo`); fetchAgentes(); } catch (err) { console.error('[Agentes.js]', err); }
   };
 
   const closeModal = () => {
@@ -159,11 +159,11 @@ const Agentes = () => {
       await api.post(`/api/agentes/${editingId}/comisiones`, comisionForm);
       fetchComisiones(editingId);
       setComisionForm({ tipo_comision: 'porcentaje', valor: '', aplicar_a: 'contrato', referencia_id: '', referencia_nombre: '', fecha_desde: '', fecha_hasta: '', activa: true });
-    } catch (err) {}
+    } catch (err) { console.error('[Agentes.js]', err); }
   };
   const handleDeleteComision = async (comisionId) => {
     if (!window.confirm('Eliminar esta comision?')) return;
-    try { await api.delete(`/api/comisiones/${comisionId}`); fetchComisiones(editingId); } catch (err) {}
+    try { await api.delete(`/api/comisiones/${comisionId}`); fetchComisiones(editingId); } catch (err) { console.error('[Agentes.js]', err); }
   };
 
   const filteredAgentes = agentes.filter(a => {
@@ -176,7 +176,7 @@ const Agentes = () => {
   const [bulkDeleting, setBulkDeleting] = React.useState(false);
   const handleBulkDelete = async () => {
     setBulkDeleting(true);
-    try { await bulkDeleteApi('agentes', selectedIds); clearSelection(); fetchAgentes(); } catch (e) {} finally { setBulkDeleting(false); }
+    try { await bulkDeleteApi('agentes', selectedIds); clearSelection(); fetchAgentes(); } catch (e) { console.error('[Agentes.js]', e); } finally { setBulkDeleting(false); }
   };
 
   return (

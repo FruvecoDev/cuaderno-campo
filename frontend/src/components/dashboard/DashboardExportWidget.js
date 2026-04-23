@@ -17,9 +17,7 @@ const DashboardExportWidget = () => {
     try {
       const data = await api.get('/api/exports/modules');
       setModules(data.modules || []);
-    } catch (err) {
-
-    } finally {
+    } catch (err) { console.error('[DashboardExportWidget.js]', err); } finally {
       setLoadingModules(false);
     }
   };
@@ -51,9 +49,7 @@ const DashboardExportWidget = () => {
         modules: Array.from(selected),
         format
       }, filename);
-    } catch (err) {
-
-    } finally {
+    } catch (err) { console.error('[DashboardExportWidget.js]', err); } finally {
       setLoading(false);
     }
   };

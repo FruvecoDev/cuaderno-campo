@@ -79,18 +79,14 @@ const ComisionesGeneradas = () => {
         ...(compra.agentes || []).map(a => ({...a, tipo: 'compra'})),
         ...(venta.agentes || []).map(a => ({...a, tipo: 'venta'}))
       ]);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[ComisionesGeneradas.js]', err); }
   };
 
   const fetchCampanas = async () => {
     try {
       const response = await api.get('/api/comisiones/campanas');
       setCampanas(response.campanas || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[ComisionesGeneradas.js]', err); }
   };
 
   const handleEstadoChange = async (comisionId, nuevoEstado) => {

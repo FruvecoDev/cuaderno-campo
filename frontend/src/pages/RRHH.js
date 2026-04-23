@@ -169,9 +169,7 @@ const RRHH = () => {
     try {
       const data = await api.get('/api/rrhh/empleados/stats');
       setEmpleadoStats(data);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[RRHH.js]', err); }
   };
 
   const handleSubmit = async (e) => {
@@ -287,9 +285,7 @@ const RRHH = () => {
       const data = await api.get(`/api/rrhh/empleados/${empleadoId}`);
       setEmpleadoDetalle(data.empleado);
       setShowDetalle(true);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[RRHH.js]', err); }
   };
 
   const resetForm = () => {    setFormData({

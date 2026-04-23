@@ -487,7 +487,7 @@ async def get_filtros_opciones(
     """
     # Proveedores únicos
     proveedores_pipeline = [
-        {"$match": {"proveedor": {"$ne": None, "$ne": ""}}},
+        {"$match": {"proveedor": {"$nin": [None, ""]}}},
         {"$group": {"_id": "$proveedor"}},
         {"$sort": {"_id": 1}}
     ]
@@ -495,7 +495,7 @@ async def get_filtros_opciones(
     
     # Cultivos únicos
     cultivos_pipeline = [
-        {"$match": {"cultivo": {"$ne": None, "$ne": ""}}},
+        {"$match": {"cultivo": {"$nin": [None, ""]}}},
         {"$group": {"_id": "$cultivo"}},
         {"$sort": {"_id": 1}}
     ]
@@ -503,7 +503,7 @@ async def get_filtros_opciones(
     
     # Parcelas únicas
     parcelas_pipeline = [
-        {"$match": {"parcela_codigo": {"$ne": None, "$ne": ""}}},
+        {"$match": {"parcela_codigo": {"$nin": [None, ""]}}},
         {"$group": {"_id": "$parcela_codigo"}},
         {"$sort": {"_id": 1}}
     ]
@@ -511,7 +511,7 @@ async def get_filtros_opciones(
     
     # Contratos con su número
     contratos_pipeline = [
-        {"$match": {"contrato_id": {"$ne": None, "$ne": ""}}},
+        {"$match": {"contrato_id": {"$nin": [None, ""]}}},
         {"$group": {"_id": "$contrato_id"}},
     ]
     contratos_ids = await albaranes_collection.aggregate(contratos_pipeline).to_list(100)

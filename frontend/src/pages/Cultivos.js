@@ -90,7 +90,7 @@ const Cultivos = () => {
     try {
       const data = await api.get('/api/tipos-cultivo');
       setTiposCultivo(data.tipos || []);
-    } catch (error) {}
+    } catch (error) { console.error('[Cultivos.js]', error); }
   };
 
   const handleAddTipo = async () => {
@@ -99,14 +99,14 @@ const Cultivos = () => {
       await api.post('/api/tipos-cultivo', { nombre: nuevoTipo.trim() });
       setNuevoTipo('');
       fetchTiposCultivo();
-    } catch (error) {}
+    } catch (error) { console.error('[Cultivos.js]', error); }
   };
 
   const handleDeleteTipo = async (tipoId) => {
     try {
       await api.delete(`/api/tipos-cultivo/${tipoId}`);
       fetchTiposCultivo();
-    } catch (error) {}
+    } catch (error) { console.error('[Cultivos.js]', error); }
   };
 
   const fetchChangelog = async (cultivoId) => {
@@ -193,7 +193,7 @@ const Cultivos = () => {
   const [bulkDeleting, setBulkDeleting] = React.useState(false);
   const handleBulkDelete = async () => {
     setBulkDeleting(true);
-    try { await bulkDeleteApi('cultivos', selectedIds); clearSelection(); fetchCultivos(); } catch (e) {} finally { setBulkDeleting(false); }
+    try { await bulkDeleteApi('cultivos', selectedIds); clearSelection(); fetchCultivos(); } catch (e) { console.error('[Cultivos.js]', e); } finally { setBulkDeleting(false); }
   };
 
   return (

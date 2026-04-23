@@ -117,7 +117,7 @@ const Clientes = () => {
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const handleBulkDelete = async () => {
     setBulkDeleting(true);
-    try { await bulkDeleteApi('clientes', selectedIds); clearSelection(); fetchClientes(); } catch (e) {} finally { setBulkDeleting(false); }
+    try { await bulkDeleteApi('clientes', selectedIds); clearSelection(); fetchClientes(); } catch (e) { console.error('[Clientes.js]', e); } finally { setBulkDeleting(false); }
   };
 
   const nextCodigo = (() => {
@@ -162,58 +162,52 @@ const Clientes = () => {
     try {
       const data = await api.get('/api/clientes/tipos');
       setTipos(data.tipos || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Clientes.js]', err); }
   };
   
   const fetchProvincias = async () => {
     try {
       const data = await api.get('/api/clientes/provincias');
       setProvincias(data.provincias || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Clientes.js]', err); }
   };
   
   const fetchStats = async () => {
     try {
       const data = await api.get('/api/clientes/stats/resumen');
       setStats(data.stats);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Clientes.js]', err); }
   };
 
   const fetchTiposClienteCrud = async () => {
-    try { const data = await api.get('/api/tipos-cliente'); setTiposClienteCrud(data.tipos || []); } catch (e) {}
+    try { const data = await api.get('/api/tipos-cliente'); setTiposClienteCrud(data.tipos || []); } catch (e) { console.error('[Clientes.js]', e); }
   };
   const fetchTiposOperacion = async () => {
-    try { const data = await api.get('/api/tipos-operacion-cliente'); setTiposOperacion(data.tipos || []); } catch (e) {}
+    try { const data = await api.get('/api/tipos-operacion-cliente'); setTiposOperacion(data.tipos || []); } catch (e) { console.error('[Clientes.js]', e); }
   };
   const handleAddTipoCl = async () => {
     if (!nuevoTipo.trim()) return;
-    try { await api.post('/api/tipos-cliente', { nombre: nuevoTipo.trim() }); setNuevoTipo(''); fetchTiposClienteCrud(); } catch (e) {}
+    try { await api.post('/api/tipos-cliente', { nombre: nuevoTipo.trim() }); setNuevoTipo(''); fetchTiposClienteCrud(); } catch (e) { console.error('[Clientes.js]', e); }
   };
   const handleDeleteTipoCl = async (id) => {
-    try { await api.delete(`/api/tipos-cliente/${id}`); fetchTiposClienteCrud(); } catch (e) {}
+    try { await api.delete(`/api/tipos-cliente/${id}`); fetchTiposClienteCrud(); } catch (e) { console.error('[Clientes.js]', e); }
   };
   const handleAddTipoOp = async () => {
     if (!nuevoTipoOp.trim()) return;
-    try { await api.post('/api/tipos-operacion-cliente', { nombre: nuevoTipoOp.trim() }); setNuevoTipoOp(''); fetchTiposOperacion(); } catch (e) {}
+    try { await api.post('/api/tipos-operacion-cliente', { nombre: nuevoTipoOp.trim() }); setNuevoTipoOp(''); fetchTiposOperacion(); } catch (e) { console.error('[Clientes.js]', e); }
   };
   const handleDeleteTipoOp = async (id) => {
-    try { await api.delete(`/api/tipos-operacion-cliente/${id}`); fetchTiposOperacion(); } catch (e) {}
+    try { await api.delete(`/api/tipos-operacion-cliente/${id}`); fetchTiposOperacion(); } catch (e) { console.error('[Clientes.js]', e); }
   };
   const fetchChangelog = async (id) => {
     try { const data = await api.get(`/api/clientes/${id}/changelog`); setChangelog(data.changelog || []); } catch (e) { setChangelog([]); }
   };
-  const fetchFormasPago = async () => { try { const d = await api.get('/api/formas-pago'); setFormasPago(d.items || []); } catch (e) {} };
-  const fetchTiposIva = async () => { try { const d = await api.get('/api/tipos-iva'); setTiposIva(d.items || []); } catch (e) {} };
-  const handleAddFormaPago = async () => { if (!nuevaFormaPago.trim()) return; try { await api.post('/api/formas-pago', { nombre: nuevaFormaPago.trim() }); setNuevaFormaPago(''); fetchFormasPago(); } catch (e) {} };
-  const handleDeleteFormaPago = async (id) => { try { await api.delete(`/api/formas-pago/${id}`); fetchFormasPago(); } catch (e) {} };
-  const handleAddTipoIva = async () => { if (!nuevoTipoIva.nombre.trim()) return; try { await api.post('/api/tipos-iva', nuevoTipoIva); setNuevoTipoIva({ nombre: '', valor: '' }); fetchTiposIva(); } catch (e) {} };
-  const handleDeleteTipoIva = async (id) => { try { await api.delete(`/api/tipos-iva/${id}`); fetchTiposIva(); } catch (e) {} };
+  const fetchFormasPago = async () => { try { const d = await api.get('/api/formas-pago'); setFormasPago(d.items || []); } catch (e) { console.error('[Clientes.js]', e); } };
+  const fetchTiposIva = async () => { try { const d = await api.get('/api/tipos-iva'); setTiposIva(d.items || []); } catch (e) { console.error('[Clientes.js]', e); } };
+  const handleAddFormaPago = async () => { if (!nuevaFormaPago.trim()) return; try { await api.post('/api/formas-pago', { nombre: nuevaFormaPago.trim() }); setNuevaFormaPago(''); fetchFormasPago(); } catch (e) { console.error('[Clientes.js]', e); } };
+  const handleDeleteFormaPago = async (id) => { try { await api.delete(`/api/formas-pago/${id}`); fetchFormasPago(); } catch (e) { console.error('[Clientes.js]', e); } };
+  const handleAddTipoIva = async () => { if (!nuevoTipoIva.nombre.trim()) return; try { await api.post('/api/tipos-iva', nuevoTipoIva); setNuevoTipoIva({ nombre: '', valor: '' }); fetchTiposIva(); } catch (e) { console.error('[Clientes.js]', e); } };
+  const handleDeleteTipoIva = async (id) => { try { await api.delete(`/api/tipos-iva/${id}`); fetchTiposIva(); } catch (e) { console.error('[Clientes.js]', e); } };
   
   const handleExportExcel = async () => {
     try {
@@ -337,9 +331,7 @@ const Clientes = () => {
     try {
       await api.patch(`/api/clientes/${clienteId}/toggle-activo`);
       fetchClientes();
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Clientes.js]', err); }
   };
   
   const handleUploadFoto = async (clienteId, file) => {
@@ -350,9 +342,7 @@ const Clientes = () => {
       
       await api.upload(`/api/clientes/${clienteId}/foto`, formDataUpload);
       fetchClientes();
-    } catch (err) {
-
-    } finally {
+    } catch (err) { console.error('[Clientes.js]', err); } finally {
       setUploadingFoto(false);
     }
   };

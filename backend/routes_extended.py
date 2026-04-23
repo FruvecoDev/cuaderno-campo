@@ -1545,7 +1545,7 @@ async def export_comisiones_excel(
     
     # Título
     ws.merge_cells('A1:I1')
-    ws['A1'] = f"LISTADO DE COMISIONES"
+    ws['A1'] = "LISTADO DE COMISIONES"
     ws['A1'].font = Font(bold=True, size=14)
     ws['A1'].alignment = Alignment(horizontal='center')
     

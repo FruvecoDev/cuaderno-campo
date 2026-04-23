@@ -148,9 +148,7 @@ const Recetas = () => {
     try {
       const data = await api.get('/api/recetas/stats/dashboard');
       setStats(data);
-    } catch (error) {
-
-    }
+    } catch (error) { console.error('[Recetas.js]', error); }
   };
 
   const fetchFitosanitarios = async (search) => {
@@ -161,7 +159,7 @@ const Recetas = () => {
       setFitosanitarios(prods);
       const plagas = [...new Set(prods.flatMap(p => p.plagas_objetivo || []).filter(Boolean))].sort();
       setPlagasUnicas(plagas);
-    } catch (error) {}
+    } catch (error) { console.error('[Recetas.js]', error); }
   };
 
   useEffect(() => { fetchFitosanitarios(''); }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -179,9 +177,7 @@ const Recetas = () => {
     try {
       const data = await api.get('/api/cultivos');
       setCultivos(data.cultivos || []);
-    } catch (error) {
-
-    }
+    } catch (error) { console.error('[Recetas.js]', error); }
   };
   
   const fetchRecetas = async () => {
@@ -405,9 +401,7 @@ const Recetas = () => {
     try {
       const data = await api.post(`/api/recetas/${recetaCalculo._id}/calcular-dosis?superficie=${superficieCalculo}`);
       setResultadoCalculo(data);
-    } catch (error) {
-
-    }
+    } catch (error) { console.error('[Recetas.js]', error); }
   };
   
   const openCalculadora = (receta) => {
@@ -451,7 +445,7 @@ const Recetas = () => {
               const url = window.URL.createObjectURL(blob);
               const a = document.createElement('a'); a.href = url; a.download = `recetas_${new Date().toISOString().slice(0,10)}.xlsx`;
               a.click(); window.URL.revokeObjectURL(url);
-            } catch (err) { }
+            } catch (err) { console.error('[Recetas.js]', err); }
           }} style={{ backgroundColor: '#16a34a', color: 'white' }} data-testid="btn-export-recetas-excel">
             <Download size={14} /> Excel
           </button>
@@ -462,7 +456,7 @@ const Recetas = () => {
               const url = window.URL.createObjectURL(blob);
               const a = document.createElement('a'); a.href = url; a.download = `recetas_${new Date().toISOString().slice(0,10)}.pdf`;
               a.click(); window.URL.revokeObjectURL(url);
-            } catch (err) { }
+            } catch (err) { console.error('[Recetas.js]', err); }
           }} style={{ backgroundColor: '#dc2626', color: 'white' }} data-testid="btn-export-recetas-pdf">
             <FileText size={14} /> PDF
           </button>
@@ -661,7 +655,7 @@ const Recetas = () => {
                 {formData.productos.length > 0 && (
                   <div style={{ marginBottom: '1rem' }}>
                     {formData.productos.map((p, i) => (
-                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', borderRadius: '8px', marginBottom: '0.5rem', background: 'white', border: '1px solid hsl(var(--border))' }}>
+                      <div key={`${p.num_registro || p.nombre_comercial || 'prod'}-${i}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', borderRadius: '8px', marginBottom: '0.5rem', background: 'white', border: '1px solid hsl(var(--border))' }}>
                         <div style={{ flex: 1 }}>
                           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
                             <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>{p.nombre_comercial}</span>
@@ -974,7 +968,7 @@ const Recetas = () => {
                     </thead>
                     <tbody>
                       {viewingReceta.productos.map((p, i) => (
-                        <tr key={i}>
+                        <tr key={`${p.num_registro || p.nombre_comercial || 'p'}-${i}`}>
                           <td style={{ fontWeight: '500' }}>{p.nombre_comercial}</td>
                           <td>{p.materia_activa}</td>
                           <td style={{ textAlign: 'right' }}>{p.dosis} {p.unidad}</td>
@@ -1108,7 +1102,7 @@ const Recetas = () => {
                     </thead>
                     <tbody>
                       {resultadoCalculo.productos.map((p, i) => (
-                        <tr key={i}>
+                        <tr key={`${p.num_registro || p.nombre_comercial || 'r'}-${i}`}>
                           <td>
                             <strong>{p.nombre_comercial}</strong>
                             <br />

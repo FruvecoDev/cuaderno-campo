@@ -65,9 +65,7 @@ const Cosechas = () => {
     try {
       const data = await api.get('/api/cosechas');
       setCosechas(data.cosechas || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Cosechas.js]', err); }
     setLoading(false);
   };
 
@@ -75,18 +73,14 @@ const Cosechas = () => {
     try {
       const data = await api.get('/api/contratos');
       setContratos(data.contratos || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Cosechas.js]', err); }
   };
   
   const fetchStats = async () => {
     try {
       const data = await api.get('/api/cosechas/stats/dashboard');
       setStats(data);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Cosechas.js]', err); }
   };
   
   const exportToExcel = async () => {
@@ -118,9 +112,7 @@ const Cosechas = () => {
       link.download = `${data.filename}.csv`;
       link.click();
       URL.revokeObjectURL(url);
-    } catch (err) {
-
-    } finally {
+    } catch (err) { console.error('[Cosechas.js]', err); } finally {
       setExportLoading(false);
     }
   };
@@ -200,9 +192,7 @@ const Cosechas = () => {
         planificaciones: [{ fecha_planificada: '', kilos_estimados: '', observaciones: '' }]
       });
       fetchCosechas();
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Cosechas.js]', err); }
   };
 
   // Añadir carga
@@ -231,9 +221,7 @@ const Cosechas = () => {
         observaciones: ''
       });
       fetchCosechas();
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Cosechas.js]', err); }
   };
 
   // Eliminar carga
@@ -243,9 +231,7 @@ const Cosechas = () => {
     try {
       await api.delete(`/api/cosechas/${cosechaId}/cargas/${idCarga}`);
       fetchCosechas();
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Cosechas.js]', err); }
   };
 
   // Completar cosecha
@@ -255,9 +241,7 @@ const Cosechas = () => {
     try {
       await api.put(`/api/cosechas/${cosechaId}/completar`);
       fetchCosechas();
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Cosechas.js]', err); }
   };
 
   // Eliminar cosecha
@@ -267,9 +251,7 @@ const Cosechas = () => {
     try {
       await api.delete(`/api/cosechas/${cosechaId}`);
       fetchCosechas();
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Cosechas.js]', err); }
   };
 
   // Añadir/quitar planificación
@@ -344,7 +326,7 @@ const Cosechas = () => {
               const url = window.URL.createObjectURL(blob);
               const a = document.createElement('a'); a.href = url; a.download = `cosechas_${new Date().toISOString().slice(0,10)}.pdf`;
               a.click(); window.URL.revokeObjectURL(url);
-            } catch (err) { }
+            } catch (err) { console.error('[Cosechas.js]', err); }
           }} style={{ backgroundColor: '#dc2626', color: 'white' }} data-testid="btn-export-cosechas-pdf">
             <FileText size={18} /> PDF
           </button>
@@ -559,7 +541,7 @@ const Cosechas = () => {
                   <button type="button" className="btn btn-sm btn-secondary" onClick={addPlanificacion}><Plus size={14} /> Anadir fecha</button>
                 </div>
                 {formData.planificaciones.map((plan, idx) => (
-                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: '180px 160px 1fr auto', gap: '0.75rem', marginBottom: '0.75rem', alignItems: 'start', padding: '0.75rem', background: 'hsl(var(--muted) / 0.15)', borderRadius: '8px', border: '1px solid hsl(var(--border))' }}>
+                  <div key={`plan-${plan.fecha_planificada || idx}-${idx}`} style={{ display: 'grid', gridTemplateColumns: '180px 160px 1fr auto', gap: '0.75rem', marginBottom: '0.75rem', alignItems: 'start', padding: '0.75rem', background: 'hsl(var(--muted) / 0.15)', borderRadius: '8px', border: '1px solid hsl(var(--border))' }}>
                     <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '600', textTransform: 'uppercase' }}>Fecha</label><input type="date" className="form-input" value={plan.fecha_planificada} onChange={(e) => updatePlanificacion(idx, 'fecha_planificada', e.target.value)} /></div>
                     <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '600', textTransform: 'uppercase' }}>Kilos Estimados</label><input type="number" className="form-input" value={plan.kilos_estimados} onChange={(e) => updatePlanificacion(idx, 'kilos_estimados', e.target.value)} placeholder="0" style={{ textAlign: 'right', fontWeight: '600' }} /></div>
                     <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '600', textTransform: 'uppercase' }}>Observaciones</label><input type="text" className="form-input" value={plan.observaciones} onChange={(e) => updatePlanificacion(idx, 'observaciones', e.target.value)} placeholder="Observaciones..." /></div>
@@ -982,7 +964,7 @@ const Cosechas = () => {
                           <tbody>
                             {cosecha.cargas.map((carga, idx) => (
                               <tr 
-                                key={idx}
+                                key={carga.id_carga || carga._id || `c-${cosecha._id}-${idx}`}
                                 style={{ 
                                   backgroundColor: carga.es_descuento ? '#fee2e2' : 'transparent'
                                 }}

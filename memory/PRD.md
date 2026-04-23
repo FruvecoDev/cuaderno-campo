@@ -198,4 +198,23 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - Solo disponible al editar un empleado ya guardado (backend necesita el ID)
 - Test e2e Playwright /app/tests/e2e/rrhh-nfc.spec.ts pasa (asignar + eliminar)
 
+### Code Quality Sweep (FASE 1 + 2 + 3d) - DONE (2026-02-XX)
+**Bugs reales corregidos:**
+- F601 (4 casos): Claves $ne duplicadas en diccionarios MongoDB en routes_alertas.py (2) y routes_gastos.py (4) → reemplazadas por $nin. La segunda $ne sobrescribía la primera, causando filtros incompletos.
+- Admin email mismatch en routes_auth.py (agrogest → fruveco)
+
+**Mejoras React:**
+- Array-index keys reemplazados por IDs estables en 13 lugares de Dashboard.js, Recetas.js, Cosechas.js, InformesGastos.js (previene pérdida de estado en re-renders)
+- useMemo añadido en 3 componentes críticos: GeoImportModal (suma áreas), MaquinariaHistorial (grouping+sort), ParcelasForm (filter contratos + fincas)
+
+**Empty catch blocks → console.error:**
+- 221 catch blocks vacíos arreglados automáticamente en 51 archivos del frontend
+- Cada catch ahora emite `console.error('[filename]', errVar)` con contexto para debugging
+
+**Auto-fixes Python (ruff):**
+- 10 fixes automáticos aplicados (f-strings sin placeholders, variables no usadas)
+
+**Validación:** 4/4 pasos del pre-deploy-check PASS, 5/5 Playwright, 17/17 backend NFC, ESLint 0 errors.
+
+
 

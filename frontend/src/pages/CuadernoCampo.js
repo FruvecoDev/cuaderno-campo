@@ -29,8 +29,7 @@ const CuadernoCampo = () => {
     try {
       const data = await api.get('/api/cuaderno-campo/parcelas');
       setParcelas(data.parcelas || []);
-    } catch (err) {
-    } finally {
+    } catch (err) { console.error('[CuadernoCampo.js]', err); } finally {
       setLoading(false);
     }
   };
@@ -39,7 +38,7 @@ const CuadernoCampo = () => {
     try {
       const data = await api.get('/api/contratos');
       setContratos(data.contratos || []);
-    } catch (err) {}
+    } catch (err) { console.error('[CuadernoCampo.js]', err); }
   };
 
   const getContratoForParcela = (parcela) => {
@@ -58,9 +57,7 @@ const CuadernoCampo = () => {
     try {
       const data = await api.get(`/api/cuaderno-campo/preview/${parcela._id}`);
       setPreview(data);
-    } catch (err) {
-
-    } finally {
+    } catch (err) { console.error('[CuadernoCampo.js]', err); } finally {
       setLoadingPreview(false);
     }
   };
@@ -112,7 +109,7 @@ const CuadernoCampo = () => {
       await bulkDeleteApi('parcelas', selectedIds);
       clearSelection();
       fetchParcelas();
-    } catch (err) {} finally { setBulkDeleting(false); }
+    } catch (err) { console.error('[CuadernoCampo.js]', err); } finally { setBulkDeleting(false); }
   };
 
   if (loading) {

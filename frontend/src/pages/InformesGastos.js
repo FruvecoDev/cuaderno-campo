@@ -69,18 +69,14 @@ const InformesGastos = () => {
     try {
       const data = await api.get('/api/gastos/filtros-opciones');
       setFiltrosOpciones(data);
-    } catch (error) {
-
-    }
+    } catch (error) { console.error('[InformesGastos.js]', error); }
   };
   
   const fetchCampanas = async () => {
     try {
       const data = await api.get('/api/gastos/campanas');
       setCampanas(data.campanas || []);
-    } catch (error) {
-
-    }
+    } catch (error) { console.error('[InformesGastos.js]', error); }
   };
 
   const fetchResumen = async () => {
@@ -123,9 +119,7 @@ const InformesGastos = () => {
       const data = await api.get(`/api/gastos/detalle-albaranes?${params}`);
       setDetalleAlbaranes(data.albaranes || []);
       setDetalleView({ tipo, valor, total: data.total_sum });
-    } catch (error) {
-
-    } finally {
+    } catch (error) { console.error('[InformesGastos.js]', error); } finally {
       setLoadingDetalle(false);
     }
   };
@@ -876,7 +870,7 @@ const InformesGastos = () => {
                 <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
                   {detalleAlbaranes.map((albaran, idx) => (
                     <div 
-                      key={idx} 
+                      key={albaran._id || albaran.id || `alb-${albaran.fecha}-${idx}`} 
                       style={{ 
                         marginBottom: '1rem', 
                         border: '1px solid hsl(var(--border))', 
@@ -925,7 +919,7 @@ const InformesGastos = () => {
                           </thead>
                           <tbody>
                             {albaran.items.map((item, itemIdx) => (
-                              <tr key={itemIdx}>
+                              <tr key={`${albaran._id || idx}-i${itemIdx}`}>
                                 <td style={{ padding: '0.5rem' }}>
                                   {item.descripcion || 'Sin descripción'}
                                 </td>

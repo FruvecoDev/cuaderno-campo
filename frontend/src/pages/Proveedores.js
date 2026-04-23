@@ -115,16 +115,14 @@ const Proveedores = () => {
     try {
       const data = await api.get('/api/proveedores/stats/resumen');
       setStats(data.stats);
-    } catch (error) {
-
-    }
+    } catch (error) { console.error('[Proveedores.js]', error); }
   };
 
   const fetchTiposProveedor = async () => {
     try {
       const data = await api.get('/api/tipos-proveedor');
       setTiposProveedor(data.tipos || []);
-    } catch (error) {}
+    } catch (error) { console.error('[Proveedores.js]', error); }
   };
 
   const handleAddTipo = async () => {
@@ -133,21 +131,21 @@ const Proveedores = () => {
       await api.post('/api/tipos-proveedor', { nombre: nuevoTipo.trim() });
       setNuevoTipo('');
       fetchTiposProveedor();
-    } catch (error) {}
+    } catch (error) { console.error('[Proveedores.js]', error); }
   };
 
   const handleDeleteTipo = async (tipoId) => {
     try {
       await api.delete(`/api/tipos-proveedor/${tipoId}`);
       fetchTiposProveedor();
-    } catch (error) {}
+    } catch (error) { console.error('[Proveedores.js]', error); }
   };
 
   const fetchTiposOperacion = async () => {
     try {
       const data = await api.get('/api/tipos-operacion-proveedor');
       setTiposOperacion(data.tipos || []);
-    } catch (error) {}
+    } catch (error) { console.error('[Proveedores.js]', error); }
   };
   const handleAddTipoOp = async () => {
     if (!nuevoTipoOp.trim()) return;
@@ -155,10 +153,10 @@ const Proveedores = () => {
       await api.post('/api/tipos-operacion-proveedor', { nombre: nuevoTipoOp.trim() });
       setNuevoTipoOp('');
       fetchTiposOperacion();
-    } catch (error) {}
+    } catch (error) { console.error('[Proveedores.js]', error); }
   };
   const handleDeleteTipoOp = async (id) => {
-    try { await api.delete(`/api/tipos-operacion-proveedor/${id}`); fetchTiposOperacion(); } catch (error) {}
+    try { await api.delete(`/api/tipos-operacion-proveedor/${id}`); fetchTiposOperacion(); } catch (error) { console.error('[Proveedores.js]', error); }
   };
 
   const fetchChangelog = async (provId) => {
@@ -168,12 +166,12 @@ const Proveedores = () => {
     } catch (error) { setChangelog([]); }
   };
 
-  const fetchFormasPago = async () => { try { const d = await api.get('/api/formas-pago'); setFormasPago(d.items || []); } catch (e) {} };
-  const fetchTiposIva = async () => { try { const d = await api.get('/api/tipos-iva'); setTiposIva(d.items || []); } catch (e) {} };
-  const handleAddFormaPago = async () => { if (!nuevaFormaPago.trim()) return; try { await api.post('/api/formas-pago', { nombre: nuevaFormaPago.trim() }); setNuevaFormaPago(''); fetchFormasPago(); } catch (e) {} };
-  const handleDeleteFormaPago = async (id) => { try { await api.delete(`/api/formas-pago/${id}`); fetchFormasPago(); } catch (e) {} };
-  const handleAddTipoIva = async () => { if (!nuevoTipoIva.nombre.trim()) return; try { await api.post('/api/tipos-iva', nuevoTipoIva); setNuevoTipoIva({ nombre: '', valor: '' }); fetchTiposIva(); } catch (e) {} };
-  const handleDeleteTipoIva = async (id) => { try { await api.delete(`/api/tipos-iva/${id}`); fetchTiposIva(); } catch (e) {} };
+  const fetchFormasPago = async () => { try { const d = await api.get('/api/formas-pago'); setFormasPago(d.items || []); } catch (e) { console.error('[Proveedores.js]', e); } };
+  const fetchTiposIva = async () => { try { const d = await api.get('/api/tipos-iva'); setTiposIva(d.items || []); } catch (e) { console.error('[Proveedores.js]', e); } };
+  const handleAddFormaPago = async () => { if (!nuevaFormaPago.trim()) return; try { await api.post('/api/formas-pago', { nombre: nuevaFormaPago.trim() }); setNuevaFormaPago(''); fetchFormasPago(); } catch (e) { console.error('[Proveedores.js]', e); } };
+  const handleDeleteFormaPago = async (id) => { try { await api.delete(`/api/formas-pago/${id}`); fetchFormasPago(); } catch (e) { console.error('[Proveedores.js]', e); } };
+  const handleAddTipoIva = async () => { if (!nuevoTipoIva.nombre.trim()) return; try { await api.post('/api/tipos-iva', nuevoTipoIva); setNuevoTipoIva({ nombre: '', valor: '' }); fetchTiposIva(); } catch (e) { console.error('[Proveedores.js]', e); } };
+  const handleDeleteTipoIva = async (id) => { try { await api.delete(`/api/tipos-iva/${id}`); fetchTiposIva(); } catch (e) { console.error('[Proveedores.js]', e); } };
 
   const handleVerHistorial = async (proveedor) => {
     setSelectedProveedor(proveedor);
@@ -181,9 +179,7 @@ const Proveedores = () => {
       const data = await api.get(`/api/proveedores/${proveedor._id}/historial`);
       setHistorialData(data.historial);
       setShowHistorial(true);
-    } catch (error) {
-
-    }
+    } catch (error) { console.error('[Proveedores.js]', error); }
   };
 
   const handleExportExcel = async () => {
@@ -297,7 +293,7 @@ const Proveedores = () => {
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const handleBulkDelete = async () => {
     setBulkDeleting(true);
-    try { await bulkDeleteApi('proveedores', selectedIds); clearSelection(); fetchProveedores(); } catch (e) {} finally { setBulkDeleting(false); }
+    try { await bulkDeleteApi('proveedores', selectedIds); clearSelection(); fetchProveedores(); } catch (e) { console.error('[Proveedores.js]', e); } finally { setBulkDeleting(false); }
   };
 
   // Column config handled by useColumnConfig hook

@@ -16,8 +16,7 @@ try {
   if (token && typeof token !== 'string') {
     localStorage.removeItem('token');
   }
-} catch (err) {
-}
+} catch (err) { console.error('[index.js]', err); }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

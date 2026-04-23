@@ -440,7 +440,7 @@ async def generate_excel(request: ReportRequest):
         return StreamingResponse(
             excel_bytes,
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={"Content-Disposition": f"attachment; filename=datos_agricolas.xlsx"}
+            headers={"Content-Disposition": "attachment; filename=datos_agricolas.xlsx"}
         )
         
     except Exception as e:

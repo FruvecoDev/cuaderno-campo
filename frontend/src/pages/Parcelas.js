@@ -86,21 +86,21 @@ const Parcelas = () => {
     try {
       const data = await api.get('/api/sigpac/provincias');
       if (data.success) setProvincias(data.provincias);
-    } catch (err) { }
+    } catch (err) { console.error('[Parcelas.js]', err); }
   };
 
   const fetchFincas = async () => {
     try {
       const data = await api.get('/api/fincas');
       setFincas(data.fincas || []);
-    } catch (err) { }
+    } catch (err) { console.error('[Parcelas.js]', err); }
   };
 
   const fetchCultivos = async () => {
     try {
       const data = await api.get('/api/cultivos');
       setCultivos(data.cultivos || []);
-    } catch (err) { }
+    } catch (err) { console.error('[Parcelas.js]', err); }
   };
 
   const generarCodigoPlantacion = useCallback(() => {
@@ -222,7 +222,7 @@ const Parcelas = () => {
         campanas: [...new Set(p.map(x => x.campana).filter(Boolean))],
         parcelas: [...new Set(p.map(x => x.codigo_plantacion).filter(Boolean))]
       });
-    } catch (err) { } finally { setLoading(false); }
+    } catch (err) { console.error('[Parcelas.js]', err); } finally { setLoading(false); }
   };
 
   const fetchContratos = async () => {
@@ -235,7 +235,7 @@ const Parcelas = () => {
         cultivos: [...new Set(c.map(x => x.cultivo).filter(Boolean))],
         campanas: [...new Set(c.map(x => x.campana).filter(Boolean))]
       });
-    } catch (err) { }
+    } catch (err) { console.error('[Parcelas.js]', err); }
   };
 
   const clearFilters = () => setFilters({ proveedor: '', cultivo: '', campana: '', codigo_plantacion: '' });
@@ -257,7 +257,7 @@ const Parcelas = () => {
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const handleBulkDelete = async () => {
     setBulkDeleting(true);
-    try { await bulkDeleteApi('parcelas', selectedIds); clearSelection(); fetchParcelas(); } catch (e) {} finally { setBulkDeleting(false); }
+    try { await bulkDeleteApi('parcelas', selectedIds); clearSelection(); fetchParcelas(); } catch (e) { console.error('[Parcelas.js]', e); } finally { setBulkDeleting(false); }
   };
 
   const handleZonesChanged = useCallback((newZones) => {

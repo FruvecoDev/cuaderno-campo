@@ -15,6 +15,7 @@ class SyncService {
       window.addEventListener('online', () => this.handleOnline());
       window.addEventListener('offline', () => this.handleOffline());
     } catch (err) {
+      console.error('[SyncService] Failed to attach online/offline listeners:', err);
     }
     
     // Check notification permission on init (safely)
@@ -25,6 +26,7 @@ class SyncService {
     try {
       await this.checkNotificationPermission();
     } catch (err) {
+      console.error('[SyncService] Notification permission check failed:', err);
     }
   }
 
@@ -53,7 +55,7 @@ class SyncService {
       this.notificationsEnabled = permission === 'granted';
       return this.notificationsEnabled;
     } catch (error) {
-
+      console.error('[SyncService] Notification.requestPermission failed:', error);
       return false;
     }
   }
@@ -84,7 +86,7 @@ class SyncService {
       
       return notification;
     } catch (error) {
-
+      console.error('[SyncService] Failed to show notification:', error);
     }
   }
 
@@ -100,6 +102,7 @@ class SyncService {
       try {
         callback(event);
       } catch (err) {
+        console.error('[SyncService] Listener threw:', err);
       }
     });
   }
@@ -115,10 +118,12 @@ class SyncService {
         icon: '/logo192.png'
       });
     } catch (err) {
+      console.error('[SyncService] Failed to show online notification:', err);
     }
     
     // Auto-sync when coming back online (safely)
     this.syncPendingItems().catch(err => {
+      console.error('[SyncService] Auto-sync on reconnect failed:', err);
     });
   }
 
@@ -169,7 +174,7 @@ class SyncService {
 
       return true;
     } catch (error) {
-
+      console.error('[SyncService] cacheReferenceData failed:', error);
       this.notifyListeners({ type: 'error', message: 'Error al descargar datos offline' });
       return false;
     }
@@ -189,7 +194,7 @@ class SyncService {
       
       return { success: true, offlineId: id, message: 'Visita guardada localmente. Se sincronizará al reconectar.' };
     } catch (error) {
-
+      console.error('[SyncService] saveVisitaOffline failed:', error);
       return { success: false, error: error.message };
     }
   }
@@ -208,7 +213,7 @@ class SyncService {
       
       return { success: true, offlineId: id, message: 'Tratamiento guardado localmente. Se sincronizará al reconectar.' };
     } catch (error) {
-
+      console.error('[SyncService] saveTratamientoOffline failed:', error);
       return { success: false, error: error.message };
     }
   }
@@ -259,7 +264,7 @@ class SyncService {
         await offlineDB.removePendingSyncItem(item.id);
         synced++;
       } catch (error) {
-
+        console.error(`[SyncService] Sync failed for ${item.type} ${item.id}:`, error);
         await offlineDB.updatePendingSyncItem(item.id, {
           status: item.attempts >= 2 ? 'failed' : 'pending',
           attempts: item.attempts + 1,

@@ -59,9 +59,7 @@ const NotificacionesDropdown = () => {
     try {
       const data = await api.get('/api/notificaciones/count');
       setNoLeidas(data.no_leidas || 0);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[NotificacionesDropdown.js]', err); }
   };
 
   const fetchNotificaciones = async () => {
@@ -70,9 +68,7 @@ const NotificacionesDropdown = () => {
       const data = await api.get('/api/notificaciones?limit=20');
       setNotificaciones(data.notificaciones || []);
       setNoLeidas(data.no_leidas || 0);
-    } catch (err) {
-
-    } finally {
+    } catch (err) { console.error('[NotificacionesDropdown.js]', err); } finally {
       setLoading(false);
     }
   };
@@ -91,9 +87,7 @@ const NotificacionesDropdown = () => {
         prev.map(n => n._id === id ? { ...n, leida: true } : n)
       );
       setNoLeidas(prev => Math.max(0, prev - 1));
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[NotificacionesDropdown.js]', err); }
   };
 
   const handleMarcarTodasLeidas = async () => {
@@ -101,9 +95,7 @@ const NotificacionesDropdown = () => {
       await api.put('/api/notificaciones/leer-todas');
       setNotificaciones(prev => prev.map(n => ({ ...n, leida: true })));
       setNoLeidas(0);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[NotificacionesDropdown.js]', err); }
   };
 
   const handleClickNotificacion = (notif) => {

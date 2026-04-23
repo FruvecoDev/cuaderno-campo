@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Cog, X, Wrench, Settings, TrendingUp } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -8,6 +8,19 @@ const MaquinariaHistorial = ({
   loadingHistorial,
   onClose,
 }) => {
+  // Memoize expensive chart data computation (reduce+sort+slice)
+  const chartData = useMemo(() => {
+    if (!historialData?.tratamientos?.length) return [];
+    const grouped = historialData.tratamientos.reduce((acc, t) => {
+      const fecha = t.fecha ? new Date(t.fecha) : new Date();
+      const mes = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+      if (!acc[mes]) acc[mes] = { mes, usos: 0 };
+      acc[mes].usos += 1;
+      return acc;
+    }, {});
+    return Object.values(grouped).sort((a, b) => a.mes.localeCompare(b.mes)).slice(-6);
+  }, [historialData]);
+
   return (
     <div
       onClick={onClose}
@@ -54,17 +67,7 @@ const MaquinariaHistorial = ({
                   </h4>
                   <div style={{ height: '160px', background: 'hsl(var(--muted) / 0.2)', borderRadius: '8px', padding: '0.5rem' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={
-                        Object.entries(
-                          historialData.tratamientos.reduce((acc, t) => {
-                            const fecha = t.fecha ? new Date(t.fecha) : new Date();
-                            const mes = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
-                            if (!acc[mes]) acc[mes] = { mes, usos: 0 };
-                            acc[mes].usos += 1;
-                            return acc;
-                          }, {})
-                        ).map(([_, v]) => v).sort((a, b) => a.mes.localeCompare(b.mes)).slice(-6)
-                      }>
+                      <AreaChart data={chartData}>
                         <defs>
                           <linearGradient id="colorUsos" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>

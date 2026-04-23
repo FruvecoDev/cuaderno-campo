@@ -242,9 +242,7 @@ const Albaranes = () => {
       if (result.ok) {
         setAlbaranes(result.data?.albaranes || []);
       }
-    } catch (error) {
-
-    }
+    } catch (error) { console.error('[Albaranes.js]', error); }
   };
   
   // Cargar estadísticas
@@ -252,9 +250,7 @@ const Albaranes = () => {
     try {
       const data = await api.get('/api/albaranes/stats/dashboard');
       setStats(data);
-    } catch (error) {
-
-    }
+    } catch (error) { console.error('[Albaranes.js]', error); }
   };
   
   // Exportar a Excel

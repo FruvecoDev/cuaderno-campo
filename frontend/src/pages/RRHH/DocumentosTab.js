@@ -107,9 +107,7 @@ const DocumentosTab = ({ empleados }) => {
       const url = queryString ? `/api/rrhh/documentos?${queryString}` : '/api/rrhh/documentos';
       const data = await api.get(url);
       setDocumentos(data.documentos || []);
-    } catch (err) {
-
-    } finally {
+    } catch (err) { console.error('[DocumentosTab.js]', err); } finally {
       setLoading(false);
     }
   };
@@ -345,9 +343,7 @@ const DocumentosTab = ({ empleados }) => {
       setDocumentoAFirmar(null);
       setFirmaGuardada(null);
       fetchDocumentos();
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[DocumentosTab.js]', err); }
   };
   
   const handleEliminarDocumento = async (docId) => {
@@ -356,9 +352,7 @@ const DocumentosTab = ({ empleados }) => {
     try {
       await api.delete(`/api/rrhh/documentos/${docId}`);
       fetchDocumentos();
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[DocumentosTab.js]', err); }
   };
   
   // Obtener nombre de empleado

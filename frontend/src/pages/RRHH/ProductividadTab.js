@@ -64,9 +64,7 @@ const ProductividadTab = ({ empleados }) => {
       setStats(statsData);
       setTiempoReal(tiempoRealData);
       setRegistros(registrosData.registros || []);
-    } catch (err) {
-
-    } finally {
+    } catch (err) { console.error('[ProductividadTab.js]', err); } finally {
       setLoading(false);
     }
   };
@@ -126,9 +124,7 @@ const ProductividadTab = ({ empleados }) => {
     try {
       await api.delete(`/api/rrhh/productividad/${registroId}`);
       fetchData();
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[ProductividadTab.js]', err); }
   };
   
   const resetForm = () => {

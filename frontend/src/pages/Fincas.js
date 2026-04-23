@@ -113,9 +113,7 @@ const Fincas = () => {
     try {
       const data = await api.get('/api/fincas');
       setFincas(data.fincas || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Fincas.js]', err); }
     setLoading(false);
   };
 
@@ -123,9 +121,7 @@ const Fincas = () => {
     try {
       const data = await api.get('/api/fincas/stats');
       setStats(data);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Fincas.js]', err); }
   };
 
   const fetchProvincias = async () => {
@@ -134,18 +130,14 @@ const Fincas = () => {
       if (data.success) {
         setProvincias(data.provincias);
       }
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Fincas.js]', err); }
   };
 
   const fetchParcelas = async () => {
     try {
       const data = await api.get('/api/parcelas');
       setParcelas(data.parcelas || data || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Fincas.js]', err); }
   };
 
   // Obtener parcelas disponibles (sin asignar a ninguna finca)
@@ -349,9 +341,7 @@ const Fincas = () => {
       await api.delete(`/api/fincas/${id}`);
       fetchFincas();
       fetchStats();
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Fincas.js]', err); }
   };
 
   // Asignar parcela a finca
@@ -376,9 +366,7 @@ const Fincas = () => {
       fetchFincas();
       fetchParcelasDisponibles();
       fetchParcelas();
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Fincas.js]', err); }
   };
 
   // Obtener parcelas de una finca

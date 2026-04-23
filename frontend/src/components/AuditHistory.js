@@ -65,9 +65,7 @@ const AuditHistory = ({ collection, documentId }) => {
     try {
       const response = await api.get(`/api/audit/history/${collection}/${documentId}`);
       setHistory(response.history || []);
-    } catch (error) {
-
-    } finally {
+    } catch (error) { console.error('[AuditHistory.js]', error); } finally {
       setLoading(false);
     }
   };

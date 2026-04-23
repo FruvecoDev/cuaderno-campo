@@ -143,36 +143,28 @@ const Irrigaciones = () => {
     try {
       const data = await api.get('/api/parcelas');
       setParcelas(data.parcelas || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Irrigaciones.js]', err); }
   };
 
   const fetchStats = async () => {
     try {
       const data = await api.get('/api/irrigaciones/stats');
       setStats(data);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Irrigaciones.js]', err); }
   };
 
   const fetchSistemas = async () => {
     try {
       const data = await api.get('/api/irrigaciones/sistemas');
       setSistemas(data.sistemas || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Irrigaciones.js]', err); }
   };
 
   const fetchCultivos = async () => {
     try {
       const data = await api.get('/api/cultivos');
       setCultivos(data.cultivos || []);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Irrigaciones.js]', err); }
   };
 
   const fetchHistorial = async (parcelaId) => {
@@ -180,9 +172,7 @@ const Irrigaciones = () => {
       const data = await api.get(`/api/irrigaciones/historial/${parcelaId}`);
       setHistorialData(data);
       setShowHistorial(parcelaId);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Irrigaciones.js]', err); }
   };
 
   // Filtrar irrigaciones
@@ -302,9 +292,7 @@ const Irrigaciones = () => {
       resetForm();
       fetchIrrigaciones();
       fetchStats();
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Irrigaciones.js]', err); }
   };
 
   const resetForm = () => {
@@ -375,9 +363,7 @@ const Irrigaciones = () => {
       await api.delete(`/api/irrigaciones/${id}`);
       fetchIrrigaciones();
       fetchStats();
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Irrigaciones.js]', err); }
   };
 
   // Export to Excel - uses api.download
@@ -389,9 +375,7 @@ const Irrigaciones = () => {
       if (filters.fecha_hasta) params.append('fecha_hasta', filters.fecha_hasta);
       
       await api.download(`/api/irrigaciones/export/excel?${params}`, `irrigaciones_${new Date().toISOString().split('T')[0]}.xlsx`);
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Irrigaciones.js]', err); }
   };
 
   const calcularConsumo = async () => {
@@ -403,9 +387,7 @@ const Irrigaciones = () => {
         superficie: data.superficie_ha,
         consumo_por_ha: data.consumo_por_ha
       });
-    } catch (err) {
-
-    }
+    } catch (err) { console.error('[Irrigaciones.js]', err); }
   };
 
   // Gráficos

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Upload, FileText, MapPin, Check, X, AlertCircle, Loader2, Pentagon, Leaf, Download } from 'lucide-react';
 import api from '../services/api';
 
@@ -16,6 +16,14 @@ const GeoImportModal = ({ isOpen, onClose, onImportComplete }) => {
     default_campana: '2025/26'
   });
   const [selectedPolygons, setSelectedPolygons] = useState([]);
+
+  // Memoize total selected area to avoid recomputing on every render
+  const selectedPolygonsTotalHa = useMemo(() => {
+    if (!parseResult?.polygons || selectedPolygons.length === 0) return '0.00';
+    return selectedPolygons
+      .reduce((sum, idx) => sum + (parseResult.polygons[idx]?.area_ha || 0), 0)
+      .toFixed(2);
+  }, [selectedPolygons, parseResult]);
 
   const handleDrag = useCallback((e) => {
     e.preventDefault();
@@ -372,7 +380,7 @@ const GeoImportModal = ({ isOpen, onClose, onImportComplete }) => {
               }}>
                 <span>{selectedPolygons.length} de {parseResult.polygons.length} seleccionados</span>
                 <span style={{ fontWeight: '600' }}>
-                  {selectedPolygons.reduce((sum, idx) => sum + parseResult.polygons[idx].area_ha, 0).toFixed(2)} ha
+                  {selectedPolygonsTotalHa} ha
                 </span>
               </div>
             </div>

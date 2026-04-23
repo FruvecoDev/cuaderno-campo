@@ -87,7 +87,7 @@ const Usuarios = () => {
       const data = await api.get('/api/auth/users');
       setUsers(data.users || []);
     } catch (error) {
-
+      console.error('[Usuarios.js]', error);
     } finally {
       setLoading(false);
     }
@@ -98,7 +98,7 @@ const Usuarios = () => {
       const data = await api.get('/api/auth/menu-items');
       setMenuItems(data.menu_items || []);
     } catch (error) {
-
+      console.error('[Usuarios.js]', error);
     }
   };
 
@@ -107,7 +107,7 @@ const Usuarios = () => {
       const data = await api.get('/api/auth/permission-profiles');
       setPermissionProfiles(data.profiles || []);
     } catch (error) {
-
+      console.error('[Usuarios.js]', error);
     }
   };
 
@@ -116,7 +116,7 @@ const Usuarios = () => {
       const data = await api.get('/api/auth/empleados-disponibles');
       setEmpleadosDisponibles(data.empleados || []);
     } catch (error) {
-
+      console.error('[Usuarios.js]', error);
     }
   };
 
@@ -267,6 +267,7 @@ const Usuarios = () => {
       await api.put(`/api/auth/users/${userId}`, { is_active: !currentStatus });
       fetchUsers();
     } catch (error) {
+      console.error('[Usuarios.js]', error);
     }
   };
 
@@ -276,6 +277,7 @@ const Usuarios = () => {
       await api.delete(`/api/auth/users/${userId}`);
       fetchUsers();
     } catch (error) {
+      console.error('[Usuarios.js]', error);
     }
   };
 
@@ -285,7 +287,7 @@ const Usuarios = () => {
       fetchUsers();
       setEditingUser(null);
     } catch (error) {
-
+      console.error('[Usuarios.js]', error);
     }
   };
 

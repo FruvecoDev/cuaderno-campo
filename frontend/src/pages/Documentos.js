@@ -17,7 +17,7 @@ const Documentos = () => {
     try {
       const data = await api.get('/api/documentos');
       setDocumentos(data.documentos || []);
-    } catch (err) { }
+    } catch (err) { console.error('[Documentos.js]', err); }
     setLoading(false);
   };
   
@@ -34,7 +34,7 @@ const Documentos = () => {
       
       await api.upload('/api/documentos/upload', formData);
       fetchDocumentos();
-    } catch (err) { }
+    } catch (err) { console.error('[Documentos.js]', err); }
     setUploading(false);
   };
   

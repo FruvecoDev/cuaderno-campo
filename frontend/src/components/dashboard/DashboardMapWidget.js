@@ -43,7 +43,7 @@ function FitAllBounds({ parcelas }) {
           const bounds = L.latLngBounds(allCoords);
           map.fitBounds(bounds, { padding: [30, 30] });
         }
-      } catch (e) { }
+      } catch (e) { console.error('[DashboardMapWidget.js]', e); }
     }, 200);
     return () => { isMounted = false; clearTimeout(timer); };
   }, [map, parcelas]);

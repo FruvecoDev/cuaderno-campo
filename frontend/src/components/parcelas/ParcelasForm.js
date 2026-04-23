@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Map as MapIcon, Search, ExternalLink, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import AdvancedParcelMap from '../AdvancedParcelMap';
 
@@ -9,6 +9,21 @@ export const ParcelasForm = ({
   // SIGPAC
   provincias, sigpacLoading, sigpacResult, sigpacError, buscarEnSigpac, updateSigpac
 }) => {
+  // Memoize filtered contracts list (filter runs on every render otherwise)
+  const filteredContratos = useMemo(() => (
+    contratos.filter(c => {
+      if (contratoSearch.proveedor && c.proveedor !== contratoSearch.proveedor) return false;
+      if (contratoSearch.cultivo && c.cultivo !== contratoSearch.cultivo) return false;
+      if (contratoSearch.campana && c.campana !== contratoSearch.campana) return false;
+      return true;
+    })
+  ), [contratos, contratoSearch]);
+
+  // Memoize filtered fincas list
+  const fincasConDenominacion = useMemo(() => (
+    fincas.filter(f => f.denominacion)
+  ), [fincas]);
+
   return (
     <div className="card mb-6">
       <h2 className="card-title">{editingId ? 'Editar Parcela' : 'Crear Parcela'}</h2>
@@ -142,18 +157,11 @@ export const ParcelasForm = ({
               <select className="form-select" value={formData.contrato_id}
                 onChange={(e) => setFormData({...formData, contrato_id: e.target.value})} required data-testid="select-contrato">
                 <option value="">-- Seleccionar contrato --</option>
-                {contratos
-                  .filter(c => {
-                    if (contratoSearch.proveedor && c.proveedor !== contratoSearch.proveedor) return false;
-                    if (contratoSearch.cultivo && c.cultivo !== contratoSearch.cultivo) return false;
-                    if (contratoSearch.campana && c.campana !== contratoSearch.campana) return false;
-                    return true;
-                  })
-                  .map(c => (
-                    <option key={c._id} value={c._id}>
-                      {c.serie}-{c.año}-{String(c.numero).padStart(3, '0')} - {c.proveedor} - {c.cultivo} ({c.campana})
-                    </option>
-                  ))}
+                {filteredContratos.map(c => (
+                  <option key={c._id} value={c._id}>
+                    {c.serie}-{c.año}-{String(c.numero).padStart(3, '0')} - {c.proveedor} - {c.cultivo} ({c.campana})
+                  </option>
+                ))}
               </select>
             </div>
           )}
@@ -183,7 +191,7 @@ export const ParcelasForm = ({
               <select className="form-select" value={formData.finca}
                 onChange={(e) => setFormData({...formData, finca: e.target.value})} data-testid="select-finca">
                 <option value="">-- Sin finca asignada --</option>
-                {fincas.filter(f => f.denominacion).map(f => (
+                {fincasConDenominacion.map(f => (
                   <option key={f._id} value={f.denominacion}>{f.denominacion} {f.provincia ? `(${f.provincia})` : ''}</option>
                 ))}
               </select>

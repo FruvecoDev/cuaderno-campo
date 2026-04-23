@@ -244,9 +244,7 @@ const Fitosanitarios = () => {
       if (data.success) {
         setMapaInfo(data.info);
       }
-    } catch (error) {
-
-    }
+    } catch (error) { console.error('[Fitosanitarios.js]', error); }
   };
 
   // Import from MAPA Excel

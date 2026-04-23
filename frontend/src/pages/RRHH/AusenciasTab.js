@@ -40,9 +40,7 @@ const AusenciasTab = ({ empleados }) => {
         aprobadas: all.filter(a => a.estado === 'aprobada').length,
         rechazadas: all.filter(a => a.estado === 'rechazada').length
       });
-    } catch (err) {
-
-    } finally {
+    } catch (err) { console.error('[AusenciasTab.js]', err); } finally {
       setLoading(false);
     }
   };
