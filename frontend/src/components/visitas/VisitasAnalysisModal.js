@@ -58,7 +58,7 @@ export const VisitasAnalysisModal = ({ showAnalysisModal, setShowAnalysisModal }
                 {showAnalysisModal.detections.map((d, i) => {
                   const style = getSeverityColor(d.severity);
                   return (
-                    <div key={i} style={{ 
+                    <div key={`det-${i}-${d.pest_or_disease || ''}`} style={{ 
                       padding: '1rem', backgroundColor: style.bg, borderRadius: '0.5rem',
                       border: `1px solid ${style.border}`
                     }}>
@@ -134,7 +134,7 @@ export const VisitasAnalysisModal = ({ showAnalysisModal, setShowAnalysisModal }
                     <label style={{ fontWeight: '600', fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Sintomas observados</label>
                     <ul style={{ margin: '0.25rem 0 0', paddingLeft: '1.25rem' }}>
                       {showAnalysisModal.symptoms.map((s, i) => (
-                        <li key={i} style={{ fontSize: '0.9rem' }}>{s}</li>
+                        <li key={`sym-${i}-${String(s).slice(0, 20)}`} style={{ fontSize: '0.9rem' }}>{s}</li>
                       ))}
                     </ul>
                   </div>
@@ -158,7 +158,7 @@ export const VisitasAnalysisModal = ({ showAnalysisModal, setShowAnalysisModal }
                     <label style={{ fontWeight: '600', fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>Medidas preventivas</label>
                     <ul style={{ margin: '0.25rem 0 0', paddingLeft: '1.25rem' }}>
                       {showAnalysisModal.preventive_measures.map((m, i) => (
-                        <li key={i} style={{ fontSize: '0.9rem' }}>{m}</li>
+                        <li key={`prev-${i}-${String(m).slice(0, 20)}`} style={{ fontSize: '0.9rem' }}>{m}</li>
                       ))}
                     </ul>
                   </div>

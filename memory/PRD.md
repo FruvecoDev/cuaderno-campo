@@ -226,7 +226,6 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - Reemplazados por combinación de `_id`/contenido + índice → keys estables que preservan estado entre renders.
 
 ### Sentry Error Monitoring Integration - DONE (2026-02-XX)
-**Frontend (React):**
 - Nuevo `/app/frontend/src/instrument.js`: SDK de Sentry inicializado solo si `REACT_APP_SENTRY_DSN` está seteado (gracefully no-op sin DSN)
 - Configuración minimal: sin performance tracing, sin session replay, sin PII (`sendDefaultPii: false`, headers/cookies stripped en `beforeSend`)
 - CaptureConsole integration: captura automáticamente los 221+ `console.error` de los catch blocks sin tocar ningún archivo
@@ -247,6 +246,24 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 **Documentación:**
 - `/app/docs/SENTRY_SETUP.md` actualizado con instrucciones para ambos proyectos (frontend+backend) — 10 min para activar full-stack
 - Validación: pre-deploy 4/4 verde, 5/5 Playwright, backend arranca limpio, DSN vacío en ambos lados = no-op completo
+
+### Code Quality Sweep Round 3 + AlbaranForm refactor - DONE (2026-02-XX)
+**Array-index keys en 6 archivos nuevos (13 cambios):**
+- Fitosanitarios.js (1), AlbaranForm.js (2), VisitasAnalysisModal.js (3), CalculadoraFitosanitarios.js (1), GeoImportModal.js (3)
+- Reemplazados por combinación de `_id`/contenido + índice.
+
+**F632 (Python `is` vs `==`):**
+- Verificado: no hay `is "literal_string"` reales en código productivo (solo `is True/False/None` en tests, que son PEP 8 válidos). No requiere cambios.
+
+**AlbaranForm.js refactor (de 951 → 831 líneas):**
+- Extraído `/app/frontend/src/components/albaranes/AlbaranPreciosCalidad.js` (58 líneas) — tabla de precios por tenderometría para guisante
+- Extraído `/app/frontend/src/components/albaranes/AlbaranLineItem.js` (326 líneas) — cada fila del albarán (destare + producto normal), el componente más complejo del form
+- Nuevo test e2e `/app/tests/e2e/albaran-form.spec.ts` valida que el form abre y renderiza correctamente tras el refactor
+- Los data-testids existentes (`item-descripcion-N`, `item-cantidad-N`, etc.) mantienen compatibilidad total con tests anteriores
+- Ventajas: código más testeable, sub-componentes reusables, archivo principal más legible
+- Imports limpiados: eliminados `MinusCircle`, `Check`, `AlertTriangle`, `Search` del AlbaranForm (ahora solo los usa el sub-componente)
+
+**Validación:** pre-deploy 4/4 verde, 6/6 Playwright (charts + NFC + nuevo albaran-form regression)
 
 
 

@@ -325,7 +325,7 @@ const GeoImportModal = ({ isOpen, onClose, onImportComplete }) => {
               }}>
                 {parseResult.polygons.map((polygon, idx) => (
                   <div 
-                    key={idx}
+                    key={`poly-${idx}-${polygon.name || polygon.id || ''}`}
                     onClick={() => togglePolygonSelection(idx)}
                     style={{
                       padding: '0.75rem 1rem',
@@ -475,7 +475,7 @@ const GeoImportModal = ({ isOpen, onClose, onImportComplete }) => {
                   </p>
                   <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.25rem', fontSize: '0.85rem' }}>
                     {importResult.errors.slice(0, 3).map((err, idx) => (
-                      <li key={idx}>{err.name}: {err.error}</li>
+                      <li key={`imperr-${idx}-${err.name || ''}`}>{err.name}: {err.error}</li>
                     ))}
                   </ul>
                 </div>
@@ -490,7 +490,7 @@ const GeoImportModal = ({ isOpen, onClose, onImportComplete }) => {
               }}>
                 {importResult.created_parcelas.map((parcela, idx) => (
                   <div 
-                    key={idx}
+                    key={parcela._id || parcela.id || `cp-${idx}-${parcela.name || ''}`}
                     style={{
                       padding: '0.5rem 1rem',
                       borderBottom: idx < importResult.created_parcelas.length - 1 ? '1px solid hsl(var(--border))' : 'none',

@@ -635,7 +635,7 @@ const Fitosanitarios = () => {
                       <strong style={{ color: '#991b1b' }}>Errores ({importResult.total_errors}):</strong>
                       <ul style={{ fontSize: '0.75rem', color: '#991b1b', marginTop: '0.25rem', paddingLeft: '1rem' }}>
                         {importResult.errors.slice(0, 5).map((err, i) => (
-                          <li key={i}>{err}</li>
+                          <li key={`fit-err-${i}-${String(err).slice(0, 20)}`}>{err}</li>
                         ))}
                       </ul>
                     </div>

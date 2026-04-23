@@ -250,7 +250,7 @@ const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
                   <thead><tr><th>Fecha</th><th>Producto</th><th>Superficie</th><th>Cantidad</th><th>Agua Total</th></tr></thead>
                   <tbody>
                     {historial.map((h, idx) => (
-                      <tr key={idx}><td>{h.fecha}</td><td>{h.nombreProducto || h.tipoProducto}</td><td>{h.resultados.superficieHa.toFixed(2)} ha</td><td>{h.resultados.cantidadProducto.toFixed(2)} {h.unidadDosis.includes('L') ? 'L' : 'kg'}</td><td>{h.resultados.volumenTotalAgua.toFixed(0)} L</td></tr>
+                      <tr key={h.id || `hist-${h.fecha || ''}-${idx}`}><td>{h.fecha}</td><td>{h.nombreProducto || h.tipoProducto}</td><td>{h.resultados.superficieHa.toFixed(2)} ha</td><td>{h.resultados.cantidadProducto.toFixed(2)} {h.unidadDosis.includes('L') ? 'L' : 'kg'}</td><td>{h.resultados.volumenTotalAgua.toFixed(0)} L</td></tr>
                     ))}
                   </tbody>
                 </table>
