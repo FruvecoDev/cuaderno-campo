@@ -174,3 +174,10 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - Monitorea errores de consola relacionados con charts en las 3 páginas
 - Script npm: `cd /app/tests && npm run test:charts`
 
+### Pre-Deploy Pipeline - DONE (2026-02-XX)
+- /app/scripts/pre-deploy-check.sh: verifica ESLint (errors), backend Python syntax, Playwright chart tests y build producción en un solo comando
+- /app/.github/workflows/charts-visual-tests.yml: GitHub Actions que bloquea PRs a main si los chart tests fallan (trigger en cambios a páginas de charts o chartStyles.js)
+- /app/docs/PRE_DEPLOY_CHECKLIST.md: documentación de uso + troubleshooting
+- Validado end-to-end: los 4 pasos pasan verde localmente contra el backend real
+
+

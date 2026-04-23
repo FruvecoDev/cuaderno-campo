@@ -1,0 +1,53 @@
+name: Charts Visual Smoke Tests
+
+# Blocks merges to main when Recharts silently fails to render.
+# See /app/tests/e2e/charts-visual.spec.ts for rationale.
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'frontend/src/pages/Dashboard.js'
+      - 'frontend/src/pages/InformesGastos.js'
+      - 'frontend/src/pages/InformesIngresos.js'
+      - 'frontend/src/utils/chartStyles.js'
+      - 'tests/e2e/charts-visual.spec.ts'
+      - '.github/workflows/charts-visual-tests.yml'
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Preview URL to run tests against'
+        required: true
+        default: 'https://campo-export-pro.preview.emergentagent.com'
+
+jobs:
+  charts-visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright deps
+        working-directory: tests
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+
+      - name: Run chart visual smoke tests
+        working-directory: tests
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url || 'https://campo-export-pro.preview.emergentagent.com' }}
+        run: npx playwright test charts-visual.spec.ts --reporter=line
+
+      - name: Upload Playwright artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            tests/test-results/
+            tests/playwright-report/
+          retention-days: 7
