@@ -75,16 +75,79 @@ const RRHH = () => {
     salario_hora_extra: '',
     salario_hora_nocturna: '',
     salario_hora_festivo: '',
-    notas: ''
+    notas: '',
+    nfc_id: ''
   });
 
   const puestos = ['Operario', 'Encargado', 'Técnico', 'Administrativo', 'Conductor', 'Almacén'];
   const tiposContrato = ['Temporal', 'Indefinido', 'Fijo-Discontinuo', 'Prácticas', 'Formación'];
 
+  // NFC management (only usable in the edit modal)
+  const nfcSupported = typeof window !== 'undefined' && 'NDEFReader' in window;
+  const [nfcScanning, setNfcScanning] = useState(false);
+  const [nfcMessage, setNfcMessage] = useState(null); // { type: 'success'|'error', text }
+
+  const saveNfcId = async (empleadoId, nfcId) => {
+    try {
+      await api.put(`/api/rrhh/empleados/${empleadoId}/nfc`, { nfc_id: nfcId });
+      setFormData(prev => ({ ...prev, nfc_id: nfcId }));
+      setNfcMessage({ type: 'success', text: `Tarjeta NFC asignada: ${nfcId}` });
+      fetchEmpleados();
+    } catch (err) {
+      setNfcMessage({ type: 'error', text: api.getErrorMessage(err) });
+    }
+  };
+
+  const handleNfcScan = async () => {
+    if (!nfcSupported || !editingId) return;
+    setNfcMessage(null);
+    setNfcScanning(true);
+    try {
+      const ndef = new window.NDEFReader();
+      await ndef.scan();
+      ndef.addEventListener('reading', ({ serialNumber }) => {
+        setNfcScanning(false);
+        if (serialNumber) saveNfcId(editingId, serialNumber);
+      });
+      ndef.addEventListener('readingerror', () => {
+        setNfcScanning(false);
+        setNfcMessage({ type: 'error', text: 'No se pudo leer la tarjeta. Inténtalo de nuevo.' });
+      });
+    } catch (err) {
+      setNfcScanning(false);
+      setNfcMessage({ type: 'error', text: 'No se pudo iniciar la lectura NFC: ' + err.message });
+    }
+  };
+
+  const handleNfcManualAssign = () => {
+    const id = (formData.nfc_id || '').trim();
+    if (!id || !editingId) return;
+    saveNfcId(editingId, id);
+  };
+
+  const handleNfcRemove = async () => {
+    if (!editingId) return;
+    if (!window.confirm('¿Eliminar la tarjeta NFC asignada a este empleado?')) return;
+    try {
+      await api.delete(`/api/rrhh/empleados/${editingId}/nfc`);
+      setFormData(prev => ({ ...prev, nfc_id: '' }));
+      setNfcMessage({ type: 'success', text: 'Tarjeta NFC eliminada.' });
+      fetchEmpleados();
+    } catch (err) {
+      setNfcMessage({ type: 'error', text: api.getErrorMessage(err) });
+    }
+  };
+
   useEffect(() => {
     fetchEmpleados();
     fetchStats();
   }, [filterPuesto, filterActivo]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Reset NFC feedback when modal closes or switches employee
+  useEffect(() => {
+    setNfcMessage(null);
+    setNfcScanning(false);
+  }, [showForm, editingId]);
 
   const fetchEmpleados = async () => {
     try {
@@ -121,6 +184,8 @@ const RRHH = () => {
         salario_hora_nocturna: formData.salario_hora_nocturna ? parseFloat(formData.salario_hora_nocturna) : null,
         salario_hora_festivo: formData.salario_hora_festivo ? parseFloat(formData.salario_hora_festivo) : null
       };
+      // nfc_id is managed via dedicated /nfc endpoints (uniqueness checks)
+      delete payload.nfc_id;
 
       if (editingId) {
         await api.put(`/api/rrhh/empleados/${editingId}`, payload);
@@ -162,7 +227,8 @@ const RRHH = () => {
       salario_hora_extra: empleado.salario_hora_extra || '',
       salario_hora_nocturna: empleado.salario_hora_nocturna || '',
       salario_hora_festivo: empleado.salario_hora_festivo || '',
-      notas: empleado.notas || ''
+      notas: empleado.notas || '',
+      nfc_id: empleado.nfc_id || ''
     });
     setShowForm(true);
     setModalTab('personal');
@@ -226,8 +292,7 @@ const RRHH = () => {
     }
   };
 
-  const resetForm = () => {
-    setFormData({
+  const resetForm = () => {    setFormData({
       nombre: '',
       apellidos: '',
       dni_nie: '',
@@ -248,7 +313,8 @@ const RRHH = () => {
       salario_hora_extra: '',
       salario_hora_nocturna: '',
       salario_hora_festivo: '',
-      notas: ''
+      notas: '',
+      nfc_id: ''
     });
   };
 
@@ -472,6 +538,80 @@ const RRHH = () => {
                       </div>
                     </div>
                     <div className="form-group"><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Notas</label><textarea className="form-input" rows="3" value={formData.notas} onChange={e => setFormData({...formData, notas: e.target.value})} style={{ fontSize: '0.85rem', resize: 'vertical' }} /></div>
+
+                    {/* NFC Management */}
+                    <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid hsl(var(--border))' }}>
+                      <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <CreditCard size={14} /> Tarjeta NFC para Fichajes
+                      </h3>
+
+                      {!editingId && (
+                        <p style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', fontStyle: 'italic' }}>
+                          Guarda primero el empleado para poder asignar una tarjeta NFC.
+                        </p>
+                      )}
+
+                      {editingId && (
+                        <>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: '0.5rem', alignItems: 'end' }}>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                              <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>ID Tarjeta NFC</label>
+                              <input
+                                type="text"
+                                className="form-input"
+                                value={formData.nfc_id}
+                                onChange={e => setFormData({ ...formData, nfc_id: e.target.value })}
+                                placeholder="Escanea una tarjeta o introduce el ID manualmente"
+                                data-testid="empleado-nfc-input"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={handleNfcScan}
+                              disabled={!nfcSupported || nfcScanning}
+                              className="btn btn-secondary"
+                              title={nfcSupported ? 'Leer tarjeta NFC' : 'Web NFC no disponible en este navegador'}
+                              data-testid="empleado-nfc-scan"
+                            >
+                              <CreditCard size={16} />
+                              {nfcScanning ? 'Esperando...' : 'Leer NFC'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleNfcManualAssign}
+                              disabled={!formData.nfc_id?.trim()}
+                              className="btn btn-primary"
+                              data-testid="empleado-nfc-assign"
+                            >
+                              <Check size={16} /> Asignar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleNfcRemove}
+                              className="btn btn-secondary"
+                              style={{ color: 'hsl(0 84% 60%)' }}
+                              data-testid="empleado-nfc-remove"
+                            >
+                              <X size={16} /> Eliminar
+                            </button>
+                          </div>
+
+                          {!nfcSupported && (
+                            <p style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'hsl(38 92% 40%)' }}>
+                              Web NFC no disponible. Usa Chrome en Android o introduce el ID manualmente.
+                            </p>
+                          )}
+                          {nfcMessage && (
+                            <p style={{
+                              marginTop: '0.5rem', fontSize: '0.8rem', fontWeight: 500,
+                              color: nfcMessage.type === 'success' ? 'hsl(142 71% 35%)' : 'hsl(0 84% 60%)'
+                            }} data-testid="empleado-nfc-message">
+                              {nfcMessage.text}
+                            </p>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>)}
 
                   {modalTab === 'economico' && (<div>

@@ -186,4 +186,16 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - Sin hardcoded URLs / secrets, env vars correctas, CORS OK, supervisor config válido, MongoDB via env
 - App LISTA para "Deploy to Production" en Emergent
 
+### NFC Admin UI (Asignación de tarjetas a empleados) - DONE (2026-02-XX)
+- Backend ya existente (PUT/DELETE /api/rrhh/empleados/{id}/nfc + /api/rrhh/fichajes/nfc) con 17/17 tests pasando
+- Nuevo bloque de gestión NFC en pestaña "Datos Laborales" del formulario de empleado (/app/frontend/src/pages/RRHH.js):
+  - Input manual de ID de tarjeta
+  - Botón "Leer NFC" usando Web NFC API (NDEFReader) si el navegador lo soporta
+  - Botón "Asignar" que valida unicidad contra el backend
+  - Botón "Eliminar" con confirmación
+  - Mensajes inline de éxito/error
+  - Aviso "Web NFC no disponible" en navegadores no compatibles (iOS/desktop)
+- Solo disponible al editar un empleado ya guardado (backend necesita el ID)
+- Test e2e Playwright /app/tests/e2e/rrhh-nfc.spec.ts pasa (asignar + eliminar)
+
 
