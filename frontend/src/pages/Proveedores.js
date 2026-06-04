@@ -54,6 +54,8 @@ const Proveedores = () => {
   const [nuevaFormaPago, setNuevaFormaPago] = useState('');
   const [showTiposIvaManager, setShowTiposIvaManager] = useState(false);
   const [nuevoTipoIva, setNuevoTipoIva] = useState({ nombre: '', valor: '' });
+  const [cultivos, setCultivos] = useState([]);
+  const [agentesCompra, setAgentesCompra] = useState([]);
   const { t } = useTranslation();
   
   const { token } = useAuth();
@@ -79,6 +81,7 @@ const Proveedores = () => {
     datos_bancarios: { banco: '', sucursal: '', iban: '', entidad: '', sucursal_num: '', dc: '', cuenta: '', swift_bic: '' },
     certificaciones: [],
     centros_descarga: [],
+    agentes_por_cultivo: [],
     activo: true
   });
 
@@ -95,7 +98,23 @@ const Proveedores = () => {
     fetchTiposOperacion();
     fetchFormasPago();
     fetchTiposIva();
+    fetchCultivos();
+    fetchAgentesCompra();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fetchCultivos = async () => {
+    try {
+      const data = await api.get('/api/cultivos?activo=true&limit=500');
+      setCultivos(data.cultivos || []);
+    } catch (err) { console.error('[Proveedores.js] fetchCultivos', err); }
+  };
+
+  const fetchAgentesCompra = async () => {
+    try {
+      const data = await api.get('/api/agentes?tipo=compra&activo=true');
+      setAgentesCompra(data.agentes || []);
+    } catch (err) { console.error('[Proveedores.js] fetchAgentesCompra', err); }
+  };
 
   const fetchProveedores = async () => {
     try {
@@ -234,6 +253,7 @@ const Proveedores = () => {
       datos_bancarios: proveedor.datos_bancarios || { banco: '', sucursal: '', iban: '', entidad: '', sucursal_num: '', dc: '', cuenta: '', swift_bic: '' },
       certificaciones: proveedor.certificaciones || [],
       centros_descarga: proveedor.centros_descarga || [],
+      agentes_por_cultivo: proveedor.agentes_por_cultivo || [],
     });
     setEditingId(proveedor._id);
     setActiveTab('general');
@@ -383,7 +403,7 @@ const Proveedores = () => {
               <button onClick={() => { setShowForm(false); setEditingId(null); resetForm(); setActiveTab('general'); }} className="config-modal-close-btn"><X size={18} /></button>
             </div>
             <div style={{ display: 'flex', gap: '0', marginBottom: '1.5rem', borderBottom: '2px solid hsl(var(--border))' }}>
-              {[{key:'general',label:'Datos Generales',icon:<Users size={14}/>},{key:'gestion',label:'Datos Gestion',icon:<CreditCard size={14}/>},{key:'documentos',label:'Documentos',icon:<FileText size={14}/>},{key:'certificaciones',label:'Certificaciones',icon:<Award size={14}/>},{key:'centros',label:'Centros Descarga',icon:<Truck size={14}/>},{key:'historial',label:'Historial',icon:<Eye size={14}/>}].map(tab=>(<button key={tab.key} type="button" onClick={()=>{setActiveTab(tab.key);if(tab.key==='historial'&&editingId)fetchChangelog(editingId);}} style={{display:'flex',alignItems:'center',gap:'0.4rem',padding:'0.6rem 1rem',fontSize:'0.8rem',fontWeight:activeTab===tab.key?'700':'500',color:activeTab===tab.key?'hsl(var(--primary))':'hsl(var(--muted-foreground))',background:'none',border:'none',borderBottom:activeTab===tab.key?'2px solid hsl(var(--primary))':'2px solid transparent',cursor:'pointer',whiteSpace:'nowrap',marginBottom:'-2px'}}>{tab.icon}{tab.label}</button>))}
+              {[{key:'general',label:'Datos Generales',icon:<Users size={14}/>},{key:'gestion',label:'Datos Gestion',icon:<CreditCard size={14}/>},{key:'documentos',label:'Documentos',icon:<FileText size={14}/>},{key:'certificaciones',label:'Certificaciones',icon:<Award size={14}/>},{key:'centros',label:'Centros Descarga',icon:<Truck size={14}/>},{key:'agentes',label:'Agentes por Cultivo',icon:<Users size={14}/>},{key:'historial',label:'Historial',icon:<Eye size={14}/>}].map(tab=>(<button key={tab.key} type="button" data-testid={`tab-${tab.key}`} onClick={()=>{setActiveTab(tab.key);if(tab.key==='historial'&&editingId)fetchChangelog(editingId);}} style={{display:'flex',alignItems:'center',gap:'0.4rem',padding:'0.6rem 1rem',fontSize:'0.8rem',fontWeight:activeTab===tab.key?'700':'500',color:activeTab===tab.key?'hsl(var(--primary))':'hsl(var(--muted-foreground))',background:'none',border:'none',borderBottom:activeTab===tab.key?'2px solid hsl(var(--primary))':'2px solid transparent',cursor:'pointer',whiteSpace:'nowrap',marginBottom:'-2px'}}>{tab.icon}{tab.label}</button>))}
             </div>
           <form onSubmit={handleSubmit} style={{ flex: 1, overflow: 'auto', minHeight: 0, paddingRight: '1rem' }}>
             {activeTab==='general'&&(<div>
@@ -400,6 +420,141 @@ const Proveedores = () => {
             {activeTab==='documentos'&&(<div style={{textAlign:'center',padding:'2rem',color:'hsl(var(--muted-foreground))'}}><FileText size={40} style={{margin:'0 auto 1rem',opacity:0.4}}/><p style={{fontSize:'0.9rem',fontWeight:'500'}}>Guarda el proveedor primero para adjuntar documentos</p><p style={{fontSize:'0.8rem'}}>Los documentos se podran subir una vez creado el registro</p></div>)}
             {activeTab==='certificaciones'&&(<div><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1rem'}}><h3 style={{fontSize:'0.75rem',fontWeight:'700',textTransform:'uppercase',letterSpacing:'0.08em',color:'hsl(var(--muted-foreground))',margin:0}}>Certificaciones</h3><button type="button" style={{background:'none',border:'none',cursor:'pointer',color:'hsl(var(--primary))',fontWeight:'600',fontSize:'0.8rem',display:'flex',alignItems:'center',gap:'0.25rem'}} onClick={()=>setFormData({...formData,certificaciones:[...(formData.certificaciones||[]),{nombre:'',fecha_emision:'',fecha_validez:'',observaciones:''}]})}><Plus size={14}/> Anadir certificacion</button></div>{(formData.certificaciones||[]).length===0&&<div style={{textAlign:'center',padding:'2rem',color:'hsl(var(--muted-foreground))',background:'hsl(var(--muted)/0.3)',borderRadius:'8px'}}><Award size={32} style={{margin:'0 auto 0.5rem',opacity:0.4}}/><p style={{fontSize:'0.85rem'}}>Sin certificaciones. Pulse "Anadir" para incluir BRC, Global GAP, etc.</p></div>}{(formData.certificaciones||[]).map((cert,idx)=>(<div key={`cert-${idx}`} style={{display:'grid',gridTemplateColumns:'1.5fr 1fr 1fr 1.5fr auto',gap:'0.5rem',marginBottom:'0.5rem',alignItems:'center',background:'hsl(var(--muted)/0.3)',padding:'0.75rem',borderRadius:'8px',border:'1px solid hsl(var(--border))'}}><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.7rem',fontWeight:'600'}}>Certificacion</label><input type="text" className="form-input" placeholder="BRC, Global GAP..." value={cert.nombre} onChange={e=>{const arr=[...formData.certificaciones];arr[idx]={...arr[idx],nombre:e.target.value};setFormData({...formData,certificaciones:arr});}} style={{fontSize:'0.85rem'}}/></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.7rem',fontWeight:'600'}}>Fecha Emision</label><input type="date" className="form-input" value={cert.fecha_emision||''} onChange={e=>{const arr=[...formData.certificaciones];arr[idx]={...arr[idx],fecha_emision:e.target.value};setFormData({...formData,certificaciones:arr});}} style={{fontSize:'0.85rem'}}/></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.7rem',fontWeight:'600'}}>Fecha Validez</label><input type="date" className="form-input" value={cert.fecha_validez||''} onChange={e=>{const arr=[...formData.certificaciones];arr[idx]={...arr[idx],fecha_validez:e.target.value};setFormData({...formData,certificaciones:arr});}} style={{fontSize:'0.85rem'}}/></div><div className="form-group" style={{marginBottom:0}}><label className="form-label" style={{fontSize:'0.7rem',fontWeight:'600'}}>Notas</label><input type="text" className="form-input" placeholder="Observaciones" value={cert.observaciones||''} onChange={e=>{const arr=[...formData.certificaciones];arr[idx]={...arr[idx],observaciones:e.target.value};setFormData({...formData,certificaciones:arr});}} style={{fontSize:'0.85rem'}}/></div><button type="button" onClick={()=>setFormData({...formData,certificaciones:formData.certificaciones.filter((_,i)=>i!==idx)})} style={{background:'none',border:'none',cursor:'pointer',color:'hsl(var(--destructive))',padding:'0.25rem',marginTop:'1.2rem'}}><X size={15}/></button></div>))}</div>)}
             {activeTab==='centros'&&(<div><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1rem'}}><h3 style={{fontSize:'0.75rem',fontWeight:'700',textTransform:'uppercase',letterSpacing:'0.08em',color:'hsl(var(--muted-foreground))',margin:0}}>Centros de Descarga</h3><button type="button" style={{background:'none',border:'none',cursor:'pointer',color:'hsl(var(--primary))',fontWeight:'600',fontSize:'0.8rem',display:'flex',alignItems:'center',gap:'0.25rem'}} onClick={()=>setFormData({...formData,centros_descarga:[...(formData.centros_descarga||[]),{nombre:'',direccion:'',poblacion:'',provincia:'',codigo_postal:'',contacto:'',telefono:''}]})}><Plus size={14}/> Anadir centro</button></div>{(formData.centros_descarga||[]).length===0&&<div style={{textAlign:'center',padding:'2rem',color:'hsl(var(--muted-foreground))',background:'hsl(var(--muted)/0.3)',borderRadius:'8px'}}><Truck size={32} style={{margin:'0 auto 0.5rem',opacity:0.4}}/><p style={{fontSize:'0.85rem'}}>Sin centros de descarga. Pulse "Anadir" para incluir centros logisticos.</p></div>}{(formData.centros_descarga||[]).map((centro,idx)=>(<div key={`cd-${idx}`} style={{background:'hsl(var(--muted)/0.3)',padding:'1rem',borderRadius:'8px',border:'1px solid hsl(var(--border))',marginBottom:'0.75rem'}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'0.5rem'}}><span style={{fontWeight:'600',fontSize:'0.8rem'}}>Centro {idx+1}</span><button type="button" onClick={()=>setFormData({...formData,centros_descarga:formData.centros_descarga.filter((_,i)=>i!==idx)})} style={{background:'none',border:'none',cursor:'pointer',color:'hsl(var(--destructive))'}}><X size={15}/></button></div><div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'0.5rem',marginBottom:'0.5rem'}}><input type="text" className="form-input" placeholder="Nombre del centro" value={centro.nombre} onChange={e=>{const arr=[...formData.centros_descarga];arr[idx]={...arr[idx],nombre:e.target.value};setFormData({...formData,centros_descarga:arr});}} style={{fontSize:'0.85rem'}}/><input type="text" className="form-input" placeholder="Direccion" value={centro.direccion||''} onChange={e=>{const arr=[...formData.centros_descarga];arr[idx]={...arr[idx],direccion:e.target.value};setFormData({...formData,centros_descarga:arr});}} style={{fontSize:'0.85rem'}}/></div><div style={{display:'grid',gridTemplateColumns:'1fr 1fr 80px 1fr 1fr',gap:'0.5rem'}}><input type="text" className="form-input" placeholder="Poblacion" value={centro.poblacion||''} onChange={e=>{const arr=[...formData.centros_descarga];arr[idx]={...arr[idx],poblacion:e.target.value};setFormData({...formData,centros_descarga:arr});}} style={{fontSize:'0.85rem'}}/><input type="text" className="form-input" placeholder="Provincia" value={centro.provincia||''} onChange={e=>{const arr=[...formData.centros_descarga];arr[idx]={...arr[idx],provincia:e.target.value};setFormData({...formData,centros_descarga:arr});}} style={{fontSize:'0.85rem'}}/><input type="text" className="form-input" placeholder="C.P." value={centro.codigo_postal||''} onChange={e=>{const arr=[...formData.centros_descarga];arr[idx]={...arr[idx],codigo_postal:e.target.value};setFormData({...formData,centros_descarga:arr});}} style={{fontSize:'0.85rem'}}/><input type="text" className="form-input" placeholder="Contacto" value={centro.contacto||''} onChange={e=>{const arr=[...formData.centros_descarga];arr[idx]={...arr[idx],contacto:e.target.value};setFormData({...formData,centros_descarga:arr});}} style={{fontSize:'0.85rem'}}/><input type="tel" className="form-input" placeholder="Telefono" value={centro.telefono||''} onChange={e=>{const arr=[...formData.centros_descarga];arr[idx]={...arr[idx],telefono:e.target.value};setFormData({...formData,centros_descarga:arr});}} style={{fontSize:'0.85rem'}}/></div></div>))}</div>)}
+            {activeTab === 'agentes' && (
+              <div data-testid="tab-panel-agentes">
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem' }}>
+                  <div>
+                    <h3 style={{ fontSize:'0.75rem', fontWeight:'700', textTransform:'uppercase', letterSpacing:'0.08em', color:'hsl(var(--muted-foreground))', margin:0 }}>Agentes de Compra por Cultivo</h3>
+                    <p style={{ fontSize:'0.75rem', color:'hsl(var(--muted-foreground))', margin:'0.25rem 0 0 0' }}>
+                      Asocia uno o varios agentes de compra a cada cultivo de este proveedor.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, agentes_por_cultivo: [...(formData.agentes_por_cultivo || []), { cultivo: '', agente_ids: [] }] })}
+                    style={{ background:'none', border:'none', cursor:'pointer', color:'hsl(var(--primary))', fontWeight:'600', fontSize:'0.8rem', display:'flex', alignItems:'center', gap:'0.25rem' }}
+                    data-testid="add-agente-cultivo-btn"
+                  >
+                    <Plus size={14} /> Anadir asociacion
+                  </button>
+                </div>
+
+                {(formData.agentes_por_cultivo || []).length === 0 && (
+                  <div style={{ textAlign:'center', padding:'2rem', color:'hsl(var(--muted-foreground))', background:'hsl(var(--muted)/0.3)', borderRadius:'8px' }}>
+                    <Users size={32} style={{ margin:'0 auto 0.5rem', opacity:0.4 }} />
+                    <p style={{ fontSize:'0.85rem', margin:0 }}>Sin asociaciones. Pulse "Anadir asociacion" para vincular cultivos con agentes de compra.</p>
+                    {agentesCompra.length === 0 && (
+                      <p style={{ fontSize:'0.75rem', marginTop:'0.5rem', color:'hsl(38 92% 40%)' }}>
+                        Aviso: no hay agentes de compra activos. Dalos de alta primero en el modulo de Agentes.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {(formData.agentes_por_cultivo || []).map((row, idx) => {
+                  // Cultivos ya usados en otras filas (para evitar duplicados)
+                  const cultivosUsados = (formData.agentes_por_cultivo || [])
+                    .map((r, i) => (i !== idx ? r.cultivo : null))
+                    .filter(Boolean);
+                  const cultivosDisponibles = cultivos.filter(
+                    c => !cultivosUsados.includes(c.nombre) || c.nombre === row.cultivo
+                  );
+
+                  return (
+                    <div
+                      key={`apc-${idx}`}
+                      style={{ background:'hsl(var(--muted)/0.3)', padding:'1rem', borderRadius:'8px', border:'1px solid hsl(var(--border))', marginBottom:'0.75rem' }}
+                      data-testid={`agente-cultivo-row-${idx}`}
+                    >
+                      <div style={{ display:'grid', gridTemplateColumns:'1fr 2fr auto', gap:'0.75rem', alignItems:'start' }}>
+                        <div className="form-group" style={{ marginBottom:0 }}>
+                          <label className="form-label" style={{ fontSize:'0.7rem', fontWeight:'600' }}>Cultivo *</label>
+                          <select
+                            className="form-input"
+                            value={row.cultivo}
+                            onChange={e => {
+                              const arr = [...formData.agentes_por_cultivo];
+                              arr[idx] = { ...arr[idx], cultivo: e.target.value };
+                              setFormData({ ...formData, agentes_por_cultivo: arr });
+                            }}
+                            style={{ fontSize:'0.85rem' }}
+                            data-testid={`agente-cultivo-select-${idx}`}
+                          >
+                            <option value="">-- Selecciona cultivo --</option>
+                            {cultivosDisponibles.map(c => (
+                              <option key={c._id} value={c.nombre}>{c.nombre}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="form-group" style={{ marginBottom:0 }}>
+                          <label className="form-label" style={{ fontSize:'0.7rem', fontWeight:'600' }}>
+                            Agentes de compra ({(row.agente_ids || []).length})
+                          </label>
+                          <div
+                            style={{
+                              border:'1px solid hsl(var(--border))',
+                              borderRadius:'6px',
+                              padding:'0.5rem',
+                              background:'white',
+                              maxHeight:'160px',
+                              overflowY:'auto',
+                              display:'flex',
+                              flexDirection:'column',
+                              gap:'0.35rem',
+                              fontSize:'0.85rem',
+                            }}
+                          >
+                            {agentesCompra.length === 0 && (
+                              <span style={{ color:'hsl(var(--muted-foreground))', fontStyle:'italic', fontSize:'0.8rem' }}>
+                                No hay agentes de compra activos.
+                              </span>
+                            )}
+                            {agentesCompra.map(ag => {
+                              const checked = (row.agente_ids || []).includes(ag._id);
+                              return (
+                                <label
+                                  key={ag._id}
+                                  style={{ display:'flex', alignItems:'center', gap:'0.4rem', cursor:'pointer', padding:'0.2rem 0.3rem', borderRadius:'4px' }}
+                                  data-testid={`agente-checkbox-${idx}-${ag._id}`}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={() => {
+                                      const arr = [...formData.agentes_por_cultivo];
+                                      const current = new Set(arr[idx].agente_ids || []);
+                                      if (checked) current.delete(ag._id);
+                                      else current.add(ag._id);
+                                      arr[idx] = { ...arr[idx], agente_ids: Array.from(current) };
+                                      setFormData({ ...formData, agentes_por_cultivo: arr });
+                                    }}
+                                  />
+                                  <span style={{ fontWeight: checked ? 600 : 400 }}>
+                                    {ag.codigo ? `${ag.codigo} - ` : ''}{ag.nombre}
+                                  </span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, agentes_por_cultivo: formData.agentes_por_cultivo.filter((_, i) => i !== idx) })}
+                          style={{ background:'none', border:'none', cursor:'pointer', color:'hsl(var(--destructive))', padding:'0.4rem', marginTop:'1.3rem' }}
+                          title="Eliminar asociacion"
+                          data-testid={`agente-cultivo-remove-${idx}`}
+                        >
+                          <X size={15} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
             {activeTab==='historial'&&(<div>
               <h3 style={{fontSize:'0.75rem',fontWeight:'700',textTransform:'uppercase',letterSpacing:'0.08em',color:'hsl(var(--muted-foreground))',marginBottom:'1rem'}}>Log de Cambios</h3>
               {!editingId?<div style={{textAlign:'center',padding:'2rem',color:'hsl(var(--muted-foreground))',background:'hsl(var(--muted)/0.3)',borderRadius:'8px'}}><Eye size={32} style={{margin:'0 auto 0.5rem',opacity:0.4}}/><p style={{fontSize:'0.85rem'}}>El historial estara disponible una vez guardado el proveedor</p></div>:changelog.length===0?<div style={{textAlign:'center',padding:'2rem',color:'hsl(var(--muted-foreground))',background:'hsl(var(--muted)/0.3)',borderRadius:'8px'}}><p style={{fontSize:'0.85rem'}}>Sin cambios registrados</p></div>:

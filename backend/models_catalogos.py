@@ -59,6 +59,13 @@ class CentroDescargaItem(BaseModel):
     contacto: Optional[str] = None
     telefono: Optional[str] = None
 
+
+class AgenteCultivoItem(BaseModel):
+    """Asocia uno o varios agentes de compra a un cultivo del proveedor."""
+    cultivo: str
+    agente_ids: List[str] = []  # IDs de agentes de compra para este cultivo
+
+
 class ProveedorBase(BaseModel):
     nombre: str
     codigo_proveedor: Optional[str] = None
@@ -79,6 +86,7 @@ class ProveedorBase(BaseModel):
     datos_bancarios: Optional[DatosBancarios] = None
     certificaciones: Optional[List[CertificacionItem]] = []
     centros_descarga: Optional[List[CentroDescargaItem]] = []
+    agentes_por_cultivo: Optional[List[AgenteCultivoItem]] = []
     observaciones: Optional[str] = None
     avisos: Optional[str] = None
     activo: bool = True
