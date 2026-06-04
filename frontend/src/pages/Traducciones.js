@@ -439,7 +439,7 @@ const Traducciones = () => {
 
             <div className="flex gap-2">
               <button type="submit" className="btn btn-primary">
-                {editingId ? t('common.update') : t('common.save')}
+                {editingId ? t('common.save') : t('common.save')}
               </button>
               <button
                 type="button"

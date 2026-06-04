@@ -263,7 +263,7 @@ const EvaluacionesForm = ({
           <div style={{ textAlign: 'center', padding: '2rem', color: 'hsl(var(--muted-foreground))', background: 'hsl(var(--muted)/0.3)', borderRadius: '8px' }}><p style={{ fontSize: '0.85rem' }}>Selecciona una parcela en la pestana anterior para ver los cuestionarios</p></div>
         )}
 
-        <div style={{ borderTop: '1px solid hsl(var(--border))', paddingTop: '1rem', marginTop: '1.25rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}><button type="button" className="btn btn-secondary" onClick={onCancel}>{t('common.cancel')}</button><button type="submit" className="btn btn-primary" data-testid="btn-guardar-evaluacion">{editingId ? t('common.update') : t('common.save')} Evaluacion</button></div>
+        <div style={{ borderTop: '1px solid hsl(var(--border))', paddingTop: '1rem', marginTop: '1.25rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}><button type="button" className="btn btn-secondary" onClick={onCancel}>{t('common.cancel')}</button><button type="submit" className="btn btn-primary" data-testid="btn-guardar-evaluacion">{t('common.save')} Evaluacion</button></div>
       </form>
     </div>
   );
