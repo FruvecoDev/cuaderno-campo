@@ -24,7 +24,9 @@ class PyObjectId(ObjectId):
 # ============================================================================
 
 class ContratoPrecios(BaseModel):
-    calidad: str
+    # `calidad` ahora es opcional. El frontend solo identifica rangos por
+    # tenderometría min/max, pero algunos sistemas (ERP) usan etiqueta textual.
+    calidad: Optional[str] = ""
     min_tenderometria: Optional[float] = None
     max_tenderometria: Optional[float] = None
     precio: float

@@ -400,7 +400,24 @@ const Contratos = () => {
                   <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Cantidades y Precios</h3>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
                     <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Cantidad (kg) *</label><input type="text" className="form-input" value={formatNumber(formData.cantidad)} onChange={e => { const rawValue = e.target.value.replace(/\./g, ''); if (/^\d*$/.test(rawValue)) setFormData({ ...formData, cantidad: rawValue }); }} placeholder="Ej: 1.000" required /></div>
-                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Precio (EUR/kg) *</label><input type="text" className="form-input" value={formatNumber(formData.precio)} onChange={e => { const rawValue = e.target.value.replace(/\./g, ''); if (/^\d*,?\d*$/.test(rawValue)) setFormData({ ...formData, precio: rawValue }); }} placeholder="Ej: 1,50" required /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>
+                        Precio (EUR/kg) {(formData.precios_calidad || []).length === 0 ? '*' : (
+                          <span style={{ color: 'hsl(var(--muted-foreground))', fontWeight: 400, fontSize: '0.7rem' }}>
+                            (opcional — se aplican precios por tenderometría)
+                          </span>
+                        )}
+                      </label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={formatNumber(formData.precio)}
+                        onChange={e => { const rawValue = e.target.value.replace(/\./g, ''); if (/^\d*,?\d*$/.test(rawValue)) setFormData({ ...formData, precio: rawValue }); }}
+                        placeholder="Ej: 1,50"
+                        required={(formData.precios_calidad || []).length === 0}
+                        data-testid="contrato-precio-input"
+                      />
+                    </div>
                     <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Moneda</label><select className="form-input" value={formData.moneda} onChange={e => setFormData({ ...formData, moneda: e.target.value })}><option value="EUR">EUR</option><option value="USD">USD</option><option value="GBP">GBP</option></select></div>
                   </div>
                 </div>
