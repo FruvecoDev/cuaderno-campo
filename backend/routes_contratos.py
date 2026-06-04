@@ -30,10 +30,17 @@ async def create_contrato(
     current_user: dict = Depends(RequireCreate),
     _access: dict = Depends(RequireContratosAccess)
 ):
-    # Get next number
-    last_contrato = await contratos_collection.find_one(sort=[("numero", -1)])
-    next_numero = (last_contrato.get("numero", 0) if last_contrato else 0) + 1
-    
+    # Generación atómica del número de contrato dentro del año actual:
+    # MP-{año}-{numero:06d}. Se busca el mayor "numero" del año en curso
+    # para evitar colisiones con contratos de otros años.
+    current_year = datetime.now().year
+    last_contrato_year = await contratos_collection.find_one(
+        {"año": current_year},
+        sort=[("numero", -1)],
+    )
+    next_numero = (last_contrato_year.get("numero", 0) if last_contrato_year else 0) + 1
+    numero_contrato = f"MP-{current_year}-{str(next_numero).zfill(6)}"
+
     # Lookup proveedor name (para contratos de Compra)
     proveedor_name = contrato.proveedor or ""
     if contrato.proveedor_id:
@@ -60,8 +67,9 @@ async def create_contrato(
     contrato_dict = contrato.dict()
     contrato_dict.update({
         "serie": "MP",
-        "año": datetime.now().year,
+        "año": current_year,
         "numero": next_numero,
+        "numero_contrato": numero_contrato,
         "proveedor": proveedor_name,
         "cliente": cliente_name,
         "cliente_id": cliente_id_str,
@@ -104,6 +112,34 @@ async def get_contratos(
     
     contratos = await contratos_collection.find(query).skip(skip).limit(limit).to_list(limit)
     return {"contratos": serialize_docs(contratos), "total": await contratos_collection.count_documents(query)}
+
+
+@router.get("/contratos/next-numero")
+async def get_next_numero_contrato(
+    current_user: dict = Depends(get_current_user),
+    _access: dict = Depends(RequireContratosAccess)
+):
+    """Previsualiza el próximo número de contrato del año actual (MP-{año}-{numero:06d}).
+
+    El frontend lo usa para mostrar al usuario qué número tendrá el contrato
+    ANTES de guardarlo. El valor real se reasigna atómicamente en POST /contratos
+    para evitar colisiones.
+
+    IMPORTANTE: este endpoint debe declararse ANTES de /contratos/{contrato_id}
+    en este archivo; de lo contrario FastAPI interpreta "next-numero" como un
+    ObjectId y devuelve "Invalid ID".
+    """
+    current_year = datetime.now().year
+    last_contrato = await contratos_collection.find_one(
+        {"año": current_year},
+        sort=[("numero", -1)],
+    )
+    next_numero = (last_contrato.get("numero", 0) if last_contrato else 0) + 1
+    return {
+        "year": current_year,
+        "numero": next_numero,
+        "numero_contrato": f"MP-{current_year}-{str(next_numero).zfill(6)}",
+    }
 
 
 @router.get("/contratos/{contrato_id}")

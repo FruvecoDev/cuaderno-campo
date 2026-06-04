@@ -117,10 +117,19 @@ const Contratos = () => {
     } catch (error) { setAuditHistory([]); }
   };
 
-  const generarNumeroContrato = () => {
-    const year = new Date().getFullYear();
-    const contratosDelAno = contratos.filter(c => (c.numero_contrato || '').includes(`MP-${year}`));
-    return `MP-${year}-${String(contratosDelAno.length + 1).padStart(6, '0')}`;
+  const generarNumeroContrato = async () => {
+    // El backend es la fuente de verdad para el número (atómico, evita duplicados).
+    // Esta función pide la previsualización al backend.
+    try {
+      const data = await api.get('/api/contratos/next-numero');
+      return data.numero_contrato || '';
+    } catch (err) {
+      console.error('[Contratos.js] next-numero failed:', err);
+      // Fallback local en caso de error de red — el backend lo sobrescribirá al guardar.
+      const year = new Date().getFullYear();
+      const contratosDelAno = contratos.filter(c => (c.numero_contrato || '').includes(`MP-${year}`));
+      return `MP-${year}-${String(contratosDelAno.length + 1).padStart(6, '0')}`;
+    }
   };
 
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
@@ -218,7 +227,8 @@ const Contratos = () => {
       if (editingId) {
         await api.put(`/api/contratos/${editingId}`, payload);
       } else {
-        payload.numero_contrato = generarNumeroContrato();
+        // El backend genera atómicamente numero_contrato (MP-{año}-{N:06d}).
+        // No es necesario enviarlo desde el frontend.
         await api.post('/api/contratos', payload);
       }
       closeModal();
@@ -258,9 +268,10 @@ const Contratos = () => {
     setShowForm(true);
   };
 
-  const handleNewContrato = () => {
+  const handleNewContrato = async () => {
     setEditingId(null);
-    setFormData({ ...initialFormData, numero_contrato: generarNumeroContrato() });
+    const nextNum = await generarNumeroContrato();
+    setFormData({ ...initialFormData, numero_contrato: nextNum });
     setActiveTab('general');
     setShowForm(true);
   };
