@@ -28,14 +28,18 @@ test.describe('Proveedores - Agentes por Cultivo', () => {
     await login(page);
     await page.goto('/proveedores', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
     await removeOverlays(page);
+    await page.evaluate(() => {
+      document.querySelectorAll('[id*="emergent-badge"]').forEach(m => m.remove());
+    });
 
     // Open first proveedor in edit mode
-    const editBtn = page.locator('table button:has(svg.lucide-square-pen), table button:has(svg.lucide-pen)').first();
+    const editBtn = page.getByRole('button', { name: /editar proveedor/i }).first();
     await expect(editBtn).toBeVisible({ timeout: 10000 });
     await editBtn.click({ force: true });
-    await page.waitForTimeout(600);
+    await expect(page.getByRole('heading', { name: /Editar Proveedor/i })).toBeVisible({ timeout: 5000 });
+    await page.waitForTimeout(500);
     await removeOverlays(page);
 
     // Switch to "Agentes por Cultivo" tab
@@ -44,16 +48,25 @@ test.describe('Proveedores - Agentes por Cultivo', () => {
     await agentesTab.click({ force: true });
     await page.waitForTimeout(400);
 
+    // Count rows before adding
+    const beforeCount = await page.locator('[data-testid^="agente-cultivo-row-"]').count();
+
     // Add an association
     await page.getByTestId('add-agente-cultivo-btn').click({ force: true });
     await page.waitForTimeout(300);
 
-    // The new row must exist with its select
-    const cultivoSelect = page.getByTestId('agente-cultivo-select-0');
-    await expect(cultivoSelect).toBeVisible({ timeout: 5000 });
+    // There must now be one more row than before
+    const afterAddCount = await page.locator('[data-testid^="agente-cultivo-row-"]').count();
+    expect(afterAddCount).toBe(beforeCount + 1);
 
-    // Remove the row again
-    await page.getByTestId('agente-cultivo-remove-0').click({ force: true });
-    await expect(cultivoSelect).not.toBeVisible({ timeout: 3000 });
+    // The new row's select must be visible
+    const newSelect = page.getByTestId(`agente-cultivo-select-${afterAddCount - 1}`);
+    await expect(newSelect).toBeVisible({ timeout: 5000 });
+
+    // Remove the newly added row
+    await page.getByTestId(`agente-cultivo-remove-${afterAddCount - 1}`).click({ force: true });
+    await page.waitForTimeout(300);
+    const afterRemoveCount = await page.locator('[data-testid^="agente-cultivo-row-"]').count();
+    expect(afterRemoveCount).toBe(beforeCount);
   });
 });
