@@ -44,7 +44,10 @@ class AgenteBase(BaseModel):
 
 
 class ComisionBase(BaseModel):
-    agente_id: str
+    # agente_id viene de la URL; opcional en el body para que el frontend
+    # no tenga que duplicarlo. Si se envía en el body se ignora y se
+    # sobrescribe con el de la URL.
+    agente_id: Optional[str] = None
     tipo_comision: str  # "porcentaje" o "euro_kilo"
     valor: float  # Porcentaje (0-100) o €/kg
     aplicar_a: str  # "contrato", "cultivo", "parcela"
@@ -68,9 +71,11 @@ async def get_agentes(
 ):
     """Obtener lista de agentes con filtros opcionales"""
     query = {}
-    
+
     if tipo:
-        query["tipo"] = tipo
+        # Aceptar tanto "compra"/"venta" como "Compra"/"Venta"
+        # (el frontend usa minúscula en algunos sitios y mayúscula en otros).
+        query["tipo"] = tipo.capitalize()
     if activo is not None:
         query["activo"] = activo
     if search:
@@ -95,7 +100,7 @@ async def get_agentes_activos(
     """Obtener agentes activos para selectores"""
     query = {"activo": True}
     if tipo:
-        query["tipo"] = tipo
+        query["tipo"] = tipo.capitalize()
     
     agentes = await agentes_collection.find(query).sort("nombre", 1).to_list(200)
     return {"agentes": [serialize_doc(a) for a in agentes]}

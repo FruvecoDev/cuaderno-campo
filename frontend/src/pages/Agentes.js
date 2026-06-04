@@ -159,7 +159,11 @@ const Agentes = () => {
       await api.post(`/api/agentes/${editingId}/comisiones`, comisionForm);
       fetchComisiones(editingId);
       setComisionForm({ tipo_comision: 'porcentaje', valor: '', aplicar_a: 'contrato', referencia_id: '', referencia_nombre: '', fecha_desde: '', fecha_hasta: '', activa: true });
-    } catch (err) { console.error('[Agentes.js]', err); }
+      setError(null);
+    } catch (err) {
+      console.error('[Agentes.js] handleAddComision failed:', err);
+      setError(api.getErrorMessage(err) || 'Error al añadir la comisión');
+    }
   };
   const handleDeleteComision = async (comisionId) => {
     if (!window.confirm('Eliminar esta comision?')) return;
