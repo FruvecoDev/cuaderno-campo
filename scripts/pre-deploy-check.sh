@@ -18,7 +18,7 @@ ok()   { printf "\033[1;32m    ✓ %s\033[0m\n" "$1"; }
 err()  { printf "\033[1;31m    ✗ %s\033[0m\n" "$1"; FAIL=1; }
 
 # 1. Frontend lint (catches no-undef bugs Recharts silently swallows)
-log "Step 1/4 — Frontend ESLint (errors only)"
+log "Step 1/5 — Frontend ESLint (errors only)"
 if ( cd /app/frontend && npx eslint src --quiet >/tmp/eslint.log 2>&1 ); then
   ok "ESLint clean (0 errors)"
 else
@@ -26,7 +26,7 @@ else
 fi
 
 # 2. Backend syntax / import check
-log "Step 2/4 — Backend Python syntax check"
+log "Step 2/5 — Backend Python syntax check"
 if python3 -m py_compile /app/backend/server.py >/tmp/pycompile.log 2>&1; then
   ok "Backend compiles"
 else
@@ -34,7 +34,7 @@ else
 fi
 
 # 3. Playwright chart smoke tests (detects silent Recharts failures)
-log "Step 3/4 — Playwright chart visual smoke tests"
+log "Step 3/5 — Playwright chart visual smoke tests"
 if ( cd /app/tests && npx playwright test charts-visual.spec.ts \
         --reporter=line --workers=1 --retries=0 >/tmp/charts-test.log 2>&1 ); then
   ok "All chart tests passed"
@@ -44,12 +44,21 @@ else
 fi
 
 # 4. Frontend production build (catches build-time errors)
-log "Step 4/4 — Frontend production build"
+log "Step 4/5 — Frontend production build"
 if ( cd /app/frontend && CI=true yarn build >/tmp/build.log 2>&1 ); then
   ok "Production build succeeded"
 else
   err "Production build failed — see /tmp/build.log"
   tail -30 /tmp/build.log || true
+fi
+
+# 5. List-fetch audit (catches setX(data) bugs that show empty lists silently)
+log "Step 5/5 — Frontend list-fetch static audit"
+if python3 /app/scripts/audit_list_fetch.py >/tmp/audit.log 2>&1; then
+  ok "All list endpoints assigned correctly"
+else
+  err "List-fetch issues — see /tmp/audit.log"
+  cat /tmp/audit.log || true
 fi
 
 echo ""
