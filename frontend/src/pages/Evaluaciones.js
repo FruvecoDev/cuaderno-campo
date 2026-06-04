@@ -130,7 +130,9 @@ const Evaluaciones = () => {
     try {
       setLoading(true);
       const data = await api.get('/api/evaluaciones');
-      setEvaluaciones(Array.isArray(data) ? data : []);
+      // El backend devuelve { evaluaciones: [...], total: N }.
+      // Soportamos también una lista plana por defensividad.
+      setEvaluaciones(Array.isArray(data) ? data : (data?.evaluaciones || []));
     } catch (error) { setError('Error al cargar evaluaciones'); }
     finally { setLoading(false); }
   };
@@ -243,6 +245,10 @@ const Evaluaciones = () => {
         variedad: parcela?.variedad || '',
         finca: parcela?.finca || '',
         campana: parcela?.campana || '',
+        // El backend espera las secciones como campos top-level
+        // (toma_datos, analisis_suelo, ...), no anidadas dentro de
+        // `secciones`. Las aplanamos aquí para que persistan correctamente.
+        ...secciones_respuestas,
         secciones: secciones_respuestas,
         tecnico: formData.tecnico || user?.full_name || user?.username || '',
       };
@@ -256,9 +262,9 @@ const Evaluaciones = () => {
       setEditingId(null);
       resetForm();
     } catch (error) {
-
+      console.error('[Evaluaciones.js] handleSubmit', error);
       if (error.response?.status === 403) handlePermissionError(error);
-      else setError('Error al guardar la evaluacion');
+      else setError(api.getErrorMessage?.(error) || 'Error al guardar la evaluacion');
       setTimeout(() => setError(null), 5000);
     }
   };
