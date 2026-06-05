@@ -21,6 +21,7 @@ failing step first.
 | 4 | Frontend `yarn build` (production)     | Confirms the bundle compiles without errors              |
 | 5 | List-fetch static audit                | Detects `setX(data)` bugs that show empty lists silently |
 | 6 | i18n key audit                         | Detects missing translation keys (avoids raw "ns.key" UI)|
+| 7 | Smoke test CRUD                        | Catches Pydantic model regressions & broken endpoints    |
 
 ## 🤖 CI Integration (GitHub)
 
