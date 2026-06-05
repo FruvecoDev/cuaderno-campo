@@ -19,6 +19,8 @@ failing step first.
 | 2 | Backend `py_compile server.py`         | Catches Python syntax errors                             |
 | 3 | Playwright charts smoke tests          | Detects Recharts silently failing to render              |
 | 4 | Frontend `yarn build` (production)     | Confirms the bundle compiles without errors              |
+| 5 | List-fetch static audit                | Detects `setX(data)` bugs that show empty lists silently |
+| 6 | i18n key audit                         | Detects missing translation keys (avoids raw "ns.key" UI)|
 
 ## 🤖 CI Integration (GitHub)
 

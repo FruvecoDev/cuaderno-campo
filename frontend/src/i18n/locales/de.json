@@ -54,7 +54,8 @@
     "success": "Erfolg",
     "error": "Fehler",
     "warning": "Warnung",
-    "info": "Information"
+    "info": "Information",
+    "settings": "Einstellungen"
   },
   "auth": {
     "login": "Anmelden",
@@ -151,8 +152,29 @@
       "inDays": "In {days} Tagen",
       "daysAgo": "Vor {days} Tagen",
       "withVisits": "Mit Besuchen",
-      "monthNames": ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
-      "dayNames": ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
+      "monthNames": [
+        "Januar",
+        "Februar",
+        "März",
+        "April",
+        "Mai",
+        "Juni",
+        "Juli",
+        "August",
+        "September",
+        "Oktober",
+        "November",
+        "Dezember"
+      ],
+      "dayNames": [
+        "Mo",
+        "Di",
+        "Mi",
+        "Do",
+        "Fr",
+        "Sa",
+        "So"
+      ]
     },
     "visits": {
       "title": "Kommende Besuche",

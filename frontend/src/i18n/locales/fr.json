@@ -54,7 +54,8 @@
     "success": "Succès",
     "error": "Erreur",
     "warning": "Avertissement",
-    "info": "Information"
+    "info": "Information",
+    "settings": "Paramètres"
   },
   "auth": {
     "login": "Connexion",
@@ -151,8 +152,29 @@
       "inDays": "Dans {days} jours",
       "daysAgo": "Il y a {days} jours",
       "withVisits": "Avec visites",
-      "monthNames": ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"],
-      "dayNames": ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
+      "monthNames": [
+        "Janvier",
+        "Février",
+        "Mars",
+        "Avril",
+        "Mai",
+        "Juin",
+        "Juillet",
+        "Août",
+        "Septembre",
+        "Octobre",
+        "Novembre",
+        "Décembre"
+      ],
+      "dayNames": [
+        "Lun",
+        "Mar",
+        "Mer",
+        "Jeu",
+        "Ven",
+        "Sam",
+        "Dim"
+      ]
     },
     "visits": {
       "title": "Prochaines visites",
