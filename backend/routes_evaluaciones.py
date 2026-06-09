@@ -287,20 +287,28 @@ async def delete_evaluacion(
 async def get_preguntas_config(
     current_user: dict = Depends(get_current_user)
 ):
-    """Obtener configuración de preguntas (default + personalizadas)"""
+    """Obtener configuración de preguntas (default + personalizadas), filtrando las ocultas."""
     # Obtener preguntas personalizadas de la BD
     custom_preguntas = await evaluaciones_config_collection.find_one({"tipo": "preguntas"})
-    
+
+    hidden_map = (custom_preguntas or {}).get("hidden", {}) if custom_preguntas else {}
+
     if custom_preguntas:
-        # Merge default con custom
+        # Merge default con custom, filtrando las ocultas por sección
         result = {}
         for seccion, preguntas in PREGUNTAS_DEFAULT.items():
-            result[seccion] = preguntas.copy()
+            hidden_ids = set(hidden_map.get(seccion, []))
+            result[seccion] = [p for p in preguntas if p.get("id") not in hidden_ids]
             if seccion in custom_preguntas.get("secciones", {}):
-                result[seccion].extend(custom_preguntas["secciones"][seccion])
-        return {"preguntas": result, "custom": custom_preguntas.get("secciones", {})}
-    
-    return {"preguntas": PREGUNTAS_DEFAULT, "custom": {}}
+                custom_list = custom_preguntas["secciones"][seccion]
+                result[seccion].extend([p for p in custom_list if p.get("id") not in hidden_ids])
+        return {
+            "preguntas": result,
+            "custom": custom_preguntas.get("secciones", {}),
+            "hidden": hidden_map,
+        }
+
+    return {"preguntas": PREGUNTAS_DEFAULT, "custom": {}, "hidden": {}}
 
 
 @router.post("/evaluaciones/config/preguntas")
@@ -353,20 +361,38 @@ async def delete_pregunta_config(
     seccion: str,
     current_user: dict = Depends(RequireDelete)
 ):
-    """Eliminar pregunta personalizada"""
+    """Eliminar (u ocultar) una pregunta.
+
+    - Preguntas personalizadas (id `custom_*`): se eliminan físicamente del array.
+    - Preguntas predeterminadas (default): se añaden a `hidden[seccion]` para
+      excluirlas del cuestionario sin perder la definición original. Permite
+      restaurarlas en el futuro vaciando la lista.
+    """
     if current_user.get("role") not in ["Admin"]:
         raise HTTPException(status_code=403, detail="Solo Admin puede eliminar preguntas")
-    
-    # Solo se pueden eliminar preguntas custom (que empiezan con "custom_")
-    if not pregunta_id.startswith("custom_"):
-        raise HTTPException(status_code=400, detail="Solo se pueden eliminar preguntas personalizadas")
-    
-    result = await evaluaciones_config_collection.update_one(
+
+    secciones_validas = list(PREGUNTAS_DEFAULT.keys())
+    if seccion not in secciones_validas:
+        raise HTTPException(status_code=400, detail=f"Sección inválida. Opciones: {secciones_validas}")
+
+    if pregunta_id.startswith("custom_"):
+        # Pregunta personalizada: eliminar físicamente
+        await evaluaciones_config_collection.update_one(
+            {"tipo": "preguntas"},
+            {"$pull": {f"secciones.{seccion}": {"id": pregunta_id}}}
+        )
+        return {"success": True, "message": "Pregunta personalizada eliminada"}
+
+    # Pregunta predeterminada: añadir al listado de ocultas (idempotente)
+    await evaluaciones_config_collection.update_one(
         {"tipo": "preguntas"},
-        {"$pull": {f"secciones.{seccion}": {"id": pregunta_id}}}
+        {
+            "$addToSet": {f"hidden.{seccion}": pregunta_id},
+            "$set": {"updated_at": datetime.now()},
+        },
+        upsert=True,
     )
-    
-    return {"success": True, "message": "Pregunta eliminada"}
+    return {"success": True, "message": "Pregunta predeterminada ocultada"}
 
 
 @router.put("/evaluaciones/config/preguntas/reorder")

@@ -148,14 +148,22 @@ const Evaluaciones = () => {
   };
 
   const fetchPreguntasConfig = async () => {
-    try { const data = await api.get('/api/evaluaciones/config/preguntas'); setCustomPreguntas(data?.preguntas || {}); }
-    catch (error) { }
+    try {
+      const data = await api.get('/api/evaluaciones/config/preguntas');
+      // Backend devuelve { preguntas: { seccion: [default + custom (sin ocultas)] }, custom, hidden }
+      // Guardamos directamente el listado ya unificado para evitar duplicados.
+      setCustomPreguntas(data?.preguntas || {});
+    } catch (error) { }
   };
 
   const getPreguntasSeccion = (seccion) => {
-    const defaults = PREGUNTAS_DEFAULT[seccion] || [];
-    const custom = customPreguntas[seccion] || [];
-    return [...defaults, ...custom];
+    // Si el backend devolvió un listado para esta sección, usarlo tal cual
+    // (ya incluye defaults visibles + custom, y excluye ocultas).
+    if (customPreguntas && customPreguntas[seccion]) {
+      return customPreguntas[seccion];
+    }
+    // Fallback: solo defaults locales (primer render antes del fetch)
+    return PREGUNTAS_DEFAULT[seccion] || [];
   };
 
   const initializeRespuestas = () => {
@@ -344,9 +352,13 @@ const Evaluaciones = () => {
   };
 
   const handleDeleteQuestion = async (preguntaId, seccion) => {
-    if (!window.confirm('Eliminar esta pregunta personalizada?')) return;
+    const isCustom = preguntaId.startsWith('custom_');
+    const confirmMsg = isCustom
+      ? 'Eliminar esta pregunta personalizada?'
+      : 'Esta es una pregunta predeterminada. Se ocultará del cuestionario. ¿Continuar?';
+    if (!window.confirm(confirmMsg)) return;
     try {
-      await api.delete(`/api/evaluaciones/config/preguntas/${preguntaId}`);
+      await api.delete(`/api/evaluaciones/config/preguntas/${preguntaId}?seccion=${encodeURIComponent(seccion)}`);
       fetchPreguntasConfig();
     } catch (error) { setError('Error al eliminar la pregunta'); setTimeout(() => setError(null), 5000); }
   };
