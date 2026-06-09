@@ -251,7 +251,11 @@ const Contratos = () => {
       precio: contrato.precio ? String(contrato.precio).replace('.', ',') : '',
       periodo_desde: contrato.periodo_desde || '', periodo_hasta: contrato.periodo_hasta || '',
       moneda: contrato.moneda || 'EUR', observaciones: contrato.observaciones || '',
-      precios_calidad: contrato.precios_calidad || [],
+      precios_calidad: (contrato.precios_calidad || []).map(pc => ({
+        min_tenderometria: pc.min_tenderometria ?? '',
+        max_tenderometria: pc.max_tenderometria ?? '',
+        precio: (pc.precio !== null && pc.precio !== undefined && pc.precio !== '') ? String(pc.precio).replace('.', ',') : ''
+      })),
       agente_compra: contrato.agente_compra || '', agente_venta: contrato.agente_venta || '',
       comision_compra_tipo: contrato.comision_compra_tipo || 'porcentaje',
       comision_compra_valor: contrato.comision_compra_valor || '',
@@ -461,7 +465,7 @@ const Contratos = () => {
                           <div key={`tend-${idx}`} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: '0.5rem', alignItems: 'center', background: 'white', padding: '0.5rem', borderRadius: '6px' }}>
                             <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '600' }}>Tend. Min</label><input type="number" step="1" className="form-input" style={{ textAlign: 'center', fontSize: '0.85rem' }} value={pc.min_tenderometria} onChange={e => updatePrecioTenderometria(idx, 'min_tenderometria', e.target.value)} placeholder="90" /></div>
                             <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '600' }}>Tend. Max</label><input type="number" step="1" className="form-input" style={{ textAlign: 'center', fontSize: '0.85rem' }} value={pc.max_tenderometria} onChange={e => updatePrecioTenderometria(idx, 'max_tenderometria', e.target.value)} placeholder="100" /></div>
-                            <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '600' }}>Precio EUR/kg</label><input type="number" step="0.01" className="form-input" style={{ textAlign: 'center', fontSize: '0.85rem' }} value={pc.precio} onChange={e => updatePrecioTenderometria(idx, 'precio', e.target.value)} placeholder="0.45" /></div>
+                            <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '600' }}>Precio EUR/kg</label><input type="text" inputMode="decimal" className="form-input" style={{ textAlign: 'center', fontSize: '0.85rem' }} value={pc.precio} onChange={e => { const v = e.target.value.replace(/\./g, ','); if (/^\d*,?\d{0,4}$/.test(v)) updatePrecioTenderometria(idx, 'precio', v); }} placeholder="0,45" /></div>
                             <button type="button" onClick={() => removePrecioTenderometria(idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--destructive))', padding: '0.25rem', marginTop: '1.2rem' }}><X size={15} /></button>
                           </div>
                         ))}
