@@ -395,6 +395,30 @@ async def delete_pregunta_config(
     return {"success": True, "message": "Pregunta predeterminada ocultada"}
 
 
+@router.post("/evaluaciones/config/preguntas/restore")
+async def restore_pregunta_config(
+    pregunta_id: str,
+    seccion: str,
+    current_user: dict = Depends(RequireEdit)
+):
+    """Restaurar una pregunta predeterminada previamente ocultada."""
+    if current_user.get("role") not in ["Admin", "Manager"]:
+        raise HTTPException(status_code=403, detail="Solo Admin o Manager pueden restaurar preguntas")
+
+    secciones_validas = list(PREGUNTAS_DEFAULT.keys())
+    if seccion not in secciones_validas:
+        raise HTTPException(status_code=400, detail=f"Sección inválida. Opciones: {secciones_validas}")
+
+    await evaluaciones_config_collection.update_one(
+        {"tipo": "preguntas"},
+        {
+            "$pull": {f"hidden.{seccion}": pregunta_id},
+            "$set": {"updated_at": datetime.now()},
+        },
+    )
+    return {"success": True, "message": "Pregunta restaurada"}
+
+
 @router.put("/evaluaciones/config/preguntas/reorder")
 async def reorder_preguntas(
     seccion: str,

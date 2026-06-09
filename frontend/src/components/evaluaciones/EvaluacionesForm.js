@@ -65,6 +65,9 @@ const EvaluacionesForm = ({
   handleDragEnd,
   handleDuplicateQuestion,
   handleDeleteQuestion,
+  handleRestoreQuestion,
+  hiddenPreguntas = {},
+  preguntasDefault = {},
   setNewQuestionSection,
   setShowAddQuestion,
   fetchPreguntasConfig,
@@ -80,6 +83,8 @@ const EvaluacionesForm = ({
   const [editingQuestion, setEditingQuestion] = React.useState(null);
   const [editText, setEditText] = React.useState('');
   const [editType, setEditType] = React.useState('texto');
+  // Show hidden questions panel per section
+  const [showHiddenForSection, setShowHiddenForSection] = React.useState(null);
 
   const handleInlineAdd = async (seccionKey) => {
     if (!inlineText.trim()) return;
@@ -195,15 +200,61 @@ const EvaluacionesForm = ({
           {SECCIONES.map(seccion => {
             const preguntas = getPreguntasSeccion(seccion.key);
             const isExpanded = expandedSections[seccion.key];
+            const hiddenIds = (hiddenPreguntas && hiddenPreguntas[seccion.key]) || [];
+            const hiddenCount = hiddenIds.length;
+            const defaultsBySection = preguntasDefault[seccion.key] || [];
+            const hiddenItems = hiddenIds
+              .map(id => defaultsBySection.find(p => p.id === id))
+              .filter(Boolean);
+            const isShowingHidden = showHiddenForSection === seccion.key;
             return (
               <div key={seccion.key} style={{ marginBottom: '0.5rem', border: '1px solid hsl(var(--border))', borderRadius: '8px', overflow: 'hidden' }}>
                 <button type="button" onClick={() => toggleSection(seccion.key)} style={{ width: '100%', padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: isExpanded ? 'hsl(var(--primary) / 0.1)' : 'hsl(var(--muted) / 0.3)', border: 'none', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem' }}>
                   <span>{seccion.label} ({preguntas.length})</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    {hiddenCount > 0 && (user?.role === 'Admin' || user?.role === 'Manager') && (
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => { e.stopPropagation(); setShowHiddenForSection(isShowingHidden ? null : seccion.key); if (!isExpanded) toggleSection(seccion.key); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); e.preventDefault(); setShowHiddenForSection(isShowingHidden ? null : seccion.key); if (!isExpanded) toggleSection(seccion.key); } }}
+                        style={{ padding: '0.15rem 0.5rem', borderRadius: '999px', backgroundColor: isShowingHidden ? 'hsl(38 92% 50%)' : 'hsl(38 92% 50% / 0.15)', color: isShowingHidden ? 'white' : 'hsl(38 92% 40%)', border: '1px solid hsl(38 92% 50% / 0.4)', fontSize: '0.7rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}
+                        title={isShowingHidden ? 'Ocultar panel' : 'Ver preguntas ocultas'}
+                        data-testid={`chip-ocultas-${seccion.key}`}
+                      >
+                        {hiddenCount} oculta{hiddenCount !== 1 ? 's' : ''}
+                      </span>
+                    )}
                     {(user?.role === 'Admin' || user?.role === 'Manager') && <button type="button" onClick={(e) => { e.stopPropagation(); setAddingToSection(addingToSection === seccion.key ? null : seccion.key); setInlineText(''); setInlineType('texto'); }} style={{ padding: '0.15rem 0.4rem', borderRadius: '4px', backgroundColor: addingToSection === seccion.key ? 'hsl(var(--destructive))' : 'hsl(var(--primary))', color: 'white', border: 'none', cursor: 'pointer', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.2rem' }} title="Anadir pregunta">{addingToSection === seccion.key ? <X size={12} /> : <Plus size={12} />}</button>}
                     {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                   </div>
                 </button>
+                {/* Panel de Preguntas Ocultas */}
+                {isExpanded && isShowingHidden && hiddenItems.length > 0 && (
+                  <div style={{ padding: '0.75rem', backgroundColor: 'hsl(38 92% 50% / 0.06)', borderBottom: '1px solid hsl(38 92% 50% / 0.2)' }} data-testid={`panel-ocultas-${seccion.key}`}>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'hsl(38 92% 40%)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      Preguntas predeterminadas ocultas ({hiddenItems.length})
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                      {hiddenItems.map(pq => (
+                        <div key={pq.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0.65rem', borderRadius: '6px', background: 'white', border: '1px solid hsl(var(--border))' }}>
+                          <span style={{ fontSize: '0.82rem', color: 'hsl(var(--muted-foreground))', flex: 1, paddingRight: '0.5rem' }}>{pq.pregunta}</span>
+                          {handleRestoreQuestion && (
+                            <button
+                              type="button"
+                              onClick={() => handleRestoreQuestion(pq.id, seccion.key)}
+                              style={{ padding: '0.3rem 0.65rem', borderRadius: '6px', backgroundColor: 'hsl(142 76% 36%)', color: 'white', border: 'none', cursor: 'pointer', fontSize: '0.72rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem', whiteSpace: 'nowrap' }}
+                              title="Restaurar pregunta"
+                              data-testid={`btn-restaurar-${pq.id}`}
+                            >
+                              <Check size={12} /> Restaurar
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {/* Inline Add Question Form */}
                 {addingToSection === seccion.key && (
                   <div style={{ padding: '0.75rem', backgroundColor: 'hsl(var(--primary) / 0.05)', borderBottom: '1px solid hsl(var(--border))' }}>

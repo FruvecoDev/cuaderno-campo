@@ -92,6 +92,7 @@ const Evaluaciones = () => {
   const [filters, setFilters] = useState({ parcela: '', cultivo: '', proveedor: '', campana: '', contrato: '', estado: '' });
   const [expandedSections, setExpandedSections] = useState({});
   const [customPreguntas, setCustomPreguntas] = useState({});
+  const [hiddenPreguntas, setHiddenPreguntas] = useState({});
   const [contratos, setContratos] = useState([]);
   const [showAddQuestion, setShowAddQuestion] = useState(false);
   const [newQuestionSection, setNewQuestionSection] = useState('');
@@ -139,12 +140,12 @@ const Evaluaciones = () => {
 
   const fetchParcelas = async () => {
     try { const data = await api.get('/api/parcelas?limit=1000'); setParcelas(Array.isArray(data) ? data : data?.parcelas || []); }
-    catch (error) { }
+    catch (e) { console.error('[Evaluaciones.js] fetchParcelas', e); }
   };
 
   const fetchContratos = async () => {
     try { const data = await api.get('/api/contratos?limit=1000'); setContratos(Array.isArray(data) ? data : data?.contratos || []); }
-    catch (error) { }
+    catch (e) { console.error('[Evaluaciones.js] fetchContratos', e); }
   };
 
   const fetchPreguntasConfig = async () => {
@@ -153,7 +154,8 @@ const Evaluaciones = () => {
       // Backend devuelve { preguntas: { seccion: [default + custom (sin ocultas)] }, custom, hidden }
       // Guardamos directamente el listado ya unificado para evitar duplicados.
       setCustomPreguntas(data?.preguntas || {});
-    } catch (error) { }
+      setHiddenPreguntas(data?.hidden || {});
+    } catch (e) { console.error('[Evaluaciones.js] fetchPreguntasConfig', e); }
   };
 
   const getPreguntasSeccion = (seccion) => {
@@ -337,7 +339,7 @@ const Evaluaciones = () => {
 
   const handleDownloadPDF = async (id) => {
     try { await api.download(`/api/evaluaciones/${id}/pdf`, `evaluacion_${id}.pdf`); }
-    catch (error) { }
+    catch (e) { console.error('[Evaluaciones.js] handleDownloadPDF', e); }
   };
 
   const handleAddQuestion = async () => {
@@ -361,6 +363,13 @@ const Evaluaciones = () => {
       await api.delete(`/api/evaluaciones/config/preguntas/${preguntaId}?seccion=${encodeURIComponent(seccion)}`);
       fetchPreguntasConfig();
     } catch (error) { setError('Error al eliminar la pregunta'); setTimeout(() => setError(null), 5000); }
+  };
+
+  const handleRestoreQuestion = async (preguntaId, seccion) => {
+    try {
+      await api.post(`/api/evaluaciones/config/preguntas/restore?seccion=${encodeURIComponent(seccion)}&pregunta_id=${encodeURIComponent(preguntaId)}`);
+      fetchPreguntasConfig();
+    } catch (error) { setError('Error al restaurar la pregunta'); setTimeout(() => setError(null), 5000); }
   };
 
   const handleDuplicateQuestion = (pregunta, seccion) => {
@@ -498,6 +507,9 @@ const Evaluaciones = () => {
               handleDragEnd={handleDragEnd}
               handleDuplicateQuestion={handleDuplicateQuestion}
               handleDeleteQuestion={handleDeleteQuestion}
+              handleRestoreQuestion={handleRestoreQuestion}
+              hiddenPreguntas={hiddenPreguntas}
+              preguntasDefault={PREGUNTAS_DEFAULT}
               setNewQuestionSection={setNewQuestionSection}
               setShowAddQuestion={setShowAddQuestion}
               fetchPreguntasConfig={fetchPreguntasConfig}
