@@ -12,6 +12,7 @@ import api, { BACKEND_URL } from '../services/api';
 import LanguageSelector from './LanguageSelector';
 import OfflineIndicator from './OfflineIndicator';
 import NotificacionesDropdown from './NotificacionesDropdown';
+import VersionBadge from './VersionBadge';
 import ResumenDiario from './ResumenDiario';
 import { MobileBottomNav } from './MobileBottomNav';
 import '../App.css';
@@ -493,6 +494,7 @@ const Layout = ({ children }) => {
         </div>
         {/* Header - desktop only */}
         <div className="desktop-header">
+          <VersionBadge />
           <NotificacionesDropdown />
           <OfflineIndicator />
         </div>
