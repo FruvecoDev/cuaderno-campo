@@ -187,8 +187,13 @@ const Layout = ({ children }) => {
       if (user?.role === 'Empleado') {
         return item.forEmpleado === true;
       }
-      // Admin always has access to everything
+      // Admin always has access to everything EXCEPT operation type filter
+      // (tipo_operacion must be respected for all roles including Admin)
       if (user?.role === 'Admin') {
+        // Still apply operation type filter
+        if (item.operacion && !canDoOperacion(item.operacion)) {
+          return false;
+        }
         return true;
       }
       // No mostrar items exclusivos de empleados a otros roles

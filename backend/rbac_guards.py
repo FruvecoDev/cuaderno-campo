@@ -53,3 +53,29 @@ RequireRecetasAccess = require_module_access("recetas")
 RequireAlbaranesAccess = require_module_access("albaranes")
 RequireCosechasAccess = require_module_access("cosechas")
 RequireAIAccess = require_permission("can_create")  # AI reports require create permission
+
+
+def check_tipo_operacion(current_user: dict, tipo: str) -> bool:
+    """Devuelve True si el usuario puede realizar operaciones del `tipo` dado.
+
+    `tipo` es el tipo del documento (Contrato/Albaran): "Compra" o "Venta".
+    `current_user["tipo_operacion"]` puede ser "compra", "venta" o "ambos".
+    Si el usuario no tiene `tipo_operacion`, por defecto se permite ("ambos").
+    """
+    user_tipo = (current_user or {}).get("tipo_operacion") or "ambos"
+    user_tipo = str(user_tipo).strip().lower()
+    if user_tipo == "ambos":
+        return True
+    if not tipo:
+        # Si el documento no especifica tipo, se considera Compra por defecto
+        return user_tipo == "compra"
+    return user_tipo == str(tipo).strip().lower()
+
+
+def ensure_tipo_operacion(current_user: dict, tipo: str):
+    """Lanza 403 si el usuario no puede realizar operaciones de ese tipo."""
+    if not check_tipo_operacion(current_user, tipo):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Permiso denegado: el usuario solo puede operar con tipo '{(current_user or {}).get('tipo_operacion','ambos')}'",
+        )

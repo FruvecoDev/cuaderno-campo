@@ -18,7 +18,7 @@ from database import (
 from rbac_guards import (
     RequireCreate, RequireEdit, RequireDelete,
     RequireRecetasAccess, RequireAlbaranesAccess,
-    get_current_user
+    get_current_user, ensure_tipo_operacion
 )
 
 router = APIRouter(prefix="/api", tags=["extended"])
@@ -341,6 +341,9 @@ async def create_albaran(
     _access: dict = Depends(RequireAlbaranesAccess)
 ):
     albaran_dict = albaran.dict()
+
+    # Validar tipo de operación del usuario (Compra/Venta/Ambos)
+    ensure_tipo_operacion(current_user, albaran_dict.get("tipo"))
     
     # Variables para el cálculo
     kilos_brutos = 0
@@ -638,7 +641,14 @@ async def update_albaran(
         raise HTTPException(status_code=400, detail="Invalid ID")
     
     update_data = albaran.dict()
-    
+
+    # Validar tipo de operación del usuario para el albarán entrante
+    ensure_tipo_operacion(current_user, update_data.get("tipo"))
+    # Validar también contra el albarán original (por si tipo cambió)
+    _existing = await albaranes_collection.find_one({"_id": ObjectId(albaran_id)}, {"tipo": 1})
+    if _existing:
+        ensure_tipo_operacion(current_user, _existing.get("tipo"))
+
     # Variables para el cálculo (similar a create)
     kilos_brutos = 0
     kilos_destare = 0

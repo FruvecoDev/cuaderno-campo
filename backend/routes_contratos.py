@@ -12,7 +12,7 @@ from models import ContratoCreate
 from database import contratos_collection, serialize_doc, serialize_docs, db
 from rbac_guards import (
     RequireCreate, RequireEdit, RequireDelete,
-    RequireContratosAccess, get_current_user
+    RequireContratosAccess, get_current_user, ensure_tipo_operacion
 )
 from services.audit_service import create_audit_log, calculate_changes
 
@@ -30,6 +30,9 @@ async def create_contrato(
     current_user: dict = Depends(RequireCreate),
     _access: dict = Depends(RequireContratosAccess)
 ):
+    # Validar tipo de operación del usuario (Compra/Venta/Ambos)
+    ensure_tipo_operacion(current_user, contrato.tipo)
+
     # Generación atómica del número de contrato dentro del año actual:
     # MP-{año}-{numero:06d}. Se busca el mayor "numero" del año en curso
     # para evitar colisiones con contratos de otros años.
@@ -172,6 +175,10 @@ async def update_contrato(
     old_doc = await contratos_collection.find_one({"_id": ObjectId(contrato_id)})
     if not old_doc:
         raise HTTPException(status_code=404, detail="Contrato not found")
+
+    # Validar tipo de operación tanto del documento existente como del nuevo
+    ensure_tipo_operacion(current_user, old_doc.get("tipo"))
+    ensure_tipo_operacion(current_user, contrato.tipo)
     
     # Lookup proveedor name (para contratos de Compra)
     proveedor_name = contrato.proveedor or ""
