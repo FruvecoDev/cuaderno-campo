@@ -199,6 +199,7 @@ async def create_recomendacion(
     current_user: dict = Depends(get_current_user)
 ):
     """Create a new recommendation (Technicians and Managers only)"""
+    # noqa: tipo_operacion — recomendaciones agronómicas; no son documentos Compra/Venta
     if not can_manage_recomendaciones(current_user):
         raise HTTPException(status_code=403, detail="Solo técnicos y managers pueden crear recomendaciones")
     

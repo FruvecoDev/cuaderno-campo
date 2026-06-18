@@ -155,6 +155,7 @@ async def create_plantilla(
     current_user: dict = Depends(get_current_user)
 ):
     """Create a new recommendation template (Admin/Manager only)"""
+    # noqa: tipo_operacion — plantillas de recomendaciones agronómicas; no son Compra/Venta
     if not can_manage_plantillas(current_user):
         raise HTTPException(status_code=403, detail="Solo Admin y Manager pueden crear plantillas")
     

@@ -21,7 +21,26 @@ failing step first.
 | 4 | Frontend `yarn build` (production)     | Confirms the bundle compiles without errors              |
 | 5 | List-fetch static audit                | Detects `setX(data)` bugs that show empty lists silently |
 | 6 | i18n key audit                         | Detects missing translation keys (avoids raw "ns.key" UI)|
-| 7 | Smoke test CRUD                        | Catches Pydantic model regressions & broken endpoints    |
+| 7 | `tipo_operacion` permission audit      | Catches POST/PUT endpoints handling Compra/Venta that forget to call `ensure_tipo_operacion(current_user, tipo)` — security gap |
+| 8 | Smoke test CRUD                        | Catches Pydantic model regressions & broken endpoints    |
+
+#### Suppressing false positives in the `tipo_operacion` audit
+
+Some endpoints legitimately mention `Compra`/`Venta`/`.tipo` without needing
+per-user enforcement (e.g. report generators, notification dispatchers, batch
+admin tools, or ERP API-key endpoints with no end-user). Mark them with an
+inline comment **inside the handler**:
+
+```python
+@router.post("/some-endpoint")
+async def my_handler(...):
+    # noqa: tipo_operacion — short reason why this is exempt
+    ...
+```
+
+Files exempt at the file level (in `audit_tipo_operacion.py`):
+`routes_auth.py`, `routes_clientes.py`, `routes_catalogos.py`,
+`routes_erp_integration.py`.
 
 ## 🤖 CI Integration (GitHub)
 

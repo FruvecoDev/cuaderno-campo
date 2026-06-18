@@ -400,6 +400,7 @@ async def crear_notificacion(
     current_user: dict = Depends(get_current_user)
 ):
     """Create a new notification"""
+    # noqa: tipo_operacion — `data.tipo` aquí es el tipo de notificación (info/warning/etc), no Compra/Venta
     if current_user.get("role") not in ["Admin", "Manager"]:
         raise HTTPException(status_code=403, detail="Solo Admin y Manager pueden crear notificaciones")
     

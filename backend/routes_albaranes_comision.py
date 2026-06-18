@@ -234,6 +234,9 @@ async def regenerar_albaranes_comision(
     - solo_faltantes=False: borra los existentes (solo estado=pendiente, para no
       tocar los ya pagados) y recrea.
     """
+    # noqa: tipo_operacion — batch admin operation que recorre TODOS los albaranes
+    # (compra + venta) para regenerar sus comisiones derivadas. No crea documentos
+    # de venta nuevos; opera sobre datos ya existentes y solo recalcula comisiones.
     creados = 0
     actualizados = 0
     saltados = 0

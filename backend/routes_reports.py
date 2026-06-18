@@ -41,6 +41,7 @@ class AIReportRequest(BaseModel):
 
 @router.post("/api/generate-ai-report")
 async def generate_ai_report(request: AIReportRequest):
+    # noqa: tipo_operacion — `request.tipo` aquí es el tipo de informe (parcela/cultivo/...), no Compra/Venta
     try:
         api_key = os.getenv('EMERGENT_LLM_KEY')
         if not api_key:
@@ -326,6 +327,7 @@ class ExcelRequest(BaseModel):
 
 @router.post("/api/generate-excel")
 async def generate_excel(request: ExcelRequest):
+    # noqa: tipo_operacion — `request.tipo` aquí es el tipo de informe Excel (parcela/general), no Compra/Venta
     try:
         wb = Workbook()
         
