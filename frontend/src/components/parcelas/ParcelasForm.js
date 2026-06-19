@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { Map as MapIcon, Search, ExternalLink, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import AdvancedParcelMap from '../AdvancedParcelMap';
 
@@ -23,6 +23,30 @@ export const ParcelasForm = ({
   const fincasConDenominacion = useMemo(() => (
     fincas.filter(f => f.denominacion)
   ), [fincas]);
+
+  // Auto-select variedad when there is exactly one option for the current cultivo
+  // (typical case: a cultivo has a single registered variedad → no need to ask).
+  const variedadesDisponibles = useMemo(
+    () => (typeof getVariedadesParaCultivo === 'function' ? getVariedadesParaCultivo() : []),
+    [getVariedadesParaCultivo, formData.cultivo]
+  );
+  useEffect(() => {
+    if (
+      variedadesDisponibles.length === 1 &&
+      (!formData.variedad || !variedadesDisponibles.includes(formData.variedad))
+    ) {
+      setFormData(prev => ({ ...prev, variedad: variedadesDisponibles[0] }));
+    }
+    // Si el cultivo cambia y la variedad actual ya no aplica, limpiarla
+    if (
+      variedadesDisponibles.length > 1 &&
+      formData.variedad &&
+      !variedadesDisponibles.includes(formData.variedad)
+    ) {
+      setFormData(prev => ({ ...prev, variedad: '' }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [variedadesDisponibles]);
 
   return (
     <div className="card mb-6">
@@ -215,10 +239,16 @@ export const ParcelasForm = ({
               <select className="form-select" value={formData.variedad}
                 onChange={(e) => setFormData({...formData, variedad: e.target.value})} data-testid="select-variedad">
                 <option value="">-- Sin variedad --</option>
-                {getVariedadesParaCultivo().map(v => <option key={v} value={v}>{v}</option>)}
+                {variedadesDisponibles.map(v => <option key={v} value={v}>{v}</option>)}
               </select>
               <small style={{ color: 'hsl(var(--muted-foreground))' }}>
-                {formData.cultivo ? `Variedades disponibles para ${formData.cultivo}` : 'Selecciona un cultivo primero'}
+                {!formData.cultivo
+                  ? 'Selecciona un cultivo primero'
+                  : variedadesDisponibles.length === 0
+                    ? `Sin variedades definidas para ${formData.cultivo}`
+                    : variedadesDisponibles.length === 1
+                      ? 'Autoseleccionada (única variedad para este cultivo)'
+                      : `Variedades disponibles para ${formData.cultivo}`}
               </small>
             </div>
           )}
@@ -233,9 +263,11 @@ export const ParcelasForm = ({
             )}
             {fieldsConfig.num_plantas && (
               <div className="form-group">
-                <label className="form-label">Nº Plantas *</label>
+                <label className="form-label">Nº Plantas</label>
                 <input type="number" className="form-input" value={formData.num_plantas}
-                  onChange={(e) => setFormData({...formData, num_plantas: e.target.value})} required />
+                  onChange={(e) => setFormData({...formData, num_plantas: e.target.value})}
+                  placeholder="Opcional" data-testid="parcela-num-plantas-input" />
+                <small style={{ color: 'hsl(var(--muted-foreground))' }}>Opcional</small>
               </div>
             )}
           </div>

@@ -226,12 +226,12 @@ class ParcelaCreate(BaseModel):
     proveedor: str
     cultivo: str
     campana: str
-    variedad: str
+    variedad: Optional[str] = ""
     superficie_total: float
     codigo_plantacion: str
-    num_plantas: int
+    num_plantas: Optional[int] = 0
     finca: str
-    recintos: List[ParcelaRecinto]
+    recintos: List[ParcelaRecinto] = []
     contrato_id: Optional[str] = None  # Referencia al contrato asociado
 
 class ParcelaUpdate(BaseModel):
