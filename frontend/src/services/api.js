@@ -39,6 +39,33 @@ const buildHeaders = (customHeaders = {}, includeAuth = true) => {
 /**
  * Custom API Error class
  */
+/**
+ * Format Pydantic validation errors into a readable string.
+ *
+ * FastAPI/Pydantic returns 422 errors as:
+ *   { detail: [ { type, loc: ["body", "field", ...], msg, input, ... }, ... ] }
+ *
+ * This helper turns that into something users can act on, e.g.:
+ *   "recintos: Field required, precio: Value error, ..."
+ *
+ * Returns null when `detail` is not a Pydantic-style list.
+ */
+const formatPydanticErrors = (detail) => {
+  if (!Array.isArray(detail) || detail.length === 0) return null;
+  const lines = detail
+    .map(err => {
+      if (!err || typeof err !== 'object') return null;
+      const loc = Array.isArray(err.loc) ? err.loc : [];
+      // Strip the "body"/"query"/"path" prefix (Pydantic always prepends one).
+      const path = loc.filter(p => !['body', 'query', 'path', 'header', 'cookie'].includes(p));
+      const field = path.length ? path.join('.') : '(root)';
+      const msg = err.msg || err.type || 'Error de validación';
+      return `${field}: ${msg}`;
+    })
+    .filter(Boolean);
+  return lines.length ? lines.join(' | ') : null;
+};
+
 class ApiError extends Error {
   constructor(message, status, data = null) {
     super(message);
@@ -74,12 +101,26 @@ const parseResponse = async (response) => {
  */
 const handleResponse = async (response) => {
   const data = await parseResponse(response);
-  
+
   if (!response.ok) {
-    const errorMessage = data?.detail || data?.message || `Error ${response.status}: ${response.statusText}`;
+    // Pydantic validation errors come as `detail: [{loc, msg, ...}, ...]`.
+    // Format them as a readable string so the user sees the failing field(s).
+    const pydanticMsg = data && typeof data === 'object' ? formatPydanticErrors(data.detail) : null;
+
+    let errorMessage;
+    if (pydanticMsg) {
+      errorMessage = pydanticMsg;
+    } else if (typeof data?.detail === 'string') {
+      errorMessage = data.detail;
+    } else if (typeof data?.message === 'string') {
+      errorMessage = data.message;
+    } else {
+      errorMessage = `Error ${response.status}: ${response.statusText}`;
+    }
+
     throw new ApiError(errorMessage, response.status, data);
   }
-  
+
   return data;
 };
 
@@ -309,12 +350,23 @@ const api = {
   isApiError: (error) => error instanceof ApiError,
 
   /**
-   * Get error message from any error
+   * Get error message from any error.
+   *
+   * Tries (in order):
+   *   1. ApiError → its already-formatted message (set by handleResponse).
+   *   2. Raw error.response.data with Pydantic-style detail.
+   *   3. error.message.
+   *   4. Generic fallback.
    */
   getErrorMessage: (error) => {
     if (error instanceof ApiError) {
       return error.message;
     }
+    // Safety net for any non-ApiError that still carries a Pydantic payload.
+    const raw = error?.data?.detail ?? error?.response?.data?.detail;
+    const pydanticMsg = formatPydanticErrors(raw);
+    if (pydanticMsg) return pydanticMsg;
+    if (typeof raw === 'string') return raw;
     return error?.message || 'Ha ocurrido un error inesperado';
   },
 
