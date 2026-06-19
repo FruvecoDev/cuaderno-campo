@@ -7,6 +7,7 @@ import LanguageSelector from '../components/LanguageSelector';
 import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
 import defaultLogo from '../assets/logo.png';
+import { notify } from '../lib/notify';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -60,7 +61,7 @@ const Login = () => {
     const result = await initializeAdmin();
     
     if (result.success) {
-      alert(`${t('auth.adminCreated')}!\n\nEmail: ${result.credentials.email}\nPassword: ${result.credentials.password}\n\n${t('auth.useCredentials')}`);
+      notify.info(`${t('auth.adminCreated')}!\n\nEmail: ${result.credentials.email}\nPassword: ${result.credentials.password}\n\n${t('auth.useCredentials')}`);
       setEmail(result.credentials.email);
       setPassword(result.credentials.password);
       setShowInitAdmin(false);

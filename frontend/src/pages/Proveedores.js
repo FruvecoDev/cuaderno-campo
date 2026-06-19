@@ -10,6 +10,7 @@ import PaisSelect from '../components/PaisSelect';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
 import '../App.css';
+import { notify } from '../lib/notify';
 
 const DEFAULT_COLUMNS = [
   { id: 'codigo_proveedor', label: 'ID', visible: true },
@@ -207,7 +208,7 @@ const Proveedores = () => {
       await api.download(`/api/proveedores/export/excel${params}`, `proveedores_${new Date().toISOString().split('T')[0]}.xlsx`);
     } catch (error) {
 
-      alert('Error al exportar');
+      notify.error('Error al exportar');
     }
   };
 

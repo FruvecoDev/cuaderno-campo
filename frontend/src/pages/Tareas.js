@@ -12,6 +12,7 @@ import TabbedModal from '../components/TabbedModal';
 import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
 import PaginationFooter, { usePagination } from '../components/PaginationFooter';
 import '../App.css';
+import { notify } from '../lib/notify';
 
 
 const PRIORIDAD_COLORS = {
@@ -183,10 +184,10 @@ const Tareas = () => {
       setTareas(prev => prev.filter(x => !deleted.has(x._id)));
       clearSelection();
       if (r?.deleted_count != null) {
-        window.alert(`${r.deleted_count} tarea${r.deleted_count > 1 ? 's' : ''} eliminada${r.deleted_count > 1 ? 's' : ''}.`);
+        notify.success(`${r.deleted_count} tarea${r.deleted_count > 1 ? 's' : ''} eliminada${r.deleted_count > 1 ? 's' : ''}.`);
       }
     } catch (err) {
-      window.alert(err?.response?.data?.detail || 'Error al eliminar masivamente');
+      notify.error(err?.response?.data?.detail || 'Error al eliminar masivamente');
     } finally {
       setBulkDeleting(false);
     }

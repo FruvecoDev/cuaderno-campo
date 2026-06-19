@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import { QrReader } from 'react-qr-reader';
 import api from '../../services/api';
+import { notify } from '../../lib/notify';
 
 const ControlHorarioTab = ({ empleados }) => {
   const [fichajes, setFichajes] = useState([]);
@@ -262,7 +263,7 @@ const ControlHorarioTab = ({ empleados }) => {
       );
     } catch (err) {
 
-      alert('Error al exportar el informe');
+      notify.error('Error al exportar el informe');
     }
   };
   
@@ -282,7 +283,7 @@ const ControlHorarioTab = ({ empleados }) => {
       );
     } catch (err) {
 
-      alert('Error al generar el informe PDF');
+      notify.error('Error al generar el informe PDF');
     }
   };
   

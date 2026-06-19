@@ -11,6 +11,7 @@ import PaisSelect from '../components/PaisSelect';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
 import '../App.css';
+import { notify } from '../lib/notify';
 
 const DEFAULT_COLUMNS = [
   { id: 'codigo', label: 'Codigo', visible: true },
@@ -215,7 +216,7 @@ const Clientes = () => {
       await api.download(`/api/clientes/export/excel${params}`, `clientes_${new Date().toISOString().split('T')[0]}.xlsx`);
     } catch (err) {
 
-      alert('Error al exportar');
+      notify.error('Error al exportar');
     }
   };
   

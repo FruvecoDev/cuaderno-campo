@@ -11,6 +11,7 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import L from 'leaflet';
 import '../App.css';
+import { notify } from '../lib/notify';
 
 // Fix for default marker icons in React-Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -222,7 +223,7 @@ const Mapas = () => {
       setSelectedParcela(null);
     } catch (err) {
 
-      alert('Error al guardar coordenadas');
+      notify.error('Error al guardar coordenadas');
     } finally {
       setSaving(false);
     }
@@ -307,7 +308,7 @@ const Mapas = () => {
       }
     } catch (err) {
 
-      alert('Error al guardar el polígono');
+      notify.error('Error al guardar el polígono');
     } finally {
       setSaving(false);
     }
@@ -329,7 +330,7 @@ const Mapas = () => {
       ));
     } catch (err) {
 
-      alert('Error al eliminar el polígono');
+      notify.error('Error al eliminar el polígono');
     }
   };
 
@@ -390,10 +391,10 @@ const Mapas = () => {
       const res = await api.get('/api/parcelas');
       setParcelas(res.parcelas || res || []);
       
-      alert('Imagen del mapa guardada correctamente');
+      notify.success('Imagen del mapa guardada correctamente');
     } catch (error) {
 
-      alert('Error al capturar la imagen del mapa');
+      notify.error('Error al capturar la imagen del mapa');
     } finally {
       setCapturingMap(false);
     }

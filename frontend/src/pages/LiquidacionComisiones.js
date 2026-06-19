@@ -4,6 +4,7 @@ import { Download, FileText, Euro, Users, TrendingUp, Filter, Loader2, ChevronDo
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
+import { notify } from '../lib/notify';
 
 
 const LiquidacionComisiones = () => {
@@ -87,7 +88,7 @@ const LiquidacionComisiones = () => {
       );
     } catch (error) {
 
-      alert('Error al generar el PDF');
+      notify.error('Error al generar el PDF');
     } finally {
       setGeneratingPdf(null);
     }

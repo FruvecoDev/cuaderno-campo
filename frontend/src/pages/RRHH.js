@@ -14,6 +14,7 @@ import ProvinciaSelect from '../components/ProvinciaSelect';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
 import '../App.css';
+import { notify } from '../lib/notify';
 
 const DEFAULT_COLUMNS = [
   { id: 'codigo', label: 'Codigo', visible: true },
@@ -946,7 +947,7 @@ const RRHH = () => {
                                 setEmpleadoDetalle(prev => ({ ...prev, nfc_id: null }));
                                 fetchEmpleados();
                               } catch (err) {
-                                alert('Error al eliminar NFC: ' + api.getErrorMessage(err));
+                                notify.error('Error al eliminar NFC: ' + api.getErrorMessage(err));
                               }
                             }
                           }}
@@ -981,7 +982,7 @@ const RRHH = () => {
                               fetchEmpleados();
                               input.value = '';
                             } catch (err) {
-                              alert('Error: ' + api.getErrorMessage(err));
+                              notify.error('Error: ' + api.getErrorMessage(err));
                             }
                           }}
                           className="btn btn-primary"

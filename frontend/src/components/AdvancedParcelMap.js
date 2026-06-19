@@ -10,6 +10,7 @@ import {
   Crosshair, Search, Trash2, Square, Circle, Scissors, Combine,
   Navigation, ZoomIn, Check, X, FileJson, Map as MapIcon
 } from 'lucide-react';
+import { notify } from '../lib/notify';
 
 // Fix leaflet icon
 delete L.Icon.Default.prototype._getIconUrl;
@@ -100,7 +101,7 @@ function CoordinateDisplay({ onCoordinateClick }) {
       <button 
         onClick={() => {
           navigator.clipboard.writeText(`${coords.lat}, ${coords.lng}`);
-          alert('Coordenadas copiadas');
+          notify.info('Coordenadas copiadas');
         }}
         style={{ marginLeft: '8px', cursor: 'pointer', background: 'none', border: 'none' }}
         title="Copiar coordenadas"
@@ -371,7 +372,7 @@ function GeolocationControl({ onLocate }) {
         if (onLocate) onLocate(e.latlng);
       });
       map.on('locationerror', () => {
-        alert('No se pudo obtener tu ubicación');
+        notify.error('No se pudo obtener tu ubicación');
       });
     } catch (e) { console.error('[AdvancedParcelMap.js]', e); }
   };
@@ -470,18 +471,18 @@ const AdvancedParcelMap = ({
             .openPopup();
         }
       } else {
-        alert('No se encontró la dirección');
+        notify.info('No se encontró la dirección');
       }
     } catch (error) {
 
-      alert('Error al buscar dirección');
+      notify.error('Error al buscar dirección');
     }
   };
   
   // Exportar a GeoJSON - todas las zonas
   const exportToGeoJSON = () => {
     if (effectiveZones.length === 0) {
-      alert('No hay polígonos para exportar');
+      notify.info('No hay polígonos para exportar');
       return;
     }
     
@@ -511,7 +512,7 @@ const AdvancedParcelMap = ({
   // Exportar a KML - todas las zonas
   const exportToKML = () => {
     if (effectiveZones.length === 0) {
-      alert('No hay polígonos para exportar');
+      notify.info('No hay polígonos para exportar');
       return;
     }
     
@@ -549,7 +550,7 @@ ${placemarks}
   // Copiar coordenadas de todas las zonas
   const copyCoordinates = () => {
     if (effectiveZones.length === 0) {
-      alert('No hay polígonos para copiar');
+      notify.info('No hay polígonos para copiar');
       return;
     }
     
@@ -558,7 +559,7 @@ ${placemarks}
       return `--- Zona ${idx + 1} ---\n${coords}`;
     }).join('\n\n');
     navigator.clipboard.writeText(text);
-    alert('Coordenadas copiadas al portapapeles');
+    notify.info('Coordenadas copiadas al portapapeles');
   };
   
   // Importar archivo - añade como nueva zona
@@ -623,13 +624,13 @@ ${placemarks}
             const bounds = L.latLngBounds(allCoords.map(c => [c.lat, c.lng]));
             mapRef.current.fitBounds(bounds, { padding: [50, 50] });
           }
-          alert(`Importadas ${importedZones.length} zona(s) con ${importedZones.reduce((s, z) => s + z.length, 0)} puntos totales`);
+          notify.info(`Importadas ${importedZones.length} zona(s) con ${importedZones.reduce((s, z) => s + z.length, 0)} puntos totales`);
         } else {
-          alert('No se pudo extraer un polígono válido del archivo');
+          notify.error('No se pudo extraer un polígono válido del archivo');
         }
       } catch (error) {
 
-        alert('Error al leer el archivo');
+        notify.error('Error al leer el archivo');
       }
     };
     reader.readAsText(file);

@@ -28,7 +28,11 @@ export const ParcelasForm = ({
   // (typical case: a cultivo has a single registered variedad → no need to ask).
   const variedadesDisponibles = useMemo(
     () => (typeof getVariedadesParaCultivo === 'function' ? getVariedadesParaCultivo() : []),
-    [getVariedadesParaCultivo, formData.cultivo]
+    // We intentionally depend on cultivo (not getVariedadesParaCultivo) because
+    // the consumer rebuilds the list whenever cultivo changes, but the function
+    // reference itself is stable. The disable below silences the lint warning.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [formData.cultivo]
   );
   useEffect(() => {
     if (

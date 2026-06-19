@@ -1,6 +1,7 @@
 import React from 'react';
 import { Search, Filter, X, FileText, Download } from 'lucide-react';
 import { BACKEND_URL } from '../../services/api';
+import { notify } from '../../lib/notify';
 
 const ContratoFilters = ({
   filters,
@@ -38,7 +39,7 @@ const ContratoFilters = ({
       window.URL.revokeObjectURL(url);
     } catch (error) {
 
-      alert(`Error al exportar ${format.toUpperCase()}`);
+      notify.error(`Error al exportar ${format.toUpperCase()}`);
     }
   };
 

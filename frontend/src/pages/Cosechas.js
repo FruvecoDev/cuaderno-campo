@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
 import PaginationFooter, { usePagination } from '../components/PaginationFooter';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import { notify } from '../lib/notify';
 
 
 const Cosechas = () => {
@@ -152,10 +153,10 @@ const Cosechas = () => {
       setCosechas(prev => prev.filter(x => !deleted.has(x._id)));
       clearSelection();
       if (r?.deleted_count != null) {
-        window.alert(`${r.deleted_count} cosecha${r.deleted_count > 1 ? 's' : ''} eliminada${r.deleted_count > 1 ? 's' : ''}.`);
+        notify.success(`${r.deleted_count} cosecha${r.deleted_count > 1 ? 's' : ''} eliminada${r.deleted_count > 1 ? 's' : ''}.`);
       }
     } catch (err) {
-      window.alert(err?.response?.data?.detail || 'Error al eliminar masivamente');
+      notify.error(err?.response?.data?.detail || 'Error al eliminar masivamente');
     } finally {
       setBulkDeleting(false);
     }

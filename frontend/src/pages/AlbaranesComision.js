@@ -12,6 +12,7 @@ import { formatEuro, formatKg, formatNumber } from '../utils/format';
 import { ColumnSettings, useColumnConfig } from '../components/ColumnSettings';
 import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
 import '../App.css';
+import { notify } from '../lib/notify';
 
 const AlbaranesComision = () => {
   const { token, user } = useAuth();
@@ -102,10 +103,10 @@ const AlbaranesComision = () => {
     try {
       const res = await api.post('/api/albaranes-comision/regenerar?solo_faltantes=true');
       const r = res?.data ?? res;
-      window.alert(`Regeneración completada.\n• Creados: ${r.creados ?? 0}\n• Saltados: ${r.saltados ?? 0}${r.errores?.length ? `\n• Errores: ${r.errores.length}` : ''}`);
+      notify.error(`Regeneración completada.\n• Creados: ${r.creados ?? 0}\n• Saltados: ${r.saltados ?? 0}${r.errores?.length ? `\n• Errores: ${r.errores.length}` : ''}`);
       await fetchAlbaranes();
     } catch (err) {
-      window.alert('Error regenerando albaranes de comisión');
+      notify.error('Error regenerando albaranes de comisión');
     } finally {
       setRegenerating(false);
     }
@@ -128,7 +129,7 @@ const AlbaranesComision = () => {
       a.remove();
       URL.revokeObjectURL(url);
     } catch (err) {
-      window.alert('Error al descargar el PDF');
+      notify.error('Error al descargar el PDF');
     } finally {
       setDownloadingId(null);
     }
@@ -137,7 +138,7 @@ const AlbaranesComision = () => {
   const handleGenerarResumen = async (e) => {
     e.preventDefault();
     if (!resumenForm.agente_id) {
-      window.alert('Selecciona un agente');
+      notify.info('Selecciona un agente');
       return;
     }
     setGeneratingResumen(true);
@@ -150,7 +151,7 @@ const AlbaranesComision = () => {
       });
       if (!resp.ok) {
         const data = await resp.json().catch(() => ({}));
-        window.alert(data.detail || 'No hay albaranes de comisión en este periodo');
+        notify.info(data.detail || 'No hay albaranes de comisión en este periodo');
         return;
       }
       const blob = await resp.blob();
@@ -166,7 +167,7 @@ const AlbaranesComision = () => {
       URL.revokeObjectURL(url);
       setShowResumenModal(false);
     } catch (err) {
-      window.alert('Error al generar la factura-resumen');
+      notify.error('Error al generar la factura-resumen');
     } finally {
       setGeneratingResumen(false);
     }
@@ -175,7 +176,7 @@ const AlbaranesComision = () => {
   const [closingResumen, setClosingResumen] = useState(false);
   const handleMarcarTodoPagado = async () => {
     if (!resumenForm.agente_id) {
-      window.alert('Selecciona un agente');
+      notify.info('Selecciona un agente');
       return;
     }
     const agenteNombre = agentesDisponibles.find(x => x.id === resumenForm.agente_id)?.nombre || 'agente';
@@ -194,12 +195,12 @@ const AlbaranesComision = () => {
       const res = await api.post(`/api/comisiones-generadas/liquidar-agente/${resumenForm.agente_id}${qs}`);
       const n = res?.liquidadas ?? res?.data?.liquidadas ?? 0;
       const imp = res?.importe_total ?? res?.data?.importe_total ?? 0;
-      window.alert(`Liquidadas ${n} ACM del agente "${agenteNombre}". Importe total: ${formatEuro(imp)}`);
+      notify.info(`Liquidadas ${n} ACM del agente "${agenteNombre}". Importe total: ${formatEuro(imp)}`);
       await fetchAlbaranes();
       await fetchHistorico();
       setShowResumenModal(false);
     } catch (err) {
-      window.alert('Error al marcar como pagadas');
+      notify.error('Error al marcar como pagadas');
     } finally {
       setClosingResumen(false);
     }
@@ -296,14 +297,14 @@ const AlbaranesComision = () => {
         try {
           const res = await api.post('/api/albaranes-comision/regenerar?solo_faltantes=true');
           const r = res?.data ?? res;
-          window.alert(`Eliminación masiva completada.\nRegenerados automáticamente: ${r.creados ?? 0} albarán(es) de comisión.`);
+          notify.success(`Eliminación masiva completada.\nRegenerados automáticamente: ${r.creados ?? 0} albarán(es) de comisión.`);
         } catch {
-          window.alert('Eliminación completada, pero hubo un error al regenerar.');
+          notify.error('Eliminación completada, pero hubo un error al regenerar.');
         }
       }
       await fetchAlbaranes();
     } catch (err) {
-      window.alert('Error al eliminar masivamente');
+      notify.error('Error al eliminar masivamente');
     } finally {
       setBulkDeleting(false);
     }

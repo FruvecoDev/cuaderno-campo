@@ -3,6 +3,7 @@ import {
   X, User, CreditCard, FileText, Download, Eye, Check, ChevronDown
 } from 'lucide-react';
 import api from '../../services/api';
+import { notify } from '../../lib/notify';
 
 const PrenominaTab = ({ empleados }) => {
   const [prenominas, setPrenominas] = useState([]);
@@ -56,7 +57,7 @@ const PrenominaTab = ({ empleados }) => {
       setEmpleadoCalculo('');
     } catch (err) {
 
-      alert('Error al calcular prenómina: ' + api.getErrorMessage(err));
+      notify.error('Error al calcular prenómina: ' + api.getErrorMessage(err));
     } finally {
       setCalculandoIndividual(false);
     }
@@ -74,7 +75,7 @@ const PrenominaTab = ({ empleados }) => {
       fetchPrenominas();
     } catch (err) {
 
-      alert('Error al calcular prenóminas: ' + api.getErrorMessage(err));
+      notify.error('Error al calcular prenóminas: ' + api.getErrorMessage(err));
     } finally {
       setCalculando(false);
     }
@@ -90,7 +91,7 @@ const PrenominaTab = ({ empleados }) => {
       fetchPrenominas();
     } catch (err) {
 
-      alert('Error al validar: ' + api.getErrorMessage(err));
+      notify.error('Error al validar: ' + api.getErrorMessage(err));
     }
   };
   
@@ -102,7 +103,7 @@ const PrenominaTab = ({ empleados }) => {
       );
     } catch (err) {
 
-      alert('Error al exportar Excel');
+      notify.error('Error al exportar Excel');
     }
   };
   
@@ -114,7 +115,7 @@ const PrenominaTab = ({ empleados }) => {
       );
     } catch (err) {
 
-      alert('Error al exportar PDF');
+      notify.error('Error al exportar PDF');
     }
   };
   
@@ -148,7 +149,7 @@ const PrenominaTab = ({ empleados }) => {
       );
     } catch (err) {
 
-      alert('Error al exportar CSV: ' + (err.message || 'Error desconocido'));
+      notify.error('Error al exportar CSV: ' + (err.message || 'Error desconocido'));
     } finally {
       setExportando(false);
     }
@@ -164,7 +165,7 @@ const PrenominaTab = ({ empleados }) => {
       );
     } catch (err) {
 
-      alert('Error al exportar Excel: ' + (err.message || 'Error desconocido'));
+      notify.error('Error al exportar Excel: ' + (err.message || 'Error desconocido'));
     } finally {
       setExportando(false);
     }

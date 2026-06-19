@@ -11,6 +11,7 @@ import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
 import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
 import '../App.css';
+import { notify } from '../lib/notify';
 
 const parseFormattedNumber = (value) => {
   if (!value && value !== 0) return '';
@@ -180,10 +181,10 @@ const Contratos = () => {
       setContratos(prev => prev.filter(c => !deleted.has(c._id)));
       clearSelection();
       if (r?.deleted_count != null) {
-        window.alert(`${r.deleted_count} contrato${r.deleted_count > 1 ? 's' : ''} eliminado${r.deleted_count > 1 ? 's' : ''}.`);
+        notify.success(`${r.deleted_count} contrato${r.deleted_count > 1 ? 's' : ''} eliminado${r.deleted_count > 1 ? 's' : ''}.`);
       }
     } catch (err) {
-      window.alert(err?.response?.data?.detail || 'Error al eliminar masivamente');
+      notify.error(err?.response?.data?.detail || 'Error al eliminar masivamente');
     } finally {
       setBulkDeleting(false);
     }

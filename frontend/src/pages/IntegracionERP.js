@@ -6,6 +6,7 @@ import {
   Shield, Activity, Database, Clock, ChevronDown, ChevronUp, Link2, Zap
 } from 'lucide-react';
 import api from '../services/api';
+import { notify } from '../lib/notify';
 
 const MODULOS_DISPONIBLES = [
   'contratos', 'parcelas', 'fincas', 'proveedores', 'clientes', 'cultivos',
@@ -190,9 +191,9 @@ const TabWebhooks = () => {
     setTesting(id);
     try {
       const data = await api.post(`/api/erp/sync/webhooks/${id}/test`, {});
-      alert(data.message);
+      notify.info(data.message);
       fetchWebhooks();
-    } catch (e) { alert('Error al probar webhook'); }
+    } catch (e) { notify.error('Error al probar webhook'); }
     finally { setTesting(null); }
   };
 

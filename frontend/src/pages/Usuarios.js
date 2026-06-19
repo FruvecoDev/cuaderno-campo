@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
+import { notify } from '../lib/notify';
 
 const DEFAULT_COLUMNS = [
   { id: 'nombre', label: 'Nombre', visible: true },
@@ -143,7 +144,7 @@ const Usuarios = () => {
       fetchUsers();
     } catch (error) {
 
-      alert('Error guardando permisos');
+      notify.error('Error guardando permisos');
     } finally {
       setSavingPermissions(false);
     }
@@ -201,7 +202,7 @@ const Usuarios = () => {
       await api.put(`/api/auth/users/${selectedUserForPassword._id}/password`, { new_password: newPassword });
       setShowPasswordModal(false);
       setSelectedUserForPassword(null);
-      alert('Contraseña actualizada correctamente');
+      notify.success('Contraseña actualizada correctamente');
     } catch (error) {
 
       setPasswordError('Error al cambiar contraseña');
@@ -258,7 +259,7 @@ const Usuarios = () => {
       setFormData({ email: '', password: '', full_name: '', role: 'Viewer' });
     } catch (error) {
 
-      alert(t('messages.errorSaving'));
+      notify.error(t('messages.errorSaving'));
     }
   };
 
@@ -320,7 +321,7 @@ const Usuarios = () => {
       fetchUsers();
     } catch (error) {
 
-      alert('Error guardando tipo de operación');
+      notify.error('Error guardando tipo de operación');
     } finally {
       setSavingTipoOp(false);
     }
@@ -364,7 +365,7 @@ const Usuarios = () => {
       fetchUsers();
     } catch (error) {
 
-      alert(error.response?.data?.detail || 'Error al vincular empleado');
+      notify.error(error.response?.data?.detail || 'Error al vincular empleado');
     } finally {
       setSavingVinculacion(false);
     }

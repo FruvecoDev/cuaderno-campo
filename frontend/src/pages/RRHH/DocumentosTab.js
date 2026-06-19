@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import api, { BACKEND_URL } from '../../services/api';
 import SignatureCanvas from 'react-signature-canvas';
+import { notify } from '../../lib/notify';
 
 const DocumentosTab = ({ empleados }) => {
   const [documentos, setDocumentos] = useState([]);
@@ -147,7 +148,7 @@ const DocumentosTab = ({ empleados }) => {
       fetchDocumentos();
     } catch (err) {
 
-      alert('Error al crear el documento: ' + (err.message || 'Error desconocido'));
+      notify.error('Error al crear el documento: ' + (err.message || 'Error desconocido'));
     } finally {
       setUploading(false);
       setUploadProgress(0);
@@ -195,13 +196,13 @@ const DocumentosTab = ({ empleados }) => {
     ];
     
     if (!allowedTypes.includes(file.type)) {
-      alert('Tipo de archivo no permitido. Use PDF, Word o imágenes.');
+      notify.info('Tipo de archivo no permitido. Use PDF, Word o imágenes.');
       return;
     }
     
     // Validar tamaño (10MB max)
     if (file.size > 10 * 1024 * 1024) {
-      alert('El archivo es demasiado grande. Máximo 10MB.');
+      notify.info('El archivo es demasiado grande. Máximo 10MB.');
       return;
     }
     
@@ -262,7 +263,7 @@ const DocumentosTab = ({ empleados }) => {
       await api.download(url, `documentos_rrhh_${new Date().toISOString().split('T')[0]}.xlsx`);
     } catch (err) {
 
-      alert('Error al exportar a Excel');
+      notify.error('Error al exportar a Excel');
     }
   };
   
@@ -290,7 +291,7 @@ const DocumentosTab = ({ empleados }) => {
       await api.download(url, `informe_documentos_${new Date().toISOString().split('T')[0]}.pdf`);
     } catch (err) {
 
-      alert('Error al generar el informe PDF');
+      notify.error('Error al generar el informe PDF');
     }
   };
   

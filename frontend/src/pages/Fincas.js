@@ -5,6 +5,7 @@ import { Plus, Edit2, Trash2, X, MapPin, Search, Home, ChevronDown, ChevronUp, L
 import { useAuth } from '../contexts/AuthContext';
 import MapaSigpac from '../components/MapaSigpac';
 import ProvinciaSelect from '../components/ProvinciaSelect';
+import { notify } from '../lib/notify';
 
 
 // Diccionario de usos SIGPAC
@@ -292,7 +293,7 @@ const Fincas = () => {
       fetchStats();
     } catch (err) {
 
-      alert('Error al guardar la finca');
+      notify.error('Error al guardar la finca');
     }
   };
 
@@ -353,7 +354,7 @@ const Fincas = () => {
       fetchParcelas();
     } catch (err) {
 
-      alert(err.message || 'Error al asignar parcela');
+      notify.error(err.message || 'Error al asignar parcela');
     }
   };
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, Plus, Clock, Calendar, TrendingUp, Trash2, Edit2, X, Filter, RefreshCw, Award, BarChart3 } from 'lucide-react';
 import api from '../../services/api';
+import { notify } from '../../lib/notify';
 
 const ProductividadTab = ({ empleados }) => {
   const [stats, setStats] = useState(null);
@@ -71,7 +72,7 @@ const ProductividadTab = ({ empleados }) => {
   
   const handleSubmit = async () => {
     if (!formData.empleado_id) {
-      alert('Selecciona un empleado');
+      notify.info('Selecciona un empleado');
       return;
     }
     
@@ -98,7 +99,7 @@ const ProductividadTab = ({ empleados }) => {
       fetchData();
     } catch (err) {
 
-      alert('Error al guardar el registro');
+      notify.error('Error al guardar el registro');
     }
   };
   

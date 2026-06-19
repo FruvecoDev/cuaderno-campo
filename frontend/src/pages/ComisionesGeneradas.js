@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 import '../App.css';
+import { notify } from '../lib/notify';
 
 const ComisionesGeneradas = () => {
   const { t } = useTranslation();
@@ -117,7 +118,7 @@ const ComisionesGeneradas = () => {
       const n = res?.liquidadas ?? res?.data?.liquidadas ?? 0;
       const imp = res?.importe_total ?? res?.data?.importe_total ?? 0;
       await fetchComisiones();
-      window.alert(`Liquidadas ${n} comisión(es) del agente "${agente.agente_nombre}". Importe total: €${(imp).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+      notify.info(`Liquidadas ${n} comisión(es) del agente "${agente.agente_nombre}". Importe total: €${(imp).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
     } catch (err) {
       setError('Error al liquidar las comisiones del agente');
     } finally {

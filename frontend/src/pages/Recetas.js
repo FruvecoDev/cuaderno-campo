@@ -7,6 +7,7 @@ import PaginationFooter, { usePagination } from '../components/PaginationFooter'
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
+import { notify } from '../lib/notify';
 
 
 // Tipos de tratamiento
@@ -224,10 +225,10 @@ const Recetas = () => {
       setRecetas(prev => prev.filter(x => !deleted.has(x._id)));
       clearSelection();
       if (r?.deleted_count != null) {
-        window.alert(`${r.deleted_count} receta${r.deleted_count > 1 ? 's' : ''} eliminada${r.deleted_count > 1 ? 's' : ''}.`);
+        notify.success(`${r.deleted_count} receta${r.deleted_count > 1 ? 's' : ''} eliminada${r.deleted_count > 1 ? 's' : ''}.`);
       }
     } catch (err) {
-      window.alert(err?.response?.data?.detail || 'Error al eliminar masivamente');
+      notify.error(err?.response?.data?.detail || 'Error al eliminar masivamente');
     } finally {
       setBulkDeleting(false);
     }

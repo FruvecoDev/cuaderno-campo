@@ -15,6 +15,7 @@ import TratamientosKPIs from '../components/tratamientos/TratamientosKPIs';
 import TratamientosFilters from '../components/tratamientos/TratamientosFilters';
 import TratamientosTable from '../components/tratamientos/TratamientosTable';
 import '../App.css';
+import { notify } from '../lib/notify';
 
 
 // Default field configuration
@@ -235,7 +236,7 @@ const Tratamientos = () => {
       await api.download(`/api/tratamientos/export/excel?${params}`, `tratamientos_${new Date().toISOString().split('T')[0]}.xlsx`);
     } catch (err) {
 
-      alert('Error al exportar');
+      notify.error('Error al exportar');
     } finally {
       setExportLoading(false);
     }
@@ -381,10 +382,10 @@ const Tratamientos = () => {
       setTratamientos(prev => prev.filter(x => !deleted.has(x._id)));
       clearSelection();
       if (r?.deleted_count != null) {
-        window.alert(`${r.deleted_count} tratamiento${r.deleted_count > 1 ? 's' : ''} eliminado${r.deleted_count > 1 ? 's' : ''}.`);
+        notify.success(`${r.deleted_count} tratamiento${r.deleted_count > 1 ? 's' : ''} eliminado${r.deleted_count > 1 ? 's' : ''}.`);
       }
     } catch (err) {
-      window.alert(err?.response?.data?.detail || 'Error al eliminar masivamente');
+      notify.error(err?.response?.data?.detail || 'Error al eliminar masivamente');
     } finally {
       setBulkDeleting(false);
     }
@@ -484,7 +485,7 @@ const Tratamientos = () => {
           });
           setShowForm(false);
           // Mostrar mensaje de éxito offline
-          alert('Tratamiento guardado localmente. Se sincronizará automáticamente cuando vuelva la conexión.');
+          notify.success('Tratamiento guardado localmente. Se sincronizará automáticamente cuando vuelva la conexión.');
         } else {
           setError('Error al guardar offline: ' + result.error);
         }

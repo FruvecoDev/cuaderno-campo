@@ -7,6 +7,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
 import SignatureCanvas from 'react-signature-canvas';
+import { notify } from '../lib/notify';
 
 const PortalEmpleado = () => {
   const { user } = useAuth();
@@ -138,9 +139,9 @@ const PortalEmpleado = () => {
       await api.post('/api/portal-empleado/fichar', { tipo });
       fetchDashboard();
       setShowFicharModal(false);
-      alert(`Fichaje de ${tipo} registrado correctamente`);
+      notify.success(`Fichaje de ${tipo} registrado correctamente`);
     } catch (err) {
-      alert('Error: ' + api.getErrorMessage(err));
+      notify.error('Error: ' + api.getErrorMessage(err));
     }
   };
   
@@ -151,15 +152,15 @@ const PortalEmpleado = () => {
       fetchAusencias();
       setShowAusenciaModal(false);
       setAusenciaForm({ tipo: 'vacaciones', fecha_inicio: '', fecha_fin: '', motivo: '' });
-      alert('Solicitud enviada correctamente');
+      notify.success('Solicitud enviada correctamente');
     } catch (err) {
-      alert('Error: ' + api.getErrorMessage(err));
+      notify.error('Error: ' + api.getErrorMessage(err));
     }
   };
   
   const handleFirmarDocumento = async () => {
     if (!sigCanvas.current || sigCanvas.current.isEmpty()) {
-      alert('Por favor, firma el documento');
+      notify.info('Por favor, firma el documento');
       return;
     }
     
@@ -169,9 +170,9 @@ const PortalEmpleado = () => {
       fetchDocumentos();
       setShowFirmaModal(false);
       setDocumentoParaFirmar(null);
-      alert('Documento firmado correctamente');
+      notify.info('Documento firmado correctamente');
     } catch (err) {
-      alert('Error: ' + api.getErrorMessage(err));
+      notify.error('Error: ' + api.getErrorMessage(err));
     }
   };
   

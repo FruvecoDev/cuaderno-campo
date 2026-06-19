@@ -14,6 +14,7 @@ import { ParcelasHistorial } from '../components/parcelas/ParcelasHistorial';
 import Pagination from '../components/Pagination';
 import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
+import { notify } from '../lib/notify';
 
 const DEFAULT_FIELDS_CONFIG = {
   contrato_id: true, codigo_plantacion: true, proveedor: true, finca: true,
@@ -291,7 +292,7 @@ const Parcelas = () => {
       setSigpacResult(null);
       setSigpacError(null);
       fetchParcelas();
-    } catch (err) { alert('Error: ' + api.getErrorMessage(err)); }
+    } catch (err) { notify.error('Error: ' + api.getErrorMessage(err)); }
   };
 
   const handleEdit = (parcela) => {
@@ -340,7 +341,7 @@ const Parcelas = () => {
     try {
       await api.delete(`/api/parcelas/${parcelaId}`);
       fetchParcelas();
-    } catch (err) { alert('Error: ' + api.getErrorMessage(err)); }
+    } catch (err) { notify.error('Error: ' + api.getErrorMessage(err)); }
   };
 
   const handleGenerateCuaderno = async (parcelaId, campana) => {
@@ -348,7 +349,7 @@ const Parcelas = () => {
     try {
       const url = campana ? `/api/cuaderno-campo/generar/${parcelaId}?campana=${encodeURIComponent(campana)}` : `/api/cuaderno-campo/generar/${parcelaId}`;
       await api.download(url, `cuaderno_campo_${parcelaId}.pdf`);
-    } catch (err) { alert('Error: ' + api.getErrorMessage(err)); } finally { setGeneratingCuaderno(null); }
+    } catch (err) { notify.error('Error: ' + api.getErrorMessage(err)); } finally { setGeneratingCuaderno(null); }
   };
 
   const hasActiveFilters = Object.values(filters).some(v => v !== '');

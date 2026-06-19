@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import api from '../../services/api';
 import CalendarioAusencias from './CalendarioAusencias';
+import { notify } from '../../lib/notify';
 
 const AusenciasTab = ({ empleados }) => {
   const [ausencias, setAusencias] = useState([]);
@@ -56,7 +57,7 @@ const AusenciasTab = ({ empleados }) => {
       fetchAusencias();
     } catch (err) {
 
-      alert('Error al aprobar: ' + api.getErrorMessage(err));
+      notify.error('Error al aprobar: ' + api.getErrorMessage(err));
     }
   };
   
@@ -75,7 +76,7 @@ const AusenciasTab = ({ empleados }) => {
       fetchAusencias();
     } catch (err) {
 
-      alert('Error al rechazar: ' + api.getErrorMessage(err));
+      notify.error('Error al rechazar: ' + api.getErrorMessage(err));
     }
   };
   

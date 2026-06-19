@@ -12,6 +12,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
 import PaginationFooter, { usePagination } from '../components/PaginationFooter';
 import '../App.css';
+import { notify } from '../lib/notify';
 
 
 const ESTADO_COLORS = {
@@ -224,10 +225,10 @@ const Irrigaciones = () => {
       setIrrigaciones(prev => prev.filter(x => !deleted.has(x._id)));
       clearSelection();
       if (r?.deleted_count != null) {
-        window.alert(`${r.deleted_count} irrigación${r.deleted_count > 1 ? 'es' : ''} eliminada${r.deleted_count > 1 ? 's' : ''}.`);
+        notify.success(`${r.deleted_count} irrigación${r.deleted_count > 1 ? 'es' : ''} eliminada${r.deleted_count > 1 ? 's' : ''}.`);
       }
     } catch (err) {
-      window.alert(err?.response?.data?.detail || 'Error al eliminar masivamente');
+      notify.error(err?.response?.data?.detail || 'Error al eliminar masivamente');
     } finally {
       setBulkDeleting(false);
     }

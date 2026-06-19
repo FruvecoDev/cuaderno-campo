@@ -15,6 +15,7 @@ import { VisitasAnalysisModal } from '../components/visitas/VisitasAnalysisModal
 import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
 import PaginationFooter, { usePagination } from '../components/PaginationFooter';
 import '../App.css';
+import { notify } from '../lib/notify';
 
 // Default configs
 const DEFAULT_FIELDS_CONFIG = {
@@ -295,10 +296,10 @@ const Visitas = () => {
       setVisitas(prev => prev.filter(v => !deleted.has(v._id)));
       clearSelection();
       if (r?.deleted_count != null) {
-        window.alert(`${r.deleted_count} visita${r.deleted_count > 1 ? 's' : ''} eliminada${r.deleted_count > 1 ? 's' : ''}.`);
+        notify.success(`${r.deleted_count} visita${r.deleted_count > 1 ? 's' : ''} eliminada${r.deleted_count > 1 ? 's' : ''}.`);
       }
     } catch (err) {
-      window.alert(err?.response?.data?.detail || 'Error al eliminar masivamente');
+      notify.error(err?.response?.data?.detail || 'Error al eliminar masivamente');
     } finally {
       setBulkDeleting(false);
     }
@@ -335,7 +336,7 @@ const Visitas = () => {
         const result = await syncService.saveVisitaOffline(payload);
         if (result.success) {
           setError(null); resetForm(); setShowForm(false);
-          alert('Visita guardada localmente. Se sincronizara automaticamente cuando vuelva la conexion.');
+          notify.success('Visita guardada localmente. Se sincronizara automaticamente cuando vuelva la conexion.');
         } else { setError('Error al guardar offline: ' + result.error); }
         return;
       } catch (error) { setError('Error al guardar offline'); return; }

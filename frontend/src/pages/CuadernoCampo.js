@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../utils/permissions';
 import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
 import '../App.css';
+import { notify } from '../lib/notify';
 
 const CuadernoCampo = () => {
   const { t } = useTranslation();
@@ -73,7 +74,7 @@ const CuadernoCampo = () => {
       );
     } catch (err) {
 
-      alert('Error al generar el PDF');
+      notify.error('Error al generar el PDF');
     } finally {
       setGenerating(false);
     }

@@ -9,6 +9,7 @@ import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
 import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
 import '../App.css';
+import { notify } from '../lib/notify';
 
 const DEFAULT_COLUMNS = [
   { id: 'numero', label: 'Num Albaran', visible: true },
@@ -601,7 +602,7 @@ const Albaranes = () => {
       const res = await api.delete(`/api/albaranes/${albaranId}?cascade_acm=${cascade}`);
       const r = res?.data ?? res;
       if (r?.cascaded_acm) {
-        window.alert(`Albarán eliminado. ${r.cascaded_acm} albarán(es) de comisión asociado(s) también eliminado(s).`);
+        notify.success(`Albarán eliminado. ${r.cascaded_acm} albarán(es) de comisión asociado(s) también eliminado(s).`);
       }
       reloadAlbaranes();
     } catch (error) {
@@ -790,10 +791,10 @@ const Albaranes = () => {
       setAlbaranes(prev => prev.filter(a => !deleted.has(a._id)));
       clearSelection();
       if (r?.cascaded_acm) {
-        window.alert(`${r.deleted_count} albaranes eliminados. ${r.cascaded_acm} albaranes de comisión asociados también eliminados.`);
+        notify.success(`${r.deleted_count} albaranes eliminados. ${r.cascaded_acm} albaranes de comisión asociados también eliminados.`);
       }
     } catch (err) {
-      window.alert('Error al eliminar masivamente');
+      notify.error('Error al eliminar masivamente');
     } finally {
       setBulkDeleting(false);
     }
