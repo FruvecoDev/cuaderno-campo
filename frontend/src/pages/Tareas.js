@@ -223,13 +223,14 @@ const Tareas = () => {
         : await api.post(url, formData);
       
       if (data) {
+        notify.success(editingId ? 'Tarea actualizada correctamente' : 'Tarea creada correctamente');
         setShowForm(false);
         setEditingId(null);
         resetForm();
         fetchTareas();
         fetchStats();
       }
-    } catch (err) { console.error('[Tareas.js]', err); }
+    } catch (err) { console.error('[Tareas.js]', err); notify.error('Error: ' + api.getErrorMessage(err)); }
   };
 
   const resetForm = () => {

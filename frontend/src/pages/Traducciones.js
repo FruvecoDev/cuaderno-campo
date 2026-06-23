@@ -4,6 +4,7 @@ import {
   Plus, Edit2, Trash2, Check, X, Search, Filter, 
   Globe, Book, ChevronDown, ChevronUp, Download, Upload
 } from 'lucide-react';
+import { notify } from '../lib/notify';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
@@ -221,6 +222,7 @@ const Traducciones = () => {
   const handleApprove = async (id) => {
     try {
       await api.post(`/api/translations/${id}/approve`);
+      notify.success('Translation creado correctamente');
       setSuccessMsg(t('translations.approved'));
       fetchTranslations();
       setTimeout(() => setSuccessMsg(null), 3000);

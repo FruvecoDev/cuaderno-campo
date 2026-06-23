@@ -149,7 +149,7 @@ const Mapas = () => {
   const [drawMode, setDrawMode] = useState(false);
   const [editCoords, setEditCoords] = useState({ latitud: '', longitud: '' });
   const [drawnPolygon, setDrawnPolygon] = useState(null);
-  const [filters, setFilters] = useState({ cultivo: '', finca: '', search: '' });
+  const [filters, setFilters] = useState({ cultivo: '', finca: '', search: '', contrato: '', proveedor: '' });
   const [showList, setShowList] = useState(true);
   const [mapCenter, setMapCenter] = useState([40.4168, -3.7038]); // Madrid default
   const [mapZoom, setMapZoom] = useState(6);
@@ -211,6 +211,7 @@ const Mapas = () => {
         latitud: parseFloat(editCoords.latitud),
         longitud: parseFloat(editCoords.longitud)
       });
+      notify.success('Parcela actualizadoa correctamente');
       
       // Update local state
       setParcelas(parcelas.map(p => 
@@ -292,6 +293,7 @@ const Mapas = () => {
       };
       
       await api.put(`/api/parcelas/${selectedParcela._id}`, updatedParcela);
+      notify.success('Parcela actualizadoa correctamente');
       
       // Update local state
       setParcelas(parcelas.map(p => 
@@ -324,6 +326,7 @@ const Mapas = () => {
       };
       
       await api.put(`/api/parcelas/${parcela._id}`, updatedParcela);
+      notify.success('Parcela actualizadoa correctamente');
       
       setParcelas(parcelas.map(p => 
         p._id === parcela._id ? { ...p, recintos: [] } : p
@@ -386,6 +389,7 @@ const Mapas = () => {
         imagen_mapa_url: uploadResponse.url,
         imagen_mapa_path: uploadResponse.path
       });
+      notify.success('Parcela actualizadoa correctamente');
       
       // Reload parcelas
       const res = await api.get('/api/parcelas');
@@ -422,13 +426,20 @@ const Mapas = () => {
   const filteredParcelas = parcelas.filter(p => {
     if (filters.cultivo && p.cultivo !== filters.cultivo) return false;
     if (filters.finca && p.finca_id !== filters.finca) return false;
+    if (filters.proveedor && p.proveedor !== filters.proveedor) return false;
+    if (filters.contrato) {
+      const matchById = p.contrato_id && p.contrato_id === filters.contrato;
+      const matchByNumero = p.numero_contrato && p.numero_contrato === filters.contrato;
+      if (!matchById && !matchByNumero) return false;
+    }
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       const matchCodigo = p.codigo_plantacion?.toLowerCase().includes(searchLower);
       const matchFinca = p.finca?.toLowerCase().includes(searchLower);
       const matchCultivo = p.cultivo?.toLowerCase().includes(searchLower);
       const matchProveedor = p.proveedor?.toLowerCase().includes(searchLower);
-      if (!matchCodigo && !matchFinca && !matchCultivo && !matchProveedor) return false;
+      const matchContrato = p.numero_contrato?.toLowerCase?.().includes(searchLower);
+      if (!matchCodigo && !matchFinca && !matchCultivo && !matchProveedor && !matchContrato) return false;
     }
     return true;
   });
@@ -441,8 +452,12 @@ const Mapas = () => {
   );
   const parcelasConPoligono = filteredParcelas.filter(p => p.recintos?.[0]?.geometria?.length > 0);
 
-  // Get unique cultivos for filter
+  // Get unique cultivos / proveedores / contratos for filters
   const cultivosUnicos = [...new Set(parcelas.map(p => p.cultivo).filter(Boolean))];
+  const proveedoresUnicos = [...new Set(parcelas.map(p => p.proveedor).filter(Boolean))].sort();
+  const contratosUnicos = [...new Set(parcelas
+    .map(p => p.numero_contrato || p.contrato_id)
+    .filter(Boolean))].sort();
 
   if (loading) {
     return (
@@ -453,7 +468,7 @@ const Mapas = () => {
   }
 
   return (
-    <div data-testid="mapas-page" style={{ height: 'calc(100vh - 120px)' }}>
+    <div data-testid="mapas-page" style={{ height: 'calc(100vh - 200px)', maxHeight: '720px' }}>
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h1 style={{ fontSize: '2rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -552,10 +567,34 @@ const Mapas = () => {
               <option key={f._id} value={f._id}>{f.nombre}</option>
             ))}
           </select>
-          {(filters.cultivo || filters.finca || filters.search) && (
+          <select
+            className="form-select"
+            style={{ width: 'auto', minWidth: '160px' }}
+            value={filters.proveedor}
+            onChange={(e) => setFilters({ ...filters, proveedor: e.target.value })}
+            data-testid="filter-proveedor"
+          >
+            <option value="">Todos los proveedores</option>
+            {proveedoresUnicos.map(p => (
+              <option key={p} value={p}>{p}</option>
+            ))}
+          </select>
+          <select
+            className="form-select"
+            style={{ width: 'auto', minWidth: '160px' }}
+            value={filters.contrato}
+            onChange={(e) => setFilters({ ...filters, contrato: e.target.value })}
+            data-testid="filter-contrato"
+          >
+            <option value="">Todos los contratos</option>
+            {contratosUnicos.map(c => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+          {(filters.cultivo || filters.finca || filters.search || filters.proveedor || filters.contrato) && (
             <button 
               className="btn btn-sm btn-ghost"
-              onClick={() => setFilters({ cultivo: '', finca: '', search: '' })}
+              onClick={() => setFilters({ cultivo: '', finca: '', search: '', proveedor: '', contrato: '' })}
             >
               <X size={16} /> Limpiar
             </button>

@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
 import '../App.css';
+import { notify } from '../lib/notify';
 
 const DEFAULT_COLUMNS = [
   { id: 'codigo_cultivo', label: 'ID', visible: true },
@@ -97,6 +98,7 @@ const Cultivos = () => {
     if (!nuevoTipo.trim()) return;
     try {
       await api.post('/api/tipos-cultivo', { nombre: nuevoTipo.trim() });
+      notify.success('Tipos-cultivo creado correctamente');
       setNuevoTipo('');
       fetchTiposCultivo();
     } catch (error) { console.error('[Cultivos.js]', error); }
@@ -122,8 +124,10 @@ const Cultivos = () => {
       setError(null);
       if (editingId) {
         await api.put(`/api/cultivos/${editingId}`, formData);
+        notify.success('Cultivo actualizado correctamente');
       } else {
         await api.post('/api/cultivos', formData);
+        notify.success('Cultivo creado correctamente');
       }
       setShowForm(false);
       setEditingId(null);

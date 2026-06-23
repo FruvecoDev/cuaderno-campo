@@ -54,6 +54,7 @@ const AusenciasTab = ({ empleados }) => {
         estado: 'aprobada',
         aprobada_por: 'admin'
       });
+      notify.success('Empleado actualizado correctamente');
       fetchAusencias();
     } catch (err) {
 
@@ -70,6 +71,7 @@ const AusenciasTab = ({ empleados }) => {
         aprobada_por: 'admin',
         comentario: comentarioRechazo
       });
+      notify.success('Empleado actualizado correctamente');
       setShowRechazarModal(false);
       setAusenciaSeleccionada(null);
       setComentarioRechazo('');

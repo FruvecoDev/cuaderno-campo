@@ -11,6 +11,7 @@ import EvaluacionesFilters from '../components/evaluaciones/EvaluacionesFilters'
 import EvaluacionesTable from '../components/evaluaciones/EvaluacionesTable';
 import EvaluacionesForm from '../components/evaluaciones/EvaluacionesForm';
 import '../App.css';
+import { notify } from '../lib/notify';
 
 
 // Preguntas por defecto para cada seccion
@@ -264,8 +265,10 @@ const Evaluaciones = () => {
       };
       if (editingId) {
         await api.put(`/api/evaluaciones/${editingId}`, payload);
+        notify.success('Evaluación actualizadoa correctamente');
       } else {
         await api.post('/api/evaluaciones', payload);
+        notify.success('Evaluación creadoa correctamente');
       }
       fetchEvaluaciones();
       setShowForm(false);
@@ -346,6 +349,7 @@ const Evaluaciones = () => {
     if (!newQuestionSection || !newQuestionText.trim()) { setError('Completa todos los campos'); setTimeout(() => setError(null), 3000); return; }
     try {
       await api.post('/api/evaluaciones/config/preguntas', { seccion: newQuestionSection, pregunta: newQuestionText.trim(), tipo: newQuestionType });
+      notify.success('Evaluación creadoa correctamente');
       fetchPreguntasConfig();
       setNewQuestionText('');
       setNewQuestionType('texto');
@@ -368,6 +372,7 @@ const Evaluaciones = () => {
   const handleRestoreQuestion = async (preguntaId, seccion) => {
     try {
       await api.post(`/api/evaluaciones/config/preguntas/restore?seccion=${encodeURIComponent(seccion)}&pregunta_id=${encodeURIComponent(preguntaId)}`);
+      notify.success('Evaluación creadoa correctamente');
       fetchPreguntasConfig();
     } catch (error) { setError('Error al restaurar la pregunta'); setTimeout(() => setError(null), 5000); }
   };
@@ -391,6 +396,7 @@ const Evaluaciones = () => {
     setCustomPreguntas(prev => ({ ...prev, [seccionKey]: customOnly }));
     try {
       await api.post('/api/evaluaciones/config/preguntas/reorder', { seccion: seccionKey, order: reordered.map(p => p.id) });
+      notify.success('Evaluación creadoa correctamente');
     } catch (error) { console.error('[Evaluaciones.js]', error); }
   };
 

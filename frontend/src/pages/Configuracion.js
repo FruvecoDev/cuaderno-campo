@@ -5,6 +5,7 @@ import api, { BACKEND_URL } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { Settings, Upload, Trash2, Image, Check, AlertCircle, RefreshCw, Palette, RotateCcw, Clock, Bell, Mail, Play } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
+import { notify } from '../lib/notify';
 
 
 // Logo Uploader Component
@@ -497,6 +498,7 @@ const SchedulerConfig = ({ token }) => {
         notificar_email: config.notificar_email,
         roles_notificar: config.roles_notificar
       });
+      notify.success('Notificacione actualizado correctamente');
 
       setMessage({ type: 'success', text: 'Configuración guardada correctamente' });
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
@@ -512,6 +514,7 @@ const SchedulerConfig = ({ token }) => {
     setExecuting(true);
     try {
       await api.post('/api/notificaciones/scheduler/ejecutar');
+      notify.success('Notificacione creado correctamente');
 
       setMessage({ type: 'success', text: 'Verificación climática iniciada. Revisa las alertas en unos segundos.' });
       setTimeout(() => setMessage({ type: '', text: '' }), 5000);

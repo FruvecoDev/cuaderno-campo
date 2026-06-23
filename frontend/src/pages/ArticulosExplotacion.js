@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
+import { notify } from '../lib/notify';
 
 const DEFAULT_COLUMNS = [
   { id: 'codigo', label: 'Codigo', visible: true },
@@ -178,8 +179,10 @@ const ArticulosExplotacion = () => {
       
       if (editingId) {
         await api.put(`/api/articulos/${editingId}`, payload);
+        notify.success('Articulo actualizado correctamente');
       } else {
         await api.post('/api/articulos', payload);
+        notify.success('Articulo creado correctamente');
       }
       
       setShowForm(false);

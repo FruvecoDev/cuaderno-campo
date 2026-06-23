@@ -7,6 +7,7 @@ import {
   Calculator, Droplets, Info, Copy, Layers, Zap, 
   ToggleLeft, ToggleRight, Settings
 } from 'lucide-react';
+import { notify } from '../lib/notify';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
@@ -776,6 +777,7 @@ const Recomendaciones = () => {
     for (const rec of recomendacionesPendientes) {
       try {
         await api.post('/api/recomendaciones', rec);
+        notify.success('Recomendación creadoa correctamente');
         savedCount++;
       } catch (err) {
         errors.push(`${rec.producto_nombre}: ${err.message}`);

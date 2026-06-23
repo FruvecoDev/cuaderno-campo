@@ -186,6 +186,7 @@ const Cosechas = () => {
         contrato_id: formData.contrato_id,
         planificaciones
       });
+      notify.success('Cosecha creadoa correctamente');
       
       setShowForm(false);
       setFormData({
@@ -209,6 +210,7 @@ const Cosechas = () => {
       }
       
       await api.post(`/api/cosechas/${cosechaId}/cargas`, payload);
+      notify.success('Cosecha creadoa correctamente');
       
       setShowCargaForm(null);
       setCargaForm({
@@ -241,6 +243,7 @@ const Cosechas = () => {
     
     try {
       await api.put(`/api/cosechas/${cosechaId}/completar`);
+      notify.success('Cosecha actualizadoa correctamente');
       fetchCosechas();
     } catch (err) { console.error('[Cosechas.js]', err); }
   };

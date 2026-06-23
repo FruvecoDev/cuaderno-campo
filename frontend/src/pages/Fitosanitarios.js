@@ -7,6 +7,7 @@ import api, { BACKEND_URL } from '../services/api';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
 import '../App.css';
+import { notify } from '../lib/notify';
 
 
 const TIPOS_PRODUCTO = [
@@ -354,8 +355,10 @@ const Fitosanitarios = () => {
 
       if (editingId) {
         await api.put(`/api/fitosanitarios/${editingId}`, payload);
+        notify.success('Fitosanitario actualizado correctamente');
       } else {
         await api.post('/api/fitosanitarios', payload);
+        notify.success('Fitosanitario creado correctamente');
       }
 
       setSuccessMsg(editingId ? t('messages.savedSuccessfully') : t('messages.savedSuccessfully'));

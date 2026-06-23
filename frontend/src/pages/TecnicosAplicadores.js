@@ -6,6 +6,7 @@ import {
   AlertTriangle, CheckCircle, XCircle, FileImage, Calendar,
   Award, CreditCard, Eye, Download, FileText, Settings, User, Briefcase
 } from 'lucide-react';
+import { notify } from '../lib/notify';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
 import { useAuth } from '../contexts/AuthContext';
@@ -256,6 +257,7 @@ const TecnicosAplicadores = () => {
   const handleToggleActivo = async (id) => {
     try {
       await api.put(`/api/tecnicos-aplicadores/${id}/toggle-activo`);
+      notify.success('Técnico aplicador actualizado correctamente');
       fetchTecnicos();
     } catch (err) { console.error('[TecnicosAplicadores.js]', err); }
   };

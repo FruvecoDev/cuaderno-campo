@@ -89,8 +89,10 @@ const ProductividadTab = ({ empleados }) => {
       
       if (editingRegistro) {
         await api.put(`/api/rrhh/productividad/${editingRegistro._id}`, dataToSend);
+        notify.success('Empleado actualizado correctamente');
       } else {
         await api.post('/api/rrhh/productividad', dataToSend);
+        notify.success('Empleado creado correctamente');
       }
       
       setShowNuevoRegistro(false);

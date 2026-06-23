@@ -5,6 +5,7 @@ import {
   RefreshCw, Settings, CheckCircle, X, Zap, Eye, Clock, 
   ChevronDown, ChevronUp, MapPin, Loader2, Wind
 } from 'lucide-react';
+import { notify } from '../lib/notify';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
 import '../App.css';
@@ -150,6 +151,7 @@ const AlertasClima = () => {
   const handleUpdateAlertaEstado = async (alertaId, nuevoEstado) => {
     try {
       await api.put(`/api/alertas-clima/${alertaId}`, { estado: nuevoEstado });
+      notify.success('Alertas-clima actualizado correctamente');
       fetchAlertas();
       fetchStats();
     } catch (err) {
@@ -163,6 +165,7 @@ const AlertasClima = () => {
         rule_id: regla.id,
         activo: !regla.activo 
       });
+      notify.success('Alertas-clima actualizado correctamente');
       fetchReglas();
     } catch (err) {
       setError(err.message);

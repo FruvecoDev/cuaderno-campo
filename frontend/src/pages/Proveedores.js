@@ -149,6 +149,7 @@ const Proveedores = () => {
     if (!nuevoTipo.trim()) return;
     try {
       await api.post('/api/tipos-proveedor', { nombre: nuevoTipo.trim() });
+      notify.success('Tipos-proveedor creado correctamente');
       setNuevoTipo('');
       fetchTiposProveedor();
     } catch (error) { console.error('[Proveedores.js]', error); }
@@ -171,6 +172,7 @@ const Proveedores = () => {
     if (!nuevoTipoOp.trim()) return;
     try {
       await api.post('/api/tipos-operacion-proveedor', { nombre: nuevoTipoOp.trim() });
+      notify.success('Tipos-operacion-proveedor creado correctamente');
       setNuevoTipoOp('');
       fetchTiposOperacion();
     } catch (error) { console.error('[Proveedores.js]', error); }
@@ -227,8 +229,10 @@ const Proveedores = () => {
       };
       if (editingId) {
         await api.put(`/api/proveedores/${editingId}`, payload);
+        notify.success('Proveedor actualizado correctamente');
       } else {
         await api.post('/api/proveedores', payload);
+        notify.success('Proveedor creado correctamente');
       }
       
       setShowForm(false);

@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import '../App.css';
+import { notify } from '../lib/notify';
 
 import {
   DndContext,
@@ -87,6 +88,7 @@ const Dashboard = () => {
     setSavingConfig(true);
     try {
       await api.post('/api/dashboard/config', { widgets: configWidgets, layout: dashboardConfig?.layout || 'default' });
+      notify.success('Dashboard creado correctamente');
       setDashboardConfig({ ...dashboardConfig, widgets: configWidgets });
       setShowConfigModal(false);
     } catch (error) { console.error('[Dashboard.js]', error); }
@@ -166,6 +168,7 @@ const Dashboard = () => {
     // Auto-save
     try {
       await api.post('/api/dashboard/config', { widgets: newWidgets, layout: dashboardConfig?.layout || 'default' });
+      notify.success('Dashboard creado correctamente');
     } catch (err) { console.error('[Dashboard.js]', err); }
   }, [sortedWidgetIds, dashboardConfig]);
   

@@ -174,6 +174,7 @@ const TabWebhooks = () => {
     if (!form.url || !form.nombre) return;
     try {
       await api.post('/api/erp/sync/webhooks', form);
+      notify.success('Erp creado correctamente');
       setShowCreate(false);
       setForm({ url: '', nombre: '', eventos: ['create', 'update'], modulos: ['contratos'], activo: true });
       fetchWebhooks();
@@ -183,6 +184,7 @@ const TabWebhooks = () => {
   const handleToggle = async (id) => {
     try {
       await api.post(`/api/erp/sync/webhooks/${id}/toggle`, {});
+      notify.success('Erp creado correctamente');
       fetchWebhooks();
     } catch (e) { console.error('[IntegracionERP.js]', e); }
   };

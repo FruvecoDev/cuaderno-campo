@@ -91,6 +91,7 @@ const RRHH = () => {
   const saveNfcId = async (empleadoId, nfcId) => {
     try {
       await api.put(`/api/rrhh/empleados/${empleadoId}/nfc`, { nfc_id: nfcId });
+      notify.success('Empleado actualizado correctamente');
       setFormData(prev => ({ ...prev, nfc_id: nfcId }));
       setNfcMessage({ type: 'success', text: `Tarjeta NFC asignada: ${nfcId}` });
       fetchEmpleados();
@@ -188,8 +189,10 @@ const RRHH = () => {
 
       if (editingId) {
         await api.put(`/api/rrhh/empleados/${editingId}`, payload);
+        notify.success('Empleado actualizado correctamente');
       } else {
         await api.post('/api/rrhh/empleados', payload);
+        notify.success('Empleado creado correctamente');
       }
       
       setShowForm(false);
@@ -262,6 +265,7 @@ const RRHH = () => {
     if (!window.confirm('¿Reactivar a este empleado?')) return;
     try {
       await api.put(`/api/rrhh/empleados/${id}/reactivar`);
+      notify.success('Empleado actualizado correctamente');
       fetchEmpleados();
       fetchStats();
     } catch (err) {
@@ -978,6 +982,7 @@ const RRHH = () => {
                             if (!nfcId) return;
                             try {
                               await api.put(`/api/rrhh/empleados/${empleadoDetalle._id}/nfc`, { nfc_id: nfcId });
+                              notify.success('Empleado actualizado correctamente');
                               setEmpleadoDetalle(prev => ({ ...prev, nfc_id: nfcId }));
                               fetchEmpleados();
                               input.value = '';

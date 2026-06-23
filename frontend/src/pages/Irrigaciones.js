@@ -284,8 +284,10 @@ const Irrigaciones = () => {
       
       if (editingId) {
         await api.put(`/api/irrigaciones/${editingId}`, submitData);
+        notify.success('Riego actualizado correctamente');
       } else {
         await api.post('/api/irrigaciones', submitData);
+        notify.success('Riego creado correctamente');
       }
       
       setShowForm(false);

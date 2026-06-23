@@ -339,6 +339,7 @@ const DocumentosTab = ({ empleados }) => {
       await api.put(`/api/rrhh/documentos/${documentoAFirmar._id}/firmar`, {
         firma_url: firmaGuardada
       });
+      notify.success('Empleado actualizado correctamente');
       
       setShowFirmaModal(false);
       setDocumentoAFirmar(null);

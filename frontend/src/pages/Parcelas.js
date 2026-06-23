@@ -277,8 +277,10 @@ const Parcelas = () => {
     try {
       if (editingId) {
         await api.put(`/api/parcelas/${editingId}`, payload);
+        notify.success('Parcela actualizadoa correctamente');
       } else {
         await api.post('/api/parcelas', payload);
+        notify.success('Parcela creadoa correctamente');
       }
       setShowForm(false);
       setEditingId(null);

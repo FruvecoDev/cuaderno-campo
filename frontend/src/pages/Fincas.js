@@ -283,8 +283,10 @@ const Fincas = () => {
       
       if (editingId) {
         await api.put(`/api/fincas/${editingId}`, payload);
+        notify.success('Finca actualizadoa correctamente');
       } else {
         await api.post('/api/fincas', payload);
+        notify.success('Finca creadoa correctamente');
       }
       
       setShowForm(false);
@@ -349,6 +351,7 @@ const Fincas = () => {
   const asignarParcela = async (fincaId, parcelaId) => {
     try {
       await api.post(`/api/fincas/${fincaId}/parcelas/${parcelaId}`);
+      notify.success('Finca creadoa correctamente');
       fetchFincas();
       fetchParcelasDisponibles();
       fetchParcelas();

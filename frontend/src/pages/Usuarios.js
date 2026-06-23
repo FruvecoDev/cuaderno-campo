@@ -139,6 +139,7 @@ const Usuarios = () => {
     setSavingPermissions(true);
     try {
       await api.put(`/api/auth/users/${selectedUserForPermissions._id}/menu-permissions`, { menu_permissions: menuPermissions });
+      notify.success('Auth actualizado correctamente');
       setShowPermissionsModal(false);
       setSelectedUserForPermissions(null);
       fetchUsers();
@@ -200,6 +201,7 @@ const Usuarios = () => {
     setSavingPassword(true);
     try {
       await api.put(`/api/auth/users/${selectedUserForPassword._id}/password`, { new_password: newPassword });
+      notify.success('Auth actualizado correctamente');
       setShowPasswordModal(false);
       setSelectedUserForPassword(null);
       notify.success('Contraseña actualizada correctamente');
@@ -239,6 +241,7 @@ const Usuarios = () => {
     setSavingEdit(true);
     try {
       await api.put(`/api/auth/users/${selectedUserForEdit._id}`, editFormData);
+      notify.success('Auth actualizado correctamente');
       setShowEditModal(false);
       setSelectedUserForEdit(null);
       fetchUsers();
@@ -254,6 +257,7 @@ const Usuarios = () => {
     e.preventDefault();
     try {
       await api.post('/api/auth/register', formData);
+      notify.success('Auth creado correctamente');
       setShowForm(false);
       fetchUsers();
       setFormData({ email: '', password: '', full_name: '', role: 'Viewer' });
@@ -266,6 +270,7 @@ const Usuarios = () => {
   const handleToggleActive = async (userId, currentStatus) => {
     try {
       await api.put(`/api/auth/users/${userId}`, { is_active: !currentStatus });
+      notify.success('Auth actualizado correctamente');
       fetchUsers();
     } catch (error) {
       console.error('[Usuarios.js]', error);
@@ -285,6 +290,7 @@ const Usuarios = () => {
   const handleEditRole = async (userId, newRole) => {
     try {
       await api.put(`/api/auth/users/${userId}`, { role: newRole });
+      notify.success('Auth actualizado correctamente');
       fetchUsers();
       setEditingUser(null);
     } catch (error) {
@@ -316,6 +322,7 @@ const Usuarios = () => {
     setSavingTipoOp(true);
     try {
       await api.put(`/api/auth/users/${selectedUserForTipoOp._id}/tipo-operacion`, { tipo_operacion: tipoOperacionValue });
+      notify.success('Auth actualizado correctamente');
       setShowTipoOperacionModal(false);
       setSelectedUserForTipoOp(null);
       fetchUsers();
@@ -360,6 +367,7 @@ const Usuarios = () => {
       await api.put(`/api/auth/users/${selectedUserForVincular._id}/vincular-empleado`, { 
         empleado_id: empleadoSeleccionado || null 
       });
+      notify.success('Auth actualizado correctamente');
       setShowVincularEmpleadoModal(false);
       setSelectedUserForVincular(null);
       fetchUsers();

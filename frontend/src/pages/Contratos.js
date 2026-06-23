@@ -227,10 +227,12 @@ const Contratos = () => {
 
       if (editingId) {
         await api.put(`/api/contratos/${editingId}`, payload);
+        notify.success('Contrato actualizado correctamente');
       } else {
         // El backend genera atómicamente numero_contrato (MP-{año}-{N:06d}).
         // No es necesario enviarlo desde el frontend.
         await api.post('/api/contratos', payload);
+        notify.success('Contrato creado correctamente');
       }
       closeModal();
       fetchContratos();

@@ -10,6 +10,7 @@ import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
 import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
 import '../App.css';
+import { notify } from '../lib/notify';
 
 const DEFAULT_COLUMNS = [
   { id: 'codigo', label: 'Codigo', visible: true },
@@ -157,6 +158,7 @@ const Agentes = () => {
     if (!comisionForm.valor || !editingId) return;
     try {
       await api.post(`/api/agentes/${editingId}/comisiones`, comisionForm);
+      notify.success('Agente creado correctamente');
       fetchComisiones(editingId);
       setComisionForm({ tipo_comision: 'porcentaje', valor: '', aplicar_a: 'contrato', referencia_id: '', referencia_nombre: '', fecha_desde: '', fecha_hasta: '', activa: true });
       setError(null);

@@ -53,6 +53,7 @@ const PrenominaTab = ({ empleados }) => {
         mes: mesSeleccionado,
         ano: anoSeleccionado
       });
+      notify.success('Empleado creado correctamente');
       fetchPrenominas();
       setEmpleadoCalculo('');
     } catch (err) {
@@ -72,6 +73,7 @@ const PrenominaTab = ({ empleados }) => {
         mes: mesSeleccionado,
         ano: anoSeleccionado
       });
+      notify.success('Empleado creado correctamente');
       fetchPrenominas();
     } catch (err) {
 
@@ -88,6 +90,7 @@ const PrenominaTab = ({ empleados }) => {
       await api.put(`/api/rrhh/prenominas/${prenominaId}/validar`, {
         validado_por: 'admin'
       });
+      notify.success('Empleado actualizado correctamente');
       fetchPrenominas();
     } catch (err) {
 

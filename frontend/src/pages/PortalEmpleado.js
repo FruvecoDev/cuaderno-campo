@@ -73,6 +73,7 @@ const PortalEmpleado = () => {
   const handleMarcarLeida = async (notifId) => {
     try {
       await api.put(`/api/portal-empleado/notificaciones/${notifId}/leer`);
+      notify.success('Portal-empleado actualizado correctamente');
       fetchNotificaciones();
     } catch (err) { console.error('[PortalEmpleado.js]', err); }
   };
@@ -80,6 +81,7 @@ const PortalEmpleado = () => {
   const handleMarcarTodasLeidas = async () => {
     try {
       await api.put('/api/portal-empleado/notificaciones/leer-todas');
+      notify.success('Portal-empleado actualizado correctamente');
       fetchNotificaciones();
     } catch (err) { console.error('[PortalEmpleado.js]', err); }
   };
@@ -137,6 +139,7 @@ const PortalEmpleado = () => {
   const handleFichar = async (tipo) => {
     try {
       await api.post('/api/portal-empleado/fichar', { tipo });
+      notify.success('Portal-empleado creado correctamente');
       fetchDashboard();
       setShowFicharModal(false);
       notify.success(`Fichaje de ${tipo} registrado correctamente`);
@@ -149,6 +152,7 @@ const PortalEmpleado = () => {
     e.preventDefault();
     try {
       await api.post('/api/portal-empleado/solicitar-ausencia', ausenciaForm);
+      notify.success('Portal-empleado creado correctamente');
       fetchAusencias();
       setShowAusenciaModal(false);
       setAusenciaForm({ tipo: 'vacaciones', fecha_inicio: '', fecha_fin: '', motivo: '' });
@@ -167,6 +171,7 @@ const PortalEmpleado = () => {
     try {
       const firma = sigCanvas.current.toDataURL('image/png');
       await api.put(`/api/portal-empleado/firmar-documento/${documentoParaFirmar._id}`, { firma });
+      notify.success('Portal-empleado actualizado correctamente');
       fetchDocumentos();
       setShowFirmaModal(false);
       setDocumentoParaFirmar(null);
