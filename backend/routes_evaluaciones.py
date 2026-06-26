@@ -287,14 +287,14 @@ async def delete_evaluacion(
 async def get_preguntas_config(
     current_user: dict = Depends(get_current_user)
 ):
-    """Obtener configuración de preguntas (default + personalizadas), filtrando las ocultas."""
-    # Obtener preguntas personalizadas de la BD
+    """Obtener configuración de preguntas (default + personalizadas), filtrando las ocultas
+    y aplicando, si existe, un orden global plano (`orden_global`)."""
     custom_preguntas = await evaluaciones_config_collection.find_one({"tipo": "preguntas"})
 
     hidden_map = (custom_preguntas or {}).get("hidden", {}) if custom_preguntas else {}
+    orden_global = (custom_preguntas or {}).get("orden_global", []) if custom_preguntas else []
 
     if custom_preguntas:
-        # Merge default con custom, filtrando las ocultas por sección
         result = {}
         for seccion, preguntas in PREGUNTAS_DEFAULT.items():
             hidden_ids = set(hidden_map.get(seccion, []))
@@ -302,13 +302,26 @@ async def get_preguntas_config(
             if seccion in custom_preguntas.get("secciones", {}):
                 custom_list = custom_preguntas["secciones"][seccion]
                 result[seccion].extend([p for p in custom_list if p.get("id") not in hidden_ids])
+
+        # Aplicar orden_global si existe: reordena cada sección según las
+        # posiciones globales. IDs no presentes en orden_global mantienen su
+        # orden relativo al final de la sección.
+        if orden_global:
+            pos_map = {pid: idx for idx, pid in enumerate(orden_global)}
+            for seccion, lst in result.items():
+                result[seccion] = sorted(
+                    lst,
+                    key=lambda p: pos_map.get(p.get("id"), 10_000 + lst.index(p)),
+                )
+
         return {
             "preguntas": result,
             "custom": custom_preguntas.get("secciones", {}),
             "hidden": hidden_map,
+            "orden_global": orden_global,
         }
 
-    return {"preguntas": PREGUNTAS_DEFAULT, "custom": {}, "hidden": {}}
+    return {"preguntas": PREGUNTAS_DEFAULT, "custom": {}, "hidden": {}, "orden_global": []}
 
 
 @router.post("/evaluaciones/config/preguntas")
@@ -431,11 +444,36 @@ async def restore_pregunta_config(
 
 @router.put("/evaluaciones/config/preguntas/reorder")
 async def reorder_preguntas(
-    seccion: str,
-    orden: list,
+    payload: dict,
     current_user: dict = Depends(RequireEdit)
 ):
-    """Reordena las preguntas personalizadas."""
+    """Reordena preguntas (default y custom) usando un orden global plano.
+
+    Acepta DOS formatos para mantener compatibilidad:
+      - {"orden_global": [id1, id2, ...]}  → guarda un orden plano único que se
+        aplica a la lista combinada de TODAS las preguntas.
+      - {"seccion": "toma_datos", "orden": [...]}  → modo antiguo, reordena
+        solo customs dentro de una sección (sigue funcionando).
+    """
+    orden_global = (payload or {}).get("orden_global")
+    if isinstance(orden_global, list) and orden_global:
+        # Validar que cada id sea str
+        ids = [str(i) for i in orden_global if i]
+        await evaluaciones_config_collection.update_one(
+            {"tipo": "preguntas"},
+            {
+                "$set": {
+                    "orden_global": ids,
+                    "updated_at": datetime.now(),
+                }
+            },
+            upsert=True,
+        )
+        return {"success": True, "message": "Orden global guardado", "count": len(ids)}
+
+    # --- Legacy mode: por sección ---
+    seccion = (payload or {}).get("seccion") or ""
+    orden = (payload or {}).get("orden") or []
     secciones_validas = list(PREGUNTAS_DEFAULT.keys())
     if seccion not in secciones_validas:
         raise HTTPException(status_code=400, detail="Seccion invalida")

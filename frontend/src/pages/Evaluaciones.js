@@ -400,6 +400,42 @@ const Evaluaciones = () => {
     } catch (error) { console.error('[Evaluaciones.js]', error); }
   };
 
+  // Reordenación de la VISTA PLANA. Recibe el listado completo de preguntas
+  // (default + custom de todas las secciones) y guarda un orden global plano
+  // en el backend (`orden_global`). La UI actualiza ópticamente.
+  const handleFlatDragEnd = async (event, flatItems) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = flatItems.findIndex(p => p.id === active.id);
+    const newIndex = flatItems.findIndex(p => p.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+    const reordered = arrayMove(flatItems, oldIndex, newIndex);
+    const orden = reordered.map(p => p.id);
+
+    // Update local state optimistically: reagrupa por sección _seccion respetando el nuevo orden
+    setCustomPreguntas(prev => {
+      const next = { ...prev };
+      const grouped = {};
+      reordered.forEach(p => {
+        const k = p._seccion;
+        if (!grouped[k]) grouped[k] = [];
+        grouped[k].push(p);
+      });
+      Object.keys(grouped).forEach(k => { next[k] = grouped[k]; });
+      return next;
+    });
+
+    try {
+      await api.put('/api/evaluaciones/config/preguntas/reorder', { orden_global: orden });
+      notify.success('Orden actualizado');
+    } catch (error) {
+      console.error('[Evaluaciones.js] handleFlatDragEnd', error);
+      notify.error('No se pudo guardar el orden');
+      // Refresca desde servidor para revertir
+      fetchPreguntasConfig();
+    }
+  };
+
   const getEstadoBadge = (estado) => {
     switch (estado) {
       case 'completada': return { class: 'badge-success', icon: <CheckCircle size={12} /> };
@@ -511,6 +547,7 @@ const Evaluaciones = () => {
               SECCIONES={SECCIONES}
               getPreguntasSeccion={getPreguntasSeccion}
               handleDragEnd={handleDragEnd}
+              handleFlatDragEnd={handleFlatDragEnd}
               handleDuplicateQuestion={handleDuplicateQuestion}
               handleDeleteQuestion={handleDeleteQuestion}
               handleRestoreQuestion={handleRestoreQuestion}

@@ -43,6 +43,41 @@ const SortableQuestion = ({ pregunta, idx, isCustom, canDrag, children }) => {
   );
 };
 
+// Row variant tailored for the flat questionnaire view (uniform card style,
+// drag handle on the left, content on the right).
+const SortableQuestionRow = ({ pregunta, isCustom, canDrag, children }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: pregunta.id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '0.5rem',
+    padding: '0.65rem 0.75rem',
+    borderRadius: '8px',
+    border: '1px solid hsl(var(--border))',
+    background: 'white',
+    boxShadow: isDragging ? '0 4px 12px rgba(0,0,0,0.10)' : 'none',
+    opacity: isDragging ? 0.85 : 1,
+  };
+  return (
+    <div ref={setNodeRef} style={style}>
+      {canDrag && (
+        <div
+          {...attributes}
+          {...listeners}
+          style={{ cursor: 'grab', padding: '0.1rem 0.2rem', color: 'hsl(var(--muted-foreground))', display: 'flex', alignItems: 'center', flexShrink: 0 }}
+          title="Arrastra para reordenar"
+          data-testid={`drag-handle-${pregunta.id}`}
+        >
+          <GripVertical size={14} />
+        </div>
+      )}
+      {children}
+    </div>
+  );
+};
+
 const EvaluacionesForm = ({
   formData,
   setFormData,
@@ -63,6 +98,7 @@ const EvaluacionesForm = ({
   SECCIONES,
   getPreguntasSeccion,
   handleDragEnd,
+  handleFlatDragEnd,
   handleDuplicateQuestion,
   handleDeleteQuestion,
   handleRestoreQuestion,
@@ -94,6 +130,12 @@ const EvaluacionesForm = ({
   }, [flatView]);
   // Section selector for the global add form (only in flat view)
   const [flatAddSection, setFlatAddSection] = React.useState(null);
+
+  // DnD sensors for the flat questionnaire view
+  const dndSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   const handleInlineAdd = async (seccionKey) => {
     if (!inlineText.trim()) return;
@@ -257,36 +299,51 @@ const EvaluacionesForm = ({
                   </div>
                 )}
 
-                {/* Continuous list of all questions — no section badges */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                  {flatItems.length === 0 ? (
-                    <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.85rem', textAlign: 'center', padding: '1rem' }}>
-                      {t('evaluations.noQuestions')}
-                    </p>
-                  ) : flatItems.map((pregunta, idx) => {
-                    const isCustom = pregunta.id.startsWith('custom_');
-                    const seccionKey = pregunta._seccion;
-                    return (
-                      <div key={pregunta.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', padding: '0.65rem 0.75rem', borderRadius: '8px', border: '1px solid hsl(var(--border))', background: 'white' }}>
-                        <div style={{ flex: 1 }}>
-                          <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 500, fontSize: '0.85rem' }}>
-                            {idx + 1}. {pregunta.pregunta}
-                            {isCustom && <span style={{ fontSize: '0.7rem', color: 'hsl(var(--primary))', marginLeft: '0.4rem' }}>(personalizada)</span>}
-                          </label>
-                          {renderCampoRespuesta(pregunta)}
-                        </div>
-                        <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0, paddingTop: '0.1rem' }}>
-                          {(user?.role === 'Admin' || user?.role === 'Manager') && (
-                            <button type="button" onClick={() => handleDuplicateQuestion(pregunta, seccionKey)} style={{ padding: '0.25rem', borderRadius: '4px', backgroundColor: 'hsl(var(--primary) / 0.1)', color: 'hsl(var(--primary))', border: '1px solid hsl(var(--primary) / 0.3)', cursor: 'pointer' }} title="Duplicar"><Copy size={14} /></button>
-                          )}
-                          {user?.role === 'Admin' && (
-                            <button type="button" onClick={() => handleDeleteQuestion(pregunta.id, seccionKey)} style={{ padding: '0.25rem', borderRadius: '4px', backgroundColor: 'hsl(var(--destructive) / 0.1)', color: 'hsl(var(--destructive))', border: '1px solid hsl(var(--destructive) / 0.3)', cursor: 'pointer' }} title={isCustom ? 'Eliminar' : 'Ocultar pregunta predeterminada'}><Trash2 size={14} /></button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                {/* Continuous list of all questions — drag-and-drop reordering enabled */}
+                <DndContext
+                  sensors={dndSensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={(event) => handleFlatDragEnd && handleFlatDragEnd(event, flatItems)}
+                >
+                  <SortableContext items={flatItems.map(p => p.id)} strategy={verticalListSortingStrategy}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                      {flatItems.length === 0 ? (
+                        <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.85rem', textAlign: 'center', padding: '1rem' }}>
+                          {t('evaluations.noQuestions')}
+                        </p>
+                      ) : flatItems.map((pregunta, idx) => {
+                        const isCustom = pregunta.id.startsWith('custom_');
+                        const seccionKey = pregunta._seccion;
+                        const canDrag = user?.role === 'Admin' || user?.role === 'Manager';
+                        return (
+                          <SortableQuestionRow
+                            key={pregunta.id}
+                            pregunta={pregunta}
+                            idx={idx}
+                            isCustom={isCustom}
+                            canDrag={canDrag}
+                          >
+                            <div style={{ flex: 1 }}>
+                              <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 500, fontSize: '0.85rem' }}>
+                                {idx + 1}. {pregunta.pregunta}
+                                {isCustom && <span style={{ fontSize: '0.7rem', color: 'hsl(var(--primary))', marginLeft: '0.4rem' }}>(personalizada)</span>}
+                              </label>
+                              {renderCampoRespuesta(pregunta)}
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0, paddingTop: '0.1rem' }}>
+                              {(user?.role === 'Admin' || user?.role === 'Manager') && (
+                                <button type="button" onClick={() => handleDuplicateQuestion(pregunta, seccionKey)} style={{ padding: '0.25rem', borderRadius: '4px', backgroundColor: 'hsl(var(--primary) / 0.1)', color: 'hsl(var(--primary))', border: '1px solid hsl(var(--primary) / 0.3)', cursor: 'pointer' }} title="Duplicar"><Copy size={14} /></button>
+                              )}
+                              {user?.role === 'Admin' && (
+                                <button type="button" onClick={() => handleDeleteQuestion(pregunta.id, seccionKey)} style={{ padding: '0.25rem', borderRadius: '4px', backgroundColor: 'hsl(var(--destructive) / 0.1)', color: 'hsl(var(--destructive))', border: '1px solid hsl(var(--destructive) / 0.3)', cursor: 'pointer' }} title={isCustom ? 'Eliminar' : 'Ocultar pregunta predeterminada'}><Trash2 size={14} /></button>
+                              )}
+                            </div>
+                          </SortableQuestionRow>
+                        );
+                      })}
+                    </div>
+                  </SortableContext>
+                </DndContext>
               </div>
             );
           })()}
