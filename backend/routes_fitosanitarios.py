@@ -840,6 +840,192 @@ def categorize_tipo(tipo_str: str) -> str:
         return 'Fitosanitario'
 
 
+@router.post("/import-mapa-pdf")
+async def import_mapa_pdf(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Importa productos fitosanitarios desde el PDF oficial del MAPA
+    (Listado de Productos Autorizados). Extrae las tablas de cada página con
+    pdfplumber, intenta detectar la cabecera automáticamente y mapea las
+    columnas al esquema de la app. Idempotente: actualiza por nº de registro
+    o nombre comercial.
+    """
+    if current_user.get("role") not in ["Admin", "Manager"]:
+        raise HTTPException(status_code=403, detail="No tienes permisos para importar datos del MAPA")
+    if not file.filename.lower().endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="El archivo debe ser PDF")
+
+    # Local import: pdfplumber is heavy and only needed here.
+    try:
+        import pdfplumber
+    except ImportError:
+        raise HTTPException(status_code=500, detail="pdfplumber no está instalado en el servidor")
+
+    contents = await file.read()
+    if not contents:
+        raise HTTPException(status_code=400, detail="Archivo PDF vacío")
+
+    # Mapping of normalized column header -> internal field
+    HEADER_MAP = {
+        "n registro": "numero_registro",
+        "nº registro": "numero_registro",
+        "num registro": "numero_registro",
+        "numero registro": "numero_registro",
+        "registro": "numero_registro",
+        "nombre comercial": "nombre_comercial",
+        "nombre": "nombre_comercial",
+        "formulado": "nombre_comercial",
+        "denominacion": "denominacion_comun",
+        "denominación": "denominacion_comun",
+        "titular": "empresa",
+        "empresa": "empresa",
+        "fabricante": "empresa",
+        "sustancia activa": "materia_activa",
+        "sustancias activas": "materia_activa",
+        "materia activa": "materia_activa",
+        "tipo de producto": "tipo",
+        "tipo": "tipo",
+        "uso": "tipo",
+        "plazo de seguridad": "plazo_seguridad",
+        "plazo seguridad": "plazo_seguridad",
+        "dosis": "dosis_raw",
+        "volumen de agua": "volumen_agua_raw",
+        "estado": "estado_mapa",
+        "situacion": "estado_mapa",
+        "situación": "estado_mapa",
+    }
+
+    def normalize(s: str) -> str:
+        return " ".join((s or "").lower().replace(".", "").replace("º", "").replace("°", "").strip().split())
+
+    rows_processed = 0
+    inserted = 0
+    updated = 0
+    errors: list = []
+    parsed_tables = 0
+
+    try:
+        with pdfplumber.open(io.BytesIO(contents)) as pdf:
+            current_header_indices: dict = {}
+            for page_num, page in enumerate(pdf.pages, start=1):
+                try:
+                    tables = page.extract_tables() or []
+                except Exception as e:
+                    errors.append(f"Página {page_num}: extracción de tabla falló ({e})")
+                    continue
+                for table in tables:
+                    if not table or len(table) < 2:
+                        continue
+                    parsed_tables += 1
+                    # Detect header row: look for one that contains 'registro' or 'nombre'
+                    header_row = None
+                    header_idx = 0
+                    for h_idx, candidate in enumerate(table[:3]):
+                        if not candidate:
+                            continue
+                        joined = normalize(" ".join([c or "" for c in candidate]))
+                        if "registro" in joined or "nombre" in joined or "comercial" in joined:
+                            header_row = candidate
+                            header_idx = h_idx
+                            break
+                    if header_row:
+                        current_header_indices = {}
+                        for col_idx, cell in enumerate(header_row):
+                            key = normalize(cell or "")
+                            for hkey, field in HEADER_MAP.items():
+                                if hkey in key:
+                                    current_header_indices[field] = col_idx
+                                    break
+                        data_start = header_idx + 1
+                    else:
+                        # No header in this table; if we already saw one earlier in the doc reuse it
+                        data_start = 0
+                        if not current_header_indices:
+                            continue
+                    for row in table[data_start:]:
+                        if not row or all((c or "").strip() == "" for c in row):
+                            continue
+                        rows_processed += 1
+                        try:
+                            def cell(field: str, default: str = "") -> str:
+                                idx = current_header_indices.get(field)
+                                if idx is None or idx >= len(row):
+                                    return default
+                                return (row[idx] or "").strip().replace("\n", " ")
+
+                            numero_registro = cell("numero_registro")
+                            nombre_comercial = cell("nombre_comercial")
+                            if not numero_registro and not nombre_comercial:
+                                continue
+
+                            producto_data = {
+                                "numero_registro": numero_registro,
+                                "nombre_comercial": nombre_comercial,
+                                "denominacion_comun": cell("denominacion_comun") or None,
+                                "empresa": cell("empresa") or "",
+                                "materia_activa": cell("materia_activa") or "",
+                                "tipo": categorize_tipo(cell("tipo")),
+                                "source": "MAPA_PDF_IMPORT",
+                                "imported_at": datetime.utcnow(),
+                                "activo": (cell("estado_mapa") or "Activo").lower() not in ("baja", "revocado", "cancelado"),
+                            }
+
+                            # plazo_seguridad — extraer el primer número que aparezca
+                            plazo_raw = cell("plazo_seguridad")
+                            if plazo_raw:
+                                import re as _re
+                                nums = _re.findall(r"\d+", plazo_raw)
+                                if nums:
+                                    producto_data["plazo_seguridad"] = int(nums[0])
+
+                            # Upsert por numero_registro (preferente) o nombre_comercial
+                            query_or = []
+                            if numero_registro:
+                                query_or.append({"numero_registro": numero_registro})
+                            if nombre_comercial:
+                                query_or.append({"nombre_comercial": nombre_comercial})
+                            existing = None
+                            if query_or:
+                                existing = await fitosanitarios_collection.find_one({"$or": query_or})
+                            if existing:
+                                await fitosanitarios_collection.update_one(
+                                    {"_id": existing["_id"]},
+                                    {"$set": {**producto_data, "updated_at": datetime.utcnow()}},
+                                )
+                                updated += 1
+                            else:
+                                producto_data["created_at"] = datetime.utcnow()
+                                await fitosanitarios_collection.insert_one(producto_data)
+                                inserted += 1
+                        except Exception as e:
+                            errors.append(f"Página {page_num}: {e}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error procesando PDF: {e}")
+
+    if rows_processed == 0:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "No se pudieron extraer filas del PDF. Verifica que sea el listado oficial del "
+                "MAPA con tablas seleccionables (no un PDF escaneado/imagen)."
+            ),
+        )
+
+    return {
+        "success": True,
+        "message": f"Importación PDF completada: {inserted} nuevos, {updated} actualizados",
+        "inserted": inserted,
+        "updated": updated,
+        "total_procesados": inserted + updated,
+        "tablas_procesadas": parsed_tables,
+        "filas_leidas": rows_processed,
+        "errors": errors[:10] if errors else [],
+        "total_errors": len(errors),
+    }
+
+
 @router.get("/verify-mapa/{producto_id}")
 async def verify_producto_mapa(
     producto_id: str,

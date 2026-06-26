@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, Search, Filter, Settings, X, Beaker, AlertTriangle, Database, Download, Upload, FileSpreadsheet, ExternalLink, RefreshCw, CheckCircle, XCircle, Info, Loader2, Shield } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Filter, Settings, X, Beaker, AlertTriangle, Database, Download, Upload, FileSpreadsheet, FileText, ExternalLink, RefreshCw, CheckCircle, XCircle, Info, Loader2, Shield } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
@@ -274,6 +274,29 @@ const Fitosanitarios = () => {
         success: false,
         error: error.message
       });
+    } finally {
+      setImportLoading(false);
+      e.target.value = '';
+    }
+  };
+
+  // Import from MAPA PDF (Listado oficial)
+  const mapaPdfInputRef = useRef(null);
+  const handleMapaPdfSelect = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setImportLoading(true);
+    setImportResult(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const data = await api.upload('/api/fitosanitarios/import-mapa-pdf', formData);
+      setImportResult({ success: true, ...data });
+      fetchProductos();
+      setSuccessMsg(`Importación PDF MAPA: ${data.inserted} nuevos, ${data.updated} actualizados (${data.filas_leidas} filas leídas)`);
+      setTimeout(() => setSuccessMsg(null), 5000);
+    } catch (error) {
+      setImportResult({ success: false, error: error.message });
     } finally {
       setImportLoading(false);
       e.target.value = '';
@@ -723,6 +746,43 @@ const Fitosanitarios = () => {
                   onChange={handleMapaFileSelect}
                   style={{ display: 'none' }}
                   data-testid="mapa-file-input"
+                />
+              </div>
+              {/* PDF import dropzone */}
+              <div
+                style={{
+                  border: '2px dashed #fca5a5',
+                  borderRadius: '8px',
+                  padding: '1rem',
+                  textAlign: 'center',
+                  backgroundColor: 'white',
+                  cursor: 'pointer',
+                  marginTop: '0.75rem'
+                }}
+                onClick={() => mapaPdfInputRef.current?.click()}
+                data-testid="mapa-pdf-dropzone"
+              >
+                {importLoading ? (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                    <Loader2 size={20} className="animate-spin" />
+                    <span>Procesando PDF...</span>
+                  </div>
+                ) : (
+                  <>
+                    <FileText size={28} style={{ color: '#dc2626', marginBottom: '0.4rem' }} />
+                    <p style={{ fontWeight: '500', fontSize: '0.85rem', margin: 0 }}>Subir PDF del MAPA</p>
+                    <p style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))', margin: 0 }}>
+                      Listado de Productos Autorizados (.pdf con tablas seleccionables)
+                    </p>
+                  </>
+                )}
+                <input
+                  ref={mapaPdfInputRef}
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  onChange={handleMapaPdfSelect}
+                  style={{ display: 'none' }}
+                  data-testid="mapa-pdf-input"
                 />
               </div>
             </div>
