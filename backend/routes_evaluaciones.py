@@ -1514,27 +1514,111 @@ async def generate_evaluacion_pdf(
         </div>
             """
     
-    # Impresos
-    impresos = evaluacion.get('impresos', {})
+    # Impresos — Cabecera + 6 secciones (esquema nuevo)
+    impresos = evaluacion.get('impresos', {}) or {}
     if impresos:
+        def _fmt_sn(v):
+            """Format Sí/No tri-state (True/False/None)."""
+            if v is True:
+                return '<span class="answer-yes">Sí</span>'
+            if v is False:
+                return '<span class="answer-no">No</span>'
+            return '<span style="color:#888;">—</span>'
+
+        def _fmt_sintomas(s):
+            if not s or not isinstance(s, dict):
+                return '<span style="color:#888;">—</span>'
+            marcados = [k.capitalize() for k in ('enfermedades', 'plagas', 'virus') if s.get(k)]
+            return ', '.join(marcados) if marcados else '<span style="color:#888;">Ninguno</span>'
+
+        def _txt(v, dash='—'):
+            v = (v if v is not None else '')
+            v = str(v).strip()
+            return v if v else f'<span style="color:#888;">{dash}</span>'
+
+        analisis = impresos.get('analisis_suelo', {}) or {}
+        pasos = impresos.get('pasos_precampana', {}) or {}
+        calibracion = impresos.get('calibracion', {}) or {}
+        cepellones = impresos.get('calidad_cepellones', {}) or {}
+        maquinaria = impresos.get('inspeccion_maquinaria', {}) or {}
+
         html_content += f"""
+        <div class="page-break"></div>
         <div class="section">
-            <div class="section-title">IMPRESOS</div>
+            <div class="section-title">IMPRESOS — CABECERA / PLANTACIÓN</div>
             <div class="section-content">
                 <div class="datos-grid">
-                    <div class="dato-item">
-                        <div class="dato-label">Fecha Inicio</div>
-                        <div class="dato-value">{impresos.get('fecha_inicio', '—')}</div>
-                    </div>
-                    <div class="dato-item">
-                        <div class="dato-label">Fecha Fin</div>
-                        <div class="dato-value">{impresos.get('fecha_fin', '—')}</div>
-                    </div>
-                    <div class="dato-item">
-                        <div class="dato-label">Técnico</div>
-                        <div class="dato-value">{impresos.get('tecnico', '—')}</div>
-                    </div>
+                    <div class="dato-item"><div class="dato-label">La plantación (Proveedor)</div><div class="dato-value">{_txt(impresos.get('proveedor'))}</div></div>
+                    <div class="dato-item"><div class="dato-label">Código Plantación</div><div class="dato-value">{_txt(impresos.get('codigo_plantacion'))}</div></div>
+                    <div class="dato-item"><div class="dato-label">Finca</div><div class="dato-value">{_txt(impresos.get('finca'))}</div></div>
+                    <div class="dato-item"><div class="dato-label">Cultivo</div><div class="dato-value">{_txt(impresos.get('cultivo'))}</div></div>
+                    <div class="dato-item"><div class="dato-label">Variedad</div><div class="dato-value">{_txt(impresos.get('variedad'))}</div></div>
+                    <div class="dato-item"><div class="dato-label">Superficie</div><div class="dato-value">{_txt(impresos.get('superficie'))}</div></div>
                 </div>
+                <div style="margin-top:8px;">
+                    <div class="dato-label">Comentarios</div>
+                    <div class="dato-value" style="white-space:pre-wrap;">{_txt(impresos.get('comentarios'))}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">1 · ANÁLISIS DE SUELO</div>
+            <div class="section-content">
+                <div class="question-row"><span class="question-text">¿Se ha archivado la hoja de los resultados de análisis con este impreso?</span><div class="answer">{_fmt_sn(analisis.get('hoja_archivada'))}</div></div>
+                <div class="question-row"><span class="question-text">¿Los paquetes/envases de semillas están archivados?</span><div class="answer">{_fmt_sn(analisis.get('envases_archivados'))}</div></div>
+                <div class="question-row"><span class="question-text">Medidas tomadas como consecuencia de los resultados de los análisis</span><div class="answer" style="white-space:pre-wrap;">{_txt(analisis.get('medidas_tomadas'))}</div></div>
+                <div class="question-row"><span class="question-text">Este lote en el momento de entrega estaba libre de síntomas de:</span><div class="answer">{_fmt_sintomas(analisis.get('libre_sintomas'))}</div></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">2 · PASOS PRECAMPAÑA DESINFECCIÓN</div>
+            <div class="section-content">
+                <div class="question-row"><span class="question-text">Observaciones de interés</span><div class="answer" style="white-space:pre-wrap;">{_txt(pasos.get('observaciones'))}</div></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">3 · CALIBRACIÓN Y MANTENIMIENTO APARATOS MEDICIÓN FITO</div>
+            <div class="section-content">
+                <div class="datos-grid-2">
+                    <div class="dato-item"><div class="dato-label">Vaso</div><div class="dato-value">{_txt(calibracion.get('vaso'))}</div></div>
+                    <div class="dato-item"><div class="dato-label">Peso</div><div class="dato-value">{_txt(calibracion.get('peso'))}</div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">4 · CALIDAD DE CEPELLONES</div>
+            <div class="section-content">
+                <div class="question-row"><span class="question-text">Nº de referencia de lote de cepellones</span><div class="answer">{_txt(cepellones.get('numero_lote'))}</div></div>
+                <div class="question-row"><span class="question-text">¿Los paquetes/envases de semillas están archivados con este impreso?</span><div class="answer">{_fmt_sn(cepellones.get('envases_archivados'))}</div></div>
+                <div class="question-row"><span class="question-text">¿El semillero ha suministrado un certificado de sanidad vegetal?</span><div class="answer">{_fmt_sn(cepellones.get('certificado_sanidad'))}</div></div>
+                <div class="question-row"><span class="question-text">Si existe el certificado de sanidad, ¿está archivado con este impreso?</span><div class="answer">{_fmt_sn(cepellones.get('certificado_archivado'))}</div></div>
+                <div class="question-row"><span class="question-text">Este lote en el momento de entrega estaba libre de síntomas de:</span><div class="answer">{_fmt_sintomas(cepellones.get('libre_sintomas'))}</div></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">5 · INSPECCIÓN MAQUINARIA</div>
+            <div class="section-content">
+                <div class="datos-grid">
+                    <div class="dato-item"><div class="dato-label">Tipo</div><div class="dato-value">{_txt(maquinaria.get('tipo'))}</div></div>
+                    <div class="dato-item"><div class="dato-label">Modelo</div><div class="dato-value">{_txt(maquinaria.get('modelo'))}</div></div>
+                    <div class="dato-item"><div class="dato-label">Nº de serie</div><div class="dato-value">{_txt(maquinaria.get('numero_serie'))}</div></div>
+                </div>
+                <div class="question-row"><span class="question-text">¿Se ha realizado la limpieza de los filtros?</span><div class="answer">{_fmt_sn(maquinaria.get('limpieza_filtros'))}</div></div>
+                <div class="question-row"><span class="question-text">¿Se ha comprobado el estado de la manguera?</span><div class="answer">{_fmt_sn(maquinaria.get('estado_manguera'))}</div></div>
+                <div class="question-row"><span class="question-text">¿Se han cambiado los diafragmas?</span><div class="answer">{_fmt_sn(maquinaria.get('diafragmas_cambiados'))}</div></div>
+                <div class="question-row"><span class="question-text">¿Se han revisado todas las conexiones?</span><div class="answer">{_fmt_sn(maquinaria.get('conexiones_revisadas'))}</div></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">6 · OBSERVACIONES GENERALES</div>
+            <div class="section-content">
+                <div class="dato-value" style="white-space:pre-wrap;">{_txt(impresos.get('observaciones_generales'))}</div>
             </div>
         </div>
         """

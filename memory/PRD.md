@@ -281,6 +281,13 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - 30+ `data-testid` añadidos para automatización.
 - **Testing**: testing_agent_v3_fork — backend 100%, frontend 100% (iteration_68.json). Pytest creado en `/app/backend/tests/test_evaluaciones_impresos.py`.
 
+### Export PDF — Impresos completos en `/api/evaluaciones/{id}/pdf` - DONE (2026-06-26)
+- Reemplazado el bloque legacy "IMPRESOS" del PDF (solo mostraba fecha_inicio/fecha_fin/tecnico) por:
+  - **Cabecera Plantación** (Proveedor, Código, Finca, Cultivo, Variedad, Superficie, Comentarios).
+  - 6 secciones (Análisis de suelo, Pasos precampaña, Calibración fito, Calidad cepellones, Inspección maquinaria, Observaciones generales) con formato Sí/No coloreado y checkboxes de síntomas (Enfermedades/Plagas/Virus).
+- Validado: PDF generado correctamente (49KB), todas las secciones presentes (verificado con análisis OCR).
+- Los técnicos pueden ahora descargar/imprimir la hoja completa lista para archivar o entregar al cliente.
+
 
 
 
