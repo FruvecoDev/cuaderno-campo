@@ -273,8 +273,65 @@ const EvaluacionesForm = ({
                   return sorted;
                 })()
               : baseFlat;
+
+            // Progress: count answered questions (respuesta no nula/vacía).
+            const isAnswered = (id) => {
+              const v = respuestas?.[id];
+              if (v === null || v === undefined) return false;
+              if (typeof v === 'string') return v.trim() !== '';
+              if (Array.isArray(v)) return v.length > 0;
+              if (typeof v === 'object') return Object.keys(v).length > 0;
+              return true; // booleans (false counts as answered) y números 0 también
+            };
+            const totalQ = flatItems.length;
+            const answeredQ = flatItems.reduce((acc, p) => acc + (isAnswered(p.id) ? 1 : 0), 0);
+            const percent = totalQ > 0 ? Math.round((answeredQ / totalQ) * 100) : 0;
             return (
               <div data-testid="cuestionarios-vista-plana">
+                {/* Indicador de progreso del cuestionario */}
+                <div
+                  data-testid="cuestionario-progress"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    padding: '0.55rem 0.8rem',
+                    background: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    marginBottom: '0.75rem'
+                  }}
+                >
+                  <div style={{ flexShrink: 0, fontSize: '0.78rem', fontWeight: 700, color: 'hsl(var(--foreground))' }}>
+                    {answeredQ} / {totalQ}
+                  </div>
+                  <div style={{ flex: 1, position: 'relative', height: '8px', background: 'hsl(var(--muted))', borderRadius: '999px', overflow: 'hidden' }}>
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        height: '100%',
+                        width: `${percent}%`,
+                        background: percent === 100 ? 'hsl(142 76% 36%)' : 'hsl(var(--primary))',
+                        transition: 'width 0.25s ease',
+                      }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      flexShrink: 0,
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      color: percent === 100 ? 'hsl(142 76% 36%)' : 'hsl(var(--muted-foreground))',
+                      minWidth: '3rem',
+                      textAlign: 'right'
+                    }}
+                  >
+                    {percent}%{percent === 100 ? ' ✓' : ''}
+                  </div>
+                </div>
+
                 {/* Global "Añadir pregunta" panel — sin selector de sección */}
                 {(user?.role === 'Admin' || user?.role === 'Manager') && (
                   <div style={{ padding: '0.6rem 0.75rem', background: 'hsl(var(--primary) / 0.05)', border: '1px solid hsl(var(--primary) / 0.2)', borderRadius: '8px', marginBottom: '0.75rem' }}>
