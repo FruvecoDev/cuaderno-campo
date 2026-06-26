@@ -23,6 +23,7 @@ failing step first.
 | 6 | i18n key audit                         | Detects missing translation keys (avoids raw "ns.key" UI)|
 | 7 | `tipo_operacion` permission audit      | Catches POST/PUT endpoints handling Compra/Venta that forget to call `ensure_tipo_operacion(current_user, tipo)` — security gap |
 | 8 | Smoke test CRUD                        | Catches Pydantic model regressions & broken endpoints    |
+| 9 | Route body/query mismatch (informational) | Detects POST/PUT endpoints with primitive params that FastAPI treats as query but the frontend sends in body (silent 422) |
 
 #### Suppressing false positives in the `tipo_operacion` audit
 

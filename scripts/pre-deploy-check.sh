@@ -81,7 +81,7 @@ else
 fi
 
 # 8. Smoke test CRUD - catches Pydantic model regressions and broken endpoints
-log "Step 8/8 — Smoke test CRUD against live backend"
+log "Step 8/9 — Smoke test CRUD against live backend"
 if ( cd /app/backend && REACT_APP_BACKEND_URL="$(grep REACT_APP_BACKEND_URL /app/frontend/.env | cut -d '=' -f2)" \
        TEST_EMAIL=admin@fruveco.com TEST_PASSWORD=admin123 \
        python3 -m pytest tests/test_smoke_crud.py -q --tb=short >/tmp/smoke.log 2>&1 ); then
@@ -89,6 +89,16 @@ if ( cd /app/backend && REACT_APP_BACKEND_URL="$(grep REACT_APP_BACKEND_URL /app
 else
   err "Smoke tests failed — see /tmp/smoke.log"
   tail -40 /tmp/smoke.log || true
+fi
+
+# 9. Route body/query mismatch audit (informational, non-blocking)
+log "Step 9/9 — Route body/query mismatch audit (informational)"
+if python3 /app/scripts/audit_route_body_mismatch.py >/tmp/route_body.log 2>&1; then
+  ok "No POST/PUT handlers expose unexpected query-style primitives"
+else
+  # Always shows warnings but doesn't block — flip to --strict in the audit script if you want this to fail.
+  printf "\033[1;33m WARN: potential body/query mismatches (non-blocking)\033[0m\n"
+  cat /tmp/route_body.log | sed 's/^/  /' || true
 fi
 
 echo ""
