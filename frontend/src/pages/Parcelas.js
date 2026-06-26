@@ -407,6 +407,7 @@ const Parcelas = () => {
           fieldsConfig={fieldsConfig} contratos={contratos} fincas={fincas}
           contratoSearch={contratoSearch} setContratoSearch={setContratoSearch}
           contratoFilterOptions={contratoFilterOptions} getVariedadesParaCultivo={getVariedadesParaCultivo}
+          cultivos={cultivos} onCultivosRefresh={fetchCultivos}
           provincias={provincias} sigpacLoading={sigpacLoading} sigpacResult={sigpacResult}
           sigpacError={sigpacError} buscarEnSigpac={buscarEnSigpac} updateSigpac={updateSigpac}
         />

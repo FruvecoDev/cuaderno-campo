@@ -111,6 +111,7 @@ class CultivoBase(BaseModel):
     nombre: str
     codigo_cultivo: Optional[str] = None
     variedad: Optional[str] = None
+    variedades: List[str] = []
     tipo: Optional[str] = None
     unidad_medida: str = "kg"
     ciclo_cultivo: Optional[str] = None

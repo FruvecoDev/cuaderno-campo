@@ -703,6 +703,49 @@ async def delete_cultivo(
     
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Cultivo not found")
+
+
+@router.post("/cultivos/{cultivo_id}/variedades")
+async def add_variedad_to_cultivo(
+    cultivo_id: str,
+    payload: dict,
+    current_user: dict = Depends(RequireEdit)
+):
+    """Add a new variedad to the cultivo's `variedades` list (idempotent).
+
+    Body: {"variedad": "Nombre de la variedad"}
+    """
+    if not ObjectId.is_valid(cultivo_id):
+        raise HTTPException(status_code=400, detail="Invalid ID")
+
+    raw = (payload or {}).get("variedad", "")
+    variedad = str(raw).strip()
+    if not variedad:
+        raise HTTPException(status_code=400, detail="`variedad` no puede estar vacía")
+
+    cultivo = await cultivos_collection.find_one({"_id": ObjectId(cultivo_id)})
+    if not cultivo:
+        raise HTTPException(status_code=404, detail="Cultivo not found")
+
+    # Idempotente: si ya existe (case-insensitive) no añade duplicado.
+    existing = cultivo.get("variedades") or []
+    if any(v.lower() == variedad.lower() for v in existing):
+        return {"success": True, "variedades": existing, "message": "Variedad ya existía"}
+
+    await cultivos_collection.update_one(
+        {"_id": ObjectId(cultivo_id)},
+        {
+            "$addToSet": {"variedades": variedad},
+            "$set": {"updated_at": datetime.now()},
+        },
+    )
+
+    updated = await cultivos_collection.find_one({"_id": ObjectId(cultivo_id)})
+    await log_cultivo_change(
+        cultivo_id, "modificacion", current_user,
+        [{"campo": "variedades", "antes": existing, "despues": updated.get("variedades", [])}]
+    )
+    return {"success": True, "variedades": updated.get("variedades", [])}
     
     await log_cultivo_change(cultivo_id, "eliminacion", current_user)
     

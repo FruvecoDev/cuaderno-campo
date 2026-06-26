@@ -1,11 +1,14 @@
-import React, { useMemo, useEffect } from 'react';
-import { Map as MapIcon, Search, ExternalLink, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import React, { useMemo, useEffect, useState } from 'react';
+import { Map as MapIcon, Search, ExternalLink, Loader2, CheckCircle, AlertCircle, Plus, X } from 'lucide-react';
 import AdvancedParcelMap from '../AdvancedParcelMap';
+import api from '../../services/api';
+import { notify } from '../../lib/notify';
 
 export const ParcelasForm = ({
   editingId, zones, setZones, handleZonesChanged, handleSubmit, handleCancelEdit,
   formData, setFormData, fieldsConfig, contratos, fincas,
   contratoSearch, setContratoSearch, contratoFilterOptions, getVariedadesParaCultivo,
+  cultivos = [], onCultivosRefresh,
   // SIGPAC
   provincias, sigpacLoading, sigpacResult, sigpacError, buscarEnSigpac, updateSigpac
 }) => {
@@ -28,11 +31,10 @@ export const ParcelasForm = ({
   // (typical case: a cultivo has a single registered variedad → no need to ask).
   const variedadesDisponibles = useMemo(
     () => (typeof getVariedadesParaCultivo === 'function' ? getVariedadesParaCultivo() : []),
-    // We intentionally depend on cultivo (not getVariedadesParaCultivo) because
-    // the consumer rebuilds the list whenever cultivo changes, but the function
-    // reference itself is stable. The disable below silences the lint warning.
+    // Depend on cultivo AND the cultivos catalog, so adding a new variedad
+    // through the inline panel re-renders this list immediately.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [formData.cultivo]
+    [formData.cultivo, cultivos]
   );
   useEffect(() => {
     if (
@@ -51,6 +53,40 @@ export const ParcelasForm = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [variedadesDisponibles]);
+
+  // ----- Inline "Nueva variedad" -----
+  const [showNewVariedad, setShowNewVariedad] = useState(false);
+  const [newVariedadName, setNewVariedadName] = useState('');
+  const [savingVariedad, setSavingVariedad] = useState(false);
+
+  const currentCultivoObj = useMemo(
+    () => cultivos.find(c => c.nombre?.toLowerCase() === (formData.cultivo || '').toLowerCase()),
+    [cultivos, formData.cultivo]
+  );
+
+  const handleAddVariedad = async () => {
+    const name = newVariedadName.trim();
+    if (!name) return notify.warning('Escribe el nombre de la variedad');
+    if (!currentCultivoObj?._id) {
+      return notify.error('Primero selecciona un cultivo válido del catálogo');
+    }
+    setSavingVariedad(true);
+    try {
+      const res = await api.post(`/api/cultivos/${currentCultivoObj._id}/variedades`, { variedad: name });
+      notify.success(`Variedad "${name}" añadida a ${currentCultivoObj.nombre}`);
+      // Refrescar el catálogo y auto-seleccionar la nueva variedad
+      if (typeof onCultivosRefresh === 'function') await onCultivosRefresh();
+      setFormData(prev => ({ ...prev, variedad: name }));
+      setNewVariedadName('');
+      setShowNewVariedad(false);
+      // eslint-disable-next-line no-unused-vars
+      const _ = res;
+    } catch (err) {
+      notify.error('Error: ' + api.getErrorMessage(err));
+    } finally {
+      setSavingVariedad(false);
+    }
+  };
 
   return (
     <div className="card mb-6">
@@ -239,21 +275,70 @@ export const ParcelasForm = ({
           
           {fieldsConfig.variedad && (
             <div className="form-group">
-              <label className="form-label">Variedad</label>
-              <select className="form-select" value={formData.variedad}
-                onChange={(e) => setFormData({...formData, variedad: e.target.value})} data-testid="select-variedad">
-                <option value="">-- Sin variedad --</option>
-                {variedadesDisponibles.map(v => <option key={v} value={v}>{v}</option>)}
-              </select>
-              <small style={{ color: 'hsl(var(--muted-foreground))' }}>
-                {!formData.cultivo
-                  ? 'Selecciona un cultivo primero'
-                  : variedadesDisponibles.length === 0
-                    ? `Sin variedades definidas para ${formData.cultivo}`
-                    : variedadesDisponibles.length === 1
-                      ? 'Autoseleccionada (única variedad para este cultivo)'
-                      : `Variedades disponibles para ${formData.cultivo}`}
-              </small>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+                <label className="form-label" style={{ marginBottom: 0 }}>Variedad</label>
+                {formData.cultivo && currentCultivoObj?._id && !showNewVariedad && (
+                  <button
+                    type="button"
+                    onClick={() => { setShowNewVariedad(true); setNewVariedadName(''); }}
+                    className="btn btn-xs btn-secondary"
+                    style={{ padding: '0.15rem 0.5rem', fontSize: '0.7rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                    data-testid="btn-nueva-variedad"
+                    title={`Añadir nueva variedad a ${formData.cultivo}`}
+                  >
+                    <Plus size={12} /> Nueva
+                  </button>
+                )}
+              </div>
+              {!showNewVariedad ? (
+                <>
+                  <select className="form-select" value={formData.variedad}
+                    onChange={(e) => setFormData({...formData, variedad: e.target.value})} data-testid="select-variedad">
+                    <option value="">-- Sin variedad --</option>
+                    {variedadesDisponibles.map(v => <option key={v} value={v}>{v}</option>)}
+                  </select>
+                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
+                    {!formData.cultivo
+                      ? 'Selecciona un cultivo primero'
+                      : variedadesDisponibles.length === 0
+                        ? `Sin variedades definidas para ${formData.cultivo} — pulsa "Nueva" para crearla`
+                        : variedadesDisponibles.length === 1
+                          ? 'Autoseleccionada (única variedad para este cultivo)'
+                          : `Variedades disponibles para ${formData.cultivo}`}
+                  </small>
+                </>
+              ) : (
+                <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }} data-testid="nueva-variedad-panel">
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={newVariedadName}
+                    onChange={(e) => setNewVariedadName(e.target.value)}
+                    onKeyPress={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddVariedad(); } }}
+                    placeholder={`Nueva variedad de ${formData.cultivo}`}
+                    autoFocus
+                    data-testid="input-nueva-variedad"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddVariedad}
+                    disabled={savingVariedad || !newVariedadName.trim()}
+                    className="btn btn-sm btn-primary"
+                    data-testid="btn-guardar-variedad"
+                  >
+                    {savingVariedad ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
+                    {savingVariedad ? 'Guardando' : 'Guardar'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setShowNewVariedad(false); setNewVariedadName(''); }}
+                    className="btn btn-sm btn-ghost"
+                    title="Cancelar"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              )}
             </div>
           )}
           
