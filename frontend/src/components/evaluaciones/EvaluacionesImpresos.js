@@ -1,5 +1,7 @@
-import React from 'react';
-import { ExternalLink, FileText } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { ExternalLink, FileText, Paperclip, X, Upload, Loader2 } from 'lucide-react';
+import api from '../../services/api';
+import { notify } from '../../lib/notify';
 
 // Default impresos schema — used both for new evaluations and to safely
 // hydrate evaluations created before the Impresos tab existed.
@@ -32,6 +34,7 @@ export const DEFAULT_IMPRESOS = {
   // S4 Calidad de cepellones
   calidad_cepellones: {
     numero_lote: '',
+    anexo: null,
     envases_archivados: null,
     certificado_sanidad: null,
     certificado_archivado: null,
@@ -197,6 +200,55 @@ const EvaluacionesImpresos = ({ impresos, setImpresos, selectedParcelaInfo, parc
     });
   };
 
+  // Anexo de la sección 4 (Calidad de cepellones).
+  const anexoInputRef = useRef(null);
+  const [uploadingAnexo, setUploadingAnexo] = useState(false);
+  const anexo = data.calidad_cepellones?.anexo || null;
+
+  const handleAnexoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (file.size > 15 * 1024 * 1024) {
+      notify.error('El archivo supera el tamaño máximo permitido (15 MB).');
+      return;
+    }
+    setUploadingAnexo(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await api.upload('/api/evaluaciones/anexos/upload', formData);
+      const meta = res?.data || res;
+      update('calidad_cepellones.anexo', meta);
+      notify.success('Anexo adjuntado correctamente');
+    } catch (err) {
+      notify.error(err?.message || 'No se pudo subir el anexo');
+    } finally {
+      setUploadingAnexo(false);
+    }
+  };
+
+  const handleAnexoRemove = async () => {
+    if (!anexo) return;
+    try {
+      if (anexo.stored_name) {
+        await api.delete(`/api/evaluaciones/anexos/${anexo.stored_name}`);
+      }
+    } catch (err) {
+      // Silently swallow — even if the file is gone, we still want to clear the reference
+      console.warn('[Impresos] delete anexo:', err?.message);
+    }
+    update('calidad_cepellones.anexo', null);
+    notify.success('Anexo eliminado');
+  };
+
+  const fmtSize = (bytes) => {
+    if (!bytes && bytes !== 0) return '';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
   // Read-only display field with the same visual weight as a form input.
   const renderReadOnly = (label, value, testid) => (
     <div className="form-group" style={{ marginBottom: 0 }}>
@@ -348,6 +400,80 @@ const EvaluacionesImpresos = ({ impresos, setImpresos, selectedParcelaInfo, parc
             onChange={(e) => update('calidad_cepellones.numero_lote', e.target.value)}
             data-testid="impresos-cc-lote"
           />
+        </div>
+
+        {/* Anexo (PDF / imagen / documento) */}
+        <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+          <label style={labelStyle}>Anexo (PDF / imagen / documento — máx. 15 MB)</label>
+          <input
+            ref={anexoInputRef}
+            type="file"
+            accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx"
+            onChange={handleAnexoUpload}
+            style={{ display: 'none' }}
+            data-testid="impresos-cc-anexo-input"
+          />
+          {!anexo ? (
+            <button
+              type="button"
+              onClick={() => anexoInputRef.current?.click()}
+              disabled={uploadingAnexo}
+              data-testid="impresos-cc-anexo-btn"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                padding: '0.55rem 1rem',
+                borderRadius: '6px',
+                border: '1px dashed hsl(var(--primary) / 0.5)',
+                background: 'hsl(var(--primary) / 0.05)',
+                color: 'hsl(var(--primary))',
+                cursor: uploadingAnexo ? 'wait' : 'pointer',
+                fontSize: '0.85rem',
+                fontWeight: 500,
+              }}
+            >
+              {uploadingAnexo ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+              {uploadingAnexo ? 'Subiendo…' : 'Adjuntar anexo'}
+            </button>
+          ) : (
+            <div
+              data-testid="impresos-cc-anexo-info"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.6rem',
+                padding: '0.55rem 0.75rem',
+                borderRadius: '6px',
+                border: '1px solid hsl(var(--border))',
+                background: 'hsl(var(--muted) / 0.4)',
+                fontSize: '0.85rem',
+              }}
+            >
+              <Paperclip size={14} style={{ color: 'hsl(var(--primary))', flexShrink: 0 }} />
+              <a
+                href={anexo.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'hsl(var(--primary))', textDecoration: 'underline', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+              >
+                {anexo.filename}
+              </a>
+              <span style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.75rem' }}>
+                {fmtSize(anexo.size)}
+              </span>
+              <button
+                type="button"
+                onClick={handleAnexoRemove}
+                title="Eliminar anexo"
+                data-testid="impresos-cc-anexo-remove"
+                style={{
+                  marginLeft: 'auto', padding: '0.25rem',
+                  background: 'transparent', border: 'none',
+                  color: 'hsl(0, 84%, 60%)', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center',
+                }}
+              >
+                <X size={14} />
+              </button>
+            </div>
+          )}
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '0.75rem' }}>

@@ -1,9 +1,11 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from typing import Optional, List, Dict, Any
 from bson import ObjectId
 from datetime import datetime
 from pydantic import BaseModel, Field
 import os
+import uuid
+import shutil
 
 from database import db, serialize_doc, serialize_docs, parcelas_collection
 from rbac_guards import RequireCreate, RequireEdit, RequireDelete, get_current_user
@@ -103,6 +105,99 @@ PREGUNTAS_DEFAULT = {
 # ============================================================================
 # CRUD EVALUACIONES
 # ============================================================================
+
+# ----------------------------------------------------------------------------
+# Anexos (Impresos) — File uploads attached to an evaluación's impresos.
+# Stored under /app/uploads/evaluaciones/anexos/<uuid>__<filename> and served
+# via the global StaticFiles mount at /api/uploads.
+# ----------------------------------------------------------------------------
+
+ANEXOS_DIR = "/app/uploads/evaluaciones/anexos"
+os.makedirs(ANEXOS_DIR, exist_ok=True)
+
+ALLOWED_ANEXO_TYPES = {
+    "application/pdf",
+    "image/jpeg", "image/jpg", "image/png", "image/webp",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+}
+MAX_ANEXO_SIZE_BYTES = 15 * 1024 * 1024  # 15 MB
+
+
+@router.post("/evaluaciones/anexos/upload")
+async def upload_evaluacion_anexo(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(RequireCreate),
+):
+    """Subir un anexo (PDF / imagen / documento) para una hoja de evaluación.
+
+    Devuelve metadatos `{filename, url, size, content_type, uploaded_at}` que
+    el frontend debe guardar en `impresos.<seccion>.anexo` al persistir la
+    evaluación.
+    """
+    if file.content_type not in ALLOWED_ANEXO_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Tipo de archivo no permitido ({file.content_type}). Use PDF, imagen o documento Office.",
+        )
+
+    original = file.filename or "anexo"
+    safe_name = "".join(c for c in original if c.isalnum() or c in (".", "_", "-"))[-80:]
+    stored_name = f"{uuid.uuid4().hex}__{safe_name}"
+    file_path = os.path.join(ANEXOS_DIR, stored_name)
+
+    size = 0
+    with open(file_path, "wb") as buffer:
+        while True:
+            chunk = await file.read(1024 * 1024)
+            if not chunk:
+                break
+            size += len(chunk)
+            if size > MAX_ANEXO_SIZE_BYTES:
+                buffer.close()
+                try:
+                    os.remove(file_path)
+                except OSError:
+                    pass
+                raise HTTPException(status_code=413, detail="El archivo supera el tamaño máximo permitido (15 MB).")
+            buffer.write(chunk)
+
+    return {
+        "success": True,
+        "data": {
+            "filename": original,
+            "stored_name": stored_name,
+            "url": f"/api/uploads/evaluaciones/anexos/{stored_name}",
+            "size": size,
+            "content_type": file.content_type,
+            "uploaded_at": datetime.now().isoformat(),
+            "uploaded_by": current_user.get("username") or current_user.get("email") or "",
+        },
+    }
+
+
+@router.delete("/evaluaciones/anexos/{stored_name}")
+async def delete_evaluacion_anexo(
+    stored_name: str,
+    current_user: dict = Depends(RequireDelete),
+):
+    """Eliminar un anexo subido previamente. `stored_name` es el nombre con UUID."""
+    # Defence: prevent path traversal — only basenames allowed
+    if "/" in stored_name or ".." in stored_name:
+        raise HTTPException(status_code=400, detail="Nombre de archivo inválido")
+    path = os.path.join(ANEXOS_DIR, stored_name)
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="Anexo no encontrado")
+    try:
+        os.remove(path)
+    except OSError as e:
+        raise HTTPException(status_code=500, detail=f"No se pudo eliminar el anexo: {e}")
+    return {"success": True}
+
+
+
 
 @router.post("/evaluaciones", response_model=dict)
 async def create_evaluacion(
@@ -1596,6 +1691,7 @@ async def generate_evaluacion_pdf(
             <div class="section-title">4 · CALIDAD DE CEPELLONES</div>
             <div class="section-content">
                 <div class="question-row"><span class="question-text">Nº de referencia de lote de cepellones</span><div class="answer">{_txt(cepellones.get('numero_lote'))}</div></div>
+                <div class="question-row"><span class="question-text">Anexo adjunto</span><div class="answer">{(lambda a: f'<span style="color:#1976d2;">📎 {a.get("filename","anexo")}</span> <span style="color:#888; font-size:0.85em;">({a.get("content_type","")})</span>' if isinstance(a, dict) and a.get('filename') else '<span style="color:#888;">—</span>')(cepellones.get('anexo'))}</div></div>
                 <div class="question-row"><span class="question-text">¿Los paquetes/envases de semillas están archivados con este impreso?</span><div class="answer">{_fmt_sn(cepellones.get('envases_archivados'))}</div></div>
                 <div class="question-row"><span class="question-text">¿El semillero ha suministrado un certificado de sanidad vegetal?</span><div class="answer">{_fmt_sn(cepellones.get('certificado_sanidad'))}</div></div>
                 <div class="question-row"><span class="question-text">Si existe el certificado de sanidad, ¿está archivado con este impreso?</span><div class="answer">{_fmt_sn(cepellones.get('certificado_archivado'))}</div></div>

@@ -281,6 +281,15 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - 30+ `data-testid` añadidos para automatización.
 - **Testing**: testing_agent_v3_fork — backend 100%, frontend 100% (iteration_68.json). Pytest creado en `/app/backend/tests/test_evaluaciones_impresos.py`.
 
+### Adjuntar anexo en Sección 4 (Calidad de cepellones) - DONE (2026-06-26)
+- Nuevo endpoint `POST /api/evaluaciones/anexos/upload` (PDF, imagen, Office; máx 15 MB; validación de content-type).
+- Endpoint `DELETE /api/evaluaciones/anexos/{stored_name}` para eliminar.
+- Archivos persisten en `/app/uploads/evaluaciones/anexos/<uuid>__<filename>` y se sirven vía StaticFiles (`/api/uploads/...`).
+- UI en `EvaluacionesImpresos.js` Sección 4: botón "Adjuntar anexo" → muestra card con icono clip, nombre clicable (descargable), tamaño y botón eliminar.
+- Metadata persistida en `impresos.calidad_cepellones.anexo = {filename, stored_name, url, size, content_type, uploaded_at, uploaded_by}`.
+- PDF export de la evaluación incluye fila "Anexo adjunto" con nombre y tipo del archivo.
+- Validado end-to-end: upload UI ✅, persistencia DB ✅, descarga static ✅, delete ✅, rechazo de tipos inválidos ✅.
+
 ### Cabecera "Impresos" sincronizada en vivo desde Parcela + Contrato - DONE (2026-06-26)
 - Los 6 campos de cabecera (Proveedor, Código Plantación, Finca, Cultivo, Variedad, Superficie) ahora son **read-only** y se computan en vivo desde la Parcela y el Contrato vinculado.
 - **Variedad** resuelta con misma lógica que `ParcelasForm`: si la parcela no la tiene, busca en el catálogo de cultivos y auto-selecciona si hay 1 sola variedad disponible (ej. GUISANTE VERDE → MUCIO).
