@@ -1,0 +1,24 @@
+{
+  "summary": "[BUG VERIFICATION] User-reported bug 'Impresos tab fields not saving' could NOT be reproduced. Both backend persistence tests (3/3 PASS via pytest) and end-to-end Playwright UI test (edit existing COT-GUI-25-001, fill ALL 22 Impresos fields including comentarios, tri-state Sí/No buttons, síntomas checkboxes, calibración, calidad cepellones, inspección maquinaria, observaciones; click Guardar; re-open same evaluation) confirm 100% of values persist correctly. Tri-state False values (clicking 'No') also persist. The bug appears to be ALREADY FIXED — current code is working as designed.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_impresos_save_bug.py",
+    "/app/test_reports/pytest/test_impresos_save_bug.xml"
+  ],
+  "action_items": [
+    "Ask the user for additional details: (a) which browser/device, (b) does the issue happen on a NEW evaluation or EDIT of existing, (c) any console errors visible when clicking Guardar, (d) exact field(s) lost (text vs Sí/No buttons vs checkboxes), (e) is the success toast appearing? — current implementation in EvaluacionesImpresos.js + Evaluaciones.js handleSubmit + routes_evaluaciones.py POST/PUT works correctly for ALL field types incl. tri-state False."
+  ],
+  "critical_code_review_comments": [
+    "Minor (not the bug): notify.success messages contain typos 'actualizadoa'/'creadoa' (Evaluaciones.js lines 309/312/408/431/455) — should be 'actualizada'/'creada'.",
+    "Minor: routes_evaluaciones.py is 1500+ lines — PDF generation logic should be split into a separate module for maintainability."
+  ],
+  "updated_files": ["/app/backend/tests/test_impresos_save_bug.py"],
+  "success_rate": {"backend": "100% (3/3)", "frontend": "100% (all 22 Impresos fields + 9 tri-state buttons + 3 sintomas checkboxes persisted on save→close→re-open)"},
+  "test_credentials": "admin@fruveco.com / admin123",
+  "seed_data_creation": "Used existing parcela + existing evaluation; test data created with TESTAGENT2026_ / TESTBUG2026 prefixes and cleaned up via DELETE in pytest. Manual UI test left one evaluation with TESTAGENT2026_ markers on the first row — main agent can delete if needed.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "BUG NOT REPRODUCIBLE. POST /api/evaluaciones and PUT /api/evaluaciones/{id} both correctly persist the entire impresos dict (incl. nested analisis_suelo, pasos_precampana, calibracion, calidad_cepellones, inspeccion_maquinaria, observaciones_generales, libre_sintomas). Frontend setImpresos via setFormData merges correctly; mergeImpresos on handleEdit re-hydrates correctly. Tri-state Sí/No false values persist (verified). If user still reports the bug, likely a stale browser cache / specific environment issue — gather console logs from user directly.",
+  "rca of the issue": "No bug found. Both backend (pytest 3/3) and frontend e2e (Playwright) verified save+reload works for all Impresos fields including tri-state false. Suspect user may have been viewing a stale/cached state, or testing on an evaluation whose form they didn't actually click Save on. Recommend asking user for browser console screenshot + reproducible steps."
+}
