@@ -216,30 +216,7 @@ const Evaluaciones = () => {
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
 
   const handleParcelaSelect = (parcelaId) => {
-    setFormData(prev => {
-      const next = { ...prev, parcela_id: parcelaId };
-      if (parcelaId) {
-        const parcela = parcelas.find(p => p._id === parcelaId);
-        if (parcela) {
-          // Auto-fill impresos header from parcela (editable later).
-          // Only overwrite fields that are empty so user edits are preserved
-          // when switching between parcelas.
-          const currentImp = prev.impresos || { ...DEFAULT_IMPRESOS };
-          next.impresos = {
-            ...DEFAULT_IMPRESOS,
-            ...currentImp,
-            proveedor: currentImp.proveedor || parcela.proveedor || '',
-            codigo_plantacion: currentImp.codigo_plantacion || parcela.codigo_plantacion || '',
-            finca: currentImp.finca || parcela.finca || '',
-            cultivo: currentImp.cultivo || parcela.cultivo || '',
-            variedad: currentImp.variedad || parcela.variedad || '',
-            superficie: currentImp.superficie || parcela.superficie_total || '',
-            parcela_id: parcelaId,
-          };
-        }
-      }
-      return next;
-    });
+    setFormData(prev => ({ ...prev, parcela_id: parcelaId }));
     if (parcelaId) {
       const parcela = parcelas.find(p => p._id === parcelaId);
       if (parcela) {
@@ -267,6 +244,9 @@ const Evaluaciones = () => {
     try {
       setError(null);
       const parcela = parcelas.find(p => p._id === formData.parcela_id);
+      const contrato = (parcela?.contrato_id && Array.isArray(contratos))
+        ? (contratos.find(c => c._id === parcela.contrato_id) || null)
+        : null;
       const secciones_respuestas = {};
       SECCIONES.forEach(seccion => {
         const preguntas = getPreguntasSeccion(seccion.key);
@@ -274,8 +254,24 @@ const Evaluaciones = () => {
           pregunta_id: p.id, pregunta: p.pregunta, tipo: p.tipo, respuesta: respuestas[p.id] || ''
         }));
       });
+      // Cabecera de Impresos SIEMPRE sincronizada en vivo desde Parcela + Contrato.
+      // Solo el resto del impresos (comentarios, secciones 1-6) queda como lo
+      // editó el usuario. Esto garantiza que el PDF y la base de datos reflejen
+      // siempre los datos actuales de la parcela/contrato asignado.
+      const impresosSync = {
+        ...(formData.impresos || {}),
+        proveedor: parcela?.proveedor || contrato?.proveedor || '',
+        codigo_plantacion: parcela?.codigo_plantacion || '',
+        finca: parcela?.finca || '',
+        cultivo: parcela?.cultivo || contrato?.cultivo || '',
+        variedad: parcela?.variedad || contrato?.variedad || '',
+        superficie: parcela?.superficie_total ?? parcela?.superficie ?? '',
+        parcela_id: formData.parcela_id || '',
+        contrato_id: parcela?.contrato_id || '',
+      };
       const payload = {
         ...formData,
+        impresos: impresosSync,
         codigo_plantacion: parcela?.codigo_plantacion || '',
         proveedor: parcela?.proveedor || '',
         cultivo: parcela?.cultivo || '',
@@ -578,6 +574,7 @@ const Evaluaciones = () => {
               handleSubmit={handleSubmit}
               onCancel={() => { setShowForm(false); setEditingId(null); resetForm(); }}
               parcelas={parcelas}
+              contratos={contratos}
               filteredParcelas={filteredParcelas}
               parcelaSearch={parcelaSearch}
               setParcelaSearch={setParcelaSearch}

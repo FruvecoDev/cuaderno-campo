@@ -157,8 +157,19 @@ const SintomasCheckboxes = ({ value, onChange, testid }) => {
   );
 };
 
-const EvaluacionesImpresos = ({ impresos, setImpresos, selectedParcelaInfo, parcelaId }) => {
+const EvaluacionesImpresos = ({ impresos, setImpresos, selectedParcelaInfo, parcelaId, parcela, contrato }) => {
   const data = impresos || DEFAULT_IMPRESOS;
+
+  // Cabecera SIEMPRE en vivo desde Parcela + Contrato (no editable).
+  // Prioridad: Parcela → Contrato (fallback si la parcela no tiene el campo).
+  const headerLive = {
+    proveedor: parcela?.proveedor || contrato?.proveedor || '',
+    codigo_plantacion: parcela?.codigo_plantacion || '',
+    finca: parcela?.finca || '',
+    cultivo: parcela?.cultivo || contrato?.cultivo || '',
+    variedad: parcela?.variedad || contrato?.variedad || '',
+    superficie: parcela?.superficie_total ?? parcela?.superficie ?? '',
+  };
 
   const update = (path, value) => {
     setImpresos((prev) => {
@@ -173,6 +184,30 @@ const EvaluacionesImpresos = ({ impresos, setImpresos, selectedParcelaInfo, parc
       return next;
     });
   };
+
+  // Read-only display field with the same visual weight as a form input.
+  const renderReadOnly = (label, value, testid) => (
+    <div className="form-group" style={{ marginBottom: 0 }}>
+      <label style={labelStyle}>{label}</label>
+      <div
+        data-testid={testid}
+        style={{
+          minHeight: '38px',
+          padding: '0.5rem 0.75rem',
+          borderRadius: '6px',
+          border: '1px solid hsl(var(--border))',
+          background: 'hsl(var(--muted) / 0.4)',
+          fontSize: '0.9rem',
+          color: value ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))',
+          fontStyle: value ? 'normal' : 'italic',
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
+        {value || 'Sin datos en parcela/contrato'}
+      </div>
+    </div>
+  );
 
   return (
     <div data-testid="impresos-tab-content" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -195,30 +230,16 @@ const EvaluacionesImpresos = ({ impresos, setImpresos, selectedParcelaInfo, parc
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label style={labelStyle}>La plantación (Proveedor)</label>
-            <input type="text" className="form-input" value={data.proveedor || ''} onChange={(e) => update('proveedor', e.target.value)} data-testid="impresos-proveedor" />
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label style={labelStyle}>Código Plantación</label>
-            <input type="text" className="form-input" value={data.codigo_plantacion || ''} onChange={(e) => update('codigo_plantacion', e.target.value)} data-testid="impresos-codigo" />
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label style={labelStyle}>Finca</label>
-            <input type="text" className="form-input" value={data.finca || ''} onChange={(e) => update('finca', e.target.value)} data-testid="impresos-finca" />
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label style={labelStyle}>Cultivo</label>
-            <input type="text" className="form-input" value={data.cultivo || ''} onChange={(e) => update('cultivo', e.target.value)} data-testid="impresos-cultivo" />
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label style={labelStyle}>Variedad</label>
-            <input type="text" className="form-input" value={data.variedad || ''} onChange={(e) => update('variedad', e.target.value)} data-testid="impresos-variedad" />
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label style={labelStyle}>Superficie (ha)</label>
-            <input type="text" className="form-input" value={data.superficie ?? ''} onChange={(e) => update('superficie', e.target.value)} data-testid="impresos-superficie" />
-          </div>
+          {renderReadOnly('La plantación (Proveedor)', headerLive.proveedor, 'impresos-proveedor')}
+          {renderReadOnly('Código Plantación', headerLive.codigo_plantacion, 'impresos-codigo')}
+          {renderReadOnly('Finca', headerLive.finca, 'impresos-finca')}
+          {renderReadOnly('Cultivo', headerLive.cultivo, 'impresos-cultivo')}
+          {renderReadOnly('Variedad', headerLive.variedad, 'impresos-variedad')}
+          {renderReadOnly('Superficie (ha)', headerLive.superficie !== '' ? String(headerLive.superficie) : '', 'impresos-superficie')}
+        </div>
+
+        <div style={{ marginTop: '0.4rem', fontSize: '0.72rem', color: 'hsl(var(--muted-foreground))', fontStyle: 'italic' }}>
+          Estos campos se sincronizan automáticamente desde la Parcela y el Contrato asignados a la hoja de evaluación.
         </div>
 
         {parcelaId && (

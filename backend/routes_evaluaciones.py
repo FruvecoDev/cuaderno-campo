@@ -1516,7 +1516,10 @@ async def generate_evaluacion_pdf(
     
     # Impresos — Cabecera + 6 secciones (esquema nuevo)
     impresos = evaluacion.get('impresos', {}) or {}
-    if impresos:
+    # Mostrar Impresos siempre que haya una parcela vinculada al evaluación
+    # (la cabecera se computa en vivo desde parcela/contrato; las 6 secciones
+    # solo se muestran si el usuario ha rellenado algo en impresos).
+    if impresos or evaluacion.get('parcela_id'):
         def _fmt_sn(v):
             """Format Sí/No tri-state (True/False/None)."""
             if v is True:
@@ -1548,12 +1551,12 @@ async def generate_evaluacion_pdf(
             <div class="section-title">IMPRESOS — CABECERA / PLANTACIÓN</div>
             <div class="section-content">
                 <div class="datos-grid">
-                    <div class="dato-item"><div class="dato-label">La plantación (Proveedor)</div><div class="dato-value">{_txt(impresos.get('proveedor'))}</div></div>
-                    <div class="dato-item"><div class="dato-label">Código Plantación</div><div class="dato-value">{_txt(impresos.get('codigo_plantacion'))}</div></div>
-                    <div class="dato-item"><div class="dato-label">Finca</div><div class="dato-value">{_txt(impresos.get('finca'))}</div></div>
-                    <div class="dato-item"><div class="dato-label">Cultivo</div><div class="dato-value">{_txt(impresos.get('cultivo'))}</div></div>
-                    <div class="dato-item"><div class="dato-label">Variedad</div><div class="dato-value">{_txt(impresos.get('variedad'))}</div></div>
-                    <div class="dato-item"><div class="dato-label">Superficie</div><div class="dato-value">{_txt(impresos.get('superficie'))}</div></div>
+                    <div class="dato-item"><div class="dato-label">La plantación (Proveedor)</div><div class="dato-value">{_txt(impresos.get('proveedor') or evaluacion.get('proveedor'))}</div></div>
+                    <div class="dato-item"><div class="dato-label">Código Plantación</div><div class="dato-value">{_txt(impresos.get('codigo_plantacion') or evaluacion.get('codigo_plantacion'))}</div></div>
+                    <div class="dato-item"><div class="dato-label">Finca</div><div class="dato-value">{_txt(impresos.get('finca') or evaluacion.get('finca'))}</div></div>
+                    <div class="dato-item"><div class="dato-label">Cultivo</div><div class="dato-value">{_txt(impresos.get('cultivo') or evaluacion.get('cultivo'))}</div></div>
+                    <div class="dato-item"><div class="dato-label">Variedad</div><div class="dato-value">{_txt(impresos.get('variedad') or evaluacion.get('variedad'))}</div></div>
+                    <div class="dato-item"><div class="dato-label">Superficie</div><div class="dato-value">{_txt(impresos.get('superficie') if impresos.get('superficie') not in (None, '') else evaluacion.get('superficie'))}</div></div>
                 </div>
                 <div style="margin-top:8px;">
                     <div class="dato-label">Comentarios</div>

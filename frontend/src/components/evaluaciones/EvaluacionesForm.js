@@ -88,6 +88,7 @@ const EvaluacionesForm = ({
   handleSubmit,
   onCancel,
   parcelas,
+  contratos = [],
   filteredParcelas,
   parcelaSearch,
   setParcelaSearch,
@@ -435,6 +436,12 @@ const EvaluacionesForm = ({
             }))}
             selectedParcelaInfo={selectedParcelaInfo}
             parcelaId={formData.parcela_id}
+            parcela={parcelas.find(p => p._id === formData.parcela_id)}
+            contrato={(() => {
+              const p = parcelas.find(pp => pp._id === formData.parcela_id);
+              if (!p?.contrato_id || !Array.isArray(contratos)) return null;
+              return contratos.find(c => c._id === p.contrato_id) || null;
+            })()}
           />
         )}
         {activeTab === 'impresos' && !formData.parcela_id && (
