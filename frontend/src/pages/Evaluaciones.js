@@ -94,6 +94,7 @@ const Evaluaciones = () => {
   const [expandedSections, setExpandedSections] = useState({});
   const [customPreguntas, setCustomPreguntas] = useState({});
   const [hiddenPreguntas, setHiddenPreguntas] = useState({});
+  const [ordenGlobal, setOrdenGlobal] = useState([]);
   const [contratos, setContratos] = useState([]);
   const [showAddQuestion, setShowAddQuestion] = useState(false);
   const [newQuestionSection, setNewQuestionSection] = useState('');
@@ -152,10 +153,11 @@ const Evaluaciones = () => {
   const fetchPreguntasConfig = async () => {
     try {
       const data = await api.get('/api/evaluaciones/config/preguntas');
-      // Backend devuelve { preguntas: { seccion: [default + custom (sin ocultas)] }, custom, hidden }
+      // Backend devuelve { preguntas: { seccion: [default + custom (sin ocultas)] }, custom, hidden, orden_global }
       // Guardamos directamente el listado ya unificado para evitar duplicados.
       setCustomPreguntas(data?.preguntas || {});
       setHiddenPreguntas(data?.hidden || {});
+      setOrdenGlobal(Array.isArray(data?.orden_global) ? data.orden_global : []);
     } catch (e) { console.error('[Evaluaciones.js] fetchPreguntasConfig', e); }
   };
 
@@ -411,6 +413,7 @@ const Evaluaciones = () => {
     if (oldIndex === -1 || newIndex === -1) return;
     const reordered = arrayMove(flatItems, oldIndex, newIndex);
     const orden = reordered.map(p => p.id);
+    setOrdenGlobal(orden);
 
     // Update local state optimistically: reagrupa por sección _seccion respetando el nuevo orden
     setCustomPreguntas(prev => {
@@ -548,6 +551,7 @@ const Evaluaciones = () => {
               getPreguntasSeccion={getPreguntasSeccion}
               handleDragEnd={handleDragEnd}
               handleFlatDragEnd={handleFlatDragEnd}
+              ordenGlobal={ordenGlobal}
               handleDuplicateQuestion={handleDuplicateQuestion}
               handleDeleteQuestion={handleDeleteQuestion}
               handleRestoreQuestion={handleRestoreQuestion}

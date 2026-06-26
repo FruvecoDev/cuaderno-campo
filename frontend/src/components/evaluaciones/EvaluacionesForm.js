@@ -99,6 +99,7 @@ const EvaluacionesForm = ({
   getPreguntasSeccion,
   handleDragEnd,
   handleFlatDragEnd,
+  ordenGlobal = [],
   handleDuplicateQuestion,
   handleDeleteQuestion,
   handleRestoreQuestion,
@@ -255,9 +256,23 @@ const EvaluacionesForm = ({
             // with existing evaluations) but the user always sees a single list.
             const DEFAULT_SECTION_KEY = (SECCIONES[0] && SECCIONES[0].key) || 'toma_datos';
             // Build a single flat list across all internal sections, preserving order.
-            const flatItems = SECCIONES.flatMap(s =>
+            const baseFlat = SECCIONES.flatMap(s =>
               (getPreguntasSeccion(s.key) || []).map(p => ({ ...p, _seccion: s.key }))
             );
+            // Si hay un orden global guardado, lo aplicamos como fuente de verdad
+            // para permitir reordenar a través de secciones (el usuario no ve
+            // secciones, así que cualquier movimiento debe respetarse).
+            const flatItems = (ordenGlobal && ordenGlobal.length > 0)
+              ? (() => {
+                  const pos = new Map(ordenGlobal.map((id, idx) => [id, idx]));
+                  const sorted = [...baseFlat].sort((a, b) => {
+                    const pa = pos.has(a.id) ? pos.get(a.id) : Number.MAX_SAFE_INTEGER;
+                    const pb = pos.has(b.id) ? pos.get(b.id) : Number.MAX_SAFE_INTEGER;
+                    return pa - pb;
+                  });
+                  return sorted;
+                })()
+              : baseFlat;
             return (
               <div data-testid="cuestionarios-vista-plana">
                 {/* Global "Añadir pregunta" panel — sin selector de sección */}
