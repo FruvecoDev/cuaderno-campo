@@ -306,10 +306,10 @@ const Evaluaciones = () => {
       };
       if (editingId) {
         await api.put(`/api/evaluaciones/${editingId}`, payload);
-        notify.success('Evaluación actualizadoa correctamente');
+        notify.success('Evaluación actualizada correctamente');
       } else {
         await api.post('/api/evaluaciones', payload);
-        notify.success('Evaluación creadoa correctamente');
+        notify.success('Evaluación creada correctamente');
       }
       fetchEvaluaciones();
       setShowForm(false);
