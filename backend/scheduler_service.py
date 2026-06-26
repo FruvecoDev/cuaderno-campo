@@ -43,6 +43,74 @@ def sync_climate_check():
     run_async_task(scheduled_climate_check())
 
 
+# -----------------------------------------------------------------------------
+# MAPA import reminder — lunes 09:00
+# -----------------------------------------------------------------------------
+# Comprueba semanalmente cuándo se hizo la última importación del registro MAPA.
+# Si han pasado más de 7 días, crea una notificación interna para los Admin
+# para que vuelvan a importar el listado oficial actualizado.
+async def scheduled_mapa_import_reminder():
+    """Aviso semanal a Admin si la última importación MAPA es > 7 días."""
+    try:
+        from database import db
+        from routes_notificaciones import crear_notificacion_interna
+
+        # Considerar tanto `imported_at` (importaciones) como `updated_at` (cualquier cambio)
+        latest = await db.fitosanitarios.find_one(
+            {"imported_at": {"$exists": True}},
+            sort=[("imported_at", -1)],
+        )
+        last_import_at = latest.get("imported_at") if latest else None
+        days_since = None
+        if last_import_at:
+            delta = datetime.utcnow() - last_import_at
+            days_since = delta.days
+
+        # Recolectar IDs de admins para destinatarios
+        admin_ids = [
+            str(u["_id"]) async for u in db.users.find(
+                {"role": "Admin"}, {"_id": 1}
+            )
+        ]
+
+        if last_import_at is None:
+            titulo = "Importa el registro MAPA"
+            mensaje = (
+                "Aún no se ha realizado ninguna importación del registro oficial "
+                "MAPA de productos fitosanitarios. Visita Fitosanitarios → MAPA "
+                "para subir el listado actualizado."
+            )
+        elif days_since is not None and days_since >= 7:
+            titulo = f"Registro MAPA pendiente de actualizar ({days_since} días)"
+            mensaje = (
+                f"La última importación del registro oficial MAPA fue hace {days_since} "
+                "días. El MAPA actualiza su base de datos cada viernes a las 14:00. "
+                "Recomendado: vuelve a importar el listado en Fitosanitarios → MAPA."
+            )
+        else:
+            # Importación reciente — no avisar
+            print(f"[Scheduler] MAPA import OK ({days_since} día(s) desde la última)")
+            return
+
+        await crear_notificacion_interna(
+            titulo=titulo,
+            mensaje=mensaje,
+            tipo="warning",
+            enlace="/fitosanitarios",
+            destinatarios=admin_ids or None,
+            prioridad="alta",
+            datos_extra={"days_since_import": days_since, "kind": "mapa_import_reminder"},
+        )
+        print(f"[Scheduler] MAPA reminder sent to {len(admin_ids)} admin(s)")
+    except Exception as e:
+        print(f"[Scheduler Error] MAPA reminder failed: {e}")
+
+
+def sync_mapa_import_reminder():
+    """Sync wrapper for the async MAPA reminder."""
+    run_async_task(scheduled_mapa_import_reminder())
+
+
 async def update_scheduler_from_config():
     """Update scheduler jobs based on database configuration"""
     from database import db
@@ -109,6 +177,17 @@ def init_scheduler():
                 await update_scheduler_from_config()
             
             asyncio.create_task(load_config())
+
+            # MAPA import reminder: cada lunes a las 09:00 (Europe/Madrid).
+            # No configurable desde UI (frecuencia fija acorde al ciclo semanal del MAPA).
+            scheduler.add_job(
+                sync_mapa_import_reminder,
+                trigger=CronTrigger(day_of_week='mon', hour=9, minute=0),
+                id='mapa_import_reminder',
+                name='MAPA Import Reminder',
+                replace_existing=True,
+            )
+            print("[Scheduler] MAPA import reminder scheduled: every Monday at 09:00")
             
     except Exception as e:
         print(f"[Scheduler Error] Failed to start: {e}")
