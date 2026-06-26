@@ -39,6 +39,10 @@ class EvaluacionCreate(BaseModel):
     inspeccion_maquinaria: Optional[List[Dict[str, Any]]] = []
     observaciones: Optional[List[Dict[str, Any]]] = []
     calibracion_mantenimiento: Optional[List[Dict[str, Any]]] = []
+    # Mapa completo de respuestas por sección — espejo de los campos top-level.
+    # El frontend lo usa para releer todas las respuestas en handleEdit, así que
+    # debemos persistirlo aunque sea redundante con los campos top-level.
+    secciones: Optional[Dict[str, Any]] = {}
 
 class PreguntaConfig(BaseModel):
     seccion: str
@@ -147,7 +151,19 @@ async def create_evaluacion(
         "inspeccion_maquinaria": evaluacion.inspeccion_maquinaria or [],
         "observaciones": evaluacion.observaciones or [],
         "calibracion_mantenimiento": evaluacion.calibracion_mantenimiento or [],
-        
+        # Mapa completo de respuestas — espejo de los campos top-level.
+        # Persistirlo es lo que permite a handleEdit del frontend releer las
+        # respuestas con un único Object.values(secciones).
+        "secciones": evaluacion.secciones if evaluacion.secciones else {
+            "toma_datos": evaluacion.toma_datos or [],
+            "analisis_suelo": evaluacion.analisis_suelo or [],
+            "pasos_precampana": evaluacion.pasos_precampana or [],
+            "calidad_cepellones": evaluacion.calidad_cepellones or [],
+            "inspeccion_maquinaria": evaluacion.inspeccion_maquinaria or [],
+            "observaciones": evaluacion.observaciones or [],
+            "calibracion_mantenimiento": evaluacion.calibracion_mantenimiento or [],
+        },
+
         # Metadatos
         "estado": "borrador",  # borrador, completada, archivada
         "created_by": str(current_user.get("_id", "")),
@@ -223,6 +239,18 @@ async def update_evaluacion(
         "inspeccion_maquinaria": evaluacion.inspeccion_maquinaria or [],
         "observaciones": evaluacion.observaciones or [],
         "calibracion_mantenimiento": evaluacion.calibracion_mantenimiento or [],
+        # Mapa completo {seccion: [respuestas]} — usado por el frontend en handleEdit
+        # para releer todas las respuestas. Si el cliente envía un objeto vacío,
+        # reconstruimos el mapa desde los campos top-level para no perder datos.
+        "secciones": evaluacion.secciones if evaluacion.secciones else {
+            "toma_datos": evaluacion.toma_datos or [],
+            "analisis_suelo": evaluacion.analisis_suelo or [],
+            "pasos_precampana": evaluacion.pasos_precampana or [],
+            "calidad_cepellones": evaluacion.calidad_cepellones or [],
+            "inspeccion_maquinaria": evaluacion.inspeccion_maquinaria or [],
+            "observaciones": evaluacion.observaciones or [],
+            "calibracion_mantenimiento": evaluacion.calibracion_mantenimiento or [],
+        },
         "updated_at": datetime.now()
     }
     

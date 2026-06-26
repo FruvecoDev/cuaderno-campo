@@ -324,13 +324,28 @@ const Evaluaciones = () => {
       }
     }
     const newRespuestas = {};
-    if (evaluacion.secciones) {
+    // Read from `evaluacion.secciones` (preferred — written by backend on save)
+    // and also from the top-level section fields (legacy / belt & braces) so
+    // that older evaluations created before the backend persisted `secciones`
+    // continue to load correctly.
+    if (evaluacion.secciones && typeof evaluacion.secciones === 'object') {
       Object.values(evaluacion.secciones).forEach(seccionResp => {
         if (Array.isArray(seccionResp)) {
-          seccionResp.forEach(r => { newRespuestas[r.pregunta_id] = r.respuesta; });
+          seccionResp.forEach(r => { if (r && r.pregunta_id !== undefined) newRespuestas[r.pregunta_id] = r.respuesta; });
         }
       });
     }
+    SECCIONES.forEach(s => {
+      const arr = evaluacion[s.key];
+      if (Array.isArray(arr)) {
+        arr.forEach(r => {
+          // Top-level wins only if `secciones` didn't already provide a value.
+          if (r && r.pregunta_id !== undefined && newRespuestas[r.pregunta_id] === undefined) {
+            newRespuestas[r.pregunta_id] = r.respuesta;
+          }
+        });
+      }
+    });
     setRespuestas(newRespuestas);
     setShowForm(true);
   };
