@@ -97,6 +97,7 @@ const Evaluaciones = () => {
   const [hiddenPreguntas, setHiddenPreguntas] = useState({});
   const [ordenGlobal, setOrdenGlobal] = useState([]);
   const [contratos, setContratos] = useState([]);
+  const [cultivosCatalog, setCultivosCatalog] = useState([]);
   const [showAddQuestion, setShowAddQuestion] = useState(false);
   const [newQuestionSection, setNewQuestionSection] = useState('');
   const [newQuestionText, setNewQuestionText] = useState('');
@@ -114,6 +115,7 @@ const Evaluaciones = () => {
     fetchEvaluaciones();
     fetchParcelas();
     fetchContratos();
+    fetchCultivos();
     fetchPreguntasConfig();
   }, []);
 
@@ -149,6 +151,22 @@ const Evaluaciones = () => {
   const fetchContratos = async () => {
     try { const data = await api.get('/api/contratos?limit=1000'); setContratos(Array.isArray(data) ? data : data?.contratos || []); }
     catch (e) { console.error('[Evaluaciones.js] fetchContratos', e); }
+  };
+
+  const fetchCultivos = async () => {
+    try { const data = await api.get('/api/cultivos?limit=500'); setCultivosCatalog(Array.isArray(data) ? data : data?.cultivos || []); }
+    catch (e) { console.error('[Evaluaciones.js] fetchCultivos', e); }
+  };
+
+  // Resolve variedad live from the cultivos catalog when the parcela doesn't
+  // explicitly have one (matches the auto-selection behaviour of ParcelasForm).
+  const resolveVariedad = (parcela) => {
+    if (!parcela) return '';
+    if (parcela.variedad) return parcela.variedad;
+    const cultivoName = (parcela.cultivo || '').toLowerCase();
+    const cultivoObj = cultivosCatalog.find(c => (c.nombre || '').toLowerCase() === cultivoName);
+    const variedades = cultivoObj?.variedades || [];
+    return variedades.length === 1 ? variedades[0] : '';
   };
 
   const fetchPreguntasConfig = async () => {
@@ -258,13 +276,14 @@ const Evaluaciones = () => {
       // Solo el resto del impresos (comentarios, secciones 1-6) queda como lo
       // editó el usuario. Esto garantiza que el PDF y la base de datos reflejen
       // siempre los datos actuales de la parcela/contrato asignado.
+      const variedadResuelta = resolveVariedad(parcela) || contrato?.variedad || '';
       const impresosSync = {
         ...(formData.impresos || {}),
         proveedor: parcela?.proveedor || contrato?.proveedor || '',
         codigo_plantacion: parcela?.codigo_plantacion || '',
         finca: parcela?.finca || '',
         cultivo: parcela?.cultivo || contrato?.cultivo || '',
-        variedad: parcela?.variedad || contrato?.variedad || '',
+        variedad: variedadResuelta,
         superficie: parcela?.superficie_total ?? parcela?.superficie ?? '',
         parcela_id: formData.parcela_id || '',
         contrato_id: parcela?.contrato_id || '',
@@ -275,7 +294,7 @@ const Evaluaciones = () => {
         codigo_plantacion: parcela?.codigo_plantacion || '',
         proveedor: parcela?.proveedor || '',
         cultivo: parcela?.cultivo || '',
-        variedad: parcela?.variedad || '',
+        variedad: variedadResuelta,
         finca: parcela?.finca || '',
         campana: parcela?.campana || '',
         // El backend espera las secciones como campos top-level
@@ -575,6 +594,7 @@ const Evaluaciones = () => {
               onCancel={() => { setShowForm(false); setEditingId(null); resetForm(); }}
               parcelas={parcelas}
               contratos={contratos}
+              cultivosCatalog={cultivosCatalog}
               filteredParcelas={filteredParcelas}
               parcelaSearch={parcelaSearch}
               setParcelaSearch={setParcelaSearch}

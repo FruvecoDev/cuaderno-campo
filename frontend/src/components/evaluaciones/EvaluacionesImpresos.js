@@ -157,8 +157,20 @@ const SintomasCheckboxes = ({ value, onChange, testid }) => {
   );
 };
 
-const EvaluacionesImpresos = ({ impresos, setImpresos, selectedParcelaInfo, parcelaId, parcela, contrato }) => {
+const EvaluacionesImpresos = ({ impresos, setImpresos, selectedParcelaInfo, parcelaId, parcela, contrato, cultivosCatalog = [] }) => {
   const data = impresos || DEFAULT_IMPRESOS;
+
+  // Resolve variedad live: if the parcela doesn't have one explicitly, fall
+  // back to the cultivos catalog (same auto-selection rule used by ParcelasForm:
+  // if the cultivo has exactly one variedad, use it).
+  const resolveVariedadLive = () => {
+    if (parcela?.variedad) return parcela.variedad;
+    const cultivoName = (parcela?.cultivo || '').toLowerCase();
+    const cultivoObj = cultivosCatalog.find(c => (c.nombre || '').toLowerCase() === cultivoName);
+    const variedades = cultivoObj?.variedades || [];
+    if (variedades.length === 1) return variedades[0];
+    return contrato?.variedad || '';
+  };
 
   // Cabecera SIEMPRE en vivo desde Parcela + Contrato (no editable).
   // Prioridad: Parcela → Contrato (fallback si la parcela no tiene el campo).
@@ -167,7 +179,7 @@ const EvaluacionesImpresos = ({ impresos, setImpresos, selectedParcelaInfo, parc
     codigo_plantacion: parcela?.codigo_plantacion || '',
     finca: parcela?.finca || '',
     cultivo: parcela?.cultivo || contrato?.cultivo || '',
-    variedad: parcela?.variedad || contrato?.variedad || '',
+    variedad: resolveVariedadLive(),
     superficie: parcela?.superficie_total ?? parcela?.superficie ?? '',
   };
 

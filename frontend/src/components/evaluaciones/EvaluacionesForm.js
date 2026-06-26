@@ -89,6 +89,7 @@ const EvaluacionesForm = ({
   onCancel,
   parcelas,
   contratos = [],
+  cultivosCatalog = [],
   filteredParcelas,
   parcelaSearch,
   setParcelaSearch,
@@ -442,6 +443,7 @@ const EvaluacionesForm = ({
               if (!p?.contrato_id || !Array.isArray(contratos)) return null;
               return contratos.find(c => c._id === p.contrato_id) || null;
             })()}
+            cultivosCatalog={cultivosCatalog}
           />
         )}
         {activeTab === 'impresos' && !formData.parcela_id && (

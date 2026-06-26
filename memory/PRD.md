@@ -283,8 +283,8 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 
 ### Cabecera "Impresos" sincronizada en vivo desde Parcela + Contrato - DONE (2026-06-26)
 - Los 6 campos de cabecera (Proveedor, Código Plantación, Finca, Cultivo, Variedad, Superficie) ahora son **read-only** y se computan en vivo desde la Parcela y el Contrato vinculado.
+- **Variedad** resuelta con misma lógica que `ParcelasForm`: si la parcela no la tiene, busca en el catálogo de cultivos y auto-selecciona si hay 1 sola variedad disponible (ej. GUISANTE VERDE → MUCIO).
 - Al guardar, se sincronizan automáticamente en `impresos.*` y se añaden `parcela_id` y `contrato_id` para trazabilidad.
-- Lógica de fallback: Parcela → Contrato (si la parcela no tiene el campo).
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
