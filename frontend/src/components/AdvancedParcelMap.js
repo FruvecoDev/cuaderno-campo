@@ -424,6 +424,10 @@ const AdvancedParcelMap = ({
   const [measuredDistance, setMeasuredDistance] = useState(null);
   const [searchAddress, setSearchAddress] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const searchMarkerRef = React.useRef(null);
+  const searchDebounceRef = React.useRef(null);
   const [showImportExport, setShowImportExport] = useState(false);
   const fileInputRef = useRef(null);
   const mapRef = useRef(null);
@@ -451,32 +455,83 @@ const AdvancedParcelMap = ({
   const totalArea = effectiveZones.reduce((sum, z) => sum + parseFloat(calculateArea(z) || 0), 0);
   const totalPoints = effectiveZones.reduce((sum, z) => sum + (z ? z.length : 0), 0);
   
-  // Buscar dirección usando Nominatim
-  const handleSearchAddress = async () => {
-    if (!searchAddress.trim()) return;
-    
+  // Buscar lugar usando múltiples proveedores estilo Google Maps:
+  //   1) Photon (Komoot) — bueno con autocompletado y nombres en español
+  //   2) Nominatim — backup, gratis y sin API key
+  // Devuelve hasta 6 resultados con coordenadas + dirección formateada.
+  const handleSearchAddress = async (overrideQuery) => {
+    const query = (overrideQuery ?? searchAddress).trim();
+    if (!query) { setSearchResults([]); return; }
+    setSearchLoading(true);
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchAddress)}`
-      );
-      const data = await response.json();
-      
-      if (data && data.length > 0) {
-        const { lat, lon } = data[0];
-        if (mapRef.current) {
-          mapRef.current.setView([parseFloat(lat), parseFloat(lon)], 15);
-          L.marker([parseFloat(lat), parseFloat(lon)])
-            .addTo(mapRef.current)
-            .bindPopup(data[0].display_name)
-            .openPopup();
+      // Photon primero (mejor para autocompletado de localidades/POIs)
+      const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=6&lang=es`;
+      let results = [];
+      try {
+        const res = await fetch(photonUrl);
+        if (res.ok) {
+          const data = await res.json();
+          results = (data.features || []).map(f => {
+            const [lon, lat] = f.geometry.coordinates;
+            const p = f.properties || {};
+            const parts = [p.name, p.street && (p.housenumber ? `${p.street} ${p.housenumber}` : p.street), p.city || p.town || p.village, p.state, p.country].filter(Boolean);
+            return { lat, lon, label: parts.join(', '), source: 'photon' };
+          });
         }
-      } else {
-        notify.info('No se encontró la dirección');
-      }
-    } catch (error) {
+      } catch (_) { /* ignore, fallback below */ }
 
+      // Si Photon no devuelve nada, usar Nominatim como red de seguridad
+      if (results.length === 0) {
+        const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=6&addressdetails=1&accept-language=es&countrycodes=es`;
+        const res = await fetch(nominatimUrl);
+        if (res.ok) {
+          const data = await res.json();
+          results = (data || []).map(d => ({
+            lat: parseFloat(d.lat),
+            lon: parseFloat(d.lon),
+            label: d.display_name,
+            source: 'nominatim',
+          }));
+        }
+      }
+
+      setSearchResults(results);
+      if (results.length === 0) notify.info('No se encontraron resultados');
+    } catch (e) {
+      console.error('[AdvancedParcelMap] search', e);
       notify.error('Error al buscar dirección');
+      setSearchResults([]);
+    } finally {
+      setSearchLoading(false);
     }
+  };
+
+  // Auto-buscar mientras escribes (debounce 350ms)
+  useEffect(() => {
+    if (!showSearch) return;
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    if (!searchAddress.trim() || searchAddress.trim().length < 3) {
+      setSearchResults([]);
+      return;
+    }
+    searchDebounceRef.current = setTimeout(() => handleSearchAddress(), 350);
+    return () => searchDebounceRef.current && clearTimeout(searchDebounceRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchAddress, showSearch]);
+
+  // Centrar el mapa en un resultado y plantar un marcador único (sustituye el anterior)
+  const handleSelectSearchResult = (result) => {
+    if (!mapRef.current) return;
+    const { lat, lon, label } = result;
+    mapRef.current.setView([lat, lon], 16);
+    if (searchMarkerRef.current) {
+      try { mapRef.current.removeLayer(searchMarkerRef.current); } catch (_) {}
+    }
+    searchMarkerRef.current = L.marker([lat, lon])
+      .addTo(mapRef.current)
+      .bindPopup(label)
+      .openPopup();
+    setSearchResults([]); // ocultar lista tras seleccionar
   };
   
   // Exportar a GeoJSON - todas las zonas
@@ -753,29 +808,93 @@ ${placemarks}
         </div>
       </div>
       
-      {/* Panel de búsqueda de dirección */}
+      {/* Panel de búsqueda de dirección (estilo Google Maps con autocompletado) */}
       {showSearch && (
         <div style={{
           display: 'flex',
+          flexDirection: 'column',
           gap: '0.5rem',
           marginBottom: '0.5rem',
           padding: '0.5rem',
           background: 'hsl(var(--card))',
           borderRadius: '0.5rem',
-          border: '1px solid hsl(var(--border))'
+          border: '1px solid hsl(var(--border))',
+          position: 'relative'
         }}>
-          <input
-            type="text"
-            value={searchAddress}
-            onChange={(e) => setSearchAddress(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSearchAddress()}
-            placeholder="Buscar dirección, localidad..."
-            className="form-input"
-            style={{ flex: 1, padding: '6px 10px', fontSize: '13px' }}
-          />
-          <button onClick={handleSearchAddress} className="btn btn-primary btn-sm">
-            <Search size={14} /> Buscar
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <input
+              type="text"
+              value={searchAddress}
+              onChange={(e) => setSearchAddress(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearchAddress()}
+              placeholder="Buscar dirección, localidad o punto de interés..."
+              className="form-input"
+              style={{ flex: 1, padding: '6px 10px', fontSize: '13px' }}
+              data-testid="map-search-input"
+              autoFocus
+            />
+            <button onClick={() => handleSearchAddress()} className="btn btn-primary btn-sm" data-testid="map-search-submit">
+              <Search size={14} /> {searchLoading ? 'Buscando…' : 'Buscar'}
+            </button>
+            {(searchAddress || searchResults.length > 0) && (
+              <button
+                onClick={() => { setSearchAddress(''); setSearchResults([]); }}
+                className="btn btn-sm btn-ghost"
+                title="Limpiar"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+          {searchResults.length > 0 && (
+            <ul
+              data-testid="map-search-results"
+              style={{
+                listStyle: 'none',
+                margin: 0,
+                padding: 0,
+                maxHeight: '240px',
+                overflowY: 'auto',
+                border: '1px solid hsl(var(--border))',
+                borderRadius: '0.4rem',
+                background: 'hsl(var(--background))'
+              }}
+            >
+              {searchResults.map((r, idx) => (
+                <li key={`${r.lat}-${r.lon}-${idx}`}>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectSearchResult(r)}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '0.5rem 0.65rem',
+                      background: 'transparent',
+                      border: 'none',
+                      borderBottom: idx === searchResults.length - 1 ? 'none' : '1px solid hsl(var(--border))',
+                      cursor: 'pointer',
+                      fontSize: '0.78rem',
+                      lineHeight: 1.3,
+                      color: 'hsl(var(--foreground))',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '0.4rem'
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'hsl(var(--accent))'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                  >
+                    <MapPin size={12} style={{ marginTop: 2, flexShrink: 0, color: 'hsl(var(--primary))' }} />
+                    <span>{r.label}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          {searchAddress.trim().length > 0 && searchAddress.trim().length < 3 && (
+            <small style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.7rem' }}>
+              Escribe al menos 3 caracteres…
+            </small>
+          )}
         </div>
       )}
       
