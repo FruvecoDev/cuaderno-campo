@@ -16,6 +16,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import EvaluacionesImpresos from './EvaluacionesImpresos';
 
 const SortableQuestion = ({ pregunta, idx, isCustom, canDrag, children }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: pregunta.id });
@@ -212,7 +213,8 @@ const EvaluacionesForm = ({
         {[
           { key: 'general', label: t('evaluations.generalData'), icon: <Save size={14} /> },
           { key: 'parcela', label: t('evaluations.plantation'), icon: <Plus size={14} /> },
-          { key: 'cuestionarios', label: t('evaluations.questionnaires'), icon: <ChevronDown size={14} /> }
+          { key: 'cuestionarios', label: t('evaluations.questionnaires'), icon: <ChevronDown size={14} /> },
+          { key: 'impresos', label: 'Impresos', icon: <Save size={14} /> }
         ].map(tab => (
           <button key={tab.key} type="button" onClick={() => setActiveTab(tab.key)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1rem', fontSize: '0.8rem', fontWeight: activeTab === tab.key ? '700' : '500', color: activeTab === tab.key ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))', background: 'none', border: 'none', borderBottom: activeTab === tab.key ? '2px solid hsl(var(--primary))' : '2px solid transparent', cursor: 'pointer', whiteSpace: 'nowrap', marginBottom: '-2px' }}>{tab.icon}{tab.label}</button>
         ))}
@@ -422,6 +424,21 @@ const EvaluacionesForm = ({
         </div>)}
         {activeTab === 'cuestionarios' && !formData.parcela_id && (
           <div style={{ textAlign: 'center', padding: '2rem', color: 'hsl(var(--muted-foreground))', background: 'hsl(var(--muted)/0.3)', borderRadius: '8px' }}><p style={{ fontSize: '0.85rem' }}>Selecciona una parcela en la pestana anterior para ver los cuestionarios</p></div>
+        )}
+
+        {activeTab === 'impresos' && formData.parcela_id && (
+          <EvaluacionesImpresos
+            impresos={formData.impresos}
+            setImpresos={(updater) => setFormData((prev) => ({
+              ...prev,
+              impresos: typeof updater === 'function' ? updater(prev.impresos) : updater,
+            }))}
+            selectedParcelaInfo={selectedParcelaInfo}
+            parcelaId={formData.parcela_id}
+          />
+        )}
+        {activeTab === 'impresos' && !formData.parcela_id && (
+          <div style={{ textAlign: 'center', padding: '2rem', color: 'hsl(var(--muted-foreground))', background: 'hsl(var(--muted)/0.3)', borderRadius: '8px' }}><p style={{ fontSize: '0.85rem' }}>Selecciona una parcela en la pestaña anterior para rellenar los impresos</p></div>
         )}
 
         <div style={{ borderTop: '1px solid hsl(var(--border))', paddingTop: '1rem', marginTop: '1.25rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}><button type="button" className="btn btn-secondary" onClick={onCancel}>{t('common.cancel')}</button><button type="submit" className="btn btn-primary" data-testid="btn-guardar-evaluacion">{t('common.save')} Evaluacion</button></div>

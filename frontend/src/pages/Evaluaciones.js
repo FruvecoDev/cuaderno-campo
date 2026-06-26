@@ -10,6 +10,7 @@ import { arrayMove } from '@dnd-kit/sortable';
 import EvaluacionesFilters from '../components/evaluaciones/EvaluacionesFilters';
 import EvaluacionesTable from '../components/evaluaciones/EvaluacionesTable';
 import EvaluacionesForm from '../components/evaluaciones/EvaluacionesForm';
+import { DEFAULT_IMPRESOS, mergeImpresos } from '../components/evaluaciones/EvaluacionesImpresos';
 import '../App.css';
 import { notify } from '../lib/notify';
 
@@ -103,7 +104,7 @@ const Evaluaciones = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [formData, setFormData] = useState({
     parcela_id: '', fecha_inicio: new Date().toISOString().split('T')[0], fecha_fin: '',
-    tecnico: '', toma_datos: [], impresos: { fecha_inicio: '', fecha_fin: '', tecnico: '' },
+    tecnico: '', toma_datos: [], impresos: { ...DEFAULT_IMPRESOS },
     analisis_suelo: [], pasos_precampana: [], calidad_cepellones: [],
     inspeccion_maquinaria: [], observaciones: [], calibracion_mantenimiento: []
   });
@@ -215,7 +216,30 @@ const Evaluaciones = () => {
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
 
   const handleParcelaSelect = (parcelaId) => {
-    setFormData(prev => ({ ...prev, parcela_id: parcelaId }));
+    setFormData(prev => {
+      const next = { ...prev, parcela_id: parcelaId };
+      if (parcelaId) {
+        const parcela = parcelas.find(p => p._id === parcelaId);
+        if (parcela) {
+          // Auto-fill impresos header from parcela (editable later).
+          // Only overwrite fields that are empty so user edits are preserved
+          // when switching between parcelas.
+          const currentImp = prev.impresos || { ...DEFAULT_IMPRESOS };
+          next.impresos = {
+            ...DEFAULT_IMPRESOS,
+            ...currentImp,
+            proveedor: currentImp.proveedor || parcela.proveedor || '',
+            codigo_plantacion: currentImp.codigo_plantacion || parcela.codigo_plantacion || '',
+            finca: currentImp.finca || parcela.finca || '',
+            cultivo: currentImp.cultivo || parcela.cultivo || '',
+            variedad: currentImp.variedad || parcela.variedad || '',
+            superficie: currentImp.superficie || parcela.superficie_total || '',
+            parcela_id: parcelaId,
+          };
+        }
+      }
+      return next;
+    });
     if (parcelaId) {
       const parcela = parcelas.find(p => p._id === parcelaId);
       if (parcela) {
@@ -287,7 +311,7 @@ const Evaluaciones = () => {
   const resetForm = () => {
     setFormData({
       parcela_id: '', fecha_inicio: new Date().toISOString().split('T')[0], fecha_fin: '',
-      tecnico: '', toma_datos: [], impresos: { fecha_inicio: '', fecha_fin: '', tecnico: '' },
+      tecnico: '', toma_datos: [], impresos: { ...DEFAULT_IMPRESOS },
       analisis_suelo: [], pasos_precampana: [], calidad_cepellones: [],
       inspeccion_maquinaria: [], observaciones: [], calibracion_mantenimiento: []
     });
@@ -305,7 +329,7 @@ const Evaluaciones = () => {
       fecha_fin: evaluacion.fecha_fin || '',
       tecnico: evaluacion.tecnico || '',
       toma_datos: evaluacion.toma_datos || [],
-      impresos: evaluacion.impresos || { fecha_inicio: '', fecha_fin: '', tecnico: '' },
+      impresos: mergeImpresos(evaluacion.impresos),
       analisis_suelo: evaluacion.analisis_suelo || [],
       pasos_precampana: evaluacion.pasos_precampana || [],
       calidad_cepellones: evaluacion.calidad_cepellones || [],
