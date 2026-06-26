@@ -313,26 +313,36 @@ async def get_preguntas_config(
 
 @router.post("/evaluaciones/config/preguntas")
 async def add_pregunta_config(
-    seccion: str,
-    pregunta: str,
-    tipo: str = "texto",
+    payload: dict,
     current_user: dict = Depends(RequireCreate)
 ):
-    """Agregar nueva pregunta personalizada a una sección"""
+    """Agregar nueva pregunta personalizada a una sección.
+
+    Body: { seccion: str, pregunta: str, tipo?: "texto"|"numero"|"si_no"|"fecha" }
+    """
     # Verificar permisos (solo Admin o Manager)
     if current_user.get("role") not in ["Admin", "Manager"]:
         raise HTTPException(status_code=403, detail="Solo Admin o Manager pueden agregar preguntas")
-    
+
+    seccion = (payload or {}).get("seccion", "")
+    pregunta = (payload or {}).get("pregunta", "")
+    tipo = (payload or {}).get("tipo", "texto") or "texto"
+    if not seccion or not isinstance(seccion, str):
+        raise HTTPException(status_code=422, detail="Campo 'seccion' requerido")
+    if not pregunta or not isinstance(pregunta, str) or not pregunta.strip():
+        raise HTTPException(status_code=422, detail="Campo 'pregunta' requerido")
+    pregunta = pregunta.strip()
+
     secciones_validas = list(PREGUNTAS_DEFAULT.keys())
     if seccion not in secciones_validas:
         raise HTTPException(status_code=400, detail=f"Sección inválida. Opciones: {secciones_validas}")
-    
+
     tipos_validos = ["texto", "numero", "si_no", "fecha"]
     if tipo not in tipos_validos:
         raise HTTPException(status_code=400, detail=f"Tipo inválido. Opciones: {tipos_validos}")
-    
+
     # Generar ID único para la pregunta
-    pregunta_id = f"custom_{seccion}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+    pregunta_id = f"custom_{seccion}_{datetime.now().strftime('%Y%m%d%H%M%S%f')}"
     
     nueva_pregunta = {
         "id": pregunta_id,
