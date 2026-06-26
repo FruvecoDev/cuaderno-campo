@@ -85,6 +85,15 @@ const EvaluacionesForm = ({
   const [editType, setEditType] = React.useState('texto');
   // Show hidden questions panel per section
   const [showHiddenForSection, setShowHiddenForSection] = React.useState(null);
+  // Flat / grouped view toggle for the Cuestionarios tab
+  const [flatView, setFlatView] = React.useState(() => {
+    try { return localStorage.getItem('evaluaciones_flat_view') === '1'; } catch { return false; }
+  });
+  React.useEffect(() => {
+    try { localStorage.setItem('evaluaciones_flat_view', flatView ? '1' : '0'); } catch { /* ignore */ }
+  }, [flatView]);
+  // Section selector for the global add form (only in flat view)
+  const [flatAddSection, setFlatAddSection] = React.useState(null);
 
   const handleInlineAdd = async (seccionKey) => {
     if (!inlineText.trim()) return;
@@ -197,7 +206,129 @@ const EvaluacionesForm = ({
         </div>)}
 
         {activeTab === 'cuestionarios' && formData.parcela_id && (<div>
-          {SECCIONES.map(seccion => {
+          {/* Toggle Vista agrupada / Vista plana */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+            <span style={{ fontSize: '0.72rem', color: 'hsl(var(--muted-foreground))' }}>Vista:</span>
+            <div style={{ display: 'inline-flex', borderRadius: '6px', overflow: 'hidden', border: '1px solid hsl(var(--border))' }}>
+              <button
+                type="button"
+                onClick={() => setFlatView(false)}
+                data-testid="vista-agrupada"
+                style={{ padding: '0.3rem 0.7rem', fontSize: '0.72rem', fontWeight: 600, background: !flatView ? 'hsl(var(--primary))' : 'white', color: !flatView ? 'white' : 'hsl(var(--foreground))', border: 'none', cursor: 'pointer' }}
+              >
+                Agrupada
+              </button>
+              <button
+                type="button"
+                onClick={() => setFlatView(true)}
+                data-testid="vista-plana"
+                style={{ padding: '0.3rem 0.7rem', fontSize: '0.72rem', fontWeight: 600, background: flatView ? 'hsl(var(--primary))' : 'white', color: flatView ? 'white' : 'hsl(var(--foreground))', border: 'none', cursor: 'pointer' }}
+              >
+                Plana
+              </button>
+            </div>
+          </div>
+
+          {/* FLAT VIEW: todas las preguntas de todas las secciones, una tras otra */}
+          {flatView && (() => {
+            // Build a single flat list with the seccion attached for context.
+            const flatItems = SECCIONES.flatMap(s =>
+              (getPreguntasSeccion(s.key) || []).map(p => ({ ...p, _seccion: s.key, _seccionLabel: s.label }))
+            );
+            return (
+              <div data-testid="cuestionarios-vista-plana">
+                {/* Global "Añadir pregunta" panel */}
+                {(user?.role === 'Admin' || user?.role === 'Manager') && (
+                  <div style={{ padding: '0.6rem 0.75rem', background: 'hsl(var(--primary) / 0.05)', border: '1px solid hsl(var(--primary) / 0.2)', borderRadius: '8px', marginBottom: '0.75rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr 120px auto', gap: '0.5rem', alignItems: 'end' }}>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: 600 }}>Sección</label>
+                        <select
+                          className="form-select"
+                          value={flatAddSection || ''}
+                          onChange={(e) => setFlatAddSection(e.target.value || null)}
+                          data-testid="flat-add-seccion"
+                        >
+                          <option value="">— Selecciona sección —</option>
+                          {SECCIONES.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
+                        </select>
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: 600 }}>Nueva pregunta</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={inlineText}
+                          onChange={(e) => setInlineText(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && flatAddSection && (e.preventDefault(), handleInlineAdd(flatAddSection))}
+                          placeholder="Escribe la pregunta..."
+                          data-testid="flat-add-text"
+                        />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: 600 }}>Tipo</label>
+                        <select className="form-select" value={inlineType} onChange={(e) => setInlineType(e.target.value)}>
+                          <option value="texto">Texto</option>
+                          <option value="si_no">Si/No</option>
+                          <option value="numero">Numero</option>
+                          <option value="fecha">Fecha</option>
+                        </select>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        disabled={!inlineText.trim() || !flatAddSection}
+                        onClick={() => handleInlineAdd(flatAddSection)}
+                        style={{ marginBottom: 0 }}
+                        data-testid="flat-add-submit"
+                      >
+                        <Check size={14} /> Anadir
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Continuous list of all questions */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  {flatItems.length === 0 ? (
+                    <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.85rem', textAlign: 'center', padding: '1rem' }}>
+                      {t('evaluations.noQuestions')}
+                    </p>
+                  ) : flatItems.map((pregunta, idx) => {
+                    const isCustom = pregunta.id.startsWith('custom_');
+                    const seccionKey = pregunta._seccion;
+                    return (
+                      <div key={pregunta.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', padding: '0.65rem 0.75rem', borderRadius: '8px', border: '1px solid hsl(var(--border))', background: 'white' }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
+                            <span style={{ padding: '0.1rem 0.5rem', borderRadius: '999px', background: 'hsl(var(--muted))', color: 'hsl(var(--muted-foreground))', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                              {pregunta._seccionLabel}
+                            </span>
+                            <label style={{ fontWeight: 500, fontSize: '0.85rem', margin: 0 }}>
+                              {idx + 1}. {pregunta.pregunta}
+                              {isCustom && <span style={{ fontSize: '0.7rem', color: 'hsl(var(--primary))', marginLeft: '0.4rem' }}>(personalizada)</span>}
+                            </label>
+                          </div>
+                          {renderCampoRespuesta(pregunta)}
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0, paddingTop: '0.1rem' }}>
+                          {(user?.role === 'Admin' || user?.role === 'Manager') && (
+                            <button type="button" onClick={() => handleDuplicateQuestion(pregunta, seccionKey)} style={{ padding: '0.25rem', borderRadius: '4px', backgroundColor: 'hsl(var(--primary) / 0.1)', color: 'hsl(var(--primary))', border: '1px solid hsl(var(--primary) / 0.3)', cursor: 'pointer' }} title="Duplicar"><Copy size={14} /></button>
+                          )}
+                          {user?.role === 'Admin' && (
+                            <button type="button" onClick={() => handleDeleteQuestion(pregunta.id, seccionKey)} style={{ padding: '0.25rem', borderRadius: '4px', backgroundColor: 'hsl(var(--destructive) / 0.1)', color: 'hsl(var(--destructive))', border: '1px solid hsl(var(--destructive) / 0.3)', cursor: 'pointer' }} title={isCustom ? 'Eliminar' : 'Ocultar pregunta predeterminada'}><Trash2 size={14} /></button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* GROUPED VIEW (original) */}
+          {!flatView && SECCIONES.map(seccion => {
             const preguntas = getPreguntasSeccion(seccion.key);
             const isExpanded = expandedSections[seccion.key];
             const hiddenIds = (hiddenPreguntas && hiddenPreguntas[seccion.key]) || [];
