@@ -281,6 +281,17 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - 30+ `data-testid` añadidos para automatización.
 - **Testing**: testing_agent_v3_fork — backend 100%, frontend 100% (iteration_68.json). Pytest creado en `/app/backend/tests/test_evaluaciones_impresos.py`.
 
+### Cuaderno de Campo PDF — Refactor completo - DONE (2026-06-26)
+- **Orden cronológico ASC**: Visitas y Tratamientos ahora se ordenan de más antiguo a más nuevo (`sort(fecha, 1)`).
+- **Tipo de tratamiento real**: Reemplazado el "Sin tipo" por `tipo_tratamiento — subtipo` (ej. "FITOSANITARIOS — Herbicida/Fungicida/Insecticida") tanto en índice como en detalle.
+- **Eliminadas Irrigaciones y Cosechas**: removidas del índice, páginas, resumen y footer.
+- **Ficha del Aplicador y Maquinaria consolidada**: una única página al FINAL del documento (en vez de 3 páginas por cada tratamiento), con aplicadores y máquinas únicos, fallback de nombres cuando no hay ficha completa, imágenes de certificados y placas CE embebidas.
+- **Paginación dinámica**: CSS `@page` con `counter(page) "de" counter(pages)` → footer profesional "Página X de Y" correcto en todas las páginas.
+- **Anexo en Impresos Sección 4**: si el anexo es imagen (image/*), se embebe en marco con borde y caption en el PDF.
+- **Cabecera de portada profesional**: muestra Proveedor · Cultivo · Campaña.
+- Estructura final: Portada+Resumen+Índice → Datos Generales → Plantación → Ubicación parcela → Toma de Datos (cuestionarios) → IMPRESOS (6 secciones) → Visitas (ASC) → Tratamientos (ASC) → Ficha Aplicador y Maquinaria (final).
+- **Testing**: testing_agent_v3_fork iteration_70.json → 13/13 backend tests PASS. PDF 94KB, 14 páginas, todas las secciones en orden correcto.
+
 ### Adjuntar anexo en Sección 4 (Calidad de cepellones) - DONE (2026-06-26)
 - Nuevo endpoint `POST /api/evaluaciones/anexos/upload` (PDF, imagen, Office; máx 15 MB; validación de content-type).
 - Endpoint `DELETE /api/evaluaciones/anexos/{stored_name}` para eliminar.
