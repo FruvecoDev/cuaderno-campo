@@ -760,15 +760,15 @@ async def generate_evaluacion_pdf(
     if parcela_id and ObjectId.is_valid(parcela_id):
         parcela_data = await parcelas_collection.find_one({"_id": ObjectId(parcela_id)})
     
-    # Obtener visitas de la parcela
+    # Obtener visitas de la parcela (ordenadas de más antigua a más nueva)
     visitas = []
     if parcela_id:
-        visitas = await visitas_collection.find({"parcela_id": parcela_id}).sort("fecha_visita", -1).to_list(100)
+        visitas = await visitas_collection.find({"parcela_id": parcela_id}).sort("fecha_visita", 1).to_list(100)
     
-    # Obtener tratamientos de la parcela
+    # Obtener tratamientos de la parcela (ordenados de más antiguo a más nuevo)
     tratamientos = []
     if parcela_id:
-        tratamientos = await tratamientos_collection.find({"parcelas_ids": parcela_id}).sort("fecha_tratamiento", -1).to_list(100)
+        tratamientos = await tratamientos_collection.find({"parcelas_ids": parcela_id}).sort("fecha_tratamiento", 1).to_list(100)
     
     # Para cada tratamiento, obtener los datos completos del aplicador y la máquina
     tratamientos_enriquecidos = []
@@ -793,20 +793,9 @@ async def generate_evaluacion_pdf(
     
     tratamientos = tratamientos_enriquecidos
     
-    # Obtener irrigaciones de la parcela
-    irrigaciones = []
-    if parcela_id:
-        from database import irrigaciones_collection
-        irrigaciones = await irrigaciones_collection.find({"parcela_id": parcela_id}).sort("fecha", -1).to_list(100)
-    
-    # Obtener cosechas de la parcela
-    cosechas = []
-    if parcela_id:
-        from database import cosechas_collection
-        cosechas = await cosechas_collection.find({"parcelas_ids": parcela_id}).sort("created_at", -1).to_list(100)
-    
-    # Calcular total de páginas (1 principal + visitas + tratamientos*3 (trat + aplicador + maquina) + irrigaciones + cosechas)
-    total_pages = 1 + len(visitas) + (len(tratamientos) * 3) + len(irrigaciones) + len(cosechas)
+    # Irrigaciones y Cosechas: eliminadas del cuaderno de campo (no se incluyen
+    # en el PDF según requerimientos de usuario).
+    # La paginación se calcula dinámicamente con counter(page)/counter(pages) en CSS.
     
     # Función helper para formatear respuestas
     def format_respuesta(resp):
@@ -828,6 +817,16 @@ async def generate_evaluacion_pdf(
         @page {
             size: A4;
             margin: 1.5cm;
+            @bottom-center {
+                content: "Página " counter(page) " de " counter(pages);
+                font-size: 8pt;
+                color: #888;
+            }
+            @bottom-right {
+                content: "FRUVECO · Cuaderno de Campo";
+                font-size: 8pt;
+                color: #aaa;
+            }
         }
         body {
             font-family: 'Helvetica', 'Arial', sans-serif;
@@ -1174,8 +1173,8 @@ async def generate_evaluacion_pdf(
         <!-- PÁGINA 1: HOJA DE EVALUACIÓN PRINCIPAL -->
         <div class="header">
             <h1>FRUVECO</h1>
-            <h2>HOJA DE EVALUACIÓN - CUADERNO DE CAMPO</h2>
-            <h3>Página 1 de {total_pages}</h3>
+            <h2>HOJA DE EVALUACIÓN · CUADERNO DE CAMPO</h2>
+            <h3 style="font-size: 11pt; color: #2d5a27;">{evaluacion.get('proveedor', '')} · {evaluacion.get('cultivo', '')} · Campaña {evaluacion.get('campana', '')}</h3>
         </div>
         
         <!-- Resumen -->
@@ -1191,16 +1190,8 @@ async def generate_evaluacion_pdf(
                     <div class="dato-value" style="font-size: 14pt; font-weight: bold; color: #b9770e;">{len(tratamientos)}</div>
                 </div>
                 <div class="dato-item">
-                    <div class="dato-label">Irrigaciones</div>
-                    <div class="dato-value" style="font-size: 14pt; font-weight: bold; color: #2874a6;">{len(irrigaciones)}</div>
-                </div>
-                <div class="dato-item">
-                    <div class="dato-label">Cosechas</div>
-                    <div class="dato-value" style="font-size: 14pt; font-weight: bold; color: #1e8449;">{len(cosechas)}</div>
-                </div>
-                <div class="dato-item">
                     <div class="dato-label">Total Páginas</div>
-                    <div class="dato-value" style="font-size: 14pt; font-weight: bold;">{total_pages}</div>
+                    <div class="dato-value" style="font-size: 14pt; font-weight: bold;">Ver pie de página</div>
                 </div>
             </div>
         </div>
@@ -1243,11 +1234,16 @@ async def generate_evaluacion_pdf(
         for idx, tratamiento in enumerate(tratamientos, 1):
             page_num = 1 + len(visitas) + idx
             fecha = format_fecha(tratamiento.get('fecha_tratamiento'))
-            tipo = tratamiento.get('tipo', 'Sin tipo')[:30]
-            descripcion = tratamiento.get('descripcion', '')[:20] or ''
+            # El backend almacena el tipo en `tipo_tratamiento` (e.g. "FITOSANITARIOS")
+            # y el subtipo (e.g. "Herbicida", "Fungicida"). El campo legacy
+            # `tipo` raramente está poblado, por lo que mostrábamos "Sin tipo".
+            tipo_principal = (tratamiento.get('tipo_tratamiento') or tratamiento.get('tipo') or 'Tratamiento').strip()
+            subtipo = (tratamiento.get('subtipo') or '').strip()
+            tipo_label = f"{tipo_principal}" + (f" — {subtipo}" if subtipo else '')
+            descripcion = (tratamiento.get('producto_fitosanitario_nombre') or tratamiento.get('descripcion') or '')[:30]
             html_content += f"""
                 <div class="index-item">
-                    <span class="index-item-name">{idx}. {tipo} {('- ' + descripcion) if descripcion else ''}</span>
+                    <span class="index-item-name">{idx}. {tipo_label[:50]} {('· ' + descripcion) if descripcion else ''}</span>
                     <span class="index-item-date">{fecha}</span>
                     <span class="index-item-page">Pág. {page_num}</span>
                 </div>
@@ -1257,58 +1253,8 @@ async def generate_evaluacion_pdf(
                 <div class="index-empty">No hay tratamientos registrados</div>
         """
     
-    # Índice de Irrigaciones
-    html_content += """
-            </div>
-            
-            <!-- Índice de Irrigaciones -->
-            <div class="index-section">
-                <div class="index-section-title irrigaciones">IRRIGACIONES (""" + str(len(irrigaciones)) + """)</div>
-    """
-    
-    if irrigaciones:
-        for idx, irrigacion in enumerate(irrigaciones, 1):
-            page_num = 1 + len(visitas) + len(tratamientos) + idx
-            fecha = format_fecha(irrigacion.get('fecha'))
-            sistema = irrigacion.get('sistema', 'Sin sistema')[:25]
-            volumen = irrigacion.get('volumen', 0)
-            html_content += f"""
-                <div class="index-item">
-                    <span class="index-item-name">{idx}. {sistema} - {volumen} m³</span>
-                    <span class="index-item-date">{fecha}</span>
-                    <span class="index-item-page">Pág. {page_num}</span>
-                </div>
-            """
-    else:
-        html_content += """
-                <div class="index-empty">No hay irrigaciones registradas</div>
-        """
-    
-    # Índice de Cosechas
-    html_content += """
-            </div>
-            
-            <!-- Índice de Cosechas -->
-            <div class="index-section">
-                <div class="index-section-title cosechas">COSECHAS (""" + str(len(cosechas)) + """)</div>
-    """
-    
-    if cosechas:
-        for idx, cosecha in enumerate(cosechas, 1):
-            page_num = 1 + len(visitas) + len(tratamientos) + len(irrigaciones) + idx
-            nombre = cosecha.get('nombre', 'Sin nombre')[:30]
-            total_kg = cosecha.get('cosecha_total', 0)
-            html_content += f"""
-                <div class="index-item">
-                    <span class="index-item-name">{idx}. {nombre} - {total_kg:,.0f} kg</span>
-                    <span class="index-item-date"></span>
-                    <span class="index-item-page">Pág. {page_num}</span>
-                </div>
-            """
-    else:
-        html_content += """
-                <div class="index-empty">No hay cosechas registradas</div>
-        """
+    # Índices de Irrigaciones y Cosechas: eliminados del cuaderno de campo
+    # según requerimiento del usuario.
     
     html_content += f"""
             </div>
@@ -1692,6 +1638,16 @@ async def generate_evaluacion_pdf(
             <div class="section-content">
                 <div class="question-row"><span class="question-text">Nº de referencia de lote de cepellones</span><div class="answer">{_txt(cepellones.get('numero_lote'))}</div></div>
                 <div class="question-row"><span class="question-text">Anexo adjunto</span><div class="answer">{(lambda a: f'<span style="color:#1976d2;">📎 {a.get("filename","anexo")}</span> <span style="color:#888; font-size:0.85em;">({a.get("content_type","")})</span>' if isinstance(a, dict) and a.get('filename') else '<span style="color:#888;">—</span>')(cepellones.get('anexo'))}</div></div>
+                {(lambda a: (
+                    (lambda local: (
+                        f'<div style="margin:10px 0; padding:8px; border:1px solid #ccc; border-radius:6px; background:#fafafa; text-align:center;">'
+                        f'<img src="file://{local}" style="max-width:100%; max-height:380px; border:1px solid #d4d4d4; border-radius:4px; box-shadow:0 2px 6px rgba(0,0,0,0.08);" alt="Anexo adjunto" />'
+                        f'<div style="font-size:8.5pt; color:#666; margin-top:6px; font-style:italic;">{a.get("filename", "Anexo")}</div>'
+                        f'</div>'
+                    ) if local and os.path.exists(local) else '')(
+                        a.get('url', '').replace('/api/uploads/', '/app/uploads/') if a.get('url', '').startswith('/api/uploads/') else ''
+                    )
+                ) if isinstance(a, dict) and a.get('content_type', '').startswith('image/') else '')(cepellones.get('anexo') or {})}
                 <div class="question-row"><span class="question-text">¿Los paquetes/envases de semillas están archivados con este impreso?</span><div class="answer">{_fmt_sn(cepellones.get('envases_archivados'))}</div></div>
                 <div class="question-row"><span class="question-text">¿El semillero ha suministrado un certificado de sanidad vegetal?</span><div class="answer">{_fmt_sn(cepellones.get('certificado_sanidad'))}</div></div>
                 <div class="question-row"><span class="question-text">Si existe el certificado de sanidad, ¿está archivado con este impreso?</span><div class="answer">{_fmt_sn(cepellones.get('certificado_archivado'))}</div></div>
@@ -1732,7 +1688,7 @@ async def generate_evaluacion_pdf(
         <div class="header">
             <h1>FRUVECO</h1>
             <h2>REGISTRO DE VISITA</h2>
-            <h3>Visita {idx} de {len(visitas)} | Página {page_num} de {total_pages}</h3>
+            <h3>Visita {idx} de {len(visitas)}</h3>
         </div>
         
         <div class="visita-header">
@@ -1823,7 +1779,7 @@ async def generate_evaluacion_pdf(
         <div class="header">
             <h1>FRUVECO</h1>
             <h2>REGISTRO DE TRATAMIENTO</h2>
-            <h3>Tratamiento {idx} de {len(tratamientos)} | Página {page_num} de {total_pages}</h3>
+            <h3>Tratamiento {idx} de {len(tratamientos)}</h3>
         </div>
         
         <div class="tratamiento-header">
@@ -1844,7 +1800,7 @@ async def generate_evaluacion_pdf(
                     </div>
                     <div class="dato-item">
                         <div class="dato-label">Tipo</div>
-                        <div class="dato-value">{tratamiento.get('tipo', '—')}</div>
+                        <div class="dato-value">{((tratamiento.get('tipo_tratamiento') or tratamiento.get('tipo') or '—') + ((' — ' + tratamiento.get('subtipo')) if tratamiento.get('subtipo') else ''))}</div>
                     </div>
                     <div class="dato-item">
                         <div class="dato-label">Aplicador</div>
@@ -1920,349 +1876,122 @@ async def generate_evaluacion_pdf(
             </div>
         </div>
             """
-        
-        # ====================================================================
-        # PÁGINA DE FICHA DEL APLICADOR
-        # ====================================================================
-        aplicador = tratamiento.get("aplicador_completo")
-        page_num_aplicador = 1 + len(visitas) + (idx * 3) - 1
-        
-        html_content += f"""
-        <div class="page-break"></div>
-        <div class="header">
-            <h1>FRUVECO</h1>
-            <h2>FICHA DEL TÉCNICO APLICADOR</h2>
-            <h3>Tratamiento {idx} | Página {page_num_aplicador} de {total_pages}</h3>
-        </div>
-        
-        <div class="aplicador-header">
-            <h3>TÉCNICO APLICADOR - TRATAMIENTO #{idx}</h3>
-        </div>
-        """
-        
-        if aplicador:
-            nombre_completo = f"{aplicador.get('nombre', '')} {aplicador.get('apellidos', '')}"
-            # Usar path absoluto para WeasyPrint
-            img_certificado_path = aplicador.get('imagen_certificado_path', '')
-            img_certificado_url = aplicador.get('imagen_certificado_url', '')
-            # Si hay path local, usarlo; si no, usar URL
-            img_certificado = f"file://{img_certificado_path}" if img_certificado_path else img_certificado_url
-            
-            html_content += f"""
-        <div class="ficha-datos">
-            <div class="ficha-titulo ficha-titulo-aplicador">DATOS DEL TÉCNICO APLICADOR</div>
-            <div class="datos-grid-2">
-                <div class="dato-item">
-                    <div class="dato-label">Nombre Completo</div>
-                    <div class="dato-value" style="font-size: 14pt; font-weight: bold;">{nombre_completo}</div>
-                </div>
-                <div class="dato-item">
-                    <div class="dato-label">DNI/NIF</div>
-                    <div class="dato-value">{aplicador.get('dni', '—')}</div>
-                </div>
-                <div class="dato-item">
-                    <div class="dato-label">Nivel de Capacitación</div>
-                    <div class="dato-value" style="font-weight: bold; color: #7b2cbf;">{aplicador.get('nivel_capacitacion', '—')}</div>
-                </div>
-                <div class="dato-item">
-                    <div class="dato-label">Número de Carnet</div>
-                    <div class="dato-value">{aplicador.get('num_carnet', '—')}</div>
-                </div>
-                <div class="dato-item">
-                    <div class="dato-label">Fecha de Certificación</div>
-                    <div class="dato-value">{format_fecha(aplicador.get('fecha_certificacion'))}</div>
-                </div>
-                <div class="dato-item">
-                    <div class="dato-label">Fecha de Validez</div>
-                    <div class="dato-value">{format_fecha(aplicador.get('fecha_validez'))}</div>
-                </div>
-                <div class="dato-item">
-                    <div class="dato-label">Estado</div>
-                    <div class="dato-value">{'Activo' if aplicador.get('activo') else 'Inactivo'}</div>
-                </div>
-                <div class="dato-item">
-                    <div class="dato-label">Observaciones</div>
-                    <div class="dato-value">{aplicador.get('observaciones', '—') or '—'}</div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="section">
-            <div class="section-title section-title-purple">CERTIFICADO DE CAPACITACIÓN</div>
-            <div class="section-content" style="text-align: center;">
-            """
-            
-            if img_certificado:
-                html_content += f"""
-                <img src="{img_certificado}" class="certificate-image" alt="Certificado de {nombre_completo}" />
-                <p style="font-size: 9pt; color: #666; margin-top: 10px;">Imagen del certificado de capacitación</p>
-                """
-            else:
-                html_content += """
-                <div class="no-image-box">
-                    <p>No hay imagen del certificado disponible</p>
-                </div>
-                """
-            
-            html_content += """
-            </div>
-        </div>
-            """
-        else:
-            html_content += """
-        <div class="ficha-datos">
-            <div class="no-image-box">
-                <p style="font-size: 12pt;">No hay información del aplicador asociado a este tratamiento</p>
-                <p style="font-size: 10pt; margin-top: 10px;">Asigne un técnico aplicador al tratamiento para ver sus datos</p>
-            </div>
-        </div>
-            """
-        
-        # ====================================================================
-        # PÁGINA DE FICHA DE LA MÁQUINA
-        # ====================================================================
-        maquina = tratamiento.get("maquina_completa")
-        page_num_maquina = 1 + len(visitas) + (idx * 3)
-        
-        html_content += f"""
-        <div class="page-break"></div>
-        <div class="header">
-            <h1>FRUVECO</h1>
-            <h2>FICHA DE MAQUINARIA</h2>
-            <h3>Tratamiento {idx} | Página {page_num_maquina} de {total_pages}</h3>
-        </div>
-        
-        <div class="maquina-header">
-            <h3>MAQUINARIA UTILIZADA - TRATAMIENTO #{idx}</h3>
-        </div>
-        """
-        
-        if maquina:
-            # Usar path absoluto para WeasyPrint
-            img_placa_ce_path = maquina.get('imagen_placa_ce_path', '')
-            img_placa_ce_url = maquina.get('imagen_placa_ce_url', '')
-            img_placa_ce = f"file://{img_placa_ce_path}" if img_placa_ce_path else img_placa_ce_url
-            
-            html_content += f"""
-        <div class="ficha-datos">
-            <div class="ficha-titulo ficha-titulo-maquina">DATOS DE LA MAQUINARIA</div>
-            <div class="datos-grid-2">
-                <div class="dato-item">
-                    <div class="dato-label">Nombre</div>
-                    <div class="dato-value" style="font-size: 14pt; font-weight: bold;">{maquina.get('nombre', '—')}</div>
-                </div>
-                <div class="dato-item">
-                    <div class="dato-label">Tipo</div>
-                    <div class="dato-value" style="font-weight: bold; color: #495057;">{maquina.get('tipo', '—')}</div>
-                </div>
-                <div class="dato-item">
-                    <div class="dato-label">Marca</div>
-                    <div class="dato-value">{maquina.get('marca', '—') or '—'}</div>
-                </div>
-                <div class="dato-item">
-                    <div class="dato-label">Modelo</div>
-                    <div class="dato-value">{maquina.get('modelo', '—') or '—'}</div>
-                </div>
-                <div class="dato-item">
-                    <div class="dato-label">Matrícula</div>
-                    <div class="dato-value">{maquina.get('matricula', '—') or '—'}</div>
-                </div>
-                <div class="dato-item">
-                    <div class="dato-label">Número de Serie</div>
-                    <div class="dato-value">{maquina.get('num_serie', '—') or '—'}</div>
-                </div>
-                <div class="dato-item">
-                    <div class="dato-label">Año de Fabricación</div>
-                    <div class="dato-value">{maquina.get('año_fabricacion', '—') or '—'}</div>
-                </div>
-                <div class="dato-item">
-                    <div class="dato-label">Capacidad</div>
-                    <div class="dato-value">{maquina.get('capacidad', '—') or '—'}</div>
-                </div>
-                <div class="dato-item">
-                    <div class="dato-label">Estado</div>
-                    <div class="dato-value">{maquina.get('estado', '—')}</div>
-                </div>
-                <div class="dato-item">
-                    <div class="dato-label">Observaciones</div>
-                    <div class="dato-value">{maquina.get('observaciones', '—') or '—'}</div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="section">
-            <div class="section-title section-title-gray">PLACA CE (MARCADO CE)</div>
-            <div class="section-content" style="text-align: center;">
-            """
-            
-            if img_placa_ce:
-                html_content += f"""
-                <img src="{img_placa_ce}" class="placa-ce-image" alt="Placa CE de {maquina.get('nombre', 'Máquina')}" />
-                <p style="font-size: 9pt; color: #666; margin-top: 10px;">Imagen de la placa CE de conformidad europea</p>
-                """
-            else:
-                html_content += """
-                <div class="no-image-box">
-                    <p>No hay imagen de la placa CE disponible</p>
-                </div>
-                """
-            
-            html_content += """
-            </div>
-        </div>
-            """
-        else:
-            html_content += """
-        <div class="ficha-datos">
-            <div class="no-image-box">
-                <p style="font-size: 12pt;">No hay información de maquinaria asociada a este tratamiento</p>
-                <p style="font-size: 10pt; margin-top: 10px;">Asigne una máquina al tratamiento para ver sus datos</p>
-            </div>
-        </div>
-            """
     
     # ========================================================================
-    # PÁGINAS DE IRRIGACIONES - Una página por cada irrigación
+    # PÁGINA FINAL — FICHA DEL APLICADOR Y MAQUINARIA (consolidada)
+    # Mostramos los aplicadores y máquinas únicos usados en todos los
+    # tratamientos del cuaderno de campo, una sola vez al final del documento.
     # ========================================================================
-    for idx, irrigacion in enumerate(irrigaciones, 1):
-        page_num = 1 + len(visitas) + (len(tratamientos) * 3) + idx
-        html_content += f"""
-        <div class="page-break"></div>
-        <div class="header">
-            <h1>FRUVECO</h1>
-            <h2>REGISTRO DE IRRIGACIÓN</h2>
-            <h3>Irrigación {idx} de {len(irrigaciones)} | Página {page_num} de {total_pages}</h3>
-        </div>
-        
-        <div class="irrigacion-header">
-            <h3>IRRIGACIÓN #{idx} - {format_fecha(irrigacion.get('fecha'))}</h3>
-        </div>
-        
-        <div class="section">
-            <div class="section-title section-title-water">DATOS DE LA IRRIGACIÓN</div>
-            <div class="section-content">
-                <div class="datos-grid">
-                    <div class="dato-item">
-                        <div class="dato-label">Fecha</div>
-                        <div class="dato-value">{format_fecha(irrigacion.get('fecha'))}</div>
-                    </div>
-                    <div class="dato-item">
-                        <div class="dato-label">Sistema</div>
-                        <div class="dato-value">{irrigacion.get('sistema', '—')}</div>
-                    </div>
-                    <div class="dato-item">
-                        <div class="dato-label">Duración</div>
-                        <div class="dato-value">{irrigacion.get('duracion', 0)} horas</div>
-                    </div>
-                    <div class="dato-item">
-                        <div class="dato-label">Volumen</div>
-                        <div class="dato-value">{irrigacion.get('volumen', 0)} m³</div>
-                    </div>
-                    <div class="dato-item">
-                        <div class="dato-label">Coste</div>
-                        <div class="dato-value">{irrigacion.get('coste', 0):.2f} €</div>
-                    </div>
-                    <div class="dato-item">
-                        <div class="dato-label">Fuente</div>
-                        <div class="dato-value">{irrigacion.get('fuente', '—')}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="section">
-            <div class="section-title section-title-water">OBSERVACIONES</div>
-            <div class="section-content">
-                <p>{irrigacion.get('observaciones') or 'Sin observaciones registradas.'}</p>
-            </div>
-        </div>
-        """
+    aplicadores_unicos = {}
+    maquinas_unicas = {}
+    for trat in tratamientos:
+        ap = trat.get("aplicador_completo")
+        if ap and ap.get("_id"):
+            aplicadores_unicos.setdefault(str(ap["_id"]), ap)
+        elif trat.get("aplicador_nombre"):
+            # Fallback: aplicador asignado por nombre pero sin ficha completa.
+            key = f"name:{trat['aplicador_nombre']}"
+            aplicadores_unicos.setdefault(key, {"nombre": trat["aplicador_nombre"], "_minimal": True})
+        mq = trat.get("maquina_completa")
+        if mq and mq.get("_id"):
+            maquinas_unicas.setdefault(str(mq["_id"]), mq)
+        elif trat.get("maquina_nombre"):
+            key = f"name:{trat['maquina_nombre']}"
+            maquinas_unicas.setdefault(key, {"nombre": trat["maquina_nombre"], "_minimal": True})
     
-    # ========================================================================
-    # PÁGINAS DE COSECHAS - Una página por cada cosecha
-    # ========================================================================
-    for idx, cosecha in enumerate(cosechas, 1):
-        page_num = 1 + len(visitas) + (len(tratamientos) * 3) + len(irrigaciones) + idx
-        html_content += f"""
+    if aplicadores_unicos or maquinas_unicas:
+        html_content += """
         <div class="page-break"></div>
         <div class="header">
             <h1>FRUVECO</h1>
-            <h2>REGISTRO DE COSECHA</h2>
-            <h3>Cosecha {idx} de {len(cosechas)} | Página {page_num} de {total_pages}</h3>
-        </div>
-        
-        <div class="cosecha-header">
-            <h3>COSECHA #{idx} - {cosecha.get('nombre', 'Sin nombre')}</h3>
-        </div>
-        
-        <div class="section">
-            <div class="section-title section-title-harvest">DATOS DE LA COSECHA</div>
-            <div class="section-content">
-                <div class="datos-grid">
-                    <div class="dato-item">
-                        <div class="dato-label">Nombre</div>
-                        <div class="dato-value">{cosecha.get('nombre', '—')}</div>
-                    </div>
-                    <div class="dato-item">
-                        <div class="dato-label">Superficie Total</div>
-                        <div class="dato-value">{cosecha.get('superficie_total', 0)} {cosecha.get('unidad_medida', 'ha')}</div>
-                    </div>
-                    <div class="dato-item">
-                        <div class="dato-label">Nº Plantas</div>
-                        <div class="dato-value">{cosecha.get('num_plantas', 0):,}</div>
-                    </div>
-                    <div class="dato-item">
-                        <div class="dato-label">Cosecha Total</div>
-                        <div class="dato-value" style="font-weight: bold; color: #1e8449;">{cosecha.get('cosecha_total', 0):,.0f} kg</div>
-                    </div>
-                    <div class="dato-item">
-                        <div class="dato-label">Ingreso Total</div>
-                        <div class="dato-value" style="font-weight: bold; color: #1e8449;">{cosecha.get('ingreso_total', 0):,.2f} €</div>
-                    </div>
-                    <div class="dato-item">
-                        <div class="dato-label">Realizado</div>
-                        <div class="dato-value">{'Sí' if cosecha.get('realizado') else 'No'}</div>
-                    </div>
-                </div>
-            </div>
+            <h2>FICHA DEL APLICADOR Y MAQUINARIA</h2>
+            <h3>Resumen de aplicadores y maquinaria utilizada</h3>
         </div>
         """
         
-        # Registros de cosecha (detalles de cada recogida)
-        registros = cosecha.get('cosechas', [])
-        if registros:
+        # Aplicadores
+        if aplicadores_unicos:
             html_content += """
         <div class="section">
-            <div class="section-title section-title-harvest">REGISTROS DE RECOGIDA</div>
+            <div class="section-title section-title-purple">TÉCNICOS APLICADORES</div>
             <div class="section-content">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Albarán</th>
-                            <th>Cantidad</th>
-                            <th>Precio</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
             """
-            for reg in registros:
-                cantidad = reg.get('cantidad', 0)
-                precio = reg.get('precio_venta', 0)
-                total = cantidad * precio
+            for ap in aplicadores_unicos.values():
+                nombre_completo = f"{ap.get('nombre', '')} {ap.get('apellidos', '')}".strip() or "—"
+                img_path = ap.get('imagen_certificado_path', '')
+                img_url = ap.get('imagen_certificado_url', '')
+                if img_path:
+                    img_certificado = f"file://{img_path}"
+                elif img_url and img_url.startswith('/api/uploads/'):
+                    local = img_url.replace('/api/uploads/', '/app/uploads/')
+                    import os as _os
+                    img_certificado = f"file://{local}" if _os.path.exists(local) else ''
+                else:
+                    img_certificado = ''
                 html_content += f"""
-                        <tr>
-                            <td>{reg.get('fecha_fin', '—')}</td>
-                            <td>{reg.get('num_albaran', '—')}</td>
-                            <td>{cantidad:,.0f} {reg.get('unidad', 'kg')}</td>
-                            <td>{precio:.2f} €/{reg.get('unidad', 'kg')}</td>
-                            <td style="font-weight: bold;">{total:,.2f} €</td>
-                        </tr>
+                <div style="border:1px solid #d4cfeb; border-radius:8px; padding:12px; margin-bottom:14px; background:#faf9ff; page-break-inside:avoid;">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px 16px;">
+                        <div class="dato-item"><div class="dato-label">Nombre Completo</div><div class="dato-value" style="font-weight:bold; font-size:11pt;">{nombre_completo}</div></div>
+                        <div class="dato-item"><div class="dato-label">DNI/NIF</div><div class="dato-value">{ap.get('dni', '—') or '—'}</div></div>
+                        <div class="dato-item"><div class="dato-label">Nivel Capacitación</div><div class="dato-value" style="font-weight:bold; color:#7b2cbf;">{ap.get('nivel_capacitacion', '—') or '—'}</div></div>
+                        <div class="dato-item"><div class="dato-label">Nº Carnet</div><div class="dato-value">{ap.get('num_carnet', '—') or '—'}</div></div>
+                        <div class="dato-item"><div class="dato-label">Fecha Certificación</div><div class="dato-value">{format_fecha(ap.get('fecha_certificacion'))}</div></div>
+                        <div class="dato-item"><div class="dato-label">Fecha Validez</div><div class="dato-value">{format_fecha(ap.get('fecha_validez'))}</div></div>
+                    </div>
                 """
+                if img_certificado:
+                    html_content += f"""
+                    <div style="margin-top:10px; text-align:center;">
+                        <img src="{img_certificado}" style="max-width:100%; max-height:260px; border:1px solid #ccc; border-radius:4px;" alt="Certificado de {nombre_completo}" />
+                        <div style="font-size:8.5pt; color:#777; margin-top:4px;">Certificado de capacitación</div>
+                    </div>
+                    """
+                html_content += "</div>"
             html_content += """
-                    </tbody>
-                </table>
+            </div>
+        </div>
+            """
+        
+        # Maquinaria
+        if maquinas_unicas:
+            html_content += """
+        <div class="section">
+            <div class="section-title section-title-gray">MAQUINARIA UTILIZADA</div>
+            <div class="section-content">
+            """
+            for mq in maquinas_unicas.values():
+                img_path = mq.get('imagen_placa_ce_path', '')
+                img_url = mq.get('imagen_placa_ce_url', '')
+                if img_path:
+                    img_placa = f"file://{img_path}"
+                elif img_url and img_url.startswith('/api/uploads/'):
+                    local = img_url.replace('/api/uploads/', '/app/uploads/')
+                    import os as _os
+                    img_placa = f"file://{local}" if _os.path.exists(local) else ''
+                else:
+                    img_placa = ''
+                html_content += f"""
+                <div style="border:1px solid #d9d9d9; border-radius:8px; padding:12px; margin-bottom:14px; background:#fafafa; page-break-inside:avoid;">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px 16px;">
+                        <div class="dato-item"><div class="dato-label">Nombre</div><div class="dato-value" style="font-weight:bold; font-size:11pt;">{mq.get('nombre', '—') or '—'}</div></div>
+                        <div class="dato-item"><div class="dato-label">Tipo</div><div class="dato-value">{mq.get('tipo', '—') or '—'}</div></div>
+                        <div class="dato-item"><div class="dato-label">Marca</div><div class="dato-value">{mq.get('marca', '—') or '—'}</div></div>
+                        <div class="dato-item"><div class="dato-label">Modelo</div><div class="dato-value">{mq.get('modelo', '—') or '—'}</div></div>
+                        <div class="dato-item"><div class="dato-label">Matrícula</div><div class="dato-value">{mq.get('matricula', '—') or '—'}</div></div>
+                        <div class="dato-item"><div class="dato-label">Nº Serie</div><div class="dato-value">{mq.get('num_serie', '—') or '—'}</div></div>
+                        <div class="dato-item"><div class="dato-label">Registro ROMA</div><div class="dato-value">{mq.get('registro_roma', '—') or '—'}</div></div>
+                        <div class="dato-item"><div class="dato-label">Nº Bastidor</div><div class="dato-value">{mq.get('numero_bastidor', '—') or '—'}</div></div>
+                    </div>
+                """
+                if img_placa:
+                    html_content += f"""
+                    <div style="margin-top:10px; text-align:center;">
+                        <img src="{img_placa}" style="max-width:100%; max-height:200px; border:1px solid #ccc; border-radius:4px;" alt="Placa CE de {mq.get('nombre', 'Máquina')}" />
+                        <div style="font-size:8.5pt; color:#777; margin-top:4px;">Placa CE (marcado CE)</div>
+                    </div>
+                    """
+                html_content += "</div>"
+            html_content += """
             </div>
         </div>
             """
@@ -2272,7 +2001,7 @@ async def generate_evaluacion_pdf(
         <div class="footer">
             <p>Documento generado automáticamente por FRUVECO - Cuaderno de Campo</p>
             <p>Fecha de generación: {datetime.now().strftime('%d/%m/%Y %H:%M')}</p>
-            <p>Total: {total_pages} páginas | {len(visitas)} visitas | {len(tratamientos)} tratamientos | {len(irrigaciones)} irrigaciones | {len(cosechas)} cosechas</p>
+            <p>{len(visitas)} visitas | {len(tratamientos)} tratamientos</p>
         </div>
     </body>
     </html>
