@@ -233,9 +233,12 @@ const Fitosanitarios = () => {
     }
   };
 
-  // Open MAPA official registry
+  // Open MAPA official registry. We use the canonical registro-productos URL
+  // (sin slash final). El portal actualiza la BD oficial cada viernes a las 14:00
+  // y permite exportar a Excel y PDF desde la interfaz de búsqueda.
+  const MAPA_REGISTRY_URL = 'https://www.mapa.gob.es/es/agricultura/temas/sanidad-vegetal/productos-fitosanitarios/registro-productos';
   const openMapaRegistry = () => {
-    window.open('https://www.mapa.gob.es/es/agricultura/temas/sanidad-vegetal/productos-fitosanitarios/registro-productos/', '_blank');
+    window.open(MAPA_REGISTRY_URL, '_blank', 'noopener,noreferrer');
   };
 
   // Fetch MAPA info
@@ -691,16 +694,40 @@ const Fitosanitarios = () => {
               <h4 style={{ fontWeight: '600', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Info size={16} /> Información
               </h4>
-              <p style={{ fontSize: '0.875rem', marginBottom: '1rem', color: 'hsl(var(--muted-foreground))' }}>
+              <p style={{ fontSize: '0.875rem', marginBottom: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
                 El MAPA (Ministerio de Agricultura, Pesca y Alimentación) mantiene el registro oficial de productos fitosanitarios autorizados en España.
               </p>
               <button
                 className="btn btn-primary"
                 onClick={openMapaRegistry}
                 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', justifyContent: 'center' }}
+                data-testid="btn-acceder-mapa"
               >
                 <ExternalLink size={16} /> Acceder al Registro Oficial
               </button>
+              <div style={{
+                marginTop: '0.75rem',
+                padding: '0.6rem 0.7rem',
+                background: 'hsl(217 91% 60% / 0.06)',
+                border: '1px solid hsl(217 91% 60% / 0.18)',
+                borderRadius: '6px',
+                fontSize: '0.72rem',
+                lineHeight: 1.5,
+                color: 'hsl(var(--foreground))'
+              }}>
+                <strong style={{ display: 'block', marginBottom: '0.3rem', color: 'hsl(217 91% 45%)' }}>
+                  Cómo obtener el archivo:
+                </strong>
+                <ol style={{ margin: 0, paddingLeft: '1.1rem' }}>
+                  <li>Pulsa <em>Acceder al Registro Oficial</em>.</li>
+                  <li>Filtra por cultivo, plaga o tipo de producto en el buscador del MAPA.</li>
+                  <li>Pulsa <strong>Exportar</strong> y elige <strong>Excel</strong> o <strong>PDF</strong>.</li>
+                  <li>Vuelve aquí y arrastra el archivo en una de las zonas de subida.</li>
+                </ol>
+                <small style={{ display: 'block', marginTop: '0.4rem', color: 'hsl(var(--muted-foreground))' }}>
+                  La BD oficial se actualiza cada viernes a las 14:00.
+                </small>
+              </div>
               {mapaInfo?.ultima_sincronizacion && (
                 <p style={{ fontSize: '0.75rem', marginTop: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
                   Última importación: {new Date(mapaInfo.ultima_sincronizacion).toLocaleDateString('es-ES')}
