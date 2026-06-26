@@ -266,5 +266,22 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 **Validación:** pre-deploy 4/4 verde, 6/6 Playwright (charts + NFC + nuevo albaran-form regression)
 
 
+### Hoja de Evaluación — Pestaña "Impresos" - DONE (2026-06-26)
+- Nueva pestaña "Impresos" en `EvaluacionesForm.js` junto a "Cuestionarios" (basada en PDF de referencia "Scan.pdf").
+- Nuevo componente `/app/frontend/src/components/evaluaciones/EvaluacionesImpresos.js` con:
+  - **Cabecera** auto-rellenable y editable: Comentarios, La plantación (Proveedor), Código Plantación, Finca, Cultivo, Variedad, Superficie + enlace "Ver parcela vinculada".
+  - **Sección 1 — Análisis de suelo**: Sí/No archivado, medidas tomadas (texto), envases archivados Sí/No, libre de síntomas (Enfermedades/Plagas/Virus).
+  - **Sección 2 — Pasos precampaña desinfección**: observaciones (texto largo).
+  - **Sección 3 — Calibración y mantenimiento aparatos medición fito**: Vaso, Peso.
+  - **Sección 4 — Calidad de cepellones**: Nº lote, envases archivados, certificado sanidad vegetal, certificado archivado, libre de síntomas.
+  - **Sección 5 — Inspección maquinaria** (una sola máquina por evaluación): Tipo, Modelo, Nº serie, Sí/No para 4 verificaciones.
+  - **Sección 6 — Observaciones generales** (texto libre).
+- Auto-relleno desde Parcela cuando se selecciona (preserva ediciones manuales del usuario).
+- Backend ya soportaba `impresos: Dict[str, Any]` en `EvaluacionCreate` (create/update endpoints persisten el campo).
+- 30+ `data-testid` añadidos para automatización.
+- **Testing**: testing_agent_v3_fork — backend 100%, frontend 100% (iteration_68.json). Pytest creado en `/app/backend/tests/test_evaluaciones_impresos.py`.
+
+
+
 
 
