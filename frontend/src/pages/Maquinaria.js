@@ -69,7 +69,8 @@ const Maquinaria = () => {
   });
   const [formData, setFormData] = useState({
     nombre: '', tipo: 'Tractor', marca: '', modelo: '', matricula: '',
-    num_serie: '', año_fabricacion: '', capacidad: '', estado: 'Operativo', observaciones: '',
+    num_serie: '', numero_bastidor: '', registro_roma: '',
+    año_fabricacion: '', capacidad: '', estado: 'Operativo', observaciones: '',
     fecha_proxima_itv: '', fecha_ultimo_mantenimiento: '', intervalo_mantenimiento_dias: ''
   });
   const [selectedImage, setSelectedImage] = useState(null);
@@ -183,13 +184,13 @@ const Maquinaria = () => {
   };
 
   const resetForm = () => {
-    setFormData({ nombre: '', tipo: 'Tractor', marca: '', modelo: '', matricula: '', num_serie: '', año_fabricacion: '', capacidad: '', estado: 'Operativo', observaciones: '', fecha_proxima_itv: '', fecha_ultimo_mantenimiento: '', intervalo_mantenimiento_dias: '' });
+    setFormData({ nombre: '', tipo: 'Tractor', marca: '', modelo: '', matricula: '', num_serie: '', numero_bastidor: '', registro_roma: '', año_fabricacion: '', capacidad: '', estado: 'Operativo', observaciones: '', fecha_proxima_itv: '', fecha_ultimo_mantenimiento: '', intervalo_mantenimiento_dias: '' });
     setSelectedImage(null); setImagePreview(null);
   };
 
   const handleEdit = (item) => {
     setEditingId(item._id);
-    setFormData({ nombre: item.nombre || '', tipo: item.tipo || 'Tractor', marca: item.marca || '', modelo: item.modelo || '', matricula: item.matricula || '', num_serie: item.num_serie || '', año_fabricacion: item.año_fabricacion || '', capacidad: item.capacidad || '', estado: item.estado || 'Operativo', observaciones: item.observaciones || '', fecha_proxima_itv: item.fecha_proxima_itv || '', fecha_ultimo_mantenimiento: item.fecha_ultimo_mantenimiento || '', intervalo_mantenimiento_dias: item.intervalo_mantenimiento_dias || '' });
+    setFormData({ nombre: item.nombre || '', tipo: item.tipo || 'Tractor', marca: item.marca || '', modelo: item.modelo || '', matricula: item.matricula || '', num_serie: item.num_serie || '', numero_bastidor: item.numero_bastidor || '', registro_roma: item.registro_roma || '', año_fabricacion: item.año_fabricacion || '', capacidad: item.capacidad || '', estado: item.estado || 'Operativo', observaciones: item.observaciones || '', fecha_proxima_itv: item.fecha_proxima_itv || '', fecha_ultimo_mantenimiento: item.fecha_ultimo_mantenimiento || '', intervalo_mantenimiento_dias: item.intervalo_mantenimiento_dias || '' });
     if (item.imagen_placa_ce_url) {
       let url = item.imagen_placa_ce_url;
       if (url.startsWith('/api/uploads/')) url = `${BACKEND_URL}${url}`;
@@ -322,6 +323,30 @@ const Maquinaria = () => {
                     <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>N. Serie</label><input type="text" className="form-input" value={formData.num_serie} onChange={(e) => setFormData({...formData, num_serie: e.target.value})} data-testid="input-num-serie" /></div>
                     <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Ano Fabricacion</label><input type="number" min="1900" max={new Date().getFullYear() + 1} className="form-input" value={formData.año_fabricacion} onChange={(e) => setFormData({...formData, año_fabricacion: e.target.value})} placeholder="2020" data-testid="input-año" /></div>
                     <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Capacidad</label><input type="text" className="form-input" value={formData.capacidad} onChange={(e) => setFormData({...formData, capacidad: e.target.value})} placeholder="Ej: 1000L, 150CV" data-testid="input-capacidad" /></div>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.75rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Registro ROMA</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={formData.registro_roma || ''}
+                        onChange={(e) => setFormData({ ...formData, registro_roma: e.target.value })}
+                        placeholder="Ej: 12345/2024"
+                        data-testid="input-registro-roma"
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>N.º Bastidor</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={formData.numero_bastidor || ''}
+                        onChange={(e) => setFormData({ ...formData, numero_bastidor: e.target.value })}
+                        placeholder="Ej: VF1234ABC56789"
+                        data-testid="input-numero-bastidor"
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="form-group"><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Observaciones</label><textarea className="form-input" rows="2" value={formData.observaciones} onChange={(e) => setFormData({...formData, observaciones: e.target.value})} style={{ fontSize: '0.85rem', resize: 'vertical' }} data-testid="textarea-observaciones" /></div>

@@ -168,6 +168,8 @@ class MaquinariaBase(BaseModel):
     marca: Optional[str] = None
     matricula: Optional[str] = None
     num_serie: Optional[str] = None
+    numero_bastidor: Optional[str] = None  # N.º de Bastidor (VIN-equivalente para maquinaria)
+    registro_roma: Optional[str] = None    # Registro Oficial de Maquinaria Agrícola
     año_fabricacion: Optional[int] = None
     capacidad: Optional[str] = None  # Ej: "1000L", "150CV"
     estado: str = "Operativo"  # Operativo, En mantenimiento, Averiado
@@ -184,6 +186,8 @@ class MaquinariaCreate(BaseModel):
     marca: Optional[str] = None
     matricula: Optional[str] = None
     num_serie: Optional[str] = None
+    numero_bastidor: Optional[str] = None
+    registro_roma: Optional[str] = None
     año_fabricacion: Optional[int] = None
     capacidad: Optional[str] = None
     estado: str = "Operativo"
