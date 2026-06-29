@@ -281,6 +281,12 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - 30+ `data-testid` añadidos para automatización.
 - **Testing**: testing_agent_v3_fork — backend 100%, frontend 100% (iteration_68.json). Pytest creado en `/app/backend/tests/test_evaluaciones_impresos.py`.
 
+### Aviso trazabilidad: Máquina no asignada al técnico - DONE (2026-06-29)
+- Aviso visual amarillo en pestaña Aplicación de Tratamientos (`data-testid="warn-maquina-no-asignada"`) cuando la máquina elegida NO está en `tecnico.maquinas_ids`.
+- Al pulsar Guardar/Actualizar, aparece `window.confirm` con mensaje "Esta máquina no está asignada al técnico... ¿Deseas continuar?": Cancel deja el modal abierto en pestaña aplicacion; OK persiste el tratamiento.
+- No se muestra el aviso cuando hay match, o el técnico no tiene máquinas asignadas, o no se seleccionó máquina.
+- **Testing**: testing_agent_v3_fork iteration_75 — 6/6 escenarios PASS, sin issues bloqueantes.
+
 ### Maquina asociada al Aplicador - DONE (2026-06-29)
 - **Backend**: Añadido campo `maquinas_ids: List[str]` al modelo `TecnicoAplicadorCreate` (`routes_tecnicos_aplicadores.py`); POST/PUT persisten correctamente; endpoint `/activos` devuelve `maquinas_ids` en la proyección.
 - **Frontend Técnicos Aplicadores**: Nueva pestaña "Maquinaria" con grid de checkboxes para asignar máquinas al técnico.
