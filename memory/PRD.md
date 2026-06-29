@@ -281,6 +281,12 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - 30+ `data-testid` añadidos para automatización.
 - **Testing**: testing_agent_v3_fork — backend 100%, frontend 100% (iteration_68.json). Pytest creado en `/app/backend/tests/test_evaluaciones_impresos.py`.
 
+### Fix Vaso/Impresos cabecera — Eval con parcela_id huérfana - DONE (2026-06-29)
+- **Causa raíz**: La evaluación COT-GUI-25-001 (id `6a3e4b01e223c5dd1673c04c`) tenía `parcela_id` huérfana apuntando a una parcela borrada → cabecera Impresos se mostraba vacía ("Sin datos en parcela/contrato") y al guardar la sincronización `impresosSync` SOBREESCRIBÍA los campos con strings vacías.
+- **Fix 1 (datos)**: script `/app/scripts/relink_orphan_eval_parcela.py` ejecutado → eval COT re-vinculada a parcela existente `6a3e90f77b8cf2eb0d697bc1`.
+- **Fix 2 (código defensivo)**: `Evaluaciones.js` `handleSubmit` ahora detecta `parcelaOk = !!parcela`; si la parcela no existe, **preserva** el `currentImp` y los campos top-level en lugar de wiparlos.
+- **Testing**: `testing_agent_v3_fork` iteration_72 — backend 6/6 PASS, frontend 0 issues. PDF generado correctamente con cabecera completa (Proveedor=COTO DE MINGUILLO, Variedad=MUCIO, etc.) y Vaso preservado tras múltiples saves.
+
 ### Número de Visita correlativo por parcela - DONE (2026-06-26)
 - Nuevo campo `numero_visita: Optional[int]` en modelo Visita (`models.py`).
 - Auto-asignación en POST `/api/visitas`: si no se envía, calcula `max(numero_visita) + 1` para esa parcela (primera visita → 1).

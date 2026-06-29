@@ -60,8 +60,10 @@ const TecnicosAplicadores = () => {
     nivel_capacitacion: '',
     num_carnet: '',
     fecha_certificacion: '',
-    observaciones: ''
+    observaciones: '',
+    maquinas_ids: []
   });
+  const [maquinariaCatalog, setMaquinariaCatalog] = useState([]);
   
   // File upload
   const [selectedFile, setSelectedFile] = useState(null);
@@ -137,7 +139,15 @@ const TecnicosAplicadores = () => {
   useEffect(() => {
     fetchTecnicos();
     fetchNiveles();
+    fetchMaquinaria();
   }, [searchTerm, filterNivel, filterActivo]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fetchMaquinaria = async () => {
+    try {
+      const data = await api.get('/api/maquinaria?limit=500');
+      setMaquinariaCatalog(Array.isArray(data) ? data : (data?.maquinaria || data?.data || []));
+    } catch (err) { console.error('[TecnicosAplicadores.js] fetchMaquinaria', err); }
+  };
 
   const fetchTecnicos = async () => {
     try {
@@ -219,7 +229,8 @@ const TecnicosAplicadores = () => {
       nivel_capacitacion: tecnico.nivel_capacitacion || '',
       num_carnet: tecnico.num_carnet || '',
       fecha_certificacion: tecnico.fecha_certificacion || '',
-      observaciones: tecnico.observaciones || ''
+      observaciones: tecnico.observaciones || '',
+      maquinas_ids: Array.isArray(tecnico.maquinas_ids) ? tecnico.maquinas_ids : []
     });
     setEditingId(tecnico._id);
     // Si tiene certificado, mostrar preview
@@ -270,7 +281,8 @@ const TecnicosAplicadores = () => {
       nivel_capacitacion: '',
       num_carnet: '',
       fecha_certificacion: '',
-      observaciones: ''
+      observaciones: '',
+      maquinas_ids: []
     });
     setEditingId(null);
     setShowForm(false);
@@ -459,6 +471,7 @@ const TecnicosAplicadores = () => {
                 { key: 'personales', label: 'Datos Personales', icon: <User size={14} /> },
                 { key: 'profesionales', label: 'Datos Profesionales', icon: <Briefcase size={14} /> },
                 { key: 'certificado', label: 'Certificado', icon: <Award size={14} /> },
+                { key: 'maquinaria', label: 'Maquinaria', icon: <Settings size={14} /> },
               ].map(tab => (
                 <button
                   key={tab.key}
@@ -686,6 +699,59 @@ const TecnicosAplicadores = () => {
                         </label>
                       )}
                     </div>
+                  </div>
+                )}
+
+                {/* TAB: Maquinaria asociada */}
+                {activeTab === 'maquinaria' && (
+                  <div>
+                    <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>
+                      Máquinas asociadas a este técnico
+                    </h3>
+                    <p style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', marginBottom: '1rem' }}>
+                      Marca las máquinas que este técnico aplicador puede utilizar. En los tratamientos, sólo aparecerán las máquinas asignadas a él.
+                    </p>
+                    {maquinariaCatalog.length === 0 ? (
+                      <div style={{ padding: '1.5rem', background: 'hsl(var(--muted) / 0.4)', borderRadius: '8px', textAlign: 'center', color: 'hsl(var(--muted-foreground))', fontSize: '0.85rem' }}>
+                        No hay maquinaria registrada todavía. Añade máquinas desde el catálogo de Maquinaria.
+                      </div>
+                    ) : (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '0.6rem' }}>
+                        {maquinariaCatalog.map((m) => {
+                          const checked = (formData.maquinas_ids || []).includes(m._id);
+                          return (
+                            <label
+                              key={m._id}
+                              data-testid={`maquina-row-${m._id}`}
+                              style={{
+                                display: 'flex', alignItems: 'center', gap: '0.6rem',
+                                padding: '0.6rem 0.8rem', borderRadius: '8px',
+                                border: checked ? '1px solid hsl(var(--primary))' : '1px solid hsl(var(--border))',
+                                background: checked ? 'hsl(var(--primary) / 0.06)' : 'white',
+                                cursor: 'pointer', fontSize: '0.85rem',
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={(e) => {
+                                  const ids = new Set(formData.maquinas_ids || []);
+                                  if (e.target.checked) ids.add(m._id); else ids.delete(m._id);
+                                  setFormData({ ...formData, maquinas_ids: Array.from(ids) });
+                                }}
+                                data-testid={`maquina-check-${m._id}`}
+                              />
+                              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontWeight: 600 }}>{m.nombre}</span>
+                                <span style={{ fontSize: '0.72rem', color: 'hsl(var(--muted-foreground))' }}>
+                                  {[m.tipo, m.marca, m.modelo, m.matricula].filter(Boolean).join(' · ') || '—'}
+                                </span>
+                              </div>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

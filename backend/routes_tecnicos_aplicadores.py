@@ -4,7 +4,7 @@ CRUD operations for managing certified applicators used in treatments
 """
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends
-from typing import Optional
+from typing import Optional, List
 from bson import ObjectId
 from datetime import datetime, timedelta
 from pydantic import BaseModel
@@ -39,6 +39,7 @@ class TecnicoAplicadorCreate(BaseModel):
     num_carnet: str
     fecha_certificacion: str  # YYYY-MM-DD
     observaciones: Optional[str] = ""
+    maquinas_ids: List[str] = []  # IDs de máquinas asociadas a este técnico
 
 
 @router.post("/tecnicos-aplicadores", response_model=dict)
@@ -136,7 +137,8 @@ async def get_tecnicos_activos(
             "dni": t.get("dni", ""),
             "nivel_capacitacion": t.get("nivel_capacitacion", ""),
             "num_carnet": t.get("num_carnet", ""),
-            "fecha_validez": t.get("fecha_validez", "")
+            "fecha_validez": t.get("fecha_validez", ""),
+            "maquinas_ids": t.get("maquinas_ids", []) or []
         })
     
     return {"tecnicos": result}

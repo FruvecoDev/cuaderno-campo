@@ -1289,37 +1289,62 @@ const Tratamientos = () => {
                 </div>
               )}
               
-              {fieldsConfig.maquina_id && (
-                <div className="form-group">
-                  <label className="form-label">Máquina</label>
-                  <select
-                    className="form-select"
-                    value={formData.maquina_id}
-                    onChange={(e) => {
-                      const selectedId = e.target.value;
-                      const selectedMaquina = maquinaria.find(m => m._id === selectedId);
-                      setFormData({
-                        ...formData,
-                        maquina_id: selectedId,
-                        maquina_nombre: selectedMaquina ? selectedMaquina.nombre : ''
-                      });
-                    }}
-                    data-testid="select-maquina"
-                  >
-                    <option value="">-- Seleccionar máquina --</option>
-                    {maquinaria.filter(m => m.estado === 'Operativo').map(m => (
+              {/* Máquina — siempre visible. Si el aplicador seleccionado
+                  tiene máquinas asociadas, filtramos a esas; si no, mostramos
+                  todas las operativas como antes. */}
+              <div className="form-group">
+                <label className="form-label">Máquina</label>
+                <select
+                  className="form-select"
+                  value={formData.maquina_id}
+                  onChange={(e) => {
+                    const selectedId = e.target.value;
+                    const selectedMaquina = maquinaria.find(m => m._id === selectedId);
+                    setFormData({
+                      ...formData,
+                      maquina_id: selectedId,
+                      maquina_nombre: selectedMaquina ? selectedMaquina.nombre : ''
+                    });
+                  }}
+                  data-testid="select-maquina"
+                >
+                  <option value="">-- Seleccionar máquina --</option>
+                  {(() => {
+                    const tecnico = tecnicosAplicadores.find(t => t._id === formData.tecnico_aplicador_id);
+                    const allowed = Array.isArray(tecnico?.maquinas_ids) ? tecnico.maquinas_ids : null;
+                    const operativas = maquinaria.filter(m => m.estado === 'Operativo');
+                    const list = (allowed && allowed.length > 0)
+                      ? operativas.filter(m => allowed.includes(m._id))
+                      : operativas;
+                    return list.map(m => (
                       <option key={m._id} value={m._id}>
                         {m.nombre} {m.tipo && `(${m.tipo})`} {m.matricula && `- ${m.matricula}`}
                       </option>
-                    ))}
-                  </select>
-                  {maquinaria.length === 0 && (
-                    <small style={{ color: 'hsl(var(--muted-foreground))' }}>
-                      No hay maquinaria registrada. Puedes añadirla desde el catálogo de Maquinaria.
+                    ));
+                  })()}
+                </select>
+                {formData.tecnico_aplicador_id && (() => {
+                  const tecnico = tecnicosAplicadores.find(t => t._id === formData.tecnico_aplicador_id);
+                  const allowed = Array.isArray(tecnico?.maquinas_ids) ? tecnico.maquinas_ids : [];
+                  if (allowed.length === 0) {
+                    return (
+                      <small style={{ color: 'hsl(var(--muted-foreground))' }}>
+                        Este técnico no tiene máquinas asociadas. Mostrando todas las máquinas operativas.
+                      </small>
+                    );
+                  }
+                  return (
+                    <small style={{ color: 'hsl(var(--primary))' }}>
+                      Sólo se muestran las máquinas asociadas a {tecnico.nombre_completo || tecnico.nombre}.
                     </small>
-                  )}
-                </div>
-              )}
+                  );
+                })()}
+                {maquinaria.length === 0 && (
+                  <small style={{ color: 'hsl(var(--muted-foreground))' }}>
+                    No hay maquinaria registrada. Puedes añadirla desde el catálogo de Maquinaria.
+                  </small>
+                )}
+              </div>
             </div>
             </>)}
 
