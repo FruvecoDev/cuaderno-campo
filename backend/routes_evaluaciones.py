@@ -760,10 +760,14 @@ async def generate_evaluacion_pdf(
     if parcela_id and ObjectId.is_valid(parcela_id):
         parcela_data = await parcelas_collection.find_one({"_id": ObjectId(parcela_id)})
     
-    # Obtener visitas de la parcela (ordenadas de más antigua a más nueva)
+    # Obtener visitas de la parcela (ordenadas por número de visita ASC,
+    # con fallback a fecha_visita cuando una visita antigua no tenga número).
     visitas = []
     if parcela_id:
-        visitas = await visitas_collection.find({"parcela_id": parcela_id}).sort("fecha_visita", 1).to_list(100)
+        visitas = await visitas_collection.find({"parcela_id": parcela_id}).sort([
+            ("numero_visita", 1),
+            ("fecha_visita", 1),
+        ]).to_list(100)
     
     # Obtener tratamientos de la parcela (ordenados de más antiguo a más nuevo)
     tratamientos = []
