@@ -144,6 +144,7 @@ class TratamientoCreate(BaseModel):
     
     # Nuevos campos para Aplicador y Máquina
     aplicador_nombre: Optional[str] = None  # Nombre del aplicador (texto libre)
+    tecnico_aplicador_id: Optional[str] = None  # ObjectId ref a tecnicos_aplicadores (técnico seleccionado en el dropdown)
     maquina_id: Optional[str] = None  # ObjectId ref a maquinaria
     
     # Fechas
