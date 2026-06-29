@@ -281,6 +281,13 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - 30+ `data-testid` añadidos para automatización.
 - **Testing**: testing_agent_v3_fork — backend 100%, frontend 100% (iteration_68.json). Pytest creado en `/app/backend/tests/test_evaluaciones_impresos.py`.
 
+### Maquina asociada al Aplicador - DONE (2026-06-29)
+- **Backend**: Añadido campo `maquinas_ids: List[str]` al modelo `TecnicoAplicadorCreate` (`routes_tecnicos_aplicadores.py`); POST/PUT persisten correctamente; endpoint `/activos` devuelve `maquinas_ids` en la proyección.
+- **Frontend Técnicos Aplicadores**: Nueva pestaña "Maquinaria" con grid de checkboxes para asignar máquinas al técnico.
+- **Frontend Tratamientos**: Selector "Máquina" ahora siempre visible en pestaña Aplicación. Cuando se selecciona un técnico con `maquinas_ids` asignados, la lista de máquinas se **filtra** a esas; sin asignaciones muestra todas las operativas. Hint contextual.
+- **Bug crítico encontrado y resuelto**: `TratamientoCreate` Pydantic model carecía del campo `tecnico_aplicador_id` → Pydantic silenciosamente lo dropeaba del payload. Añadido en `/app/backend/models_tratamientos.py` línea 147. Test pytest específico creado: `test_tratamiento_aplicador_persistence.py` (4/4 PASS).
+- **Testing**: testing_agent_v3_fork iteration_74 — backend 0 issues, frontend 0 issues, round-trip persistencia confirmada.
+
 ### Fix Vaso/Impresos cabecera — Eval con parcela_id huérfana - DONE (2026-06-29)
 - **Causa raíz**: La evaluación COT-GUI-25-001 (id `6a3e4b01e223c5dd1673c04c`) tenía `parcela_id` huérfana apuntando a una parcela borrada → cabecera Impresos se mostraba vacía ("Sin datos en parcela/contrato") y al guardar la sincronización `impresosSync` SOBREESCRIBÍA los campos con strings vacías.
 - **Fix 1 (datos)**: script `/app/scripts/relink_orphan_eval_parcela.py` ejecutado → eval COT re-vinculada a parcela existente `6a3e90f77b8cf2eb0d697bc1`.
