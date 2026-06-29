@@ -281,6 +281,11 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - 30+ `data-testid` añadidos para automatización.
 - **Testing**: testing_agent_v3_fork — backend 100%, frontend 100% (iteration_68.json). Pytest creado en `/app/backend/tests/test_evaluaciones_impresos.py`.
 
+### Fix: Cuestionario de Plagas y Enfermedades en PDF Visitas - DONE (2026-06-29)
+- **Bug**: la sección "CUESTIONARIO PLAGAS Y ENFERMEDADES" salía vacía en el PDF aunque el cuestionario estuviera relleno. Causa: el código hacía `if value:` lo que descarta `0` (Python falsy), y los valores son tri-estado 0/1/2.
+- **Fix**: cambiado a `is not None`, renderizado en tabla 2 columnas, con etiquetas legibles "0 · Sin presencia / 1 · Presencia baja / 2 · Presencia alta" en colores (verde / naranja / rojo) y leyenda.
+- **Testing**: análisis OCR del PDF generado (confianza 100%) — los 10 items aparecen con sus valores, leyenda visible, mismatches por visita detectados correctamente (ej. visita #7 muestra Mildiu+Pulgón en presencia baja).
+
 ### Aviso trazabilidad: Máquina no asignada al técnico - DONE (2026-06-29)
 - Aviso visual amarillo en pestaña Aplicación de Tratamientos (`data-testid="warn-maquina-no-asignada"`) cuando la máquina elegida NO está en `tecnico.maquinas_ids`.
 - Al pulsar Guardar/Actualizar, aparece `window.confirm` con mensaje "Esta máquina no está asignada al técnico... ¿Deseas continuar?": Cancel deja el modal abierto en pestaña aplicacion; OK persiste el tratamiento.

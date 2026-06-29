@@ -1777,24 +1777,57 @@ async def generate_evaluacion_pdf(
         </div>
         """
         
-        # Cuestionario de Plagas y Enfermedades si existe
-        cuestionario_plagas = visita.get('cuestionario_plagas', {})
-        if cuestionario_plagas:
+        # Cuestionario de Plagas y Enfermedades si existe.
+        # NOTA: los valores son tri-estado 0/1/2 (Sin presencia / Baja / Alta).
+        # El `if value:` original saltaba 0 → la sección salía vacía. Aquí
+        # comprobamos `is not None` para incluir el 0.
+        cuestionario_plagas = visita.get('cuestionario_plagas') or {}
+        if isinstance(cuestionario_plagas, dict) and cuestionario_plagas:
+            # Etiqueta legible para cada valor.
+            def _label_presencia(v):
+                try:
+                    n = int(v)
+                except (TypeError, ValueError):
+                    return str(v) if v is not None else '—'
+                if n == 0:
+                    return '<span style="color:#2e7d32; font-weight:600;">0 · Sin presencia</span>'
+                if n == 1:
+                    return '<span style="color:#ed6c02; font-weight:600;">1 · Presencia baja</span>'
+                if n == 2:
+                    return '<span style="color:#c62828; font-weight:600;">2 · Presencia alta</span>'
+                return str(v)
+            
             html_content += """
         <div class="section">
             <div class="section-title section-title-blue">CUESTIONARIO PLAGAS Y ENFERMEDADES</div>
             <div class="section-content">
+                <div style="font-size: 8.5pt; color: #666; margin-bottom: 6px;">
+                    Escala: <strong>0</strong> Sin presencia · <strong>1</strong> Presencia baja · <strong>2</strong> Presencia alta
+                </div>
+                <table style="width:100%; border-collapse:collapse; font-size: 9.5pt;">
+                    <tbody>
             """
-            for key, value in cuestionario_plagas.items():
-                if value:
+            # Renderizamos en filas de 2 columnas (igual que la UI).
+            items = list(cuestionario_plagas.items())
+            for i in range(0, len(items), 2):
+                pair = items[i:i + 2]
+                html_content += "<tr>"
+                for key, value in pair:
                     label = key.replace('_', ' ').title()
                     html_content += f"""
-                <div class="question-row">
-                    <span class="question-text"><strong>{label}:</strong></span>
-                    <div class="answer">{format_respuesta(value)}</div>
-                </div>
-                """
+                        <td style="padding:6px 10px; border:1px solid #e0e0e0; width:50%;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                                <span style="font-weight:600; color:#333;">{label}</span>
+                                <span>{_label_presencia(value)}</span>
+                            </div>
+                        </td>
+                    """
+                if len(pair) == 1:
+                    html_content += '<td style="border:1px solid #e0e0e0;"></td>'
+                html_content += "</tr>"
             html_content += """
+                    </tbody>
+                </table>
             </div>
         </div>
             """
