@@ -760,6 +760,31 @@ async def generate_evaluacion_pdf(
     if parcela_id and ObjectId.is_valid(parcela_id):
         parcela_data = await parcelas_collection.find_one({"_id": ObjectId(parcela_id)})
     
+    # Resolver Variedad en vivo desde el catálogo de Cultivos cuando la parcela
+    # tiene `variedad` vacía pero el cultivo asociado tiene exactamente una
+    # variedad en su catálogo (replica la lógica del frontend ParcelasForm /
+    # EvaluacionesImpresos). Garantiza que el PDF muestre la variedad real
+    # aunque nunca se haya guardado explícitamente en la parcela.
+    variedad_resuelta = ""
+    if parcela_data:
+        variedad_resuelta = (parcela_data.get("variedad") or "").strip()
+    if not variedad_resuelta:
+        cultivo_nombre = (parcela_data or {}).get("cultivo") or evaluacion.get("cultivo") or ""
+        if cultivo_nombre:
+            cultivo_doc = await db['cultivos'].find_one({"nombre": cultivo_nombre})
+            variedades = (cultivo_doc or {}).get("variedades") or []
+            if len(variedades) == 1:
+                variedad_resuelta = str(variedades[0]).strip()
+    # Inyectar la variedad resuelta tanto en `evaluacion` como en `impresos`
+    # para que todas las plantillas (cabecera Plantación, Impresos cabecera y
+    # Datos Generales) la muestren de forma consistente.
+    if variedad_resuelta:
+        if not (evaluacion.get("variedad") or "").strip():
+            evaluacion["variedad"] = variedad_resuelta
+        imp_inline = evaluacion.get("impresos")
+        if isinstance(imp_inline, dict) and not (imp_inline.get("variedad") or "").strip():
+            imp_inline["variedad"] = variedad_resuelta
+    
     # Obtener visitas de la parcela (ordenadas por número de visita ASC,
     # con fallback a fecha_visita cuando una visita antigua no tenga número).
     visitas = []
