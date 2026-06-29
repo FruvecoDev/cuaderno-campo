@@ -1,0 +1,38 @@
+{
+  "summary": "Frontend testing of Tratamiento aplicador+maquina mismatch warning feature. All 6 scenarios PASSED: (1) inline yellow warning appears when tecnico has maquinas_ids and selected maquina is not in the list; (2) window.confirm dialog on submit with correct Spanish message including 'continuar y guardar... de todos modos'; cancel keeps modal open and switches to 'aplicacion' tab; (3) OK on confirm proceeds with save and closes the modal; (4-6) NO warning when match, no warning when tecnico without maquinas_ids, no warning when no maquina selected.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Tratamientos list (general app)", "issues": ["Multiple React hydration warnings logged: 'In HTML, span cannot be a child of select/option/tr/td/tbody/th'. Caused by visual-editor instrumentation wrapping. Non-blocking but noisy in console."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/frontend/src/pages/Tratamientos.js",
+    "/app/backend/tests/test_tratamiento_aplicador_persistence.py"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Tratamientos.js is 1426 lines — exceeds the 700-line guideline. Should be split (e.g., extract TratamientoForm, TratamientoAplicacionTab subcomponents).",
+    "The window.confirm message in handleSubmit and the inline warning text are duplicated literals — consider extracting to a helper to keep messages consistent.",
+    "Warning logic appears 2x (render + handleSubmit). Extracting a computeAplicadorMismatch(tecnico, maquina_id, tecnicosAplicadores, maquinaria) helper would DRY both call sites."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped per request)", "frontend": "100% (6/6 scenarios)"},
+  "test_credentials": "admin@fruveco.com / admin123",
+  "seed_data_creation": "Temporarily created a 'TEST_MAQ_MISMATCH' maquina via POST /api/maquinaria (because seed only had AGRIFAC which is Antonio's assigned maquina, making a mismatch impossible). The test tratamiento created during T3 (accept-OK) and the test maquina were both cleaned up via DELETE API calls after testing completed.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Tab buttons in TabbedModal use data-testid='tab-{key}' (NOT 'tratamiento-tab-{key}'). For tratamiento form: tabs are tab-general, tab-parcelas, tab-producto, tab-aplicacion. To trigger aplicador+maquina mismatch on this DB you must create an extra Operativo maquina (only AGRIFAC seeded, which is Antonio's only assigned one). Antonio Sanchez (_id 6a27edb2c7c8f845aea00124) has maquinas_ids=['6a3e364d40b2b1b51493e704'] (AGRIFAC). Clemente Torres Martín (_id 6a3e350d40b2b1b51493e703) has empty maquinas_ids.",
+  "verification_evidence": {
+    "warning_text": "⚠️Esta máquina no está asignada al técnico Antonio Sanchez. Puede generar incidencias en una inspección administrativa.",
+    "confirm_dialog_text": "⚠️ Aviso de trazabilidad\\n\\nLa máquina \"TEST_MAQ_MISMATCH\" NO está asignada al técnico Antonio Sanchez.\\n\\nEsto puede generar incidencias en una inspección administrativa.\\n\\n¿Deseas continuar y guardar el tratamiento de todos modos?",
+    "T1_warning_visible_on_mismatch": true,
+    "T2_cancel_keeps_modal_open_and_aplicacion_tab_active": true,
+    "T3_accept_saves_and_closes_modal": true,
+    "T4_no_warning_when_match": true,
+    "T5_no_warning_when_tecnico_has_no_maquinas_ids": true,
+    "T6_no_warning_when_no_maquina_selected": true
+  }
+}

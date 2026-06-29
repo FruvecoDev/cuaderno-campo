@@ -428,6 +428,27 @@ const Tratamientos = () => {
       return;
     }
     
+    // Aviso si la máquina elegida NO está asignada al técnico (evitar
+    // errores de trazabilidad ante inspección administrativa).
+    if (formData.tecnico_aplicador_id && formData.maquina_id) {
+      const tecnico = tecnicosAplicadores.find(t => t._id === formData.tecnico_aplicador_id);
+      const allowed = Array.isArray(tecnico?.maquinas_ids) ? tecnico.maquinas_ids : [];
+      if (allowed.length > 0 && !allowed.includes(formData.maquina_id)) {
+        const maquina = maquinaria.find(m => m._id === formData.maquina_id);
+        const ok = window.confirm(
+          `⚠️ Aviso de trazabilidad\n\n` +
+          `La máquina "${maquina?.nombre || 'seleccionada'}" NO está asignada al técnico ` +
+          `${tecnico?.nombre_completo || tecnico?.nombre || ''}.\n\n` +
+          `Esto puede generar incidencias en una inspección administrativa.\n\n` +
+          `¿Deseas continuar y guardar el tratamiento de todos modos?`
+        );
+        if (!ok) {
+          setActiveTab('aplicacion');
+          return;
+        }
+      }
+    }
+    
     // Payload simplificado - el backend hereda el resto
     const payload = {
       tipo_tratamiento: formData.tipo_tratamiento,
@@ -1326,6 +1347,26 @@ const Tratamientos = () => {
                 {formData.tecnico_aplicador_id && (() => {
                   const tecnico = tecnicosAplicadores.find(t => t._id === formData.tecnico_aplicador_id);
                   const allowed = Array.isArray(tecnico?.maquinas_ids) ? tecnico.maquinas_ids : [];
+                  // Aviso visual: máquina elegida NO está en la lista del técnico.
+                  if (formData.maquina_id && allowed.length > 0 && !allowed.includes(formData.maquina_id)) {
+                    return (
+                      <div
+                        data-testid="warn-maquina-no-asignada"
+                        style={{
+                          marginTop: '0.5rem', padding: '0.6rem 0.8rem', borderRadius: '6px',
+                          background: 'hsl(45, 95%, 95%)', border: '1px solid hsl(45, 80%, 60%)',
+                          color: 'hsl(35, 80%, 30%)', fontSize: '0.8rem', fontWeight: 500,
+                          display: 'flex', alignItems: 'flex-start', gap: '0.5rem',
+                        }}
+                      >
+                        <span style={{ fontSize: '1rem' }}>⚠️</span>
+                        <span>
+                          Esta máquina <strong>no está asignada</strong> al técnico {tecnico?.nombre_completo || tecnico?.nombre}.
+                          Puede generar incidencias en una inspección administrativa.
+                        </span>
+                      </div>
+                    );
+                  }
                   if (allowed.length === 0) {
                     return (
                       <small style={{ color: 'hsl(var(--muted-foreground))' }}>
