@@ -281,6 +281,15 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - 30+ `data-testid` añadidos para automatización.
 - **Testing**: testing_agent_v3_fork — backend 100%, frontend 100% (iteration_68.json). Pytest creado en `/app/backend/tests/test_evaluaciones_impresos.py`.
 
+### Número de Visita correlativo por parcela - DONE (2026-06-26)
+- Nuevo campo `numero_visita: Optional[int]` en modelo Visita (`models.py`).
+- Auto-asignación en POST `/api/visitas`: si no se envía, calcula `max(numero_visita) + 1` para esa parcela (primera visita → 1).
+- PUT `/api/visitas/{id}` permite override manual del número.
+- Backfill ejecutado: `/app/scripts/backfill_numero_visita.py` numeró las 9 visitas existentes 1-9 en orden cronológico.
+- Frontend: nueva columna "Nº" en tabla de Visitas (`VisitasTable.js`) y nuevo input "Nº Visita" en formulario (`VisitasForm.js` 4-col grid).
+- PDF Cuaderno de Campo: índice muestra "Visita #N · Objetivo" y detalle muestra "VISITA #N · fecha".
+- **Testing**: testing_agent_v3_fork iteration_71 — backend (POST/PUT/GET auto-assignment + override) y frontend (tabla + form + create→edit flow) PASS.
+
 ### Cuaderno de Campo PDF — Refactor completo - DONE (2026-06-26)
 - **Orden cronológico ASC**: Visitas y Tratamientos ahora se ordenan de más antiguo a más nuevo (`sort(fecha, 1)`).
 - **Tipo de tratamiento real**: Reemplazado el "Sin tipo" por `tipo_tratamiento — subtipo` (ej. "FITOSANITARIOS — Herbicida/Fungicida/Insecticida") tanto en índice como en detalle.
