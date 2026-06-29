@@ -1,0 +1,54 @@
+{
+  "summary": "Tested new 'Número de Visita' feature end-to-end: backend auto-assignment + manual override, GET listing with backfill, frontend Nº column + form input, and full UI create→edit flow. All passed.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_visitas_numero.py",
+    "/app/test_reports/pytest/test_visitas_numero.xml"
+  ],
+  "tests_executed": {
+    "backend": [
+      "test_backfill_cot_visits_have_numero — PASS (COT-GUI-25-001 has 9 visits, all with numero_visita populated 1..9)",
+      "test_create_visit_auto_assigns_next_number — PASS (new visit on COT got next number = max+1)",
+      "test_create_visit_with_explicit_numero — PASS (POST honoured numero_visita=555)",
+      "test_put_override_numero_visita — PASS (PUT changed numero to 99 and persisted)",
+      "test_create_first_visit_on_empty_parcela — PASS (first visit on new parcela = 1)",
+      "test_zzz_cleanup — PASS (all TEST_ visits + temp parcela deleted)"
+    ],
+    "frontend_playwright": [
+      "Visitas table renders Nº column with data-testid='visita-numero-{id}' showing #1..#9 for COT existing visits",
+      "Form has input-numero-visita with placeholder='Auto' and empty value on create",
+      "Created new visit on COT (numero blank) → table shows #10",
+      "Opened edit form → input-numero-visita pre-filled with '10' (loads existing numero_visita)",
+      "Edited numero to 99 → save → table shows #99 (manual override persists)",
+      "Cleanup: deleted test visit via API"
+    ]
+  },
+  "code_review_findings": [
+    "routes_visitas.py POST: numero_visita auto-assign logic correctly queries max numero_visita for parcela_id and falls back to 1 (lines 89-100). Race condition theoretically possible under concurrent creates on same parcela (two requests could read same max and write duplicate); acceptable for typical low-frequency use, but consider a unique index (parcela_id, numero_visita) or atomic counter if concurrent creation becomes an issue.",
+    "routes_visitas.py PUT (line 234-235): allows override only when numero_visita is not None and > 0 — correct.",
+    "VisitasForm.js line 70: input is type='number' min=1 placeholder='Auto', good UX.",
+    "VisitasTable.js line 37-62: Nº column rendered when tableConfig.objetivo is true, with proper testid; renders '—' when numero_visita is missing (graceful).",
+    "Visitas.js handleSubmit (lines 333-335): only sends numero_visita when user filled it (correct — backend will auto-assign when omitted).",
+    "PDF (routes_evaluaciones.py lines 1213, 1696): uses visita.get('numero_visita') or idx — correct fallback to sequential index if missing. Confirmed via code review; could not verify PDF output with visits because the only COT-linked evaluacion (6a3e4b01...) references parcela_id 6a3b7f57... while the 9 visits live on parcela_id 6a3e90f7..., so PDF renders '0 visitas' (data mismatch, not a code bug).",
+    "Pre-existing console hydration warnings about <span> wrappers around <th>/<td>/<tr> (x-excluded dev instrumentation, NOT related to this feature) — unchanged from prior iterations."
+  ],
+  "action_items": [],
+  "updated_files": [
+    "/app/backend/tests/test_visitas_numero.py (new)"
+  ],
+  "success_rate": {"backend": "100% (6/6)", "frontend": "100%"},
+  "test_credentials": "admin@fruveco.com / admin123",
+  "seed_data_creation": "None persisted. Tests create & delete TEST_ visits and one TEST_ parcela in cleanup step. UI test #99 visit cleaned up via API.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Feature fully validated. COT-GUI-25-001 (parcela_id 6a3e90f77b8cf2eb0d697bc1) still has 9 visits numbered #1..#9 after cleanup. data-testids: visita-numero-{id} (table cell), input-numero-visita (form input).",
+  "rca of the issue": "N/A — no defects found."
+}

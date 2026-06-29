@@ -409,6 +409,7 @@ class VisitaBase(BaseModel):
     planificado: bool = False
     fecha_visita: str  # OBLIGATORIO - fecha de la visita
     hora_visita: Optional[str] = None
+    numero_visita: Optional[int] = None  # Nº de visita correlativo dentro de la parcela (auto-asignado)
     
     # Vínculos obligatorios al contexto agronómico
     contrato_id: Optional[str] = None  # ObjectId ref a contratos (recomendado)
@@ -446,6 +447,7 @@ class VisitaCreate(BaseModel):
     fecha_visita: str  # OBLIGATORIO - fecha de la visita
     fecha_planificada: Optional[str] = None  # Para planificar visitas futuras
     observaciones: Optional[str] = None
+    numero_visita: Optional[int] = None  # Nº correlativo (si no se envía, se auto-asigna)
     
     # Cuestionario de Plagas y Enfermedades (solo cuando objetivo = "Plagas y Enfermedades")
     cuestionario_plagas: Optional[Dict[str, int]] = None

@@ -86,6 +86,19 @@ async def create_visita(
         "updated_at": datetime.now()
     }
     
+    # Asignar nº de visita correlativo dentro de la parcela.
+    # Si el cliente envía un nº explícito lo respetamos; si no, calculamos
+    # el siguiente (max+1) considerando todas las visitas existentes de la
+    # misma parcela. La primera visita de una parcela arranca en 1.
+    if visita.numero_visita is not None and visita.numero_visita > 0:
+        visita_dict["numero_visita"] = int(visita.numero_visita)
+    else:
+        ultima = await visitas_collection.find(
+            {"parcela_id": visita.parcela_id, "numero_visita": {"$exists": True, "$ne": None}}
+        ).sort("numero_visita", -1).limit(1).to_list(1)
+        siguiente = (ultima[0]["numero_visita"] + 1) if ultima else 1
+        visita_dict["numero_visita"] = siguiente
+    
     result = await visitas_collection.insert_one(visita_dict)
     created = await visitas_collection.find_one({"_id": result.inserted_id})
     
@@ -217,6 +230,9 @@ async def update_visita(
         update_data["fecha_visita"] = visita.fecha_visita
     if visita.observaciones is not None:
         update_data["observaciones"] = visita.observaciones
+    # Permitir editar el nº de visita manualmente (override del auto-asignado).
+    if visita.numero_visita is not None and visita.numero_visita > 0:
+        update_data["numero_visita"] = int(visita.numero_visita)
     
     # Actualizar cuestionario de plagas si el objetivo es "Plagas y Enfermedades"
     if visita.objetivo == "Plagas y Enfermedades" and visita.cuestionario_plagas:

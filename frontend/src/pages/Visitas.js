@@ -71,7 +71,8 @@ const Visitas = () => {
     fecha_visita: new Date().toISOString().split('T')[0],
     fecha_planificada: '',
     parcela_id: '',
-    observaciones: ''
+    observaciones: '',
+    numero_visita: ''
   });
   
   const [cuestionarioPlagas, setCuestionarioPlagas] = useState(() => {
@@ -306,7 +307,7 @@ const Visitas = () => {
   };
   
   const resetForm = () => {
-    setFormData({ objetivo: 'Control Rutinario', fecha_visita: new Date().toISOString().split('T')[0], fecha_planificada: '', parcela_id: '', observaciones: '' });
+    setFormData({ objetivo: 'Control Rutinario', fecha_visita: new Date().toISOString().split('T')[0], fecha_planificada: '', parcela_id: '', observaciones: '', numero_visita: '' });
     const initialPlagas = {};
     PLAGAS_ENFERMEDADES.forEach(p => { initialPlagas[p.key] = 0; });
     setCuestionarioPlagas(initialPlagas);
@@ -327,6 +328,11 @@ const Visitas = () => {
       fecha_visita: formData.fecha_visita, fecha_planificada: formData.fecha_planificada,
       observaciones: formData.observaciones
     };
+    // Nº de visita: solo enviar si el usuario lo ha tocado (entero > 0).
+    // Si no, el backend lo auto-asignará como max+1 dentro de la parcela.
+    if (formData.numero_visita !== '' && Number(formData.numero_visita) > 0) {
+      payload.numero_visita = Number(formData.numero_visita);
+    }
     if (formData.objetivo === 'Plagas y Enfermedades') payload.cuestionario_plagas = cuestionarioPlagas;
     
     if (!navigator.onLine && !editingId) {
@@ -367,7 +373,8 @@ const Visitas = () => {
       fecha_visita: visita.fecha_visita || new Date().toISOString().split('T')[0],
       fecha_planificada: visita.fecha_planificada || '',
       parcela_id: visita.parcela_id || '',
-      observaciones: visita.observaciones || ''
+      observaciones: visita.observaciones || '',
+      numero_visita: visita.numero_visita ?? ''
     });
     if (visita.cuestionario_plagas) {
       setCuestionarioPlagas(visita.cuestionario_plagas);

@@ -1210,9 +1210,10 @@ async def generate_evaluacion_pdf(
             page_num = 1 + idx
             fecha = format_fecha(visita.get('fecha_visita'))
             objetivo = visita.get('objetivo', 'Sin objetivo')[:40]
+            n_visita = visita.get('numero_visita') or idx
             html_content += f"""
                 <div class="index-item">
-                    <span class="index-item-name">{idx}. {objetivo}</span>
+                    <span class="index-item-name">Visita #{n_visita} · {objetivo}</span>
                     <span class="index-item-date">{fecha}</span>
                     <span class="index-item-page">Pág. {page_num}</span>
                 </div>
@@ -1692,7 +1693,7 @@ async def generate_evaluacion_pdf(
         </div>
         
         <div class="visita-header">
-            <h3>VISITA #{idx} - {format_fecha(visita.get('fecha_visita'))}</h3>
+            <h3>VISITA #{visita.get('numero_visita') or idx} · {format_fecha(visita.get('fecha_visita'))}</h3>
         </div>
         
         <div class="section">

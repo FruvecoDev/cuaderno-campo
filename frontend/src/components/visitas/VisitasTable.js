@@ -34,6 +34,7 @@ export const VisitasTable = ({
                     onToggle={onToggleAll}
                   />
                 )}
+                {tableConfig.objetivo ? <th style={{ width: '60px' }}>Nº</th> : null}
                 {tableConfig.objetivo ? <th>Objetivo</th> : null}
                 {tableConfig.parcela ? <th>Parcela</th> : null}
                 {tableConfig.proveedor ? <th>Proveedor</th> : null}
@@ -54,6 +55,11 @@ export const VisitasTable = ({
                       onToggle={onToggleOne}
                     />
                   )}
+                  {tableConfig.objetivo ? (
+                    <td style={{ textAlign: 'center', fontWeight: 700, color: 'hsl(var(--primary))' }} data-testid={`visita-numero-${visita._id}`}>
+                      {visita.numero_visita ? `#${visita.numero_visita}` : '—'}
+                    </td>
+                  ) : null}
                   {tableConfig.objetivo ? (
                     <td className="font-semibold">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
