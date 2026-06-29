@@ -272,13 +272,16 @@ const Evaluaciones = () => {
           pregunta_id: p.id, pregunta: p.pregunta, tipo: p.tipo, respuesta: respuestas[p.id] || ''
         }));
       });
-      // Cabecera de Impresos SIEMPRE sincronizada en vivo desde Parcela + Contrato.
-      // Solo el resto del impresos (comentarios, secciones 1-6) queda como lo
-      // editó el usuario. Esto garantiza que el PDF y la base de datos reflejen
-      // siempre los datos actuales de la parcela/contrato asignado.
+      // Cabecera de Impresos sincronizada con Parcela + Contrato cuando la
+      // parcela existe. Si la parcela ha sido borrada (huérfana), preservamos
+      // los valores actuales del impresos en lugar de sobrescribirlos con
+      // cadenas vacías. Así evitamos que un click en "Guardar" wipie la
+      // cabecera de evaluaciones cuyas parcelas ya no existen en BD.
       const variedadResuelta = resolveVariedad(parcela) || contrato?.variedad || '';
-      const impresosSync = {
-        ...(formData.impresos || {}),
+      const currentImp = formData.impresos || {};
+      const parcelaOk = !!parcela;
+      const impresosSync = parcelaOk ? {
+        ...currentImp,
         proveedor: parcela?.proveedor || contrato?.proveedor || '',
         codigo_plantacion: parcela?.codigo_plantacion || '',
         finca: parcela?.finca || '',
@@ -287,16 +290,20 @@ const Evaluaciones = () => {
         superficie: parcela?.superficie_total ?? parcela?.superficie ?? '',
         parcela_id: formData.parcela_id || '',
         contrato_id: parcela?.contrato_id || '',
+      } : {
+        // Parcela huérfana → conservar lo que ya hubiera en impresos.
+        ...currentImp,
+        parcela_id: formData.parcela_id || currentImp.parcela_id || '',
       };
       const payload = {
         ...formData,
         impresos: impresosSync,
-        codigo_plantacion: parcela?.codigo_plantacion || '',
-        proveedor: parcela?.proveedor || '',
-        cultivo: parcela?.cultivo || '',
-        variedad: variedadResuelta,
-        finca: parcela?.finca || '',
-        campana: parcela?.campana || '',
+        codigo_plantacion: parcelaOk ? (parcela?.codigo_plantacion || '') : (formData.codigo_plantacion || ''),
+        proveedor: parcelaOk ? (parcela?.proveedor || '') : (formData.proveedor || ''),
+        cultivo: parcelaOk ? (parcela?.cultivo || '') : (formData.cultivo || ''),
+        variedad: parcelaOk ? variedadResuelta : (formData.variedad || ''),
+        finca: parcelaOk ? (parcela?.finca || '') : (formData.finca || ''),
+        campana: parcelaOk ? (parcela?.campana || '') : (formData.campana || ''),
         // El backend espera las secciones como campos top-level
         // (toma_datos, analisis_suelo, ...), no anidadas dentro de
         // `secciones`. Las aplanamos aquí para que persistan correctamente.
