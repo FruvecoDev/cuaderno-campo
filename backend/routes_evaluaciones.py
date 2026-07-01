@@ -752,6 +752,67 @@ async def export_evaluaciones_pdf(
 # GENERACIÓN DE PDF - CON VISITAS Y TRATAMIENTOS
 # ============================================================================
 
+@router.get("/evaluaciones/{evaluacion_id}/diagnose")
+async def diagnose_evaluacion(
+    evaluacion_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Devuelve un JSON con el diagnóstico de por qué el PDF de una
+    evaluación puede no encontrar sus visitas/tratamientos. No modifica
+    nada. Útil para depurar producción sin acceso directo a MongoDB."""
+    from database import visitas_collection, tratamientos_collection
+    if not ObjectId.is_valid(evaluacion_id):
+        raise HTTPException(status_code=400, detail="ID inválido")
+    ev = await evaluaciones_collection.find_one({"_id": ObjectId(evaluacion_id)})
+    if not ev:
+        raise HTTPException(status_code=404, detail="Evaluación no encontrada")
+    parcela_id = ev.get("parcela_id", "")
+    codigo_plant = (ev.get("codigo_plantacion") or "").strip()
+    contrato_id = ev.get("contrato_id")
+    parcela_data = None
+    if parcela_id and ObjectId.is_valid(parcela_id):
+        parcela_data = await parcelas_collection.find_one({"_id": ObjectId(parcela_id)})
+    parcela_por_codigo = None
+    if codigo_plant:
+        parcela_por_codigo = await parcelas_collection.find_one({"codigo_plantacion": codigo_plant}, {"_id": 1, "codigo_plantacion": 1, "proveedor": 1})
+    # counts under each strategy
+    n_vis_by_pid = await visitas_collection.count_documents({"parcela_id": parcela_id}) if parcela_id else 0
+    n_vis_by_codigo = await visitas_collection.count_documents({"codigo_plantacion": codigo_plant}) if codigo_plant else 0
+    n_vis_by_contrato = await visitas_collection.count_documents({"contrato_id": contrato_id}) if contrato_id else 0
+    n_trat_by_pid = await tratamientos_collection.count_documents({"parcelas_ids": parcela_id}) if parcela_id else 0
+    parcela_ids_by_codigo = []
+    if codigo_plant:
+        async for p in parcelas_collection.find({"codigo_plantacion": codigo_plant}, {"_id": 1}):
+            parcela_ids_by_codigo.append(str(p["_id"]))
+    n_trat_by_codigo = await tratamientos_collection.count_documents({"parcelas_ids": {"$in": parcela_ids_by_codigo}}) if parcela_ids_by_codigo else 0
+    n_trat_by_contrato = await tratamientos_collection.count_documents({"contrato_id": contrato_id}) if contrato_id else 0
+    return {
+        "evaluacion_id": evaluacion_id,
+        "evaluacion": {
+            "parcela_id": parcela_id,
+            "codigo_plantacion": codigo_plant,
+            "contrato_id": contrato_id,
+            "proveedor": ev.get("proveedor"),
+            "cultivo": ev.get("cultivo"),
+            "campana": ev.get("campana"),
+        },
+        "parcela_ref_by_id_existe": parcela_data is not None,
+        "parcela_encontrada_por_codigo": {
+            "_id": str(parcela_por_codigo["_id"]) if parcela_por_codigo else None,
+            "codigo_plantacion": parcela_por_codigo.get("codigo_plantacion") if parcela_por_codigo else None,
+            "proveedor": parcela_por_codigo.get("proveedor") if parcela_por_codigo else None,
+        } if parcela_por_codigo else None,
+        "counts": {
+            "visitas_por_parcela_id": n_vis_by_pid,
+            "visitas_por_codigo_plantacion": n_vis_by_codigo,
+            "visitas_por_contrato_id": n_vis_by_contrato,
+            "tratamientos_por_parcelas_ids": n_trat_by_pid,
+            "tratamientos_por_codigo_plantacion(fallback)": n_trat_by_codigo,
+            "tratamientos_por_contrato_id": n_trat_by_contrato,
+        }
+    }
+
+
 @router.get("/evaluaciones/{evaluacion_id}/pdf")
 async def generate_evaluacion_pdf(
     evaluacion_id: str,
@@ -845,19 +906,37 @@ async def generate_evaluacion_pdf(
             ("numero_visita", 1),
             ("fecha_visita", 1),
         ]).to_list(100)
+    # Último fallback: por contrato_id de la evaluación (algunas visitas
+    # antiguas pueden no tener codigo_plantacion pero sí contrato_id).
+    if not visitas:
+        contrato_id_ev = evaluacion.get("contrato_id")
+        if contrato_id_ev:
+            visitas = await visitas_collection.find({"contrato_id": contrato_id_ev}).sort([
+                ("numero_visita", 1),
+                ("fecha_visita", 1),
+            ]).to_list(100)
     
     # Obtener tratamientos de la parcela (ordenados de más antiguo a más nuevo).
-    # Mismo fallback por `codigo_plantacion` que en visitas.
+    # Fallbacks robustos: (a) por `parcelas_ids` con el nuevo _id resuelto,
+    # (b) buscando todas las parcelas con mismo `codigo_plantacion` y usando
+    # sus _id en $in, (c) como último recurso por `contrato_id` de la
+    # evaluación — que los tratamientos también almacenan.
     tratamientos = []
     if parcela_id:
         tratamientos = await tratamientos_collection.find({"parcelas_ids": parcela_id}).sort("fecha_tratamiento", 1).to_list(100)
     if not tratamientos and codigo_plant_lookup:
-        tratamientos = await tratamientos_collection.find({
-            "$or": [
-                {"codigo_plantacion": codigo_plant_lookup},
-                {"parcelas_codigos": codigo_plant_lookup},
-            ]
-        }).sort("fecha_tratamiento", 1).to_list(100)
+        # Recolectar todos los _id de parcelas que compartan codigo_plantacion
+        parcela_ids_por_codigo = []
+        async for pdoc in parcelas_collection.find({"codigo_plantacion": codigo_plant_lookup}, {"_id": 1}):
+            parcela_ids_por_codigo.append(str(pdoc["_id"]))
+        if parcela_ids_por_codigo:
+            tratamientos = await tratamientos_collection.find({
+                "parcelas_ids": {"$in": parcela_ids_por_codigo}
+            }).sort("fecha_tratamiento", 1).to_list(100)
+    if not tratamientos:
+        contrato_id_ev = evaluacion.get("contrato_id")
+        if contrato_id_ev:
+            tratamientos = await tratamientos_collection.find({"contrato_id": contrato_id_ev}).sort("fecha_tratamiento", 1).to_list(100)
     
     # Para cada tratamiento, obtener los datos completos del aplicador y la máquina
     tratamientos_enriquecidos = []
