@@ -22,6 +22,21 @@ from rbac_guards import (
 router = APIRouter(prefix="/api", tags=["visitas"])
 
 
+def _visita_realizada(observaciones: Optional[str], cuestionario_plagas: Optional[dict], fecha_visita: Optional[str]) -> bool:
+    """Regla auto: una visita se considera 'Realizada' cuando tiene contenido
+    real registrado. Coherente con el rendering del PDF, que siempre imprime
+    'Realizado: Sí' en visitas que aparecen en el informe.
+    """
+    if (observaciones or "").strip():
+        return True
+    if cuestionario_plagas and isinstance(cuestionario_plagas, dict):
+        if any(v is not None for v in cuestionario_plagas.values()):
+            return True
+    if (fecha_visita or "").strip():
+        return True
+    return False
+
+
 @router.post("/visitas", response_model=dict)
 async def create_visita(
     visita: VisitaCreate,
@@ -77,7 +92,7 @@ async def create_visita(
         "fecha_visita": visita.fecha_visita or "",
         "fecha_planificada": visita.fecha_planificada or "",
         "observaciones": visita.observaciones or "",
-        "realizado": False,
+        "realizado": _visita_realizada(visita.observaciones, visita.cuestionario_plagas, visita.fecha_visita),
         "planificado": bool(visita.fecha_planificada),
         "documentos": [],
         "formularios": [],
@@ -240,6 +255,15 @@ async def update_visita(
     elif visita.objetivo != "Plagas y Enfermedades":
         # Si el objetivo cambió, eliminar el cuestionario
         update_data["cuestionario_plagas"] = None
+    
+    # Auto-marcar `realizado=True` si la visita tiene contenido real (obs,
+    # cuestionario o fecha_visita). Coherente con el PDF que siempre imprime
+    # "Realizado: Sí" para visitas que aparecen en el informe.
+    _existing = await visitas_collection.find_one({"_id": ObjectId(visita_id)}, {"observaciones": 1, "cuestionario_plagas": 1, "fecha_visita": 1})
+    _obs = update_data.get("observaciones", (_existing or {}).get("observaciones"))
+    _cp = update_data.get("cuestionario_plagas", (_existing or {}).get("cuestionario_plagas"))
+    _fv = update_data.get("fecha_visita", (_existing or {}).get("fecha_visita"))
+    update_data["realizado"] = _visita_realizada(_obs, _cp, _fv)
     
     result = await visitas_collection.update_one(
         {"_id": ObjectId(visita_id)},

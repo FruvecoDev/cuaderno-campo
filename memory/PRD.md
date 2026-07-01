@@ -341,6 +341,15 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
+### Auto-marcar visitas como "Realizado" cuando tienen contenido - DONE (2026-07-01)
+- **Regla**: una visita se marca automáticamente como `realizado=True` en BD cuando tiene contenido real registrado (observaciones no vacías, cuestionario_plagas con datos, o fecha_visita rellena). Coherente con el PDF que siempre imprime "Realizado: Sí".
+- **Implementación** en `routes_visitas.py`:
+  - Helper `_visita_realizada(obs, cp, fv)` centraliza la lógica.
+  - POST `/api/visitas` calcula `realizado` en la creación (antes hardcoded `False`).
+  - PUT `/api/visitas/{id}` recalcula en cada save mergeando update_data + valores existentes (fetch previo del doc con proyección mínima).
+- **Backfill**: `/app/scripts/backfill_visitas_realizado.py` recorre todas las visitas existentes y aplica la regla. Ejecutado en este job → **9/9 visitas actualizadas a `realizado=True`**.
+- **Testing**: script `/tmp/test_visita_realizado.py` cubre 4 escenarios (crear vacía → False, añadir obs → True, vaciar obs → False, añadir fecha → True). Todos PASS.
+
 ### Fix: Visitas en PDF muestran siempre "Realizado: Sí" - DONE (2026-07-01)
 - **Regla de negocio**: si una visita está registrada (aparece en el PDF con observaciones/cuestionario), significa que fue realizada → el campo "Realizado" debe siempre mostrar "Sí".
 - **Antes**: `routes_evaluaciones.py:1866` renderizaba `{'Sí' if visita.get('realizado') else 'No'}` — como `realizado` defaultea a `False` al crear la visita y nadie lo togglea, salía "No" aunque la visita tuviera datos completos.
