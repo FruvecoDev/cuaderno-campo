@@ -341,6 +341,17 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
+### Fitosanitarios: paginación cliente para 1970 productos - DONE (2026-07-01)
+- **Bug reportado**: la lista de productos fitosanitarios renderizaba 1970 filas de una vez → scroll infinito, UX pobre.
+- **Fix**: paginación **cliente** (los productos ya vienen todos de una llamada al backend).
+  - Estado `currentPage` + `pageSize` (default 25).
+  - Barra superior `pagination-top` con: info "Mostrando X - Y de N", selector "Por página" 25/50/100/200, botones « Primera / ‹ Anterior / **X / N** / Siguiente › / Última ».
+  - `productos.slice((currentPage - 1) * pageSize, currentPage * pageSize).map(...)` renderiza solo la página actual.
+  - `setCurrentPage(1)` reset automático al aplicar filtros o cambiar pageSize.
+  - Botones deshabilitados en los extremos.
+- data-testids: `pagination-top`, `pagination-info`, `pagination-page-size`, `pagination-first`, `pagination-prev`, `pagination-current`, `pagination-next`, `pagination-last`.
+- **Testing agent iter 80**: **PASS 100% frontend**. 1970 productos → 79 páginas @25/pp o 20 páginas @100/pp. Navegación completa verificada. Reset a página 1 al filtrar por Tipo o buscar "MICROTHIOL" confirmado.
+
 ### Fix: Fitosanitarios columna "Acciones" cortada + falta botón Ver - DONE (2026-07-01)
 - **Bug reportado**: la tabla de Fitosanitarios tenía 10 columnas y en viewport 1920 las últimas ("Estado", "Acciones") quedaban fuera del área visible. El usuario no veía los botones de visualización/edición/borrado.
 - **Fix**:
