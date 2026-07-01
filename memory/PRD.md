@@ -341,6 +341,14 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
+### Fix: Fitosanitarios columna "Acciones" cortada + falta botón Ver - DONE (2026-07-01)
+- **Bug reportado**: la tabla de Fitosanitarios tenía 10 columnas y en viewport 1920 las últimas ("Estado", "Acciones") quedaban fuera del área visible. El usuario no veía los botones de visualización/edición/borrado.
+- **Fix**:
+  - Columna "Acciones" ahora **sticky a la derecha** (`position: sticky; right: 0`) tanto en `<th>` como en cada `<td>`, con `box-shadow` sutil de separación (`-4px 0 6px -2px rgba(0,0,0,0.08)`) y `background: hsl(var(--background))` para que no transparente el contenido debajo. Sigue siempre visible incluso al hacer scroll horizontal.
+  - Añadido botón **"Ver"** (icono `Eye` de lucide) además de los 3 existentes (Verificar/Editar/Eliminar) → 4 botones por fila.
+  - Añadidos data-testids: `th-acciones`, `td-acciones-{id}`, `btn-view-{id}`, `btn-verify-{id}`, `btn-edit-{id}`, `btn-delete-{id}`.
+- **Testing agent iter 79**: **PASS 100% frontend**. Verificado con bounding_box que `th-acciones` se mantiene en x=1637 tras `scrollLeft=247` (sticky funciona). Los 4 botones presentes en las 1970 filas. Ver reusa `handleEdit` (patrón simple para no duplicar UI).
+
 ### Fix: Fitosanitarios lista + detalle sin dosis/vol.agua/plazo/usos - DONE (2026-07-01)
 - **Bug reportado**: tras importar 2055 productos + 60965 usos MAPA, la lista de Fitosanitarios mostraba columnas Dosis Mín/Máx, Vol. Agua y Plazo Seg. vacías. El modal de edición no mostraba las plagas × cultivos × dosis del producto.
 - **Root cause**: la nueva arquitectura almacena dosis/vol.agua/plazo a nivel de USO (colección `fitosanitarios_usos`), no del producto raíz. La lista y el detalle no consultaban esa colección.
