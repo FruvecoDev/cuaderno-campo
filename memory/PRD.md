@@ -600,3 +600,9 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 
 
 
+
+
+### Backlog rápido: refactor Cultivos + anchors navegables en PDF (2026-02)
+- **Extracción `CultivoFormModal.jsx`**: modal tabulado del formulario de cultivo movido a `/app/frontend/src/components/cultivos/CultivoFormModal.jsx` (249 líneas, props-driven, sin estado local). Cultivos.js pasa de 541 → 414 líneas.
+- **Índice del PDF navegable**: en el Cuaderno de Campo (`/api/evaluaciones/{id}/pdf`), cada entrada del índice inicial es ahora un anchor HTML `<a href="#visita-{n}">` / `<a href="#tratamiento-{n}">`. WeasyPrint los convierte automáticamente en enlaces internos del PDF (LINK_NAMED). Cada página de destino tiene su `id="visita-{n}"` / `id="tratamiento-{n}"`. CSS `.index-item-link` con hover verde para feedback visual.
+- **Testing (iteración 83)**: 100% backend + frontend. Verificados 88 enlaces internos clicables en un PDF de 23 páginas mediante PyMuPDF (`fitz.Document.resolve_names()`). Test persistente en `/app/backend/tests/test_pdf_anchors_navigation.py`.
