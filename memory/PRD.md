@@ -341,6 +341,14 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
+### Mapa satelital real en Cuaderno de Campo PDF - DONE (2026-07-01)
+- Reemplazado el diagrama SVG básico por un **mapa satelital real** (Esri World Imagery) con el polígono de la parcela dibujado encima, para que el informe sea profesional (misma calidad visual que el editor Leaflet Avanzado).
+- Implementación: librería `staticmap` fetching de tiles Esri + Pillow para renderizar el polígono (fill `#4CAF5066` translúcido, outline `#2E7D32`) y marcador central azul/blanco tipo Leaflet.
+- **Bug corregido**: `staticmap`/PIL no acepta `rgba(r,g,b,0.85)` con alpha decimal → convertidos todos los colores a formato hex (`#rrggbbaa`).
+- Fallback SVG legacy sigue activo si falla la descarga de tiles (sin red).
+- Los archivos generados se guardan en `/app/uploads/evaluaciones/pdf_maps/map_<uuid>.png` (900x540) y se embeben en el PDF vía `file://`.
+- **Testing**: PDF regenerado end-to-end (HTTP 200, 1.2MB, 24 páginas). Imagen 900x540 embebida verificada con `PyPDF2` y `analyze_file_tool` (satélite real de campo agrícola con pivote central + polígono verde encima). Sin errores en logs post-restart.
+
 ### Export PDF — Impresos completos en `/api/evaluaciones/{id}/pdf` - DONE (2026-06-26)
 - Reemplazado el bloque legacy "IMPRESOS" del PDF (solo mostraba fecha_inicio/fecha_fin/tecnico) por:
   - **Cabecera Plantación** (Proveedor, Código, Finca, Cultivo, Variedad, Superficie, Comentarios).

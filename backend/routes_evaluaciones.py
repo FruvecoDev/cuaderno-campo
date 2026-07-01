@@ -1426,57 +1426,78 @@ async def generate_evaluacion_pdf(
             min_lat, max_lat = min(lats), max(lats)
             min_lng, max_lng = min(lngs), max(lngs)
             
-            # Calcular dimensiones del SVG
-            svg_width = 500
-            svg_height = 300
-            padding = 30
+            # === Mapa satélite REAL con polígono superpuesto ===
+            # Usamos `staticmap` (fetch de tiles Esri World Imagery) + Pillow
+            # para renderizar la parcela sobre imagen aérea, igual que el
+            # editor Leaflet Avanzado. Fallback a SVG si falla la red.
+            satelite_ok = False
+            try:
+                from staticmap import StaticMap, Polygon as SmPolygon, CircleMarker
+                import uuid as _uuid
+                # Esri World Imagery (satélite gratuito)
+                esri_url = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                sm = StaticMap(900, 540, url_template=esri_url)
+                pts = [(p.get('lng', 0), p.get('lat', 0)) for p in geometria]
+                # Cerrar el anillo si no viene cerrado
+                if pts and pts[0] != pts[-1]:
+                    pts.append(pts[0])
+                # Polígono verde translúcido con borde oscuro
+                # NOTA: staticmap/PIL requieren color hex (#rrggbbaa) — no acepta rgba(..., 0.85)
+                # Polygon(coords, fill_color, outline_color)
+                sm.add_polygon(SmPolygon(pts, '#4CAF5066', '#2E7D32', simplify=False))
+                # Marcador de centro (azul con núcleo blanco tipo Leaflet)
+                sm.add_marker(CircleMarker((center_lng, center_lat), '#1565C0', 14))
+                sm.add_marker(CircleMarker((center_lng, center_lat), '#FFFFFF', 8))
+                img = sm.render()
+                out_dir = "/app/uploads/evaluaciones/pdf_maps"
+                os.makedirs(out_dir, exist_ok=True)
+                out_path = os.path.join(out_dir, f"map_{_uuid.uuid4().hex}.png")
+                img.save(out_path)
+                map_html = f'''
+                    <div style="border:2px solid #ccc; border-radius:8px; overflow:hidden;">
+                        <img src="file://{out_path}" style="width:100%; display:block;" alt="Mapa satélite de la parcela" />
+                    </div>
+                    <div style="text-align:right; font-size:8pt; color:#888; margin-top:4px;">
+                        Imagen satélite: Esri World Imagery · Polígono con {len(geometria)} vértices
+                    </div>
+                '''
+                satelite_ok = True
+            except Exception as _e:
+                print(f"[PDF] staticmap satelite failed, falling back to SVG: {_e}")
+                satelite_ok = False
             
-            # Escalar coordenadas al SVG
-            lat_range = max_lat - min_lat if max_lat != min_lat else 0.001
-            lng_range = max_lng - min_lng if max_lng != min_lng else 0.001
-            
-            # Función para convertir coordenadas geo a coordenadas SVG
-            def geo_to_svg(lat, lng):
-                x = padding + ((lng - min_lng) / lng_range) * (svg_width - 2 * padding)
-                y = padding + ((max_lat - lat) / lat_range) * (svg_height - 2 * padding)  # Invertir Y
-                return x, y
-            
-            # Generar puntos del polígono
-            polygon_points = ' '.join([f"{geo_to_svg(p.get('lat', 0), p.get('lng', 0))[0]:.1f},{geo_to_svg(p.get('lat', 0), p.get('lng', 0))[1]:.1f}" for p in geometria])
-            
-            # Generar SVG del mapa con el polígono
-            svg_map = f'''
-            <svg width="{svg_width}" height="{svg_height}" viewBox="0 0 {svg_width} {svg_height}" style="border: 2px solid #ddd; border-radius: 8px; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);">
-                <!-- Fondo con patrón de cuadrícula -->
-                <defs>
-                    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#a5d6a7" stroke-width="0.5"/>
-                    </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#grid)"/>
+            if not satelite_ok:
+                # ---- Fallback SVG diagrama (código legacy) ----
+                svg_width = 500
+                svg_height = 300
+                padding = 30
+                lat_range = max_lat - min_lat if max_lat != min_lat else 0.001
+                lng_range = max_lng - min_lng if max_lng != min_lng else 0.001
                 
-                <!-- Polígono de la parcela -->
-                <polygon points="{polygon_points}" fill="rgba(76, 175, 80, 0.4)" stroke="#2e7d32" stroke-width="3"/>
+                def geo_to_svg(lat, lng):
+                    x = padding + ((lng - min_lng) / lng_range) * (svg_width - 2 * padding)
+                    y = padding + ((max_lat - lat) / lat_range) * (svg_height - 2 * padding)
+                    return x, y
                 
-                <!-- Vértices del polígono -->
-                {"".join([f'<circle cx="{geo_to_svg(p.get("lat", 0), p.get("lng", 0))[0]:.1f}" cy="{geo_to_svg(p.get("lat", 0), p.get("lng", 0))[1]:.1f}" r="5" fill="#c62828" stroke="white" stroke-width="2"/>' for p in geometria])}
-                
-                <!-- Etiqueta del centro -->
-                <circle cx="{geo_to_svg(center_lat, center_lng)[0]:.1f}" cy="{geo_to_svg(center_lat, center_lng)[1]:.1f}" r="8" fill="#1565c0" stroke="white" stroke-width="2"/>
-                <text x="{geo_to_svg(center_lat, center_lng)[0]:.1f}" y="{geo_to_svg(center_lat, center_lng)[1] + 25:.1f}" text-anchor="middle" font-size="11" fill="#1565c0" font-weight="bold">Centro</text>
-                
-                <!-- Leyenda -->
-                <rect x="10" y="{svg_height - 50}" width="180" height="40" fill="white" fill-opacity="0.9" rx="5"/>
-                <circle cx="25" cy="{svg_height - 35}" r="5" fill="#c62828"/>
-                <text x="35" y="{svg_height - 31}" font-size="10" fill="#333">Vértices ({len(geometria)})</text>
-                <circle cx="25" cy="{svg_height - 18}" r="5" fill="#1565c0"/>
-                <text x="35" y="{svg_height - 14}" font-size="10" fill="#333">Centro del polígono</text>
-            </svg>
-            '''
+                polygon_points = ' '.join([f"{geo_to_svg(p.get('lat', 0), p.get('lng', 0))[0]:.1f},{geo_to_svg(p.get('lat', 0), p.get('lng', 0))[1]:.1f}" for p in geometria])
+                map_html = f'''
+                <svg width="{svg_width}" height="{svg_height}" viewBox="0 0 {svg_width} {svg_height}" style="border: 2px solid #ddd; border-radius: 8px; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);">
+                    <defs>
+                        <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#a5d6a7" stroke-width="0.5"/>
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#grid)"/>
+                    <polygon points="{polygon_points}" fill="rgba(76, 175, 80, 0.4)" stroke="#2e7d32" stroke-width="3"/>
+                    {"".join([f'<circle cx="{geo_to_svg(p.get("lat", 0), p.get("lng", 0))[0]:.1f}" cy="{geo_to_svg(p.get("lat", 0), p.get("lng", 0))[1]:.1f}" r="5" fill="#c62828" stroke="white" stroke-width="2"/>' for p in geometria])}
+                    <circle cx="{geo_to_svg(center_lat, center_lng)[0]:.1f}" cy="{geo_to_svg(center_lat, center_lng)[1]:.1f}" r="8" fill="#1565c0" stroke="white" stroke-width="2"/>
+                    <text x="{geo_to_svg(center_lat, center_lng)[0]:.1f}" y="{geo_to_svg(center_lat, center_lng)[1] + 25:.1f}" text-anchor="middle" font-size="11" fill="#1565c0" font-weight="bold">Centro</text>
+                </svg>
+                '''
             
             html_content += f"""
                 <div style="margin-bottom: 15px;">
-                    {svg_map}
+                    {map_html}
                 </div>
                 <table style="width: 100%; margin-top: 10px; border-collapse: collapse;">
                     <tr>
