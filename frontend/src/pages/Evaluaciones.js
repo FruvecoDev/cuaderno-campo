@@ -269,7 +269,9 @@ const Evaluaciones = () => {
       SECCIONES.forEach(seccion => {
         const preguntas = getPreguntasSeccion(seccion.key);
         secciones_respuestas[seccion.key] = preguntas.map(p => ({
-          pregunta_id: p.id, pregunta: p.pregunta, tipo: p.tipo, respuesta: respuestas[p.id] || ''
+          // Nullish coalescing (??) para preservar respuestas falsy legítimas
+          // como `false` (No en si_no) o `0` (número). Con `||` se perdían.
+          pregunta_id: p.id, pregunta: p.pregunta, tipo: p.tipo, respuesta: respuestas[p.id] ?? ''
         }));
       });
       // Cabecera de Impresos sincronizada con Parcela + Contrato cuando la
