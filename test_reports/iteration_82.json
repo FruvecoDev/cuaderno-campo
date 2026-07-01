@@ -1,0 +1,41 @@
+{
+  "summary": "Multi-variedades feature for Cultivos fully validated end-to-end. Backend accepts and persists variedades: List[str] with singular retrocompat mirror; frontend chip-input adds/removes/de-dupes correctly; table renders all variedades as badges; search matches non-primary variedades; edit hydrates from variedades[] (and falls back to legacy variedad); downstream Contratos dropdown correctly shows first/principal variedad; downstream Parcelas form still readable.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_cultivos_variedades.py",
+    "/app/test_reports/pytest/test_cultivos_variedades.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Pre-existing (not blocking): React hydration warnings caused by the visual-editor <span data-ve-dynamic ...> wrappers being injected as children of <thead>/<tr>/<tbody>/<td>/<select>. These originate from an external instrumentation layer (x-file-name/x-excluded), NOT from Cultivos.js code — the raw JSX in Cultivos.js is valid. Harmless in preview but pollutes console. Consider disabling the visual editor wrapper in preview if it triggers hydration warnings on any element that must have restricted children.",
+    "Cultivos.js is now 541 lines — still under the 700-line threshold, but the modal (~150 lines) is a candidate for extraction into a `CultivoFormModal.jsx` component to improve readability.",
+    "handleSubmit always overwrites `variedad` singular with variedades[0]. Good for retrocompat, but if the frontend ever sends variedad without variedades (legacy client), the PUT could clobber existing variedades[]. Current PUT uses full CultivoCreate replacement — safe here because current UI always sends both. Just noting for future partial-update endpoints."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_cultivos_variedades.py"
+  ],
+  "success_rate": { "backend": "100%", "frontend": "100%" },
+  "test_credentials": "admin@fruveco.com / admin123",
+  "seed_data_creation": "Test cultivo TEST_Cultivo_Multi_UI (UI) and TEST_Cultivo_Multi_Var (backend) — BOTH cleaned up automatically after tests.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Cultivos multi-variedades feature fully working across backend (POST/PUT/GET, add-variedad endpoint idempotent), UI (chip-input add/remove/dedupe/search), retrocompat edit (legacy `variedad` string → chip on edit), and downstream (Contratos label = 'nombre - variedad principal', Parcelas exposes cultivoObj.variedades). Reusable regression test at /app/backend/tests/test_cultivos_variedades.py.",
+  "verified_scenarios": [
+    "Create cultivo with 3 variedades via chip-input — 3 chips rendered",
+    "Duplicate variedad (case-insensitive 'variedad a' vs 'Variedad A') rejected — chip count stays at 3",
+    "Remove variedad via btn-remove-variedad-1 — chip count went 3→2 immediately",
+    "Save persists variedades[] to Mongo (verified via GET /api/cultivos/{id}) — variedades == ['Variedad A','Variedad B','Variedad C'] and variedad == 'Variedad A'",
+    "Table row cell-variedades-{id} renders all 3 variedades as green badges",
+    "Search 'Variedad C' (non-primary) returns 1 row",
+    "Click Edit → variedades-list rehydrated with 3 chips",
+    "PUT with variedades=['Variedad A','Variedad D'] persists correctly and singular variedad still = 'Variedad A'",
+    "POST /api/cultivos/{id}/variedades idempotent (case-insensitive dedupe)",
+    "Contratos → Nuevo Contrato → cultivo select shows 'TEST_Cultivo_Multi_UI - Variedad A'",
+    "Delete cultivo cleans up successfully"
+  ]
+}

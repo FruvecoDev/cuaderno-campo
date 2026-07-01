@@ -45,6 +45,7 @@ const Cultivos = () => {
   const initialFormData = {
     nombre: '',
     variedad: '',
+    variedades: [],
     tipo: '',
     unidad_medida: 'kg',
     ciclo_cultivo: '',
@@ -62,6 +63,25 @@ const Cultivos = () => {
   };
   
   const [formData, setFormData] = useState(initialFormData);
+  const [nuevaVariedad, setNuevaVariedad] = useState('');
+
+  const addVariedad = () => {
+    const v = nuevaVariedad.trim();
+    if (!v) return;
+    const existentes = formData.variedades || [];
+    if (existentes.some(x => x.toLowerCase() === v.toLowerCase())) {
+      notify.error('Esa variedad ya está añadida');
+      setNuevaVariedad('');
+      return;
+    }
+    setFormData({ ...formData, variedades: [...existentes, v] });
+    setNuevaVariedad('');
+  };
+
+  const removeVariedad = (idx) => {
+    const nuevas = (formData.variedades || []).filter((_, i) => i !== idx);
+    setFormData({ ...formData, variedades: nuevas });
+  };
 
   const nextCodigo = (() => {
     if (!cultivos.length) return '000001';
@@ -122,11 +142,18 @@ const Cultivos = () => {
     e.preventDefault();
     try {
       setError(null);
+      // Sincronizar `variedad` (singular, retrocompatible) con el primer elemento de la lista
+      const variedades = (formData.variedades || []).map(v => v.trim()).filter(Boolean);
+      const payload = {
+        ...formData,
+        variedades,
+        variedad: variedades[0] || '',
+      };
       if (editingId) {
-        await api.put(`/api/cultivos/${editingId}`, formData);
+        await api.put(`/api/cultivos/${editingId}`, payload);
         notify.success('Cultivo actualizado correctamente');
       } else {
-        await api.post('/api/cultivos', formData);
+        await api.post('/api/cultivos', payload);
         notify.success('Cultivo creado correctamente');
       }
       setShowForm(false);
@@ -141,9 +168,13 @@ const Cultivos = () => {
   };
 
   const handleEdit = (cultivo) => {
+    // Retrocompatibilidad: si el cultivo tiene un `variedad` legado pero no `variedades[]`, inicializar la lista con ese valor.
+    let variedades = Array.isArray(cultivo.variedades) ? [...cultivo.variedades] : [];
+    if (variedades.length === 0 && cultivo.variedad) variedades = [cultivo.variedad];
     setFormData({
       nombre: cultivo.nombre || '',
       variedad: cultivo.variedad || '',
+      variedades,
       tipo: cultivo.tipo || '',
       unidad_medida: cultivo.unidad_medida || 'kg',
       ciclo_cultivo: cultivo.ciclo_cultivo || '',
@@ -181,12 +212,17 @@ const Cultivos = () => {
     setShowForm(false);
     setEditingId(null);
     setFormData(initialFormData);
+    setNuevaVariedad('');
     setActiveTab('general');
   };
 
   const filteredCultivos = cultivos.filter(c => {
-    const matchesSearch = c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (c.variedad && c.variedad.toLowerCase().includes(searchTerm.toLowerCase()));
+    const q = searchTerm.toLowerCase();
+    const variedades = Array.isArray(c.variedades) ? c.variedades : [];
+    const matchesSearch =
+      c.nombre.toLowerCase().includes(q) ||
+      (c.variedad && c.variedad.toLowerCase().includes(q)) ||
+      variedades.some(v => (v || '').toLowerCase().includes(q));
     const matchesEstado = filtroEstado === 'todos' ||
       (filtroEstado === 'activos' && c.activo !== false) ||
       (filtroEstado === 'inactivos' && c.activo === false);
@@ -263,11 +299,65 @@ const Cultivos = () => {
                 </div>
                 <div style={{ marginBottom: '1.5rem' }}>
                   <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Caracteristicas</h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.75rem' }}>
-                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Variedad</label><input type="text" className="form-input" placeholder="Ej: RAF, Piquillo, Galia" value={formData.variedad} onChange={e => setFormData({ ...formData, variedad: e.target.value })} data-testid="input-variedad-cultivo" /></div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
                     <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Unidad de Medida</label><select className="form-input" value={formData.unidad_medida} onChange={e => setFormData({ ...formData, unidad_medida: e.target.value })}><option value="kg">Kilogramos (kg)</option><option value="toneladas">Toneladas (t)</option><option value="unidades">Unidades</option><option value="cajas">Cajas</option></select></div>
                     <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Ciclo de Cultivo</label><select className="form-input" value={formData.ciclo_cultivo} onChange={e => setFormData({ ...formData, ciclo_cultivo: e.target.value })}><option value="">Seleccionar...</option><option value="Corto">Corto (3-4 meses)</option><option value="Medio">Medio (5-6 meses)</option><option value="Largo">Largo (7+ meses)</option></select></div>
                     <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Temporada</label><select className="form-input" value={formData.temporada || ''} onChange={e => setFormData({ ...formData, temporada: e.target.value })}><option value="">Seleccionar...</option><option value="Primavera-Verano">Primavera-Verano</option><option value="Otono-Invierno">Otono-Invierno</option><option value="Todo el ano">Todo el ano</option></select></div>
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      Variedades
+                      <span style={{ fontSize: '0.7rem', fontWeight: '400', color: 'hsl(var(--muted-foreground))' }}>
+                        (puedes añadir varias — la primera se toma como principal)
+                      </span>
+                    </label>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.25rem' }}>
+                      <input
+                        type="text"
+                        className="form-input"
+                        placeholder="Ej: RAF, Piquillo, Galia — pulsa Enter o Añadir"
+                        value={nuevaVariedad}
+                        onChange={e => setNuevaVariedad(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addVariedad(); } }}
+                        data-testid="input-variedad-cultivo"
+                        style={{ flex: 1 }}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-primary"
+                        onClick={addVariedad}
+                        disabled={!nuevaVariedad.trim()}
+                        data-testid="btn-add-variedad-cultivo"
+                      >
+                        <Plus size={14} /> Añadir
+                      </button>
+                    </div>
+                    {(formData.variedades || []).length > 0 && (
+                      <div
+                        data-testid="variedades-list"
+                        style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.6rem', padding: '0.5rem', background: 'hsl(var(--muted)/0.3)', border: '1px solid hsl(var(--border))', borderRadius: '6px', minHeight: '40px' }}
+                      >
+                        {formData.variedades.map((v, idx) => (
+                          <span
+                            key={`${v}-${idx}`}
+                            data-testid={`variedad-chip-${idx}`}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.25rem 0.6rem', borderRadius: '999px', fontSize: '0.78rem', fontWeight: '500', background: idx === 0 ? 'hsl(142 76% 36% / 0.15)' : 'hsl(var(--background))', color: idx === 0 ? 'hsl(142 76% 30%)' : 'hsl(var(--foreground))', border: '1px solid ' + (idx === 0 ? 'hsl(142 76% 36% / 0.35)' : 'hsl(var(--border))') }}
+                          >
+                            {idx === 0 && <span title="Variedad principal" style={{ fontSize: '0.65rem', fontWeight: '700', textTransform: 'uppercase' }}>★</span>}
+                            {v}
+                            <button
+                              type="button"
+                              onClick={() => removeVariedad(idx)}
+                              data-testid={`btn-remove-variedad-${idx}`}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'inline-flex', color: 'hsl(var(--muted-foreground))' }}
+                              title="Eliminar variedad"
+                            >
+                              <X size={12} />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '1.25rem', alignItems: 'start', marginBottom: '0.5rem' }}>
@@ -396,7 +486,21 @@ const Cultivos = () => {
                       switch (col.id) {
                         case 'codigo_cultivo': return <td key="codigo_cultivo"><code style={{ fontFamily: 'monospace', fontWeight: '600', fontSize: '0.85rem' }}>{cultivo.codigo_cultivo || '-'}</code></td>;
                         case 'nombre': return <td key="nombre" style={{ fontWeight: '600' }}>{cultivo.nombre}</td>;
-                        case 'variedad': return <td key="variedad">{cultivo.variedad || '-'}</td>;
+                        case 'variedad': {
+                          const vs = Array.isArray(cultivo.variedades) && cultivo.variedades.length > 0
+                            ? cultivo.variedades
+                            : (cultivo.variedad ? [cultivo.variedad] : []);
+                          if (vs.length === 0) return <td key="variedad">-</td>;
+                          return (
+                            <td key="variedad" data-testid={`cell-variedades-${cultivo._id}`}>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
+                                {vs.map((v, i) => (
+                                  <span key={i} style={{ padding: '0.1rem 0.5rem', borderRadius: '999px', fontSize: '0.72rem', fontWeight: '500', background: 'hsl(142 76% 36% / 0.1)', color: 'hsl(142 76% 30%)', border: '1px solid hsl(142 76% 36% / 0.25)' }}>{v}</span>
+                                ))}
+                              </div>
+                            </td>
+                          );
+                        }
                         case 'tipo': return <td key="tipo"><span style={{ padding: '0.15rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', backgroundColor: 'hsl(142 76% 36% / 0.1)', color: 'hsl(142 76% 36%)' }}>{cultivo.tipo || '-'}</span></td>;
                         case 'unidad_medida': return <td key="unidad_medida">{cultivo.unidad_medida}</td>;
                         case 'ciclo': return <td key="ciclo">{cultivo.ciclo_cultivo || '-'}</td>;
