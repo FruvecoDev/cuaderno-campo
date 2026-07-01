@@ -43,6 +43,37 @@ def sync_climate_check():
     run_async_task(scheduled_climate_check())
 
 
+def cleanup_pdf_map_tempfiles():
+    """
+    Elimina PNGs de mapas satelitales (Cuaderno de Campo PDF) con >1h de
+    antigüedad en /app/uploads/evaluaciones/pdf_maps/. Estos archivos son
+    temporales — se generan durante `generate_evaluacion_pdf` y se borran
+    en el `finally` inmediato. Este job es solo red de seguridad para
+    orfanatos cuando el PDF falla antes del cleanup inline.
+    """
+    import os
+    import time
+
+    map_dir = "/app/uploads/evaluaciones/pdf_maps"
+    if not os.path.isdir(map_dir):
+        return
+
+    cutoff = time.time() - 3600  # 1 hora
+    removed = 0
+    for name in os.listdir(map_dir):
+        if not name.startswith("map_") or not name.endswith(".png"):
+            continue
+        path = os.path.join(map_dir, name)
+        try:
+            if os.path.isfile(path) and os.path.getmtime(path) < cutoff:
+                os.remove(path)
+                removed += 1
+        except Exception as e:
+            print(f"[PDF Cleanup] failed for {path}: {e}")
+    if removed:
+        print(f"[PDF Cleanup] removed {removed} orphaned map tempfile(s) from {map_dir}")
+
+
 # -----------------------------------------------------------------------------
 # MAPA import reminder — lunes 09:00
 # -----------------------------------------------------------------------------
@@ -188,6 +219,19 @@ def init_scheduler():
                 replace_existing=True,
             )
             print("[Scheduler] MAPA import reminder scheduled: every Monday at 09:00")
+
+            # Cleanup PDF map tempfiles: cada hora, borra PNGs de mapas
+            # satelitales del PDF de Evaluaciones con >1h de antigüedad.
+            # Red de seguridad para orfanatos si el PDF genera errores
+            # antes de llegar al `finally` de limpieza inline.
+            scheduler.add_job(
+                cleanup_pdf_map_tempfiles,
+                trigger=IntervalTrigger(hours=1),
+                id='pdf_map_cleanup',
+                name='PDF Map Tempfiles Cleanup',
+                replace_existing=True,
+            )
+            print("[Scheduler] PDF map tempfile cleanup scheduled: every 1h")
             
     except Exception as e:
         print(f"[Scheduler Error] Failed to start: {e}")

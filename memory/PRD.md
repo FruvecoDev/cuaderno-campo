@@ -341,6 +341,13 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
+### Cleanup automático de mapas satelitales del PDF - DONE (2026-07-01)
+- **Problema**: cada exportación de Cuaderno de Campo PDF generaba un PNG único (~650 KB) en `/app/uploads/evaluaciones/pdf_maps/map_<uuid>.png` que nunca se borraba → disco crecería sin control.
+- **Fix en dos capas**:
+  1. **Cleanup inline** (`routes_evaluaciones.py::generate_evaluacion_pdf`): lista `_pdf_temp_files` acumula rutas, y un `finally` post-`write_pdf` borra cada PNG inmediatamente. El PNG solo hace falta mientras WeasyPrint lo lee vía `file://`.
+  2. **Job periódico APScheduler** (`scheduler_service.py::cleanup_pdf_map_tempfiles`): cada 1 hora, elimina cualquier PNG con >1h de antigüedad en el directorio. Red de seguridad para orfanatos si el PDF explota antes del `finally`.
+- **Testing**: end-to-end verificado — directorio limpio antes → PDF de 1.2 MB con mapa embebido correctamente → directorio vacío tras la petición. Job scheduler verificado con archivo dummy (mtime -2h) borrado, archivo fresco preservado. Log: `[Scheduler] PDF map tempfile cleanup scheduled: every 1h`.
+
 ### Fix: Cuestionario perdía respuestas "No" al guardar - DONE (2026-07-01)
 - **Bug reportado**: al marcar "No" en una pregunta si_no del cuestionario de evaluación y guardar, la respuesta se perdía (el botón quedaba en blanco tras recargar y en el PDF salía vacío).
 - **Root cause**: `/app/frontend/src/pages/Evaluaciones.js` línea 272 usaba `respuesta: respuestas[p.id] || ''`. En JS, `false` es falsy → `false || ''` = `''`. Idéntico al bug de "0-value falsiness" ya corregido en el PDF.

@@ -755,6 +755,10 @@ async def generate_evaluacion_pdf(
     
     parcela_id = evaluacion.get("parcela_id", "")
     
+    # Ficheros temporales que se generan durante el render del PDF
+    # (mapas satelitales de `staticmap`) y hay que borrar tras `write_pdf`.
+    _pdf_temp_files: list[str] = []
+    
     # Obtener datos completos de la parcela incluyendo geometría
     parcela_data = None
     if parcela_id and ObjectId.is_valid(parcela_id):
@@ -1453,6 +1457,7 @@ async def generate_evaluacion_pdf(
                 os.makedirs(out_dir, exist_ok=True)
                 out_path = os.path.join(out_dir, f"map_{_uuid.uuid4().hex}.png")
                 img.save(out_path)
+                _pdf_temp_files.append(out_path)
                 map_html = f'''
                     <div style="border:2px solid #ccc; border-radius:8px; overflow:hidden;">
                         <img src="file://{out_path}" style="width:100%; display:block;" alt="Mapa satélite de la parcela" />
@@ -2108,6 +2113,17 @@ async def generate_evaluacion_pdf(
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generando PDF: {str(e)}")
+    finally:
+        # Limpieza inmediata de mapas temporales — el PNG solo hace falta
+        # mientras WeasyPrint lo lee vía file://. Después se puede borrar
+        # para evitar que /app/uploads/evaluaciones/pdf_maps/ crezca sin
+        # control con un UUID por cada exportación.
+        for _tf in _pdf_temp_files:
+            try:
+                if _tf and os.path.exists(_tf):
+                    os.remove(_tf)
+            except Exception as _cleanup_err:
+                print(f"[PDF] cleanup failed for {_tf}: {_cleanup_err}")
 
 
 
