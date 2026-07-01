@@ -3,7 +3,7 @@ import { Edit2, Trash2, CheckCircle, XCircle, PlayCircle } from 'lucide-react';
 import { BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell } from '../BulkActions';
 
 const TratamientosTable = ({
-  tratamientos, loading, hasActiveFilters, tableConfig, canEdit, canDelete,
+  tratamientos, parcelas = [], loading, hasActiveFilters, tableConfig, canEdit, canDelete,
   handleEdit, handleDelete, handleChangeEstado,
   canBulkDelete = false,
   selectedIds = new Set(),
@@ -73,7 +73,7 @@ const TratamientosTable = ({
                   {tableConfig.fecha_tratamiento && <td>{t.fecha_tratamiento || '—'}</td>}
                   {tableConfig.fecha_aplicacion && <td>{t.fecha_aplicacion || '—'}</td>}
                   {tableConfig.superficie && <td>{t.superficie_aplicacion} ha</td>}
-                  {tableConfig.parcelas && <td>{t.parcelas_ids?.length || 0} parcela(s)</td>}
+                  {tableConfig.parcelas && <td>{(t.parcelas_ids || []).filter(id => parcelas.some(p => p._id === id)).length} parcela(s)</td>}
                   {tableConfig.aplicador && <td>{t.aplicador_nombre || '—'}</td>}
                   {tableConfig.maquina && <td>{t.maquina_nombre || '—'}</td>}
                   {tableConfig.estado && (

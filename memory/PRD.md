@@ -341,6 +341,14 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
+### Fix: contador de parcelas seleccionadas en Tratamientos ignora huérfanas - DONE (2026-07-01)
+- **Bug reportado**: al seleccionar 1 parcela real en el editor de Tratamientos, el contador mostraba "2 parcela(s) seleccionada(s)".
+- **Root cause**: los tratamientos ORTIVA y BISMARK tenían `parcelas_ids = ['6a3b7f57d9e369edbbc3e5b7', '6a3e90f77b8cf2eb0d697bc1']` donde el primer ID apunta a una parcela borrada (huérfano). El checkbox no se renderizaba (no existe la parcela) pero el contador `selectedParcelas.length` sí lo incluía → discrepancia 1 checkbox / 2 en contador.
+- **Fix 1 – Modal editor** (`Tratamientos.js`): contador ahora usa `selectedParcelas.filter(id => parcelas.some(p => p._id === id)).length`. Además muestra un aviso discreto en cursiva "· N referencia(s) huérfana(s) (se limpiarán al guardar)" cuando detecta huérfanos.
+- **Fix 2 – Payload al guardar**: se purga `parcelas_ids` para que solo persistan referencias vigentes → auto-cleanup progresivo cada vez que el usuario edita/guarda un tratamiento.
+- **Fix 3 – Lista de Tratamientos** (`TratamientosTable.js`): la columna "Parcelas" también filtra huérfanas. Ahora ORTIVA y BISMARK muestran "1 parcela(s)" (antes "2").
+- **Testing**: end-to-end via Playwright screenshot — KPI y columna "Parcelas" pasaron de "2 parcela(s)" a "1 parcela(s)". `data-testid="tratamiento-parcelas-count"` añadido para futuros tests.
+
 ### Auto-marcar visitas como "Realizado" cuando tienen contenido - DONE (2026-07-01)
 - **Regla**: una visita se marca automáticamente como `realizado=True` en BD cuando tiene contenido real registrado (observaciones no vacías, cuestionario_plagas con datos, o fecha_visita rellena). Coherente con el PDF que siempre imprime "Realizado: Sí".
 - **Implementación** en `routes_visitas.py`:

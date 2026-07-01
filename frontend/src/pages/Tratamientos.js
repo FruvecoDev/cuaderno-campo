@@ -450,6 +450,12 @@ const Tratamientos = () => {
     }
     
     // Payload simplificado - el backend hereda el resto
+    // Purga IDs huérfanos: parcelas_ids solo debe contener referencias a
+    // parcelas que existen actualmente en BD (evita persistir huérfanos y
+    // desincronizar el contador vs. checkbox visible).
+    const parcelasIdsLimpio = (formData.parcelas_ids || []).filter(
+      id => parcelas.some(p => p._id === id)
+    );
     const payload = {
       tipo_tratamiento: formData.tipo_tratamiento,
       subtipo: formData.subtipo,
@@ -457,7 +463,7 @@ const Tratamientos = () => {
       metodo_aplicacion: formData.metodo_aplicacion,
       superficie_aplicacion: parseFloat(formData.superficie_aplicacion) || 0,
       caldo_superficie: parseFloat(formData.caldo_superficie) || 0,
-      parcelas_ids: formData.parcelas_ids,
+      parcelas_ids: parcelasIdsLimpio,
       fecha_tratamiento: formData.fecha_tratamiento || null,
       fecha_aplicacion: formData.fecha_aplicacion || null,
       aplicador_nombre: formData.aplicador_nombre || null,
@@ -1093,11 +1099,24 @@ const Tratamientos = () => {
                 )}
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem' }}>
-                {selectedParcelas.length > 0 && (
-                  <small style={{ color: 'hsl(var(--primary))' }}>
-                    {selectedParcelas.length} parcela(s) seleccionada(s)
-                  </small>
-                )}
+                {(() => {
+                  // Contar solo IDs que apuntan a parcelas que existen en BD.
+                  // Un tratamiento puede tener `parcelas_ids` con referencias
+                  // huérfanas (parcelas borradas); no deben contarse ni
+                  // renderizarse en el checklist.
+                  const existentes = selectedParcelas.filter(id => parcelas.some(p => p._id === id));
+                  const huerfanos = selectedParcelas.length - existentes.length;
+                  return existentes.length > 0 || huerfanos > 0 ? (
+                    <small style={{ color: 'hsl(var(--primary))' }} data-testid="tratamiento-parcelas-count">
+                      {existentes.length} parcela(s) seleccionada(s)
+                      {huerfanos > 0 && (
+                        <span style={{ color: 'hsl(var(--muted-foreground))', marginLeft: '0.4rem', fontStyle: 'italic' }}>
+                          · {huerfanos} referencia(s) huérfana(s) (se limpiarán al guardar)
+                        </span>
+                      )}
+                    </small>
+                  ) : null;
+                })()}
                 {(parcelaSearch.proveedor || parcelaSearch.cultivo || parcelaSearch.campana) && (
                   <small style={{ color: 'hsl(var(--muted-foreground))' }}>
                     Mostrando {parcelas.filter(p => {
@@ -1394,6 +1413,7 @@ const Tratamientos = () => {
       
       <TratamientosTable
         tratamientos={paginatedTratamientos}
+        parcelas={parcelas}
         loading={loading}
         hasActiveFilters={hasActiveFilters}
         tableConfig={tableConfig}
