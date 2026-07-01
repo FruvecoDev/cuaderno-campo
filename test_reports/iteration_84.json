@@ -1,0 +1,36 @@
+{
+  "summary": "Iteration 84 valida el fix de data-freshness en GET /api/evaluaciones/{id}/pdf. Los 5 tests pasan (100%): (1) el PDF se descarga OK (~1.8 MB, 23 páginas) y contiene aplicador/máquina leídos en vivo; (2) al editar el técnico aplicador vía PUT /api/tecnicos-aplicadores/{id} el PDF siguiente refleja el nombre NUEVO; (3) idem con PUT /api/maquinaria/{id}; (4) al cambiar la variedad de la parcela con PUT /api/parcelas/{id} la NUEVA_VARIEDAD_TEST aparece propagada en TODAS las visitas/tratamientos (>=2 ocurrencias); (5) la Ficha final de aplicador/máquina no se duplica por tratamiento (<=2 ocurrencias, no >=3). Los datos originales se restauraron en el finally de cada test.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_pdf_freshness_evaluacion.py",
+    "/app/test_reports/pytest/test_pdf_freshness_evaluacion.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "routes_evaluaciones.py:826-847 — enriquecimiento correcto: por cada tratamiento se consulta tecnicos_aplicadores_collection y maquinaria_collection en vivo por ObjectId; se guarda como aplicador_completo / maquina_completa. Fallback al snapshot (aplicador_nombre/maquina_nombre) en el render (líneas 2056-2066) es defensivo y correcto.",
+    "routes_evaluaciones.py:858-878 — _overlay_inherited(doc) sobrescribe proveedor/cultivo/variedad/finca/campana/codigo_plantacion sólo si la parcela tiene valor no vacío, preservando snapshots legados. Se aplica a TODAS las visitas y tratamientos, no sólo al primero (confirmado con 3 ocurrencias de NUEVA_VARIEDAD_TEST en PDF).",
+    "routes_evaluaciones.py:2156-2177 — deduplicación de la Ficha final: aplicadores_unicos/maquinas_unicas por _id + segunda pasada por nombre normalizado (lowercase strip). Confirmado: con 3 tratamientos que usan el mismo técnico + máquina, cada uno aparece <=2 veces en la ficha final (etiqueta+valor), no 3+.",
+    "MEJORA opcional: el endpoint hace N+1 queries a tecnicos_aplicadores y maquinaria (una por tratamiento). Para plantaciones con muchos tratamientos convendría precargar en batch los IDs únicos con $in. No es blocking porque el PDF tarda ~15s incluso con múltiples visitas.",
+    "MEJORA opcional: parcela `variedad_id` no se resuelve dentro de _overlay_inherited — sólo se usa parcela.variedad como string. `variedad_resuelta` sí se calcula antes (línea 863) pero sólo si la parcela guarda `variedad_id` apuntando al catálogo de cultivos. Considerar documentar este comportamiento."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_pdf_freshness_evaluacion.py"
+  ],
+  "success_rate": {
+    "backend": "100% (5/5)",
+    "frontend": "n/a (backend-only testing)"
+  },
+  "test_credentials": "admin@fruveco.com / admin123",
+  "seed_data_creation": "No se crearon datos nuevos. Se usó la evaluación existente 6a3e4b01e223c5dd1673c04c (parcela 6a3e90f77b8cf2eb0d697bc1 · COTO DE MINGUILLO · GUISANTE VERDE · MUCIO) con 8 visitas + 3 tratamientos vinculados al técnico 6a3e350d40b2b1b51493e703 (Clemente Torres Martín) y máquina 6a3e364d40b2b1b51493e704 (AGRIFAC). Todas las mutaciones (PUT tecnico/maquina/parcela) se revierten en el bloque finally.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "El endpoint GET /api/evaluaciones/{id}/pdf ahora es data-fresh para: aplicador (en vivo), máquina (en vivo), y campos heredados de parcela (proveedor/cultivo/variedad/finca/campana/codigo_plantacion) propagados a todas las visitas+tratamientos. Test reutilizable: /app/backend/tests/test_pdf_freshness_evaluacion.py. Usa fitz (PyMuPDF 1.28.0) para extraer texto y hace assertions por presencia + conteo de ocurrencias. La evaluación de prueba tiene 3 tratamientos por lo que un cambio de parcela debe aparecer >=2 veces en el texto del PDF. Login: admin@fruveco.com / admin123."
+}

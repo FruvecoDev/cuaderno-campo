@@ -846,6 +846,37 @@ async def generate_evaluacion_pdf(
     
     tratamientos = tratamientos_enriquecidos
     
+    # ------------------------------------------------------------------
+    # Data-freshness: sobrescribir los campos "heredados" de la parcela
+    # (proveedor, cultivo, variedad, finca, campaña, codigo_plantacion)
+    # dentro de cada visita y tratamiento con los valores ACTUALES de la
+    # parcela y del catálogo de cultivos. Así, cualquier edición posterior
+    # de la parcela / cultivo / técnico / maquinaria queda reflejada en el
+    # PDF de la Hoja de Evaluación de inmediato, sin depender del snapshot
+    # denormalizado que se guardó al crear la visita/tratamiento.
+    # ------------------------------------------------------------------
+    inherited_fields = {}
+    if parcela_data:
+        inherited_fields = {
+            "proveedor": (parcela_data.get("proveedor") or "").strip(),
+            "cultivo": (parcela_data.get("cultivo") or "").strip(),
+            "variedad": (variedad_resuelta or (parcela_data.get("variedad") or "")).strip(),
+            "finca": (parcela_data.get("finca") or "").strip(),
+            "campana": (parcela_data.get("campana") or "").strip(),
+            "codigo_plantacion": (parcela_data.get("codigo_plantacion") or "").strip(),
+        }
+    def _overlay_inherited(doc):
+        """Devuelve una copia del doc con los inherited_fields sobrescritos
+        cuando la parcela sí trae ese valor. Preserva los originales si la
+        parcela no tiene el campo (para no perder información legada)."""
+        merged = dict(doc)
+        for k, v in inherited_fields.items():
+            if v:  # sólo si la parcela tiene un valor no vacío
+                merged[k] = v
+        return merged
+    visitas = [_overlay_inherited(v) for v in visitas]
+    tratamientos = [_overlay_inherited(t) for t in tratamientos]
+    
     # Irrigaciones y Cosechas: eliminadas del cuaderno de campo (no se incluyen
     # en el PDF según requerimientos de usuario).
     # La paginación se calcula dinámicamente con counter(page)/counter(pages) en CSS.
@@ -2022,11 +2053,17 @@ async def generate_evaluacion_pdf(
                     </div>
                     <div class="dato-item">
                         <div class="dato-label">Aplicador</div>
-                        <div class="dato-value">{tratamiento.get('aplicador_nombre') or '—'}</div>
+                        <div class="dato-value">{
+                            (lambda ap: (f"{ap.get('nombre','').strip()} {ap.get('apellidos','').strip()}".strip() or None) if ap else None)(tratamiento.get('aplicador_completo'))
+                            or tratamiento.get('aplicador_nombre') or '—'
+                        }</div>
                     </div>
                     <div class="dato-item">
                         <div class="dato-label">Máquina</div>
-                        <div class="dato-value">{tratamiento.get('maquina_nombre') or '—'}</div>
+                        <div class="dato-value">{
+                            (tratamiento.get('maquina_completa') or {}).get('nombre')
+                            or tratamiento.get('maquina_nombre') or '—'
+                        }</div>
                     </div>
                     <div class="dato-item">
                         <div class="dato-label">Campaña</div>
