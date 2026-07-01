@@ -586,6 +586,17 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - Contratos.js: mantenidos 2 directivas legítimas para `useEffect` de sólo-al-montar (fetches iniciales + lectura de query-param). Sin ellas, webpack CRA reporta warnings de dep-array (el patrón mount-only es intencional aquí).
 - Verificación: `webpack compiled successfully` sin warnings; `mcp_lint_javascript` limpio en los 4 archivos objetivo.
 
+### Cultivos: soporte para múltiples variedades por cultivo (2026-02)
+- Antes: un cultivo aceptaba una única `variedad` (string) en la UI.
+- Ahora: un cultivo puede tener N variedades (`variedades: List[str]`). El backend ya lo soportaba en `CultivoBase` (modelos_catalogos.py). Cambio 100% en frontend Cultivos.js + tests.
+- UI: chip-input con Enter/botón "Añadir" (`input-variedad-cultivo`, `btn-add-variedad-cultivo`), lista visual (`variedades-list`) con chips (`variedad-chip-{i}`) y botón de eliminar por chip (`btn-remove-variedad-{i}`). Primera variedad marcada con ★ como "principal".
+- Retrocompatibilidad: `handleSubmit` sincroniza `variedad = variedades[0]` para no romper Contratos, AsistenteIA, Recomendaciones, Mapas ni Fincas (que aún leen el singular). `handleEdit` rehidrata desde `variedades[]` con fallback a `[cultivo.variedad]` para registros legacy.
+- Tabla: muestra todas las variedades como badges verdes (`cell-variedades-{id}`).
+- Buscador: filtra ahora por cualquier variedad (no sólo la principal).
+- Deduplicación case-insensitive con toast de error si se intenta añadir un duplicado.
+- **Testing (iteración 82)**: 100% backend + 100% frontend. Test de regresión creado en `/app/backend/tests/test_cultivos_variedades.py`. Verificados 11 escenarios incluyendo persistencia MongoDB, edición de legacy, y consumo aguas abajo desde Contratos (dropdown) y Parcelas (select de variedades disponibles vía `cultivoObj.variedades`).
+
+
 
 
 
