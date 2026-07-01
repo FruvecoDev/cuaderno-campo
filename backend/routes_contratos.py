@@ -187,7 +187,7 @@ async def import_contratos_excel(
         if not doc:
             new_doc = {
                 "nombre": nombre.strip(),
-                "tipo_proveedor": "Materia Prima",
+                "tipo_proveedor": "Agricultor",
                 "codigo_proveedor": str(codigo_counter['next']).zfill(6),
                 "activo": True,
                 "created_at": datetime.now(),

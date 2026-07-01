@@ -341,6 +341,11 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
+### Todos los proveedores marcados como tipo "Agricultor" - DONE (2026-07-01)
+- Actualizada la migración masiva: 136 proveedores pasaron de "Materia Prima" (default de importación) a **"Agricultor"** — los 11 restantes ya lo tenían.
+- **Import futuro** (`routes_contratos.py::resolve_proveedor`): default cambiado de `"Materia Prima"` → `"Agricultor"`.
+- **Testing**: `GET /api/proveedores` devuelve `{'Agricultor': 147}` — 100% homogéneo.
+
 ### Fix: proveedores/cultivos importados sin código único y sin activo=True - DONE (2026-07-01)
 - **Bug reportado**: los proveedores creados por la importación Excel aparecían todos con el mismo ID (vacío) y sin marca de activo.
 - **Root cause**: `resolve_proveedor` insertaba directamente en Mongo sin generar `codigo_proveedor` ni fijar `activo=True`. La UI usa `codigo_proveedor` como "ID" visible.
