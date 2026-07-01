@@ -341,6 +341,12 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
+### Fix: Cuestionario perdía respuestas "No" al guardar - DONE (2026-07-01)
+- **Bug reportado**: al marcar "No" en una pregunta si_no del cuestionario de evaluación y guardar, la respuesta se perdía (el botón quedaba en blanco tras recargar y en el PDF salía vacío).
+- **Root cause**: `/app/frontend/src/pages/Evaluaciones.js` línea 272 usaba `respuesta: respuestas[p.id] || ''`. En JS, `false` es falsy → `false || ''` = `''`. Idéntico al bug de "0-value falsiness" ya corregido en el PDF.
+- **Fix**: reemplazado `||` por nullish coalescing `??`, que solo cae al default cuando el valor es null/undefined. Preserva `false` (No) y `0` correctamente y mantiene `''` como default para preguntas de texto/fecha sin responder.
+- **Testing**: `testing_agent_v3_fork` iteration_76 → backend 100%, frontend 100%. Ciclo completo verificado (marcar No → save → reload → botón sigue en rojo; PDF muestra "R: No"). Nuevo test de regresión en `/app/backend/tests/test_evaluaciones_no_answer.py`.
+
 ### Mapa satelital real en Cuaderno de Campo PDF - DONE (2026-07-01)
 - Reemplazado el diagrama SVG básico por un **mapa satelital real** (Esri World Imagery) con el polígono de la parcela dibujado encima, para que el informe sea profesional (misma calidad visual que el editor Leaflet Avanzado).
 - Implementación: librería `staticmap` fetching de tiles Esri + Pillow para renderizar el polígono (fill `#4CAF5066` translúcido, outline `#2E7D32`) y marcador central azul/blanco tipo Leaflet.
