@@ -606,3 +606,10 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - **Extracción `CultivoFormModal.jsx`**: modal tabulado del formulario de cultivo movido a `/app/frontend/src/components/cultivos/CultivoFormModal.jsx` (249 líneas, props-driven, sin estado local). Cultivos.js pasa de 541 → 414 líneas.
 - **Índice del PDF navegable**: en el Cuaderno de Campo (`/api/evaluaciones/{id}/pdf`), cada entrada del índice inicial es ahora un anchor HTML `<a href="#visita-{n}">` / `<a href="#tratamiento-{n}">`. WeasyPrint los convierte automáticamente en enlaces internos del PDF (LINK_NAMED). Cada página de destino tiene su `id="visita-{n}"` / `id="tratamiento-{n}"`. CSS `.index-item-link` con hover verde para feedback visual.
 - **Testing (iteración 83)**: 100% backend + frontend. Verificados 88 enlaces internos clicables en un PDF de 23 páginas mediante PyMuPDF (`fitz.Document.resolve_names()`). Test persistente en `/app/backend/tests/test_pdf_anchors_navigation.py`.
+
+### Logo FRUVECO en cabecera de todas las páginas del PDF (2026-02)
+- Añadido `/app/backend/static/fruveco_logo.png` (1526×502 PNG con transparencia) y `_get_fruveco_logo_data_uri()` con cache a nivel de módulo en `routes_evaluaciones.py`.
+- El logo se inyecta como `<div class="fruveco-logo-header">` con `position: fixed; top: -2.2cm; left: -0.5cm; width: 4.5cm;` — WeasyPrint replica los elementos `position: fixed` en **cada página** automáticamente.
+- Ajustado `@page { margin-top: 3cm; ... }` (antes 1.5cm) para dejar espacio al logo sin superponerse al contenido.
+- **Verificación**: PDF de 10 páginas generado, PyMuPDF confirma **1 imagen por página en las 10 páginas**; análisis visual confirma posición esquina superior izquierda sin colisiones.
+

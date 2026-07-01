@@ -16,6 +16,26 @@ router = APIRouter(prefix="/api", tags=["evaluaciones"])
 evaluaciones_collection = db['evaluaciones']
 evaluaciones_config_collection = db['evaluaciones_config']
 
+# ---------------------------------------------------------------------------
+# LOGO — se embebe como data-URI base64 en el PDF para que aparezca en la
+# cabecera superior-izquierda de todas las páginas (WeasyPrint + position:fixed).
+# Cacheado a nivel de módulo para no releer el disco en cada request.
+# ---------------------------------------------------------------------------
+_FRUVECO_LOGO_DATA_URI: Optional[str] = None
+
+def _get_fruveco_logo_data_uri() -> str:
+    global _FRUVECO_LOGO_DATA_URI
+    if _FRUVECO_LOGO_DATA_URI is None:
+        import base64
+        logo_path = os.path.join(os.path.dirname(__file__), 'static', 'fruveco_logo.png')
+        try:
+            with open(logo_path, 'rb') as f:
+                encoded = base64.b64encode(f.read()).decode('ascii')
+            _FRUVECO_LOGO_DATA_URI = f"data:image/png;base64,{encoded}"
+        except FileNotFoundError:
+            _FRUVECO_LOGO_DATA_URI = ""  # PDF sigue generándose sin logo
+    return _FRUVECO_LOGO_DATA_URI
+
 # ============================================================================
 # MODELS
 # ============================================================================
@@ -845,11 +865,19 @@ async def generate_evaluacion_pdf(
             return "—"
         return str(fecha)
     
+    # Logo FRUVECO (fragmento HTML pre-computado; posicionado como fixed
+    # aparece en la esquina superior-izquierda de TODAS las páginas).
+    _logo_data_uri = _get_fruveco_logo_data_uri()
+    logo_header_html = (
+        f'<div class="fruveco-logo-header"><img src="{_logo_data_uri}" alt="FRUVECO" /></div>'
+        if _logo_data_uri else ''
+    )
+
     # CSS común para todas las páginas
     css_styles = """
         @page {
             size: A4;
-            margin: 1.5cm;
+            margin: 3cm 1.5cm 1.5cm 1.5cm;
             @bottom-center {
                 content: "Página " counter(page) " de " counter(pages);
                 font-size: 8pt;
@@ -866,6 +894,19 @@ async def generate_evaluacion_pdf(
             font-size: 10pt;
             line-height: 1.4;
             color: #333;
+        }
+        /* Logo FRUVECO fijado en la esquina superior izquierda de cada página */
+        .fruveco-logo-header {
+            position: fixed;
+            top: -2.2cm;
+            left: -0.5cm;
+            width: 4.5cm;
+            height: auto;
+        }
+        .fruveco-logo-header img {
+            width: 100%;
+            height: auto;
+            display: block;
         }
         .page-break {
             page-break-before: always;
@@ -1211,6 +1252,8 @@ async def generate_evaluacion_pdf(
         <style>{css_styles}</style>
     </head>
     <body>
+        <!-- Logo FRUVECO fijado en la esquina superior izquierda de todas las páginas -->
+        {logo_header_html}
         <!-- PÁGINA 1: HOJA DE EVALUACIÓN PRINCIPAL -->
         <div class="header">
             <h1>FRUVECO</h1>
