@@ -266,21 +266,40 @@ def create_visitas_table(visitas: list, styles) -> list:
     if not visitas:
         elements.append(Paragraph('No se han registrado visitas para esta parcela.', styles['NormalText']))
         return elements
-    
-    data = [['Fecha', 'Tipo', 'Técnico', 'Observaciones']]
-    
+
+    # Estilo dedicado para celdas con texto largo: word-wrap + tamaño pequeño.
+    obs_style = ParagraphStyle(
+        'CellObs', parent=styles['NormalText'],
+        fontSize=8, leading=10, spaceBefore=0, spaceAfter=0, wordWrap='CJK'
+    )
+
+    data = [['Fecha', 'Tipo', 'Nº Visita', 'Observaciones']]
+
     for v in visitas:
-        obs = v.get('observaciones') or '-'
-        if len(obs) > 50:
-            obs = obs[:47] + '...'
+        # Campos reales del modelo Visita (verificados en MongoDB):
+        #  - fecha real: `fecha_visita` (fallback: `fecha_planificada`)
+        #  - tipo real: `objetivo` (Plagas y Enfermedades / etc.)
+        #  - identificador: `numero_visita`
+        #  - `observaciones`: texto libre.
+        fecha = v.get('fecha_visita') or v.get('fecha_planificada') or '-'
+        tipo = (v.get('objetivo') or v.get('tipo_visita') or v.get('tipo') or '-')
+        num_visita = v.get('numero_visita')
+        num_visita_str = f'#{num_visita}' if num_visita is not None else '-'
+        obs_text = v.get('observaciones') or '-'
         data.append([
-            v.get('fecha') or '-',
-            (v.get('tipo_visita') or '-')[:15],
-            (v.get('tecnico_nombre') or '-')[:20],
-            obs
+            str(fecha),
+            Paragraph(str(tipo), obs_style),
+            num_visita_str,
+            Paragraph(obs_text, obs_style),
         ])
-    
-    table = Table(data, colWidths=[2.5*cm, 3*cm, 3.5*cm, 6*cm])
+
+    # Ancho de columnas ajustado: Observaciones más ancho para que no se corte
+    # (el ancho útil de una A4 con márgenes 1.5cm ≈ 18cm → repartimos así).
+    table = Table(
+        data,
+        colWidths=[2.3*cm, 4.5*cm, 1.7*cm, 9.5*cm],
+        repeatRows=1,
+    )
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#27ae60')),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
@@ -290,7 +309,7 @@ def create_visitas_table(visitas: list, styles) -> list:
         ('ALIGN', (0, 0), (2, -1), 'CENTER'),
         ('ALIGN', (3, 1), (3, -1), 'LEFT'),
         ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#dee2e6')),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ('PADDING', (0, 0), (-1, -1), 4),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#eafaf1')]),
     ]))
