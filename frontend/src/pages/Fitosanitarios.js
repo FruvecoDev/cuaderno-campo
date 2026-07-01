@@ -401,7 +401,10 @@ const Fitosanitarios = () => {
     }
   };
 
-  const handleEdit = (producto) => {
+  const [productoUsos, setProductoUsos] = useState([]);
+  const [loadingUsos, setLoadingUsos] = useState(false);
+  
+  const handleEdit = async (producto) => {
     setEditingId(producto._id);
     setFormData({
       numero_registro: producto.numero_registro || '',
@@ -420,7 +423,15 @@ const Fitosanitarios = () => {
       observaciones: producto.observaciones || '',
       activo: producto.activo !== false
     });
+    setProductoUsos([]);
     setShowForm(true);
+    // Cargar usos autorizados (cultivo × plaga × dosis) en paralelo.
+    setLoadingUsos(true);
+    try {
+      const data = await api.get(`/api/fitosanitarios/${producto._id}`);
+      setProductoUsos(data.producto?.usos || []);
+    } catch (err) { console.error('[Fitosanitarios] load usos', err); }
+    finally { setLoadingUsos(false); }
   };
 
   const handleDelete = async (productoId) => {
@@ -1199,7 +1210,66 @@ const Fitosanitarios = () => {
               </label>
             </div>
 
-            <div className="flex gap-2">
+            {/* Usos autorizados MAPA: tabla con cultivo × plaga × dosis */}
+            {editingId && (
+              <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '8px' }} data-testid="section-usos-autorizados">
+                <h3 style={{ marginTop: 0, marginBottom: '0.5rem', color: '#166534', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  Usos autorizados MAPA
+                  <span style={{ padding: '2px 8px', background: '#166534', color: 'white', fontSize: '0.7rem', borderRadius: '10px', fontWeight: 600 }} data-testid="badge-usos-count">
+                    {loadingUsos ? '…' : productoUsos.length}
+                  </span>
+                </h3>
+                <p style={{ margin: '0 0 0.75rem', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
+                  Combinaciones oficialmente registradas de <b>cultivo · plaga · dosis</b> para este producto.
+                </p>
+                {loadingUsos && <div style={{ padding: '1rem', textAlign: 'center', color: 'hsl(var(--muted-foreground))' }}>Cargando usos...</div>}
+                {!loadingUsos && productoUsos.length === 0 && (
+                  <div style={{ padding: '1rem', textAlign: 'center', color: 'hsl(var(--muted-foreground))', fontSize: '0.85rem' }}>
+                    Este producto no tiene usos registrados en el catálogo MAPA. Puedes gestionar la dosis manualmente arriba.
+                  </div>
+                )}
+                {!loadingUsos && productoUsos.length > 0 && (
+                  <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid #d1fae5', borderRadius: '6px', background: 'white' }} data-testid="tabla-usos-autorizados">
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+                      <thead style={{ position: 'sticky', top: 0, background: '#f0fdf4', zIndex: 1 }}>
+                        <tr>
+                          <th style={{ padding: '0.5rem', textAlign: 'left', borderBottom: '1px solid #86efac' }}>Cultivo</th>
+                          <th style={{ padding: '0.5rem', textAlign: 'left', borderBottom: '1px solid #86efac' }}>Plaga / Agente</th>
+                          <th style={{ padding: '0.5rem', textAlign: 'center', borderBottom: '1px solid #86efac' }}>Dosis</th>
+                          <th style={{ padding: '0.5rem', textAlign: 'center', borderBottom: '1px solid #86efac' }}>Vol. Agua</th>
+                          <th style={{ padding: '0.5rem', textAlign: 'center', borderBottom: '1px solid #86efac' }}>Plazo Seg.</th>
+                          <th style={{ padding: '0.5rem', textAlign: 'center', borderBottom: '1px solid #86efac' }}>BBCH</th>
+                          <th style={{ padding: '0.5rem', textAlign: 'center', borderBottom: '1px solid #86efac' }}>Aplic.</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {productoUsos.map((uso, i) => (
+                          <tr key={uso._id || i} style={{ borderBottom: '1px solid #f0fdf4' }} data-testid={`uso-row-${i}`}>
+                            <td style={{ padding: '0.4rem 0.5rem' }}>{uso.cultivo || '—'}</td>
+                            <td style={{ padding: '0.4rem 0.5rem' }}>{uso.plaga || '—'}</td>
+                            <td style={{ padding: '0.4rem 0.5rem', textAlign: 'center', fontWeight: 600, color: '#166534' }}>
+                              {uso.dosis_min != null && uso.dosis_max != null
+                                ? (uso.dosis_min === uso.dosis_max ? `${uso.dosis_min}` : `${uso.dosis_min}-${uso.dosis_max}`) + ' ' + (uso.unidad_dosis || '')
+                                : '—'}
+                            </td>
+                            <td style={{ padding: '0.4rem 0.5rem', textAlign: 'center' }}>
+                              {uso.volumen_agua_min != null && uso.volumen_agua_max != null
+                                ? `${uso.volumen_agua_min}-${uso.volumen_agua_max} L/ha`
+                                : uso.volumen_caldo || '—'}
+                            </td>
+                            <td style={{ padding: '0.4rem 0.5rem', textAlign: 'center' }}>{uso.plazo_seguridad || '—'}</td>
+                            <td style={{ padding: '0.4rem 0.5rem', textAlign: 'center' }}>{uso.bbch || '—'}</td>
+                            <td style={{ padding: '0.4rem 0.5rem', textAlign: 'center' }}>{uso.aplicaciones || '—'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="flex gap-2" style={{ marginTop: '1.5rem' }}>
               <button type="submit" className="btn btn-primary" data-testid="btn-guardar">
                 {editingId ? 'Actualizar Producto' : 'Guardar Producto'}
               </button>
@@ -1225,7 +1295,7 @@ const Fitosanitarios = () => {
             <Beaker size={48} style={{ color: 'hsl(var(--muted-foreground))', marginBottom: '1rem' }} />
             <p className="text-muted">No hay productos fitosanitarios registrados.</p>
             <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))', marginTop: '0.5rem' }}>
-              Haz clic en "Cargar Datos" para importar productos oficiales o añade uno manualmente.
+              Haz clic en &quot;Cargar Datos&quot; para importar productos oficiales o añade uno manualmente.
             </p>
           </div>
         ) : (

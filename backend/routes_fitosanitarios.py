@@ -137,6 +137,36 @@ async def get_productos(
     
     productos = await fitosanitarios_collection.find(query).sort("nombre_comercial", 1).to_list(length=10000)
     
+    # Enriquecer con agregados desde fitosanitarios_usos (min/max de dosis,
+    # rango de vol. agua, plazo_seguridad más común). Necesario porque tras
+    # la importación MAPA los datos de dosis viven a nivel de uso, no del
+    # producto. Sin esto la tabla del módulo Fitosanitarios sale vacía.
+    if productos:
+        ids = [str(p["_id"]) for p in productos]
+        pipeline = [
+            {"$match": {"fitosanitario_id": {"$in": ids}}},
+            {"$group": {
+                "_id": "$fitosanitario_id",
+                "dosis_min": {"$min": "$dosis_min"},
+                "dosis_max": {"$max": "$dosis_max"},
+                "unidad_dosis": {"$first": "$unidad_dosis"},
+                "volumen_agua_min": {"$min": "$volumen_agua_min"},
+                "volumen_agua_max": {"$max": "$volumen_agua_max"},
+                "plazo_seguridad": {"$first": "$plazo_seguridad"},
+                "usos_count": {"$sum": 1},
+            }},
+        ]
+        aggs = {a["_id"]: a async for a in fitosanitarios_usos_collection.aggregate(pipeline)}
+        for p in productos:
+            a = aggs.get(str(p["_id"]))
+            if a:
+                # Sólo rellenamos si el producto no tenía el dato ya (evita
+                # pisar productos manuales pre-MAPA que sí lo tenían).
+                for k in ("dosis_min", "dosis_max", "unidad_dosis", "volumen_agua_min", "volumen_agua_max", "plazo_seguridad"):
+                    if p.get(k) in (None, "", 0) and a.get(k) is not None:
+                        p[k] = a[k]
+                p["usos_count"] = a.get("usos_count", p.get("usos_count", 0))
+    
     return {
         "success": True,
         "productos": [serialize_producto(p) for p in productos],
@@ -252,7 +282,21 @@ async def get_producto(
     if not producto:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
     
-    return {"success": True, "producto": serialize_producto(producto)}
+    # Cargar usos autorizados (cultivos × plagas × dosis) para mostrarlos en
+    # el detalle. Devolvemos hasta 500 usos (los productos MAPA suelen tener
+    # entre 1 y 500 combinaciones).
+    usos_docs = await fitosanitarios_usos_collection.find(
+        {"fitosanitario_id": producto_id}
+    ).sort([("cultivo", 1), ("plaga", 1)]).to_list(length=500)
+    usos_serialized = []
+    for u in usos_docs:
+        u["_id"] = str(u["_id"])
+        usos_serialized.append(u)
+    
+    serialized = serialize_producto(producto)
+    serialized["usos"] = usos_serialized
+    serialized["usos_count"] = len(usos_serialized)
+    return {"success": True, "producto": serialized}
 
 
 # CREATE product

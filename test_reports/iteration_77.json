@@ -1,0 +1,63 @@
+{
+  "summary": "Validated fitosanitarios MAPA usos fix end-to-end. Backend enrichment (GET /api/fitosanitarios) correctly aggregates dosis_min/max, volumen_agua_min/max, plazo_seguridad and usos_count from fitosanitarios_usos_collection. GET /api/fitosanitarios/{id} returns producto.usos array with expected shape. Frontend list now shows the previously-empty columns (Dosis, Vol. Agua, Plazo Seg.) populated for imported MAPA products, and the edit modal renders the new 'Usos autorizados MAPA' section with badge-usos-count and tabla-usos-autorizados containing uso-row-{i} entries.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Fitosanitarios list — 'Plazo Seg.' column",
+        "issue": "Line 1324 concatenates hard-coded 'd' suffix to producto.plazo_seguridad, but MAPA data is often a string (e.g. 'NO PROCEDE', 'NA', '30 DÍAS* (VER COND. ESP.)'). Result displayed to user: 'NO PROCEDEd', 'NAd', '30 DÍAS* (VER COND. ESP.)d'. Should render `${value}d` only when typeof value === 'number', otherwise render the string as-is.",
+        "selector": "src/pages/Fitosanitarios.js:1324",
+        "priority": "MEDIUM"
+      },
+      {
+        "component": "Fitosanitarios edit modal — 'Plazo Seguridad (días)' input",
+        "issue": "Field is <input type=\"number\"> but the imported MAPA plazo_seguridad is frequently a text value ('NO PROCEDE', '30 DÍAS*'…). Result: input renders empty and browser logs 'The specified value \"NO PROCEDE\" cannot be parsed, or is out of range.'. Either switch to type=\"text\" or store a separate plazo_seguridad_texto. Same likely applies to volumen_agua for products where the aggregated value is only present at list level (root document is missing it, so opening edit loses it).",
+        "selector": "src/pages/Fitosanitarios.js Editar Producto → Plazo Seguridad",
+        "priority": "MEDIUM"
+      },
+      {
+        "component": "Fitosanitarios search field",
+        "issue": "Review spec references data-testid=\"input-search\" but actual attribute is data-testid=\"filter-search\" (line 981). Not blocking, but keep the naming consistent with the rest of the app or update the spec.",
+        "selector": "src/pages/Fitosanitarios.js:981",
+        "priority": "LOW"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Global (observed while loading /fitosanitarios)",
+        "issues": [
+          "React hydration warnings in console: 'In HTML, <span> cannot be a child of <select>', '<th> cannot be a child of <span>', '<tr> cannot be a child of <span>', '<td> cannot be a child of <span>'. Not caused by this iteration's changes but should be cleaned up (invalid HTML nesting somewhere in the layout / Toaster / Select components)."
+        ]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_fitosanitarios_usos_mapa.py",
+    "/app/test_reports/pytest/test_fitosanitarios_usos_mapa.xml"
+  ],
+  "action_items": [
+    "Fix Plazo Seg. column rendering in Fitosanitarios list (do not append 'd' when value is a non-numeric string).",
+    "Change Plazo Seguridad edit input to type='text' (or accept both numeric and textual plazos) so imported MAPA values like 'NO PROCEDE' survive an edit round-trip.",
+    "Optional: align data-testid 'filter-search' vs 'input-search' with the naming used elsewhere / referenced in specs."
+  ],
+  "critical_code_review_comments": [
+    "routes_fitosanitarios.py enrichment pipeline: `plazo_seguridad: {$first}` picks an arbitrary uso — for products with mixed plazos across usos this may hide the most conservative (max) plazo. Consider `$max` for numeric plazo or exposing a `plazo_seguridad_variable` flag.",
+    "routes_fitosanitarios.py:166 — the guard `p.get(k) in (None, '', 0)` overrides a manually-set `0` (which could be a legitimate value for dosis_min or plazo_seguridad=0 días). Consider `is None` only.",
+    "Fitosanitarios.js is 1375 lines — beyond the 700-line guideline. Extract the Edit form, the Usos table and the List table into separate components.",
+    "Fitosanitarios.js:1321-1324 duplicates the null-coalescing formatting logic for dosis/vol_agua/plazo — extract a small formatter helper to avoid divergent bugs like the 'NO PROCEDEd' issue."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_fitosanitarios_usos_mapa.py"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "95%"},
+  "test_credentials": "admin@fruveco.com / admin123",
+  "seed_data_creation": "None. Used the existing MAPA-imported data (2055 productos, 60965 usos). Validated concretely on MICROTHIOL SPECIAL DISPERSS (163 usos, dosis 0.25-1.25 %, vol_agua 500-1600, plazo 'NO PROCEDE') and METALDEHIDO 3% (64 usos).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Fitosanitarios list + edit modal usos flow is working. The two follow-up UI bugs above (Plazo 'd' suffix and Plazo edit input as number) are cosmetic and do NOT block the reported user issue. Backend pytest suite for this module lives at /app/backend/tests/test_fitosanitarios_usos_mapa.py. Note there are pre-existing React hydration warnings on the app that pre-date this iteration.",
+  "rca of the issue": "The user reported empty Dosis/Vol.Agua/Plazo columns in /fitosanitarios and missing uso detail in the edit modal. ROOT CAUSE: the MAPA importer stored dosis/vol_agua/plazo at the *uso* level (fitosanitarios_usos_collection) but not at the root producto document, so the fitosanitarios list query returned bare products without those fields, and the detail endpoint didn't expose the usos array to the modal. FIX (validated here): (a) routes_fitosanitarios.py GET '' now runs a $group aggregation over fitosanitarios_usos to inject min/max dosis, min/max vol_agua, first plazo_seguridad and usos_count per producto; (b) GET /{id} now attaches producto.usos (up to 500) and usos_count; (c) Fitosanitarios.js handleEdit fetches /api/fitosanitarios/{id} and renders section-usos-autorizados + badge-usos-count + tabla-usos-autorizados with uso-row-{i}. Verified via 3 pytest cases (all pass) and Playwright UI walk-through (list columns populated, edit modal shows badge=64 and 64 uso rows for METALDEHIDO 3%; backend also confirmed MICROTHIOL SPECIAL DISPERSS: 163 usos, 0.25-1.25 %, 500-1600 L/ha, 'NO PROCEDE')."
+}
