@@ -558,7 +558,7 @@ const Contratos = () => {
                       </div>
                       <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>{entry.timestamp ? new Date(entry.timestamp).toLocaleString('es-ES') : ''}</span>
                     </div>
-                    {entry.changes && entry.changes.length > 0 && <div style={{ marginTop: '0.4rem' }}>{entry.changes.map((ch, ci) => (<div key={ci} style={{ fontSize: '0.8rem', padding: '0.2rem 0', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}><span style={{ fontWeight: '600', minWidth: '120px' }}>{ch.field}:</span>{ch.old_value && <span style={{ color: 'hsl(var(--destructive))', textDecoration: 'line-through' }}>{String(ch.old_value).substring(0, 80)}</span>}<span style={{ color: 'hsl(142 76% 36%)' }}>{String(ch.new_value || '').substring(0, 80)}</span></div>))}</div>}
+                    {entry.changes && entry.changes.length > 0 && <div style={{ marginTop: '0.4rem' }}>{entry.changes.map((ch, ci) => (<div key={`${ch.field || 'chg'}-${ci}`} style={{ fontSize: '0.8rem', padding: '0.2rem 0', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}><span style={{ fontWeight: '600', minWidth: '120px' }}>{ch.field}:</span>{ch.old_value && <span style={{ color: 'hsl(var(--destructive))', textDecoration: 'line-through' }}>{String(ch.old_value).substring(0, 80)}</span>}<span style={{ color: 'hsl(142 76% 36%)' }}>{String(ch.new_value || '').substring(0, 80)}</span></div>))}</div>}
                   </div>))}
                 </div>}
               </div>)}

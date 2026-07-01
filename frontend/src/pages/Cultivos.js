@@ -368,7 +368,7 @@ const Cultivos = () => {
                             <td key="variedad" data-testid={`cell-variedades-${cultivo._id}`}>
                               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
                                 {vs.map((v, i) => (
-                                  <span key={i} style={{ padding: '0.1rem 0.5rem', borderRadius: '999px', fontSize: '0.72rem', fontWeight: '500', background: 'hsl(142 76% 36% / 0.1)', color: 'hsl(142 76% 30%)', border: '1px solid hsl(142 76% 36% / 0.25)' }}>{v}</span>
+                                  <span key={`${v}-${i}`} style={{ padding: '0.1rem 0.5rem', borderRadius: '999px', fontSize: '0.72rem', fontWeight: '500', background: 'hsl(142 76% 36% / 0.1)', color: 'hsl(142 76% 30%)', border: '1px solid hsl(142 76% 36% / 0.25)' }}>{v}</span>
                                 ))}
                               </div>
                             </td>

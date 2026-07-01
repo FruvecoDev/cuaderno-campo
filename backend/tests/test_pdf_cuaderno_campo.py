@@ -20,8 +20,8 @@ import pytest
 import requests
 
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL").rstrip("/")
-ADMIN_EMAIL = "admin@fruveco.com"
-ADMIN_PASSWORD = "admin123"
+ADMIN_EMAIL = os.environ.get("TEST_EMAIL", "admin@fruveco.com")
+ADMIN_PASSWORD = os.environ.get("TEST_PASSWORD", "admin123")
 
 EVAL_COT = "6a3e4b01e223c5dd1673c04c"   # COT-GUI-25-001, 3 tratamientos
 EVAL_JIM = "6a3e776ae366c8afa4a65c91"   # JIM-GUI-25-001, several visitas

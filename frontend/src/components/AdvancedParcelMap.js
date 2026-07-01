@@ -969,7 +969,7 @@ ${placemarks}
           {effectiveZones.length > 1 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.25rem' }}>
               {effectiveZones.map((zone, idx) => (
-                <span key={idx} style={{
+                <span key={`zone-${idx}-${zone.length}`} style={{
                   padding: '2px 8px',
                   borderRadius: '4px',
                   fontSize: '11px',

@@ -77,6 +77,17 @@ if (config.enableVisualEdits && babelMetadataPlugin) {
   };
 }
 
+// In production builds, strip all console.* statements (but keep console.error
+// and console.warn so real errors still show up in production logs / Sentry).
+if (!isDevServer) {
+  webpackConfig.babel = webpackConfig.babel || { plugins: [] };
+  webpackConfig.babel.plugins = webpackConfig.babel.plugins || [];
+  webpackConfig.babel.plugins.push([
+    "transform-remove-console",
+    { exclude: ["error", "warn"] },
+  ]);
+}
+
 webpackConfig.devServer = (devServerConfig) => {
   // Apply visual edits dev server setup only if enabled
   if (config.enableVisualEdits && setupDevServer) {

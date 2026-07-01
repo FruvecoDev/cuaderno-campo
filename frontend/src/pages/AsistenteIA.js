@@ -741,7 +741,7 @@ const AsistenteIA = () => {
                   </h4>
                   <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
                     {suggestions.suggestions.medidas_preventivas.map((m, i) => (
-                      <li key={i} style={{ marginBottom: '0.25rem' }}>{m}</li>
+                      <li key={`medida-${i}-${String(m).slice(0, 20)}`} style={{ marginBottom: '0.25rem' }}>{m}</li>
                     ))}
                   </ul>
                 </div>

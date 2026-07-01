@@ -11,8 +11,8 @@ if not BASE_URL:
             if line.startswith('REACT_APP_BACKEND_URL='):
                 BASE_URL = line.split('=', 1)[1].strip().rstrip('/')
 
-ADMIN_EMAIL = "admin@fruveco.com"
-ADMIN_PASSWORD = "admin123"
+ADMIN_EMAIL = os.environ.get("TEST_EMAIL", "admin@fruveco.com")
+ADMIN_PASSWORD = os.environ.get("TEST_PASSWORD", "admin123")
 COT_PARCELA_ID = "6a3e90f77b8cf2eb0d697bc1"  # COT-GUI-25-001
 
 

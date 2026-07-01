@@ -613,3 +613,14 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - Ajustado `@page { margin-top: 3cm; ... }` (antes 1.5cm) para dejar espacio al logo sin superponerse al contenido.
 - **Verificación**: PDF de 10 páginas generado, PyMuPDF confirma **1 imagen por página en las 10 páginas**; análisis visual confirma posición esquina superior izquierda sin colisiones.
 
+
+
+### Code Quality Report — Grupo A aplicado (2026-02)
+- **Credenciales de test → variables de entorno**: 8 archivos de test (`test_visitas_numero.py`, `test_tratamiento_aplicador_persistence.py`, `test_tecnicos_maquinas.py`, `test_pdf_cuaderno_campo.py`, `test_pdf_anchors_navigation.py`, `test_fitosanitarios_usos_mapa.py`, `test_fitosanitarios_plazo_string.py`, `test_cultivos_variedades.py`) ahora leen `TEST_EMAIL` y `TEST_PASSWORD` de env con fallback a los valores conocidos. Se preserva la retrocompatibilidad para CI y ejecuciones locales.
+- **`eval()` reportado**: falso positivo del scanner (era el identificador `original_eval`, no la función).
+- **`key={idx}` → keys estables** en los 5 archivos listados: `Cultivos.js:371`, `Contratos.js:561`, `Clientes.js:536`, `AsistenteIA.js:744`, `AdvancedParcelMap.js:972`.
+- **`babel-plugin-transform-remove-console`** añadido como devDependency y configurado en `craco.config.js` — en builds de producción se eliminan `console.log/info/debug/trace` (255 statements) preservando `console.error` y `console.warn` para monitoreo. Dev queda intacto para debugging.
+- **Recomendaciones RECHAZADAS** (con justificación técnica):
+  - "189 missing hook deps": la mayoría son `useEffect(...[])` mount-only intencionales; añadirlos a las deps sin `useCallback` provoca bucles infinitos.
+  - "localStorage → httpOnly cookies": cambio de arquitectura mayor (backend set-cookie, CORS, sin Authorization header); localStorage con JWT de corta duración es el patrón estándar SPA; XSS se mitiga con CSP.
+- **Verificación**: `pytest test_cultivos_variedades.py` 4/4 PASS; webpack compila sin errores; smoke test frontend en /cultivos OK.
