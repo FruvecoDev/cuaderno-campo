@@ -341,6 +341,18 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
+### Duplicar Tratamiento: botón por fila con auto-clonado - DONE (2026-07-01)
+- **Nueva acción "Duplicar"** en cada fila de la tabla de Tratamientos (icono `Copy`), entre editar y eliminar.
+- **Flujo**: click Duplicar → modal "Crear Tratamiento" prellenado con:
+  - Tipo, subtipo, método, aplicación_numero, superficie, caldo, dosis, producto, plaga, aplicador, máquina, materia activa, plazo seguridad, Nº registro → **heredados**.
+  - `parcelas_ids` → heredadas pero **con purga de huérfanas** (mismo criterio del save-guard).
+  - `fecha_tratamiento` → **hoy** (reseteada). `fecha_aplicacion` → vacía.
+  - Estado (realizado/cancelado) → **limpio**, el clon empieza como pendiente.
+  - `editingId = null` → POST al guardar.
+- Toast: "Tratamiento duplicado. Ajusta los datos y guarda para crear el nuevo."
+- Solo visible con permiso `canCreate`. data-testid: `duplicate-tratamiento-{id}`.
+- **Testing via Playwright**: 3 botones detectados. Click abre modal "Crear Tratamiento" con datos heredados de ORTIVA y toast verde. Botón inferior es "Guardar Tratamiento" (no "Actualizar").
+
 ### Duplicar Visita: botón por fila con auto-clonado de datos - DONE (2026-07-01)
 - **Nueva acción "Duplicar"** en cada fila de la tabla de Visitas (icono `Copy` de lucide entre editar y eliminar).
 - **Flujo**: click Duplicar → abre modal "Nueva Visita" prellenado con:

@@ -627,6 +627,45 @@ const Tratamientos = () => {
     resetForm();
   };
   
+  const handleDuplicate = (tratamiento) => {
+    // Duplicar tratamiento: clona todos los campos de producto/aplicación/parcelas
+    // en un formulario NUEVO (sin editingId → POST). Fecha se resetea a hoy y
+    // el estado (realizado/cancelado) se limpia — el clon empieza como pendiente.
+    if (!canCreate) { notify.error('No tienes permisos para crear tratamientos'); return; }
+    // Purga IDs huérfanos al copiar (mismo criterio que el save-guard).
+    const parcelasLimpias = (tratamiento.parcelas_ids || []).filter(id => parcelas.some(p => p._id === id));
+    setEditingId(null);
+    setFormData({
+      tipo_tratamiento: tratamiento.tipo_tratamiento || 'FITOSANITARIOS',
+      subtipo: tratamiento.subtipo || 'Insecticida',
+      aplicacion_numero: tratamiento.aplicacion_numero || 1,
+      metodo_aplicacion: tratamiento.metodo_aplicacion || 'Pulverización',
+      superficie_aplicacion: tratamiento.superficie_aplicacion || '',
+      caldo_superficie: tratamiento.caldo_superficie || '',
+      parcelas_ids: parcelasLimpias,
+      fecha_tratamiento: new Date().toISOString().split('T')[0],
+      fecha_aplicacion: '',
+      aplicador_nombre: tratamiento.aplicador_nombre || '',
+      tecnico_aplicador_id: tratamiento.tecnico_aplicador_id || '',
+      maquina_id: tratamiento.maquina_id || '',
+      maquina_nombre: tratamiento.maquina_nombre || '',
+      producto_fitosanitario_id: tratamiento.producto_fitosanitario_id || '',
+      producto_fitosanitario_nombre: tratamiento.producto_fitosanitario_nombre || '',
+      producto_fitosanitario_dosis: tratamiento.producto_fitosanitario_dosis || '',
+      producto_fitosanitario_unidad: tratamiento.producto_fitosanitario_unidad || 'L/ha',
+      producto_materia_activa: tratamiento.producto_materia_activa || '',
+      producto_plazo_seguridad: tratamiento.producto_plazo_seguridad || '',
+      producto_fitosanitario_num_registro: tratamiento.producto_fitosanitario_num_registro || '',
+      plaga_a_controlar: tratamiento.plaga_a_controlar || ''
+    });
+    setSelectedParcelas(parcelasLimpias);
+    setSelectedParcelasInfo(null);
+    setParcelaSearch({ proveedor: '', cultivo: '', campana: '' });
+    setActiveTab('general');
+    setShowForm(true);
+    notify.success('Tratamiento duplicado. Ajusta los datos y guarda para crear el nuevo.');
+  };
+  
   const handleDelete = async (tratamientoId) => {
     if (!canDelete) {
       setError('No tienes permisos para eliminar tratamientos');
@@ -1464,9 +1503,11 @@ const Tratamientos = () => {
         tableConfig={tableConfig}
         canEdit={canEdit}
         canDelete={canDelete}
+        canCreate={canCreate}
         handleEdit={handleEdit}
         handleDelete={handleDelete}
         handleChangeEstado={handleChangeEstado}
+        handleDuplicate={handleDuplicate}
         canBulkDelete={canBulkDelete}
         selectedIds={selectedIds}
         onToggleOne={toggleOne}

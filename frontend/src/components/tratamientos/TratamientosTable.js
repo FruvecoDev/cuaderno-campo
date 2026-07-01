@@ -1,10 +1,10 @@
 import React from 'react';
-import { Edit2, Trash2, CheckCircle, XCircle, PlayCircle } from 'lucide-react';
+import { Edit2, Trash2, CheckCircle, XCircle, PlayCircle, Copy } from 'lucide-react';
 import { BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell } from '../BulkActions';
 
 const TratamientosTable = ({
-  tratamientos, parcelas = [], loading, hasActiveFilters, tableConfig, canEdit, canDelete,
-  handleEdit, handleDelete, handleChangeEstado,
+  tratamientos, parcelas = [], loading, hasActiveFilters, tableConfig, canEdit, canDelete, canCreate = false,
+  handleEdit, handleDelete, handleChangeEstado, handleDuplicate,
   canBulkDelete = false,
   selectedIds = new Set(),
   onToggleOne,
@@ -96,6 +96,9 @@ const TratamientosTable = ({
                           <button className="btn btn-sm" style={{ backgroundColor: 'hsl(38 92% 50%)', color: 'white', border: 'none' }} onClick={() => handleChangeEstado(t._id, 'pendiente')} title="Pendiente" data-testid={`pending-tratamiento-${t._id}`}><PlayCircle size={14} /></button>
                         )}
                         {canEdit && <button className="btn btn-sm btn-secondary" onClick={() => handleEdit(t)} title="Editar" data-testid={`edit-tratamiento-${t._id}`}><Edit2 size={14} /></button>}
+                        {canCreate && typeof handleDuplicate === 'function' && (
+                          <button className="btn btn-sm btn-secondary" onClick={() => handleDuplicate(t)} title="Duplicar tratamiento (crea uno nuevo con los mismos datos)" data-testid={`duplicate-tratamiento-${t._id}`}><Copy size={14} /></button>
+                        )}
                         {canDelete && <button className="btn btn-sm btn-error" onClick={() => handleDelete(t._id)} title="Eliminar" data-testid={`delete-tratamiento-${t._id}`}><Trash2 size={14} /></button>}
                       </div>
                     </td>
