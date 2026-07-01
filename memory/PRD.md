@@ -341,6 +341,12 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
+### Nueva Visita: objetivo predeterminado "Plagas y Enfermedades" - DONE (2026-07-01)
+- Cambiado el valor default del campo `objetivo` en el formulario de Visitas de `'Control Rutinario'` a `'Plagas y Enfermedades'` (uso más frecuente).
+- Aplicado en 3 lugares: `useState({...objetivo: ...})` inicial, `resetForm` (crear nueva), y fallback en `handleEdit` para visitas legacy sin objetivo.
+- Efecto colateral positivo: la pestaña "Plagas" (cuestionario de plagas y enfermedades) aparece automáticamente ya que se muestra condicionalmente cuando `objetivo === 'Plagas y Enfermedades'`.
+- **Testing**: Playwright confirma `select-objetivo` con `input_value() === 'Plagas y Enfermedades'` al abrir "Nueva Visita".
+
 ### Fix: aplicador duplicado en PDF (ficha vacía + ficha completa) - DONE (2026-07-01)
 - **Bug reportado**: en la sección final "TÉCNICOS APLICADORES" del PDF, "Clemente Torres Martín" aparecía dos veces — la primera con todos los campos vacíos ("—") y la segunda con la ficha completa (DNI, Nº carnet, fechas, certificado).
 - **Root cause**: el bucle en `routes_evaluaciones.py::PÁGINA FINAL` usaba `setdefault` con dos claves distintas para el mismo técnico: `str(_id)` cuando el tratamiento tenía `tecnico_aplicador_id`, y `"name:<txt>"` cuando solo tenía `aplicador_nombre` (texto libre). Como las keys no coincidían, no había dedup entre las dos fuentes.

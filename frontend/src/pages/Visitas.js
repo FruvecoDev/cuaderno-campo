@@ -67,7 +67,7 @@ const Visitas = () => {
   const [filterOptions, setFilterOptions] = useState({ proveedores: [], cultivos: [], campanas: [], parcelas: [] });
   
   const [formData, setFormData] = useState({
-    objetivo: 'Control Rutinario',
+    objetivo: 'Plagas y Enfermedades',
     fecha_visita: new Date().toISOString().split('T')[0],
     fecha_planificada: '',
     parcela_id: '',
@@ -307,7 +307,7 @@ const Visitas = () => {
   };
   
   const resetForm = () => {
-    setFormData({ objetivo: 'Control Rutinario', fecha_visita: new Date().toISOString().split('T')[0], fecha_planificada: '', parcela_id: '', observaciones: '', numero_visita: '' });
+    setFormData({ objetivo: 'Plagas y Enfermedades', fecha_visita: new Date().toISOString().split('T')[0], fecha_planificada: '', parcela_id: '', observaciones: '', numero_visita: '' });
     const initialPlagas = {};
     PLAGAS_ENFERMEDADES.forEach(p => { initialPlagas[p.key] = 0; });
     setCuestionarioPlagas(initialPlagas);
@@ -369,7 +369,7 @@ const Visitas = () => {
   const handleEdit = (visita) => {
     setEditingId(visita._id);
     setFormData({
-      objetivo: visita.objetivo || 'Control Rutinario',
+      objetivo: visita.objetivo || 'Plagas y Enfermedades',
       fecha_visita: visita.fecha_visita || new Date().toISOString().split('T')[0],
       fecha_planificada: visita.fecha_planificada || '',
       parcela_id: visita.parcela_id || '',
