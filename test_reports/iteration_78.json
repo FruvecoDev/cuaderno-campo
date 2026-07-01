@@ -1,0 +1,36 @@
+{
+  "summary": "Validated iteration 77 follow-up fixes for Fitosanitarios plazo_seguridad. Both cosmetic bugs are fixed and the 'Usos autorizados MAPA' regression check passes. Backend accepts plazo_seguridad as free-text string on POST/PUT (Pydantic Optional[str]). Frontend list renders string values without stray 'd' suffix (only numbers get 'd'). Edit form input is type=text and correctly preloads the imported MAPA value 'NO PROCEDE' for MICROTHIOL SPECIAL DISPERSS. Usos autorizados section still shows badge=163 and a 163-row table with the expected 7 columns.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Global (still present, pre-existing)",
+        "issues": [
+          "React hydration warnings persist: '<span> cannot be a child of <select>/<tr>/<tbody>' and '<th>/<td> cannot be a child of <span>'. Not introduced by this iteration; visual-editor wrappers (data-ve-dynamic <span display:contents>) are being inserted between semantic HTML parents/children."
+        ]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_fitosanitarios_plazo_string.py",
+    "/app/test_reports/pytest/test_fitosanitarios_plazo_string.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Fitosanitarios.js still 1374 lines — beyond 700-line guideline. Recommend extracting Edit form, Usos table and List table components.",
+    "Duplicated conditional formatting logic in list cells (dosis / vol_agua / plazo_seguridad, lines 1320-1323) — a tiny formatter helper avoids future divergent bugs like the 'NO PROCEDEd' issue.",
+    "The 'Editar Producto' UI is an inline expanding panel, not a real modal — a stray notifications dialog ('Buenos días, admin') can visually overlap it. Consider actual Dialog component or auto-scroll to form on open."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_fitosanitarios_plazo_string.py"
+  ],
+  "success_rate": { "backend": "100%", "frontend": "100%" },
+  "test_credentials": "admin@fruveco.com / admin123",
+  "seed_data_creation": "Created transient TEST_PLAZO_* and TEST_NP_* products via API; deleted immediately after each test.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Fitosanitarios plazo_seguridad end-to-end (backend Pydantic + frontend list rendering + edit form roundtrip) is fully working with string values. MICROTHIOL SPECIAL DISPERSS is the reference product (163 usos, plazo 'NO PROCEDE'). Backend test file for plazo string: /app/backend/tests/test_fitosanitarios_plazo_string.py. Usos MAPA regression test: /app/backend/tests/test_fitosanitarios_usos_mapa.py. Pre-existing React hydration warnings on Fitosanitarios list caused by visual-editor injecting <span display:contents> wrappers inside <select>/<table> — cosmetic only.",
+  "rca of the issue": "Iteration 77 reported 2 MEDIUM cosmetic bugs. Fix verified by (a) backend pytest — POST/PUT with plazo_seguridad='NO PROCEDE' and 'N.P.' returns 200 and value round-trips through GET; (b) UI walkthrough — list shows 'NO PROCEDE' and 'N.P.' without 'd' suffix; edit form input has type='text' and value='NO PROCEDE' loaded correctly; regression 'section-usos-autorizados' still renders with badge-usos-count=163 and 163 uso rows with all 7 expected columns."
+}

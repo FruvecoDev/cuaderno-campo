@@ -375,7 +375,7 @@ const Fitosanitarios = () => {
         dosis_max: parseFloat(formData.dosis_max) || null,
         volumen_agua_min: parseFloat(formData.volumen_agua_min) || null,
         volumen_agua_max: parseFloat(formData.volumen_agua_max) || null,
-        plazo_seguridad: parseInt(formData.plazo_seguridad) || null,
+        plazo_seguridad: (formData.plazo_seguridad || '').toString().trim() || null,
         plagas_objetivo: plagasArray
       };
 
@@ -419,7 +419,7 @@ const Fitosanitarios = () => {
       volumen_agua_min: producto.volumen_agua_min?.toString() || '',
       volumen_agua_max: producto.volumen_agua_max?.toString() || '',
       plagas_objetivo: (producto.plagas_objetivo || []).join(', '),
-      plazo_seguridad: producto.plazo_seguridad?.toString() || '',
+      plazo_seguridad: producto.plazo_seguridad != null ? String(producto.plazo_seguridad) : '',
       observaciones: producto.observaciones || '',
       activo: producto.activo !== false
     });
@@ -1137,14 +1137,13 @@ const Fitosanitarios = () => {
                 </select>
               </div>
               <div className="form-group">
-                <label className="form-label">Plazo Seguridad (días)</label>
+                <label className="form-label">Plazo Seguridad</label>
                 <input
-                  type="number"
-                  min="0"
+                  type="text"
                   className="form-input"
                   value={formData.plazo_seguridad}
                   onChange={(e) => setFormData({ ...formData, plazo_seguridad: e.target.value })}
-                  placeholder="Ej: 21"
+                  placeholder="Ej: 21 días, NO PROCEDE, N.P."
                   data-testid="input-plazo-seguridad"
                 />
               </div>
@@ -1321,7 +1320,7 @@ const Fitosanitarios = () => {
                         case 'dosis': return <td key="dosis" style={{ whiteSpace: 'nowrap' }}>{producto.dosis_min || producto.dosis_max ? <span>{producto.dosis_min && producto.dosis_max ? `${producto.dosis_min}-${producto.dosis_max}` : producto.dosis_max || producto.dosis_min} {producto.unidad_dosis}</span> : '-'}</td>;
                         case 'volumen_agua': return <td key="volumen_agua" style={{ whiteSpace: 'nowrap' }}>{producto.volumen_agua_min || producto.volumen_agua_max ? <span>{producto.volumen_agua_min}-{producto.volumen_agua_max} L/ha</span> : '-'}</td>;
                         case 'plagas': return <td key="plagas" style={{ fontSize: '0.75rem', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{(producto.plagas_objetivo || []).join(', ') || '-'}</td>;
-                        case 'plazo_seguridad': return <td key="plazo_seguridad" style={{ textAlign: 'center' }}>{producto.plazo_seguridad !== null ? `${producto.plazo_seguridad}d` : '-'}</td>;
+                        case 'plazo_seguridad': return <td key="plazo_seguridad" style={{ textAlign: 'center' }}>{producto.plazo_seguridad == null || producto.plazo_seguridad === '' ? '-' : (typeof producto.plazo_seguridad === 'number' ? `${producto.plazo_seguridad}d` : String(producto.plazo_seguridad))}</td>;
                         case 'activo': return <td key="activo"><span style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '500', backgroundColor: producto.activo ? '#dcfce7' : '#fee2e2', color: producto.activo ? '#166534' : '#991b1b' }}>{producto.activo ? 'Activo' : 'Inactivo'}</span></td>;
                         default: return null;
                       }

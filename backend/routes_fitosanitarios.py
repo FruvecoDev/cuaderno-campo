@@ -52,7 +52,7 @@ class ProductoFitosanitarioBase(BaseModel):
     volumen_agua_min: Optional[float] = 200
     volumen_agua_max: Optional[float] = 600
     plagas_objetivo: Optional[List[str]] = []
-    plazo_seguridad: Optional[int] = None  # días
+    plazo_seguridad: Optional[str] = None  # texto libre: "21 días", "NO PROCEDE", "N.P."
     observaciones: Optional[str] = None
     activo: bool = True
     # Campos MAPA (nueva importación 2026)
@@ -101,7 +101,7 @@ class ProductoFitosanitarioUpdate(BaseModel):
     volumen_agua_min: Optional[float] = None
     volumen_agua_max: Optional[float] = None
     plagas_objetivo: Optional[List[str]] = None
-    plazo_seguridad: Optional[int] = None
+    plazo_seguridad: Optional[str] = None
     observaciones: Optional[str] = None
     activo: Optional[bool] = None
 
