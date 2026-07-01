@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, Search, Filter, Settings, X, Beaker, AlertTriangle, Database, Download, Upload, FileSpreadsheet, FileText, ExternalLink, RefreshCw, CheckCircle, XCircle, Info, Loader2, Shield } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Filter, Settings, X, Beaker, AlertTriangle, Database, Download, Upload, FileSpreadsheet, FileText, ExternalLink, RefreshCw, CheckCircle, XCircle, Info, Loader2, Shield, Eye } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
@@ -1298,12 +1298,24 @@ const Fitosanitarios = () => {
             </p>
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table className="table" data-testid="productos-table">
+          <div style={{ overflowX: 'auto', position: 'relative' }}>
+            <table className="table" data-testid="productos-table" style={{ minWidth: '100%' }}>
               <thead>
                 <tr>
                   {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
-                  <th>Acciones</th>
+                  <th
+                    data-testid="th-acciones"
+                    style={{
+                      position: 'sticky',
+                      right: 0,
+                      background: 'hsl(var(--background))',
+                      boxShadow: '-4px 0 6px -2px rgba(0,0,0,0.08)',
+                      textAlign: 'center',
+                      zIndex: 2,
+                    }}
+                  >
+                    Acciones
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -1325,14 +1337,33 @@ const Fitosanitarios = () => {
                         default: return null;
                       }
                     })}
-                    <td>
-                      <div style={{ display: 'flex', gap: '0.25rem' }}>
+                    <td
+                      data-testid={`td-acciones-${producto._id}`}
+                      style={{
+                        position: 'sticky',
+                        right: 0,
+                        background: 'hsl(var(--background))',
+                        boxShadow: '-4px 0 6px -2px rgba(0,0,0,0.08)',
+                        zIndex: 1,
+                      }}
+                    >
+                      <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'center' }}>
+                        <button
+                          onClick={() => handleEdit(producto)}
+                          className="btn btn-sm"
+                          style={{ backgroundColor: '#e0e7ff', color: '#3730a3' }}
+                          title="Ver detalle del producto"
+                          data-testid={`btn-view-${producto._id}`}
+                        >
+                          <Eye size={14} />
+                        </button>
                         <button
                           onClick={() => handleVerifyProduct(producto._id)}
                           className="btn btn-sm"
                           style={{ backgroundColor: '#dbeafe', color: '#1e40af' }}
                           title="Verificar en MAPA"
                           disabled={verifyingProduct === producto._id}
+                          data-testid={`btn-verify-${producto._id}`}
                         >
                           {verifyingProduct === producto._id ? (
                             <Loader2 size={14} className="animate-spin" />
@@ -1345,6 +1376,7 @@ const Fitosanitarios = () => {
                           onClick={() => handleEdit(producto)}
                           className="btn btn-sm btn-secondary"
                           title="Editar"
+                          data-testid={`btn-edit-${producto._id}`}
                         >
                           <Edit2 size={14} />
                         </PermissionButton>
@@ -1354,6 +1386,7 @@ const Fitosanitarios = () => {
                           className="btn btn-sm"
                           style={{ backgroundColor: 'hsl(var(--destructive))', color: 'white' }}
                           title="Eliminar"
+                          data-testid={`btn-delete-${producto._id}`}
                         >
                           <Trash2 size={14} />
                         </PermissionButton>

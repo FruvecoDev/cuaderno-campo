@@ -1,0 +1,37 @@
+{
+  "summary": "Validated iteration 79 fix for Fitosanitarios list: the 'Acciones' column now stays visible at the right edge of the table thanks to position:sticky; right:0 on both the th (data-testid=th-acciones) and each row's td (data-testid=td-acciones-{id}). All four action buttons per row (Ver/Verify/Edit/Delete) are present. Ver (Eye) opens the edit form correctly. Regression on 'Usos autorizados MAPA' still passes.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Fitosanitarios list (pre-existing)",
+        "issues": [
+          "React hydration warnings persist ('<span> cannot be a child of <select>/<tr>/<tbody>' and '<th>/<td> cannot be a child of <span>'). Caused by visual-editor injecting <span display:contents> wrappers between semantic HTML parents/children. Cosmetic, not introduced by this iteration."
+        ]
+      },
+      {
+        "screen": "Fitosanitarios list (narrow viewport <= 1024px)",
+        "issues": [
+          "At viewport widths where the parent .content area is wider than the visible viewport (page-level horizontal scroll instead of container-level), the sticky th/td stick to the container's right edge — which is off-screen. Not the reported bug (user was on 1920vw) and works correctly at 1920vw, but worth noting for mobile/tablet use."
+        ]
+      }
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Fitosanitarios.js is 1407 lines — still beyond the 700-line guideline. Recommend extracting the productos list <table> (thead/tbody with visibleColumns switch), the Edit form, and the Usos table into their own components. The switch/case inside .map (lines 1324-1339) is a good candidate for a small ProductoRow subcomponent.",
+    "The td-acciones background uses hsl(var(--background)) which matches the page background; on hover/striped rows the sticky cell will visually break the row zebra if any is added later. Consider using 'inherit' or matching the row background so the sticky cell stays consistent when row-level styling is applied.",
+    "Two buttons (btn-view Eye and btn-edit Edit2) call the exact same handler (handleEdit) — the 'Ver' vs 'Editar' UX distinction is only iconographic. If a read-only 'Ver' mode is intended, it should render the form as disabled/read-only; otherwise consider removing one of the two to avoid redundancy."
+  ],
+  "updated_files": [],
+  "success_rate": { "backend": "N/A (skipped)", "frontend": "100%" },
+  "test_credentials": "admin@fruveco.com / admin123",
+  "seed_data_creation": "None. Read-only checks against existing 1970 products.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Fitosanitarios list sticky-right Acciones column is confirmed working at 1920vw. th-acciones computed CSS: position=sticky, right=0px, boxShadow=rgba(0,0,0,0.08) -4px 0px 6px -2px, zIndex=2. Row count in tbody: 1970 with all four action buttons present (btn-view/btn-verify/btn-edit/btn-delete + td-acciones). Ver (Eye) reuses handleEdit and opens 'Editar Producto' inline form. Regression: section-usos-autorizados renders with badge-usos-count=64 and tabla-usos-autorizados present for the first product (METALDEHIDO 3%). Pre-existing hydration warnings from visual-editor persist and are unrelated.",
+  "rca of the issue": "Bug: at 1920vw the last table columns (Estado, Acciones) were cut off outside the visible scroll area because the table overflows its container and the user missed the horizontal scrollbar. Fix implemented in Fitosanitarios.js lines 1301-1394: the container has overflowX:auto + position:relative; the last th and each row's last td use position:sticky; right:0; background: hsl(var(--background)); boxShadow left shadow; zIndex 2/1 respectively. Verified via bounding_box: th x=1637 width=196 right-edge=1833 (< 1920), stays at x=1637 after scrollLeft=247 was applied (sticky). Ver (Eye) button added with the same handleEdit as Editar to give users a 'view' entry point without breaking Editar. All four data-testids (btn-view/btn-verify/btn-edit/btn-delete) present on all 1970 rows."
+}
