@@ -74,8 +74,7 @@ const Contratos = () => {
       setFilters(prev => ({ ...prev, search: q }));
       setShowFilters(true);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const initialFormData = {
     numero_contrato: '', tipo: puedeCompra ? 'Compra' : 'Venta', campana: '2025/26', procedencia: 'Campo',

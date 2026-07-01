@@ -580,5 +580,12 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 
 
 
+### P2: Warnings react-hooks/exhaustive-deps eliminados (2026-02)
+- Eliminados directivas `// eslint-disable-line/next-line react-hooks/exhaustive-deps` obsoletas en `Visitas.js`, `Tratamientos.js`, `Fitosanitarios.js` (3+3+1 comentarios) — la lógica ya no requiere silenciar la regla porque las dependencias son correctas.
+- `Usuarios.js` ya estaba limpio.
+- Contratos.js: mantenidos 2 directivas legítimas para `useEffect` de sólo-al-montar (fetches iniciales + lectura de query-param). Sin ellas, webpack CRA reporta warnings de dep-array (el patrón mount-only es intencional aquí).
+- Verificación: `webpack compiled successfully` sin warnings; `mcp_lint_javascript` limpio en los 4 archivos objetivo.
+
+
 
 

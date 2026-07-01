@@ -92,7 +92,6 @@ const Visitas = () => {
   const [analyzingAll, setAnalyzingAll] = useState(false);
   const [showAnalysisModal, setShowAnalysisModal] = useState(null);
   
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchVisitas(); fetchParcelas(); }, []);
   
   useEffect(() => {
@@ -113,7 +112,6 @@ const Visitas = () => {
   useEffect(() => { localStorage.setItem('visitas_fields_config', JSON.stringify(fieldsConfig)); }, [fieldsConfig]);
   useEffect(() => { localStorage.setItem('visitas_table_config', JSON.stringify(tableConfig)); }, [tableConfig]);
   
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const verParam = searchParams.get('ver');
     const editarParam = searchParams.get('editar');
@@ -125,7 +123,7 @@ const Visitas = () => {
       const visita = visitas.find(v => v._id === editarParam);
       if (visita) { handleEdit(visita); searchParams.delete('editar'); setSearchParams(searchParams); }
     }
-  }, [searchParams, visitas, setSearchParams]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [searchParams, visitas, setSearchParams]);
   
   useEffect(() => {
     if (formData.parcela_id) {

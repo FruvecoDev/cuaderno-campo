@@ -98,7 +98,7 @@ const Fitosanitarios = () => {
 
   useEffect(() => {
     fetchProductos();
-  }, [filters]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [filters]);
 
   const fetchProductos = async () => {
     try {

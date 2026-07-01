@@ -185,11 +185,9 @@ const Tratamientos = () => {
     fetchMaquinaria();
     fetchTecnicosAplicadores();
     fetchStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
   // Soporte legacy: si alguien aterriza en /tratamientos/editar/:id, cargar para editar en el modal
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (location.pathname.includes('/editar/') && urlId) {
       loadTratamientoForEdit(urlId);
@@ -199,7 +197,7 @@ const Tratamientos = () => {
       setActiveTab('general');
       setShowForm(true);
     }
-  }, [location.pathname, urlId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [location.pathname, urlId]);
   
   // Cargar tratamiento para edición
   const loadTratamientoForEdit = async (id) => {
