@@ -341,6 +341,14 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
+### Botones "Marcar todo Sí" / "Marcar todo No" en cuestionario - DONE (2026-07-01)
+- Nuevo panel bulk-mark en la pestaña "Cuestionarios" de Evaluaciones, entre el progress bar y el panel "Añadir pregunta".
+- Botón verde **"Marcar todo Sí"** + botón rojo **"Marcar todo No"** + contador dinámico `Marcar todas las preguntas Sí/No (N):`.
+- **Filtrado**: solo aplica a preguntas de tipo `si_no`. Las preguntas de texto/número/fecha (ej. "Limpios", "Mecanizado") NO se tocan.
+- **Ubicación**: `/app/frontend/src/components/evaluaciones/EvaluacionesForm.js` — IIFE que calcula `siNoItems` con `flatItems.filter(p => p.tipo === 'si_no')` y expone `markAllSiNo(valor)` que itera y llama a `handleRespuestaChange`.
+- data-testids: `bulk-mark-sino`, `bulk-mark-all-yes`, `bulk-mark-all-no`.
+- **Testing**: verificado via Playwright — click "Marcar todo No" → todos los botones Sí/No pasan a rojo, progreso salta a 74/89 (83%). Click "Marcar todo Sí" → invierte a verde manteniendo mismo progreso (74/89) porque las de texto no cambian. Combinado con el fix `?? ''` anterior, el `false` persiste correctamente al guardar.
+
 ### Brújula + barra de escala en mapa satelital del PDF (estilo SIGPAC) - DONE (2026-07-01)
 - **Overlay cartográfico profesional** añadido al PNG del mapa antes de embeberlo en el PDF:
   - **Brújula** (esquina superior derecha): badge circular blanco semitransparente con borde gris, flecha romboidal roja arriba/gris abajo y letra "N" en negrita.

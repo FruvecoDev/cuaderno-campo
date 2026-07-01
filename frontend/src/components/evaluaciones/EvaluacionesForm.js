@@ -336,6 +336,69 @@ const EvaluacionesForm = ({
                   </div>
                 </div>
 
+                {/* Bulk mark Sí/No — acelera la captura en campo cuando la mayoría de respuestas coinciden */}
+                {(() => {
+                  const siNoItems = flatItems.filter(p => p.tipo === 'si_no');
+                  if (siNoItems.length === 0) return null;
+                  const markAllSiNo = (valor) => {
+                    siNoItems.forEach(p => handleRespuestaChange(p.id, valor));
+                  };
+                  return (
+                    <div
+                      data-testid="bulk-mark-sino"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.5rem 0.75rem',
+                        background: 'hsl(var(--muted) / 0.4)',
+                        border: '1px dashed hsl(var(--border))',
+                        borderRadius: '8px',
+                        marginBottom: '0.75rem',
+                        flexWrap: 'wrap'
+                      }}
+                    >
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'hsl(var(--muted-foreground))' }}>
+                        Marcar todas las preguntas Sí/No ({siNoItems.length}):
+                      </span>
+                      <button
+                        type="button"
+                        data-testid="bulk-mark-all-yes"
+                        onClick={() => markAllSiNo(true)}
+                        style={{
+                          padding: '0.35rem 0.9rem',
+                          borderRadius: '6px',
+                          border: '1px solid hsl(142, 76%, 36%)',
+                          background: 'hsl(142, 76%, 36%)',
+                          color: 'white',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Marcar todo Sí
+                      </button>
+                      <button
+                        type="button"
+                        data-testid="bulk-mark-all-no"
+                        onClick={() => markAllSiNo(false)}
+                        style={{
+                          padding: '0.35rem 0.9rem',
+                          borderRadius: '6px',
+                          border: '1px solid hsl(0, 84%, 60%)',
+                          background: 'hsl(0, 84%, 60%)',
+                          color: 'white',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Marcar todo No
+                      </button>
+                    </div>
+                  );
+                })()}
+
                 {/* Global "Añadir pregunta" panel — sin selector de sección */}
                 {(user?.role === 'Admin' || user?.role === 'Manager') && (
                   <div style={{ padding: '0.6rem 0.75rem', background: 'hsl(var(--primary) / 0.05)', border: '1px solid hsl(var(--primary) / 0.2)', borderRadius: '8px', marginBottom: '0.75rem' }}>
