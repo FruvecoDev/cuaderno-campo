@@ -389,6 +389,34 @@ const Visitas = () => {
   
   const handleCancelEdit = () => { setEditingId(null); setShowForm(false); resetForm(); };
   
+  const handleDuplicate = (visita) => {
+    // Duplicar visita: clona objetivo, parcela, cuestionario y observaciones
+    // en un formulario NUEVO (sin editingId → POST). Fecha se resetea a hoy y
+    // numero_visita queda vacío para auto-asignar (max+1 en la parcela).
+    if (!canCreate) { setError('No tienes permisos para crear visitas'); setTimeout(() => setError(null), 5000); return; }
+    setEditingId(null);
+    setFormData({
+      objetivo: visita.objetivo || 'Plagas y Enfermedades',
+      fecha_visita: new Date().toISOString().split('T')[0],
+      fecha_planificada: '',
+      parcela_id: visita.parcela_id || '',
+      observaciones: visita.observaciones || '',
+      numero_visita: ''
+    });
+    if (visita.cuestionario_plagas) {
+      setCuestionarioPlagas({ ...visita.cuestionario_plagas });
+    } else {
+      const initialPlagas = {};
+      PLAGAS_ENFERMEDADES.forEach(p => { initialPlagas[p.key] = 0; });
+      setCuestionarioPlagas(initialPlagas);
+    }
+    // No copiamos fotos: cada visita tiene su propio registro fotográfico.
+    setFotos([]);
+    setUploadError(null);
+    setShowForm(true);
+    notify.success('Visita duplicada. Ajusta los datos y guarda para crear la nueva.');
+  };
+  
   const handleDelete = async (visitaId) => {
     if (!canDelete) { setError('No tienes permisos para eliminar visitas'); setTimeout(() => setError(null), 5000); return; }
     if (!window.confirm('Estas seguro de que quieres eliminar esta visita?')) return;
@@ -469,8 +497,9 @@ const Visitas = () => {
       
       <VisitasTable
         filteredVisitas={paginatedVisitas} loading={loading} hasActiveFilters={hasActiveFilters}
-        tableConfig={tableConfig} canEdit={canEdit} canDelete={canDelete}
+        tableConfig={tableConfig} canEdit={canEdit} canDelete={canDelete} canCreate={canCreate}
         handleEdit={handleEdit} handleDelete={handleDelete} setViewingVisita={setViewingVisita}
+        handleDuplicate={handleDuplicate}
         canBulkDelete={canBulkDelete}
         selectedIds={selectedIds}
         onToggleOne={toggleOne}

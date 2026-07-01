@@ -341,6 +341,19 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
+### Duplicar Visita: botón por fila con auto-clonado de datos - DONE (2026-07-01)
+- **Nueva acción "Duplicar"** en cada fila de la tabla de Visitas (icono `Copy` de lucide entre editar y eliminar).
+- **Flujo**: click Duplicar → abre modal "Nueva Visita" prellenado con:
+  - `objetivo`, `parcela_id`, `observaciones`, `cuestionario_plagas` → **heredados** de la visita origen.
+  - `fecha_visita` → **hoy** (reseteada).
+  - `fecha_planificada`, `numero_visita` → **vacíos** (el backend asigna `numero_visita` como `max+1` en la parcela).
+  - Fotos → **no se copian** (cada visita tiene su propio registro fotográfico).
+  - `editingId = null` → al guardar se hace POST (crea nueva).
+- **Toast informativo** "Visita duplicada. Ajusta los datos y guarda para crear la nueva."
+- **Permisos**: botón solo visible si el usuario tiene `canCreate`.
+- data-testid: `duplicate-visita-{id}`.
+- **Testing via Playwright**: los 10 botones detectados, click en el primero → modal abierto con `fecha_visita = 2026-07-01`, objetivo "Plagas y Enfermedades", observaciones heredadas y toast verde visible. Botón `Crear Visita` (POST) no "Actualizar".
+
 ### Nueva Visita: objetivo predeterminado "Plagas y Enfermedades" - DONE (2026-07-01)
 - Cambiado el valor default del campo `objetivo` en el formulario de Visitas de `'Control Rutinario'` a `'Plagas y Enfermedades'` (uso más frecuente).
 - Aplicado en 3 lugares: `useState({...objetivo: ...})` inicial, `resetForm` (crear nueva), y fallback en `handleEdit` para visitas legacy sin objetivo.

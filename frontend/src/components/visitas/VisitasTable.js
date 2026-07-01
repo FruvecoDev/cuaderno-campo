@@ -1,11 +1,12 @@
 import React from 'react';
-import { Edit2, Trash2, Camera } from 'lucide-react';
+import { Edit2, Trash2, Camera, Copy } from 'lucide-react';
 import { BulkCheckboxHeader, BulkCheckboxCell } from '../BulkActions';
 
 export const VisitasTable = ({
   filteredVisitas, loading, hasActiveFilters,
-  tableConfig, canEdit, canDelete,
+  tableConfig, canEdit, canDelete, canCreate = false,
   handleEdit, handleDelete, setViewingVisita,
+  handleDuplicate,
   canBulkDelete = false,
   selectedIds = new Set(),
   onToggleOne,
@@ -116,6 +117,16 @@ export const VisitasTable = ({
                             data-testid={`edit-visita-${visita._id}`}
                           >
                             <Edit2 size={14} />
+                          </button>
+                        )}
+                        {canCreate && typeof handleDuplicate === 'function' && (
+                          <button
+                            className="btn btn-sm btn-secondary"
+                            onClick={() => handleDuplicate(visita)}
+                            title="Duplicar visita (crea una nueva con los mismos datos)"
+                            data-testid={`duplicate-visita-${visita._id}`}
+                          >
+                            <Copy size={14} />
                           </button>
                         )}
                         {canDelete && (
