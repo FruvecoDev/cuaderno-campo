@@ -341,6 +341,22 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
+### Fitosanitarios MAPA: nuevo modelo con Usos (producto × cultivo × plaga × dosis) - DONE (2026-07-01)
+- **Problema**: un mismo producto fitosanitario tiene decenas o cientos de usos autorizados con dosis distintas según cultivo + plaga. El modelo anterior sólo guardaba dosis única por producto.
+- **Nuevo modelo**:
+  - `fitosanitarios_collection` — 1 doc por producto único (por `numero_registro`). Metadata general: nombre_comercial, denominacion_comun, empresa, tipo, materia_activa, estado, fecha_caducidad, observaciones, `usos_count`.
+  - **Nueva colección `fitosanitarios_usos_collection`** — 1 doc por combinación (producto + cultivo + plaga): `fitosanitario_id`, `numero_registro`, `nombre_comercial`, `cultivo`, `codigo_cultivo`, `plaga`, `codigo_agente`, `dosis_min`, `dosis_max`, `unidad_dosis`, `volumen_agua_min/max`, `volumen_caldo`, `plazo_seguridad`, `bbch`, `aplicaciones`, `intervalo_aplicaciones`, `condicionamiento_especifico`.
+- **Nuevos endpoints**:
+  - `GET /api/fitosanitarios/{id}/usos?cultivo=X&plaga=Y` — devuelve los usos autorizados del producto, filtrable por cultivo y/o plaga.
+  - `GET /api/fitosanitarios/usos/buscar?cultivo=X&plaga=Y&tipo=Fungicida` — devuelve productos únicos autorizados para ese uso, con rango de dosis min/max encontrado (agg pipeline). Útil para calculadora "qué productos puedo usar contra X plaga en Y cultivo".
+- **Import batch** `/app/scripts/import_fitosanitarios_mapa.py`:
+  - Lee el Excel MAPA (60.966 filas) en streaming con `openpyxl read_only`.
+  - Agrupa por `numero_registro` (2.055 productos únicos) y crea usos por fila.
+  - `bulk_write` en chunks de 5.000 → **importación completa en 6.2 segundos**.
+  - Crea índices: `fitosanitario_id`, `numero_registro`, `(cultivo, plaga)`, `nombre_comercial`, `tipo`.
+- **Testing**: `MICROTHIOL SPECIAL DISPERSS` tiene 163 usos autorizados (Acelga/Achicoria/Ajete × Araña roja/Oídios/Ácaros eriófidos × 0.25-0.6%). Búsqueda inversa `?cultivo=Trigo&plaga=Coadyuvante` devuelve 3 productos con rango dosis.
+- **Aumentado límite** de `GET /api/fitosanitarios` de 1000 → 10000 (había 2055 productos y solo se veían los 1000 primeros).
+
 ### Todos los proveedores marcados como tipo "Agricultor" - DONE (2026-07-01)
 - Actualizada la migración masiva: 136 proveedores pasaron de "Materia Prima" (default de importación) a **"Agricultor"** — los 11 restantes ya lo tenían.
 - **Import futuro** (`routes_contratos.py::resolve_proveedor`): default cambiado de `"Materia Prima"` → `"Agricultor"`.

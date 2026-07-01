@@ -15,6 +15,7 @@ router = APIRouter(prefix="/api/fitosanitarios", tags=["fitosanitarios"])
 
 # Collection
 fitosanitarios_collection = db['fitosanitarios']
+fitosanitarios_usos_collection = db['fitosanitarios_usos']
 
 # Models
 class ProductoFitosanitarioBase(BaseModel):
@@ -33,6 +34,35 @@ class ProductoFitosanitarioBase(BaseModel):
     plazo_seguridad: Optional[int] = None  # días
     observaciones: Optional[str] = None
     activo: bool = True
+    # Campos MAPA (nueva importación 2026)
+    estado: Optional[str] = None  # Vigente / Caducado
+    fecha_caducidad: Optional[str] = None
+    usos_count: Optional[int] = 0  # nº de combinaciones cultivo+plaga registradas
+
+
+class FitosanitarioUso(BaseModel):
+    """Uso autorizado de un producto fitosanitario: combinación específica
+    de producto + cultivo + plaga con su dosis y condiciones asociadas.
+    Un mismo producto puede tener decenas o cientos de usos distintos.
+    """
+    fitosanitario_id: str  # ObjectId ref al producto
+    numero_registro: str  # denormalizado para búsquedas rápidas
+    nombre_comercial: Optional[str] = None
+    cultivo: Optional[str] = None
+    codigo_cultivo: Optional[str] = None
+    plaga: Optional[str] = None
+    codigo_agente: Optional[str] = None
+    dosis_min: Optional[float] = None
+    dosis_max: Optional[float] = None
+    unidad_dosis: Optional[str] = None
+    volumen_agua_min: Optional[float] = None
+    volumen_agua_max: Optional[float] = None
+    volumen_caldo: Optional[str] = None
+    plazo_seguridad: Optional[str] = None  # texto libre (NP, "7 días", "NO PROCEDE"…)
+    bbch: Optional[str] = None
+    aplicaciones: Optional[str] = None
+    intervalo_aplicaciones: Optional[str] = None
+    condicionamiento_especifico: Optional[str] = None
 
 class ProductoFitosanitarioCreate(ProductoFitosanitarioBase):
     pass
@@ -84,7 +114,7 @@ async def get_productos(
             {"numero_registro": {"$regex": search, "$options": "i"}}
         ]
     
-    productos = await fitosanitarios_collection.find(query).sort("nombre_comercial", 1).to_list(length=1000)
+    productos = await fitosanitarios_collection.find(query).sort("nombre_comercial", 1).to_list(length=10000)
     
     return {
         "success": True,
@@ -679,6 +709,79 @@ async def get_mapa_search_url(
 # URLs oficiales del MAPA
 MAPA_REGISTRO_URL = "https://www.mapa.gob.es/es/agricultura/temas/sanidad-vegetal/productos-fitosanitarios/registro-productos/"
 MAPA_CONSULTA_URL = "https://www.mapa.gob.es/es/agricultura/temas/sanidad-vegetal/productos-fitosanitarios/registro/productos/conpam.asp"
+
+
+@router.get("/{producto_id}/usos")
+async def get_usos_producto(
+    producto_id: str,
+    cultivo: Optional[str] = None,
+    plaga: Optional[str] = None,
+    current_user: dict = Depends(get_current_user),
+):
+    """Devuelve los usos autorizados de un producto fitosanitario.
+    Un mismo producto puede tener decenas de usos (combinaciones cultivo+plaga
+    con dosis específicas). Puede filtrarse por cultivo/plaga (case-insensitive).
+    """
+    if not ObjectId.is_valid(producto_id):
+        raise HTTPException(status_code=400, detail="ID inválido")
+    query = {"fitosanitario_id": producto_id}
+    if cultivo:
+        query["cultivo"] = {"$regex": cultivo, "$options": "i"}
+    if plaga:
+        query["plaga"] = {"$regex": plaga, "$options": "i"}
+    docs = await fitosanitarios_usos_collection.find(query).sort([("cultivo", 1), ("plaga", 1)]).to_list(length=5000)
+    for d in docs:
+        d["_id"] = str(d["_id"])
+    return {"success": True, "total": len(docs), "usos": docs}
+
+
+@router.get("/usos/buscar")
+async def buscar_por_uso(
+    cultivo: Optional[str] = None,
+    plaga: Optional[str] = None,
+    tipo: Optional[str] = None,
+    limit: int = 100,
+    current_user: dict = Depends(get_current_user),
+):
+    """Devuelve los productos fitosanitarios autorizados para un uso concreto
+    (cultivo + plaga). Devuelve productos únicos (agrupados por numero_registro)
+    con el rango de dosis mínimo/máximo encontrado en sus usos.
+    Útil para la calculadora en Tratamientos: al elegir plaga+cultivo,
+    listar solo los productos autorizados.
+    """
+    query = {}
+    if cultivo:
+        query["cultivo"] = {"$regex": f"^{cultivo}$", "$options": "i"}
+    if plaga:
+        query["plaga"] = {"$regex": plaga, "$options": "i"}
+
+    # Agrupar por numero_registro para no duplicar productos
+    pipeline = [
+        {"$match": query},
+        {"$group": {
+            "_id": "$numero_registro",
+            "fitosanitario_id": {"$first": "$fitosanitario_id"},
+            "nombre_comercial": {"$first": "$nombre_comercial"},
+            "dosis_min": {"$min": "$dosis_min"},
+            "dosis_max": {"$max": "$dosis_max"},
+            "unidad_dosis": {"$first": "$unidad_dosis"},
+            "plaga_matches": {"$addToSet": "$plaga"},
+            "cultivo_matches": {"$addToSet": "$cultivo"},
+        }},
+        {"$limit": limit},
+    ]
+    resultados = await fitosanitarios_usos_collection.aggregate(pipeline).to_list(length=limit)
+
+    # Enriquecer con tipo si se pide
+    if tipo:
+        registros = [r["_id"] for r in resultados]
+        productos = await fitosanitarios_collection.find({"numero_registro": {"$in": registros}, "tipo": {"$regex": tipo, "$options": "i"}}).to_list(length=len(registros))
+        tipos_map = {p["numero_registro"]: p.get("tipo") for p in productos}
+        resultados = [r for r in resultados if r["_id"] in tipos_map]
+        for r in resultados:
+            r["tipo"] = tipos_map.get(r["_id"])
+
+    return {"success": True, "total": len(resultados), "productos": resultados}
 
 
 @router.post("/import-mapa-excel")
