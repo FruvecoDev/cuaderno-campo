@@ -341,6 +341,18 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
+### Fix: Fitosanitarios lista + detalle sin dosis/vol.agua/plazo/usos - DONE (2026-07-01)
+- **Bug reportado**: tras importar 2055 productos + 60965 usos MAPA, la lista de Fitosanitarios mostraba columnas Dosis Mín/Máx, Vol. Agua y Plazo Seg. vacías. El modal de edición no mostraba las plagas × cultivos × dosis del producto.
+- **Root cause**: la nueva arquitectura almacena dosis/vol.agua/plazo a nivel de USO (colección `fitosanitarios_usos`), no del producto raíz. La lista y el detalle no consultaban esa colección.
+- **Fixes**:
+  - **`GET /api/fitosanitarios`** ahora hace `$aggregate` sobre `fitosanitarios_usos` para enriquecer cada producto con `min(dosis_min)`, `max(dosis_max)`, `unidad_dosis`, `min/max(volumen_agua)`, `plazo_seguridad` y `usos_count`.
+  - **`GET /api/fitosanitarios/{id}`** incluye array `usos` (hasta 500 elementos) + `usos_count`.
+  - **Modal edit** (`Fitosanitarios.js`): nueva sección "Usos autorizados MAPA" con badge de count y tabla de 7 columnas (Cultivo, Plaga/Agente, Dosis, Vol. Agua, Plazo Seg., BBCH, Aplicaciones). Se carga en paralelo al abrir edit.
+- **Follow-up fixes** (iteración 78):
+  - Columna "Plazo Seg." concatenaba "d" en textos → "NO PROCEDEd". Ahora solo añade "d" si el valor es número.
+  - Input plazo_seguridad `type=number` perdía "NO PROCEDE" → cambiado a `type=text`, placeholder "Ej: 21 días, NO PROCEDE, N.P.", Pydantic `Optional[int]` → `Optional[str]`.
+- **Testing agent** (iteration_77 y 78): **PASS 100% backend + 100% frontend**. MICROTHIOL SPECIAL DISPERSS muestra 163 usos con dosis 0.25-1.25 %, vol.agua 500-1600 L/ha, plazo "NO PROCEDE". Test files creados: `/app/backend/tests/test_fitosanitarios_usos_mapa.py` y `test_fitosanitarios_plazo_string.py`.
+
 ### Calculadora Fitosanitaria: búsqueda inteligente por cultivo + plaga (MAPA) - DONE (2026-07-01)
 - **Feature**: en la Calculadora de Fitosanitarios de Tratamientos, el técnico ahora puede introducir cultivo + plaga y el selector muestra **solo los productos autorizados oficialmente por el MAPA** con la dosis exacta.
 - **Frontend** (`CalculadoraFitosanitarios.js`):
