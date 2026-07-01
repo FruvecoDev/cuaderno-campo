@@ -83,6 +83,18 @@ const Parcelas = () => {
     fetchParcelas();
   }, [currentPage, pageSize]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Cuando el catálogo maestro de cultivos cambia (carga inicial o refresh),
+  // refresca la lista de opciones del filtro para que muestre TODOS los
+  // cultivos, no sólo los que ya tienen parcelas.
+  useEffect(() => {
+    if (!cultivos || cultivos.length === 0) return;
+    setFilterOptions(prev => {
+      const cultivosFromCatalog = cultivos.map(c => c.nombre).filter(Boolean);
+      const cultivosUnicos = [...new Set([...cultivosFromCatalog, ...(prev.cultivos || [])])].sort();
+      return { ...prev, cultivos: cultivosUnicos };
+    });
+  }, [cultivos]);
+
   const fetchProvincias = async () => {
     try {
       const data = await api.get('/api/sigpac/provincias');
@@ -100,7 +112,9 @@ const Parcelas = () => {
   const fetchCultivos = async () => {
     try {
       const data = await api.get('/api/cultivos');
-      setCultivos(data.cultivos || []);
+      // El endpoint devuelve un array directamente, no { cultivos: [...] }
+      const list = Array.isArray(data) ? data : (data.cultivos || []);
+      setCultivos(list);
     } catch (err) { console.error('[Parcelas.js]', err); }
   };
 
@@ -217,12 +231,18 @@ const Parcelas = () => {
       setParcelas(data.parcelas || []);
       setTotalItems(data.total || (data.parcelas || []).length);
       const p = data.parcelas || [];
-      setFilterOptions({
-        proveedores: [...new Set(p.map(x => x.proveedor).filter(Boolean))],
-        cultivos: [...new Set(p.map(x => x.cultivo).filter(Boolean))],
-        campanas: [...new Set(p.map(x => x.campana).filter(Boolean))],
-        parcelas: [...new Set(p.map(x => x.codigo_plantacion).filter(Boolean))]
-      });
+      // NOTA IMPORTANTE: no leemos `cultivos` (catálogo maestro) aquí porque
+      // el closure de esta función puede ser stale al montar (todavía []).
+      // El useEffect [cultivos] se encarga de mezclar el catálogo con lo que
+      // haya en `prev.cultivos`. Aquí sólo AÑADIMOS lo que sale de las parcelas
+      // sin borrar lo que ya haya en prev.
+      const cultivosFromParcelas = p.map(x => x.cultivo).filter(Boolean);
+      setFilterOptions(prev => ({
+        proveedores: [...new Set([...(prev.proveedores || []), ...p.map(x => x.proveedor).filter(Boolean)])].sort(),
+        cultivos: [...new Set([...(prev.cultivos || []), ...cultivosFromParcelas])].sort(),
+        campanas: [...new Set([...(prev.campanas || []), ...p.map(x => x.campana).filter(Boolean)])].sort(),
+        parcelas: [...new Set([...(prev.parcelas || []), ...p.map(x => x.codigo_plantacion).filter(Boolean)])].sort(),
+      }));
     } catch (err) { console.error('[Parcelas.js]', err); } finally { setLoading(false); }
   };
 
