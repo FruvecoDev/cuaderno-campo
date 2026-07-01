@@ -784,6 +784,18 @@ async def generate_evaluacion_pdf(
     if parcela_id and ObjectId.is_valid(parcela_id):
         parcela_data = await parcelas_collection.find_one({"_id": ObjectId(parcela_id)})
     
+    # Fallback robusto: si la parcela referenciada por _id ya NO existe (fue
+    # borrada y recreada, restaurada tras backup con distinto ObjectId, etc.)
+    # intentamos localizarla por `codigo_plantacion` (que la evaluación guardó
+    # como snapshot). Si la encontramos, reasociamos el nuevo _id — así el
+    # PDF recupera automáticamente sus visitas y tratamientos.
+    if not parcela_data:
+        codigo_plant = (evaluacion.get("codigo_plantacion") or "").strip()
+        if codigo_plant:
+            parcela_data = await parcelas_collection.find_one({"codigo_plantacion": codigo_plant})
+            if parcela_data:
+                parcela_id = str(parcela_data["_id"])
+    
     # Resolver Variedad en vivo desde el catálogo de Cultivos cuando la parcela
     # tiene `variedad` vacía pero el cultivo asociado tiene exactamente una
     # variedad en su catálogo (replica la lógica del frontend ParcelasForm /
@@ -811,17 +823,41 @@ async def generate_evaluacion_pdf(
     
     # Obtener visitas de la parcela (ordenadas por número de visita ASC,
     # con fallback a fecha_visita cuando una visita antigua no tenga número).
+    #
+    # Fallback robusto: si NO encontramos visitas por `parcela_id` (por
+    # ejemplo, porque la parcela fue borrada y recreada con otro ObjectId,
+    # o los datos vienen de un import previo con IDs distintos), buscamos
+    # por `codigo_plantacion` — que sí es un identificador de negocio
+    # estable que compartimos entre evaluación, parcela y visita.
     visitas = []
+    codigo_plant_lookup = (
+        (parcela_data or {}).get("codigo_plantacion")
+        or evaluacion.get("codigo_plantacion")
+        or ""
+    ).strip()
     if parcela_id:
         visitas = await visitas_collection.find({"parcela_id": parcela_id}).sort([
             ("numero_visita", 1),
             ("fecha_visita", 1),
         ]).to_list(100)
+    if not visitas and codigo_plant_lookup:
+        visitas = await visitas_collection.find({"codigo_plantacion": codigo_plant_lookup}).sort([
+            ("numero_visita", 1),
+            ("fecha_visita", 1),
+        ]).to_list(100)
     
-    # Obtener tratamientos de la parcela (ordenados de más antiguo a más nuevo)
+    # Obtener tratamientos de la parcela (ordenados de más antiguo a más nuevo).
+    # Mismo fallback por `codigo_plantacion` que en visitas.
     tratamientos = []
     if parcela_id:
         tratamientos = await tratamientos_collection.find({"parcelas_ids": parcela_id}).sort("fecha_tratamiento", 1).to_list(100)
+    if not tratamientos and codigo_plant_lookup:
+        tratamientos = await tratamientos_collection.find({
+            "$or": [
+                {"codigo_plantacion": codigo_plant_lookup},
+                {"parcelas_codigos": codigo_plant_lookup},
+            ]
+        }).sort("fecha_tratamiento", 1).to_list(100)
     
     # Para cada tratamiento, obtener los datos completos del aplicador y la máquina
     tratamientos_enriquecidos = []
