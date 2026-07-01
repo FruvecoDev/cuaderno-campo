@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import PaginationFooter, { usePagination } from '../components/PaginationFooter';
 import { Plus, Edit2, Trash2, Search, Filter, Settings, X, Beaker, AlertTriangle, Database, Download, Upload, FileSpreadsheet, FileText, ExternalLink, RefreshCw, CheckCircle, XCircle, Info, Loader2, Shield, Eye } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
@@ -39,8 +40,6 @@ const Fitosanitarios = () => {
   const { t } = useTranslation();
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState(null);
@@ -64,6 +63,12 @@ const Fitosanitarios = () => {
   const [verificationResult, setVerificationResult] = useState(null);
   const [bulkVerifying, setBulkVerifying] = useState(false);
   const [bulkVerifyResult, setBulkVerifyResult] = useState(null);
+
+  // Pagination (cliente) reutilizando el hook estándar
+  const {
+    page, pageSize, totalPages, totalItems, pageStart, pageEnd,
+    paginatedItems: paginatedProductos, setPage, setPageSize,
+  } = usePagination(productos, 25);
 
   // Filters
   const [filters, setFilters] = useState({
@@ -105,7 +110,7 @@ const Fitosanitarios = () => {
 
       const data = await api.get(`/api/fitosanitarios?${params}`);
       setProductos(data.productos || []);
-      setCurrentPage(1); // reset a página 1 al recargar (filtros o import)
+      setPage(1); // reset a página 1 al recargar (filtros o import)
     } catch (error) {
 
       const errorMsg = handlePermissionError(error, 'ver los productos fitosanitarios');
@@ -1290,49 +1295,12 @@ const Fitosanitarios = () => {
       {/* Table */}
       <div className="card">
         <h2 className="card-title">Lista de Productos ({productos.length})</h2>
-        {/* Paginación cliente: productos ya vienen filtrados desde /api/fitosanitarios */}
-        {(() => {
-          if (productos.length === 0) return null;
-          const totalPages = Math.max(1, Math.ceil(productos.length / pageSize));
-          const safePage = Math.min(currentPage, totalPages);
-          if (safePage !== currentPage) setTimeout(() => setCurrentPage(safePage), 0);
-          const from = (safePage - 1) * pageSize + 1;
-          const to = Math.min(safePage * pageSize, productos.length);
-          return (
-            <div
-              data-testid="pagination-top"
-              style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', padding: '0.5rem 0 0.75rem', fontSize: '0.85rem' }}
-            >
-              <div style={{ color: 'hsl(var(--muted-foreground))' }} data-testid="pagination-info">
-                Mostrando <b>{from}</b> - <b>{to}</b> de <b>{productos.length}</b>
-              </div>
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <label style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
-                  Por página:
-                  <select
-                    className="form-select"
-                    value={pageSize}
-                    onChange={(e) => { setPageSize(parseInt(e.target.value, 10)); setCurrentPage(1); }}
-                    style={{ width: 'auto', padding: '0.25rem 0.5rem' }}
-                    data-testid="pagination-page-size"
-                  >
-                    <option value={25}>25</option>
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
-                    <option value={200}>200</option>
-                  </select>
-                </label>
-                <button className="btn btn-sm btn-secondary" onClick={() => setCurrentPage(1)} disabled={safePage === 1} data-testid="pagination-first">« Primera</button>
-                <button className="btn btn-sm btn-secondary" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={safePage === 1} data-testid="pagination-prev">‹ Anterior</button>
-                <span data-testid="pagination-current" style={{ padding: '0.25rem 0.75rem', border: '1px solid hsl(var(--border))', borderRadius: '6px', background: 'hsl(var(--muted))', minWidth: '80px', textAlign: 'center' }}>
-                  {safePage} / {totalPages}
-                </span>
-                <button className="btn btn-sm btn-secondary" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={safePage === totalPages} data-testid="pagination-next">Siguiente ›</button>
-                <button className="btn btn-sm btn-secondary" onClick={() => setCurrentPage(totalPages)} disabled={safePage === totalPages} data-testid="pagination-last">Última »</button>
-              </div>
-            </div>
-          );
-        })()}
+        <PaginationFooter
+          totalItems={totalItems} page={page} pageSize={pageSize}
+          totalPages={totalPages} pageStart={pageStart} pageEnd={pageEnd}
+          onPageChange={setPage} onPageSizeChange={setPageSize}
+          itemLabel="productos" testIdSuffix="fitosanitarios"
+        />
         {loading ? (
           <p>Cargando productos...</p>
         ) : productos.length === 0 ? (
@@ -1365,7 +1333,7 @@ const Fitosanitarios = () => {
                 </tr>
               </thead>
               <tbody>
-                {productos.slice((currentPage - 1) * pageSize, currentPage * pageSize).map(producto => (
+                {paginatedProductos.map(producto => (
                   <tr key={producto._id}>
                     {visibleColumns.map(col => {
                       switch (col.id) {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
-import { Plus, Settings, Search, X, FileText, Eye, Trash2, Edit2, Download, Upload, Users, CreditCard, Package, Truck, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { Plus, Settings, Search, X, FileText, Eye, Trash2, Edit2, Download, Upload, Users, CreditCard, Package, Truck } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
@@ -10,6 +10,7 @@ import ContratoTable from '../components/contratos/ContratoTable';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
 import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
+import PaginationFooter, { usePagination } from '../components/PaginationFooter';
 import '../App.css';
 import { notify } from '../lib/notify';
 
@@ -162,13 +163,10 @@ const Contratos = () => {
   }, [contratos, filters]);
 
   // Bulk delete (seleccion multiple sobre la pagina visible)
-  const [pageSize, setPageSize] = useState(25);
-  const [page, setPage] = useState(1);
-  const totalPages = Math.max(1, Math.ceil(filteredContratos.length / pageSize));
-  useEffect(() => { if (page > totalPages) setPage(1); }, [totalPages, page]);
-  const pageStart = (page - 1) * pageSize;
-  const pageEnd = Math.min(pageStart + pageSize, filteredContratos.length);
-  const paginatedContratos = useMemo(() => filteredContratos.slice(pageStart, pageEnd), [filteredContratos, pageStart, pageEnd]);
+  const {
+    page, pageSize, totalPages, totalItems, pageStart, pageEnd,
+    paginatedItems: paginatedContratos, setPage, setPageSize,
+  } = usePagination(filteredContratos, 25);
 
   const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(paginatedContratos);
   const [bulkDeleting, setBulkDeleting] = useState(false);
@@ -605,41 +603,12 @@ const Contratos = () => {
             />
 
             {/* Pagination footer */}
-            {filteredContratos.length > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.25rem', marginTop: '0.75rem', borderTop: '1px solid hsl(var(--border))', flexWrap: 'wrap', gap: '0.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', flexWrap: 'wrap' }}>
-                  <span>Mostrando <b>{pageStart + 1}-{pageEnd}</b> de <b>{filteredContratos.length}</b></span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    Filas:
-                    <select
-                      value={pageSize}
-                      onChange={(e) => { setPageSize(parseInt(e.target.value, 10)); setPage(1); }}
-                      data-testid="select-page-size-contratos"
-                      style={{ padding: '0.2rem 0.35rem', borderRadius: '6px', border: '1px solid hsl(var(--border))', background: 'white', fontSize: '0.8rem', cursor: 'pointer' }}
-                    >
-                      {[10, 25, 50, 100, 200].map(n => <option key={n} value={n}>{n}</option>)}
-                    </select>
-                  </span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <button type="button" className="btn btn-sm btn-secondary" onClick={() => setPage(1)} disabled={page === 1} title="Primera" data-testid="pag-first-contratos">
-                    <ChevronsLeft size={14} />
-                  </button>
-                  <button type="button" className="btn btn-sm btn-secondary" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} title="Anterior" data-testid="pag-prev-contratos">
-                    <ChevronLeft size={14} />
-                  </button>
-                  <span style={{ fontSize: '0.8rem', padding: '0 0.5rem', whiteSpace: 'nowrap' }}>
-                    Página <b>{page}</b> / {totalPages}
-                  </span>
-                  <button type="button" className="btn btn-sm btn-secondary" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} title="Siguiente" data-testid="pag-next-contratos">
-                    <ChevronRight size={14} />
-                  </button>
-                  <button type="button" className="btn btn-sm btn-secondary" onClick={() => setPage(totalPages)} disabled={page === totalPages} title="Última" data-testid="pag-last-contratos">
-                    <ChevronsRight size={14} />
-                  </button>
-                </div>
-              </div>
-            )}
+            <PaginationFooter
+              totalItems={totalItems} page={page} pageSize={pageSize}
+              totalPages={totalPages} pageStart={pageStart} pageEnd={pageEnd}
+              onPageChange={setPage} onPageSizeChange={setPageSize}
+              itemLabel="contratos" testIdSuffix="contratos"
+            />
           </>
         )}
       </div>
