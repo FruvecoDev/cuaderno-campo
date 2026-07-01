@@ -1453,6 +1453,55 @@ async def generate_evaluacion_pdf(
                 sm.add_marker(CircleMarker((center_lng, center_lat), '#1565C0', 14))
                 sm.add_marker(CircleMarker((center_lng, center_lat), '#FFFFFF', 8))
                 img = sm.render()
+                # === Overlay estilo SIGPAC: brújula N↑ y barra de escala ===
+                try:
+                    from PIL import ImageDraw, ImageFont
+                    import math as _math
+                    draw = ImageDraw.Draw(img, 'RGBA')
+                    try:
+                        font_bold = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", 16)
+                        font_scale = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", 12)
+                    except Exception:
+                        font_bold = ImageFont.load_default()
+                        font_scale = ImageFont.load_default()
+                    W, H = img.size
+
+                    # --- Brújula (esquina superior derecha) ---
+                    cx, cy, r = W - 45, 45, 26
+                    # Halo blanco semitransparente + círculo blanco con borde
+                    draw.ellipse((cx-r-2, cy-r-2, cx+r+2, cy+r+2), fill=(255, 255, 255, 220), outline=(60, 60, 60, 255), width=2)
+                    # Flecha norte (roja arriba, gris abajo) — polígono romboidal
+                    draw.polygon([(cx, cy-r+6), (cx+7, cy+2), (cx, cy-2), (cx-7, cy+2)], fill=(198, 40, 40, 255))
+                    draw.polygon([(cx, cy+r-6), (cx+7, cy-2), (cx, cy+2), (cx-7, cy-2)], fill=(90, 90, 90, 255))
+                    # Etiqueta N en negrita encima
+                    draw.text((cx-5, cy-r-2), "N", fill=(20, 20, 20, 255), font=font_bold)
+
+                    # --- Barra de escala (esquina inferior izquierda) ---
+                    # metros/pixel (Web Mercator): 156543.03392 * cos(lat) / 2^zoom
+                    lat_rad = _math.radians(center_lat)
+                    mpp = 156543.03392 * _math.cos(lat_rad) / (2 ** sm.zoom)
+                    # Elegir una distancia "bonita" ≈ 150 px
+                    target_px = 150
+                    target_m = target_px * mpp
+                    nice_values_m = [50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000]
+                    scale_m = min(nice_values_m, key=lambda v: abs(v - target_m))
+                    scale_px = int(round(scale_m / mpp))
+                    label = f"{scale_m/1000:.1f} km" if scale_m >= 1000 else f"{scale_m} m"
+
+                    bx, by = 20, H - 40
+                    bw, bh = scale_px, 10
+                    # Fondo blanco semitransparente
+                    draw.rectangle((bx-6, by-22, bx+bw+6, by+bh+6), fill=(255, 255, 255, 220), outline=(60, 60, 60, 255), width=1)
+                    # Barra bicolor: mitad blanca / mitad negra
+                    half = bw // 2
+                    draw.rectangle((bx, by, bx+half, by+bh), fill=(255, 255, 255, 255), outline=(20, 20, 20, 255), width=1)
+                    draw.rectangle((bx+half, by, bx+bw, by+bh), fill=(20, 20, 20, 255), outline=(20, 20, 20, 255), width=1)
+                    # Etiquetas: 0 · mitad · total
+                    draw.text((bx-3, by-16), "0", fill=(20, 20, 20, 255), font=font_scale)
+                    draw.text((bx+bw-len(label)*6, by-16), label, fill=(20, 20, 20, 255), font=font_scale)
+                except Exception as _ov_err:
+                    print(f"[PDF] map overlay (compass/scale) failed: {_ov_err}")
+
                 out_dir = "/app/uploads/evaluaciones/pdf_maps"
                 os.makedirs(out_dir, exist_ok=True)
                 out_path = os.path.join(out_dir, f"map_{_uuid.uuid4().hex}.png")

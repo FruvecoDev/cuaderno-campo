@@ -341,6 +341,15 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
+### Brújula + barra de escala en mapa satelital del PDF (estilo SIGPAC) - DONE (2026-07-01)
+- **Overlay cartográfico profesional** añadido al PNG del mapa antes de embeberlo en el PDF:
+  - **Brújula** (esquina superior derecha): badge circular blanco semitransparente con borde gris, flecha romboidal roja arriba/gris abajo y letra "N" en negrita.
+  - **Barra de escala** (esquina inferior izquierda): barra bicolor negra/blanca con etiquetas "0" y distancia auto-calculada. Fondo blanco semitransparente para legibilidad.
+- **Cálculo de escala**: usa la fórmula Web Mercator `mpp = 156543.03392 · cos(lat) / 2^zoom` con el `sm.zoom` elegido por `staticmap` tras el render y la latitud del centro del polígono. Se elige la distancia "bonita" más cercana a 150 px entre {50, 100, 200, 500 m, 1, 2, 5, 10, 20, 50 km}.
+- **Fuente**: `LiberationSans-Bold.ttf` (fallback a `ImageFont.load_default()` si no está disponible).
+- **Implementación**: bloque try/except después de `sm.render()` y antes de `img.save()` en `routes_evaluaciones.py`. Si el overlay falla, se guarda el mapa sin decoraciones (el resto del PDF sigue funcionando).
+- **Testing**: verificado con `analyze_file_tool` sobre el PNG generado → los tres elementos (polígono, brújula, escala) presentes y legibles. Confidence 100%. PDF end-to-end 1.2 MB, HTTP 200.
+
 ### Cleanup automático de mapas satelitales del PDF - DONE (2026-07-01)
 - **Problema**: cada exportación de Cuaderno de Campo PDF generaba un PNG único (~650 KB) en `/app/uploads/evaluaciones/pdf_maps/map_<uuid>.png` que nunca se borraba → disco crecería sin control.
 - **Fix en dos capas**:
