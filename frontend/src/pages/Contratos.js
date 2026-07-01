@@ -106,7 +106,7 @@ const Contratos = () => {
   const fetchClientes = async () => { try { const data = await api.get('/api/clientes'); setClientes(data.clientes || []); } catch (error) { console.error('[Contratos.js]', error); } };
   const fetchCultivos = async () => { try { const data = await api.get('/api/cultivos'); setCultivos(data.cultivos || []); } catch (error) { console.error('[Contratos.js]', error); } };
   const fetchContratos = async () => {
-    try { setLoading(true); const data = await api.get('/api/contratos'); setContratos(data.contratos || []); }
+    try { setLoading(true); const data = await api.get('/api/contratos?limit=10000'); setContratos(data.contratos || []); }
     catch (error) { setError(api.getErrorMessage(error) || t('messages.errorLoading')); }
     finally { setLoading(false); }
   };
