@@ -248,13 +248,15 @@ const Parcelas = () => {
 
   const fetchContratos = async () => {
     try {
-      const data = await api.get('/api/contratos');
+      // Backend paginate por defecto a 100. Para poblar los filtros necesitamos
+      // TODOS los contratos activos (proveedores, cultivos, campañas).
+      const data = await api.get('/api/contratos?limit=10000');
       const c = data.contratos || [];
       setContratos(c);
       setContratoFilterOptions({
-        proveedores: [...new Set(c.map(x => x.proveedor).filter(Boolean))],
-        cultivos: [...new Set(c.map(x => x.cultivo).filter(Boolean))],
-        campanas: [...new Set(c.map(x => x.campana).filter(Boolean))]
+        proveedores: [...new Set(c.map(x => x.proveedor).filter(Boolean))].sort(),
+        cultivos: [...new Set(c.map(x => x.cultivo).filter(Boolean))].sort(),
+        campanas: [...new Set(c.map(x => x.campana).filter(Boolean))].sort()
       });
     } catch (err) { console.error('[Parcelas.js]', err); }
   };
