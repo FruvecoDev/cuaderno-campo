@@ -341,6 +341,19 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
+### Tratamientos: campos "Nº Registro Producto" y "Plaga a Controlar" - DONE (2026-07-01)
+- **Nuevos campos añadidos** al modelo `TratamientoCreate`:
+  - `producto_fitosanitario_num_registro: Optional[str]` — Nº registro oficial del producto (auto-fill desde catálogo de fitosanitarios).
+  - `plaga_a_controlar: Optional[str]` — plaga/enfermedad objetivo de la aplicación (texto libre).
+- **Frontend** (`Tratamientos.js` tab "Producto y Dosis"):
+  - Inputs editables en `grid-2` justo debajo del panel de la calculadora.
+  - Nº Registro se **autorellena** al aplicar producto desde `CalculadoraFitosanitarios` (que ahora emite `producto_fitosanitario_num_registro: selectedProducto?.numero_registro`).
+  - También se muestra el Nº Registro en la card verde "Producto Fitosanitario Seleccionado" (`data-testid="producto-num-registro"`).
+  - Placeholders informativos: "ES-00123" y "Pulgón, Mildiu, Botrytis...".
+  - data-testids: `input-num-registro`, `input-plaga-controlar`.
+- **PDF Cuaderno de Campo** (`routes_evaluaciones.py::generate_evaluacion_pdf`): añadidos 2 campos nuevos en la tabla "DATOS DEL TRATAMIENTO" al final del bloque existente. Muestran "—" cuando están vacíos.
+- **Testing**: round-trip end-to-end via curl + Playwright screenshot. Backend PUT persiste ambos campos, GET los devuelve, UI de edit los muestra rellenos (Nº=ES-12345, Plaga="Pulgón (Aphis fabae)") y el PDF los imprime correctamente en la página del tratamiento APHOX.
+
 ### Fix: contador de parcelas seleccionadas en Tratamientos ignora huérfanas - DONE (2026-07-01)
 - **Bug reportado**: al seleccionar 1 parcela real en el editor de Tratamientos, el contador mostraba "2 parcela(s) seleccionada(s)".
 - **Root cause**: los tratamientos ORTIVA y BISMARK tenían `parcelas_ids = ['6a3b7f57d9e369edbbc3e5b7', '6a3e90f77b8cf2eb0d697bc1']` donde el primer ID apunta a una parcela borrada (huérfano). El checkbox no se renderizaba (no existe la parcela) pero el contador `selectedParcelas.length` sí lo incluía → discrepancia 1 checkbox / 2 en contador.

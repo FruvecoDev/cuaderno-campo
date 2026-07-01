@@ -141,6 +141,8 @@ class TratamientoCreate(BaseModel):
     producto_fitosanitario_nombre: Optional[str] = None  # Nombre del producto (denormalizado)
     producto_fitosanitario_dosis: Optional[float] = None  # Dosis aplicada
     producto_fitosanitario_unidad: Optional[str] = None  # Unidad de dosis
+    producto_fitosanitario_num_registro: Optional[str] = None  # Nº registro oficial del producto (autofill desde fitosanitario)
+    plaga_a_controlar: Optional[str] = None  # Plaga/enfermedad objetivo del tratamiento (texto libre)
     
     # Nuevos campos para Aplicador y Máquina
     aplicador_nombre: Optional[str] = None  # Nombre del aplicador (texto libre)

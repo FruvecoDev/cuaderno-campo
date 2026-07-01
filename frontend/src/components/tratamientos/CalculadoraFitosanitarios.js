@@ -106,7 +106,8 @@ const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
         producto_fitosanitario_dosis: parseFloat(calcData.dosisProducto) || null,
         producto_fitosanitario_unidad: calcData.unidadDosis || null,
         producto_materia_activa: selectedProducto?.materia_activa || null,
-        producto_plazo_seguridad: selectedProducto?.plazo_seguridad || null
+        producto_plazo_seguridad: selectedProducto?.plazo_seguridad || null,
+        producto_fitosanitario_num_registro: selectedProducto?.numero_registro || null
       });
       setShowCalculator(false);
     }

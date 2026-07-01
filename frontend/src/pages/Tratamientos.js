@@ -174,7 +174,9 @@ const Tratamientos = () => {
     producto_fitosanitario_dosis: '',
     producto_fitosanitario_unidad: '',
     producto_materia_activa: '',
-    producto_plazo_seguridad: ''
+    producto_plazo_seguridad: '',
+    producto_fitosanitario_num_registro: '',
+    plaga_a_controlar: ''
   });
   
   useEffect(() => {
@@ -474,7 +476,9 @@ const Tratamientos = () => {
       producto_fitosanitario_id: formData.producto_fitosanitario_id || null,
       producto_fitosanitario_nombre: formData.producto_fitosanitario_nombre || null,
       producto_fitosanitario_dosis: parseFloat(formData.producto_fitosanitario_dosis) || null,
-      producto_fitosanitario_unidad: formData.producto_fitosanitario_unidad || null
+      producto_fitosanitario_unidad: formData.producto_fitosanitario_unidad || null,
+      producto_fitosanitario_num_registro: formData.producto_fitosanitario_num_registro || null,
+      plaga_a_controlar: formData.plaga_a_controlar || null
     };
     
     // Si estamos offline y es una creación nueva, guardar localmente
@@ -571,7 +575,9 @@ const Tratamientos = () => {
       producto_fitosanitario_dosis: tratamiento.producto_fitosanitario_dosis || '',
       producto_fitosanitario_unidad: tratamiento.producto_fitosanitario_unidad || '',
       producto_materia_activa: tratamiento.producto_materia_activa || '',
-      producto_plazo_seguridad: tratamiento.producto_plazo_seguridad || ''
+      producto_plazo_seguridad: tratamiento.producto_plazo_seguridad || '',
+      producto_fitosanitario_num_registro: tratamiento.producto_fitosanitario_num_registro || '',
+      plaga_a_controlar: tratamiento.plaga_a_controlar || ''
     });
     setSelectedParcelas(tratamiento.parcelas_ids || []);
     setActiveTab('general');
@@ -605,7 +611,9 @@ const Tratamientos = () => {
       producto_fitosanitario_dosis: '',
       producto_fitosanitario_unidad: 'L/ha',
       producto_materia_activa: '',
-      producto_plazo_seguridad: ''
+      producto_plazo_seguridad: '',
+      producto_fitosanitario_num_registro: '',
+      plaga_a_controlar: ''
     });
     setSelectedParcelas([]);
     setSelectedParcelasInfo(null);
@@ -1171,7 +1179,8 @@ const Tratamientos = () => {
                   producto_fitosanitario_dosis: values.producto_fitosanitario_dosis || prev.producto_fitosanitario_dosis,
                   producto_fitosanitario_unidad: values.producto_fitosanitario_unidad || prev.producto_fitosanitario_unidad,
                   producto_materia_activa: values.producto_materia_activa || prev.producto_materia_activa,
-                  producto_plazo_seguridad: values.producto_plazo_seguridad || prev.producto_plazo_seguridad
+                  producto_plazo_seguridad: values.producto_plazo_seguridad || prev.producto_plazo_seguridad,
+                  producto_fitosanitario_num_registro: values.producto_fitosanitario_num_registro || prev.producto_fitosanitario_num_registro
                 }));
               }}
             />
@@ -1198,6 +1207,9 @@ const Tratamientos = () => {
                   {formData.producto_plazo_seguridad && (
                     <div><strong>Plazo Seguridad:</strong> {formData.producto_plazo_seguridad} días</div>
                   )}
+                  {formData.producto_fitosanitario_num_registro && (
+                    <div data-testid="producto-num-registro"><strong>Nº Registro:</strong> {formData.producto_fitosanitario_num_registro}</div>
+                  )}
                 </div>
                 <button 
                   type="button"
@@ -1209,7 +1221,8 @@ const Tratamientos = () => {
                     producto_fitosanitario_dosis: '',
                     producto_fitosanitario_unidad: '',
                     producto_materia_activa: '',
-                    producto_plazo_seguridad: ''
+                    producto_plazo_seguridad: '',
+                    producto_fitosanitario_num_registro: ''
                   }))}
                   style={{ fontSize: '0.75rem' }}
                 >
@@ -1217,6 +1230,38 @@ const Tratamientos = () => {
                 </button>
               </div>
             )}
+            
+            {/* Nº Registro (editable, auto-fill desde fitosanitario) y Plaga a controlar */}
+            <div className="grid-2" style={{ marginBottom: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label">Nº Registro del Producto</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={formData.producto_fitosanitario_num_registro || ''}
+                  onChange={(e) => setFormData({ ...formData, producto_fitosanitario_num_registro: e.target.value })}
+                  placeholder="Ej: ES-00123"
+                  data-testid="input-num-registro"
+                />
+                <small style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.75rem' }}>
+                  Se rellena automáticamente al seleccionar un producto desde la calculadora
+                </small>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Plaga a Controlar</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={formData.plaga_a_controlar || ''}
+                  onChange={(e) => setFormData({ ...formData, plaga_a_controlar: e.target.value })}
+                  placeholder="Ej: Pulgón, Mildiu, Botrytis..."
+                  data-testid="input-plaga-controlar"
+                />
+                <small style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.75rem' }}>
+                  Plaga o enfermedad objetivo de esta aplicación
+                </small>
+              </div>
+            </div>
             
             {/* Datos técnicos */}
             <div className="grid-2">

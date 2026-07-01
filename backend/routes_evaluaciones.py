@@ -1989,6 +1989,14 @@ async def generate_evaluacion_pdf(
                         <div class="dato-label">Dosis</div>
                         <div class="dato-value">{tratamiento.get('dosis', '—')}</div>
                     </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Nº Registro Producto</div>
+                        <div class="dato-value">{tratamiento.get('producto_fitosanitario_num_registro') or '—'}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Plaga a Controlar</div>
+                        <div class="dato-value">{tratamiento.get('plaga_a_controlar') or '—'}</div>
+                    </div>
                 </div>
             </div>
         </div>
