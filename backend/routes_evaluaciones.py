@@ -2063,20 +2063,40 @@ async def generate_evaluacion_pdf(
     # ========================================================================
     aplicadores_unicos = {}
     maquinas_unicas = {}
+    
+    # PRIMERA PASADA: recoger fichas completas (con _id) para tener el set
+    # canónico de nombres que ya están representados.
     for trat in tratamientos:
         ap = trat.get("aplicador_completo")
         if ap and ap.get("_id"):
             aplicadores_unicos.setdefault(str(ap["_id"]), ap)
-        elif trat.get("aplicador_nombre"):
-            # Fallback: aplicador asignado por nombre pero sin ficha completa.
-            key = f"name:{trat['aplicador_nombre']}"
-            aplicadores_unicos.setdefault(key, {"nombre": trat["aplicador_nombre"], "_minimal": True})
         mq = trat.get("maquina_completa")
         if mq and mq.get("_id"):
             maquinas_unicas.setdefault(str(mq["_id"]), mq)
-        elif trat.get("maquina_nombre"):
-            key = f"name:{trat['maquina_nombre']}"
-            maquinas_unicas.setdefault(key, {"nombre": trat["maquina_nombre"], "_minimal": True})
+    
+    # Nombres ya cubiertos por fichas completas (normalizado a lowercase para
+    # evitar duplicados por mayúsculas/tildes).
+    def _norm(s):
+        return (str(s or '').strip().lower())
+    nombres_ap_cubiertos = {
+        _norm(f"{ap.get('nombre','')} {ap.get('apellidos','')}")
+        for ap in aplicadores_unicos.values()
+    }
+    nombres_mq_cubiertos = {_norm(mq.get('nombre')) for mq in maquinas_unicas.values()}
+    
+    # SEGUNDA PASADA: añadir sólo minimal-by-name si el nombre NO coincide con
+    # ninguna ficha completa ya presente. Así evitamos que un tratamiento con
+    # solo `aplicador_nombre` (texto libre) duplique al mismo técnico que ya
+    # está registrado con su ficha vía `tecnico_aplicador_id`.
+    for trat in tratamientos:
+        nombre_ap = trat.get("aplicador_nombre")
+        if nombre_ap and _norm(nombre_ap) not in nombres_ap_cubiertos:
+            key = f"name:{_norm(nombre_ap)}"
+            aplicadores_unicos.setdefault(key, {"nombre": nombre_ap, "_minimal": True})
+        nombre_mq = trat.get("maquina_nombre")
+        if nombre_mq and _norm(nombre_mq) not in nombres_mq_cubiertos:
+            key = f"name:{_norm(nombre_mq)}"
+            maquinas_unicas.setdefault(key, {"nombre": nombre_mq, "_minimal": True})
     
     if aplicadores_unicos or maquinas_unicas:
         html_content += """

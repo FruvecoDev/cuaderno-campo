@@ -341,6 +341,15 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
+### Fix: aplicador duplicado en PDF (ficha vacía + ficha completa) - DONE (2026-07-01)
+- **Bug reportado**: en la sección final "TÉCNICOS APLICADORES" del PDF, "Clemente Torres Martín" aparecía dos veces — la primera con todos los campos vacíos ("—") y la segunda con la ficha completa (DNI, Nº carnet, fechas, certificado).
+- **Root cause**: el bucle en `routes_evaluaciones.py::PÁGINA FINAL` usaba `setdefault` con dos claves distintas para el mismo técnico: `str(_id)` cuando el tratamiento tenía `tecnico_aplicador_id`, y `"name:<txt>"` cuando solo tenía `aplicador_nombre` (texto libre). Como las keys no coincidían, no había dedup entre las dos fuentes.
+- **Fix**: refactorizado a dos pasadas:
+  1. Primera pasada recoge todas las fichas completas por `_id` y calcula `nombres_ap_cubiertos` (set de nombres normalizados a lowercase).
+  2. Segunda pasada añade la versión "minimal-by-name" solo si el nombre normalizado NO está ya cubierto por una ficha completa.
+- Aplicado el mismo patrón a **Maquinaria** (mismo bug potencial).
+- **Testing**: PDF regenerado. Página 24 muestra ambos técnicos (Clemente y Antonio) **una sola vez cada uno**, con todos los datos completos (DNI, Nivel, Nº Carnet, Fechas). Confirmado con extracción textual (`count("Clemente Torres Martín") == 1`).
+
 ### PDF Tratamientos: Coste Total → Caldo Recomendado + arreglo campos vacíos - DONE (2026-07-01)
 - **Cambio pedido**: eliminar "Coste Total", añadir "Caldo Recomendado", y mostrar todos los campos rellenos del tratamiento (varios salían "—" con datos válidos en BD).
 - **Bloque DATOS DEL TRATAMIENTO en el PDF** completamente refactorizado:
