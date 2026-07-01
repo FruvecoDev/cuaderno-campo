@@ -6,6 +6,27 @@ from datetime import datetime
 import pandas as pd
 import io
 import httpx
+import re as _re
+
+
+def _accent_insensitive_regex(s: str) -> str:
+    """Convierte 'Oidio' → 'O[iíìï]d[iíìï]o' para tolerancia a tildes en la BD.
+    Necesario porque MongoDB regex no es accent-insensitive por defecto y los
+    datos del MAPA contienen tildes (Oídio, Áfido, Pulgón…)."""
+    mapping = {
+        'a': '[aáàäâ]', 'e': '[eéèëê]', 'i': '[iíìïî]', 'o': '[oóòöô]', 'u': '[uúùüû]', 'n': '[nñ]',
+        'A': '[AÁÀÄÂaáàäâ]', 'E': '[EÉÈËÊeéèëê]', 'I': '[IÍÌÏÎiíìïî]',
+        'O': '[OÓÒÖÔoóòöô]', 'U': '[UÚÙÜÛuúùüû]', 'N': '[NÑnñ]',
+    }
+    parts = []
+    for c in s:
+        if c in mapping:
+            parts.append(mapping[c])
+        elif c.isalnum() or c.isspace():
+            parts.append(_re.escape(c))
+        else:
+            parts.append(_re.escape(c))
+    return ''.join(parts)
 from bs4 import BeautifulSoup
 
 from database import db
@@ -726,9 +747,9 @@ async def get_usos_producto(
         raise HTTPException(status_code=400, detail="ID inválido")
     query = {"fitosanitario_id": producto_id}
     if cultivo:
-        query["cultivo"] = {"$regex": cultivo, "$options": "i"}
+        query["cultivo"] = {"$regex": _accent_insensitive_regex(cultivo), "$options": "i"}
     if plaga:
-        query["plaga"] = {"$regex": plaga, "$options": "i"}
+        query["plaga"] = {"$regex": _accent_insensitive_regex(plaga), "$options": "i"}
     docs = await fitosanitarios_usos_collection.find(query).sort([("cultivo", 1), ("plaga", 1)]).to_list(length=5000)
     for d in docs:
         d["_id"] = str(d["_id"])
@@ -751,9 +772,9 @@ async def buscar_por_uso(
     """
     query = {}
     if cultivo:
-        query["cultivo"] = {"$regex": f"^{cultivo}$", "$options": "i"}
+        query["cultivo"] = {"$regex": f"^{_accent_insensitive_regex(cultivo)}$", "$options": "i"}
     if plaga:
-        query["plaga"] = {"$regex": plaga, "$options": "i"}
+        query["plaga"] = {"$regex": _accent_insensitive_regex(plaga), "$options": "i"}
 
     # Agrupar por numero_registro para no duplicar productos
     pipeline = [

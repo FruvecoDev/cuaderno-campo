@@ -9,6 +9,11 @@ const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
   const [productosDB, setProductosDB] = useState([]);
   const [loadingProductos, setLoadingProductos] = useState(false);
   const [selectedProducto, setSelectedProducto] = useState(null);
+  // Búsqueda MAPA: filtrar productos autorizados por cultivo + plaga
+  const [cultivoFiltro, setCultivoFiltro] = useState('');
+  const [plagaFiltro, setPlagaFiltro] = useState('');
+  const [usoSeleccionado, setUsoSeleccionado] = useState(null);
+  const [buscandoMapa, setBuscandoMapa] = useState(false);
   
   const [calcData, setCalcData] = useState({
     superficie: '', unidadSuperficie: 'ha', volumenAgua: '', dosisProducto: '',
@@ -66,23 +71,67 @@ const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
       try {
         const tipoMap = { 'insecticida': 'Insecticida', 'herbicida': 'Herbicida', 'fungicida': 'Fungicida', 'fertilizante': 'Fertilizante' };
         const tipo = tipoMap[calcData.tipoProducto] || calcData.tipoProducto;
-        const data = await api.get(`/api/fitosanitarios?tipo=${tipo}&activo=true`);
-        setProductosDB(data.productos || []);
+        
+        // Si el técnico ha rellenado cultivo Y plaga → filtrar por autorización MAPA
+        if (cultivoFiltro.trim() && plagaFiltro.trim()) {
+          setBuscandoMapa(true);
+          const q = new URLSearchParams({
+            cultivo: cultivoFiltro.trim(),
+            plaga: plagaFiltro.trim(),
+            tipo,
+            limit: '200',
+          }).toString();
+          const data = await api.get(`/api/fitosanitarios/usos/buscar?${q}`);
+          // Mapear a la misma forma que /fitosanitarios (para compat con selector)
+          const prods = (data.productos || []).map(p => ({
+            _id: p.fitosanitario_id,
+            numero_registro: p._id,
+            nombre_comercial: p.nombre_comercial,
+            dosis_min: p.dosis_min,
+            dosis_max: p.dosis_max,
+            unidad_dosis: p.unidad_dosis,
+            _mapa_authorized: true,
+          }));
+          setProductosDB(prods);
+        } else {
+          setBuscandoMapa(false);
+          const data = await api.get(`/api/fitosanitarios?tipo=${tipo}&activo=true`);
+          setProductosDB(data.productos || []);
+        }
       } catch (error) { console.error('[CalculadoraFitosanitarios.js]', error); }
       finally { setLoadingProductos(false); }
     };
     if (showCalculator) fetchProductos();
-  }, [calcData.tipoProducto, showCalculator, token]);
+  }, [calcData.tipoProducto, showCalculator, token, cultivoFiltro, plagaFiltro]);
   
-  const handleSelectProducto = (producto) => {
+  const handleSelectProducto = async (producto) => {
     setSelectedProducto(producto);
+    setUsoSeleccionado(null);
     setCalcData(prev => ({
       ...prev, nombreProducto: producto.nombre_comercial,
       dosisProducto: producto.dosis_max ? producto.dosis_max.toString() : prev.dosisProducto,
       unidadDosis: producto.unidad_dosis || 'L/ha',
       volumenAgua: producto.volumen_agua_max ? producto.volumen_agua_max.toString() : prev.volumenAgua,
-      plagaObjetivo: (producto.plagas_objetivo || []).join(', ')
+      plagaObjetivo: plagaFiltro || (producto.plagas_objetivo || []).join(', ')
     }));
+    // Si el filtro MAPA está activo, cargar el uso específico (cultivo+plaga)
+    // para autorellenar con la dosis EXACTA autorizada por el MAPA.
+    if (buscandoMapa && producto._id && cultivoFiltro.trim() && plagaFiltro.trim()) {
+      try {
+        const q = new URLSearchParams({ cultivo: cultivoFiltro.trim(), plaga: plagaFiltro.trim() }).toString();
+        const data = await api.get(`/api/fitosanitarios/${producto._id}/usos?${q}`);
+        const uso = (data.usos || [])[0];
+        if (uso) {
+          setUsoSeleccionado(uso);
+          setCalcData(prev => ({
+            ...prev,
+            dosisProducto: uso.dosis_max != null ? String(uso.dosis_max) : prev.dosisProducto,
+            unidadDosis: uso.unidad_dosis || prev.unidadDosis,
+            volumenAgua: uso.volumen_agua_max != null ? String(uso.volumen_agua_max) : prev.volumenAgua,
+          }));
+        }
+      } catch (e) { console.error('[Calculadora] usos fetch', e); }
+    }
   };
   
   const resetCalculator = () => {
@@ -106,8 +155,9 @@ const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
         producto_fitosanitario_dosis: parseFloat(calcData.dosisProducto) || null,
         producto_fitosanitario_unidad: calcData.unidadDosis || null,
         producto_materia_activa: selectedProducto?.materia_activa || null,
-        producto_plazo_seguridad: selectedProducto?.plazo_seguridad || null,
-        producto_fitosanitario_num_registro: selectedProducto?.numero_registro || null
+        producto_plazo_seguridad: usoSeleccionado?.plazo_seguridad || selectedProducto?.plazo_seguridad || null,
+        producto_fitosanitario_num_registro: selectedProducto?.numero_registro || null,
+        plaga_a_controlar: plagaFiltro || calcData.plagaObjetivo || null
       });
       setShowCalculator(false);
     }
@@ -157,10 +207,42 @@ const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
                   <option value="insecticida">Insecticida</option><option value="herbicida">Herbicida</option><option value="fungicida">Fungicida</option><option value="fertilizante">Fertilizante</option>
                 </select>
               </div>
+              {/* Filtro MAPA por cultivo + plaga: si ambos rellenos, el selector muestra
+                  SOLO productos autorizados oficialmente para ese uso, con dosis exacta. */}
+              <div style={{ padding: '0.75rem', background: '#eff6ff', border: '1px dashed #93c5fd', borderRadius: '8px', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', fontWeight: 600, color: '#1e40af', marginBottom: '0.5rem' }}>
+                  <Database size={14} /> Buscar productos autorizados MAPA por cultivo + plaga
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Cultivo (ej. Trigo, Tomate)"
+                    value={cultivoFiltro}
+                    onChange={(e) => setCultivoFiltro(e.target.value)}
+                    data-testid="input-mapa-cultivo"
+                    style={{ fontSize: '0.85rem' }}
+                  />
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Plaga (ej. Pulgón, Oidio)"
+                    value={plagaFiltro}
+                    onChange={(e) => setPlagaFiltro(e.target.value)}
+                    data-testid="input-mapa-plaga"
+                    style={{ fontSize: '0.85rem' }}
+                  />
+                </div>
+                {buscandoMapa && (
+                  <small style={{ display: 'block', marginTop: '0.4rem', color: '#166534', fontWeight: 600 }}>
+                    Mostrando solo productos autorizados por el MAPA para {cultivoFiltro} + {plagaFiltro} ({productosDB.length} encontrado{productosDB.length !== 1 ? 's' : ''})
+                  </small>
+                )}
+              </div>
               {productosDB.length > 0 && (
                 <div className="form-group">
-                  <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Database size={14} /> Seleccionar Producto Registrado</label>
-                  <select className="form-select" value={selectedProducto?._id || ''} onChange={(e) => { const prod = productosDB.find(p => p._id === e.target.value); if (prod) handleSelectProducto(prod); }} style={{ backgroundColor: selectedProducto ? '#f0fdf4' : 'white' }}>
+                  <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Database size={14} /> Seleccionar Producto {buscandoMapa ? 'Autorizado' : 'Registrado'}</label>
+                  <select className="form-select" value={selectedProducto?._id || ''} onChange={(e) => { const prod = productosDB.find(p => p._id === e.target.value); if (prod) handleSelectProducto(prod); }} style={{ backgroundColor: selectedProducto ? '#f0fdf4' : 'white' }} data-testid="select-producto-mapa">
                     <option value="">-- Seleccionar producto --</option>
                     {productosDB.map(prod => (<option key={prod._id} value={prod._id}>{prod.nombre_comercial} {prod.materia_activa ? `(${prod.materia_activa})` : ''}</option>))}
                   </select>
@@ -168,7 +250,15 @@ const CalculadoraFitosanitarios = ({ recetas = [], onApplyToForm }) => {
                   {selectedProducto && (
                     <div style={{ marginTop: '0.5rem', padding: '0.5rem', backgroundColor: '#f0fdf4', borderRadius: '6px', fontSize: '0.8rem', border: '1px solid #86efac' }}>
                       <strong style={{ color: '#166534' }}>Dosis recomendada:</strong> {selectedProducto.dosis_min}-{selectedProducto.dosis_max} {selectedProducto.unidad_dosis}
-                      {selectedProducto.plazo_seguridad && <span style={{ marginLeft: '1rem' }}>| <strong>Plazo:</strong> {selectedProducto.plazo_seguridad} dias</span>}
+                      {usoSeleccionado?.plazo_seguridad && <span style={{ marginLeft: '1rem' }}>| <strong>Plazo:</strong> {usoSeleccionado.plazo_seguridad}</span>}
+                      {!usoSeleccionado?.plazo_seguridad && selectedProducto.plazo_seguridad && <span style={{ marginLeft: '1rem' }}>| <strong>Plazo:</strong> {selectedProducto.plazo_seguridad} dias</span>}
+                      {usoSeleccionado && (
+                        <div style={{ marginTop: '0.35rem', paddingTop: '0.35rem', borderTop: '1px dashed #86efac', fontSize: '0.75rem', color: '#166534' }}>
+                          <strong>Uso MAPA:</strong> {usoSeleccionado.cultivo} · {usoSeleccionado.plaga}
+                          {usoSeleccionado.bbch && <span style={{ marginLeft: '0.5rem' }}>· BBCH {usoSeleccionado.bbch}</span>}
+                          {usoSeleccionado.aplicaciones && <span style={{ marginLeft: '0.5rem' }}>· {usoSeleccionado.aplicaciones} aplicaciones</span>}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

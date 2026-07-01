@@ -1219,7 +1219,8 @@ const Tratamientos = () => {
                   producto_fitosanitario_unidad: values.producto_fitosanitario_unidad || prev.producto_fitosanitario_unidad,
                   producto_materia_activa: values.producto_materia_activa || prev.producto_materia_activa,
                   producto_plazo_seguridad: values.producto_plazo_seguridad || prev.producto_plazo_seguridad,
-                  producto_fitosanitario_num_registro: values.producto_fitosanitario_num_registro || prev.producto_fitosanitario_num_registro
+                  producto_fitosanitario_num_registro: values.producto_fitosanitario_num_registro || prev.producto_fitosanitario_num_registro,
+                  plaga_a_controlar: values.plaga_a_controlar || prev.plaga_a_controlar
                 }));
               }}
             />

@@ -341,7 +341,18 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
-### Fitosanitarios MAPA: nuevo modelo con Usos (producto × cultivo × plaga × dosis) - DONE (2026-07-01)
+### Calculadora Fitosanitaria: búsqueda inteligente por cultivo + plaga (MAPA) - DONE (2026-07-01)
+- **Feature**: en la Calculadora de Fitosanitarios de Tratamientos, el técnico ahora puede introducir cultivo + plaga y el selector muestra **solo los productos autorizados oficialmente por el MAPA** con la dosis exacta.
+- **Frontend** (`CalculadoraFitosanitarios.js`):
+  - Nuevo panel azul "Buscar productos autorizados MAPA por cultivo + plaga" con dos inputs.
+  - Cuando ambos rellenos → `GET /api/fitosanitarios/usos/buscar?cultivo=X&plaga=Y&tipo=T` filtra en tiempo real.
+  - Al seleccionar producto → `GET /api/fitosanitarios/{id}/usos?cultivo=X&plaga=Y` carga el uso específico y autorrellena dosis, unidad, volumen de agua exactos + muestra badge "Uso MAPA: cultivo · plaga · BBCH · aplicaciones".
+  - Pasa `plaga_a_controlar` al form de Tratamiento automáticamente.
+- **Backend fix**: `MongoDB regex` no es accent-insensitive por defecto → los datos MAPA contienen "Oídio", "Pulgón", "Ácaro" con tildes pero el usuario escribe sin tildes. Añadido helper `_accent_insensitive_regex(s)` que sustituye vocales por char classes `[aáàäâ]`, `[oóòöô]`, etc. Aplicado a `/usos/buscar` y `/{id}/usos`.
+- **Testing**: `?cultivo=Acelga&plaga=Oidio&tipo=Fungicida` devuelve THIOPRON 825, AMYLO-X WG, ARAW con dosis reales. Con `tipo=Insecticida` devuelve 0 (correcto, oidio es fungico). UI renderiza el panel con placeholders "Cultivo (ej. Trigo, Tomate)" y "Plaga (ej. Pulgón, Oidio)".
+- data-testids: `input-mapa-cultivo`, `input-mapa-plaga`, `select-producto-mapa`.
+
+### Fitosanitarios MAPA: nuevo modelo con Usos - DONE (2026-07-01)
 - **Problema**: un mismo producto fitosanitario tiene decenas o cientos de usos autorizados con dosis distintas según cultivo + plaga. El modelo anterior sólo guardaba dosis única por producto.
 - **Nuevo modelo**:
   - `fitosanitarios_collection` — 1 doc por producto único (por `numero_registro`). Metadata general: nombre_comercial, denominacion_comun, empresa, tipo, materia_activa, estado, fecha_caducidad, observaciones, `usos_count`.
