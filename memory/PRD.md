@@ -341,6 +341,18 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
+### PDF Tratamientos: Coste Total → Caldo Recomendado + arreglo campos vacíos - DONE (2026-07-01)
+- **Cambio pedido**: eliminar "Coste Total", añadir "Caldo Recomendado", y mostrar todos los campos rellenos del tratamiento (varios salían "—" con datos válidos en BD).
+- **Bloque DATOS DEL TRATAMIENTO en el PDF** completamente refactorizado:
+  - ❌ **Eliminado** "Coste Total".
+  - ✅ **Añadido** "Caldo Recomendado" (`caldo_superficie` en L/ha).
+  - ✅ **Añadido** "Producto" (`producto_fitosanitario_nombre`) — antes no aparecía.
+  - ✅ **Añadido** "Superficie a Tratar" (`superficie_aplicacion` en ha).
+  - ✅ **Fix Dosis**: leía de `dosis` (key inexistente); ahora combina `producto_fitosanitario_dosis` + `producto_fitosanitario_unidad` (ej. "1.0 L/ha", "0.3 kg/ha").
+  - ✅ **Fix Aplicador/Máquina/Campaña**: `dict.get(k, '—')` fallaba cuando el valor es `None` (no missing). Cambiado a `or '—'` que sí maneja None.
+  - ✅ **Realizado**: aplicada misma regla que Visitas → siempre "Sí" (aparecer en el informe implica que fue realizado).
+- **Testing**: PDF regenerado y verificado página por página. Página 23 (ORTIVA): "Aplicador: Antonio Sanchez", "Máquina: AGRIFAC", "Producto: ORTIVA", "Dosis: 1.0 L/ha", "Superficie: 13.0 ha", "Caldo Recomendado: 600.0 L/ha", "Realizado: Sí". Todo lo demás (BISMARK página 22, APHOX página 21) también OK.
+
 ### Tratamientos: campos "Nº Registro Producto" y "Plaga a Controlar" - DONE (2026-07-01)
 - **Nuevos campos añadidos** al modelo `TratamientoCreate`:
   - `producto_fitosanitario_num_registro: Optional[str]` — Nº registro oficial del producto (auto-fill desde catálogo de fitosanitarios).

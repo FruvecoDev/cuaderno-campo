@@ -1955,11 +1955,11 @@ async def generate_evaluacion_pdf(
                 <div class="datos-grid">
                     <div class="dato-item">
                         <div class="dato-label">Fecha Tratamiento</div>
-                        <div class="dato-value">{format_fecha(tratamiento.get('fecha_tratamiento'))}</div>
+                        <div class="dato-value">{format_fecha(tratamiento.get('fecha_tratamiento')) or '—'}</div>
                     </div>
                     <div class="dato-item">
                         <div class="dato-label">Fecha Aplicación</div>
-                        <div class="dato-value">{format_fecha(tratamiento.get('fecha_aplicacion'))}</div>
+                        <div class="dato-value">{format_fecha(tratamiento.get('fecha_aplicacion')) or '—'}</div>
                     </div>
                     <div class="dato-item">
                         <div class="dato-label">Tipo</div>
@@ -1967,27 +1967,35 @@ async def generate_evaluacion_pdf(
                     </div>
                     <div class="dato-item">
                         <div class="dato-label">Aplicador</div>
-                        <div class="dato-value">{tratamiento.get('aplicador_nombre', '—')}</div>
+                        <div class="dato-value">{tratamiento.get('aplicador_nombre') or '—'}</div>
                     </div>
                     <div class="dato-item">
                         <div class="dato-label">Máquina</div>
-                        <div class="dato-value">{tratamiento.get('maquina_nombre', '—')}</div>
+                        <div class="dato-value">{tratamiento.get('maquina_nombre') or '—'}</div>
                     </div>
                     <div class="dato-item">
                         <div class="dato-label">Campaña</div>
-                        <div class="dato-value">{tratamiento.get('campana', '—')}</div>
+                        <div class="dato-value">{tratamiento.get('campana') or '—'}</div>
                     </div>
                     <div class="dato-item">
                         <div class="dato-label">Realizado</div>
-                        <div class="dato-value">{'Sí' if tratamiento.get('realizado') else 'No'}</div>
+                        <div class="dato-value">Sí</div>
                     </div>
                     <div class="dato-item">
-                        <div class="dato-label">Coste Total</div>
-                        <div class="dato-value">{tratamiento.get('coste_total', 0):.2f} €</div>
+                        <div class="dato-label">Producto</div>
+                        <div class="dato-value">{tratamiento.get('producto_fitosanitario_nombre') or '—'}</div>
                     </div>
                     <div class="dato-item">
                         <div class="dato-label">Dosis</div>
-                        <div class="dato-value">{tratamiento.get('dosis', '—')}</div>
+                        <div class="dato-value">{(f"{tratamiento.get('producto_fitosanitario_dosis')} {tratamiento.get('producto_fitosanitario_unidad') or ''}".strip()) if tratamiento.get('producto_fitosanitario_dosis') else '—'}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Superficie a Tratar</div>
+                        <div class="dato-value">{(f"{tratamiento.get('superficie_aplicacion')} ha") if tratamiento.get('superficie_aplicacion') else '—'}</div>
+                    </div>
+                    <div class="dato-item">
+                        <div class="dato-label">Caldo Recomendado</div>
+                        <div class="dato-value">{(f"{tratamiento.get('caldo_superficie')} L/ha") if tratamiento.get('caldo_superficie') else '—'}</div>
                     </div>
                     <div class="dato-item">
                         <div class="dato-label">Nº Registro Producto</div>
