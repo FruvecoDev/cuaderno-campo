@@ -3,10 +3,12 @@ Routes for Contratos (Contracts) - CRUD operations
 Extracted from routes_main.py for better code organization
 """
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from typing import Optional
 from bson import ObjectId
 from datetime import datetime
+import re
+import io
 
 from models import ContratoCreate
 from database import contratos_collection, serialize_doc, serialize_docs, db
@@ -96,6 +98,220 @@ async def create_contrato(
     )
     
     return {"success": True, "data": serialize_doc(created)}
+
+
+@router.post("/contratos/import-excel")
+async def import_contratos_excel(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(RequireCreate),
+    _access: dict = Depends(RequireContratosAccess),
+):
+    """Importa contratos desde un fichero Excel (.xlsx) con las columnas:
+    Numero Contrato · Tipo Contrato · Campaña · Procedencia · Fecha ·
+    Nombre Proveedor · Cultivo · Cantidad (Kg).
+    
+    Comportamiento:
+    - Los proveedores/cultivos se buscan por `nombre` (case-insensitive con trim).
+      Si no existen, se crean automáticamente con los campos mínimos.
+    - Contratos con `Numero Contrato` ya presente se omiten (dedup).
+    - Fila con "Total" o todas las columnas vacías salvo Cantidad → se ignora.
+    - Devuelve `{imported, skipped_duplicates, created_proveedores, created_cultivos, errors}`.
+    """
+    from openpyxl import load_workbook
+
+    if not file.filename or not file.filename.lower().endswith(('.xlsx', '.xlsm')):
+        raise HTTPException(status_code=400, detail="Solo se aceptan ficheros .xlsx")
+
+    contenido = await file.read()
+    try:
+        wb = load_workbook(io.BytesIO(contenido), data_only=True)
+        ws = wb.active
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error leyendo el Excel: {e}")
+
+    # Mapeo de headers a keys internas (tolerante a mayúsculas/acentos).
+    header_row = [(c.value or '') for c in ws[1]]
+    def _norm(s: str) -> str:
+        return re.sub(r'[^a-z0-9]', '', str(s).lower())
+    hidx = {}
+    aliases = {
+        'numero_contrato': ['numerocontrato', 'contrato', 'numero'],
+        'tipo': ['tipocontrato', 'tipo'],
+        'campana': ['campana', 'campaña', 'campana2', 'campaa'],
+        'procedencia': ['procedencia'],
+        'fecha': ['fecha', 'fechacontrato'],
+        'proveedor': ['nombreproveedor', 'proveedor'],
+        'cultivo': ['cultivo', 'articulo'],
+        'cantidad': ['cantidadkg', 'cantidad'],
+    }
+    for i, h in enumerate(header_row):
+        hn = _norm(h)
+        for key, alist in aliases.items():
+            if hn in alist and key not in hidx:
+                hidx[key] = i
+                break
+    faltantes = [k for k in ('numero_contrato', 'campana', 'fecha', 'proveedor', 'cultivo', 'cantidad') if k not in hidx]
+    if faltantes:
+        raise HTTPException(status_code=400, detail=f"Faltan columnas obligatorias en el Excel: {faltantes}")
+
+    imported = 0
+    skipped_dupes = 0
+    created_provs = 0
+    created_cults = 0
+    errors: list[dict] = []
+
+    # Cache de lookups por nombre normalizado
+    prov_cache: dict[str, str] = {}
+    cult_cache: dict[str, str] = {}
+
+    async def resolve_proveedor(nombre: str) -> str:
+        nonlocal created_provs
+        key = _norm(nombre)
+        if key in prov_cache:
+            return prov_cache[key]
+        doc = await proveedores_collection.find_one({"nombre": {"$regex": f"^{re.escape(nombre.strip())}$", "$options": "i"}})
+        if not doc:
+            new_doc = {
+                "nombre": nombre.strip(),
+                "tipo_proveedor": "Materia Prima",
+                "created_at": datetime.now(),
+                "updated_at": datetime.now(),
+            }
+            r = await proveedores_collection.insert_one(new_doc)
+            created_provs += 1
+            _id = str(r.inserted_id)
+        else:
+            _id = str(doc["_id"])
+        prov_cache[key] = _id
+        return _id
+
+    async def resolve_cultivo(nombre: str) -> str:
+        nonlocal created_cults
+        key = _norm(nombre)
+        if key in cult_cache:
+            return cult_cache[key]
+        doc = await cultivos_collection.find_one({"nombre": {"$regex": f"^{re.escape(nombre.strip())}$", "$options": "i"}})
+        if not doc:
+            new_doc = {
+                "nombre": nombre.strip(),
+                "tipo": "Horticola",
+                "created_at": datetime.now(),
+                "updated_at": datetime.now(),
+            }
+            r = await cultivos_collection.insert_one(new_doc)
+            created_cults += 1
+            _id = str(r.inserted_id)
+        else:
+            _id = str(doc["_id"])
+        cult_cache[key] = _id
+        return _id
+
+    def _parse_numero_contrato(s: str):
+        # Formato esperado: "MP-2025-000001" → (serie, año, numero)
+        m = re.match(r'^\s*([A-Za-z]+)[- ]?(\d{4})[- ]?(\d+)\s*$', str(s or ''))
+        if not m:
+            return None
+        return (m.group(1).upper(), int(m.group(2)), int(m.group(3)))
+
+    def _parse_fecha(v):
+        if v is None:
+            return ''
+        if isinstance(v, datetime):
+            return v.strftime('%Y-%m-%d')
+        s = str(v).strip()
+        # dd/mm/yyyy
+        m = re.match(r'^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$', s)
+        if m:
+            return f"{m.group(3)}-{m.group(2).zfill(2)}-{m.group(1).zfill(2)}"
+        return s
+
+    def _get(row, key):
+        idx = hidx.get(key)
+        return row[idx] if idx is not None and idx < len(row) else None
+
+    for row_num, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
+        try:
+            numero_txt = _get(row, 'numero_contrato')
+            cantidad = _get(row, 'cantidad')
+            # Filas totalizadoras o vacías
+            if not numero_txt:
+                continue
+            parsed = _parse_numero_contrato(numero_txt)
+            if not parsed:
+                errors.append({"row": row_num, "error": f"Número contrato inválido: {numero_txt!r}"})
+                continue
+            serie, año, numero = parsed
+            numero_contrato_str = f"{serie}-{año}-{str(numero).zfill(6)}"
+            # Dedup por número contrato exacto
+            existing = await contratos_collection.find_one({"$or": [
+                {"numero_contrato": numero_contrato_str},
+                {"serie": serie, "año": año, "numero": numero},
+                {"serie": serie, "ano": año, "numero": numero},
+            ]})
+            if existing:
+                skipped_dupes += 1
+                continue
+
+            nombre_prov = _get(row, 'proveedor')
+            nombre_cult = _get(row, 'cultivo')
+            if not nombre_prov or not nombre_cult:
+                errors.append({"row": row_num, "error": "Proveedor o cultivo vacíos"})
+                continue
+
+            proveedor_id = await resolve_proveedor(str(nombre_prov))
+            cultivo_id = await resolve_cultivo(str(nombre_cult))
+
+            tipo_str = str(_get(row, 'tipo') or 'Compra').strip().capitalize()
+            if tipo_str not in ('Compra', 'Venta'):
+                tipo_str = 'Compra'
+            campana = str(_get(row, 'campana') or '').strip()
+            procedencia = str(_get(row, 'procedencia') or 'Campo').strip()
+            fecha_str = _parse_fecha(_get(row, 'fecha'))
+            try:
+                cantidad_val = float(cantidad or 0)
+            except Exception:
+                cantidad_val = 0.0
+
+            doc = {
+                "numero_contrato": numero_contrato_str,
+                "serie": serie,
+                "año": año,
+                "ano": año,  # alias sin tilde (frontend lee `c.ano`)
+                "numero": numero,
+                "tipo": tipo_str,
+                "tipo_contrato": "Por Kilos",
+                "campana": campana,
+                "procedencia": procedencia,
+                "fecha_contrato": fecha_str,
+                "proveedor_id": proveedor_id if tipo_str == 'Compra' else None,
+                "cliente_id": None,
+                "cultivo_id": cultivo_id,
+                "proveedor": str(nombre_prov).strip(),
+                "cultivo": str(nombre_cult).strip(),
+                "cantidad": cantidad_val,
+                "precio": 0.0,
+                "moneda": "EUR",
+                "cambio": 1.0,
+                "periodo_desde": fecha_str,
+                "periodo_hasta": fecha_str,
+                "observaciones": "Importado desde Excel",
+                "created_at": datetime.now(),
+                "updated_at": datetime.now(),
+            }
+            await contratos_collection.insert_one(doc)
+            imported += 1
+        except Exception as e:
+            errors.append({"row": row_num, "error": str(e)})
+
+    return {
+        "success": True,
+        "imported": imported,
+        "skipped_duplicates": skipped_dupes,
+        "created_proveedores": created_provs,
+        "created_cultivos": created_cults,
+        "errors": errors[:50],  # solo las 50 primeras para no reventar respuesta
+        "total_errors": len(errors),
+    }
 
 
 @router.get("/contratos")

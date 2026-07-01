@@ -341,6 +341,24 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
+### Importación masiva de Contratos desde Excel - DONE (2026-07-01)
+- **Nuevo endpoint** `POST /api/contratos/import-excel` acepta un `UploadFile` `.xlsx` con las columnas:
+  `Numero Contrato · Tipo Contrato · Campaña · Procedencia · Fecha · Nombre Proveedor · Cultivo · Cantidad (Kg)`.
+- **Lógica**:
+  - Mapea headers de forma tolerante (normaliza a lowercase alfanumérico → acepta "Campaña"/"campana"/"CAMPAÑA").
+  - Parsea `MP-{año}-{numero}` → `serie`, `año`, `numero`, `numero_contrato` (guarda alias `ano` sin tilde para compatibilidad con el frontend).
+  - Parsea fecha `dd/mm/yyyy` → ISO `yyyy-mm-dd`.
+  - **Auto-crea proveedores y cultivos** que no existen (búsqueda case-insensitive por `nombre`).
+  - **Dedup** contra `numero_contrato` existente (evita reimportar).
+  - Ignora filas de totales o vacías.
+  - Devuelve `{imported, skipped_duplicates, created_proveedores, created_cultivos, errors[]}`.
+- **Frontend** (`Contratos.js`): botón "Importar Excel" (icono Upload) junto a "Nuevo Contrato", protegido por `permission="create"`. Abre input file oculto, sube via multipart, muestra toast con resumen.
+- **Testing end-to-end** con el fichero `CONTRATOS_MP.xlsx` del cliente (400 filas):
+  - Importación 1: 397 importados, 3 duplicados, 144 proveedores nuevos, 42 cultivos nuevos, 0 errores.
+  - Bug detectado y corregido: el frontend leía `c.ano` (sin tilde) → añadido alias `ano` en el doc.
+  - Importación 2 (tras fix): mismo resultado, todos los números muestran "MP-2025-000001" correctamente en la UI.
+- data-testids: `btn-import-excel-contratos`, `input-import-excel-contratos`.
+
 ### Duplicar Tratamiento: botón por fila con auto-clonado - DONE (2026-07-01)
 - **Nueva acción "Duplicar"** en cada fila de la tabla de Tratamientos (icono `Copy`), entre editar y eliminar.
 - **Flujo**: click Duplicar → modal "Crear Tratamiento" prellenado con:

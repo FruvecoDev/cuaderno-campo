@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
-import { Plus, Settings, Search, X, FileText, Eye, Trash2, Edit2, Download, Users, CreditCard, Package, Truck, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { Plus, Settings, Search, X, FileText, Eye, Trash2, Edit2, Download, Upload, Users, CreditCard, Package, Truck, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
@@ -283,6 +283,43 @@ const Contratos = () => {
     setShowForm(true);
   };
 
+  const [importing, setImporting] = useState(false);
+  const handleImportExcel = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.xlsx')) {
+      notify.error('Solo se aceptan ficheros .xlsx');
+      e.target.value = '';
+      return;
+    }
+    setImporting(true);
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const resp = await api.post('/api/contratos/import-excel', form, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      const r = resp.data || resp;
+      const parts = [
+        `${r.imported} importados`,
+        r.skipped_duplicates ? `${r.skipped_duplicates} duplicados omitidos` : null,
+        r.created_proveedores ? `${r.created_proveedores} nuevos proveedores` : null,
+        r.created_cultivos ? `${r.created_cultivos} nuevos cultivos` : null,
+        r.total_errors ? `${r.total_errors} errores` : null,
+      ].filter(Boolean).join(' · ');
+      notify.success(`Importación completada: ${parts}`);
+      if (r.errors && r.errors.length) {
+        console.warn('Errores de importación:', r.errors);
+      }
+      fetchContratos();
+    } catch (err) {
+      notify.error(api.getErrorMessage(err) || 'Error al importar el Excel');
+    } finally {
+      setImporting(false);
+      e.target.value = '';
+    }
+  };
+
   const closeModal = () => {
     setShowForm(false);
     setEditingId(null);
@@ -323,6 +360,17 @@ const Contratos = () => {
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
           <button className={`btn ${showConfig ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setShowConfig(true)} title="Configurar columnas" data-testid="btn-config-contratos"><Settings size={18} /></button>
+          <PermissionButton permission="create" onClick={() => document.getElementById('import-excel-contratos-input').click()} className="btn btn-secondary" disabled={importing} data-testid="btn-import-excel-contratos" title="Importar contratos desde un Excel">
+            <Upload size={18} /> {importing ? 'Importando...' : 'Importar Excel'}
+          </PermissionButton>
+          <input
+            id="import-excel-contratos-input"
+            type="file"
+            accept=".xlsx"
+            style={{ display: 'none' }}
+            onChange={handleImportExcel}
+            data-testid="input-import-excel-contratos"
+          />
           <PermissionButton permission="create" onClick={handleNewContrato} className="btn btn-primary" data-testid="btn-nuevo-contrato">
             <Plus size={18} /> {t('contracts.newContract')}
           </PermissionButton>
