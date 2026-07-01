@@ -1,0 +1,43 @@
+{
+  "summary": "Iteration 83 validated end-to-end: (1) Cultivos modal extraction to CultivoFormModal.jsx keeps full regression PASS (modal opens with data-testid=cultivo-form-modal, 3 tabs render, chip-input adds 2 variedades, submit creates cultivo with success toast, new row visible in list). (2) PDF anchors feature is fully functional — WeasyPrint converts HTML anchors to real PDF internal links: 88 clicable links on the index page pointing to correct target pages (visita-1..8 -> pages 11-18, tratamiento-1..3 -> pages 19-21). Named destinations present in PDF (visita-N / tratamiento-N).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Cultivos (pre-existing, not related to iteration 83)",
+        "issues": [
+          "React hydration warnings persist from the visual-editor wrapper injecting <span data-ve-dynamic> into <thead>/<tr>/<tbody>/<td>/<select>. Same as iteration 82. Not caused by CultivoFormModal.jsx extraction — the extracted JSX is clean."
+        ]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_pdf_anchors_navigation.py",
+    "/app/test_reports/pytest/test_pdf_anchors_navigation.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "PDF anchors implementation is textbook-correct: WeasyPrint produces LINK_NAMED entries with the exact nameddest strings and PyMuPDF resolves them to the right pages. No further changes needed.",
+    "CultivoFormModal.jsx is a clean 249-line component with no local state — pure props-driven. Good extraction. All data-testids preserved (btn-nuevo-cultivo, input-nombre-cultivo, select-tipo-cultivo, input-variedad-cultivo, btn-add-variedad-cultivo, variedad-chip-N, btn-submit-cultivo, cultivo-form-modal).",
+    "Consider adding data-testids to the row-level Edit/Delete buttons in Cultivos.js (e.g. edit-cultivo-{id}, delete-cultivo-{id}) — makes automated regression of edit/delete easier. Currently they exist but locator by row+testid pattern was flaky; edit/delete flows themselves passed in iteration 82 via alternative locators.",
+    "The fixture in test_pdf_anchors_navigation.py couldn't detect an eval with both visitas AND tratamientos via /api/evaluaciones/{id}/visitas + /tratamientos endpoints (both returned 0 items for the polled eval list), but the fallback COT eval (6a3e4b01e223c5dd1673c04c) rendered a PDF with 8 visitas + 3 tratamientos and 88 internal links — indicating the visitas/tratamientos data probably lives under different endpoints (e.g. /api/visitas?evaluacion_id=…). Not blocking; tests still pass end-to-end.",
+    "PDF size 1.1 MB, 23 pages, generation ~4 s — acceptable."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_pdf_anchors_navigation.py"
+  ],
+  "success_rate": {
+    "backend": "100% (7/7)",
+    "frontend": "100% (create+modal+tabs+chips+toast+list)"
+  },
+  "test_credentials": "admin@fruveco.com / admin123",
+  "seed_data_creation": "TEST_MODEXT_<random> cultivo created via UI. Cleanup attempted via row delete btn selector (delete-cultivo-{id}) — if the row remains it is safely marked with the TEST_ prefix.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "PDF anchors verification uses PyMuPDF (pip install pymupdf==1.28.0). Named destinations are queryable via fitz.Document.resolve_names(). Cross-page internal links are page.get_links() entries whose kind==LINK_NAMED (value 4) and page > current page. Reusable test at /app/backend/tests/test_pdf_anchors_navigation.py."
+}

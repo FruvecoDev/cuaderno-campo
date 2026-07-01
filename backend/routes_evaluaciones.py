@@ -1113,6 +1113,14 @@ async def generate_evaluacion_pdf(
             min-width: 50px;
             text-align: right;
         }
+        .index-item-link {
+            color: inherit;
+            text-decoration: none;
+            display: block;
+        }
+        .index-item-link:hover .index-item-name {
+            color: #1e8449;
+        }
         .index-empty {
             color: #999;
             font-style: italic;
@@ -1245,11 +1253,13 @@ async def generate_evaluacion_pdf(
             objetivo = visita.get('objetivo', 'Sin objetivo')[:40]
             n_visita = visita.get('numero_visita') or idx
             html_content += f"""
-                <div class="index-item">
-                    <span class="index-item-name">Visita #{n_visita} · {objetivo}</span>
-                    <span class="index-item-date">{fecha}</span>
-                    <span class="index-item-page">Pág. {page_num}</span>
-                </div>
+                <a href="#visita-{idx}" class="index-item-link">
+                    <div class="index-item">
+                        <span class="index-item-name">Visita #{n_visita} · {objetivo}</span>
+                        <span class="index-item-date">{fecha}</span>
+                        <span class="index-item-page">Pág. {page_num}</span>
+                    </div>
+                </a>
             """
     else:
         html_content += """
@@ -1276,11 +1286,13 @@ async def generate_evaluacion_pdf(
             tipo_label = f"{tipo_principal}" + (f" — {subtipo}" if subtipo else '')
             descripcion = (tratamiento.get('producto_fitosanitario_nombre') or tratamiento.get('descripcion') or '')[:30]
             html_content += f"""
-                <div class="index-item">
-                    <span class="index-item-name">{idx}. {tipo_label[:50]} {('· ' + descripcion) if descripcion else ''}</span>
-                    <span class="index-item-date">{fecha}</span>
-                    <span class="index-item-page">Pág. {page_num}</span>
-                </div>
+                <a href="#tratamiento-{idx}" class="index-item-link">
+                    <div class="index-item">
+                        <span class="index-item-name">{idx}. {tipo_label[:50]} {('· ' + descripcion) if descripcion else ''}</span>
+                        <span class="index-item-date">{fecha}</span>
+                        <span class="index-item-page">Pág. {page_num}</span>
+                    </div>
+                </a>
             """
     else:
         html_content += """
@@ -1814,7 +1826,7 @@ async def generate_evaluacion_pdf(
     for idx, visita in enumerate(visitas, 1):
         page_num = 1 + idx
         html_content += f"""
-        <div class="page-break"></div>
+        <div class="page-break" id="visita-{idx}"></div>
         <div class="header">
             <h1>FRUVECO</h1>
             <h2>REGISTRO DE VISITA</h2>
@@ -1938,7 +1950,7 @@ async def generate_evaluacion_pdf(
     for idx, tratamiento in enumerate(tratamientos, 1):
         page_num = 1 + len(visitas) + idx
         html_content += f"""
-        <div class="page-break"></div>
+        <div class="page-break" id="tratamiento-{idx}"></div>
         <div class="header">
             <h1>FRUVECO</h1>
             <h2>REGISTRO DE TRATAMIENTO</h2>
