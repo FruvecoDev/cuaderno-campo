@@ -570,6 +570,15 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - Los técnicos pueden ahora descargar/imprimir la hoja completa lista para archivar o entregar al cliente.
 
 
+### Unificación de la barra de paginación - DONE (2026-02)
+- Antes: dos patrones distintos coexistían — `PaginationBar.jsx` (barra de texto, sólo Fitosanitarios) y `PaginationFooter.js` + hook `usePagination` (Tratamientos, Tareas, Cosechas, Visitas, Albaranes). Contratos usaba código inline duplicado.
+- Ahora: **todas** las pantallas usan `PaginationFooter` + `usePagination`.
+- `Contratos.js`: reemplazado bloque inline (~35 líneas) por `<PaginationFooter itemLabel="contratos" testIdSuffix="contratos" />`.
+- `Fitosanitarios.js`: reemplazado `<PaginationBar />` por `<PaginationFooter itemLabel="productos" testIdSuffix="fitosanitarios" />` con `usePagination(productos, 25)`.
+- Eliminado `/app/frontend/src/components/common/PaginationBar.jsx` (y directorio `common/` vacío).
+- **Testing**: iteración 81 — 100% frontend E2E. Verificado en Contratos (400 registros, cambio 25→10 páginas, prev/next/first/last, filtro), Fitosanitarios (1970 productos, filtro reinicia a página 1), sin regresiones en Tratamientos/Cosechas/Tareas/Visitas/Albaranes.
+
+
 
 
 
