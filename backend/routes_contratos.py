@@ -163,6 +163,20 @@ async def import_contratos_excel(
     # Cache de lookups por nombre normalizado
     prov_cache: dict[str, str] = {}
     cult_cache: dict[str, str] = {}
+    
+    # Estado del contador global de codigo_proveedor (incremental durante la
+    # importación para evitar hacer N queries de "último código")
+    _last_prov = await proveedores_collection.find_one(
+        {"codigo_proveedor": {"$exists": True, "$ne": None}},
+        sort=[("codigo_proveedor", -1)],
+    )
+    _next_cp = 1
+    if _last_prov and _last_prov.get("codigo_proveedor"):
+        try:
+            _next_cp = int(_last_prov["codigo_proveedor"]) + 1
+        except (ValueError, TypeError):
+            _next_cp = (await proveedores_collection.count_documents({})) + 1
+    codigo_counter = {'next': _next_cp}
 
     async def resolve_proveedor(nombre: str) -> str:
         nonlocal created_provs
@@ -174,9 +188,12 @@ async def import_contratos_excel(
             new_doc = {
                 "nombre": nombre.strip(),
                 "tipo_proveedor": "Materia Prima",
+                "codigo_proveedor": str(codigo_counter['next']).zfill(6),
+                "activo": True,
                 "created_at": datetime.now(),
                 "updated_at": datetime.now(),
             }
+            codigo_counter['next'] += 1
             r = await proveedores_collection.insert_one(new_doc)
             created_provs += 1
             _id = str(r.inserted_id)
@@ -195,6 +212,7 @@ async def import_contratos_excel(
             new_doc = {
                 "nombre": nombre.strip(),
                 "tipo": "Horticola",
+                "activo": True,
                 "created_at": datetime.now(),
                 "updated_at": datetime.now(),
             }

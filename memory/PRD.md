@@ -341,6 +341,13 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
+### Fix: proveedores/cultivos importados sin código único y sin activo=True - DONE (2026-07-01)
+- **Bug reportado**: los proveedores creados por la importación Excel aparecían todos con el mismo ID (vacío) y sin marca de activo.
+- **Root cause**: `resolve_proveedor` insertaba directamente en Mongo sin generar `codigo_proveedor` ni fijar `activo=True`. La UI usa `codigo_proveedor` como "ID" visible.
+- **Fix importación**: contador incremental local `codigo_counter` inicializado desde el máximo actual en BD → cada nuevo proveedor recibe `codigo_proveedor` único ("000001", "000002", …) y `activo: True`. Cultivos también con `activo: True`.
+- **Backfill** `/app/scripts/backfill_proveedores_codigo_activo.py` ejecutado → 144 proveedores + 42 cultivos migrados.
+- **Testing UI**: "Total Proveedores: 147 · Activos: 147", cada uno con ID único (000001..000147) y badge verde "Activo".
+
 ### Importación masiva de Contratos desde Excel - DONE (2026-07-01)
 - **Nuevo endpoint** `POST /api/contratos/import-excel` acepta un `UploadFile` `.xlsx` con las columnas:
   `Numero Contrato · Tipo Contrato · Campaña · Procedencia · Fecha · Nombre Proveedor · Cultivo · Cantidad (Kg)`.
