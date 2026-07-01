@@ -195,16 +195,6 @@ const Login = () => {
               </button>
             </div>
           )}
-          
-          <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'hsl(var(--muted))', borderRadius: '0.5rem' }}>
-            <p className="text-xs text-muted" style={{ marginBottom: '0.5rem' }}>
-              <strong>{t('auth.defaultCredentials')}:</strong>
-            </p>
-            <p className="text-xs" style={{ fontFamily: 'var(--font-mono)' }}>
-              Email: admin@fruveco.com<br />
-              Password: admin123
-            </p>
-          </div>
         </div>
       </div>
     </div>
