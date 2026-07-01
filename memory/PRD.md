@@ -341,6 +341,19 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - PDF export usa `impresos.* OR evaluacion.*` para retro-compatibilidad con evaluaciones antiguas.
 - Solo "Comentarios" y las 6 secciones técnicas (Análisis, Cepellones, etc.) siguen siendo editables.
 
+### Fix: Visitas en PDF muestran siempre "Realizado: Sí" - DONE (2026-07-01)
+- **Regla de negocio**: si una visita está registrada (aparece en el PDF con observaciones/cuestionario), significa que fue realizada → el campo "Realizado" debe siempre mostrar "Sí".
+- **Antes**: `routes_evaluaciones.py:1866` renderizaba `{'Sí' if visita.get('realizado') else 'No'}` — como `realizado` defaultea a `False` al crear la visita y nadie lo togglea, salía "No" aunque la visita tuviera datos completos.
+- **Fix**: hardcoded a "Sí" en el HTML del PDF (el campo `realizado` en BD se conserva por si en el futuro se usa para planificación).
+- **Testing**: PDF regenerado, las 9 visitas de la evaluación COT muestran "Realizado: Sí" en cada página. Verificado extrayendo texto de cada página del PDF.
+
+### Cuestionario unificado en el PDF: 89 preguntas seguidas bajo "TOMA DE DATOS" - DONE (2026-07-01)
+- **Problema reportado**: el PDF dividía las 89 preguntas del cuestionario en 3+ secciones separadas (Toma de datos, Análisis de suelo, Calidad de cepellones, …) con numeración reiniciada 1..N por sección. Además aparecían bandas verdes vacías cuando algunas secciones tenían preguntas sin responder.
+- **Fix**: en `generate_evaluacion_pdf` (`routes_evaluaciones.py`) se reemplazó el bucle por-sección por un único bloque **"TOMA DE DATOS"** que concatena todas las respuestas de las 7 secciones internas (`toma_datos`, `analisis_suelo`, `pasos_precampana`, `calidad_cepellones`, `inspeccion_maquinaria`, `observaciones`, `calibracion_mantenimiento`) y las numera 1..N de forma continua. El orden respeta el `orden_global` guardado en `evaluaciones_config` (mismo orden que la vista plana del frontend).
+- **Compatibilidad**: los datos siguen guardándose por sección en BD (sin migración). Solo cambia el rendering del PDF.
+- **Bug de timsort resuelto**: el `list.index()` dentro del `sort key` fallaba con `ValueError: not in list` porque timsort muta la lista durante la ordenación. Se precomputa un `_fallback = {id(r): i for i,r in ...}` antes del sort.
+- **Testing**: PDF regenerado (HTTP 200, 1.2 MB, 23 páginas). Verificado end-to-end: página 3 abre "TOMA DE DATOS" con pregunta 1, la numeración avanza hasta 89 sin reiniciar y sin bandas verdes intermedias. Extracción textual confirma rango 1..89.
+
 ### Botones "Marcar todo Sí" / "Marcar todo No" en cuestionario - DONE (2026-07-01)
 - Nuevo panel bulk-mark en la pestaña "Cuestionarios" de Evaluaciones, entre el progress bar y el panel "Añadir pregunta".
 - Botón verde **"Marcar todo Sí"** + botón rojo **"Marcar todo No"** + contador dinámico `Marcar todas las preguntas Sí/No (N):`.

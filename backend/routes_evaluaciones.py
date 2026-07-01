@@ -1618,47 +1618,72 @@ async def generate_evaluacion_pdf(
         </div>
         """
     
-    # Secciones de cuestionarios
-    secciones_config = [
-        ('toma_datos', 'TOMA DE DATOS'),
-        ('analisis_suelo', 'ANÁLISIS DE SUELO'),
-        ('pasos_precampana', 'PASOS PRECAMPAÑA DESINFECCIÓN'),
-        ('calidad_cepellones', 'CALIDAD DE CEPELLONES'),
-        ('inspeccion_maquinaria', 'INSPECCIÓN MAQUINARIA'),
-        ('observaciones', 'OBSERVACIONES'),
-        ('calibracion_mantenimiento', 'CALIBRACIÓN Y MANTENIMIENTO APARATOS MEDICIÓN FITO')
+    # Cuestionario unificado: todas las secciones internas se muestran como
+    # una única "TOMA DE DATOS" con numeración continua 1..N, respetando el
+    # `orden_global` guardado en configuración (mismo orden que la vista plana
+    # del frontend). Internamente los datos siguen almacenándose por sección
+    # (toma_datos, analisis_suelo, calidad_cepellones, …) por compatibilidad.
+    secciones_internas = [
+        'toma_datos',
+        'analisis_suelo',
+        'pasos_precampana',
+        'calidad_cepellones',
+        'inspeccion_maquinaria',
+        'observaciones',
+        'calibracion_mantenimiento',
     ]
+    todas_respuestas = []
+    for _sk in secciones_internas:
+        _resp = evaluacion.get(_sk, []) or []
+        if isinstance(_resp, list):
+            todas_respuestas.extend(_resp)
     
-    for seccion_key, seccion_titulo in secciones_config:
-        respuestas = evaluacion.get(seccion_key, [])
-        if respuestas:
-            html_content += f"""
+    # Aplicar orden_global (mismo que la UI): las preguntas con posición en
+    # orden_global van primero según ese orden; las que no aparezcan mantienen
+    # el orden de sección + índice original al final.
+    try:
+        _cfg = await evaluaciones_config_collection.find_one({"tipo": "preguntas"})
+        _orden_global = (_cfg or {}).get("orden_global", []) if _cfg else []
+    except Exception:
+        _orden_global = []
+    if _orden_global:
+        _pos = {pid: i for i, pid in enumerate(_orden_global)}
+        # Precompute stable fallback index (id(r) del objeto) para preguntas que
+        # no aparecen en orden_global — evita `list.index()` durante sort que
+        # falla porque timsort muta la lista y produce ValueError.
+        _fallback = {id(r): i for i, r in enumerate(todas_respuestas)}
+        todas_respuestas.sort(
+            key=lambda r: _pos.get(r.get('pregunta_id'), 10_000 + _fallback[id(r)])
+        )
+    
+    if todas_respuestas:
+        html_content += """
         <div class="section">
-            <div class="section-title">{seccion_titulo}</div>
+            <div class="section-title">TOMA DE DATOS</div>
             <div class="section-content">
-            """
-            for idx, resp in enumerate(respuestas, 1):
-                pregunta = resp.get('pregunta', '')
-                respuesta = resp.get('respuesta')
-                respuesta_fmt = format_respuesta(respuesta)
-                
-                respuesta_class = ''
-                if respuesta is True:
-                    respuesta_class = 'answer-yes'
-                elif respuesta is False:
-                    respuesta_class = 'answer-no'
-                
-                html_content += f"""
+        """
+        for idx, resp in enumerate(todas_respuestas, 1):
+            pregunta = resp.get('pregunta', '')
+            respuesta = resp.get('respuesta')
+            respuesta_fmt = format_respuesta(respuesta)
+            
+            respuesta_class = ''
+            if respuesta is True:
+                respuesta_class = 'answer-yes'
+            elif respuesta is False:
+                respuesta_class = 'answer-no'
+            
+            html_content += f"""
                 <div class="question-row">
                     <span class="question-num">{idx}.</span>
                     <span class="question-text">{pregunta}</span>
                     <div class="answer {respuesta_class}">R: {respuesta_fmt}</div>
                 </div>
-                """
-            html_content += """
+            """
+        html_content += """
             </div>
         </div>
-            """
+        """
     
     # Impresos — Cabecera + 6 secciones (esquema nuevo)
     impresos = evaluacion.get('impresos', {}) or {}
@@ -1838,7 +1863,7 @@ async def generate_evaluacion_pdf(
                     </div>
                     <div class="dato-item">
                         <div class="dato-label">Realizado</div>
-                        <div class="dato-value">{'Sí' if visita.get('realizado') else 'No'}</div>
+                        <div class="dato-value">Sí</div>
                     </div>
                 </div>
             </div>
