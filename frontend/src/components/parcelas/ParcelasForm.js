@@ -196,19 +196,25 @@ export const ParcelasForm = ({
               <div style={{ backgroundColor: 'hsl(var(--muted))', padding: '1rem', borderRadius: '0.5rem', marginBottom: '0.75rem' }}>
                 <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Buscar contrato por:</p>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
-                  {['proveedor', 'cultivo', 'campana'].map(field => (
+                  {['proveedor', 'cultivo', 'campana'].map(field => {
+                    // Pluralización: proveedor→proveedores, cultivo→cultivos, campana→campanas
+                    const optionsKey = field === 'campana' ? 'campanas'
+                      : field === 'cultivo' ? 'cultivos'
+                      : field + 'es';
+                    return (
                     <div key={field}>
                       <label style={{ fontSize: '0.75rem', fontWeight: '500' }}>{field === 'campana' ? 'Campaña' : field.charAt(0).toUpperCase() + field.slice(1)}</label>
                       <select className="form-select" value={contratoSearch[field]}
                         onChange={(e) => setContratoSearch({...contratoSearch, [field]: e.target.value})}
                         style={{ fontSize: '0.875rem' }} data-testid={`contrato-search-${field}`}>
                         <option value="">{field === 'campana' ? 'Todas' : 'Todos'}</option>
-                        {contratoFilterOptions[`${field === 'campana' ? 'campanas' : field + 'es'}`]?.map(v => (
+                        {contratoFilterOptions[optionsKey]?.map(v => (
                           <option key={v} value={v}>{v}</option>
                         ))}
                       </select>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 {(contratoSearch.proveedor || contratoSearch.cultivo || contratoSearch.campana) && (
                   <button type="button" onClick={() => setContratoSearch({ proveedor: '', cultivo: '', campana: '' })}
