@@ -165,7 +165,7 @@ const Contratos = () => {
   const {
     page, pageSize, totalPages, totalItems, pageStart, pageEnd,
     paginatedItems: paginatedContratos, setPage, setPageSize,
-  } = usePagination(filteredContratos, 25);
+  } = usePagination(filteredContratos, 20);
 
   const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(paginatedContratos);
   const [bulkDeleting, setBulkDeleting] = useState(false);
@@ -585,6 +585,13 @@ const Contratos = () => {
                 deleting={bulkDeleting}
               />
             )}
+            {/* Pagination TOP (misma barra que abajo, para ahorrar scroll) */}
+            <PaginationFooter
+              totalItems={totalItems} page={page} pageSize={pageSize}
+              totalPages={totalPages} pageStart={pageStart} pageEnd={pageEnd}
+              onPageChange={setPage} onPageSizeChange={setPageSize}
+              itemLabel="contratos" testIdSuffix="contratos-top"
+            />
             <ContratoTable
               contratos={paginatedContratos}
               puedeCompra={puedeCompra} puedeVenta={puedeVenta}

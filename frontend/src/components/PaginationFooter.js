@@ -22,7 +22,7 @@ const PaginationFooter = ({
   onPageSizeChange,
   itemLabel = 'registros',
   testIdSuffix = '',
-  pageSizeOptions = [10, 25, 50, 100, 200],
+  pageSizeOptions = [10, 20, 25, 50, 100, 200],
 }) => {
   if (totalItems === 0) return null;
 
