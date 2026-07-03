@@ -305,7 +305,9 @@ async def create_producto(
     producto: ProductoFitosanitarioCreate,
     current_user: dict = Depends(get_current_user)
 ):
-    if current_user.get("role") not in ["Admin", "Manager"]:
+    # Admin, Manager y Technician (rol técnico de campo) pueden crear productos
+    # fitosanitarios. El borrado sigue restringido a Admin.
+    if current_user.get("role") not in ["Admin", "Manager", "Technician"]:
         raise HTTPException(status_code=403, detail="No tienes permisos para crear productos")
     
     
@@ -329,7 +331,8 @@ async def update_producto(
     producto: ProductoFitosanitarioUpdate,
     current_user: dict = Depends(get_current_user)
 ):
-    if current_user.get("role") not in ["Admin", "Manager"]:
+    # Admin, Manager y Technician pueden editar productos fitosanitarios.
+    if current_user.get("role") not in ["Admin", "Manager", "Technician"]:
         raise HTTPException(status_code=403, detail="No tienes permisos para editar productos")
     
     
