@@ -17,7 +17,8 @@ const TIPOS_PRODUCTO = [
   'Fungicida',
   'Acaricida',
   'Molusquicida',
-  'Fertilizante'
+  'Fertilizante',
+  'Otro'
 ];
 
 const UNIDADES_DOSIS = ['L/ha', 'kg/ha', 'ml/ha', 'g/ha', '%'];
