@@ -1026,10 +1026,32 @@ const Fitosanitarios = () => {
         )}
       </div>
 
-      {/* Form */}
+      {/* Form modal (ventana emergente) */}
       {showForm && (
-        <div className="card mb-6" data-testid="producto-form">
-          <h2 className="card-title">{editingId ? 'Editar Producto' : 'Nuevo Producto Fitosanitario'}</h2>
+        <div
+          data-testid="producto-form-overlay"
+          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', backdropFilter: 'blur(4px)' }}
+          onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }}
+        >
+        <div
+          className="card"
+          data-testid="producto-form"
+          style={{ maxWidth: '960px', width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', borderRadius: '12px', padding: '1.5rem' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '2px solid hsl(var(--border))' }}>
+            <h2 className="card-title" style={{ margin: 0 }}>{editingId ? 'Editar Producto' : 'Nuevo Producto Fitosanitario'}</h2>
+            <button
+              type="button"
+              onClick={() => { setShowForm(false); setEditingId(null); resetForm(); }}
+              className="config-modal-close-btn"
+              title="Cerrar"
+              data-testid="btn-close-producto-form"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.35rem', borderRadius: '6px', display: 'inline-flex' }}
+            >
+              <X size={18} />
+            </button>
+          </div>
           <form onSubmit={handleSubmit}>
             <div className="grid-3">
               <div className="form-group">
@@ -1290,6 +1312,7 @@ const Fitosanitarios = () => {
               </button>
             </div>
           </form>
+        </div>
         </div>
       )}
 
