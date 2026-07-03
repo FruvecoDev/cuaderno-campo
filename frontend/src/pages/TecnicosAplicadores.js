@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { 
   Plus, Edit2, Trash2, Search, UserCheck, Upload, X, 
   AlertTriangle, CheckCircle, XCircle, FileImage, Calendar,
-  Award, CreditCard, Eye, Download, FileText, Settings, User, Briefcase
+  Award, CreditCard, Eye, Download, FileText, Settings, User, Briefcase, ExternalLink
 } from 'lucide-react';
 import { notify } from '../lib/notify';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
@@ -639,19 +639,67 @@ const TecnicosAplicadores = () => {
                       onDrop={handleDrop}
                     >
                       {(selectedFile || filePreview) ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
-                          {filePreview && !filePreview.endsWith('.pdf') ? (
-                            <img
-                              src={filePreview}
-                              alt="Preview"
-                              style={{ maxWidth: '320px', maxHeight: '200px', objectFit: 'contain', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
-                            />
-                          ) : (
-                            <div style={{ padding: '1.5rem', backgroundColor: 'hsl(var(--muted))', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                              <FileText size={32} style={{ color: 'hsl(var(--primary))' }} />
-                              <span style={{ fontWeight: '600' }}>PDF</span>
-                            </div>
-                          )}
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', width: '100%' }}>
+                          {(() => {
+                            // Detectar tipo por MIME (archivo recién elegido) o por extensión (URL)
+                            const pv = filePreview || '';
+                            const sf = selectedFile;
+                            const isPdf = sf
+                              ? sf.type === 'application/pdf'
+                              : /\.pdf(\?|$)/i.test(pv);
+                            if (isPdf) {
+                              // Preview embebido del PDF. Usamos <object> con fallback
+                              // porque algunos navegadores (Safari, algunos móviles) no
+                              // renderizan PDFs dentro de <iframe> — <object> es más
+                              // robusto y respeta la extensión PDF viewer nativa.
+                              return (
+                                <>
+                                  <object
+                                    data={pv}
+                                    type="application/pdf"
+                                    data-testid="preview-certificado-pdf"
+                                    style={{ width: '100%', maxWidth: '640px', height: '480px', border: '1px solid hsl(var(--border))', borderRadius: '8px', backgroundColor: '#f8f9fa' }}
+                                  >
+                                    <iframe
+                                      title="Certificado PDF"
+                                      src={pv}
+                                      style={{ width: '100%', maxWidth: '640px', height: '480px', border: 'none', borderRadius: '8px' }}
+                                    >
+                                      <p>Tu navegador no puede mostrar el PDF embebido. <a href={pv} target="_blank" rel="noopener noreferrer">Ábrelo en nueva pestaña</a>.</p>
+                                    </iframe>
+                                  </object>
+                                  <a
+                                    href={pv}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn btn-sm btn-secondary"
+                                    data-testid="btn-abrir-cert-pdf"
+                                  >
+                                    <ExternalLink size={14} style={{ marginRight: '0.35rem' }} /> Abrir en nueva pestaña
+                                  </a>
+                                </>
+                              );
+                            }
+                            return (
+                              <>
+                                <img
+                                  src={pv}
+                                  alt="Preview certificado"
+                                  data-testid="preview-certificado-img"
+                                  style={{ maxWidth: '640px', maxHeight: '420px', width: '100%', objectFit: 'contain', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
+                                />
+                                <a
+                                  href={pv}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="btn btn-sm btn-secondary"
+                                  data-testid="btn-abrir-cert-img"
+                                >
+                                  <ExternalLink size={14} style={{ marginRight: '0.35rem' }} /> Ver a tamaño completo
+                                </a>
+                              </>
+                            );
+                          })()}
                           {selectedFile && (
                             <span style={{ fontSize: '0.8rem', color: 'hsl(var(--primary))', fontWeight: '600' }}>
                               Nuevo archivo: {selectedFile.name}
@@ -659,7 +707,7 @@ const TecnicosAplicadores = () => {
                           )}
                           {!selectedFile && editingId && (
                             <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
-                              Imagen actualmente guardada
+                              Archivo guardado actualmente
                             </span>
                           )}
                           <label className="btn btn-sm btn-secondary" style={{ cursor: 'pointer' }}>
