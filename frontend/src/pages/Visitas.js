@@ -280,7 +280,7 @@ const Visitas = () => {
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
 
   // Paginación
-  const { page, pageSize, totalPages, totalItems, pageStart, pageEnd, paginatedItems: paginatedVisitas, setPage, setPageSize } = usePagination(filteredVisitas, 25);
+  const { page, pageSize, totalPages, totalItems, pageStart, pageEnd, paginatedItems: paginatedVisitas, setPage, setPageSize } = usePagination(filteredVisitas, 20);
 
   // Bulk delete (seleccion multiple sobre la pagina visible)
   const canBulkDelete = !!user?.can_bulk_delete;
@@ -493,6 +493,13 @@ const Visitas = () => {
         </div>
       )}
       
+      {/* Barra de paginación arriba (misma que abajo) */}
+      <PaginationFooter
+        totalItems={totalItems} page={page} pageSize={pageSize}
+        totalPages={totalPages} pageStart={pageStart} pageEnd={pageEnd}
+        onPageChange={setPage} onPageSizeChange={setPageSize}
+        itemLabel="visitas" testIdSuffix="visitas-top"
+      />
       <VisitasTable
         filteredVisitas={paginatedVisitas} loading={loading} hasActiveFilters={hasActiveFilters}
         tableConfig={tableConfig} canEdit={canEdit} canDelete={canDelete} canCreate={canCreate}
