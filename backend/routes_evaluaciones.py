@@ -128,11 +128,17 @@ PREGUNTAS_DEFAULT = {
 
 # ----------------------------------------------------------------------------
 # Anexos (Impresos) — File uploads attached to an evaluación's impresos.
-# Stored under /app/uploads/evaluaciones/anexos/<uuid>__<filename> and served
-# via the global StaticFiles mount at /api/uploads.
+# Se guardan en la colección MongoDB `evaluaciones_anexos` (bytes inline)
+# porque `/app/uploads/` es EFÍMERO en el pod de producción y se borra en
+# cada redeploy. MongoDB es persistente entre deploys.
+# El endpoint GET streamea los bytes con el content-type correcto.
+# Backward-compat: si el URL antiguo `/api/uploads/evaluaciones/anexos/...`
+# se llama y el archivo todavía existe en disco, se sirve vía StaticFiles.
 # ----------------------------------------------------------------------------
 
-ANEXOS_DIR = "/app/uploads/evaluaciones/anexos"
+anexos_collection = db['evaluaciones_anexos']
+
+ANEXOS_DIR = "/app/uploads/evaluaciones/anexos"  # kept only para backward-compat
 os.makedirs(ANEXOS_DIR, exist_ok=True)
 
 ALLOWED_ANEXO_TYPES = {
@@ -151,11 +157,9 @@ async def upload_evaluacion_anexo(
     file: UploadFile = File(...),
     current_user: dict = Depends(RequireCreate),
 ):
-    """Subir un anexo (PDF / imagen / documento) para una hoja de evaluación.
-
-    Devuelve metadatos `{filename, url, size, content_type, uploaded_at}` que
-    el frontend debe guardar en `impresos.<seccion>.anexo` al persistir la
-    evaluación.
+    """Subir un anexo. Guarda los bytes en MongoDB (colección
+    `evaluaciones_anexos`) para que persistan entre redeploys. Devuelve
+    metadatos con `url` que apunta al endpoint GET /api/evaluaciones/anexos/{id}.
     """
     if file.content_type not in ALLOWED_ANEXO_TYPES:
         raise HTTPException(
@@ -163,33 +167,29 @@ async def upload_evaluacion_anexo(
             detail=f"Tipo de archivo no permitido ({file.content_type}). Use PDF, imagen o documento Office.",
         )
 
-    original = file.filename or "anexo"
-    safe_name = "".join(c for c in original if c.isalnum() or c in (".", "_", "-"))[-80:]
-    stored_name = f"{uuid.uuid4().hex}__{safe_name}"
-    file_path = os.path.join(ANEXOS_DIR, stored_name)
+    contents = await file.read(MAX_ANEXO_SIZE_BYTES + 1)
+    size = len(contents)
+    if size > MAX_ANEXO_SIZE_BYTES:
+        raise HTTPException(status_code=413, detail="El archivo supera el tamaño máximo permitido (15 MB).")
 
-    size = 0
-    with open(file_path, "wb") as buffer:
-        while True:
-            chunk = await file.read(1024 * 1024)
-            if not chunk:
-                break
-            size += len(chunk)
-            if size > MAX_ANEXO_SIZE_BYTES:
-                buffer.close()
-                try:
-                    os.remove(file_path)
-                except OSError:
-                    pass
-                raise HTTPException(status_code=413, detail="El archivo supera el tamaño máximo permitido (15 MB).")
-            buffer.write(chunk)
+    original = file.filename or "anexo"
+    doc = {
+        "filename": original,
+        "content_type": file.content_type,
+        "size": size,
+        "data": contents,   # bytes → BSON Binary
+        "uploaded_at": datetime.now(),
+        "uploaded_by": current_user.get("username") or current_user.get("email") or "",
+    }
+    result = await anexos_collection.insert_one(doc)
+    anexo_id = str(result.inserted_id)
 
     return {
         "success": True,
         "data": {
             "filename": original,
-            "stored_name": stored_name,
-            "url": f"/api/uploads/evaluaciones/anexos/{stored_name}",
+            "stored_name": anexo_id,   # ahora es el ObjectId
+            "url": f"/api/evaluaciones/anexos/{anexo_id}",
             "size": size,
             "content_type": file.content_type,
             "uploaded_at": datetime.now().isoformat(),
@@ -198,15 +198,56 @@ async def upload_evaluacion_anexo(
     }
 
 
+@router.get("/evaluaciones/anexos/{anexo_id}")
+async def download_evaluacion_anexo(
+    anexo_id: str,
+    # No requerir login: los PDFs se abren desde <iframe>/<a> y el navegador
+    # no envía Authorization header. La URL contiene un ObjectId aleatorio
+    # (24 hex chars) que actúa como token de acceso implícito.
+):
+    """Descargar/visualizar un anexo. Sirve los bytes con Content-Disposition
+    inline para que los PDFs y las imágenes se rendericen en el navegador
+    en lugar de forzar descarga."""
+    from fastapi.responses import Response
+    if not ObjectId.is_valid(anexo_id):
+        raise HTTPException(status_code=404, detail="Anexo no encontrado")
+    doc = await anexos_collection.find_one({"_id": ObjectId(anexo_id)})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Anexo no encontrado")
+    return Response(
+        content=doc.get("data", b""),
+        media_type=doc.get("content_type") or "application/octet-stream",
+        headers={
+            "Content-Disposition": f'inline; filename="{doc.get("filename", "anexo")}"',
+            "Cache-Control": "private, max-age=3600",
+        },
+    )
+
+
 @router.delete("/evaluaciones/anexos/{stored_name}")
 async def delete_evaluacion_anexo(
     stored_name: str,
     current_user: dict = Depends(RequireDelete),
 ):
-    """Eliminar un anexo subido previamente. `stored_name` es el nombre con UUID."""
-    # Defence: prevent path traversal — only basenames allowed
+    """Eliminar un anexo subido previamente.
+
+    Acepta:
+    - Un ObjectId de MongoDB (anexos nuevos guardados en `evaluaciones_anexos`).
+    - Un nombre-de-fichero legacy con formato `<uuid>__<filename>` (anexos
+      antiguos guardados en disco antes de migrar a Mongo).
+    """
+    # Defence: prevent path traversal en el legacy
     if "/" in stored_name or ".." in stored_name:
         raise HTTPException(status_code=400, detail="Nombre de archivo inválido")
+
+    # Nuevo formato: ObjectId de Mongo
+    if ObjectId.is_valid(stored_name):
+        result = await anexos_collection.delete_one({"_id": ObjectId(stored_name)})
+        if result.deleted_count > 0:
+            return {"success": True}
+        # Si no está en Mongo, seguimos probando el disco (podría ser legacy).
+
+    # Legacy: fichero en disco
     path = os.path.join(ANEXOS_DIR, stored_name)
     if not os.path.exists(path):
         raise HTTPException(status_code=404, detail="Anexo no encontrado")
