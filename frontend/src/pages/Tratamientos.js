@@ -131,7 +131,8 @@ const Tratamientos = () => {
     proveedor: '',
     cultivo: '',
     campana: '',
-    tipo_tratamiento: ''
+    tipo_tratamiento: '',
+    estado: '',
   });
   
   // Configuración de campos del formulario
@@ -366,6 +367,12 @@ const Tratamientos = () => {
   const filteredTratamientos = tratamientos.filter(t => {
     if (filters.campana && t.campana !== filters.campana) return false;
     if (filters.tipo_tratamiento && t.tipo_tratamiento !== filters.tipo_tratamiento) return false;
+    if (filters.estado) {
+      // Estados: realizado / pendiente / cancelado
+      if (filters.estado === 'realizado' && !t.realizado) return false;
+      if (filters.estado === 'pendiente' && (t.realizado || t.cancelado)) return false;
+      if (filters.estado === 'cancelado' && !t.cancelado) return false;
+    }
     // Para proveedor y cultivo necesitamos buscar en las parcelas asociadas
     if (filters.proveedor || filters.cultivo) {
       const parcelasIds = t.parcelas_ids || [];
@@ -447,7 +454,7 @@ const Tratamientos = () => {
   };
   
   const clearFilters = () => {
-    setFilters({ proveedor: '', cultivo: '', campana: '', tipo_tratamiento: '' });
+    setFilters({ proveedor: '', cultivo: '', campana: '', tipo_tratamiento: '', estado: '' });
   };
   
   const toggleFieldConfig = (field) => {
@@ -945,6 +952,20 @@ const Tratamientos = () => {
               {filterOptions.tipos.map(t => (
                 <option key={t} value={t}>{t}</option>
               ))}
+            </select>
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Estado</label>
+            <select
+              className="form-select"
+              value={filters.estado}
+              onChange={(e) => setFilters({ ...filters, estado: e.target.value })}
+              data-testid="filter-estado"
+            >
+              <option value="">Todos</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="realizado">Realizado</option>
+              <option value="cancelado">Cancelado</option>
             </select>
           </div>
         </div>
