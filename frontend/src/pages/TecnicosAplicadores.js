@@ -24,6 +24,24 @@ const DEFAULT_COLUMNS = [
   { id: 'estado', label: 'Estado', visible: true },
 ];
 
+// Formatea una fecha ISO (YYYY-MM-DD) o Date-like a DD-MM-AAAA. Devuelve '-' si vacia/invalida.
+const formatDateDMY = (value) => {
+  if (!value) return '-';
+  // Si viene como YYYY-MM-DD o YYYY-MM-DDT...
+  const str = String(value);
+  const isoMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) {
+    return `${isoMatch[3]}-${isoMatch[2]}-${isoMatch[1]}`;
+  }
+  // Fallback: intentar parsear como Date
+  const d = new Date(str);
+  if (isNaN(d.getTime())) return str;
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = d.getFullYear();
+  return `${dd}-${mm}-${yyyy}`;
+};
+
 
 const TecnicosAplicadores = () => {
   const { t } = useTranslation();
@@ -852,8 +870,8 @@ const TecnicosAplicadores = () => {
                           case 'dni': return <td key="dni">{tecnico.dni}</td>;
                           case 'nivel': return <td key="nivel"><span className="badge badge-info"><Award size={12} style={{ marginRight: '0.25rem' }} />{tecnico.nivel_capacitacion}</span></td>;
                           case 'num_carnet': return <td key="num_carnet"><span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><CreditCard size={14} />{tecnico.num_carnet}</span></td>;
-                          case 'certificacion': return <td key="certificacion">{tecnico.fecha_certificacion}</td>;
-                          case 'validez': return <td key="validez">{tecnico.fecha_validez}</td>;
+                          case 'certificacion': return <td key="certificacion">{formatDateDMY(tecnico.fecha_certificacion)}</td>;
+                          case 'validez': return <td key="validez">{formatDateDMY(tecnico.fecha_validez)}</td>;
                           case 'estado': return <td key="estado"><span className={`badge ${estado.class}`}>{estado.icon} {estado.label}</span></td>;
                           default: return null;
                         }
