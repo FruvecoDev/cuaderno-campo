@@ -15,12 +15,24 @@ import { notify } from '../../lib/notify';
  *
  * Props:
  *   - show: bool
- *   - evaluacionId: string
+ *   - suggestionUrl: string  (endpoint GET que devuelve { proveedor_nombre, emails: [{valor,etiqueta}] })
+ *   - sendUrl: string        (endpoint POST que recibe { recipients, cc, subject, message })
+ *   - title: string          (titulo del modal, default: "Enviar Hoja de Evaluación")
+ *   - defaultSubject: string (asunto por defecto)
  *   - currentUserEmail: string (para prefill del CC opcional)
  *   - onClose: fn
  *   - onSent: fn (opcional)
  */
-const SendEmailModal = ({ show, evaluacionId, currentUserEmail = '', onClose, onSent }) => {
+const SendEmailModal = ({
+  show,
+  suggestionUrl,
+  sendUrl,
+  title = 'Enviar Hoja de Evaluación',
+  defaultSubject = 'Hoja de Evaluación / Cuaderno de Campo',
+  currentUserEmail = '',
+  onClose,
+  onSent,
+}) => {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [suggestion, setSuggestion] = useState({ proveedor_nombre: null, emails: [] });
@@ -28,29 +40,28 @@ const SendEmailModal = ({ show, evaluacionId, currentUserEmail = '', onClose, on
   const [extraRecipients, setExtraRecipients] = useState('');
   const [ccRecipients, setCcRecipients] = useState(currentUserEmail || '');
   const [ccMe, setCcMe] = useState(false);
-  const [subject, setSubject] = useState('Hoja de Evaluación / Cuaderno de Campo');
+  const [subject, setSubject] = useState(defaultSubject);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    if (!show || !evaluacionId) return;
+    if (!show || !suggestionUrl) return;
     let cancelled = false;
     (async () => {
       setLoading(true);
       try {
-        const data = await api.get(`/api/evaluaciones/${evaluacionId}/email-suggestion`);
+        const data = await api.get(suggestionUrl);
         if (cancelled) return;
         setSuggestion(data);
-        // Preseleccionar TODOS los emails del proveedor
         setSelectedIds(new Set((data.emails || []).map(e => e.valor)));
       } catch (err) {
-        console.error('[SendEmailModal] email-suggestion failed', err);
+        console.error('[SendEmailModal] suggestion failed', err);
         setSuggestion({ proveedor_nombre: null, emails: [] });
       } finally {
         if (!cancelled) setLoading(false);
       }
     })();
     return () => { cancelled = true; };
-  }, [show, evaluacionId]);
+  }, [show, suggestionUrl]);
 
   // Reset estado cuando se cierra el modal
   useEffect(() => {
@@ -59,9 +70,9 @@ const SendEmailModal = ({ show, evaluacionId, currentUserEmail = '', onClose, on
       setCcRecipients(currentUserEmail || '');
       setCcMe(false);
       setMessage('');
-      setSubject('Hoja de Evaluación / Cuaderno de Campo');
+      setSubject(defaultSubject);
     }
-  }, [show, currentUserEmail]);
+  }, [show, currentUserEmail, defaultSubject]);
 
   const toggleEmail = (valor) => {
     setSelectedIds(prev => {
@@ -105,7 +116,7 @@ const SendEmailModal = ({ show, evaluacionId, currentUserEmail = '', onClose, on
     setSending(true);
     try {
       const cc = buildCc();
-      const result = await api.post(`/api/evaluaciones/${evaluacionId}/email`, {
+      const result = await api.post(sendUrl, {
         recipients,
         cc,
         subject: subject || undefined,
@@ -155,7 +166,7 @@ const SendEmailModal = ({ show, evaluacionId, currentUserEmail = '', onClose, on
               <Mail size={18} style={{ color: 'hsl(210 92% 50%)' }} />
             </div>
             <div>
-              <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700 }}>Enviar Hoja de Evaluación</h2>
+              <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700 }}>{title}</h2>
               <p style={{ margin: 0, fontSize: '0.78rem', color: 'hsl(var(--muted-foreground))' }}>
                 {suggestion.proveedor_nombre ? `Proveedor: ${suggestion.proveedor_nombre}` : 'Sin proveedor asociado'}
               </p>

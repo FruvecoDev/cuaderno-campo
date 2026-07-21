@@ -524,6 +524,103 @@ async def generar_cuaderno_campo(
             except Exception:
                 pass
 
+
+# ============================================================================
+# ENVIO POR EMAIL DEL CUADERNO DE CAMPO
+# ============================================================================
+
+async def _get_or_create_transient_evaluacion(parcela_id: str, campana: Optional[str], current_user: dict):
+    """Obtiene una evaluacion existente para la parcela+campana o crea una transiente.
+    Devuelve (ev_doc, created_transient_bool).
+    """
+    try:
+        parcela = await parcelas_collection.find_one({"_id": ObjectId(parcela_id)})
+    except Exception:
+        raise HTTPException(status_code=400, detail="ID de parcela invalido")
+    if not parcela:
+        raise HTTPException(status_code=404, detail="Parcela no encontrada")
+
+    campana_filtro = campana or parcela.get("campana", datetime.now().strftime("%Y/%y"))
+    query = {"parcela_id": parcela_id}
+    if campana_filtro:
+        query["campana"] = campana_filtro
+    ev = await evaluaciones_collection.find_one(query, sort=[("created_at", -1)])
+    if not ev:
+        ev = await evaluaciones_collection.find_one({"parcela_id": parcela_id}, sort=[("created_at", -1)])
+    if ev:
+        return ev, False, parcela
+    transient = {
+        "parcela_id": parcela_id,
+        "campana": campana_filtro,
+        "codigo_plantacion": parcela.get("codigo_plantacion", ""),
+        "fecha_inicio": datetime.now().strftime("%Y-%m-%d"),
+        "estado": "borrador",
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
+        "created_by": str(current_user.get("_id", "")),
+        "_transient": True,
+    }
+    result = await evaluaciones_collection.insert_one(transient)
+    ev = await evaluaciones_collection.find_one({"_id": result.inserted_id})
+    return ev, True, parcela
+
+
+@router.get("/cuaderno-campo/{parcela_id}/email-suggestion")
+async def suggest_cuaderno_email_recipients(
+    parcela_id: str,
+    current_user: dict = Depends(get_current_user),
+):
+    """Sugiere destinatarios de email a partir del proveedor de la parcela."""
+    from routes_evaluaciones import _extract_emails_from_proveedor
+    try:
+        parcela = await parcelas_collection.find_one({"_id": ObjectId(parcela_id)})
+    except Exception:
+        raise HTTPException(status_code=400, detail="ID de parcela invalido")
+    if not parcela:
+        raise HTTPException(status_code=404, detail="Parcela no encontrada")
+
+    proveedor_id_str = parcela.get("proveedor_id")
+    proveedor_nombre = parcela.get("proveedor")
+    proveedores_col = db["proveedores"]
+    proveedor_doc = None
+    if proveedor_id_str and ObjectId.is_valid(proveedor_id_str):
+        proveedor_doc = await proveedores_col.find_one({"_id": ObjectId(proveedor_id_str)})
+    if not proveedor_doc and proveedor_nombre:
+        proveedor_doc = await proveedores_col.find_one({"nombre": proveedor_nombre})
+    emails = _extract_emails_from_proveedor(proveedor_doc)
+    return {
+        "parcela_id": parcela_id,
+        "proveedor_id": str(proveedor_doc["_id"]) if proveedor_doc else None,
+        "proveedor_nombre": (proveedor_doc or {}).get("nombre") if proveedor_doc else proveedor_nombre,
+        "emails": emails,
+        "has_email": bool(emails),
+    }
+
+
+@router.post("/cuaderno-campo/{parcela_id}/email")
+async def send_cuaderno_by_email(
+    parcela_id: str,
+    payload: dict,
+    campana: Optional[str] = Query(None),
+    current_user: dict = Depends(get_current_user),
+):
+    """Envia el PDF del Cuaderno de Campo (formato Hoja de Evaluacion) por email.
+
+    Body: { recipients: [...], cc?: [...], subject?, message? }
+    """
+    from routes_evaluaciones import send_evaluacion_by_email
+    ev, created_transient, _parcela = await _get_or_create_transient_evaluacion(parcela_id, campana, current_user)
+    try:
+        return await send_evaluacion_by_email(str(ev["_id"]), payload, current_user)
+    finally:
+        if created_transient and ev:
+            try:
+                await evaluaciones_collection.delete_one({"_id": ev["_id"]})
+            except Exception:
+                pass
+
+
+
 @router.get("/cuaderno-campo/preview/{parcela_id}")
 async def preview_cuaderno_campo(
     parcela_id: str,

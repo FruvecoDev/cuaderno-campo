@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { FileText, Download, Loader2, Search, Leaf, MapPin, Calendar, Package, Droplets, Eye, ClipboardList, TrendingUp } from 'lucide-react';
+import { FileText, Download, Loader2, Search, Leaf, MapPin, Calendar, Package, Droplets, Eye, ClipboardList, TrendingUp, Mail } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../utils/permissions';
 import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
+import SendEmailModal from '../components/evaluaciones/SendEmailModal';
 import '../App.css';
 import { notify } from '../lib/notify';
 
 const CuadernoCampo = () => {
   const { t } = useTranslation();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const { canBulkDelete } = usePermissions();
   const [parcelas, setParcelas] = useState([]);  const [loading, setLoading] = useState(true);
   const [selectedParcela, setSelectedParcela] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCultivo, setFilterCultivo] = useState('');
   const [contratos, setContratos] = useState([]);
@@ -396,26 +398,39 @@ const CuadernoCampo = () => {
                 </div>
               </div>
 
-              {/* Download Button */}
-              <button
-                className="btn btn-primary"
-                onClick={handleGeneratePDF}
-                disabled={generating || preview.resumen.total_registros === 0}
-                style={{ width: '100%', padding: '1rem', fontSize: '1rem' }}
-                data-testid="btn-download-pdf"
-              >
-                {generating ? (
-                  <>
-                    <Loader2 className="animate-spin" size={20} />
-                    Generando PDF...
-                  </>
-                ) : (
-                  <>
-                    <Download size={20} />
-                    Descargar Cuaderno de Campo (PDF)
-                  </>
-                )}
-              </button>
+              {/* Download + Email Buttons */}
+              <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
+                <button
+                  className="btn btn-primary"
+                  onClick={handleGeneratePDF}
+                  disabled={generating || preview.resumen.total_registros === 0}
+                  style={{ flex: 1, padding: '1rem', fontSize: '1rem' }}
+                  data-testid="btn-download-pdf"
+                >
+                  {generating ? (
+                    <>
+                      <Loader2 className="animate-spin" size={20} />
+                      Generando PDF...
+                    </>
+                  ) : (
+                    <>
+                      <Download size={20} />
+                      Descargar Cuaderno de Campo (PDF)
+                    </>
+                  )}
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setEmailModalOpen(true)}
+                  disabled={generating || preview.resumen.total_registros === 0}
+                  style={{ padding: '1rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+                  title="Enviar Cuaderno de Campo por email"
+                  data-testid="btn-send-email"
+                >
+                  <Mail size={20} />
+                  Enviar por email
+                </button>
+              </div>
               
               {preview.resumen.total_registros === 0 && (
                 <p style={{ 
@@ -431,6 +446,15 @@ const CuadernoCampo = () => {
           ) : null}
         </div>
       </div>
+      <SendEmailModal
+        show={emailModalOpen}
+        suggestionUrl={selectedParcela ? `/api/cuaderno-campo/${selectedParcela._id}/email-suggestion` : ''}
+        sendUrl={selectedParcela ? `/api/cuaderno-campo/${selectedParcela._id}/email` : ''}
+        title="Enviar Cuaderno de Campo por Email"
+        defaultSubject={selectedParcela ? `Cuaderno de Campo — ${selectedParcela.codigo_plantacion}` : 'Cuaderno de Campo'}
+        currentUserEmail={user?.email || ''}
+        onClose={() => setEmailModalOpen(false)}
+      />
     </div>
   );
 };

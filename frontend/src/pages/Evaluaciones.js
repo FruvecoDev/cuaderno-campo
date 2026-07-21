@@ -655,7 +655,9 @@ const Evaluaciones = () => {
       />
       <SendEmailModal
         show={emailModalOpen}
-        evaluacionId={emailEvaluacionId}
+        suggestionUrl={emailEvaluacionId ? `/api/evaluaciones/${emailEvaluacionId}/email-suggestion` : ''}
+        sendUrl={emailEvaluacionId ? `/api/evaluaciones/${emailEvaluacionId}/email` : ''}
+        title="Enviar Hoja de Evaluación"
         currentUserEmail={user?.email || ''}
         onClose={() => setEmailModalOpen(false)}
       />
