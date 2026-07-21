@@ -16,6 +16,13 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 
 ## Completed Features
 
+### Proveedores: Ordenación por columnas (P1) - DONE (2026-02-21)
+- Cabeceras de tabla clicables con toggle ASC/DESC (ID, Nombre, Tipo, Teléfono, Email, Población, Estado, etc.).
+- Icono `ArrowUpDown / ArrowUp / ArrowDown` (lucide-react) indica columna activa y dirección.
+- Ordenación numérica automática para códigos (`000125` -> 125). Case-insensitive para strings.
+- Orden por defecto: `codigo_proveedor ASC`.
+
+
 ### Column Configuration (P0) - DONE (2026-04-13)
 - Generic ColumnConfigModal component and useColumnConfig hook
 - Applied to ALL 12 table-based modules

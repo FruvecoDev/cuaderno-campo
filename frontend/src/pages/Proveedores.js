@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, Search, Settings, X, Download, FileText, TrendingUp, Users, Eye, MapPin, Building, CreditCard, Award, Truck } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Settings, X, Download, FileText, TrendingUp, Users, Eye, MapPin, Building, CreditCard, Award, Truck, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
 import { useAuth } from '../contexts/AuthContext';
@@ -41,6 +41,7 @@ const Proveedores = () => {
   const [historialData, setHistorialData] = useState(null);
   const [selectedProveedor, setSelectedProveedor] = useState(null);
   const [filtroEstado, setFiltroEstado] = useState('todos');
+  const [sortConfig, setSortConfig] = useState({ field: 'codigo_proveedor', direction: 'asc' });
   const [tiposProveedor, setTiposProveedor] = useState([]);
   const [showTiposManager, setShowTiposManager] = useState(false);
   const [nuevoTipo, setNuevoTipo] = useState('');
@@ -312,7 +313,53 @@ const Proveedores = () => {
       (filtroEstado === 'activos' && p.activo !== false) ||
       (filtroEstado === 'inactivos' && p.activo === false);
     return matchesSearch && matchesEstado;
+  }).sort((a, b) => {
+    const { field, direction } = sortConfig;
+    if (!field) return 0;
+    const getValue = (obj) => {
+      switch (field) {
+        case 'telefono':
+          return obj.telefonos?.length ? (obj.telefonos[0]?.valor || '') : (obj.telefono || '');
+        case 'email':
+          return obj.emails?.length ? (obj.emails[0]?.valor || '') : (obj.email || '');
+        case 'persona_contacto':
+          return obj.contactos?.length ? (obj.contactos[0]?.nombre || '') : (obj.persona_contacto || '');
+        case 'estado':
+          return obj.activo === false ? 0 : 1;
+        default:
+          return obj[field] ?? '';
+      }
+    };
+    const va = getValue(a);
+    const vb = getValue(b);
+    // Numeric compare if both look numeric (e.g. codigo_proveedor '000125')
+    const na = typeof va === 'string' && /^\d+$/.test(va) ? parseInt(va, 10) : va;
+    const nb = typeof vb === 'string' && /^\d+$/.test(vb) ? parseInt(vb, 10) : vb;
+    if (typeof na === 'number' && typeof nb === 'number') {
+      return direction === 'asc' ? na - nb : nb - na;
+    }
+    const sa = String(va || '').toLowerCase();
+    const sb = String(vb || '').toLowerCase();
+    if (sa < sb) return direction === 'asc' ? -1 : 1;
+    if (sa > sb) return direction === 'asc' ? 1 : -1;
+    return 0;
   });
+
+  const handleSort = (field) => {
+    setSortConfig(prev => {
+      if (prev.field === field) {
+        return { field, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
+      }
+      return { field, direction: 'asc' };
+    });
+  };
+
+  const renderSortIcon = (field) => {
+    if (sortConfig.field !== field) return <ArrowUpDown size={12} style={{ opacity: 0.35, marginLeft: '0.25rem' }} />;
+    return sortConfig.direction === 'asc'
+      ? <ArrowUp size={12} style={{ marginLeft: '0.25rem', color: 'hsl(var(--primary))' }} />
+      : <ArrowDown size={12} style={{ marginLeft: '0.25rem', color: 'hsl(var(--primary))' }} />;
+  };
 
   const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredProveedores);
   const [bulkDeleting, setBulkDeleting] = useState(false);
@@ -621,7 +668,20 @@ const Proveedores = () => {
               <thead>
                 <tr>
                   {canBulkDelete && <BulkCheckboxHeader allSelected={allSelected} someSelected={someSelected} onToggle={toggleAll} />}
-                  {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
+                  {visibleColumns.map(col => (
+                    <th
+                      key={col.id}
+                      onClick={() => handleSort(col.id)}
+                      style={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}
+                      title={`Ordenar por ${col.label}`}
+                      data-testid={`sort-header-${col.id}`}
+                    >
+                      <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                        {col.label}
+                        {renderSortIcon(col.id)}
+                      </span>
+                    </th>
+                  ))}
                   {(canEdit || canDelete) ? <th>Acciones</th> : null}
                 </tr>
               </thead>
