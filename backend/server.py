@@ -38,6 +38,7 @@ from routes_ai_suggestions import router as ai_suggestions_router
 from routes_ai_chat import router as ai_chat_router
 from routes_maquinaria import router as maquinaria_router
 from routes_evaluaciones import router as evaluaciones_router
+from routes_evaluaciones_config import router as evaluaciones_config_router
 from routes_notifications import router as notifications_router
 from routes_dashboard import router as dashboard_router
 from routes_reports import router as reports_router
@@ -133,6 +134,7 @@ app.include_router(ai_suggestions_router)
 app.include_router(ai_chat_router)
 app.include_router(maquinaria_router)
 app.include_router(evaluaciones_router)
+app.include_router(evaluaciones_config_router)
 app.include_router(notifications_router)
 app.include_router(dashboard_router)
 app.include_router(reports_router)
