@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Edit2, Trash2, BookOpen, Loader2, FileSpreadsheet } from 'lucide-react';
+import { Edit2, Trash2, BookOpen, Loader2, FileSpreadsheet, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { BulkCheckboxHeader, BulkCheckboxCell } from '../BulkActions';
 import { formatDateDMY } from '../../utils/dateFormat';
 
@@ -80,6 +80,8 @@ const ContratoTable = ({
   onToggleAll,
   allSelected = false,
   someSelected = false,
+  sortConfig,
+  onSort,
 }) => {
   const { t } = useTranslation();
 
@@ -105,6 +107,17 @@ const ContratoTable = ({
     fecha: t('common.date'),
   };
 
+  const renderSortIcon = (field) => {
+    if (!sortConfig || sortConfig.field !== field) {
+      return <ArrowUpDown size={12} style={{ opacity: 0.35, marginLeft: '0.25rem' }} />;
+    }
+    return sortConfig.direction === 'asc'
+      ? <ArrowUp size={12} style={{ marginLeft: '0.25rem', color: 'hsl(var(--primary))' }} />
+      : <ArrowDown size={12} style={{ marginLeft: '0.25rem', color: 'hsl(var(--primary))' }} />;
+  };
+
+  const sortable = typeof onSort === 'function';
+
   return (
     <div className="table-container">
       <table data-testid="contratos-table">
@@ -118,7 +131,18 @@ const ContratoTable = ({
               />
             )}
             {visibleColumns.map(col => (
-              <th key={col.id}>{HEADER_LABELS[col.id] || col.label}</th>
+              <th
+                key={col.id}
+                onClick={sortable ? () => onSort(col.id) : undefined}
+                style={sortable ? { cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' } : undefined}
+                title={sortable ? `Ordenar por ${HEADER_LABELS[col.id] || col.label}` : undefined}
+                data-testid={`sort-header-contrato-${col.id}`}
+              >
+                <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  {HEADER_LABELS[col.id] || col.label}
+                  {sortable && renderSortIcon(col.id)}
+                </span>
+              </th>
             ))}
             {(canEdit || canDelete) ? <th>{t('common.actions')}</th> : null}
           </tr>

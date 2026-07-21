@@ -161,11 +161,62 @@ const Contratos = () => {
     });
   }, [contratos, filters]);
 
+  // Ordenacion por columnas (sortConfig.field debe coincidir con la col.id
+  // definida en ContratoTable / column config: numero, tipo, campana,
+  // proveedor_cliente, cultivo, cantidad, precio, total, fecha).
+  const [sortConfig, setSortConfig] = useState({ field: 'fecha', direction: 'desc' });
+
+  const handleSort = (field) => {
+    setSortConfig(prev => (
+      prev.field === field
+        ? { field, direction: prev.direction === 'asc' ? 'desc' : 'asc' }
+        : { field, direction: 'asc' }
+    ));
+  };
+
+  const sortedContratos = useMemo(() => {
+    const { field, direction } = sortConfig;
+    if (!field) return filteredContratos;
+    const getValue = (c) => {
+      switch (field) {
+        case 'numero':
+          return c.numero_contrato || `${c.serie || ''}-${c.ano || ''}-${String(c.numero || 0).padStart(3, '0')}`;
+        case 'proveedor_cliente':
+          return (c.tipo === 'Venta' ? c.cliente : c.proveedor) || '';
+        case 'total':
+          return (Number(c.cantidad) || 0) * (Number(c.precio) || 0);
+        case 'cantidad':
+        case 'precio':
+          return Number(c[field]) || 0;
+        case 'fecha':
+          return c.fecha_contrato || '';
+        case 'tipo':
+          return c.tipo || 'Compra';
+        default:
+          return c[field] ?? '';
+      }
+    };
+    const arr = [...filteredContratos];
+    arr.sort((a, b) => {
+      const va = getValue(a);
+      const vb = getValue(b);
+      if (typeof va === 'number' && typeof vb === 'number') {
+        return direction === 'asc' ? va - vb : vb - va;
+      }
+      const sa = String(va || '').toLowerCase();
+      const sb = String(vb || '').toLowerCase();
+      if (sa < sb) return direction === 'asc' ? -1 : 1;
+      if (sa > sb) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return arr;
+  }, [filteredContratos, sortConfig]);
+
   // Bulk delete (seleccion multiple sobre la pagina visible)
   const {
     page, pageSize, totalPages, totalItems, pageStart, pageEnd,
     paginatedItems: paginatedContratos, setPage, setPageSize,
-  } = usePagination(filteredContratos, 20);
+  } = usePagination(sortedContratos, 20);
 
   const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(paginatedContratos);
   const [bulkDeleting, setBulkDeleting] = useState(false);
@@ -606,6 +657,8 @@ const Contratos = () => {
               onToggleAll={toggleAll}
               allSelected={allSelected}
               someSelected={someSelected}
+              sortConfig={sortConfig}
+              onSort={handleSort}
             />
 
             {/* Pagination footer */}
