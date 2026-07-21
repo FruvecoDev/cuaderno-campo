@@ -411,12 +411,44 @@ const Evaluaciones = () => {
   };
 
   const handleSendByEmail = async (id) => {
-    const raw = window.prompt(
-      'Enviar Hoja de Evaluacion por email\n\nIntroduce los destinatarios separados por comas:',
-      ''
-    );
-    if (raw === null) return; // cancelado
-    const recipients = raw.split(',').map(s => s.trim()).filter(Boolean);
+    // 1) Consultar al backend si hay email sugerido del proveedor asociado
+    let suggestion = { has_email: false, emails: [], proveedor_nombre: null };
+    try {
+      suggestion = await api.get(`/api/evaluaciones/${id}/email-suggestion`);
+    } catch (err) {
+      // Sigue funcionando en modo "prompt manual" si falla la sugerencia
+      console.error('[Evaluaciones] email-suggestion failed', err);
+    }
+
+    let recipients = [];
+    if (suggestion.has_email && suggestion.emails.length > 0) {
+      // Preguntar confirmacion mostrando el email sugerido, con opcion a editar
+      const defaultEmails = suggestion.emails.join(', ');
+      const confirmed = window.confirm(
+        `¿Enviar la Hoja de Evaluación a "${defaultEmails}" (proveedor: ${suggestion.proveedor_nombre})?\n\nAceptar = enviar automáticamente.\nCancelar = permite editar destinatarios.`
+      );
+      if (confirmed) {
+        recipients = suggestion.emails;
+      } else {
+        // Permite al usuario editar
+        const raw = window.prompt(
+          'Introduce los destinatarios separados por comas:',
+          defaultEmails
+        );
+        if (raw === null) return; // cancelado totalmente
+        recipients = raw.split(',').map(s => s.trim()).filter(Boolean);
+      }
+    } else {
+      // Sin email en el proveedor -> pedir manualmente
+      const nombre = suggestion.proveedor_nombre ? ` (proveedor: ${suggestion.proveedor_nombre})` : '';
+      const raw = window.prompt(
+        `Enviar Hoja de Evaluación por email${nombre}\n\nEl proveedor no tiene email registrado. Introduce los destinatarios separados por comas:`,
+        ''
+      );
+      if (raw === null) return;
+      recipients = raw.split(',').map(s => s.trim()).filter(Boolean);
+    }
+
     if (recipients.length === 0) {
       notify.error('Se requiere al menos un destinatario');
       return;

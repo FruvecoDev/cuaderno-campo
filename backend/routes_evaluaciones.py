@@ -2139,6 +2139,83 @@ async def generate_evaluacion_pdf(
                 print(f"[PDF] cleanup failed for {_tf}: {_cleanup_err}")
 
 
+def _extract_emails_from_proveedor(proveedor: Optional[dict]) -> List[str]:
+    """Extrae emails validos de un proveedor.
+    Soporta ambos formatos:
+      - `emails`: List[dict] con clave `valor` (nuevo formato)
+      - `email`: str (legacy)
+    """
+    if not proveedor:
+        return []
+    result: List[str] = []
+    raw_emails = proveedor.get("emails")
+    if isinstance(raw_emails, list):
+        for item in raw_emails:
+            val = None
+            if isinstance(item, dict):
+                val = item.get("valor") or item.get("email")
+            elif isinstance(item, str):
+                val = item
+            if val and "@" in val:
+                result.append(val.strip())
+    legacy = proveedor.get("email")
+    if isinstance(legacy, str) and "@" in legacy and legacy not in result:
+        result.append(legacy.strip())
+    # Deduplicate manteniendo orden
+    seen = set()
+    unique = []
+    for e in result:
+        if e.lower() not in seen:
+            seen.add(e.lower())
+            unique.append(e)
+    return unique
+
+
+@router.get("/evaluaciones/{evaluacion_id}/email-suggestion")
+async def suggest_evaluacion_email_recipients(
+    evaluacion_id: str,
+    current_user: dict = Depends(get_current_user),
+):
+    """Sugiere destinatarios de email a partir del proveedor asociado a la
+    evaluacion (via su parcela). Devuelve emails encontrados y meta para que
+    el frontend decida si enviar directamente o preguntar al usuario.
+    """
+    if not ObjectId.is_valid(evaluacion_id):
+        raise HTTPException(status_code=400, detail="ID de evaluacion invalido")
+    ev = await evaluaciones_collection.find_one({"_id": ObjectId(evaluacion_id)})
+    if not ev:
+        raise HTTPException(status_code=404, detail="Evaluacion no encontrada")
+
+    proveedor_doc = None
+    proveedor_nombre = None
+    proveedor_id_str = None
+
+    parcela_id = ev.get("parcela_id")
+    if parcela_id and ObjectId.is_valid(parcela_id):
+        parcela = await parcelas_collection.find_one({"_id": ObjectId(parcela_id)})
+        if parcela:
+            proveedor_id_str = parcela.get("proveedor_id")
+            proveedor_nombre = parcela.get("proveedor")
+
+    proveedores_col = db["proveedores"]
+    # Buscar por id primero, si no existe intentar por nombre
+    if proveedor_id_str and ObjectId.is_valid(proveedor_id_str):
+        proveedor_doc = await proveedores_col.find_one({"_id": ObjectId(proveedor_id_str)})
+    if not proveedor_doc and proveedor_nombre:
+        proveedor_doc = await proveedores_col.find_one({"nombre": proveedor_nombre})
+
+    emails = _extract_emails_from_proveedor(proveedor_doc)
+
+    return {
+        "evaluacion_id": evaluacion_id,
+        "proveedor_id": str(proveedor_doc["_id"]) if proveedor_doc else None,
+        "proveedor_nombre": (proveedor_doc or {}).get("nombre") if proveedor_doc else proveedor_nombre,
+        "emails": emails,
+        "has_email": bool(emails),
+    }
+
+
+
 @router.post("/evaluaciones/{evaluacion_id}/email")
 async def send_evaluacion_by_email(
     evaluacion_id: str,
