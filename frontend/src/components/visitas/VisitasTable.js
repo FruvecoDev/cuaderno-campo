@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit2, Trash2, Camera, Copy } from 'lucide-react';
+import { Edit2, Trash2, Camera, Copy, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { BulkCheckboxHeader, BulkCheckboxCell } from '../BulkActions';
 import { formatDateDMY } from '../../utils/dateFormat';
 
@@ -15,7 +15,35 @@ export const VisitasTable = ({
   allSelected = false,
   someSelected = false,
   bulkBar = null,
+  sortConfig,
+  onSort,
 }) => {
+  const sortable = typeof onSort === 'function';
+  const renderSortIcon = (field) => {
+    if (!sortConfig || sortConfig.field !== field) {
+      return <ArrowUpDown size={12} style={{ opacity: 0.35, marginLeft: '0.25rem' }} />;
+    }
+    return sortConfig.direction === 'asc'
+      ? <ArrowUp size={12} style={{ marginLeft: '0.25rem', color: 'hsl(var(--primary))' }} />
+      : <ArrowDown size={12} style={{ marginLeft: '0.25rem', color: 'hsl(var(--primary))' }} />;
+  };
+  const th = (field, label, extraStyle) => (
+    <th
+      key={field}
+      onClick={sortable ? () => onSort(field) : undefined}
+      style={{
+        ...(extraStyle || {}),
+        ...(sortable ? { cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' } : {}),
+      }}
+      title={sortable ? `Ordenar por ${label}` : undefined}
+      data-testid={`sort-header-visita-${field}`}
+    >
+      <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+        {label}
+        {sortable && renderSortIcon(field)}
+      </span>
+    </th>
+  );
   return (
     <div className="card">
       <h2 className="card-title">Lista de Visitas ({filteredVisitas.length})</h2>
@@ -36,14 +64,14 @@ export const VisitasTable = ({
                     onToggle={onToggleAll}
                   />
                 )}
-                {tableConfig.objetivo ? <th style={{ width: '60px' }}>Nº</th> : null}
-                {tableConfig.objetivo ? <th>Objetivo</th> : null}
-                {tableConfig.parcela ? <th>Parcela</th> : null}
-                {tableConfig.proveedor ? <th>Proveedor</th> : null}
-                {tableConfig.cultivo ? <th>Cultivo</th> : null}
-                {tableConfig.campana ? <th>Campana</th> : null}
-                {tableConfig.fecha ? <th>Fecha</th> : null}
-                {tableConfig.estado ? <th>Estado</th> : null}
+                {tableConfig.objetivo ? th('numero', 'Nº', { width: '60px' }) : null}
+                {tableConfig.objetivo ? th('objetivo', 'Objetivo') : null}
+                {tableConfig.parcela ? th('parcela', 'Parcela') : null}
+                {tableConfig.proveedor ? th('proveedor', 'Proveedor') : null}
+                {tableConfig.cultivo ? th('cultivo', 'Cultivo') : null}
+                {tableConfig.campana ? th('campana', 'Campana') : null}
+                {tableConfig.fecha ? th('fecha', 'Fecha') : null}
+                {tableConfig.estado ? th('estado', 'Estado') : null}
                 {(canEdit || canDelete) ? <th>Acciones</th> : null}
               </tr>
             </thead>

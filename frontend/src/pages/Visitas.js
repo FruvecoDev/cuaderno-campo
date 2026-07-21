@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { Plus, Settings } from 'lucide-react';
@@ -279,8 +279,50 @@ const Visitas = () => {
   const toggleTableConfig = (field) => { setTableConfig(prev => ({ ...prev, [field]: !prev[field] })); };
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
 
+  // Ordenacion por columnas
+  const [sortConfig, setSortConfig] = useState({ field: 'fecha', direction: 'desc' });
+  const handleSort = (field) => {
+    setSortConfig(prev => (
+      prev.field === field
+        ? { field, direction: prev.direction === 'asc' ? 'desc' : 'asc' }
+        : { field, direction: 'asc' }
+    ));
+  };
+
+  const sortedVisitas = useMemo(() => {
+    const { field, direction } = sortConfig;
+    if (!field) return filteredVisitas;
+    const getValue = (v) => {
+      switch (field) {
+        case 'numero': return Number(v.numero_visita) || 0;
+        case 'objetivo': return v.objetivo || '';
+        case 'parcela': return v.codigo_plantacion || '';
+        case 'proveedor': return v.proveedor || '';
+        case 'cultivo': return v.cultivo || '';
+        case 'campana': return v.campana || '';
+        case 'fecha': return v.fecha_visita || '';
+        case 'estado': return v.realizado ? 2 : 1;
+        default: return v[field] ?? '';
+      }
+    };
+    const arr = [...filteredVisitas];
+    arr.sort((a, b) => {
+      const va = getValue(a);
+      const vb = getValue(b);
+      if (typeof va === 'number' && typeof vb === 'number') {
+        return direction === 'asc' ? va - vb : vb - va;
+      }
+      const sa = String(va || '').toLowerCase();
+      const sb = String(vb || '').toLowerCase();
+      if (sa < sb) return direction === 'asc' ? -1 : 1;
+      if (sa > sb) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return arr;
+  }, [filteredVisitas, sortConfig]);
+
   // Paginación
-  const { page, pageSize, totalPages, totalItems, pageStart, pageEnd, paginatedItems: paginatedVisitas, setPage, setPageSize } = usePagination(filteredVisitas, 20);
+  const { page, pageSize, totalPages, totalItems, pageStart, pageEnd, paginatedItems: paginatedVisitas, setPage, setPageSize } = usePagination(sortedVisitas, 20);
 
   // Bulk delete (seleccion multiple sobre la pagina visible)
   const canBulkDelete = !!user?.can_bulk_delete;
@@ -511,6 +553,8 @@ const Visitas = () => {
         onToggleAll={toggleAll}
         allSelected={allSelected}
         someSelected={someSelected}
+        sortConfig={sortConfig}
+        onSort={handleSort}
         bulkBar={canBulkDelete && selectedIds.size > 0 ? (
           <BulkActionBar
             selectedCount={selectedIds.size}
