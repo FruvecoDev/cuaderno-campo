@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit2, Trash2, CheckCircle, XCircle, PlayCircle, Copy } from 'lucide-react';
+import { Edit2, Trash2, CheckCircle, XCircle, PlayCircle, Copy, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell } from '../BulkActions';
 import { formatDateDMY } from '../../utils/dateFormat';
 
@@ -15,7 +15,32 @@ const TratamientosTable = ({
   onBulkDelete,
   onClearSelection,
   bulkDeleting = false,
+  sortConfig,
+  onSort,
 }) => {
+  const sortable = typeof onSort === 'function';
+  const renderSortIcon = (field) => {
+    if (!sortConfig || sortConfig.field !== field) {
+      return <ArrowUpDown size={12} style={{ opacity: 0.35, marginLeft: '0.25rem' }} />;
+    }
+    return sortConfig.direction === 'asc'
+      ? <ArrowUp size={12} style={{ marginLeft: '0.25rem', color: 'hsl(var(--primary))' }} />
+      : <ArrowDown size={12} style={{ marginLeft: '0.25rem', color: 'hsl(var(--primary))' }} />;
+  };
+  const th = (field, label) => (
+    <th
+      key={field}
+      onClick={sortable ? () => onSort(field) : undefined}
+      style={sortable ? { cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' } : undefined}
+      title={sortable ? `Ordenar por ${label}` : undefined}
+      data-testid={`sort-header-tratamiento-${field}`}
+    >
+      <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+        {label}
+        {sortable && renderSortIcon(field)}
+      </span>
+    </th>
+  );
   return (
     <div className="card">
       <h2 className="card-title">Lista de Tratamientos ({tratamientos.length})</h2>
@@ -43,17 +68,17 @@ const TratamientosTable = ({
                     onToggle={onToggleAll}
                   />
                 )}
-                {tableConfig.tipo && <th>Tipo</th>}
-                {tableConfig.subtipo && <th>Subtipo</th>}
-                {tableConfig.metodo && <th>Metodo</th>}
-                {tableConfig.campana && <th>Campana</th>}
-                {tableConfig.fecha_tratamiento && <th>F. Tratamiento</th>}
-                {tableConfig.fecha_aplicacion && <th>F. Aplicacion</th>}
-                {tableConfig.superficie && <th>Superficie</th>}
-                {tableConfig.parcelas && <th>Parcelas</th>}
-                {tableConfig.aplicador && <th>Aplicador</th>}
-                {tableConfig.maquina && <th>Maquina</th>}
-                {tableConfig.estado && <th>Estado</th>}
+                {tableConfig.tipo && th('tipo', 'Tipo')}
+                {tableConfig.subtipo && th('subtipo', 'Subtipo')}
+                {tableConfig.metodo && th('metodo', 'Metodo')}
+                {tableConfig.campana && th('campana', 'Campana')}
+                {tableConfig.fecha_tratamiento && th('fecha_tratamiento', 'F. Tratamiento')}
+                {tableConfig.fecha_aplicacion && th('fecha_aplicacion', 'F. Aplicacion')}
+                {tableConfig.superficie && th('superficie', 'Superficie')}
+                {tableConfig.parcelas && th('parcelas', 'Parcelas')}
+                {tableConfig.aplicador && th('aplicador', 'Aplicador')}
+                {tableConfig.maquina && th('maquina', 'Maquina')}
+                {tableConfig.estado && th('estado', 'Estado')}
                 {(canEdit || canDelete) && <th>Acciones</th>}
               </tr>
             </thead>

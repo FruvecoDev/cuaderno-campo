@@ -376,8 +376,53 @@ const Tratamientos = () => {
     return true;
   });
 
+  // Ordenacion por columnas
+  const [sortConfig, setSortConfig] = useState({ field: 'fecha_tratamiento', direction: 'desc' });
+  const handleSort = (field) => {
+    setSortConfig(prev => (
+      prev.field === field
+        ? { field, direction: prev.direction === 'asc' ? 'desc' : 'asc' }
+        : { field, direction: 'asc' }
+    ));
+  };
+
+  const sortedTratamientos = useMemo(() => {
+    const { field, direction } = sortConfig;
+    if (!field) return filteredTratamientos;
+    const getValue = (t) => {
+      switch (field) {
+        case 'tipo': return t.tipo_tratamiento || '';
+        case 'subtipo': return t.subtipo || '';
+        case 'metodo': return t.metodo_aplicacion || '';
+        case 'campana': return t.campana || '';
+        case 'fecha_tratamiento': return t.fecha_tratamiento || '';
+        case 'fecha_aplicacion': return t.fecha_aplicacion || '';
+        case 'superficie': return Number(t.superficie_aplicacion) || 0;
+        case 'parcelas': return (t.parcelas_ids || []).filter(id => parcelas.some(p => p._id === id)).length;
+        case 'aplicador': return t.aplicador_nombre || '';
+        case 'maquina': return t.maquina_nombre || '';
+        case 'estado': return t.realizado ? 2 : (t.cancelado ? 3 : 1);
+        default: return t[field] ?? '';
+      }
+    };
+    const arr = [...filteredTratamientos];
+    arr.sort((a, b) => {
+      const va = getValue(a);
+      const vb = getValue(b);
+      if (typeof va === 'number' && typeof vb === 'number') {
+        return direction === 'asc' ? va - vb : vb - va;
+      }
+      const sa = String(va || '').toLowerCase();
+      const sb = String(vb || '').toLowerCase();
+      if (sa < sb) return direction === 'asc' ? -1 : 1;
+      if (sa > sb) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return arr;
+  }, [filteredTratamientos, sortConfig, parcelas]);
+
   // Paginación
-  const { page, pageSize, totalPages, totalItems, pageStart, pageEnd, paginatedItems: paginatedTratamientos, setPage, setPageSize } = usePagination(filteredTratamientos, 25);
+  const { page, pageSize, totalPages, totalItems, pageStart, pageEnd, paginatedItems: paginatedTratamientos, setPage, setPageSize } = usePagination(sortedTratamientos, 25);
 
   // Bulk delete
   const canBulkDelete = !!user?.can_bulk_delete;
@@ -1521,6 +1566,8 @@ const Tratamientos = () => {
         onBulkDelete={handleBulkDelete}
         onClearSelection={clearSelection}
         bulkDeleting={bulkDeleting}
+        sortConfig={sortConfig}
+        onSort={handleSort}
       />
       <PaginationFooter
         totalItems={totalItems} page={page} pageSize={pageSize}
