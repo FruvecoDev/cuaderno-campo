@@ -43,7 +43,19 @@ const Usuarios = () => {
   // Edit user modal
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUserForEdit, setSelectedUserForEdit] = useState(null);
-  const [editFormData, setEditFormData] = useState({ full_name: '', email: '', role: '' });
+  const [editFormData, setEditFormData] = useState({
+    full_name: '',
+    email: '',
+    role: '',
+    smtp_host: 'smtp.office365.com',
+    smtp_port: 587,
+    smtp_use_tls: 'starttls',
+    smtp_username: '',
+    smtp_password: '',
+    smtp_from_email: '',
+    smtp_from_name: '',
+    smtp_password_set: false,
+  });
   const [savingEdit, setSavingEdit] = useState(false);
   const [editError, setEditError] = useState('');
   // Tipo operacion modal
@@ -219,7 +231,15 @@ const Usuarios = () => {
     setEditFormData({
       full_name: user.full_name || '',
       email: user.email || '',
-      role: user.role || 'Viewer'
+      role: user.role || 'Viewer',
+      smtp_host: user.smtp_host || 'smtp.office365.com',
+      smtp_port: user.smtp_port || 587,
+      smtp_use_tls: user.smtp_use_tls || 'starttls',
+      smtp_username: user.smtp_username || '',
+      smtp_password: '', // vacio = "no cambiar el existente"
+      smtp_from_email: user.smtp_from_email || '',
+      smtp_from_name: user.smtp_from_name || '',
+      smtp_password_set: !!user.smtp_password_set,
     });
     setEditError('');
     setShowEditModal(true);
@@ -240,8 +260,22 @@ const Usuarios = () => {
     
     setSavingEdit(true);
     try {
-      await api.put(`/api/auth/users/${selectedUserForEdit._id}`, editFormData);
-      notify.success('Auth actualizado correctamente');
+      // Enviar solo los campos smtp_* si fueron modificados. Password vacio
+      // significa "no cambiar" (backend ignora smtp_password === "").
+      const payload = {
+        full_name: editFormData.full_name,
+        email: editFormData.email,
+        role: editFormData.role,
+        smtp_host: editFormData.smtp_host || null,
+        smtp_port: editFormData.smtp_port || null,
+        smtp_use_tls: editFormData.smtp_use_tls || null,
+        smtp_username: editFormData.smtp_username || null,
+        smtp_password: editFormData.smtp_password || '',
+        smtp_from_email: editFormData.smtp_from_email || null,
+        smtp_from_name: editFormData.smtp_from_name || null,
+      };
+      await api.put(`/api/auth/users/${selectedUserForEdit._id}`, payload);
+      notify.success('Usuario actualizado correctamente');
       setShowEditModal(false);
       setSelectedUserForEdit(null);
       fetchUsers();
@@ -1026,6 +1060,112 @@ const Usuarios = () => {
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* ================ Configuracion SMTP por usuario ================ */}
+            <div style={{
+              marginTop: '1rem', marginBottom: '1.5rem',
+              padding: '1rem', borderRadius: '8px',
+              background: 'hsl(var(--muted) / 0.4)',
+              border: '1px solid hsl(var(--border))',
+            }}>
+              <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span>Configuración de envío de emails (SMTP)</span>
+                {editFormData.smtp_password_set && (
+                  <span style={{
+                    fontSize: '0.7rem', padding: '0.1rem 0.5rem', borderRadius: '4px',
+                    background: 'hsl(142 76% 36% / 0.15)', color: 'hsl(142 76% 30%)',
+                    fontWeight: 700, textTransform: 'uppercase',
+                  }}>Configurado</span>
+                )}
+              </h4>
+              <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', margin: '0 0 0.75rem 0' }}>
+                Estos ajustes permiten que el usuario envíe emails (hojas de evaluación, alertas...) desde su propia cuenta de correo. Para Office 365 usa <code>smtp.office365.com:587</code> con STARTTLS.
+              </p>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.75rem' }}>Servidor SMTP</label>
+                  <input
+                    type="text" className="form-input"
+                    value={editFormData.smtp_host || ''}
+                    onChange={e => setEditFormData({ ...editFormData, smtp_host: e.target.value })}
+                    placeholder="smtp.office365.com"
+                    data-testid="edit-smtp-host"
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.75rem' }}>Puerto</label>
+                  <input
+                    type="number" className="form-input"
+                    value={editFormData.smtp_port || ''}
+                    onChange={e => setEditFormData({ ...editFormData, smtp_port: parseInt(e.target.value, 10) || 587 })}
+                    placeholder="587"
+                    data-testid="edit-smtp-port"
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.75rem' }}>Seguridad</label>
+                  <select
+                    className="form-select"
+                    value={editFormData.smtp_use_tls || 'starttls'}
+                    onChange={e => setEditFormData({ ...editFormData, smtp_use_tls: e.target.value })}
+                    data-testid="edit-smtp-tls"
+                  >
+                    <option value="starttls">STARTTLS (587)</option>
+                    <option value="ssl">SSL/TLS (465)</option>
+                    <option value="none">Sin cifrar</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.75rem' }}>Usuario (email)</label>
+                  <input
+                    type="email" className="form-input"
+                    value={editFormData.smtp_username || ''}
+                    onChange={e => setEditFormData({ ...editFormData, smtp_username: e.target.value })}
+                    placeholder="usuario@fruveco.com"
+                    data-testid="edit-smtp-username"
+                    autoComplete="off"
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.75rem' }}>Contraseña</label>
+                  <input
+                    type="password" className="form-input"
+                    value={editFormData.smtp_password || ''}
+                    onChange={e => setEditFormData({ ...editFormData, smtp_password: e.target.value })}
+                    placeholder={editFormData.smtp_password_set ? '••••••• (déjalo vacío para no cambiar)' : 'Contraseña o App Password'}
+                    data-testid="edit-smtp-password"
+                    autoComplete="new-password"
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.75rem' }}>Email de envío (opcional)</label>
+                  <input
+                    type="email" className="form-input"
+                    value={editFormData.smtp_from_email || ''}
+                    onChange={e => setEditFormData({ ...editFormData, smtp_from_email: e.target.value })}
+                    placeholder="(por defecto = Usuario)"
+                    data-testid="edit-smtp-from-email"
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.75rem' }}>Nombre remitente</label>
+                  <input
+                    type="text" className="form-input"
+                    value={editFormData.smtp_from_name || ''}
+                    onChange={e => setEditFormData({ ...editFormData, smtp_from_name: e.target.value })}
+                    placeholder="Alfredo Castelo — Fruveco"
+                    data-testid="edit-smtp-from-name"
+                  />
+                </div>
+              </div>
             </div>
             
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>

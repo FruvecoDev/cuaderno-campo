@@ -141,6 +141,8 @@ async def get_current_user_info(current_user: dict = Depends(get_current_user)):
     """Get current user information"""
     user_response = current_user.copy()
     user_response.pop("hashed_password", None)
+    # No enviar el password SMTP al cliente. Solo indicar si esta configurado.
+    user_response["smtp_password_set"] = bool(user_response.pop("smtp_password", None))
     return user_response
 
 @router.get("/users")
@@ -154,6 +156,7 @@ async def get_all_users(current_user: dict = Depends(get_current_user)):
     for user in users:
         user_dict = serialize_doc(user)
         user_dict.pop("hashed_password", None)
+        user_dict["smtp_password_set"] = bool(user_dict.pop("smtp_password", None))
         users_response.append(user_dict)
     
     return {"users": users_response}
@@ -170,6 +173,12 @@ async def update_user(user_id: str, user_update: dict, current_user: dict = Depe
     # Remove sensitive fields from update
     user_update.pop("hashed_password", None)
     user_update.pop("_id", None)
+    # Si se envia smtp_password vacio, no lo actualizamos (para no borrar el
+    # existente cuando el Admin solo edita otros campos). Para BORRAR el
+    # password hay que enviarlo como null explicito.
+    if user_update.get("smtp_password") == "":
+        user_update.pop("smtp_password")
+    user_update.pop("smtp_password_set", None)  # campo derivado, no persistir
     user_update["updated_at"] = datetime.now()
     
     result = await users_collection.update_one(

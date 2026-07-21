@@ -46,6 +46,62 @@ def _is_smtp_configured() -> bool:
     return bool(SMTP_HOST and SMTP_USERNAME and SMTP_PASSWORD and SMTP_FROM_EMAIL)
 
 
+def _smtp_config_from_user(user: Optional[dict]) -> Optional[dict]:
+    """Extrae configuracion SMTP de un objeto user (dict de MongoDB).
+    Devuelve None si el usuario no tiene configuracion completa.
+    """
+    if not user or not isinstance(user, dict):
+        return None
+    host = user.get("smtp_host")
+    username = user.get("smtp_username")
+    password = user.get("smtp_password")
+    if not host or not username or not password:
+        return None
+    return {
+        "host": host,
+        "port": int(user.get("smtp_port") or 587),
+        "use_tls": (user.get("smtp_use_tls") or "starttls").lower(),
+        "username": username,
+        "password": password,
+        "from_email": user.get("smtp_from_email") or username,
+        "from_name": user.get("smtp_from_name") or "FRUVECO",
+    }
+
+
+def _resolve_smtp_config(smtp_config: Optional[dict] = None, user: Optional[dict] = None) -> Optional[dict]:
+    """Resuelve la config SMTP a usar:
+    1) Config explicita pasada por parametro
+    2) Config del usuario (dict de MongoDB con smtp_*)
+    3) Fallback a variables de entorno globales
+    Devuelve None si no hay configuracion valida.
+    """
+    if smtp_config and smtp_config.get("host") and smtp_config.get("username") and smtp_config.get("password"):
+        return {
+            "host": smtp_config["host"],
+            "port": int(smtp_config.get("port") or 587),
+            "use_tls": (smtp_config.get("use_tls") or "starttls").lower(),
+            "username": smtp_config["username"],
+            "password": smtp_config["password"],
+            "from_email": smtp_config.get("from_email") or smtp_config["username"],
+            "from_name": smtp_config.get("from_name") or "FRUVECO",
+        }
+    user_cfg = _smtp_config_from_user(user)
+    if user_cfg:
+        return user_cfg
+    # Fallback a env vars globales
+    if _is_smtp_configured():
+        return {
+            "host": SMTP_HOST,
+            "port": SMTP_PORT,
+            "use_tls": SMTP_USE_TLS,
+            "username": SMTP_USERNAME,
+            "password": SMTP_PASSWORD,
+            "from_email": SMTP_FROM_EMAIL,
+            "from_name": SMTP_FROM_NAME,
+        }
+    return None
+
+
 def get_email_template(title: str, content: str, footer_text: str = "") -> str:
     """Generate a styled HTML email template"""
     return f"""
@@ -109,23 +165,29 @@ async def send_email(
     text_content: Optional[str] = None,
     attachments: Optional[List[dict]] = None,
     cc: Optional[List[str]] = None,
+    user: Optional[dict] = None,
+    smtp_config: Optional[dict] = None,
 ) -> dict:
     """Enviar email via SMTP (Office 365 compatible, async).
 
+    Prioridad de configuracion SMTP:
+      1) `smtp_config` explicito (dict con host, port, use_tls, username, password, from_email, from_name)
+      2) `user['smtp_*']` — configuracion por usuario en el modelo User
+      3) Variables de entorno globales (SMTP_HOST, SMTP_USERNAME, ...) como fallback
+
     Args:
-        recipient_email: destinatario (str) o lista de destinatarios.
+        recipient_email: destinatario (str) o lista.
         subject: asunto.
         html_content: cuerpo HTML.
-        text_content: cuerpo texto plano opcional (default: strip del HTML).
-        attachments: lista de dicts con keys `filename`, `content` (bytes),
-                     `content_type` (str, opcional).
+        text_content: cuerpo texto plano opcional.
+        attachments: lista de dicts con `filename`, `content` (bytes), `content_type`.
         cc: lista de emails en copia.
-
-    Env vars requeridas: SMTP_HOST, SMTP_USERNAME, SMTP_PASSWORD, SMTP_FROM_EMAIL.
-    Si no hay configuracion, devuelve status=skipped.
+        user: dict del usuario actual (con campos smtp_*) para envio con su cuenta.
+        smtp_config: config explicita si no se quiere usar la del user ni la global.
     """
-    if not _is_smtp_configured():
-        logger.warning("SMTP no configurado (SMTP_HOST/USERNAME/PASSWORD faltan). Email no enviado.")
+    cfg = _resolve_smtp_config(smtp_config=smtp_config, user=user)
+    if not cfg:
+        logger.warning("SMTP no configurado (ni por usuario ni global). Email no enviado.")
         return {"status": "skipped", "message": "SMTP service not configured"}
 
     if isinstance(recipient_email, str):
@@ -136,7 +198,7 @@ async def send_email(
         return {"status": "error", "message": "No recipient provided"}
 
     msg = EmailMessage()
-    from_display = f"{SMTP_FROM_NAME} <{SMTP_FROM_EMAIL}>" if SMTP_FROM_NAME else SMTP_FROM_EMAIL
+    from_display = f"{cfg['from_name']} <{cfg['from_email']}>" if cfg.get("from_name") else cfg["from_email"]
     msg["From"] = from_display
     msg["To"] = ", ".join(recipients)
     if cc:
@@ -165,47 +227,36 @@ async def send_email(
     to_addrs = list(recipients) + list(cc or [])
 
     try:
-        if SMTP_USE_TLS == "ssl":
+        if cfg["use_tls"] == "ssl":
             await aiosmtplib.send(
                 msg,
-                hostname=SMTP_HOST,
-                port=SMTP_PORT,
-                username=SMTP_USERNAME,
-                password=SMTP_PASSWORD,
-                use_tls=True,
-                tls_context=tls_ctx,
-                recipients=to_addrs,
-                timeout=30,
+                hostname=cfg["host"], port=cfg["port"],
+                username=cfg["username"], password=cfg["password"],
+                use_tls=True, tls_context=tls_ctx,
+                recipients=to_addrs, timeout=30,
             )
-        elif SMTP_USE_TLS == "none":
+        elif cfg["use_tls"] == "none":
             await aiosmtplib.send(
                 msg,
-                hostname=SMTP_HOST,
-                port=SMTP_PORT,
-                username=SMTP_USERNAME,
-                password=SMTP_PASSWORD,
-                use_tls=False,
-                start_tls=False,
-                recipients=to_addrs,
-                timeout=30,
+                hostname=cfg["host"], port=cfg["port"],
+                username=cfg["username"], password=cfg["password"],
+                use_tls=False, start_tls=False,
+                recipients=to_addrs, timeout=30,
             )
         else:  # starttls (default)
             await aiosmtplib.send(
                 msg,
-                hostname=SMTP_HOST,
-                port=SMTP_PORT,
-                username=SMTP_USERNAME,
-                password=SMTP_PASSWORD,
-                start_tls=True,
-                tls_context=tls_ctx,
-                recipients=to_addrs,
-                timeout=30,
+                hostname=cfg["host"], port=cfg["port"],
+                username=cfg["username"], password=cfg["password"],
+                start_tls=True, tls_context=tls_ctx,
+                recipients=to_addrs, timeout=30,
             )
-        logger.info("Email SMTP enviado a %s (subject=%s)", to_addrs, subject)
+        logger.info("Email SMTP enviado a %s desde %s", to_addrs, cfg["from_email"])
         return {
             "status": "success",
             "message": f"Email sent to {', '.join(recipients)}",
             "email_id": msg.get("Message-ID"),
+            "from": cfg["from_email"],
         }
     except Exception as exc:
         logger.error("Fallo envio SMTP a %s: %s", to_addrs, exc, exc_info=True)

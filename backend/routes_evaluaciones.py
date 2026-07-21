@@ -2149,12 +2149,13 @@ async def send_evaluacion_by_email(
 
     Body: { recipients: ["email@..."], cc?: [...], subject?: str, message?: str }
     """
-    from email_service import send_email, _is_smtp_configured, get_email_template
+    from email_service import send_email, _is_smtp_configured, _smtp_config_from_user, get_email_template
 
-    if not _is_smtp_configured():
+    # Debe haber config del usuario o config global
+    if not _smtp_config_from_user(current_user) and not _is_smtp_configured():
         raise HTTPException(
             status_code=503,
-            detail="SMTP no configurado. Anade SMTP_HOST, SMTP_USERNAME, SMTP_PASSWORD en .env",
+            detail="SMTP no configurado. Añade tus credenciales SMTP en tu perfil de usuario o pide al Admin que configure el envío global.",
         )
 
     recipients = (payload or {}).get("recipients") or []
@@ -2199,6 +2200,7 @@ async def send_evaluacion_by_email(
         html_content=html_content,
         cc=cc or None,
         attachments=[{"filename": filename, "content": pdf_bytes, "content_type": "application/pdf"}],
+        user=current_user,
     )
 
     if result.get("status") == "error":

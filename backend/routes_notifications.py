@@ -16,6 +16,7 @@ from email_service import (
     send_test_email,
     get_email_template,
     _is_smtp_configured,
+    _smtp_config_from_user,
 )
 from database import visitas_collection, users_collection
 from routes_auth import get_current_user
@@ -47,11 +48,27 @@ def serialize_doc(doc):
 
 @router.get("/status")
 async def get_notification_status(current_user: dict = Depends(get_current_user)):
-    """Check if email notifications are configured"""
+    """Estado del servicio de email.
+    Prioriza la configuracion SMTP del usuario actual sobre la global (.env).
+    """
+    user_cfg = _smtp_config_from_user(current_user)
+    global_ok = _is_smtp_configured()
+    configured = bool(user_cfg) or global_ok
+    if user_cfg:
+        source = f"Usuario ({user_cfg['from_email']})"
+    elif global_ok:
+        source = "Global (.env)"
+    else:
+        source = None
     return {
-        "configured": _is_smtp_configured(),
-        "service": "SMTP (Office 365)" if _is_smtp_configured() else None,
-        "message": "Notificaciones por email configuradas" if _is_smtp_configured() else "Servicio SMTP no configurado. Configura SMTP_HOST, SMTP_USERNAME, SMTP_PASSWORD en .env"
+        "configured": configured,
+        "service": "SMTP (Office 365)" if configured else None,
+        "source": source,
+        "message": (
+            f"SMTP configurado via {source}"
+            if configured
+            else "SMTP no configurado. Configura tus credenciales en tu perfil de usuario."
+        ),
     }
 
 
@@ -60,14 +77,30 @@ async def send_test_notification(
     request: TestEmailRequest,
     current_user: dict = Depends(get_current_user)
 ):
-    """Send a test email to verify configuration"""
-    if not _is_smtp_configured():
+    """Envio de email de prueba. Usa la config SMTP del usuario actual
+    (si tiene) o hace fallback a la config global .env.
+    """
+    user_cfg = _smtp_config_from_user(current_user)
+    if not user_cfg and not _is_smtp_configured():
         raise HTTPException(
             status_code=503, 
-            detail="Servicio de email no configurado. Configura SMTP_HOST, SMTP_USERNAME, SMTP_PASSWORD en .env"
+            detail="Servicio de email no configurado. Añade tus credenciales SMTP en tu perfil de usuario o pide al Admin que configure el envío global."
         )
-    
-    result = await send_test_email(request.email)
+
+    # Delegate a send_email pasando user para que use su config
+    html = get_email_template(
+        title="Test de envío",
+        content=(
+            "<p>Este es un email de prueba enviado desde <b>FRUVECO - Cuaderno de Campo</b>.</p>"
+            "<p>Si lo has recibido, la configuración SMTP funciona correctamente.</p>"
+        ),
+    )
+    result = await send_email(
+        recipient_email=request.email,
+        subject="[FRUVECO] Test de envío SMTP",
+        html_content=html,
+        user=current_user,
+    )
     
     if result["status"] == "error":
         raise HTTPException(status_code=500, detail=result["message"])
@@ -75,7 +108,7 @@ async def send_test_notification(
     return {
         "success": True,
         "message": f"Email de prueba enviado a {request.email}",
-        "details": result
+        "details": result,
     }
 
 

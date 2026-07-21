@@ -312,6 +312,15 @@ class UserBase(BaseModel):
     # Menu permissions - dict with path as key and boolean as value
     menu_permissions: Dict[str, bool] = Field(default_factory=lambda: DEFAULT_MENU_PERMISSIONS.copy())
     
+    # Configuracion SMTP por usuario (envio de emails con la cuenta del usuario)
+    smtp_host: Optional[str] = None
+    smtp_port: Optional[int] = 587
+    smtp_use_tls: Optional[str] = "starttls"  # starttls | ssl | none
+    smtp_username: Optional[str] = None
+    smtp_password: Optional[str] = None  # Se almacena tal cual; considerar cifrado en produccion
+    smtp_from_email: Optional[str] = None  # default = smtp_username
+    smtp_from_name: Optional[str] = None
+    
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
 
