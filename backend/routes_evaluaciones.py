@@ -2139,36 +2139,39 @@ async def generate_evaluacion_pdf(
                 print(f"[PDF] cleanup failed for {_tf}: {_cleanup_err}")
 
 
-def _extract_emails_from_proveedor(proveedor: Optional[dict]) -> List[str]:
+def _extract_emails_from_proveedor(proveedor: Optional[dict]) -> List[dict]:
     """Extrae emails validos de un proveedor.
     Soporta ambos formatos:
-      - `emails`: List[dict] con clave `valor` (nuevo formato)
+      - `emails`: List[dict] con clave `valor` (nuevo formato con etiqueta)
       - `email`: str (legacy)
+    Devuelve List[{valor: str, etiqueta: str}] deduplicada case-insensitive.
     """
     if not proveedor:
         return []
-    result: List[str] = []
+    result: List[dict] = []
+    seen = set()
+
+    def _add(email: Optional[str], label: str = ""):
+        if not email or not isinstance(email, str) or "@" not in email:
+            return
+        email = email.strip()
+        key = email.lower()
+        if key in seen:
+            return
+        seen.add(key)
+        result.append({"valor": email, "etiqueta": (label or "").strip()})
+
     raw_emails = proveedor.get("emails")
     if isinstance(raw_emails, list):
         for item in raw_emails:
-            val = None
             if isinstance(item, dict):
-                val = item.get("valor") or item.get("email")
+                _add(item.get("valor") or item.get("email"), item.get("etiqueta", ""))
             elif isinstance(item, str):
-                val = item
-            if val and "@" in val:
-                result.append(val.strip())
+                _add(item)
     legacy = proveedor.get("email")
-    if isinstance(legacy, str) and "@" in legacy and legacy not in result:
-        result.append(legacy.strip())
-    # Deduplicate manteniendo orden
-    seen = set()
-    unique = []
-    for e in result:
-        if e.lower() not in seen:
-            seen.add(e.lower())
-            unique.append(e)
-    return unique
+    if isinstance(legacy, str):
+        _add(legacy, "Principal")
+    return result
 
 
 @router.get("/evaluaciones/{evaluacion_id}/email-suggestion")
@@ -2210,7 +2213,7 @@ async def suggest_evaluacion_email_recipients(
         "evaluacion_id": evaluacion_id,
         "proveedor_id": str(proveedor_doc["_id"]) if proveedor_doc else None,
         "proveedor_nombre": (proveedor_doc or {}).get("nombre") if proveedor_doc else proveedor_nombre,
-        "emails": emails,
+        "emails": emails,  # List[{valor, etiqueta}]
         "has_email": bool(emails),
     }
 

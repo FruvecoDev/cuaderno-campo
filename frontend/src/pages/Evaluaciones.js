@@ -10,6 +10,7 @@ import { arrayMove } from '@dnd-kit/sortable';
 import EvaluacionesFilters from '../components/evaluaciones/EvaluacionesFilters';
 import EvaluacionesTable from '../components/evaluaciones/EvaluacionesTable';
 import EvaluacionesForm from '../components/evaluaciones/EvaluacionesForm';
+import SendEmailModal from '../components/evaluaciones/SendEmailModal';
 import { DEFAULT_IMPRESOS, mergeImpresos } from '../components/evaluaciones/EvaluacionesImpresos';
 import '../App.css';
 import { notify } from '../lib/notify';
@@ -410,56 +411,13 @@ const Evaluaciones = () => {
     catch (e) { console.error('[Evaluaciones.js] handleDownloadPDF', e); }
   };
 
-  const handleSendByEmail = async (id) => {
-    // 1) Consultar al backend si hay email sugerido del proveedor asociado
-    let suggestion = { has_email: false, emails: [], proveedor_nombre: null };
-    try {
-      suggestion = await api.get(`/api/evaluaciones/${id}/email-suggestion`);
-    } catch (err) {
-      // Sigue funcionando en modo "prompt manual" si falla la sugerencia
-      console.error('[Evaluaciones] email-suggestion failed', err);
-    }
+  // Modal de envio de email
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [emailEvaluacionId, setEmailEvaluacionId] = useState(null);
 
-    let recipients = [];
-    if (suggestion.has_email && suggestion.emails.length > 0) {
-      // Preguntar confirmacion mostrando el email sugerido, con opcion a editar
-      const defaultEmails = suggestion.emails.join(', ');
-      const confirmed = window.confirm(
-        `¿Enviar la Hoja de Evaluación a "${defaultEmails}" (proveedor: ${suggestion.proveedor_nombre})?\n\nAceptar = enviar automáticamente.\nCancelar = permite editar destinatarios.`
-      );
-      if (confirmed) {
-        recipients = suggestion.emails;
-      } else {
-        // Permite al usuario editar
-        const raw = window.prompt(
-          'Introduce los destinatarios separados por comas:',
-          defaultEmails
-        );
-        if (raw === null) return; // cancelado totalmente
-        recipients = raw.split(',').map(s => s.trim()).filter(Boolean);
-      }
-    } else {
-      // Sin email en el proveedor -> pedir manualmente
-      const nombre = suggestion.proveedor_nombre ? ` (proveedor: ${suggestion.proveedor_nombre})` : '';
-      const raw = window.prompt(
-        `Enviar Hoja de Evaluación por email${nombre}\n\nEl proveedor no tiene email registrado. Introduce los destinatarios separados por comas:`,
-        ''
-      );
-      if (raw === null) return;
-      recipients = raw.split(',').map(s => s.trim()).filter(Boolean);
-    }
-
-    if (recipients.length === 0) {
-      notify.error('Se requiere al menos un destinatario');
-      return;
-    }
-    try {
-      const result = await api.post(`/api/evaluaciones/${id}/email`, { recipients });
-      notify.success(`Email enviado a ${result.recipients?.join(', ') || 'los destinatarios'}`);
-    } catch (err) {
-      const msg = err?.response?.data?.detail || 'Error al enviar el email';
-      notify.error(msg);
-    }
+  const handleSendByEmail = (id) => {
+    setEmailEvaluacionId(id);
+    setEmailModalOpen(true);
   };
 
   const handleAddQuestion = async () => {
@@ -694,6 +652,12 @@ const Evaluaciones = () => {
         onEdit={handleEdit}
         onDelete={handleDelete}
         getEstadoBadge={getEstadoBadge}
+      />
+      <SendEmailModal
+        show={emailModalOpen}
+        evaluacionId={emailEvaluacionId}
+        currentUserEmail={user?.email || ''}
+        onClose={() => setEmailModalOpen(false)}
       />
     </div>
   );
