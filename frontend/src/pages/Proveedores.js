@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, Search, Settings, X, Download, FileText, TrendingUp, Users, Eye, MapPin, Building, CreditCard, Award, Truck, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Settings, X, Download, FileText, TrendingUp, Users, Eye, MapPin, Building, CreditCard, Award, Truck, ArrowUp, ArrowDown, ArrowUpDown, Merge } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
 import { useAuth } from '../contexts/AuthContext';
@@ -10,6 +10,7 @@ import PaisSelect from '../components/PaisSelect';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
 import PaginationFooter, { usePagination } from '../components/PaginationFooter';
+import DuplicadosModal from '../components/proveedores/DuplicadosModal';
 import '../App.css';
 import { notify } from '../lib/notify';
 
@@ -43,6 +44,7 @@ const Proveedores = () => {
   const [selectedProveedor, setSelectedProveedor] = useState(null);
   const [filtroEstado, setFiltroEstado] = useState('todos');
   const [sortConfig, setSortConfig] = useState({ field: 'codigo_proveedor', direction: 'asc' });
+  const [showDuplicados, setShowDuplicados] = useState(false);
   const [tiposProveedor, setTiposProveedor] = useState([]);
   const [showTiposManager, setShowTiposManager] = useState(false);
   const [nuevoTipo, setNuevoTipo] = useState('');
@@ -392,6 +394,15 @@ const Proveedores = () => {
             Excel
           </button>
           <button
+            className="btn btn-secondary"
+            onClick={() => setShowDuplicados(true)}
+            title="Detectar y fusionar proveedores duplicados"
+            data-testid="btn-duplicados-proveedores"
+          >
+            <Merge size={18} />
+            Duplicados
+          </button>
+          <button
             className={`btn ${showConfig ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setShowConfig(true)}
             title="Configurar columnas"
@@ -448,6 +459,12 @@ const Proveedores = () => {
       )}
 
       <ColumnConfigModal show={showConfig} onClose={() => setShowConfig(false)} columns={columns} setColumns={setColumns} onSave={save} onReset={reset} />
+
+      <DuplicadosModal
+        show={showDuplicados}
+        onClose={() => setShowDuplicados(false)}
+        onMerged={() => { fetchProveedores(); fetchStats(); }}
+      />
 
       {showForm && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', backdropFilter: 'blur(4px)' }} onClick={() => { setShowForm(false); setEditingId(null); resetForm(); setActiveTab('general'); }}>

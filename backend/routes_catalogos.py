@@ -260,6 +260,189 @@ async def get_proveedores(
     }
 
 
+# ============================================================================
+# DEDUPLICACION DE PROVEEDORES (declarado antes de /proveedores/{id} para
+# que FastAPI no capture "duplicados" como path parameter)
+# ============================================================================
+
+def _normalize_nombre_proveedor(nombre: str) -> str:
+    """Normaliza un nombre para deteccion de duplicados.
+    Aplana espacios, elimina puntuacion final, unifica sufijos societarios
+    (S.L., SL, S.A., SA, S.COOP, S.L.U, etc.) y quita tildes.
+    """
+    if not nombre:
+        return ""
+    import re
+    import unicodedata
+    s = nombre.strip().lower()
+    s = "".join(c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn")
+    suffix_pattern = re.compile(
+        r"[\s,\.\-]*("
+        r"s\.?l\.?u\.?|"
+        r"s\.?l\.?l\.?|"
+        r"s\.?l\.?|"
+        r"s\.?a\.?u\.?|"
+        r"s\.?a\.?|"
+        r"s\.?coop\.?|"
+        r"s\.?c\.?a\.?|"
+        r"s\.?a\.?t\.?"
+        r")\s*$"
+    )
+    prev = None
+    while prev != s:
+        prev = s
+        s = suffix_pattern.sub("", s)
+    s = re.sub(r"[\.,;:\-_]+", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+
+@router.get("/proveedores/duplicados")
+async def detectar_duplicados_proveedores(current_user: dict = Depends(get_current_user)):
+    """Escanea la coleccion de proveedores y agrupa aquellos cuyo nombre
+    normalizado coincida. Devuelve grupos con >=2 registros.
+    """
+    provs = await proveedores_collection.find({}).to_list(20000)
+    grupos: dict = {}
+    for p in provs:
+        key = _normalize_nombre_proveedor(p.get("nombre", ""))
+        if not key:
+            continue
+        grupos.setdefault(key, []).append(p)
+
+    resultado = []
+    for key, items in grupos.items():
+        if len(items) < 2:
+            continue
+        items_sorted = sorted(
+            items,
+            key=lambda x: (
+                int(x.get("codigo_proveedor", "999999") or 999999)
+                if str(x.get("codigo_proveedor", "")).isdigit()
+                else 999999
+            ),
+        )
+        keep = items_sorted[0]
+
+        enriched = []
+        for it in items_sorted:
+            prov_id = str(it["_id"])
+            prov_name = it.get("nombre", "")
+            refs = {
+                "contratos": await db["contratos"].count_documents({
+                    "$or": [{"proveedor_id": prov_id}, {"proveedor": prov_name}]
+                }),
+                "parcelas": await db["parcelas"].count_documents({
+                    "$or": [{"proveedor_id": prov_id}, {"proveedor": prov_name}]
+                }),
+                "albaranes": await db["albaranes"].count_documents({
+                    "$or": [{"proveedor_id": prov_id}, {"proveedor": prov_name}]
+                }),
+            }
+            enriched.append({
+                "_id": prov_id,
+                "codigo_proveedor": it.get("codigo_proveedor", ""),
+                "nombre": prov_name,
+                "cif_nif": it.get("cif_nif", ""),
+                "activo": it.get("activo", True),
+                "referencias": refs,
+                "total_referencias": sum(refs.values()),
+            })
+
+        resultado.append({
+            "clave_normalizada": key,
+            "keep_id_sugerido": str(keep["_id"]),
+            "proveedores": enriched,
+        })
+
+    resultado.sort(key=lambda g: -len(g["proveedores"]))
+    return {"success": True, "total_grupos": len(resultado), "grupos": resultado}
+
+
+@router.post("/proveedores/merge")
+async def fusionar_proveedores(
+    payload: dict,
+    current_user: dict = Depends(RequireDelete),
+):
+    """Fusiona proveedores duplicados en uno canonico.
+    Body: { keep_id: str, merge_ids: [str, ...] }
+    """
+    keep_id = payload.get("keep_id")
+    merge_ids = payload.get("merge_ids") or []
+
+    if not keep_id or not ObjectId.is_valid(keep_id):
+        raise HTTPException(status_code=400, detail="keep_id invalido")
+    if not merge_ids or not isinstance(merge_ids, list):
+        raise HTTPException(status_code=400, detail="merge_ids requerido")
+    if keep_id in merge_ids:
+        raise HTTPException(status_code=400, detail="keep_id no puede estar en merge_ids")
+
+    for mid in merge_ids:
+        if not ObjectId.is_valid(mid):
+            raise HTTPException(status_code=400, detail=f"merge_id invalido: {mid}")
+
+    keep = await proveedores_collection.find_one({"_id": ObjectId(keep_id)})
+    if not keep:
+        raise HTTPException(status_code=404, detail="Proveedor canonico no encontrado")
+
+    keep_nombre = keep.get("nombre", "")
+    resumen = {
+        "keep_id": keep_id,
+        "keep_nombre": keep_nombre,
+        "merged": [],
+        "referencias_actualizadas": {"contratos": 0, "parcelas": 0, "albaranes": 0},
+    }
+
+    for mid in merge_ids:
+        merged = await proveedores_collection.find_one({"_id": ObjectId(mid)})
+        if not merged:
+            continue
+        merged_nombre = merged.get("nombre", "")
+
+        for col_name in ("contratos", "parcelas", "albaranes"):
+            col = db[col_name]
+            r1 = await col.update_many(
+                {"proveedor_id": mid},
+                {"$set": {"proveedor_id": keep_id, "proveedor": keep_nombre}},
+            )
+            r2 = await col.update_many(
+                {"proveedor": merged_nombre, "proveedor_id": {"$ne": keep_id}},
+                {"$set": {"proveedor": keep_nombre, "proveedor_id": keep_id}},
+            )
+            resumen["referencias_actualizadas"][col_name] += (r1.modified_count + r2.modified_count)
+
+        await documentos_proveedor_collection.update_many(
+            {"proveedor_id": mid}, {"$set": {"proveedor_id": keep_id}}
+        )
+        await changelog_proveedor_collection.update_many(
+            {"proveedor_id": mid}, {"$set": {"proveedor_id": keep_id}}
+        )
+
+        await proveedores_collection.delete_one({"_id": ObjectId(mid)})
+
+        resumen["merged"].append({
+            "_id": mid,
+            "nombre": merged_nombre,
+            "codigo_proveedor": merged.get("codigo_proveedor", ""),
+        })
+
+    if resumen["merged"]:
+        await log_proveedor_change(
+            keep_id,
+            "fusion",
+            current_user,
+            [{
+                "field": "fusion_duplicados",
+                "old": "",
+                "new": f"Fusionados {len(resumen['merged'])}: " + ", ".join(
+                    f"{m['codigo_proveedor']} {m['nombre']}" for m in resumen["merged"]
+                ),
+            }],
+        )
+
+    return {"success": True, "resumen": resumen}
+
+
 @router.get("/proveedores/{proveedor_id}")
 async def get_proveedor(
     proveedor_id: str,
