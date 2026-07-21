@@ -188,9 +188,9 @@ const DashboardAlertasWidget = () => {
             </button>
             {expandedSection === section.key && (
               <div style={{ padding: '0.5rem 0.75rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                {section.items.map((item, idx) => (
+                {section.items.map((item) => (
                   <AlertItem
-                    key={idx}
+                    key={item.alertKey}
                     item={item}
                     icon={item.badge === 'VENCIDO' || item.badge === 'VENCIDA' || item.badge === 'PENDIENTE' ? <XCircle size={16} /> : <Clock size={16} />}
                     colorClass={item.badge === 'VENCIDO' || item.badge === 'VENCIDA' || item.badge === 'PENDIENTE' ? '--destructive' : '--primary'}

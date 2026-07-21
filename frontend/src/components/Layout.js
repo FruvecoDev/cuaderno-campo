@@ -284,12 +284,12 @@ const Layout = ({ children }) => {
         </button>
         
         <nav className="sidebar-nav">
-          {filteredNavItems.map((section, idx) => {
+          {filteredNavItems.map((section) => {
             const isCollapsed = collapsedSections[section.section];
             const hasActiveItem = section.items.some(item => location.pathname === item.path);
             
             return (
-              <div key={idx} className="nav-section">
+              <div key={section.section} className="nav-section">
                 {!isSidebarCollapsed && (
                   <div 
                     className="nav-section-title"

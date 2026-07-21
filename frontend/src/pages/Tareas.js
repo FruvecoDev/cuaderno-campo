@@ -28,6 +28,15 @@ const ESTADO_COLORS = {
   cancelada: { bg: '#fee2e2', text: '#dc2626' }
 };
 
+// Tabs estables del modal de Tarea (fuera del componente para preservar
+// referencia entre renders y evitar re-renders del FormModal memoizado).
+const TAREA_TABS = [
+  { key: 'general', label: 'General', icon: <ClipboardList size={14} /> },
+  { key: 'parcelas', label: 'Parcelas y Descripción', icon: <MapPin size={14} /> },
+  { key: 'subtareas', label: 'Subtareas', icon: <CheckSquare size={14} /> },
+  { key: 'costes', label: 'Costes', icon: <Euro size={14} /> },
+];
+
 const Tareas = () => {
   const { token, user } = useAuth();
   const { t } = useTranslation();
@@ -620,12 +629,7 @@ const Tareas = () => {
         iconBg="hsl(var(--primary) / 0.1)"
         title={`${editingId ? 'Editar' : 'Nueva'} Tarea`}
         subtitle={formData.nombre ? `${formData.nombre} — ${formData.prioridad}` : 'Gestión de tareas y subtareas'}
-        tabs={[
-          { key: 'general', label: 'General', icon: <ClipboardList size={14} /> },
-          { key: 'parcelas', label: 'Parcelas y Descripción', icon: <MapPin size={14} /> },
-          { key: 'subtareas', label: 'Subtareas', icon: <CheckSquare size={14} /> },
-          { key: 'costes', label: 'Costes', icon: <Euro size={14} /> },
-        ]}
+        tabs={TAREA_TABS}
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onSubmit={handleSubmit}

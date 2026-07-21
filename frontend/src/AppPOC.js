@@ -554,8 +554,8 @@ function AppPOC() {
                   <button type="submit" disabled={loading}>Añadir</button>
                 </form>
                 <div className="event-list">
-                  {tratamientos.map((t, i) => (
-                    <div key={i} className="event-item">{t.fecha} - {t.producto} ({t.dosis})</div>
+                  {tratamientos.map((t) => (
+                    <div key={t.id || `${t.fecha}-${t.producto}-${t.dosis}`} className="event-item">{t.fecha} - {t.producto} ({t.dosis})</div>
                   ))}
                 </div>
               </div>
@@ -571,8 +571,8 @@ function AppPOC() {
                   <button type="submit" disabled={loading}>Añadir</button>
                 </form>
                 <div className="event-list">
-                  {riegos.map((r, i) => (
-                    <div key={i} className="event-item">{r.fecha} - {r.volumen} m³</div>
+                  {riegos.map((r) => (
+                    <div key={r.id || `${r.fecha}-${r.volumen}`} className="event-item">{r.fecha} - {r.volumen} m³</div>
                   ))}
                 </div>
               </div>
@@ -592,8 +592,8 @@ function AppPOC() {
                   <button type="submit" disabled={loading}>Añadir</button>
                 </form>
                 <div className="event-list">
-                  {visitas.map((v, i) => (
-                    <div key={i} className="event-item">{v.fecha} - {v.tipo}</div>
+                  {visitas.map((v) => (
+                    <div key={v.id || `${v.fecha}-${v.tipo}`} className="event-item">{v.fecha} - {v.tipo}</div>
                   ))}
                 </div>
               </div>
@@ -613,8 +613,8 @@ function AppPOC() {
                   <button type="submit" disabled={loading}>Añadir</button>
                 </form>
                 <div className="event-list">
-                  {cosechas.map((c, i) => (
-                    <div key={i} className="event-item">{c.fecha} - {c.cantidad} kg</div>
+                  {cosechas.map((c) => (
+                    <div key={c.id || `${c.fecha}-${c.cantidad}`} className="event-item">{c.fecha} - {c.cantidad} kg</div>
                   ))}
                 </div>
               </div>
@@ -649,7 +649,8 @@ function AppPOC() {
               <h3>🤖 Informe IA - Análisis de Campaña</h3>
               <div className="report-content">
                 {aiReport.split('\n').map((line, i) => (
-                  <p key={i}>{line}</p>
+                  // eslint-disable-next-line react/no-array-index-key
+                  <p key={`ai-line-${i}`}>{line}</p>
                 ))}
               </div>
             </div>

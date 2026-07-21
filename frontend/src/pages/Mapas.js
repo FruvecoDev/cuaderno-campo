@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polygon, useMap, FeatureGroup } from 'react-leaflet';
 import { EditControl } from 'react-leaflet-draw';
 import api from '../services/api';
@@ -138,6 +138,11 @@ const calculatePolygonArea = (coordinates) => {
   return area / 10000; // Convert m² to hectares
 };
 
+// Opciones estables del EditControl (rectangle/circle/marker/... desactivados,
+// solo poligonos permitidos). Se extraen fuera del componente para no crear
+// un objeto nuevo en cada render y evitar disparar re-renders del EditControl.
+const DRAW_EDIT_OPTIONS = { edit: true, remove: true };
+
 const Mapas = () => {
   const { t } = useTranslation();
   const { token } = useAuth();
@@ -161,6 +166,27 @@ const Mapas = () => {
   const [capturingMap, setCapturingMap] = useState(false);
   const featureGroupRef = useRef(null);
   const mapContainerRef = useRef(null);
+
+  // Opciones de dibujo memoizadas. Solo se recalculan cuando cambia el cultivo
+  // de la parcela seleccionada (afecta al color del poligono en dibujo).
+  const drawOptions = useMemo(() => ({
+    rectangle: false,
+    circle: false,
+    circlemarker: false,
+    marker: false,
+    polyline: false,
+    polygon: {
+      allowIntersection: false,
+      drawError: {
+        color: '#e1e4e8',
+        message: 'Los bordes no pueden cruzarse',
+      },
+      shapeOptions: {
+        color: CROP_COLORS[selectedParcela?.cultivo] || CROP_COLORS.default,
+        fillOpacity: 0.3,
+      },
+    },
+  }), [selectedParcela?.cultivo]);
 
   useEffect(() => {
     fetchParcelas();
@@ -739,28 +765,8 @@ const Mapas = () => {
                   position="topright"
                   onCreated={handleDrawCreated}
                   onDeleted={handleDrawDeleted}
-                  draw={{
-                    rectangle: false,
-                    circle: false,
-                    circlemarker: false,
-                    marker: false,
-                    polyline: false,
-                    polygon: {
-                      allowIntersection: false,
-                      drawError: {
-                        color: '#e1e4e8',
-                        message: 'Los bordes no pueden cruzarse'
-                      },
-                      shapeOptions: {
-                        color: CROP_COLORS[selectedParcela?.cultivo] || CROP_COLORS.default,
-                        fillOpacity: 0.3
-                      }
-                    }
-                  }}
-                  edit={{
-                    edit: true,
-                    remove: true
-                  }}
+                  draw={drawOptions}
+                  edit={DRAW_EDIT_OPTIONS}
                 />
               </FeatureGroup>
             )}

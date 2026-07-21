@@ -119,9 +119,9 @@ const VisitasCalendar = ({ visitas, onDateClick, t }) => {
                 <div style={{ 
                   display: 'flex', gap: '1px', marginTop: '1px'
                 }}>
-                  {visitasDelDia.slice(0, 3).map((_, vIdx) => (
+                  {visitasDelDia.slice(0, 3).map((v) => (
                     <div 
-                      key={vIdx}
+                      key={v._id || v.id || `${v.fecha_planificada}-${v.numero_visita || ''}`}
                       style={{ 
                         width: '4px', height: '4px', borderRadius: '50%',
                         backgroundColor: isToday(day) ? 'white' : '#2d5a27'

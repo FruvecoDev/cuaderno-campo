@@ -76,6 +76,16 @@ const TABLE_LABELS = {
   estado: 'Estado'
 };
 
+// Config estable de tabs del modal de tratamiento (extraida fuera del componente
+// para evitar recrear el array/JSX en cada render y provocar re-renders
+// innecesarios en el FormModal memoizado).
+const TRATAMIENTO_TABS = [
+  { key: 'general', label: 'General', icon: <FileText size={14} /> },
+  { key: 'parcelas', label: 'Parcelas', icon: <MapPin size={14} /> },
+  { key: 'producto', label: 'Producto y Dosis', icon: <Droplets size={14} /> },
+  { key: 'aplicacion', label: 'Aplicación', icon: <Cog size={14} /> },
+];
+
 const Tratamientos = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -909,12 +919,7 @@ const Tratamientos = () => {
           iconBg="hsl(142, 76%, 36% / 0.1)"
           title={`${editingId ? 'Editar' : 'Crear'} Tratamiento`}
           subtitle={formData.tipo_tratamiento ? `${formData.tipo_tratamiento}${formData.subtipo ? ' - ' + formData.subtipo : ''}` : 'Registro fitosanitario / nutrición'}
-          tabs={[
-            { key: 'general', label: 'General', icon: <FileText size={14} /> },
-            { key: 'parcelas', label: 'Parcelas', icon: <MapPin size={14} /> },
-            { key: 'producto', label: 'Producto y Dosis', icon: <Droplets size={14} /> },
-            { key: 'aplicacion', label: 'Aplicación', icon: <Cog size={14} /> },
-          ]}
+          tabs={TRATAMIENTO_TABS}
           activeTab={activeTab}
           onTabChange={setActiveTab}
           onSubmit={handleSubmit}

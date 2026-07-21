@@ -152,9 +152,9 @@ export const ParcelasHistorial = ({
               <div style={{ marginTop: '1.5rem' }}>
                 <h4 style={{ fontWeight: '600', marginBottom: '0.75rem' }}>Productos Utilizados</h4>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  {historialData.estadisticas.productos_usados.map((prod, idx) => (
+                  {historialData.estadisticas.productos_usados.map((prod) => (
                     <span 
-                      key={idx}
+                      key={prod}
                       style={{
                         padding: '0.25rem 0.75rem',
                         backgroundColor: '#f0fdf4',
