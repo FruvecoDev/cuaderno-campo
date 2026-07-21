@@ -11,6 +11,7 @@ import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
 import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
 import PaginationFooter, { usePagination } from '../components/PaginationFooter';
+import DateInputES from '../components/common/DateInputES';
 import '../App.css';
 import { notify } from '../lib/notify';
 
@@ -545,8 +546,8 @@ const Contratos = () => {
                 <div style={{ marginBottom: '1.5rem' }}>
                   <h3 style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Periodo de Entrega</h3>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Desde *</label><input type="date" className="form-input" value={formData.periodo_desde} onChange={e => setFormData({ ...formData, periodo_desde: e.target.value })} required /></div>
-                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Hasta *</label><input type="date" className="form-input" value={formData.periodo_hasta} onChange={e => setFormData({ ...formData, periodo_hasta: e.target.value })} required /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Desde *</label><DateInputES className="form-input" value={formData.periodo_desde} onChange={e => setFormData({ ...formData, periodo_desde: e.target.value })} required data-testid="input-periodo-desde" /></div>
+                    <div className="form-group" style={{ marginBottom: 0 }}><label className="form-label" style={{ fontSize: '0.75rem', fontWeight: '600' }}>Hasta *</label><DateInputES className="form-input" value={formData.periodo_hasta} onChange={e => setFormData({ ...formData, periodo_hasta: e.target.value })} required data-testid="input-periodo-hasta" /></div>
                   </div>
                 </div>
                 {/* Tenderometria para Guisante */}
