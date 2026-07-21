@@ -54,7 +54,7 @@ const Visitas = () => {
   const [parcelaSearch, setParcelaSearch] = useState({ proveedor: '', cultivo: '', campana: '' });
   const [parcelaFilterOptions, setParcelaFilterOptions] = useState({ proveedores: [], cultivos: [], campanas: [] });
   
-  const [filters, setFilters] = useState({ proveedor: '', cultivo: '', campana: '', parcela: '' });
+  const [filters, setFilters] = useState({ proveedor: '', cultivo: '', campana: '', parcela: '', estado: '' });
   const [showFieldsConfig, setShowFieldsConfig] = useState(false);
   const [fieldsConfig, setFieldsConfig] = useState(() => {
     const saved = localStorage.getItem('visitas_fields_config');
@@ -271,10 +271,14 @@ const Visitas = () => {
     if (filters.cultivo && v.cultivo !== filters.cultivo) return false;
     if (filters.campana && v.campana !== filters.campana) return false;
     if (filters.parcela && v.codigo_plantacion !== filters.parcela) return false;
+    if (filters.estado) {
+      if (filters.estado === 'realizada' && !v.realizado) return false;
+      if (filters.estado === 'pendiente' && v.realizado) return false;
+    }
     return true;
   });
   
-  const clearFilters = () => { setFilters({ proveedor: '', cultivo: '', campana: '', parcela: '' }); };
+  const clearFilters = () => { setFilters({ proveedor: '', cultivo: '', campana: '', parcela: '', estado: '' }); };
   const toggleFieldConfig = (field) => { setFieldsConfig(prev => ({ ...prev, [field]: !prev[field] })); };
   const toggleTableConfig = (field) => { setTableConfig(prev => ({ ...prev, [field]: !prev[field] })); };
   const hasActiveFilters = Object.values(filters).some(v => v !== '');

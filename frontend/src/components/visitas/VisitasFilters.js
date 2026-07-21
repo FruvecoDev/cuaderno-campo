@@ -147,6 +147,19 @@ export const VisitasSearchFilters = ({
             ))}
           </select>
         </div>
+        <div className="form-group" style={{ marginBottom: 0 }}>
+          <label className="form-label">Estado</label>
+          <select
+            className="form-select"
+            value={filters.estado || ''}
+            onChange={(e) => setFilters({ ...filters, estado: e.target.value })}
+            data-testid="filter-estado"
+          >
+            <option value="">Todos</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="realizada">Realizada</option>
+          </select>
+        </div>
       </div>
       {hasActiveFilters && (
         <p style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
