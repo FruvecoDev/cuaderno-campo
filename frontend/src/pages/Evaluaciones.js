@@ -410,6 +410,26 @@ const Evaluaciones = () => {
     catch (e) { console.error('[Evaluaciones.js] handleDownloadPDF', e); }
   };
 
+  const handleSendByEmail = async (id) => {
+    const raw = window.prompt(
+      'Enviar Hoja de Evaluacion por email\n\nIntroduce los destinatarios separados por comas:',
+      ''
+    );
+    if (raw === null) return; // cancelado
+    const recipients = raw.split(',').map(s => s.trim()).filter(Boolean);
+    if (recipients.length === 0) {
+      notify.error('Se requiere al menos un destinatario');
+      return;
+    }
+    try {
+      const result = await api.post(`/api/evaluaciones/${id}/email`, { recipients });
+      notify.success(`Email enviado a ${result.recipients?.join(', ') || 'los destinatarios'}`);
+    } catch (err) {
+      const msg = err?.response?.data?.detail || 'Error al enviar el email';
+      notify.error(msg);
+    }
+  };
+
   const handleAddQuestion = async () => {
     if (!newQuestionSection || !newQuestionText.trim()) { setError('Completa todos los campos'); setTimeout(() => setError(null), 3000); return; }
     try {
@@ -638,6 +658,7 @@ const Evaluaciones = () => {
         canDelete={canDelete}
         onChangeEstado={handleChangeEstado}
         onDownloadPDF={handleDownloadPDF}
+        onSendEmail={handleSendByEmail}
         onEdit={handleEdit}
         onDelete={handleDelete}
         getEstadoBadge={getEstadoBadge}

@@ -1,29 +1,49 @@
 """
 Email Service for FRUVECO - Cuaderno de Campo
 Handles email notifications for visits, treatments, and other farm activities.
-Uses Resend API for email delivery.
+Uses SMTP (Office 365 compatible) via aiosmtplib for async delivery.
 """
 
 import os
-import asyncio
 import logging
+import ssl
+from email.message import EmailMessage
 from datetime import datetime, timedelta
-from typing import List, Optional
-import resend
+from typing import List, Optional, Iterable, Union
+
+import aiosmtplib
 from dotenv import load_dotenv
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-# Configuration
-RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
-SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "onboarding@resend.dev")
+# ---------------------------------------------------------------------------
+# SMTP configuration (Office 365 defaults)
+#   SMTP_HOST=smtp.office365.com
+#   SMTP_PORT=587           (STARTTLS)
+#   SMTP_USERNAME=user@fruveco.com
+#   SMTP_PASSWORD=***
+#   SMTP_FROM_EMAIL=user@fruveco.com     (opcional, default=SMTP_USERNAME)
+#   SMTP_FROM_NAME="FRUVECO Notificaciones"
+#   SMTP_USE_TLS=starttls   (starttls|ssl|none)  default: starttls
+# ---------------------------------------------------------------------------
+SMTP_HOST = os.environ.get("SMTP_HOST", "")
+SMTP_PORT = int(os.environ.get("SMTP_PORT", "587") or "587")
+SMTP_USERNAME = os.environ.get("SMTP_USERNAME", "")
+SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
+SMTP_FROM_EMAIL = os.environ.get("SMTP_FROM_EMAIL") or SMTP_USERNAME
+SMTP_FROM_NAME = os.environ.get("SMTP_FROM_NAME", "FRUVECO")
+SMTP_USE_TLS = (os.environ.get("SMTP_USE_TLS", "starttls") or "starttls").lower()
+
+# Backwards compat: alguas rutas leen SENDER_EMAIL directamente.
+SENDER_EMAIL = SMTP_FROM_EMAIL
+
 APP_NAME = "FRUVECO - Cuaderno de Campo"
 
-# Initialize Resend
-if RESEND_API_KEY:
-    resend.api_key = RESEND_API_KEY
+
+def _is_smtp_configured() -> bool:
+    return bool(SMTP_HOST and SMTP_USERNAME and SMTP_PASSWORD and SMTP_FROM_EMAIL)
 
 
 def get_email_template(title: str, content: str, footer_text: str = "") -> str:
@@ -82,34 +102,114 @@ def get_email_template(title: str, content: str, footer_text: str = "") -> str:
 
 
 async def send_email(
-    recipient_email: str,
+    recipient_email: Union[str, Iterable[str]],
     subject: str,
-    html_content: str
+    html_content: str,
+    *,
+    text_content: Optional[str] = None,
+    attachments: Optional[List[dict]] = None,
+    cc: Optional[List[str]] = None,
 ) -> dict:
-    """Send an email using Resend API (async, non-blocking)"""
-    if not RESEND_API_KEY:
-        logger.warning("RESEND_API_KEY not configured. Email not sent.")
-        return {"status": "skipped", "message": "Email service not configured"}
-    
-    params = {
-        "from": SENDER_EMAIL,
-        "to": [recipient_email],
-        "subject": subject,
-        "html": html_content
-    }
-    
+    """Enviar email via SMTP (Office 365 compatible, async).
+
+    Args:
+        recipient_email: destinatario (str) o lista de destinatarios.
+        subject: asunto.
+        html_content: cuerpo HTML.
+        text_content: cuerpo texto plano opcional (default: strip del HTML).
+        attachments: lista de dicts con keys `filename`, `content` (bytes),
+                     `content_type` (str, opcional).
+        cc: lista de emails en copia.
+
+    Env vars requeridas: SMTP_HOST, SMTP_USERNAME, SMTP_PASSWORD, SMTP_FROM_EMAIL.
+    Si no hay configuracion, devuelve status=skipped.
+    """
+    if not _is_smtp_configured():
+        logger.warning("SMTP no configurado (SMTP_HOST/USERNAME/PASSWORD faltan). Email no enviado.")
+        return {"status": "skipped", "message": "SMTP service not configured"}
+
+    if isinstance(recipient_email, str):
+        recipients = [recipient_email]
+    else:
+        recipients = list(recipient_email)
+    if not recipients:
+        return {"status": "error", "message": "No recipient provided"}
+
+    msg = EmailMessage()
+    from_display = f"{SMTP_FROM_NAME} <{SMTP_FROM_EMAIL}>" if SMTP_FROM_NAME else SMTP_FROM_EMAIL
+    msg["From"] = from_display
+    msg["To"] = ", ".join(recipients)
+    if cc:
+        msg["Cc"] = ", ".join(cc)
+    msg["Subject"] = subject
+    msg.set_content(text_content or "Este correo contiene contenido HTML.")
+    msg.add_alternative(html_content, subtype="html")
+
+    for att in attachments or []:
+        try:
+            data = att["content"]
+            if isinstance(data, str):
+                data = data.encode("utf-8")
+            ctype = att.get("content_type") or "application/octet-stream"
+            maintype, _, subtype = ctype.partition("/")
+            msg.add_attachment(
+                data,
+                maintype=maintype or "application",
+                subtype=subtype or "octet-stream",
+                filename=att.get("filename", "adjunto"),
+            )
+        except Exception as exc:  # pragma: no cover
+            logger.warning("Error agregando adjunto '%s': %s", att.get("filename"), exc)
+
+    tls_ctx = ssl.create_default_context()
+    to_addrs = list(recipients) + list(cc or [])
+
     try:
-        # Run sync SDK in thread to keep FastAPI non-blocking
-        email = await asyncio.to_thread(resend.Emails.send, params)
-        logger.info(f"Email sent successfully to {recipient_email}")
+        if SMTP_USE_TLS == "ssl":
+            await aiosmtplib.send(
+                msg,
+                hostname=SMTP_HOST,
+                port=SMTP_PORT,
+                username=SMTP_USERNAME,
+                password=SMTP_PASSWORD,
+                use_tls=True,
+                tls_context=tls_ctx,
+                recipients=to_addrs,
+                timeout=30,
+            )
+        elif SMTP_USE_TLS == "none":
+            await aiosmtplib.send(
+                msg,
+                hostname=SMTP_HOST,
+                port=SMTP_PORT,
+                username=SMTP_USERNAME,
+                password=SMTP_PASSWORD,
+                use_tls=False,
+                start_tls=False,
+                recipients=to_addrs,
+                timeout=30,
+            )
+        else:  # starttls (default)
+            await aiosmtplib.send(
+                msg,
+                hostname=SMTP_HOST,
+                port=SMTP_PORT,
+                username=SMTP_USERNAME,
+                password=SMTP_PASSWORD,
+                start_tls=True,
+                tls_context=tls_ctx,
+                recipients=to_addrs,
+                timeout=30,
+            )
+        logger.info("Email SMTP enviado a %s (subject=%s)", to_addrs, subject)
         return {
             "status": "success",
-            "message": f"Email sent to {recipient_email}",
-            "email_id": email.get("id")
+            "message": f"Email sent to {', '.join(recipients)}",
+            "email_id": msg.get("Message-ID"),
         }
-    except Exception as e:
-        logger.error(f"Failed to send email to {recipient_email}: {str(e)}")
-        return {"status": "error", "message": str(e)}
+    except Exception as exc:
+        logger.error("Fallo envio SMTP a %s: %s", to_addrs, exc, exc_info=True)
+        return {"status": "error", "message": str(exc)}
 
 
 async def send_visit_reminder(

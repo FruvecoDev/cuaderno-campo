@@ -2139,6 +2139,82 @@ async def generate_evaluacion_pdf(
                 print(f"[PDF] cleanup failed for {_tf}: {_cleanup_err}")
 
 
+@router.post("/evaluaciones/{evaluacion_id}/email")
+async def send_evaluacion_by_email(
+    evaluacion_id: str,
+    payload: dict,
+    current_user: dict = Depends(get_current_user),
+):
+    """Envia el PDF de la Hoja de Evaluacion por email a uno o varios destinatarios.
+
+    Body: { recipients: ["email@..."], cc?: [...], subject?: str, message?: str }
+    """
+    from email_service import send_email, _is_smtp_configured, get_email_template
+
+    if not _is_smtp_configured():
+        raise HTTPException(
+            status_code=503,
+            detail="SMTP no configurado. Anade SMTP_HOST, SMTP_USERNAME, SMTP_PASSWORD en .env",
+        )
+
+    recipients = (payload or {}).get("recipients") or []
+    if isinstance(recipients, str):
+        recipients = [recipients]
+    recipients = [r for r in recipients if r and isinstance(r, str)]
+    if not recipients:
+        raise HTTPException(status_code=422, detail="Se requiere al menos un destinatario")
+
+    cc = (payload or {}).get("cc") or []
+    subject = (payload or {}).get("subject") or "Hoja de Evaluacion / Cuaderno de Campo"
+    body_msg = (payload or {}).get("message") or ""
+
+    # Generar el PDF reutilizando la funcion existente (misma logica que el GET)
+    resp = await generate_evaluacion_pdf(evaluacion_id, current_user)
+    pdf_bytes = resp.body if hasattr(resp, "body") else b""
+    if not pdf_bytes:
+        raise HTTPException(status_code=500, detail="No se pudo generar el PDF de la evaluacion")
+
+    # Meta de la evaluacion para nombre de archivo + cuerpo del email
+    evaluacion = await evaluaciones_collection.find_one({"_id": ObjectId(evaluacion_id)})
+    codigo = (evaluacion or {}).get("codigo_plantacion", "sin_codigo")
+    campana = (evaluacion or {}).get("campana", "sin_campana")
+    filename = f"cuaderno_campo_{codigo}_{campana}.pdf"
+
+    html_content = get_email_template(
+        title="Hoja de Evaluacion / Cuaderno de Campo",
+        content=(
+            f"<p>Se adjunta la hoja de evaluacion correspondiente a:</p>"
+            f"<ul>"
+            f"<li><b>Codigo Plantacion:</b> {codigo}</li>"
+            f"<li><b>Campana:</b> {campana}</li>"
+            f"</ul>"
+            + (f"<p style='margin-top:16px'>{body_msg}</p>" if body_msg else "")
+            + "<p style='margin-top:16px'>Un saludo,<br/>Equipo FRUVECO</p>"
+        ),
+    )
+
+    result = await send_email(
+        recipient_email=recipients,
+        subject=subject,
+        html_content=html_content,
+        cc=cc or None,
+        attachments=[{"filename": filename, "content": pdf_bytes, "content_type": "application/pdf"}],
+    )
+
+    if result.get("status") == "error":
+        raise HTTPException(status_code=500, detail=result.get("message", "Fallo al enviar email"))
+
+    return {
+        "success": True,
+        "recipients": recipients,
+        "cc": cc,
+        "filename": filename,
+        "status": result.get("status"),
+        "message": result.get("message"),
+    }
+
+
+
 
 @router.get("/evaluaciones/export/excel")
 async def export_evaluaciones_excel(

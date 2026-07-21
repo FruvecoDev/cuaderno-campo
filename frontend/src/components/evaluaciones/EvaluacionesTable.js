@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, Edit2, Trash2, Download, CheckCircle, Clock, Archive } from 'lucide-react';
+import { FileText, Edit2, Trash2, Download, CheckCircle, Clock, Archive, Mail } from 'lucide-react';
 
 const EvaluacionesTable = ({
   evaluaciones,
@@ -9,6 +9,7 @@ const EvaluacionesTable = ({
   canDelete,
   onChangeEstado,
   onDownloadPDF,
+  onSendEmail,
   onEdit,
   onDelete,
   getEstadoBadge,
@@ -99,6 +100,16 @@ const EvaluacionesTable = ({
                           >
                             <Download size={14} />
                           </button>
+                          {onSendEmail && (
+                            <button
+                              className="btn btn-sm btn-secondary"
+                              onClick={() => onSendEmail(evaluacion._id)}
+                              title="Enviar PDF por email"
+                              data-testid={`btn-email-evaluacion-${evaluacion._id}`}
+                            >
+                              <Mail size={14} />
+                            </button>
+                          )}
                           {canEdit && (
                             <button
                               className="btn btn-sm btn-secondary"

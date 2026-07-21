@@ -15,7 +15,7 @@ from email_service import (
     send_daily_visit_summary,
     send_test_email,
     get_email_template,
-    RESEND_API_KEY
+    _is_smtp_configured,
 )
 from database import visitas_collection, users_collection
 from routes_auth import get_current_user
@@ -49,9 +49,9 @@ def serialize_doc(doc):
 async def get_notification_status(current_user: dict = Depends(get_current_user)):
     """Check if email notifications are configured"""
     return {
-        "configured": bool(RESEND_API_KEY),
-        "service": "Resend" if RESEND_API_KEY else None,
-        "message": "Notificaciones por email configuradas" if RESEND_API_KEY else "Servicio de email no configurado. Añade RESEND_API_KEY en .env"
+        "configured": _is_smtp_configured(),
+        "service": "SMTP (Office 365)" if _is_smtp_configured() else None,
+        "message": "Notificaciones por email configuradas" if _is_smtp_configured() else "Servicio SMTP no configurado. Configura SMTP_HOST, SMTP_USERNAME, SMTP_PASSWORD en .env"
     }
 
 
@@ -61,10 +61,10 @@ async def send_test_notification(
     current_user: dict = Depends(get_current_user)
 ):
     """Send a test email to verify configuration"""
-    if not RESEND_API_KEY:
+    if not _is_smtp_configured():
         raise HTTPException(
             status_code=503, 
-            detail="Servicio de email no configurado. Añade RESEND_API_KEY en el archivo .env"
+            detail="Servicio de email no configurado. Configura SMTP_HOST, SMTP_USERNAME, SMTP_PASSWORD en .env"
         )
     
     result = await send_test_email(request.email)
@@ -89,7 +89,7 @@ async def trigger_visit_reminders(
     Manually trigger visit reminder emails.
     Sends reminders for visits planned within the next N days.
     """
-    if not RESEND_API_KEY:
+    if not _is_smtp_configured():
         raise HTTPException(
             status_code=503, 
             detail="Servicio de email no configurado"
@@ -166,7 +166,7 @@ async def trigger_daily_summary(
     Send a daily summary of planned visits.
     If target_date not provided, uses today.
     """
-    if not RESEND_API_KEY:
+    if not _is_smtp_configured():
         raise HTTPException(
             status_code=503, 
             detail="Servicio de email no configurado"
