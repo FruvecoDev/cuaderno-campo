@@ -98,7 +98,7 @@ const Cultivos = () => {
   const fetchCultivos = async () => {
     try {
       setError(null);
-      const data = await api.get('/api/cultivos');
+      const data = await api.get('/api/cultivos?limit=10000');
       setCultivos(data.cultivos || []);
     } catch (error) {
       const errorMsg = handlePermissionError(error, 'ver los cultivos');

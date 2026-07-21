@@ -143,7 +143,7 @@ const Clientes = () => {
     try {
       setLoading(true);
       let params = new URLSearchParams();
-      params.append('limit', '200');
+      params.append('limit', '10000');
       if (searchTerm) params.append('search', searchTerm);
       if (filterTipo) params.append('tipo', filterTipo);
       if (filterProvincia) params.append('provincia', filterProvincia);

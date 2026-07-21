@@ -112,7 +112,7 @@ const Fincas = () => {
 
   const fetchFincas = async () => {
     try {
-      const data = await api.get('/api/fincas');
+      const data = await api.get('/api/fincas?limit=10000');
       setFincas(data.fincas || []);
     } catch (err) { console.error('[Fincas.js]', err); }
     setLoading(false);
@@ -136,7 +136,7 @@ const Fincas = () => {
 
   const fetchParcelas = async () => {
     try {
-      const data = await api.get('/api/parcelas');
+      const data = await api.get('/api/parcelas?limit=10000');
       setParcelas(data.parcelas || data || []);
     } catch (err) { console.error('[Fincas.js]', err); }
   };

@@ -68,6 +68,7 @@ const Agentes = () => {
       setLoading(true);
       const params = new URLSearchParams();
       params.append('tipo', listTab);
+      params.append('limit', '10000');
       if (searchTerm) params.append('search', searchTerm);
       if (filterActivo === 'activos') params.append('activo', 'true');
       if (filterActivo === 'inactivos') params.append('activo', 'false');
@@ -80,9 +81,9 @@ const Agentes = () => {
   const fetchReferencias = async () => {
     try {
       const [cData, cuData, pData] = await Promise.all([
-        api.get('/api/contratos'),
-        api.get('/api/cultivos'),
-        api.get('/api/parcelas')
+        api.get('/api/contratos?limit=10000'),
+        api.get('/api/cultivos?limit=10000'),
+        api.get('/api/parcelas?limit=10000')
       ]);
       setContratos(cData.contratos || []);
       setCultivos(cuData.cultivos || []);

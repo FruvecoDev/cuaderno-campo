@@ -105,6 +105,7 @@ const Fitosanitarios = () => {
     try {
       setError(null);
       const params = new URLSearchParams();
+      params.append('limit', '10000');
       if (filters.tipo) params.append('tipo', filters.tipo);
       if (filters.search) params.append('search', filters.search);
       if (filters.activo !== '') params.append('activo', filters.activo);

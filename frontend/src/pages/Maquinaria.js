@@ -84,7 +84,7 @@ const Maquinaria = () => {
   useEffect(() => { localStorage.setItem('maquinaria_fields_config', JSON.stringify(fieldsConfig)); }, [fieldsConfig]);
 
   const fetchMaquinaria = async () => {
-    try { setError(null); const data = await api.get('/api/maquinaria'); setMaquinaria(data.maquinaria || []); }
+    try { setError(null); const data = await api.get('/api/maquinaria?limit=10000'); setMaquinaria(data.maquinaria || []); }
     catch (error) { const msg = handlePermissionError(error, 'ver la maquinaria'); setError(msg); }
     finally { setLoading(false); }
   };
