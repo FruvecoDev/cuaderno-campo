@@ -11,6 +11,7 @@ import EvaluacionesFilters from '../components/evaluaciones/EvaluacionesFilters'
 import EvaluacionesTable from '../components/evaluaciones/EvaluacionesTable';
 import EvaluacionesForm from '../components/evaluaciones/EvaluacionesForm';
 import SendEmailModal from '../components/evaluaciones/SendEmailModal';
+import EmailHistoryModal from '../components/evaluaciones/EmailHistoryModal';
 import { DEFAULT_IMPRESOS, mergeImpresos } from '../components/evaluaciones/EvaluacionesImpresos';
 import '../App.css';
 import { notify } from '../lib/notify';
@@ -415,9 +416,18 @@ const Evaluaciones = () => {
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [emailEvaluacionId, setEmailEvaluacionId] = useState(null);
 
+  // Modal de historial de emails
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  const [historyEvaluacionId, setHistoryEvaluacionId] = useState(null);
+
   const handleSendByEmail = (id) => {
     setEmailEvaluacionId(id);
     setEmailModalOpen(true);
+  };
+
+  const handleShowEmailHistory = (id) => {
+    setHistoryEvaluacionId(id);
+    setHistoryModalOpen(true);
   };
 
   const handleAddQuestion = async () => {
@@ -649,6 +659,7 @@ const Evaluaciones = () => {
         onChangeEstado={handleChangeEstado}
         onDownloadPDF={handleDownloadPDF}
         onSendEmail={handleSendByEmail}
+        onEmailHistory={handleShowEmailHistory}
         onEdit={handleEdit}
         onDelete={handleDelete}
         getEstadoBadge={getEstadoBadge}
@@ -660,6 +671,12 @@ const Evaluaciones = () => {
         title="Enviar Hoja de Evaluación"
         currentUserEmail={user?.email || ''}
         onClose={() => setEmailModalOpen(false)}
+      />
+      <EmailHistoryModal
+        show={historyModalOpen}
+        queryUrl={historyEvaluacionId ? `/api/email-logs?entity_type=evaluacion&entity_id=${historyEvaluacionId}` : ''}
+        title="Historial de envíos"
+        onClose={() => setHistoryModalOpen(false)}
       />
     </div>
   );

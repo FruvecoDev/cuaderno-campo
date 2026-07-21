@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { FileText, Download, Loader2, Search, Leaf, MapPin, Calendar, Package, Droplets, Eye, ClipboardList, TrendingUp, Mail } from 'lucide-react';
+import { FileText, Download, Loader2, Search, Leaf, MapPin, Calendar, Package, Droplets, Eye, ClipboardList, TrendingUp, Mail, History } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../utils/permissions';
 import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
 import SendEmailModal from '../components/evaluaciones/SendEmailModal';
+import EmailHistoryModal from '../components/evaluaciones/EmailHistoryModal';
 import '../App.css';
 import { notify } from '../lib/notify';
 
@@ -19,6 +20,7 @@ const CuadernoCampo = () => {
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCultivo, setFilterCultivo] = useState('');
   const [contratos, setContratos] = useState([]);
@@ -430,6 +432,16 @@ const CuadernoCampo = () => {
                   <Mail size={20} />
                   Enviar por email
                 </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setHistoryModalOpen(true)}
+                  style={{ padding: '1rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+                  title="Historial de envíos por email"
+                  data-testid="btn-email-history"
+                >
+                  <History size={20} />
+                  Historial
+                </button>
               </div>
               
               {preview.resumen.total_registros === 0 && (
@@ -454,6 +466,12 @@ const CuadernoCampo = () => {
         defaultSubject={selectedParcela ? `Cuaderno de Campo — ${selectedParcela.codigo_plantacion}` : 'Cuaderno de Campo'}
         currentUserEmail={user?.email || ''}
         onClose={() => setEmailModalOpen(false)}
+      />
+      <EmailHistoryModal
+        show={historyModalOpen}
+        queryUrl={selectedParcela ? `/api/email-logs?parcela_id=${selectedParcela._id}` : ''}
+        title={selectedParcela ? `Historial de envíos — ${selectedParcela.codigo_plantacion}` : 'Historial de envíos'}
+        onClose={() => setHistoryModalOpen(false)}
       />
     </div>
   );

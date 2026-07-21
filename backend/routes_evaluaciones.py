@@ -2283,6 +2283,38 @@ async def send_evaluacion_by_email(
         user=current_user,
     )
 
+    # Registrar el envio en el historial (no bloquea si falla).
+    try:
+        from routes_email_logs import log_email_sent
+        # Meta del proveedor via parcela
+        proveedor_id_str = None
+        proveedor_nombre = None
+        parcela_id = (evaluacion or {}).get("parcela_id")
+        if parcela_id and ObjectId.is_valid(parcela_id):
+            parcela = await parcelas_collection.find_one({"_id": ObjectId(parcela_id)})
+            if parcela:
+                proveedor_id_str = parcela.get("proveedor_id")
+                proveedor_nombre = parcela.get("proveedor")
+        await log_email_sent(
+            entity_type="evaluacion",
+            entity_id=evaluacion_id,
+            parcela_id=parcela_id,
+            proveedor_id=proveedor_id_str,
+            proveedor_nombre=proveedor_nombre,
+            recipients=recipients,
+            cc=cc,
+            subject=subject,
+            filename=filename,
+            status=result.get("status", "error"),
+            error_message=result.get("message") if result.get("status") == "error" else None,
+            sent_by_id=str(current_user.get("_id", "")) or None,
+            sent_by_email=current_user.get("email"),
+            sent_by_name=current_user.get("full_name") or current_user.get("email"),
+        )
+    except Exception:
+        # Nunca falle el endpoint por un problema de logging
+        pass
+
     if result.get("status") == "error":
         raise HTTPException(status_code=500, detail=result.get("message", "Fallo al enviar email"))
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, Edit2, Trash2, Download, CheckCircle, Clock, Archive, Mail } from 'lucide-react';
+import { FileText, Edit2, Trash2, Download, CheckCircle, Clock, Archive, Mail, History } from 'lucide-react';
 
 const EvaluacionesTable = ({
   evaluaciones,
@@ -10,6 +10,7 @@ const EvaluacionesTable = ({
   onChangeEstado,
   onDownloadPDF,
   onSendEmail,
+  onEmailHistory,
   onEdit,
   onDelete,
   getEstadoBadge,
@@ -108,6 +109,16 @@ const EvaluacionesTable = ({
                               data-testid={`btn-email-evaluacion-${evaluacion._id}`}
                             >
                               <Mail size={14} />
+                            </button>
+                          )}
+                          {onEmailHistory && (
+                            <button
+                              className="btn btn-sm btn-secondary"
+                              onClick={() => onEmailHistory(evaluacion._id)}
+                              title="Historial de envíos"
+                              data-testid={`btn-email-history-${evaluacion._id}`}
+                            >
+                              <History size={14} />
                             </button>
                           )}
                           {canEdit && (
