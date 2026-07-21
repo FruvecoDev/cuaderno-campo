@@ -9,6 +9,7 @@ import ProvinciaSelect from '../components/ProvinciaSelect';
 import PaisSelect from '../components/PaisSelect';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
+import PaginationFooter, { usePagination } from '../components/PaginationFooter';
 import '../App.css';
 import { notify } from '../lib/notify';
 
@@ -362,6 +363,10 @@ const Proveedores = () => {
   };
 
   const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredProveedores);
+  const {
+    page, pageSize, totalPages, totalItems, pageStart, pageEnd, paginatedItems,
+    setPage, setPageSize,
+  } = usePagination(filteredProveedores, 20);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const handleBulkDelete = async () => {
     setBulkDeleting(true);
@@ -686,7 +691,7 @@ const Proveedores = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredProveedores.map((proveedor) => (
+                {paginatedItems.map((proveedor) => (
                   <tr key={proveedor._id}>
                     {canBulkDelete && <BulkCheckboxCell id={proveedor._id} selected={selectedIds.has(proveedor._id)} onToggle={toggleOne} />}
                     {visibleColumns.map(col => {
@@ -743,6 +748,18 @@ const Proveedores = () => {
                 ))}
               </tbody>
             </table>
+            <PaginationFooter
+              totalItems={totalItems}
+              page={page}
+              pageSize={pageSize}
+              totalPages={totalPages}
+              pageStart={pageStart}
+              pageEnd={pageEnd}
+              onPageChange={setPage}
+              onPageSizeChange={setPageSize}
+              itemLabel="proveedores"
+              testIdSuffix="proveedores"
+            />
           </div>
         )}
       </div>
