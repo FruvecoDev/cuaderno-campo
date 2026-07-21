@@ -1,6 +1,7 @@
 import React from 'react';
 import { Edit2, Trash2, Camera, Copy } from 'lucide-react';
 import { BulkCheckboxHeader, BulkCheckboxCell } from '../BulkActions';
+import { formatDateDMY } from '../../utils/dateFormat';
 
 export const VisitasTable = ({
   filteredVisitas, loading, hasActiveFilters,
@@ -90,7 +91,7 @@ export const VisitasTable = ({
                   {tableConfig.proveedor ? <td>{visita.proveedor || 'N/A'}</td> : null}
                   {tableConfig.cultivo ? <td>{visita.cultivo || 'N/A'}</td> : null}
                   {tableConfig.campana ? <td>{visita.campana || 'N/A'}</td> : null}
-                  {tableConfig.fecha ? <td>{visita.fecha_visita ? new Date(visita.fecha_visita).toLocaleDateString() : 'Sin fecha'}</td> : null}
+                  {tableConfig.fecha ? <td>{formatDateDMY(visita.fecha_visita, 'Sin fecha')}</td> : null}
                   {tableConfig.estado ? (
                     <td>
                       <span className={`badge ${visita.realizado ? 'badge-success' : 'badge-default'}`}>

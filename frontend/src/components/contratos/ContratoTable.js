@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Edit2, Trash2, BookOpen, Loader2, FileSpreadsheet } from 'lucide-react';
 import { BulkCheckboxHeader, BulkCheckboxCell } from '../BulkActions';
+import { formatDateDMY } from '../../utils/dateFormat';
 
 const formatES = (num, decimals = 2) => {
   if (num == null) return '-';
@@ -59,7 +60,7 @@ const COLUMN_RENDERERS = {
   cantidad: (c) => <td key="cantidad">{formatES(c.cantidad, 0)}</td>,
   precio: (c) => <td key="precio">{'\u20AC'}{formatES(c.precio, 2)}</td>,
   total: (c) => <td key="total" className="font-semibold">{'\u20AC'}{formatES((c.cantidad || 0) * (c.precio || 0), 2)}</td>,
-  fecha: (c) => <td key="fecha">{c.fecha_contrato ? new Date(c.fecha_contrato).toLocaleDateString() : '-'}</td>,
+  fecha: (c) => <td key="fecha">{formatDateDMY(c.fecha_contrato)}</td>,
 };
 
 const ContratoTable = ({

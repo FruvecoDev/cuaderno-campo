@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
 import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
+import { formatDateDMY } from '../utils/dateFormat';
 import '../App.css';
 import { notify } from '../lib/notify';
 
@@ -1139,7 +1140,7 @@ const Albaranes = () => {
                       switch (col.id) {
                         case 'numero': return <td key="numero"><code style={{ fontSize: '0.8rem' }}>{albaran.numero_albaran || `ALB-${String(pageStart + index + 1).padStart(4, '0')}`}</code></td>;
                         case 'tipo': return <td key="tipo"><span style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', backgroundColor: albaran.tipo === 'Albarán de compra' ? '#dcfce7' : '#fee2e2', color: albaran.tipo === 'Albarán de compra' ? '#166534' : '#991b1b' }}>{albaran.tipo}</span></td>;
-                        case 'fecha': return <td key="fecha">{albaran.fecha ? new Date(albaran.fecha).toLocaleDateString('es-ES') : '-'}</td>;
+                        case 'fecha': return <td key="fecha">{formatDateDMY(albaran.fecha)}</td>;
                         case 'contrato': return <td key="contrato">{albaran.contrato_id ? <code style={{ fontSize: '0.75rem' }}>{contratos.find(c => c._id === albaran.contrato_id)?.numero_contrato || albaran.contrato_id.slice(-6)}</code> : '-'}</td>;
                         case 'proveedor': return <td key="proveedor"><div style={{ display: 'flex', flexDirection: 'column' }}><span style={{ fontSize: '0.65rem', color: '#6b7280' }}>{albaran.tipo === 'Albarán de venta' ? 'Cliente:' : 'Prov:'}</span><span>{albaran.tipo === 'Albarán de venta' ? (albaran.cliente || '-') : (albaran.proveedor || '-')}</span></div></td>;
                         case 'cultivo': return <td key="cultivo">{albaran.cultivo || '-'}</td>;

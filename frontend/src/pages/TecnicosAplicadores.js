@@ -13,6 +13,7 @@ import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
+import { formatDateDMY } from '../utils/dateFormat';
 
 const DEFAULT_COLUMNS = [
   { id: 'nombre_completo', label: 'Nombre Completo', visible: true },
@@ -23,24 +24,6 @@ const DEFAULT_COLUMNS = [
   { id: 'validez', label: 'Validez', visible: true },
   { id: 'estado', label: 'Estado', visible: true },
 ];
-
-// Formatea una fecha ISO (YYYY-MM-DD) o Date-like a DD-MM-AAAA. Devuelve '-' si vacia/invalida.
-const formatDateDMY = (value) => {
-  if (!value) return '-';
-  // Si viene como YYYY-MM-DD o YYYY-MM-DDT...
-  const str = String(value);
-  const isoMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (isoMatch) {
-    return `${isoMatch[3]}-${isoMatch[2]}-${isoMatch[1]}`;
-  }
-  // Fallback: intentar parsear como Date
-  const d = new Date(str);
-  if (isNaN(d.getTime())) return str;
-  const dd = String(d.getDate()).padStart(2, '0');
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const yyyy = d.getFullYear();
-  return `${dd}-${mm}-${yyyy}`;
-};
 
 
 const TecnicosAplicadores = () => {

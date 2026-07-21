@@ -1,6 +1,7 @@
 import React from 'react';
 import { Edit2, Trash2, CheckCircle, XCircle, PlayCircle, Copy } from 'lucide-react';
 import { BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell } from '../BulkActions';
+import { formatDateDMY } from '../../utils/dateFormat';
 
 const TratamientosTable = ({
   tratamientos, parcelas = [], loading, hasActiveFilters, tableConfig, canEdit, canDelete, canCreate = false,
@@ -70,7 +71,7 @@ const TratamientosTable = ({
                   {tableConfig.subtipo && <td>{t.subtipo || '—'}</td>}
                   {tableConfig.metodo && <td>{t.metodo_aplicacion}</td>}
                   {tableConfig.campana && <td>{t.campana || 'N/A'}</td>}
-                  {tableConfig.fecha_tratamiento && <td>{t.fecha_tratamiento || '—'}</td>}
+                  {tableConfig.fecha_tratamiento && <td>{formatDateDMY(t.fecha_tratamiento, '—')}</td>}
                   {tableConfig.fecha_aplicacion && <td>{t.fecha_aplicacion || '—'}</td>}
                   {tableConfig.superficie && <td>{t.superficie_aplicacion} ha</td>}
                   {tableConfig.parcelas && <td>{(t.parcelas_ids || []).filter(id => parcelas.some(p => p._id === id)).length} parcela(s)</td>}

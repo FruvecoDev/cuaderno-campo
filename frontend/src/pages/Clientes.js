@@ -10,6 +10,7 @@ import ProvinciaSelect from '../components/ProvinciaSelect';
 import PaisSelect from '../components/PaisSelect';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
+import { formatDateDMY } from '../utils/dateFormat';
 import '../App.css';
 import { notify } from '../lib/notify';
 
@@ -1033,7 +1034,7 @@ const Clientes = () => {
                                 {c.serie || 'MP'}-{c.año}-{String(c.numero || 0).padStart(3, '0')}
                               </div>
                               <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
-                                {c.fecha_inicio ? new Date(c.fecha_inicio).toLocaleDateString('es-ES') : '-'}
+                                {formatDateDMY(c.fecha_inicio)}
                                 {c.cultivo && ` • ${c.cultivo}`}
                               </div>
                             </div>
@@ -1074,7 +1075,7 @@ const Clientes = () => {
                             <div>
                               <div style={{ fontWeight: '500' }}>Albarán {a.numero || ''}</div>
                               <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
-                                {a.fecha ? new Date(a.fecha).toLocaleDateString('es-ES') : '-'}
+                                {formatDateDMY(a.fecha)}
                               </div>
                             </div>
                             <div style={{ fontWeight: '600', color: 'hsl(142 76% 36%)' }}>
