@@ -468,127 +468,61 @@ async def generar_cuaderno_campo(
 ):
     """
     Generate Cuaderno de Campo PDF for a specific parcela.
-    Includes all treatments, irrigations, visits, and harvests.
+
+    Este endpoint delega en el generador de PDF de la Hoja de Evaluacion para
+    que el documento sea IDENTICO al de la seccion Evaluaciones. Busca una
+    evaluacion existente para la parcela+campana; si no existe, crea una
+    evaluacion transiente (borrable si se desea).
     """
-    # Get parcela
+    # Validar parcela
     try:
         parcela = await parcelas_collection.find_one({"_id": ObjectId(parcela_id)})
-    except:
-        raise HTTPException(status_code=400, detail="ID de parcela inválido")
-    
+    except Exception:
+        raise HTTPException(status_code=400, detail="ID de parcela invalido")
     if not parcela:
         raise HTTPException(status_code=404, detail="Parcela no encontrada")
-    
-    # Use provided campana or parcela's campana
-    campana_filtro = campana or parcela.get("campana", datetime.now().strftime("%Y/%y"))
-    
-    # Get related data
-    tratamientos = await tratamientos_collection.find({
-        "parcelas_ids": parcela_id,
-        "campana": campana_filtro
-    }).sort("fecha_tratamiento", 1).to_list(length=500)
-    
-    # Obtener datos completos de los técnicos aplicadores
-    tecnicos_ids = [t.get('tecnico_aplicador_id') for t in tratamientos if t.get('tecnico_aplicador_id')]
-    tecnicos_ids = [ObjectId(tid) for tid in tecnicos_ids if tid]
-    
-    tecnicos_dict = {}
-    if tecnicos_ids:
-        tecnicos_cursor = tecnicos_aplicadores_collection.find({"_id": {"$in": tecnicos_ids}})
-        async for tecnico in tecnicos_cursor:
-            tecnicos_dict[str(tecnico['_id'])] = tecnico
-    
-    # Enriquecer tratamientos con datos del técnico
-    for t in tratamientos:
-        tecnico_id = t.get('tecnico_aplicador_id')
-        if tecnico_id and tecnico_id in tecnicos_dict:
-            t['tecnico_data'] = tecnicos_dict[tecnico_id]
-    
-    irrigaciones = await irrigaciones_collection.find({
-        "parcela_id": parcela_id
-    }).sort("fecha", 1).to_list(length=500)
-    
-    visitas = await visitas_collection.find({
-        "parcela_id": parcela_id
-    }).sort("fecha", 1).to_list(length=500)
-    
-    cosechas = await cosechas_collection.find({
-        "parcela_id": parcela_id
-    }).sort("fecha_inicio", 1).to_list(length=500)
-    
-    # Calculate summary data
-    summary_data = {
-        'num_tratamientos': len(tratamientos),
-        'tratamientos_realizados': sum(1 for t in tratamientos if t.get('realizado')),
-        'num_riegos': len(irrigaciones),
-        'volumen_total': sum(i.get('volumen', 0) or 0 for i in irrigaciones),
-        'num_visitas': len(visitas),
-        'num_cosechas': len(cosechas),
-        'kg_total': sum(c.get('kg_reales', 0) or 0 for c in cosechas),
-    }
-    
-    # Create PDF
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(
-        buffer,
-        pagesize=A4,
-        rightMargin=1.5*cm,
-        leftMargin=1.5*cm,
-        topMargin=1.5*cm,
-        bottomMargin=1.5*cm
-    )
-    
-    styles = get_styles()
-    elements = []
-    
-    # Header
-    elements.append(create_header_table(parcela, campana_filtro))
-    elements.append(Spacer(1, 0.5*cm))
-    
-    # Summary
-    elements.extend(create_resumen_section(summary_data, styles))
-    elements.append(Spacer(1, 0.3*cm))
-    
-    # Tratamientos
-    elements.extend(create_tratamientos_table(tratamientos, styles))
-    elements.append(Spacer(1, 0.3*cm))
-    
-    # Irrigaciones
-    elements.extend(create_irrigaciones_table(irrigaciones, styles))
-    elements.append(Spacer(1, 0.3*cm))
-    
-    # Visitas
-    elements.extend(create_visitas_table(visitas, styles))
-    elements.append(Spacer(1, 0.3*cm))
-    
-    # Cosechas
-    elements.extend(create_cosechas_table(cosechas, styles))
-    
-    # Footer note
-    elements.append(Spacer(1, 1*cm))
-    elements.append(Paragraph(
-        f'Documento generado automáticamente el {datetime.now().strftime("%d/%m/%Y a las %H:%M")}',
-        styles['SmallText']
-    ))
-    elements.append(Paragraph(
-        'Este cuaderno de campo cumple con los requisitos de trazabilidad agrícola.',
-        styles['SmallText']
-    ))
-    
-    # Build PDF
-    doc.build(elements)
-    buffer.seek(0)
-    
-    # Generate filename
-    codigo = parcela.get('codigo_plantacion', 'parcela').replace(' ', '_')
-    filename = f"cuaderno_campo_{codigo}_{campana_filtro.replace('/', '-')}_{datetime.now().strftime('%Y%m%d')}.pdf"
-    
-    return StreamingResponse(
-        buffer,
-        media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename={filename}"}
-    )
 
+    campana_filtro = campana or parcela.get("campana", datetime.now().strftime("%Y/%y"))
+
+    # Buscar evaluacion existente para parcela+campana (ordenar por mas reciente)
+    query = {"parcela_id": parcela_id}
+    if campana_filtro:
+        query["campana"] = campana_filtro
+    ev = await evaluaciones_collection.find_one(query, sort=[("created_at", -1)])
+    # Fallback si no coincide la campaña — buscar cualquier evaluacion de la parcela
+    if not ev:
+        ev = await evaluaciones_collection.find_one({"parcela_id": parcela_id}, sort=[("created_at", -1)])
+
+    created_transient = False
+    if not ev:
+        # Crear evaluacion transiente para poder generar el PDF con el mismo formato
+        transient = {
+            "parcela_id": parcela_id,
+            "campana": campana_filtro,
+            "codigo_plantacion": parcela.get("codigo_plantacion", ""),
+            "fecha_inicio": datetime.now().strftime("%Y-%m-%d"),
+            "estado": "borrador",
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
+            "created_by": str(current_user.get("_id", "")),
+            "_transient": True,
+        }
+        result = await evaluaciones_collection.insert_one(transient)
+        ev = await evaluaciones_collection.find_one({"_id": result.inserted_id})
+        created_transient = True
+
+    # Delegar en el generador oficial de la Hoja de Evaluacion
+    try:
+        from routes_evaluaciones import generate_evaluacion_pdf as _gen_pdf
+        response = await _gen_pdf(str(ev["_id"]), current_user)
+        return response
+    finally:
+        # Limpieza de evaluacion transiente si la creamos aqui (no dejamos basura)
+        if created_transient and ev:
+            try:
+                await evaluaciones_collection.delete_one({"_id": ev["_id"]})
+            except Exception:
+                pass
 
 @router.get("/cuaderno-campo/preview/{parcela_id}")
 async def preview_cuaderno_campo(
