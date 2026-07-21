@@ -122,7 +122,7 @@ const Proveedores = () => {
   const fetchProveedores = async () => {
     try {
       setError(null);
-      const data = await api.get('/api/proveedores');
+      const data = await api.get('/api/proveedores?limit=10000');
       setProveedores(data.proveedores || []);
     } catch (error) {
 
