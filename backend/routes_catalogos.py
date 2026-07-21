@@ -243,7 +243,7 @@ async def create_proveedor(
 @router.get("/proveedores")
 async def get_proveedores(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 10000,
     activo: Optional[bool] = None,
     current_user: dict = Depends(get_current_user)
 ):
@@ -625,7 +625,7 @@ async def create_cultivo(
 @router.get("/cultivos")
 async def get_cultivos(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 10000,
     activo: Optional[bool] = None,
     tipo: Optional[str] = None,
     current_user: dict = Depends(get_current_user)

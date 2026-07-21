@@ -85,7 +85,7 @@ async def get_agentes(
             {"nif": {"$regex": search, "$options": "i"}}
         ]
     
-    agentes = await agentes_collection.find(query).sort("codigo", 1).to_list(500)
+    agentes = await agentes_collection.find(query).sort("codigo", 1).to_list(10000)
     return {
         "agentes": [serialize_doc(a) for a in agentes],
         "total": len(agentes)

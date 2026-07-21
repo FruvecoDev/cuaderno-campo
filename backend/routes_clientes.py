@@ -152,7 +152,7 @@ async def create_cliente(
 @router.get("/clientes")
 async def get_clientes(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 10000,
     search: Optional[str] = None,
     activo: Optional[bool] = None,
     tipo: Optional[str] = None,

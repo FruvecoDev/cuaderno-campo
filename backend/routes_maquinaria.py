@@ -34,7 +34,7 @@ async def create_maquinaria(
 @router.get("/maquinaria")
 async def get_maquinaria_list(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 10000,
     tipo: Optional[str] = None,
     estado: Optional[str] = None,
     current_user: dict = Depends(get_current_user)

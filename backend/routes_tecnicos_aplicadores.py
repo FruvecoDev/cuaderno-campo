@@ -85,7 +85,7 @@ async def create_tecnico_aplicador(
 @router.get("/tecnicos-aplicadores")
 async def get_tecnicos_aplicadores(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 10000,
     activo: Optional[bool] = None,
     nivel: Optional[str] = None,
     search: Optional[str] = None,

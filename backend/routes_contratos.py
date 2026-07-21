@@ -335,7 +335,7 @@ async def import_contratos_excel(
 @router.get("/contratos")
 async def get_contratos(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 10000,
     campana: Optional[str] = None,
     proveedor: Optional[str] = None,
     current_user: dict = Depends(get_current_user),

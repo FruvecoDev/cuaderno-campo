@@ -41,7 +41,7 @@ async def create_parcela(
 @router.get("/parcelas")
 async def get_parcelas(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 10000,
     campana: Optional[str] = None,
     proveedor: Optional[str] = None,
     contrato_id: Optional[str] = None,

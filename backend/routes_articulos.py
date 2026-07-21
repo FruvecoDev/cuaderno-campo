@@ -93,7 +93,7 @@ async def generate_codigo(categoria: str) -> str:
 @router.get("/articulos")
 async def get_articulos(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 10000,
     search: Optional[str] = None,
     categoria: Optional[str] = None,
     activo: Optional[bool] = None,

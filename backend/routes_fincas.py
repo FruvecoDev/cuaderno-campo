@@ -99,7 +99,7 @@ async def create_finca(
 @router.get("/fincas")
 async def get_fincas(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 10000,
     search: Optional[str] = None,
     provincia: Optional[str] = None,
     poblacion: Optional[str] = None,
