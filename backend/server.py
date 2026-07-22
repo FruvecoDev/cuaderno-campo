@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
+from typing import Any, Dict
 import os
 
 # Load environment
@@ -188,7 +189,7 @@ app.mount("/api/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 
 
 @app.get("/")
-async def root() -> dict:
+async def root() -> Dict[str, Any]:
     return {
         "message": "FRUVECO - Agricultural Management System V1 API",
         "version": "1.0.0",

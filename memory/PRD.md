@@ -652,3 +652,10 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - **models.py**: `PyObjectId.validate(cls, v: Any) -> ObjectId` y `PyObjectId.__get_pydantic_json_schema__(cls, _schema_generator: Any) -> Dict[str, str]`. El resto del archivo son BaseModel Pydantic (ya inherentemente tipados).
 - **server.py**: `startup_event() -> None`, `shutdown_event() -> None`, `root() -> dict` y `uploads_dir: str`.
 - **Verificación**: `python3 -c "import server, database, models"` OK; login endpoint retorna 200; lint Python sin errores; backend arranca sin regresiones.
+
+### mypy --strict progresivo + regression test (2026-02) - DONE
+- **`/app/backend/mypy.ini`**: config gradual/progressive. `follow_imports = silent` para no propagar errores de código legacy. Defaults relajados globalmente, `strict = True` por módulo (`database`, `models`, `server`). Cada bloque strict incluye excepciones documentadas para motor (Any generic) y FastAPI decorators.
+- **Bonus discovery**: mypy detectó campo `agente_compra` DUPLICADO en `ContratoBase` (línea 51 + 72) — bug real corregido eliminando la definición duplicada.
+- **Regression test `/app/backend/tests/test_mypy_strict.py`**: ejecuta `mypy database.py models.py server.py` con subprocess y falla si returncode != 0. Cualquier futuro cambio que rompa el tipado en los módulos migrados fallará el CI.
+- **Verificación**: `mypy database.py models.py server.py` → "Success: no issues found in 3 source files". `pytest tests/test_mypy_strict.py -v` → PASS. Backend arranca y `/api/auth/login` retorna 200.
+- **Cómo migrar un módulo nuevo a strict**: (1) añadir bloque `[mypy-<modulo>]` en `mypy.ini` con `strict = True`, (2) añadirlo a `STRICT_MODULES` en el test, (3) ejecutar mypy y arreglar errores, (4) commit.

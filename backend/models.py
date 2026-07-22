@@ -1,12 +1,12 @@
 from pydantic import BaseModel, Field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Iterator, List, Optional
 from datetime import datetime
 from bson import ObjectId
 
 # Helper for MongoDB ObjectId
 class PyObjectId(ObjectId):
     @classmethod
-    def __get_validators__(cls):
+    def __get_validators__(cls) -> Iterator[Any]:
         yield cls.validate
 
     @classmethod
@@ -69,7 +69,6 @@ class ContratoBase(BaseModel):
     periodo_hasta: str
     
     # Agente
-    agente_compra: Optional[str] = None
     comision_agente: Optional[float] = None
     tipo_comision: Optional[str] = None  # Porcentaje / por Kilos
     
