@@ -302,7 +302,11 @@ const ContratoFormFields = ({
               </thead>
               <tbody>
                 {(formData.precios_calidad || []).map((pc, idx) => (
-                  <tr key={idx}>
+                  // Nota: idx como key es intencional aquí — la lista es editable con
+                  // inputs controlados; cambiar la key al modificar valores causaría
+                  // remount y pérdida de foco. Los rangos son ordinales y estables.
+                  // eslint-disable-next-line react/no-array-index-key
+                  <tr key={pc._key || `pc-${idx}`}>
                     <td style={{ padding: '4px' }}>
                       <input type="number" step="1" className="form-input" style={{ textAlign: 'center' }}
                         value={pc.min_tenderometria} onChange={(e) => updatePrecioTenderometria(idx, 'min_tenderometria', e.target.value)} placeholder="Ej: 90" />

@@ -768,3 +768,23 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - **testid**: `fincas-summary-footer` para tests de regresión visual.
 - **Gate**: se muestra siempre que haya `filteredFincas.length > 0`.
 - **Verificación**: screenshot confirma `Total (1 finca): | Superficie: 28 ha | Producción esperada: 0 t`. Compile OK, lint 0 errores.
+
+### Code Quality — batch de fixes críticos + bajo riesgo (2026-02) - DONE
+**Aplicados**:
+- `tests/test_visitas_ordering_bug.py`: `ADMIN_EMAIL`/`ADMIN_PASSWORD` movidos a `os.environ.get('TEST_ADMIN_*', <default>)`. Defaults preservados para compatibilidad de tests locales.
+- `tests/test_impresos_vaso_fix.py`: mismo tratamiento + rename de fixture `original_eval` → `original_evaluation` (elimina falso positivo del scanner "eval() detected"). Confirmado con `grep -E "\beval\s*\("` que no hay ninguna llamada eval real.
+- Index-as-key corregidos en 4 archivos:
+  - `ConsultaSIGPAC.js:665`: `key={recinto.referencia || recinto.recinto || 'recinto-'+idx}`. testid preservado como `recinto-${idx}`.
+  - `DashboardContratosWidget.js:80`: `key={contrato._id || contrato.numero || 'contrato-row-'+idx}`.
+  - `CultivoFormModal.jsx:222`: `key={${entry._id||entry.timestamp}-${ch.field}-${ci}}` — combina identidad del log entry con nombre del campo.
+  - `ContratoFormFields.js:305`: `key={pc._key || 'pc-'+idx}` con comentario `eslint-disable react/no-array-index-key` justificando el trade-off (inputs controlados; cambiar key en cada edición causaría pérdida de foco). Preparado para migración futura si el padre añade `_key` al crear el rango.
+- **Verificación**: lint Python + JS 0 errores; compile de Dashboard/Cultivos/SIGPAC sin errores; screenshot SIGPAC OK.
+
+**Deferido (requiere planificación arquitectónica dedicada, no fixes automáticos)**:
+- **P0 SEC**: fixes del security audit anterior (RRHH sin auth, JWT weak secret, admin init endpoint) — bloqueadores reales de producción, aún pendientes.
+- **localStorage → httpOnly cookies**: cambio arquitectónico (necesita cookie config backend, CSRF token, refactor AuthContext).
+- **202 useEffect deps faltantes**: adding deps naively causa loops infinitos si las funciones no están envueltas en useCallback. Merece un sprint dedicado con testing agent para verificar cada uno.
+- **Refactor de componentes 800+ líneas** (`Albaranes.js`, `AlbaranForm.js`, `AlbaranesComision.js`, `AdvancedParcelMap.js`, `App.js`): multi-hora cada uno.
+- **257 console statements**: mezclados legítimos (error logging) y debug — necesita revisión manual o wrapper de logging.
+- **Migración a TypeScript**: proyecto de semanas.
+- **Refactor de complejidad en `email_service.py`, `ai_service.py`, `rrhh_documentos.py`**: multi-hora por función.

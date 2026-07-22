@@ -220,7 +220,7 @@ const CultivoFormModal = ({
                       {entry.changes && entry.changes.length > 0 && (
                         <div style={{ marginTop: '0.4rem' }}>
                           {entry.changes.map((ch, ci) => (
-                            <div key={ci} style={{ fontSize: '0.8rem', padding: '0.2rem 0', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            <div key={`${entry._id || entry.timestamp || 'entry'}-${ch.field}-${ci}`} style={{ fontSize: '0.8rem', padding: '0.2rem 0', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                               <span style={{ fontWeight: '600', minWidth: '120px' }}>{ch.field}:</span>
                               {ch.old && <span style={{ color: 'hsl(var(--destructive))', textDecoration: 'line-through' }}>{String(ch.old).substring(0, 80)}</span>}
                               <span style={{ color: 'hsl(142 76% 36%)' }}>{ch.new ? String(ch.new).substring(0, 80) : ''}</span>

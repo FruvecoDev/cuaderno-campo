@@ -662,7 +662,7 @@ export default function ConsultaSIGPAC() {
 
               {/* Individual recintos */}
               {sortedRecintos.map((recinto, idx) => (
-                <div key={idx} className="card" style={{ padding: '0.75rem 1rem', borderLeft: `4px solid ${recinto.uso_sigpac?.startsWith('TA') ? '#4caf50' : '#2196f3'}` }} data-testid={`recinto-${idx}`}>
+                <div key={recinto.referencia || recinto.recinto || `recinto-${idx}`} className="card" style={{ padding: '0.75rem 1rem', borderLeft: `4px solid ${recinto.uso_sigpac?.startsWith('TA') ? '#4caf50' : '#2196f3'}` }} data-testid={`recinto-${idx}`}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                       <div style={{ fontWeight: '600', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

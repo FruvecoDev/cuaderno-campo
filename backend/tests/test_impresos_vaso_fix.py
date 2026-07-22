@@ -12,6 +12,8 @@ import pytest
 import requests
 
 BASE_URL = os.environ["REACT_APP_BACKEND_URL"].rstrip("/")
+ADMIN_EMAIL = os.environ.get("TEST_ADMIN_EMAIL", "admin@fruveco.com")
+ADMIN_PASSWORD = os.environ.get("TEST_ADMIN_PASSWORD", "admin123")
 EVAL_ID = "6a3e4b01e223c5dd1673c04c"
 EXPECTED_PARCELA_ID = "6a3e90f77b8cf2eb0d697bc1"
 
@@ -20,7 +22,7 @@ EXPECTED_PARCELA_ID = "6a3e90f77b8cf2eb0d697bc1"
 def token():
     r = requests.post(
         f"{BASE_URL}/api/auth/login",
-        json={"email": "admin@fruveco.com", "password": "admin123"},
+        json={"email": ADMIN_EMAIL, "password": ADMIN_PASSWORD},
         timeout=15,
     )
     assert r.status_code == 200, r.text
@@ -33,7 +35,7 @@ def auth(token):
 
 
 @pytest.fixture
-def original_eval(auth):
+def original_evaluation(auth):
     r = requests.get(f"{BASE_URL}/api/evaluaciones/{EVAL_ID}", headers=auth, timeout=15)
     assert r.status_code == 200, r.text
     return r.json()
@@ -41,15 +43,15 @@ def original_eval(auth):
 
 # 1) Eval is linked to existing COT parcela ---------------------------------
 class TestEvalRelinked:
-    def test_parcela_id_points_to_existing_cot_parcela(self, original_eval):
-        assert original_eval.get("parcela_id") == EXPECTED_PARCELA_ID
+    def test_parcela_id_points_to_existing_cot_parcela(self, original_evaluation):
+        assert original_evaluation.get("parcela_id") == EXPECTED_PARCELA_ID
 
-    def test_cabecera_top_level_fields_present(self, original_eval):
-        assert original_eval.get("codigo_plantacion") == "COT-GUI-25-001"
-        assert original_eval.get("proveedor") == "COTO DE MINGUILLO, S.L."
-        assert original_eval.get("finca") == "Cinco Casas"
-        assert original_eval.get("cultivo") == "GUISANTE VERDE"
-        assert float(original_eval.get("superficie") or 0) == 13.0
+    def test_cabecera_top_level_fields_present(self, original_evaluation):
+        assert original_evaluation.get("codigo_plantacion") == "COT-GUI-25-001"
+        assert original_evaluation.get("proveedor") == "COTO DE MINGUILLO, S.L."
+        assert original_evaluation.get("finca") == "Cinco Casas"
+        assert original_evaluation.get("cultivo") == "GUISANTE VERDE"
+        assert float(original_evaluation.get("superficie") or 0) == 13.0
 
     def test_referenced_parcela_exists_with_variedad(self, auth):
         r = requests.get(
@@ -65,8 +67,8 @@ class TestEvalRelinked:
 class TestImpresosVasoSavePreservesCabecera:
     NEW_VASO = "VASO_FIX_2026_TESTAGENT"
 
-    def test_update_vaso_and_verify_persistence(self, auth, original_eval):
-        payload = dict(original_eval)
+    def test_update_vaso_and_verify_persistence(self, auth, original_evaluation):
+        payload = dict(original_evaluation)
         # Frontend writes to impresos.calibracion (data-testid impresos-calibracion-vaso)
         impresos = dict(payload.get("impresos") or {})
         cal = dict(impresos.get("calibracion") or {})

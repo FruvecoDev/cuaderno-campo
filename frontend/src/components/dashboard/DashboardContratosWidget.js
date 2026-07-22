@@ -77,7 +77,7 @@ const DashboardContratosWidget = ({ kpis, navigate }) => {
           </div>
           <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
             {kpis.contratos_activos.map((contrato, idx) => (
-              <div key={idx} style={{
+              <div key={contrato._id || contrato.numero || `contrato-row-${idx}`} style={{
                 display: 'grid', gridTemplateColumns: '100px 70px 150px 120px auto 100px',
                 gap: '0.5rem', padding: '0.5rem 1rem',
                 backgroundColor: idx % 2 === 0 ? 'white' : 'hsl(var(--muted))',
