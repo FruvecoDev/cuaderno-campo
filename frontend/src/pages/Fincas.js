@@ -1191,6 +1191,20 @@ const Fincas = () => {
                     }}>
                       {fincasAgrupadas.grupos[provincia].length} finca{fincasAgrupadas.grupos[provincia].length > 1 ? 's' : ''}
                     </span>
+                    <span
+                      style={{
+                        backgroundColor: '#fff3cd',
+                        color: '#856404',
+                        padding: '2px 10px',
+                        borderRadius: '12px',
+                        fontSize: '0.8rem',
+                        fontWeight: '500'
+                      }}
+                      data-testid={`provincia-total-ha-${provincia}`}
+                      title="Suma total de hectáreas de la provincia"
+                    >
+                      {fincasAgrupadas.grupos[provincia].reduce((acc, f) => acc + (Number(f.hectareas) || 0), 0).toLocaleString('es-ES', { maximumFractionDigits: 2 })} ha
+                    </span>
                   </div>
                   
                   {/* Botones expandir/colapsar todas */}

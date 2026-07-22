@@ -754,3 +754,9 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - **Sort integrado en `fincasAgrupadas` useMemo**: aplica la comparación al array de cada grupo antes de renderizar. Numérico para superficie, string para nombre/población, concatenación para SIGPAC (poligono-parcela-subparcela).
 - **Verificación**: compile OK, selector visible, cambio a "Superficie DESC" persiste correctamente en localStorage. Screenshot preview confirma UX.
 - **Cobertura del sistema**: **17 módulos** con ordenación unificada (16 con hook + Fincas con patrón intra-grupo).
+
+### Fincas: contador de hectáreas totales por provincia (2026-02) - DONE
+- **Fincas.js**: nueva badge amarilla (`#fff3cd`/`#856404`) junto al contador de fincas en la cabecera de cada provincia, mostrando la suma total de hectáreas del grupo con formato `es-ES` (2 decimales máx).
+- **testid**: `provincia-total-ha-<provincia>` para permitir tests visuales.
+- **Cálculo**: `.reduce((acc, f) => acc + (Number(f.hectareas) || 0), 0)` — coerce a Number para evitar NaN si el campo viniera vacío/string.
+- **Verificación**: `Ciudad Real | 1 finca | 28 ha` visible correctamente en screenshot. Compile OK, lint 0 issues.
