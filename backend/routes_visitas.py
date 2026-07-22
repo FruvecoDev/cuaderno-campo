@@ -123,7 +123,7 @@ async def create_visita(
 @router.get("/visitas")
 async def get_visitas(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 10000,
     parcela_id: Optional[str] = None,
     campana: Optional[str] = None,
     current_user: dict = Depends(get_current_user),
@@ -135,7 +135,9 @@ async def get_visitas(
     if campana:
         query["campana"] = campana
     
-    visitas = await visitas_collection.find(query).skip(skip).limit(limit).to_list(limit)
+    # Orden por created_at DESC (mas nuevas primero). Fallback a _id que en
+    # MongoDB tambien es monotonamente creciente por timestamp de creacion.
+    visitas = await visitas_collection.find(query).sort([("created_at", -1), ("_id", -1)]).skip(skip).limit(limit).to_list(limit)
     return {"visitas": serialize_docs(visitas), "total": await visitas_collection.count_documents(query)}
 
 

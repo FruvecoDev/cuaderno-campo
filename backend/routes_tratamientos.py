@@ -99,7 +99,7 @@ async def create_tratamiento(
 @router.get("/tratamientos")
 async def get_tratamientos(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 10000,
     parcela_id: Optional[str] = None,
     campana: Optional[str] = None,
     cultivo_id: Optional[str] = None,
@@ -117,7 +117,9 @@ async def get_tratamientos(
     if contrato_id:
         query["contrato_id"] = contrato_id
     
-    tratamientos = await tratamientos_collection.find(query).skip(skip).limit(limit).to_list(limit)
+    # Orden por created_at DESC (mas nuevos primero). Fallback a _id para
+    # documentos sin created_at (compatible con MongoDB monotonico por _id).
+    tratamientos = await tratamientos_collection.find(query).sort([("created_at", -1), ("_id", -1)]).skip(skip).limit(limit).to_list(limit)
     return {"tratamientos": serialize_docs(tratamientos), "total": await tratamientos_collection.count_documents(query)}
 
 

@@ -352,7 +352,7 @@ const Tratamientos = () => {
   const fetchTratamientos = async () => {
     try {
       setError(null);
-      const data = await api.get('/api/tratamientos');
+      const data = await api.get('/api/tratamientos?limit=10000');
       setTratamientos(data.tratamientos || []);
     } catch (error) {
 

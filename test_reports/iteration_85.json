@@ -1,0 +1,49 @@
+{
+  "summary": "BUG FIX VALIDADO. El fix del bug 'nueva visita no aparece en el listado tras crearla' funciona correctamente tanto en backend como en frontend. Backend: 5/5 tests PASS + 1 skip (test de tratamiento sólo skip porque el modelo requiere más campos, no bloqueante). Frontend E2E completo con Playwright: (a) login admin OK, (b) total antes=8, (c) formulario 'Nueva Visita' → objetivo 'Control Rutinario' (el objetivo 'General' NO existe en el select del formulario: las opciones reales son Control Rutinario/Informe/Evaluacion/Plagas y Enfermedades/Cosecha; usé la más neutra), fecha=hoy, parcela COT-GUI-25-001, observaciones 'TEST_AUTO_FE_<ts>', (d) POST OK → footer 'Mostrando 1-9 de 9 visitas' (+1), (e) primera fila = #9 · Control Rutinario · fecha 22-07-2026 con _id 6a6063fb8423f9509569b70d y observaciones IDÉNTICAS al valor enviado, (f) cleanup DELETE 200. GET /api/visitas ordena por created_at DESC (verificado con 3 creaciones consecutivas: aparecen en orden reverso al de creación). Default limit es 10000 (verificado: con total=X<=10000 devuelve X registros).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "/visitas (todas las páginas con tablas y selects)",
+        "issues": [
+          "Hydration warnings en consola: '<span> cannot be a child of <th>/<tr>/<tbody>/<select>'. Provienen de wrappers <span data-ve-dynamic style={display:contents}> insertados alrededor de <BulkCheckboxHeader>, <BulkCheckboxCell>, <option> dentro de <select> y <tr> renderizados en .map(). No rompen funcionalidad (React hidrata igual gracias a display:contents) pero contaminan la consola y pueden causar hydration mismatch en SSR. Recomendado revisar el compilador/wrapper que inyecta esos <span> excluidos (x-excluded=true) o mover los data-attributes al elemento hijo real."
+        ]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_visitas_ordering_bug.py",
+    "/app/test_reports/pytest/test_visitas_ordering_bug.xml"
+  ],
+  "action_items": [
+    "NINGUNO bloqueante — el fix del bug reportado funciona en backend y frontend.",
+    "MENOR (opcional): decidir si 'General' debe existir como opción en el select de Objetivo. El brief del test usaba 'General', pero el formulario expone Control Rutinario/Informe/Evaluacion/Plagas y Enfermedades/Cosecha (Visitas.js VisitasForm.js:67).",
+    "MENOR (opcional): resolver hydration warnings <span> dentro de <th>/<tr>/<tbody>/<select> generados por wrappers del compilador (ver design_issues)."
+  ],
+  "critical_code_review_comments": [
+    "routes_visitas.py:123-141 — GET /api/visitas ahora hace .sort([('created_at', -1), ('_id', -1)]).skip(skip).limit(limit) con limit por defecto 10000. Correcto y robusto: el fallback a _id descendente cubre documentos legados sin created_at (ObjectId es monotónico por timestamp).",
+    "routes_tratamientos.py:99-123 — Mismo patrón aplicado consistentemente. Correcto.",
+    "Visitas.js:157-169 — fetchVisitas() usa api.get('/api/visitas?limit=10000'). handleSubmit() en línea 404 llama fetchVisitas() dentro del if(data.success), tras cerrar el modal y resetear el form. Correcto.",
+    "Visitas.js:287-326 — El frontend re-ordena en memoria sortedVisitas por sortConfig, cuyo default es {field:'fecha', direction:'desc'} (por fecha_visita, NO por created_at). ATENCIÓN: si un usuario crea una visita con fecha_visita PASADA (ej: mes atrás) mientras existen visitas con fecha_visita futura, la nueva NO aparecerá en la primera fila aunque el backend la devuelva primera. Este comportamiento es INTENCIONAL (el usuario espera ver la lista ordenada por fecha) pero puede confundir al reportar el bug si el usuario crea visitas con fechas retroactivas. Consideraciones para el main agent: (1) documentar este comportamiento, (2) o cambiar default a field:'created_at' cuando exista, (3) o mostrar toast tipo 'Visita creada · fecha=X' con enlace a la fila.",
+    "Visitas.js:401-404 — Si hay fotos pendientes y falla el upload, se hace fetchVisitas() en el finally implícito del bloque exterior; la visita queda creada pero fotos no. Se recomienda añadir notify.warning si el upload de fotos falla tras crear la visita.",
+    "routes_visitas.py:315,374 — Los endpoints /export/excel y /export/pdf siguen usando .sort('fecha', -1) con campo 'fecha' que no existe en el modelo actual (el campo real es 'fecha_visita'). Bug preexistente no relacionado con este fix pero convendría corregirlo."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_visitas_ordering_bug.py (nuevo)"
+  ],
+  "success_rate": {
+    "backend": "100% (5/5 relevantes, 1 skip esperado)",
+    "frontend": "100% (E2E completo del flujo del bug con creación → aparición en pos 0 → cleanup)"
+  },
+  "test_credentials": "admin@fruveco.com / admin123 (ver /app/memory/test_credentials.md)",
+  "seed_data_creation": "No se crearon datos persistentes. Todos los objetos TEST_AUTO_* fueron eliminados via DELETE en el bloque finally/cleanup.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "El bug reportado (nueva visita no aparece en el listado) está RESUELTO. Test regresivo reutilizable: /app/backend/tests/test_visitas_ordering_bug.py cubre orden created_at DESC, default limit 10000, aparición en pos 0 tras POST, y consistencia con 3 creaciones consecutivas. Nota importante para el frontend: el default sortConfig es por fecha_visita DESC (Visitas.js:287), NO por created_at, por lo que una visita creada con fecha_visita retroactiva NO aparecerá en pos 0 en la UI aunque el backend la devuelva primera. Para reproducir el bug original hay que crear con fecha_visita=hoy o futura.",
+  "rca_of_the_issue": "ROOT CAUSE (según diagnóstico del main agent, confirmado): GET /api/visitas devolvía documentos SIN sort explícito y con limit=100. En una BD con >100 visitas, la nueva no aparecía porque (a) MongoDB no garantiza orden sin sort, (b) el límite antiguo (100) descartaba las visitas más allá. FIX aplicado en routes_visitas.py:140: .sort([('created_at', -1), ('_id', -1)]).limit(10000). En frontend Visitas.js:160 se explicita ?limit=10000 y fetchVisitas se llama en handleSubmit tras data.success. Mismo fix preventivo aplicado a routes_tratamientos.py:122. VALIDACIÓN: backend test crea 3 visitas seguidas y verifica que aparecen en las posiciones [0][1][2] en el orden inverso al de creación (más reciente primero); frontend E2E abre modal, guarda visita con fecha=hoy y verifica footer +1 y primera fila con id y observaciones correctas."
+}

@@ -157,7 +157,7 @@ const Visitas = () => {
   const fetchVisitas = async () => {
     try {
       setError(null);
-      const data = await api.get('/api/visitas');
+      const data = await api.get('/api/visitas?limit=10000');
       setVisitas(data.visitas || []);
     } catch (error) {
 
