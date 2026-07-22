@@ -1,4 +1,4 @@
-# Pre-commit hooks for FRUVECO backend.
+# Pre-commit hooks for FRUVECO.
 #
 # Install:
 #   cd /app && pip install pre-commit && pre-commit install
@@ -7,9 +7,13 @@
 #   git commit --no-verify -m "..."
 #
 # Hooks activos:
-#   1. mypy-strict: verifica los módulos migrados a strict typing.
+#   1. mypy-strict: verifica los módulos migrados a strict typing en el backend.
 #      Añadir un módulo: editar `entry` abajo + `STRICT_MODULES` en
 #      /app/backend/tests/test_mypy_strict.py.
+#
+#   2. jest-related: ejecuta el test suite de frontend relacionado con los
+#      archivos .js/.jsx modificados. Delegado a scripts/precommit_jest.sh
+#      para usar --findRelatedTests (no corre toda la suite).
 
 repos:
   - repo: local
@@ -20,3 +24,10 @@ repos:
         language: system
         files: ^backend/(database|models|server)\.py$
         pass_filenames: false
+
+      - id: jest-related
+        name: jest --findRelatedTests (frontend)
+        entry: scripts/precommit_jest.sh
+        language: system
+        files: ^frontend/src/.*\.(js|jsx)$
+        pass_filenames: true

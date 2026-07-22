@@ -722,3 +722,10 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - **Dependencias**: `@testing-library/react@14` (compatible con node 20).
 - **Ejecutar**: `cd /app/frontend && CI=true yarn test --testPathPattern="useSortAndPaginate" --watchAll=false`
 - **Resultado**: 18/18 tests PASS en 0.879s.
+
+### Pre-commit hook con Jest (--findRelatedTests) (2026-02) - DONE
+- **`/app/scripts/precommit_jest.sh`**: script bash que recibe los archivos staged, filtra los que están bajo `frontend/src/`, y ejecuta `yarn test --findRelatedTests` sólo sobre esos. Rápido y focalizado.
+- **`.pre-commit-config.yaml`**: nuevo hook `jest-related` con `files: ^frontend/src/.*\.(js|jsx)$` y `pass_filenames: true`. No corre toda la suite, sólo los tests relacionados al cambio.
+- **Verificación de negación**: rompí el hook `useSortAndPaginate.js` inyectando `if (false && ...)` → 1/18 tests falló y hook bloqueó el commit. Restaurado → 18/18 passed.
+- **Comportamiento**: si un archivo no tiene tests relacionados, `--passWithNoTests` permite pasar sin fricción. Si hay tests y fallan, el commit se rechaza.
+- **Extensión natural del hook mypy**: ahora backend + frontend tienen red de seguridad automática antes de cada commit.
