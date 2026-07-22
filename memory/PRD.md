@@ -631,3 +631,13 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
   - "189 missing hook deps": la mayoría son `useEffect(...[])` mount-only intencionales; añadirlos a las deps sin `useCallback` provoca bucles infinitos.
   - "localStorage → httpOnly cookies": cambio de arquitectura mayor (backend set-cookie, CORS, sin Authorization header); localStorage con JWT de corta duración es el patrón estándar SPA; XSS se mitiga con CSP.
 - **Verificación**: `pytest test_cultivos_variedades.py` 4/4 PASS; webpack compila sin errores; smoke test frontend en /cultivos OK.
+
+
+### Auditoría preventiva sort/limit en endpoints transaccionales (2026-02) - DONE
+- **Contexto**: Bug conocido "nuevos registros no aparecen" causado por `limit=100` por defecto.
+- **Cambios aplicados** (mínimos y quirúrgicos):
+  - `routes_cosechas.py` — `GET /api/cosechas`: `limit=100` → `limit=10000` (sort `created_at DESC` ya existente).
+  - `routes_irrigaciones.py` — `GET /api/irrigaciones`: `limit=100` → `limit=10000` (sort `fecha DESC`).
+  - `routes_tareas.py` — `GET /api/tareas`: `limit=100` → `limit=10000` (sort `fecha_inicio DESC`).
+  - `routes_albaranes_comision.py` — `GET /api/albaranes-comision`: sin cambios; ya usaba cursor sin límite y sort por `fecha_albaran DESC`.
+- **Verificación**: HTTP 200 en los 4 endpoints con `admin@fruveco.com`; lint Python sin errores; `total` correctamente devuelto en cada respuesta.

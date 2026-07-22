@@ -79,7 +79,7 @@ async def create_cosecha(
 @router.get("/cosechas")
 async def get_cosechas(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 10000,
     contrato_id: Optional[str] = None,
     proveedor: Optional[str] = None,
     campana: Optional[str] = None,

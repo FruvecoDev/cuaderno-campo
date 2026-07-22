@@ -70,7 +70,7 @@ async def create_irrigacion(
 @router.get("/irrigaciones")
 async def get_irrigaciones(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 10000,
     parcela_id: Optional[str] = None,
     sistema: Optional[str] = None,
     estado: Optional[str] = None,

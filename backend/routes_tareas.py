@@ -70,7 +70,7 @@ async def create_tarea(
 @router.get("/tareas")
 async def get_tareas(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 10000,
     estado: Optional[str] = None,
     prioridad: Optional[str] = None,
     asignado_a: Optional[str] = None,
