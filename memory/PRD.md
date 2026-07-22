@@ -708,3 +708,17 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - **Código eliminado**: ~280 líneas duplicadas de sortConfig/handleSort/sortedItems/useMemo/usePagination sustituidas por hook calls de 8-15 líneas cada una.
 - **Ventaja global**: persistencia por usuario en localStorage aplicada en 10 módulos (2 previos + 8 nuevos). El usuario recupera sus preferencias de orden en cada módulo al recargar.
 - **Verificación**: lint 0 errores en las 8 páginas; smoke test batch → 7/7 rutas sin compile errors, localStorage inicializado con defaults correctos; screenshot Mapa de Parcelas OK (dropdown Ordenar + paginación funcional).
+
+### Jest test suite para useSortAndPaginate (2026-02) - DONE
+- **`/app/frontend/src/hooks/useSortAndPaginate.test.js`**: 18 tests cubriendo el hook compartido por 10 módulos.
+- **Cobertura**:
+  - Ordenación: strings ASC/DESC, numérica ASC/DESC, sin defaultField
+  - handleSort (tabla clicable): primer click aplica ASC, reclick toggle DESC, cambio de campo resetea a ASC
+  - Dropdown API: setSortField + toggleSortDirection
+  - getValue custom: extractor personalizado con casting arbitrario
+  - Persistencia localStorage: guardar cambios, rehidratar al montar, resistencia a JSON corrupto
+  - Paginación: pageSize, cambio de página, cambio de pageSize, respeto del orden aplicado
+  - Casos borde: items null/undefined, array vacío
+- **Dependencias**: `@testing-library/react@14` (compatible con node 20).
+- **Ejecutar**: `cd /app/frontend && CI=true yarn test --testPathPattern="useSortAndPaginate" --watchAll=false`
+- **Resultado**: 18/18 tests PASS en 0.879s.
