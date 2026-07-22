@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { MapContainer, TileLayer, WMSTileLayer, Polygon, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import {
@@ -7,6 +7,7 @@ import {
   MousePointer, X, ArrowUp, ArrowDown
 } from 'lucide-react';
 import api from '../services/api';
+import useSortAndPaginate from '../hooks/useSortAndPaginate';
 import 'leaflet/dist/leaflet.css';
 
 // Fix marker icon
@@ -106,37 +107,22 @@ export default function ConsultaSIGPAC() {
   const [clickLoading, setClickLoading] = useState(false);
   const [clickPolygon, setClickPolygon] = useState(null);
 
-  // Ordenación de la lista de recintos
-  const [sortField, setSortField] = useState('recinto');
-  const [sortDirection, setSortDirection] = useState('asc');
-  const toggleSortDirection = () => setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
-
-  const sortedRecintos = useMemo(() => {
-    if (!results?.data) return [];
-    const arr = [...results.data];
-    const getValue = (r) => {
-      switch (sortField) {
+  // Ordenación unificada de la lista de recintos (sin paginación — resultados típicamente pocos)
+  const { sortField, setSortField, sortDirection, toggleSortDirection, sortedItems: sortedRecintos } = useSortAndPaginate(results?.data || [], {
+    defaultField: 'recinto',
+    defaultDirection: 'asc',
+    defaultPageSize: 999,
+    storageKey: 'sort:sigpac',
+    getValue: (r, field) => {
+      switch (field) {
         case 'recinto': return Number(r.recinto) || 0;
         case 'superficie_ha': return Number(r.superficie_ha) || 0;
         case 'uso_sigpac': return r.uso_sigpac || '';
         case 'coef_regadio': return Number(r.coef_regadio) || 0;
-        default: return r[sortField] ?? '';
+        default: return r[field] ?? '';
       }
-    };
-    arr.sort((a, b) => {
-      const va = getValue(a);
-      const vb = getValue(b);
-      if (typeof va === 'number' && typeof vb === 'number') {
-        return sortDirection === 'asc' ? va - vb : vb - va;
-      }
-      const sa = String(va).toLowerCase();
-      const sb = String(vb).toLowerCase();
-      if (sa < sb) return sortDirection === 'asc' ? -1 : 1;
-      if (sa > sb) return sortDirection === 'asc' ? 1 : -1;
-      return 0;
-    });
-    return arr;
-  }, [results, sortField, sortDirection]);
+    },
+  });
 
   const handleSearch = async () => {
     if (!form.provincia || !form.municipio || !form.poligono || !form.parcela) {

@@ -10,7 +10,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../utils/permissions';
 import TabbedModal from '../components/TabbedModal';
 import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
-import PaginationFooter, { usePagination } from '../components/PaginationFooter';
+import PaginationFooter from '../components/PaginationFooter';
+import useSortAndPaginate from '../hooks/useSortAndPaginate';
 import '../App.css';
 import { notify } from '../lib/notify';
 
@@ -178,7 +179,7 @@ const Tareas = () => {
   const activeFiltersCount = Object.values(filters).filter(v => v !== '').length;
 
   // Paginación
-  const { page, pageSize, totalPages, totalItems, pageStart, pageEnd, paginatedItems: paginatedTareas, setPage, setPageSize } = usePagination(filteredTareas, 25);
+  const { page, pageSize, totalPages, totalItems, pageStart, pageEnd, paginatedItems: paginatedTareas, setPage, setPageSize } = useSortAndPaginate(filteredTareas, { defaultPageSize: 25, storageKey: 'sort:tareas' });
 
   // Bulk delete
   const canBulkDelete = !!user?.can_bulk_delete;

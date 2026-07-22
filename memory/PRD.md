@@ -694,3 +694,17 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - **Ventaja**: en una tabla de 1970 productos con 11 columnas, el usuario nunca pierde de vista qué columna gobierna el orden actual.
 - **testid**: `col-<field>` (o `col-<field>-active` cuando corresponde) para permitir tests visuales de regresión.
 - **Verificación**: click en "Tipo" → columna resaltada correctamente, primer producto muestra "Acaricida" (orden ASC alfabético). Screenshot preview confirma la UX.
+
+### Migración completa a useSortAndPaginate (2026-02) - DONE
+- **8 páginas migradas** (todas las restantes) con eliminación de código duplicado:
+  - `Proveedores.js` — `sort:proveedores` (default: codigo_proveedor asc). getValue para telefono/email/persona_contacto/estado.
+  - `Contratos.js` — `sort:contratos` (default: fecha desc). getValue para numero/proveedor_cliente/total.
+  - `Tratamientos.js` — `sort:tratamientos` (default: fecha_tratamiento desc). getValue con closure sobre parcelas para el count "parcelas".
+  - `Visitas.js` — `sort:visitas` (default: fecha desc).
+  - `Tareas.js` — `sort:tareas` (solo paginación, sin sortField default).
+  - `Cosechas.js` — `sort:cosechas` (solo paginación, sin sortField default).
+  - `Mapas.js` — `sort:mapas` (default: codigo_plantacion asc, dropdown-based).
+  - `ConsultaSIGPAC.js` — `sort:sigpac` (default: recinto asc, dropdown-based, sin paginación).
+- **Código eliminado**: ~280 líneas duplicadas de sortConfig/handleSort/sortedItems/useMemo/usePagination sustituidas por hook calls de 8-15 líneas cada una.
+- **Ventaja global**: persistencia por usuario en localStorage aplicada en 10 módulos (2 previos + 8 nuevos). El usuario recupera sus preferencias de orden en cada módulo al recargar.
+- **Verificación**: lint 0 errores en las 8 páginas; smoke test batch → 7/7 rutas sin compile errors, localStorage inicializado con defaults correctos; screenshot Mapa de Parcelas OK (dropdown Ordenar + paginación funcional).

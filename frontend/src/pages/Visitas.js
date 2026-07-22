@@ -13,7 +13,8 @@ import { VisitasTable } from '../components/visitas/VisitasTable';
 import { VisitasDetailModal } from '../components/visitas/VisitasDetailModal';
 import { VisitasAnalysisModal } from '../components/visitas/VisitasAnalysisModal';
 import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
-import PaginationFooter, { usePagination } from '../components/PaginationFooter';
+import PaginationFooter from '../components/PaginationFooter';
+import useSortAndPaginate from '../hooks/useSortAndPaginate';
 import '../App.css';
 import { notify } from '../lib/notify';
 
@@ -283,20 +284,17 @@ const Visitas = () => {
   const toggleTableConfig = (field) => { setTableConfig(prev => ({ ...prev, [field]: !prev[field] })); };
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
 
-  // Ordenacion por columnas
-  const [sortConfig, setSortConfig] = useState({ field: 'fecha', direction: 'desc' });
-  const handleSort = (field) => {
-    setSortConfig(prev => (
-      prev.field === field
-        ? { field, direction: prev.direction === 'asc' ? 'desc' : 'asc' }
-        : { field, direction: 'asc' }
-    ));
-  };
-
-  const sortedVisitas = useMemo(() => {
-    const { field, direction } = sortConfig;
-    if (!field) return filteredVisitas;
-    const getValue = (v) => {
+  // Ordenación + paginación unificada
+  const {
+    sortConfig, handleSort,
+    page, pageSize, totalPages, totalItems, pageStart, pageEnd,
+    paginatedItems: paginatedVisitas, setPage, setPageSize,
+  } = useSortAndPaginate(filteredVisitas, {
+    defaultField: 'fecha',
+    defaultDirection: 'desc',
+    defaultPageSize: 20,
+    storageKey: 'sort:visitas',
+    getValue: (v, field) => {
       switch (field) {
         case 'numero': return Number(v.numero_visita) || 0;
         case 'objetivo': return v.objetivo || '';
@@ -308,25 +306,8 @@ const Visitas = () => {
         case 'estado': return v.realizado ? 2 : 1;
         default: return v[field] ?? '';
       }
-    };
-    const arr = [...filteredVisitas];
-    arr.sort((a, b) => {
-      const va = getValue(a);
-      const vb = getValue(b);
-      if (typeof va === 'number' && typeof vb === 'number') {
-        return direction === 'asc' ? va - vb : vb - va;
-      }
-      const sa = String(va || '').toLowerCase();
-      const sb = String(vb || '').toLowerCase();
-      if (sa < sb) return direction === 'asc' ? -1 : 1;
-      if (sa > sb) return direction === 'asc' ? 1 : -1;
-      return 0;
-    });
-    return arr;
-  }, [filteredVisitas, sortConfig]);
-
-  // Paginación
-  const { page, pageSize, totalPages, totalItems, pageStart, pageEnd, paginatedItems: paginatedVisitas, setPage, setPageSize } = usePagination(sortedVisitas, 20);
+    },
+  });
 
   // Bulk delete (seleccion multiple sobre la pagina visible)
   const canBulkDelete = !!user?.can_bulk_delete;

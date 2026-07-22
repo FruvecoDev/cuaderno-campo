@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, Edit2, Package, TrendingUp, TrendingDown, Check, ChevronDown, ChevronUp, X, Download, Target, Scale, DollarSign, Clock, CheckCircle, Loader2, Leaf, FileText } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
-import PaginationFooter, { usePagination } from '../components/PaginationFooter';
+import PaginationFooter from '../components/PaginationFooter';
+import useSortAndPaginate from '../hooks/useSortAndPaginate';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { notify } from '../lib/notify';
 
@@ -138,7 +139,7 @@ const Cosechas = () => {
   }), [cosechas]);
 
   // Paginación
-  const { page, pageSize, totalPages, totalItems, pageStart, pageEnd, paginatedItems: paginatedCosechas, setPage, setPageSize } = usePagination(filteredCosechas, 25);
+  const { page, pageSize, totalPages, totalItems, pageStart, pageEnd, paginatedItems: paginatedCosechas, setPage, setPageSize } = useSortAndPaginate(filteredCosechas, { defaultPageSize: 25, storageKey: 'sort:cosechas' });
 
   // Bulk delete
   const canBulkDelete = !!user?.can_bulk_delete;

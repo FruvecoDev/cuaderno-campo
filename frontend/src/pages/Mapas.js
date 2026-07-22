@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { Map, Layers, MapPin, Edit2, Save, X, Maximize2, List, Filter, Leaf, Ruler, Pentagon, Trash2, Check, Upload, Search, Navigation, Eye, Camera, ArrowUp, ArrowDown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import GeoImportModal from '../components/GeoImportModal';
-import PaginationFooter, { usePagination } from '../components/PaginationFooter';
+import PaginationFooter from '../components/PaginationFooter';
+import useSortAndPaginate from '../hooks/useSortAndPaginate';
 import html2canvas from 'html2canvas';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
@@ -479,44 +480,25 @@ const Mapas = () => {
   );
   const parcelasConPoligono = filteredParcelas.filter(p => p.recintos?.[0]?.geometria?.length > 0);
 
-  // Ordenación del panel lateral (aplica a "Con ubicación")
-  const [sortField, setSortField] = useState('codigo_plantacion');
-  const [sortDirection, setSortDirection] = useState('asc');
-  const toggleSortDirection = () => setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
-
-  const sortedParcelasConUbicacion = useMemo(() => {
-    const arr = [...parcelasConUbicacion];
-    const getValue = (p) => {
-      switch (sortField) {
-        case 'codigo_plantacion': return p.codigo_plantacion || '';
-        case 'cultivo': return p.cultivo || '';
-        case 'proveedor': return p.proveedor || '';
-        case 'finca': return p.finca || '';
-        case 'superficie_total': return Number(p.superficie_total) || 0;
-        default: return p[sortField] ?? '';
-      }
-    };
-    arr.sort((a, b) => {
-      const va = getValue(a);
-      const vb = getValue(b);
-      if (typeof va === 'number' && typeof vb === 'number') {
-        return sortDirection === 'asc' ? va - vb : vb - va;
-      }
-      const sa = String(va).toLowerCase();
-      const sb = String(vb).toLowerCase();
-      if (sa < sb) return sortDirection === 'asc' ? -1 : 1;
-      if (sa > sb) return sortDirection === 'asc' ? 1 : -1;
-      return 0;
-    });
-    return arr;
-  }, [parcelasConUbicacion, sortField, sortDirection]);
-
+  // Ordenación + paginación unificada del panel lateral (aplica a "Con ubicación")
   const {
+    sortField, setSortField, sortDirection, toggleSortDirection,
     page: mapasPage, pageSize: mapasPageSize, totalPages: mapasTotalPages,
     totalItems: mapasTotalItems, pageStart: mapasPageStart, pageEnd: mapasPageEnd,
     paginatedItems: paginatedParcelasConUbicacion,
     setPage: setMapasPage, setPageSize: setMapasPageSize,
-  } = usePagination(sortedParcelasConUbicacion, 25);
+  } = useSortAndPaginate(parcelasConUbicacion, {
+    defaultField: 'codigo_plantacion',
+    defaultDirection: 'asc',
+    defaultPageSize: 25,
+    storageKey: 'sort:mapas',
+    getValue: (p, field) => {
+      switch (field) {
+        case 'superficie_total': return Number(p.superficie_total) || 0;
+        default: return p[field] ?? '';
+      }
+    },
+  });
 
   // Get unique cultivos / proveedores / contratos for filters
   const cultivosUnicos = [...new Set(parcelas.map(p => p.cultivo).filter(Boolean))];

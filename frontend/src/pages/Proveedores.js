@@ -9,7 +9,8 @@ import ProvinciaSelect from '../components/ProvinciaSelect';
 import PaisSelect from '../components/PaisSelect';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
-import PaginationFooter, { usePagination } from '../components/PaginationFooter';
+import PaginationFooter from '../components/PaginationFooter';
+import useSortAndPaginate from '../hooks/useSortAndPaginate';
 import DuplicadosModal from '../components/proveedores/DuplicadosModal';
 import '../App.css';
 import { notify } from '../lib/notify';
@@ -43,7 +44,6 @@ const Proveedores = () => {
   const [historialData, setHistorialData] = useState(null);
   const [selectedProveedor, setSelectedProveedor] = useState(null);
   const [filtroEstado, setFiltroEstado] = useState('todos');
-  const [sortConfig, setSortConfig] = useState({ field: 'codigo_proveedor', direction: 'asc' });
   const [showDuplicados, setShowDuplicados] = useState(false);
   const [tiposProveedor, setTiposProveedor] = useState([]);
   const [showTiposManager, setShowTiposManager] = useState(false);
@@ -316,10 +316,19 @@ const Proveedores = () => {
       (filtroEstado === 'activos' && p.activo !== false) ||
       (filtroEstado === 'inactivos' && p.activo === false);
     return matchesSearch && matchesEstado;
-  }).sort((a, b) => {
-    const { field, direction } = sortConfig;
-    if (!field) return 0;
-    const getValue = (obj) => {
+  });
+
+  // Ordenación + paginación unificada
+  const {
+    sortConfig, handleSort,
+    page, pageSize, totalPages, totalItems, pageStart, pageEnd,
+    paginatedItems, setPage, setPageSize,
+  } = useSortAndPaginate(filteredProveedores, {
+    defaultField: 'codigo_proveedor',
+    defaultDirection: 'asc',
+    defaultPageSize: 20,
+    storageKey: 'sort:proveedores',
+    getValue: (obj, field) => {
       switch (field) {
         case 'telefono':
           return obj.telefonos?.length ? (obj.telefonos[0]?.valor || '') : (obj.telefono || '');
@@ -329,33 +338,15 @@ const Proveedores = () => {
           return obj.contactos?.length ? (obj.contactos[0]?.nombre || '') : (obj.persona_contacto || '');
         case 'estado':
           return obj.activo === false ? 0 : 1;
+        case 'codigo_proveedor': {
+          const v = obj.codigo_proveedor ?? '';
+          return /^\d+$/.test(v) ? parseInt(v, 10) : v;
+        }
         default:
           return obj[field] ?? '';
       }
-    };
-    const va = getValue(a);
-    const vb = getValue(b);
-    // Numeric compare if both look numeric (e.g. codigo_proveedor '000125')
-    const na = typeof va === 'string' && /^\d+$/.test(va) ? parseInt(va, 10) : va;
-    const nb = typeof vb === 'string' && /^\d+$/.test(vb) ? parseInt(vb, 10) : vb;
-    if (typeof na === 'number' && typeof nb === 'number') {
-      return direction === 'asc' ? na - nb : nb - na;
-    }
-    const sa = String(va || '').toLowerCase();
-    const sb = String(vb || '').toLowerCase();
-    if (sa < sb) return direction === 'asc' ? -1 : 1;
-    if (sa > sb) return direction === 'asc' ? 1 : -1;
-    return 0;
+    },
   });
-
-  const handleSort = (field) => {
-    setSortConfig(prev => {
-      if (prev.field === field) {
-        return { field, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
-      }
-      return { field, direction: 'asc' };
-    });
-  };
 
   const renderSortIcon = (field) => {
     if (sortConfig.field !== field) return <ArrowUpDown size={12} style={{ opacity: 0.35, marginLeft: '0.25rem' }} />;
@@ -365,10 +356,6 @@ const Proveedores = () => {
   };
 
   const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredProveedores);
-  const {
-    page, pageSize, totalPages, totalItems, pageStart, pageEnd, paginatedItems,
-    setPage, setPageSize,
-  } = usePagination(filteredProveedores, 20);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const handleBulkDelete = async () => {
     setBulkDeleting(true);

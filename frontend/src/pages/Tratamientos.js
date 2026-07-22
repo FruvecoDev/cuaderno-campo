@@ -10,7 +10,8 @@ import api, { BACKEND_URL } from '../services/api';
 import CalculadoraFitosanitarios from '../components/tratamientos/CalculadoraFitosanitarios';
 import TabbedModal from '../components/TabbedModal';
 import { useBulkSelect, bulkDeleteApi } from '../components/BulkActions';
-import PaginationFooter, { usePagination } from '../components/PaginationFooter';
+import PaginationFooter from '../components/PaginationFooter';
+import useSortAndPaginate from '../hooks/useSortAndPaginate';
 import TratamientosKPIs from '../components/tratamientos/TratamientosKPIs';
 import TratamientosFilters from '../components/tratamientos/TratamientosFilters';
 import TratamientosTable from '../components/tratamientos/TratamientosTable';
@@ -383,20 +384,17 @@ const Tratamientos = () => {
     return true;
   });
 
-  // Ordenacion por columnas
-  const [sortConfig, setSortConfig] = useState({ field: 'fecha_tratamiento', direction: 'desc' });
-  const handleSort = (field) => {
-    setSortConfig(prev => (
-      prev.field === field
-        ? { field, direction: prev.direction === 'asc' ? 'desc' : 'asc' }
-        : { field, direction: 'asc' }
-    ));
-  };
-
-  const sortedTratamientos = useMemo(() => {
-    const { field, direction } = sortConfig;
-    if (!field) return filteredTratamientos;
-    const getValue = (t) => {
+  // Ordenación + paginación unificada
+  const {
+    sortConfig, handleSort,
+    page, pageSize, totalPages, totalItems, pageStart, pageEnd,
+    paginatedItems: paginatedTratamientos, setPage, setPageSize,
+  } = useSortAndPaginate(filteredTratamientos, {
+    defaultField: 'fecha_tratamiento',
+    defaultDirection: 'desc',
+    defaultPageSize: 25,
+    storageKey: 'sort:tratamientos',
+    getValue: (t, field) => {
       switch (field) {
         case 'tipo': return t.tipo_tratamiento || '';
         case 'subtipo': return t.subtipo || '';
@@ -411,25 +409,8 @@ const Tratamientos = () => {
         case 'estado': return t.realizado ? 2 : (t.cancelado ? 3 : 1);
         default: return t[field] ?? '';
       }
-    };
-    const arr = [...filteredTratamientos];
-    arr.sort((a, b) => {
-      const va = getValue(a);
-      const vb = getValue(b);
-      if (typeof va === 'number' && typeof vb === 'number') {
-        return direction === 'asc' ? va - vb : vb - va;
-      }
-      const sa = String(va || '').toLowerCase();
-      const sb = String(vb || '').toLowerCase();
-      if (sa < sb) return direction === 'asc' ? -1 : 1;
-      if (sa > sb) return direction === 'asc' ? 1 : -1;
-      return 0;
-    });
-    return arr;
-  }, [filteredTratamientos, sortConfig, parcelas]);
-
-  // Paginación
-  const { page, pageSize, totalPages, totalItems, pageStart, pageEnd, paginatedItems: paginatedTratamientos, setPage, setPageSize } = usePagination(sortedTratamientos, 25);
+    },
+  });
 
   // Bulk delete
   const canBulkDelete = !!user?.can_bulk_delete;
