@@ -659,3 +659,10 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - **Regression test `/app/backend/tests/test_mypy_strict.py`**: ejecuta `mypy database.py models.py server.py` con subprocess y falla si returncode != 0. Cualquier futuro cambio que rompa el tipado en los módulos migrados fallará el CI.
 - **Verificación**: `mypy database.py models.py server.py` → "Success: no issues found in 3 source files". `pytest tests/test_mypy_strict.py -v` → PASS. Backend arranca y `/api/auth/login` retorna 200.
 - **Cómo migrar un módulo nuevo a strict**: (1) añadir bloque `[mypy-<modulo>]` en `mypy.ini` con `strict = True`, (2) añadirlo a `STRICT_MODULES` en el test, (3) ejecutar mypy y arreglar errores, (4) commit.
+
+### Pre-commit hook con mypy --strict (2026-02) - DONE
+- **`/app/.pre-commit-config.yaml`**: hook local `mypy-strict` que corre `mypy database.py models.py server.py` antes de cada `git commit`. Filtro `files:` limita la ejecución a cambios en los 3 archivos strict (no penaliza commits en otros módulos).
+- **Instalación**: `pip install pre-commit && cd /app && pre-commit install` (ya ejecutado). El hook queda registrado en `.git/hooks/pre-commit` (con backup del legacy en `.git/hooks/pre-commit.legacy`).
+- **Bypass de emergencia**: `git commit --no-verify -m "..."` (uso restringido).
+- **Cómo escalar**: al migrar un módulo nuevo a strict, editar `entry` en `.pre-commit-config.yaml` + regex de `files:` + `STRICT_MODULES` en `test_mypy_strict.py`.
+- **Verificación**: `pre-commit run mypy-strict --all-files` → Passed. Test de negación con error de tipo inyectado → Failed correctamente (bloquea commit). Restaurado y vuelve a Passed.

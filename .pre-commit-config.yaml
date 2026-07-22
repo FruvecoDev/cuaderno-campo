@@ -1,0 +1,22 @@
+# Pre-commit hooks for FRUVECO backend.
+#
+# Install:
+#   cd /app && pip install pre-commit && pre-commit install
+#
+# Bypass (solo emergencias):
+#   git commit --no-verify -m "..."
+#
+# Hooks activos:
+#   1. mypy-strict: verifica los módulos migrados a strict typing.
+#      Añadir un módulo: editar `entry` abajo + `STRICT_MODULES` en
+#      /app/backend/tests/test_mypy_strict.py.
+
+repos:
+  - repo: local
+    hooks:
+      - id: mypy-strict
+        name: mypy --strict (backend core)
+        entry: bash -c 'cd backend && mypy database.py models.py server.py'
+        language: system
+        files: ^backend/(database|models|server)\.py$
+        pass_filenames: false
