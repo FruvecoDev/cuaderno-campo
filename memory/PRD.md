@@ -641,3 +641,8 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
   - `routes_tareas.py` — `GET /api/tareas`: `limit=100` → `limit=10000` (sort `fecha_inicio DESC`).
   - `routes_albaranes_comision.py` — `GET /api/albaranes-comision`: sin cambios; ya usaba cursor sin límite y sort por `fecha_albaran DESC`.
 - **Verificación**: HTTP 200 en los 4 endpoints con `admin@fruveco.com`; lint Python sin errores; `total` correctamente devuelto en cada respuesta.
+
+### Evaluaciones + Cuaderno de Campo: ordenación + paginación (2026-02) - DONE
+- **Evaluaciones**: cabeceras de tabla clicables (Código, Proveedores, Cultivos, Campaña, Fecha Inicio, Técnico, Estado) con toggle ASC/DESC e iconos `ArrowUp/ArrowDown/ArrowUpDown` de lucide-react. Orden por defecto `fecha_inicio DESC`. `PaginationFooter` con default 20 filas, selector 10/20/25/50/100/200. Total mostrado en el título de la card refleja el `totalItems` no la página visible.
+- **Cuaderno de Campo**: la lista de parcelas es card-based (no tabla), así que se implementó como selector "Ordenar por" (Código/Cultivo/Proveedor/Campaña/Superficie) + botón ASC/DESC + `PaginationFooter` (20/pág). El selector de todo/bulk-delete y `useBulkSelect` ahora operan sobre la página visible (`paginatedParcelas`), en línea con el patrón de Visitas/Proveedores.
+- **Testing**: smoke screenshot preview OK; lint JS/ESLint 0 errores; testids: `sort-header-evaluacion-*`, `pagination-footer-evaluaciones`, `sort-field-cuaderno`, `sort-direction-cuaderno`, `pagination-footer-cuaderno`.

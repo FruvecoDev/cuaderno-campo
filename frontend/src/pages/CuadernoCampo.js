@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { FileText, Download, Loader2, Search, Leaf, MapPin, Calendar, Package, Droplets, Eye, ClipboardList, TrendingUp, Mail, History } from 'lucide-react';
+import { FileText, Download, Loader2, Search, Leaf, MapPin, Calendar, Package, Droplets, Eye, ClipboardList, TrendingUp, Mail, History, ArrowUp, ArrowDown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../utils/permissions';
 import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
 import SendEmailModal from '../components/evaluaciones/SendEmailModal';
 import EmailHistoryModal from '../components/evaluaciones/EmailHistoryModal';
+import PaginationFooter, { usePagination } from '../components/PaginationFooter';
 import '../App.css';
 import { notify } from '../lib/notify';
 
@@ -105,7 +106,45 @@ const CuadernoCampo = () => {
   const cultivosUnicos = [...new Set(parcelas.map(p => p.cultivo).filter(Boolean))].sort();
   const proveedoresUnicos = [...new Set(contratos.map(c => c.proveedor || c.cliente).filter(Boolean))].sort();
 
-  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredParcelas);
+  // Ordenación de la lista de parcelas
+  const [sortField, setSortField] = useState('codigo_plantacion');
+  const [sortDirection, setSortDirection] = useState('asc');
+  const toggleSortDirection = () => setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
+
+  const sortedParcelas = useMemo(() => {
+    const arr = [...filteredParcelas];
+    const getValue = (p) => {
+      switch (sortField) {
+        case 'codigo_plantacion': return p.codigo_plantacion || '';
+        case 'cultivo': return p.cultivo || '';
+        case 'proveedor': return p.proveedor || '';
+        case 'campana': return p.campana || '';
+        case 'superficie_total': return Number(p.superficie_total) || 0;
+        default: return p[sortField] ?? '';
+      }
+    };
+    arr.sort((a, b) => {
+      const va = getValue(a);
+      const vb = getValue(b);
+      if (typeof va === 'number' && typeof vb === 'number') {
+        return sortDirection === 'asc' ? va - vb : vb - va;
+      }
+      const sa = String(va).toLowerCase();
+      const sb = String(vb).toLowerCase();
+      if (sa < sb) return sortDirection === 'asc' ? -1 : 1;
+      if (sa > sb) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return arr;
+  }, [filteredParcelas, sortField, sortDirection]);
+
+  // Paginación
+  const {
+    page, pageSize, totalPages, totalItems, pageStart, pageEnd,
+    paginatedItems: paginatedParcelas, setPage, setPageSize,
+  } = usePagination(sortedParcelas, 20);
+
+  const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(paginatedParcelas);
   const [bulkDeleting, setBulkDeleting] = useState(false);
 
   const handleBulkDelete = async () => {
@@ -153,7 +192,7 @@ const CuadernoCampo = () => {
           </h2>
           
           {/* Search and Filter */}
-          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
             <div style={{ flex: 1, position: 'relative' }}>
               <Search size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--muted-foreground))' }} />
               <input
@@ -180,23 +219,51 @@ const CuadernoCampo = () => {
             </select>
           </div>
 
+          {/* Sort selector */}
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', whiteSpace: 'nowrap' }}>Ordenar por:</span>
+            <select
+              className="form-select"
+              value={sortField}
+              onChange={(e) => setSortField(e.target.value)}
+              style={{ flex: 1, minWidth: '130px' }}
+              data-testid="sort-field-cuaderno"
+            >
+              <option value="codigo_plantacion">Código</option>
+              <option value="cultivo">Cultivo</option>
+              <option value="proveedor">Proveedor</option>
+              <option value="campana">Campaña</option>
+              <option value="superficie_total">Superficie</option>
+            </select>
+            <button
+              type="button"
+              className="btn btn-sm btn-secondary"
+              onClick={toggleSortDirection}
+              title={sortDirection === 'asc' ? 'Ascendente' : 'Descendente'}
+              data-testid="sort-direction-cuaderno"
+              style={{ padding: '0.4rem 0.6rem' }}
+            >
+              {sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
+            </button>
+          </div>
+
           {/* Bulk Actions */}
           {canBulkDelete && <BulkActionBar selectedCount={selectedIds.size} onDelete={handleBulkDelete} onClear={clearSelection} deleting={bulkDeleting} />}
 
           {/* Parcelas List */}
           <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-            {canBulkDelete && filteredParcelas.length > 0 && (
+            {canBulkDelete && paginatedParcelas.length > 0 && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 0.75rem', marginBottom: '0.5rem', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
                 <input type="checkbox" checked={allSelected} ref={el => { if (el) el.indeterminate = someSelected; }} onChange={toggleAll} style={{ width: '15px', height: '15px', cursor: 'pointer' }} data-testid="bulk-select-all" />
                 <span>Seleccionar todo</span>
               </div>
             )}
-            {filteredParcelas.length === 0 ? (
+            {paginatedParcelas.length === 0 ? (
               <p style={{ textAlign: 'center', color: 'hsl(var(--muted-foreground))', padding: '2rem' }}>
                 No se encontraron parcelas
               </p>
             ) : (
-              filteredParcelas.map(p => {
+              paginatedParcelas.map(p => {
                 const contrato = getContratoForParcela(p);
                 return (
                 <div
@@ -262,6 +329,12 @@ const CuadernoCampo = () => {
               })
             )}
           </div>
+          <PaginationFooter
+            totalItems={totalItems} page={page} pageSize={pageSize}
+            totalPages={totalPages} pageStart={pageStart} pageEnd={pageEnd}
+            onPageChange={setPage} onPageSizeChange={setPageSize}
+            itemLabel="parcelas" testIdSuffix="cuaderno"
+          />
         </div>
 
         {/* Right Panel - Preview and Download */}
