@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import PaginationFooter, { usePagination } from '../components/PaginationFooter';
-import { Plus, Edit2, Trash2, Search, Filter, Settings, X, Beaker, AlertTriangle, Database, Download, Upload, FileSpreadsheet, FileText, ExternalLink, RefreshCw, CheckCircle, XCircle, Info, Loader2, Shield, Eye } from 'lucide-react';
+import PaginationFooter from '../components/PaginationFooter';
+import useSortAndPaginate from '../hooks/useSortAndPaginate';
+import { Plus, Edit2, Trash2, Search, Filter, Settings, X, Beaker, AlertTriangle, Database, Download, Upload, FileSpreadsheet, FileText, ExternalLink, RefreshCw, CheckCircle, XCircle, Info, Loader2, Shield, Eye, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
@@ -65,11 +66,27 @@ const Fitosanitarios = () => {
   const [bulkVerifying, setBulkVerifying] = useState(false);
   const [bulkVerifyResult, setBulkVerifyResult] = useState(null);
 
-  // Pagination (cliente) reutilizando el hook estándar
+  // Pagination + Sort (cliente) reutilizando el hook unificado
   const {
+    sortConfig, handleSort,
     page, pageSize, totalPages, totalItems, pageStart, pageEnd,
     paginatedItems: paginatedProductos, setPage, setPageSize,
-  } = usePagination(productos, 25);
+  } = useSortAndPaginate(productos, {
+    defaultField: 'numero_registro',
+    defaultDirection: 'asc',
+    defaultPageSize: 25,
+    storageKey: 'sort:fitosanitarios',
+    getValue: (p, field) => {
+      switch (field) {
+        case 'dosis': return Number(p.dosis_max ?? p.dosis_min ?? 0);
+        case 'volumen_agua': return Number(p.volumen_agua_max ?? p.volumen_agua_min ?? 0);
+        case 'plazo_seguridad': return Number(p.plazo_seguridad) || 0;
+        case 'activo': return p.activo ? 1 : 0;
+        case 'plagas': return (p.plagas_objetivo || []).join(', ');
+        default: return p[field] ?? '';
+      }
+    },
+  });
 
   // Filters
   const [filters, setFilters] = useState({
@@ -1341,7 +1358,24 @@ const Fitosanitarios = () => {
             <table className="table" data-testid="productos-table" style={{ minWidth: '100%' }}>
               <thead>
                 <tr>
-                  {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
+                  {visibleColumns.map(col => {
+                    const active = sortConfig.field === col.id;
+                    const Icon = !active ? ArrowUpDown : (sortConfig.direction === 'asc' ? ArrowUp : ArrowDown);
+                    return (
+                      <th
+                        key={col.id}
+                        onClick={() => handleSort(col.id)}
+                        style={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}
+                        title={`Ordenar por ${col.label}`}
+                        data-testid={`sort-header-fito-${col.id}`}
+                      >
+                        <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                          {col.label}
+                          <Icon size={12} style={{ marginLeft: '0.25rem', opacity: active ? 1 : 0.35, color: active ? 'hsl(var(--primary))' : undefined }} />
+                        </span>
+                      </th>
+                    );
+                  })}
                   <th
                     data-testid="th-acciones"
                     style={{

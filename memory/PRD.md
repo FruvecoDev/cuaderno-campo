@@ -681,3 +681,9 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
   - `CuadernoCampo.js`: `storageKey: 'sort:cuaderno-campo'` con `getValue` custom para casting numérico de `superficie_total`. Mismo ahorro de líneas.
 - **Verificación**: click en cabecera de Evaluaciones → localStorage guarda `{"field":"proveedor","direction":"asc"}`. Cambio en dropdown de Cuaderno de Campo → guarda `{"field":"cultivo","direction":"asc"}`. Recarga preserva la elección. Lint 0 errores. Smoke screenshot preview OK.
 - **Backlog progresivo**: quedan pendientes de migrar al hook: Proveedores, Contratos, Tratamientos, Visitas, Tareas, Cosechas, Mapas.js, ConsultaSIGPAC. Migración segura archivo por archivo (sin regresiones porque el hook expone ambas interfaces).
+
+### Fitosanitarios: cabeceras ordenables + migración a useSortAndPaginate (2026-02) - DONE
+- **Fitosanitarios.js**: cabeceras de tabla clicables para las 11 columnas (Num Registro, Nombre Comercial, Denominación, Empresa, Tipo, Materia Activa, Dosis, Vol. Agua, Plagas Objetivo, Plazo Seg., Estado). Toggle ASC/DESC + iconos `ArrowUp/ArrowDown/ArrowUpDown` (activo en `hsl(var(--primary))`).
+- **Migrado al hook `useSortAndPaginate`** con `storageKey: 'sort:fitosanitarios'` (persistencia por usuario) y `getValue` custom para casting numérico de `dosis`, `volumen_agua`, `plazo_seguridad`, boolean → int para `activo`, y join array para `plagas`.
+- **Testids**: `sort-header-fito-<col.id>` por cabecera (dinámico desde `visibleColumns`).
+- **Verificación**: 7 headers verificados presentes; click en "Nombre Comercial" → localStorage guarda correctamente; lista 1970 productos, paginación 79 páginas funcional; lint 0 errores.
