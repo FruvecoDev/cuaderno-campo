@@ -687,3 +687,10 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - **Migrado al hook `useSortAndPaginate`** con `storageKey: 'sort:fitosanitarios'` (persistencia por usuario) y `getValue` custom para casting numérico de `dosis`, `volumen_agua`, `plazo_seguridad`, boolean → int para `activo`, y join array para `plagas`.
 - **Testids**: `sort-header-fito-<col.id>` por cabecera (dinámico desde `visibleColumns`).
 - **Verificación**: 7 headers verificados presentes; click en "Nombre Comercial" → localStorage guarda correctamente; lista 1970 productos, paginación 79 páginas funcional; lint 0 errores.
+
+### Indicador visual de columna activa en Fitosanitarios (2026-02) - DONE
+- **`<colgroup>` + `<col>`**: aplica `background: hsl(var(--primary) / 0.04)` en todas las celdas de la columna ordenada. Al hacer click en otra cabecera, el highlight se mueve dinámicamente.
+- **Cabecera activa**: fondo `hsl(var(--primary) / 0.08)` + texto en color primario para mayor contraste.
+- **Ventaja**: en una tabla de 1970 productos con 11 columnas, el usuario nunca pierde de vista qué columna gobierna el orden actual.
+- **testid**: `col-<field>` (o `col-<field>-active` cuando corresponde) para permitir tests visuales de regresión.
+- **Verificación**: click en "Tipo" → columna resaltada correctamente, primer producto muestra "Acaricida" (orden ASC alfabético). Screenshot preview confirma la UX.

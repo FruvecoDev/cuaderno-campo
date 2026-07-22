@@ -1356,6 +1356,16 @@ const Fitosanitarios = () => {
         ) : (
           <div style={{ overflowX: 'auto', position: 'relative' }}>
             <table className="table" data-testid="productos-table" style={{ minWidth: '100%' }}>
+              <colgroup>
+                {visibleColumns.map(col => (
+                  <col
+                    key={col.id}
+                    style={sortConfig.field === col.id ? { backgroundColor: 'hsl(var(--primary) / 0.04)' } : undefined}
+                    data-testid={`col-${col.id}${sortConfig.field === col.id ? '-active' : ''}`}
+                  />
+                ))}
+                <col />
+              </colgroup>
               <thead>
                 <tr>
                   {visibleColumns.map(col => {
@@ -1365,7 +1375,12 @@ const Fitosanitarios = () => {
                       <th
                         key={col.id}
                         onClick={() => handleSort(col.id)}
-                        style={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}
+                        style={{
+                          cursor: 'pointer',
+                          userSelect: 'none',
+                          whiteSpace: 'nowrap',
+                          ...(active ? { backgroundColor: 'hsl(var(--primary) / 0.08)', color: 'hsl(var(--primary))' } : {}),
+                        }}
                         title={`Ordenar por ${col.label}`}
                         data-testid={`sort-header-fito-${col.id}`}
                       >
