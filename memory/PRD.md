@@ -737,3 +737,12 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - **PaginationFooter** añadido (25/pág default).
 - **Verificación**: 7 headers presentes, click en "Nivel" resalta columna + localStorage persiste correctamente. Screenshot confirma UX consistente. Lint 0 errores nuevos.
 - **11 módulos** ya usan el hook: Evaluaciones, Cuaderno de Campo, Fitosanitarios, Proveedores, Contratos, Tratamientos, Visitas, Tareas, Cosechas, Mapas, ConsultaSIGPAC, Técnicos Aplicadores (12 con este).
+
+### Migración a useSortAndPaginate — Cultivos, Artículos, Agentes, Maquinaria (2026-02) - DONE
+- **Cultivos.js** (`sort:cultivos`, default: codigo_cultivo asc, 7 headers): añadido colgroup + cabeceras clicables + PaginationFooter. Parsing numérico para codigo_cultivo.
+- **ArticulosExplotacion.js** (`sort:articulos-explotacion`, default: codigo asc, 8 headers): idem. Casting numérico para precio_unitario, iva, stock_actual y bool para estado.
+- **Agentes.js** (`sort:agentes`, default: codigo asc, 7 headers): idem. Parsing numérico condicional para codigo.
+- **Maquinaria** (`sort:maquinaria`, default: nombre asc, 7 headers): refactor de `MaquinariaTable.js` para recibir `sortConfig`/`onSort`/`page`/`pageSize`/... y renderizar colgroup + headers clicables + PaginationFooter integrado. Padre pasa hook.
+- **Verificación smoke test**: 4/4 rutas sin compile errors, 29 sort headers totales presentes, localStorage inicializado con defaults correctos, PaginationFooter visible en todas. Lint 0 issues.
+- **Cobertura del sistema**: **16 módulos** con `useSortAndPaginate` (12 previos + 4 nuevos).
+- **Skipped por complejidad estructural** (para otra fase): Fincas (agrupado por provincia con secciones expandibles), Parcelas (mapas embebidos), Clientes (tabla+form monolítico), Recomendaciones (tabla dentro de modal).

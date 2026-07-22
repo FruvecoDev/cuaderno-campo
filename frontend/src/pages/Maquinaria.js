@@ -10,6 +10,7 @@ import MaquinariaForm from '../components/maquinaria/MaquinariaForm';
 import MaquinariaHistorial from '../components/maquinaria/MaquinariaHistorial';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
+import useSortAndPaginate from '../hooks/useSortAndPaginate';
 import '../App.css';
 
 const DEFAULT_FIELDS_CONFIG = {
@@ -123,6 +124,18 @@ const Maquinaria = () => {
     setBulkDeleting(true);
     try { await bulkDeleteApi('maquinaria', selectedIds); clearSelection(); fetchMaquinaria(); } catch (e) { console.error('[Maquinaria.js]', e); } finally { setBulkDeleting(false); }
   };
+
+  // Ordenación + paginación unificada
+  const {
+    sortConfig, handleSort,
+    page, pageSize, totalPages, totalItems, pageStart, pageEnd,
+    paginatedItems: paginatedMaquinaria, setPage, setPageSize,
+  } = useSortAndPaginate(filteredMaquinaria, {
+    defaultField: 'nombre',
+    defaultDirection: 'asc',
+    defaultPageSize: 25,
+    storageKey: 'sort:maquinaria',
+  });
 
   const getEstadoBadgeClass = (estado) => {
     switch (estado) {
@@ -405,13 +418,18 @@ const Maquinaria = () => {
 
       {/* Table */}
       <MaquinariaTable
-        maquinaria={filteredMaquinaria} loading={loading} hasActiveFilters={hasActiveFilters}
+        maquinaria={paginatedMaquinaria} totalCount={totalItems}
+        loading={loading} hasActiveFilters={hasActiveFilters}
         visibleColumns={visibleColumns} canEdit={canEdit} canDelete={canDelete}
         getEstadoBadgeClass={getEstadoBadgeClass} onViewImage={viewImage}
         onViewHistorial={handleVerHistorial} onEdit={handleEdit} onDelete={handleDelete}
         canBulkDelete={canBulkDelete} selectedIds={selectedIds} toggleOne={toggleOne}
         toggleAll={toggleAll} allSelected={allSelected} someSelected={someSelected}
         clearSelection={clearSelection} bulkDeleting={bulkDeleting} handleBulkDelete={handleBulkDelete}
+        sortConfig={sortConfig} onSort={handleSort}
+        page={page} pageSize={pageSize} totalPages={totalPages} totalItems={totalItems}
+        pageStart={pageStart} pageEnd={pageEnd}
+        onPageChange={setPage} onPageSizeChange={setPageSize}
       />
 
       {/* Historial Modal */}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Users, Plus, Edit2, Trash2, Search, X, Upload, Percent, Euro, Settings, Eye, CreditCard, FileText } from 'lucide-react';
+import { Users, Plus, Edit2, Trash2, Search, X, Upload, Percent, Euro, Settings, Eye, CreditCard, FileText, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import api, { BACKEND_URL } from '../services/api';
 import { useDropzone } from 'react-dropzone';
@@ -8,6 +8,8 @@ import ProvinciaSelect from '../components/ProvinciaSelect';
 import PaisSelect from '../components/PaisSelect';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
+import useSortAndPaginate from '../hooks/useSortAndPaginate';
+import PaginationFooter from '../components/PaginationFooter';
 import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
 import '../App.css';
 import { notify } from '../lib/notify';
@@ -180,6 +182,28 @@ const Agentes = () => {
   });
 
   const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredAgentes);
+
+  // Ordenación + paginación unificada
+  const {
+    sortConfig, handleSort,
+    page, pageSize, totalPages, totalItems, pageStart, pageEnd,
+    paginatedItems: paginatedAgentes, setPage, setPageSize,
+  } = useSortAndPaginate(filteredAgentes, {
+    defaultField: 'codigo',
+    defaultDirection: 'asc',
+    defaultPageSize: 25,
+    storageKey: 'sort:agentes',
+    getValue: (a, field) => {
+      switch (field) {
+        case 'codigo': {
+          const v = a.codigo ?? '';
+          return /^\d+$/.test(String(v)) ? parseInt(v, 10) : v;
+        }
+        case 'estado': return a.activo === false ? 0 : 1;
+        default: return a[field] ?? '';
+      }
+    },
+  });
   const [bulkDeleting, setBulkDeleting] = React.useState(false);
   const handleBulkDelete = async () => {
     setBulkDeleting(true);
@@ -361,9 +385,39 @@ const Agentes = () => {
           <div style={{ overflowX: 'auto' }}>
             {canBulkDelete && <BulkActionBar selectedCount={selectedIds.size} onDelete={handleBulkDelete} onClear={clearSelection} deleting={bulkDeleting} />}
             <table>
-              <thead><tr>{canBulkDelete && <BulkCheckboxHeader allSelected={allSelected} someSelected={someSelected} onToggle={toggleAll} />}{visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}<th>Acciones</th></tr></thead>
+              <colgroup>
+                {canBulkDelete && <col />}
+                {visibleColumns.map(col => (
+                  <col key={col.id} style={sortConfig.field === col.id ? { backgroundColor: 'hsl(var(--primary) / 0.04)' } : undefined} />
+                ))}
+                <col />
+              </colgroup>
+              <thead>
+                <tr>
+                  {canBulkDelete && <BulkCheckboxHeader allSelected={allSelected} someSelected={someSelected} onToggle={toggleAll} />}
+                  {visibleColumns.map(col => {
+                    const active = sortConfig.field === col.id;
+                    const Icon = !active ? ArrowUpDown : (sortConfig.direction === 'asc' ? ArrowUp : ArrowDown);
+                    return (
+                      <th
+                        key={col.id}
+                        onClick={() => handleSort(col.id)}
+                        style={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap', ...(active ? { backgroundColor: 'hsl(var(--primary) / 0.08)', color: 'hsl(var(--primary))' } : {}) }}
+                        title={`Ordenar por ${col.label}`}
+                        data-testid={`sort-header-agente-${col.id}`}
+                      >
+                        <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                          {col.label}
+                          <Icon size={12} style={{ marginLeft: '0.25rem', opacity: active ? 1 : 0.35, color: active ? 'hsl(var(--primary))' : undefined }} />
+                        </span>
+                      </th>
+                    );
+                  })}
+                  <th>Acciones</th>
+                </tr>
+              </thead>
               <tbody>
-                {filteredAgentes.map(agente => (
+                {paginatedAgentes.map(agente => (
                   <tr key={agente._id}>
                     {canBulkDelete && <BulkCheckboxCell id={agente._id} selected={selectedIds.has(agente._id)} onToggle={toggleOne} />}
                     {visibleColumns.map(col => {
@@ -388,6 +442,12 @@ const Agentes = () => {
                 ))}
               </tbody>
             </table>
+            <PaginationFooter
+              totalItems={totalItems} page={page} pageSize={pageSize}
+              totalPages={totalPages} pageStart={pageStart} pageEnd={pageEnd}
+              onPageChange={setPage} onPageSizeChange={setPageSize}
+              itemLabel="agentes" testIdSuffix="agentes"
+            />
           </div>
         )}
       </div>

@@ -1,9 +1,11 @@
 import React from 'react';
-import { Cog, Edit2, Trash2, Eye } from 'lucide-react';
+import { Cog, Edit2, Trash2, Eye, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell } from '../BulkActions';
+import PaginationFooter from '../PaginationFooter';
 
 const MaquinariaTable = ({
   maquinaria,
+  totalCount,
   loading,
   hasActiveFilters,
   visibleColumns,
@@ -16,12 +18,17 @@ const MaquinariaTable = ({
   onDelete,
   canBulkDelete, selectedIds, toggleOne, toggleAll, allSelected, someSelected,
   clearSelection, bulkDeleting, handleBulkDelete,
+  sortConfig, onSort,
+  page, pageSize, totalPages, totalItems, pageStart, pageEnd, onPageChange, onPageSizeChange,
 }) => {
+  const displayCount = typeof totalCount === 'number' ? totalCount : maquinaria.length;
+  const sortable = typeof onSort === 'function';
+
   return (
     <div className="card">
       <h2 className="card-title">
         <Cog size={20} style={{ display: 'inline', marginRight: '0.5rem' }} />
-        Catalogo de Maquinaria ({maquinaria.length})
+        Catalogo de Maquinaria ({displayCount})
       </h2>
       {loading ? (
         <p>Cargando maquinaria...</p>
@@ -31,10 +38,35 @@ const MaquinariaTable = ({
         <div className="table-container">
           {canBulkDelete && <BulkActionBar selectedCount={selectedIds.size} onDelete={handleBulkDelete} onClear={clearSelection} deleting={bulkDeleting} />}
           <table data-testid="maquinaria-table">
+            <colgroup>
+              {canBulkDelete && <col />}
+              {visibleColumns.map(col => (
+                <col key={col.id} style={sortable && sortConfig?.field === col.id ? { backgroundColor: 'hsl(var(--primary) / 0.04)' } : undefined} />
+              ))}
+              {(canEdit || canDelete) ? <col /> : null}
+            </colgroup>
             <thead>
               <tr>
                 {canBulkDelete && <BulkCheckboxHeader allSelected={allSelected} someSelected={someSelected} onToggle={toggleAll} />}
-                {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
+                {visibleColumns.map(col => {
+                  if (!sortable) return <th key={col.id}>{col.label}</th>;
+                  const active = sortConfig?.field === col.id;
+                  const Icon = !active ? ArrowUpDown : (sortConfig.direction === 'asc' ? ArrowUp : ArrowDown);
+                  return (
+                    <th
+                      key={col.id}
+                      onClick={() => onSort(col.id)}
+                      style={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap', ...(active ? { backgroundColor: 'hsl(var(--primary) / 0.08)', color: 'hsl(var(--primary))' } : {}) }}
+                      title={`Ordenar por ${col.label}`}
+                      data-testid={`sort-header-maquinaria-${col.id}`}
+                    >
+                      <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                        {col.label}
+                        <Icon size={12} style={{ marginLeft: '0.25rem', opacity: active ? 1 : 0.35, color: active ? 'hsl(var(--primary))' : undefined }} />
+                      </span>
+                    </th>
+                  );
+                })}
                 {(canEdit || canDelete) ? <th>Acciones</th> : null}
               </tr>
             </thead>
@@ -77,6 +109,14 @@ const MaquinariaTable = ({
               ))}
             </tbody>
           </table>
+          {typeof onPageChange === 'function' && (
+            <PaginationFooter
+              totalItems={totalItems} page={page} pageSize={pageSize}
+              totalPages={totalPages} pageStart={pageStart} pageEnd={pageEnd}
+              onPageChange={onPageChange} onPageSizeChange={onPageSizeChange}
+              itemLabel="máquinas" testIdSuffix="maquinaria"
+            />
+          )}
         </div>
       )}
     </div>

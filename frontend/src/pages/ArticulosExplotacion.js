@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, Filter, Search, X, Package, Check, XCircle, DollarSign, Settings, Eye } from 'lucide-react';
+import { Plus, Edit2, Trash2, Filter, Search, X, Package, Check, XCircle, DollarSign, Settings, Eye, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
 import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
+import useSortAndPaginate from '../hooks/useSortAndPaginate';
+import PaginationFooter from '../components/PaginationFooter';
 import { notify } from '../lib/notify';
 
 const DEFAULT_COLUMNS = [
@@ -68,6 +70,28 @@ const ArticulosExplotacion = () => {
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { handlePermissionError } = usePermissionError();
   const { columns, setColumns, showConfig, setShowConfig, save, reset, visibleColumns } = useColumnConfig('articulos_col_config', DEFAULT_COLUMNS);
+
+  // Ordenación + paginación unificada
+  const {
+    sortConfig, handleSort,
+    page, pageSize, totalPages, totalItems, pageStart, pageEnd,
+    paginatedItems: paginatedArticulos, setPage, setPageSize,
+  } = useSortAndPaginate(articulos, {
+    defaultField: 'codigo',
+    defaultDirection: 'asc',
+    defaultPageSize: 25,
+    storageKey: 'sort:articulos-explotacion',
+    getValue: (a, field) => {
+      switch (field) {
+        case 'precio': return Number(a.precio_unitario) || 0;
+        case 'iva': return Number(a.iva) || 0;
+        case 'stock': return Number(a.stock_actual) || 0;
+        case 'unidad': return a.unidad_medida || '';
+        case 'estado': return a.activo === false ? 0 : 1;
+        default: return a[field] ?? '';
+      }
+    },
+  });
   
   // Filtros
   const [searchTerm, setSearchTerm] = useState('');
@@ -458,14 +482,37 @@ const ArticulosExplotacion = () => {
         ) : (
           <div className="table-container">
             <table data-testid="articulos-table">
+              <colgroup>
+                {visibleColumns.map(col => (
+                  <col key={col.id} style={sortConfig.field === col.id ? { backgroundColor: 'hsl(var(--primary) / 0.04)' } : undefined} />
+                ))}
+                {(canEdit || canDelete) && <col />}
+              </colgroup>
               <thead>
                 <tr>
-                  {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
+                  {visibleColumns.map(col => {
+                    const active = sortConfig.field === col.id;
+                    const Icon = !active ? ArrowUpDown : (sortConfig.direction === 'asc' ? ArrowUp : ArrowDown);
+                    return (
+                      <th
+                        key={col.id}
+                        onClick={() => handleSort(col.id)}
+                        style={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap', ...(active ? { backgroundColor: 'hsl(var(--primary) / 0.08)', color: 'hsl(var(--primary))' } : {}) }}
+                        title={`Ordenar por ${col.label}`}
+                        data-testid={`sort-header-articulo-${col.id}`}
+                      >
+                        <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                          {col.label}
+                          <Icon size={12} style={{ marginLeft: '0.25rem', opacity: active ? 1 : 0.35, color: active ? 'hsl(var(--primary))' : undefined }} />
+                        </span>
+                      </th>
+                    );
+                  })}
                   {(canEdit || canDelete) && <th>Acciones</th>}
                 </tr>
               </thead>
               <tbody>
-                {articulos.map((articulo) => (
+                {paginatedArticulos.map((articulo) => (
                   <tr key={articulo._id} style={{ opacity: articulo.activo !== false ? 1 : 0.6 }}>
                     {visibleColumns.map(col => {
                       switch (col.id) {
@@ -510,6 +557,12 @@ const ArticulosExplotacion = () => {
                 ))}
               </tbody>
             </table>
+            <PaginationFooter
+              totalItems={totalItems} page={page} pageSize={pageSize}
+              totalPages={totalPages} pageStart={pageStart} pageEnd={pageEnd}
+              onPageChange={setPage} onPageSizeChange={setPageSize}
+              itemLabel="artículos" testIdSuffix="articulos"
+            />
           </div>
         )}
       </div>

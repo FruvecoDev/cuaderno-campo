@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, Search, Settings, X, Download, Leaf, Eye } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Settings, X, Download, Leaf, Eye, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
 import { useBulkSelect, BulkActionBar, BulkCheckboxHeader, BulkCheckboxCell, bulkDeleteApi } from '../components/BulkActions';
 import { useAuth } from '../contexts/AuthContext';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
+import useSortAndPaginate from '../hooks/useSortAndPaginate';
+import PaginationFooter from '../components/PaginationFooter';
 import CultivoFormModal from '../components/cultivos/CultivoFormModal';
 import '../App.css';
 import { notify } from '../lib/notify';
@@ -231,6 +233,28 @@ const Cultivos = () => {
   });
 
   const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(filteredCultivos);
+
+  // Ordenación + paginación unificada
+  const {
+    sortConfig, handleSort,
+    page, pageSize, totalPages, totalItems, pageStart, pageEnd,
+    paginatedItems: paginatedCultivos, setPage, setPageSize,
+  } = useSortAndPaginate(filteredCultivos, {
+    defaultField: 'codigo_cultivo',
+    defaultDirection: 'asc',
+    defaultPageSize: 25,
+    storageKey: 'sort:cultivos',
+    getValue: (c, field) => {
+      switch (field) {
+        case 'codigo_cultivo': {
+          const v = c.codigo_cultivo ?? '';
+          return /^\d+$/.test(String(v)) ? parseInt(v, 10) : v;
+        }
+        case 'estado': return c.activo === false ? 0 : 1;
+        default: return c[field] ?? '';
+      }
+    },
+  });
   const [bulkDeleting, setBulkDeleting] = React.useState(false);
   const handleBulkDelete = async () => {
     setBulkDeleting(true);
@@ -344,15 +368,39 @@ const Cultivos = () => {
           {canBulkDelete && <BulkActionBar selectedCount={selectedIds.size} onDelete={handleBulkDelete} onClear={clearSelection} deleting={bulkDeleting} />}
           <div style={{ overflowX: 'auto' }}>
             <table>
+              <colgroup>
+                {canBulkDelete && <col />}
+                {visibleColumns.map(col => (
+                  <col key={col.id} style={sortConfig.field === col.id ? { backgroundColor: 'hsl(var(--primary) / 0.04)' } : undefined} />
+                ))}
+                {(canEdit || canDelete) ? <col /> : null}
+              </colgroup>
               <thead>
                 <tr>
                   {canBulkDelete && <BulkCheckboxHeader allSelected={allSelected} someSelected={someSelected} onToggle={toggleAll} />}
-                  {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
+                  {visibleColumns.map(col => {
+                    const active = sortConfig.field === col.id;
+                    const Icon = !active ? ArrowUpDown : (sortConfig.direction === 'asc' ? ArrowUp : ArrowDown);
+                    return (
+                      <th
+                        key={col.id}
+                        onClick={() => handleSort(col.id)}
+                        style={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap', ...(active ? { backgroundColor: 'hsl(var(--primary) / 0.08)', color: 'hsl(var(--primary))' } : {}) }}
+                        title={`Ordenar por ${col.label}`}
+                        data-testid={`sort-header-cultivo-${col.id}`}
+                      >
+                        <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                          {col.label}
+                          <Icon size={12} style={{ marginLeft: '0.25rem', opacity: active ? 1 : 0.35, color: active ? 'hsl(var(--primary))' : undefined }} />
+                        </span>
+                      </th>
+                    );
+                  })}
                   {(canEdit || canDelete) ? <th>Acciones</th> : null}
                 </tr>
               </thead>
               <tbody>
-                {filteredCultivos.map((cultivo) => (
+                {paginatedCultivos.map((cultivo) => (
                   <tr key={cultivo._id}>
                     {canBulkDelete && <BulkCheckboxCell id={cultivo._id} selected={selectedIds.has(cultivo._id)} onToggle={toggleOne} />}
                     {visibleColumns.map(col => {
@@ -404,6 +452,12 @@ const Cultivos = () => {
               </tbody>
             </table>
           </div>
+          <PaginationFooter
+            totalItems={totalItems} page={page} pageSize={pageSize}
+            totalPages={totalPages} pageStart={pageStart} pageEnd={pageEnd}
+            onPageChange={setPage} onPageSizeChange={setPageSize}
+            itemLabel="cultivos" testIdSuffix="cultivos"
+          />
           </>
         )}
       </div>
