@@ -746,3 +746,11 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - **Verificación smoke test**: 4/4 rutas sin compile errors, 29 sort headers totales presentes, localStorage inicializado con defaults correctos, PaginationFooter visible en todas. Lint 0 issues.
 - **Cobertura del sistema**: **16 módulos** con `useSortAndPaginate` (12 previos + 4 nuevos).
 - **Skipped por complejidad estructural** (para otra fase): Fincas (agrupado por provincia con secciones expandibles), Parcelas (mapas embebidos), Clientes (tabla+form monolítico), Recomendaciones (tabla dentro de modal).
+
+### Fincas: sort intra-provincia (2026-02) - DONE
+- **Fincas.js**: nuevo selector "Ordenar dentro de cada provincia" en la cabecera del listado (Nombre / Población / Superficie / Referencia SIGPAC) + botón ASC/DESC.
+- **Patrón nuevo**: cada grupo de provincia se ordena independientemente según el mismo criterio (aplicación uniforme). La estructura agrupada por provincia se mantiene intacta (colapsable/expandible).
+- **Persistencia**: localStorage key `sort:fincas` con `{field, direction}`. Reconstruye la preferencia del usuario al recargar. Protegido con try/catch para modo incógnito/JSON corrupto.
+- **Sort integrado en `fincasAgrupadas` useMemo**: aplica la comparación al array de cada grupo antes de renderizar. Numérico para superficie, string para nombre/población, concatenación para SIGPAC (poligono-parcela-subparcela).
+- **Verificación**: compile OK, selector visible, cambio a "Superficie DESC" persiste correctamente en localStorage. Screenshot preview confirma UX.
+- **Cobertura del sistema**: **17 módulos** con ordenación unificada (16 con hook + Fincas con patrón intra-grupo).

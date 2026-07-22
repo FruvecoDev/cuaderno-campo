@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import api, { BACKEND_URL } from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit2, Trash2, X, MapPin, Search, Home, ChevronDown, ChevronUp, Layers, Loader2, ExternalLink, CheckCircle, AlertCircle, Link2, Unlink, Map, Eye } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, MapPin, Search, Home, ChevronDown, ChevronUp, Layers, Loader2, ExternalLink, CheckCircle, AlertCircle, Link2, Unlink, Map, Eye, ArrowUp, ArrowDown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import MapaSigpac from '../components/MapaSigpac';
 import ProvinciaSelect from '../components/ProvinciaSelect';
@@ -233,7 +233,31 @@ const Fincas = () => {
     provincias: [...new Set(fincas.map(f => f.provincia).filter(Boolean))].sort()
   }), [fincas]);
 
-  // Agrupar fincas por provincia
+  // Sort dentro de cada grupo de provincia (persistido por usuario).
+  // Cada provincia se ordena de forma independiente pero con el mismo criterio.
+  const [fincasSort, setFincasSort] = useState(() => {
+    try {
+      const raw = window.localStorage.getItem('sort:fincas');
+      if (raw) return JSON.parse(raw);
+    } catch (_e) { /* corrupto */ }
+    return { field: 'nombre', direction: 'asc' };
+  });
+  useEffect(() => {
+    try { window.localStorage.setItem('sort:fincas', JSON.stringify(fincasSort)); } catch (_e) { /* quota */ }
+  }, [fincasSort]);
+  const toggleFincasSortDirection = () => setFincasSort(prev => ({ ...prev, direction: prev.direction === 'asc' ? 'desc' : 'asc' }));
+
+  const getFincaSortValue = (f, field) => {
+    switch (field) {
+      case 'nombre': return (f.denominacion || f.nombre || '').toLowerCase();
+      case 'poblacion': return (f.poblacion || '').toLowerCase();
+      case 'hectareas': return Number(f.hectareas) || 0;
+      case 'sigpac': return `${f.poligono || ''}-${f.parcela || ''}-${f.subparcela || ''}`;
+      default: return f[field] ?? '';
+    }
+  };
+
+  // Agrupar fincas por provincia (con sort intra-grupo aplicado)
   const fincasAgrupadas = useMemo(() => {
     const grupos = {};
     filteredFincas.forEach(finca => {
@@ -243,6 +267,22 @@ const Fincas = () => {
       }
       grupos[provincia].push(finca);
     });
+    // Ordenar cada grupo según fincasSort
+    const { field, direction } = fincasSort;
+    Object.keys(grupos).forEach(prov => {
+      grupos[prov].sort((a, b) => {
+        const va = getFincaSortValue(a, field);
+        const vb = getFincaSortValue(b, field);
+        if (typeof va === 'number' && typeof vb === 'number') {
+          return direction === 'asc' ? va - vb : vb - va;
+        }
+        const sa = String(va).toLowerCase();
+        const sb = String(vb).toLowerCase();
+        if (sa < sb) return direction === 'asc' ? -1 : 1;
+        if (sa > sb) return direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    });
     // Ordenar provincias alfabéticamente, "Sin provincia" al final
     const provinciasOrdenadas = Object.keys(grupos).sort((a, b) => {
       if (a === 'Sin provincia') return 1;
@@ -250,7 +290,7 @@ const Fincas = () => {
       return a.localeCompare(b);
     });
     return { grupos, provinciasOrdenadas };
-  }, [filteredFincas]);
+  }, [filteredFincas, fincasSort]);
 
   const resetForm = () => {
     setFormData(emptyFormData);
@@ -1068,10 +1108,40 @@ const Fincas = () => {
 
       {/* Lista de Fincas agrupadas por provincia */}
       <div className="card">
-        <h3 style={{ fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Layers size={20} />
-          Listado de Fincas ({filteredFincas.length})
-        </h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <h3 style={{ fontWeight: '600', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Layers size={20} />
+            Listado de Fincas ({filteredFincas.length})
+          </h3>
+          {/* Sort intra-provincia */}
+          <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', whiteSpace: 'nowrap' }}>
+              Ordenar dentro de cada provincia:
+            </span>
+            <select
+              className="form-select"
+              value={fincasSort.field}
+              onChange={(e) => setFincasSort(prev => ({ ...prev, field: e.target.value }))}
+              style={{ minWidth: '160px', fontSize: '0.8rem', padding: '0.25rem 0.4rem' }}
+              data-testid="sort-field-fincas"
+            >
+              <option value="nombre">Nombre</option>
+              <option value="poblacion">Población</option>
+              <option value="hectareas">Superficie</option>
+              <option value="sigpac">Referencia SIGPAC</option>
+            </select>
+            <button
+              type="button"
+              className="btn btn-sm btn-secondary"
+              onClick={toggleFincasSortDirection}
+              title={fincasSort.direction === 'asc' ? 'Ascendente' : 'Descendente'}
+              data-testid="sort-direction-fincas"
+              style={{ padding: '0.25rem 0.4rem' }}
+            >
+              {fincasSort.direction === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+            </button>
+          </div>
+        </div>
         
         {loading ? (
           <p>Cargando...</p>
