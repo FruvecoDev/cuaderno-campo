@@ -666,3 +666,9 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - **Bypass de emergencia**: `git commit --no-verify -m "..."` (uso restringido).
 - **Cómo escalar**: al migrar un módulo nuevo a strict, editar `entry` en `.pre-commit-config.yaml` + regex de `files:` + `STRICT_MODULES` en `test_mypy_strict.py`.
 - **Verificación**: `pre-commit run mypy-strict --all-files` → Passed. Test de negación con error de tipo inyectado → Failed correctamente (bloquea commit). Restaurado y vuelve a Passed.
+
+### Mapa de Parcelas + Consulta SIGPAC: ordenación (+ paginación en Mapas) (2026-02) - DONE
+- **Mapas.js (Mapa de Parcelas)**: selector "Ordenar" (Código / Cultivo / Proveedor / Finca / Superficie) + botón toggle ASC/DESC en el panel lateral. `PaginationFooter` con default 25/pág aplicado a la lista "Con ubicación" (la lista principal larga). "Sin ubicación" queda fuera de paginación al ser normalmente corta y de acción rápida.
+- **ConsultaSIGPAC.js**: selector "Ordenar recintos" (Nº Recinto / Superficie / Uso SIGPAC / Coef. Regadío) + ASC/DESC, condicionado a `sortedRecintos.length > 1` para no aparecer sin resultados. Sin paginación (resultados típicos < 10 recintos por consulta).
+- **testids**: `sort-field-mapas`, `sort-direction-mapas`, `pagination-footer-mapas`, `sort-field-sigpac`, `sort-direction-sigpac`.
+- **Verificación**: lint ESLint 0 issues; smoke test preview OK (page rendering, selectores presentes, toggle direction funciona, paginación calcula 1-1 de 1); Consulta SIGPAC renderiza sin compile errors.

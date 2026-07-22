@@ -3,9 +3,10 @@ import { MapContainer, TileLayer, Marker, Popup, Polygon, useMap, FeatureGroup }
 import { EditControl } from 'react-leaflet-draw';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
-import { Map, Layers, MapPin, Edit2, Save, X, Maximize2, List, Filter, Leaf, Ruler, Pentagon, Trash2, Check, Upload, Search, Navigation, Eye, Camera } from 'lucide-react';
+import { Map, Layers, MapPin, Edit2, Save, X, Maximize2, List, Filter, Leaf, Ruler, Pentagon, Trash2, Check, Upload, Search, Navigation, Eye, Camera, ArrowUp, ArrowDown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import GeoImportModal from '../components/GeoImportModal';
+import PaginationFooter, { usePagination } from '../components/PaginationFooter';
 import html2canvas from 'html2canvas';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
@@ -478,6 +479,45 @@ const Mapas = () => {
   );
   const parcelasConPoligono = filteredParcelas.filter(p => p.recintos?.[0]?.geometria?.length > 0);
 
+  // Ordenación del panel lateral (aplica a "Con ubicación")
+  const [sortField, setSortField] = useState('codigo_plantacion');
+  const [sortDirection, setSortDirection] = useState('asc');
+  const toggleSortDirection = () => setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
+
+  const sortedParcelasConUbicacion = useMemo(() => {
+    const arr = [...parcelasConUbicacion];
+    const getValue = (p) => {
+      switch (sortField) {
+        case 'codigo_plantacion': return p.codigo_plantacion || '';
+        case 'cultivo': return p.cultivo || '';
+        case 'proveedor': return p.proveedor || '';
+        case 'finca': return p.finca || '';
+        case 'superficie_total': return Number(p.superficie_total) || 0;
+        default: return p[sortField] ?? '';
+      }
+    };
+    arr.sort((a, b) => {
+      const va = getValue(a);
+      const vb = getValue(b);
+      if (typeof va === 'number' && typeof vb === 'number') {
+        return sortDirection === 'asc' ? va - vb : vb - va;
+      }
+      const sa = String(va).toLowerCase();
+      const sb = String(vb).toLowerCase();
+      if (sa < sb) return sortDirection === 'asc' ? -1 : 1;
+      if (sa > sb) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return arr;
+  }, [parcelasConUbicacion, sortField, sortDirection]);
+
+  const {
+    page: mapasPage, pageSize: mapasPageSize, totalPages: mapasTotalPages,
+    totalItems: mapasTotalItems, pageStart: mapasPageStart, pageEnd: mapasPageEnd,
+    paginatedItems: paginatedParcelasConUbicacion,
+    setPage: setMapasPage, setPageSize: setMapasPageSize,
+  } = usePagination(sortedParcelasConUbicacion, 25);
+
   // Get unique cultivos / proveedores / contratos for filters
   const cultivosUnicos = [...new Set(parcelas.map(p => p.cultivo).filter(Boolean))];
   const proveedoresUnicos = [...new Set(parcelas.map(p => p.proveedor).filter(Boolean))].sort();
@@ -874,9 +914,37 @@ const Mapas = () => {
         {/* List panel */}
         {showList && (
           <div className="card" style={{ padding: '1rem', overflowY: 'auto' }}>
-            <h3 style={{ marginBottom: '1rem', fontWeight: '600', fontSize: '0.9rem' }}>
+            <h3 style={{ marginBottom: '0.75rem', fontWeight: '600', fontSize: '0.9rem' }}>
               Parcelas ({filteredParcelas.length})
             </h3>
+
+            {/* Sort selector */}
+            <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.75rem', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', whiteSpace: 'nowrap' }}>Ordenar:</span>
+              <select
+                className="form-select"
+                value={sortField}
+                onChange={(e) => setSortField(e.target.value)}
+                style={{ flex: 1, minWidth: '110px', fontSize: '0.8rem', padding: '0.25rem 0.4rem' }}
+                data-testid="sort-field-mapas"
+              >
+                <option value="codigo_plantacion">Código</option>
+                <option value="cultivo">Cultivo</option>
+                <option value="proveedor">Proveedor</option>
+                <option value="finca">Finca</option>
+                <option value="superficie_total">Superficie</option>
+              </select>
+              <button
+                type="button"
+                className="btn btn-sm btn-secondary"
+                onClick={toggleSortDirection}
+                title={sortDirection === 'asc' ? 'Ascendente' : 'Descendente'}
+                data-testid="sort-direction-mapas"
+                style={{ padding: '0.25rem 0.4rem' }}
+              >
+                {sortDirection === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+              </button>
+            </div>
             
             {parcelasSinUbicacion.length > 0 && (
               <div style={{ marginBottom: '1rem' }}>
@@ -922,7 +990,7 @@ const Mapas = () => {
             <h4 style={{ fontSize: '0.8rem', color: 'hsl(var(--primary))', marginBottom: '0.5rem' }}>
               Con ubicación ({parcelasConUbicacion.length})
             </h4>
-            {parcelasConUbicacion.map(p => {
+            {paginatedParcelasConUbicacion.map(p => {
               const hasPolygon = p.recintos?.[0]?.geometria?.length > 0;
               return (
                 <div 
@@ -1011,6 +1079,13 @@ const Mapas = () => {
                 </div>
               );
             })}
+            <PaginationFooter
+              totalItems={mapasTotalItems} page={mapasPage} pageSize={mapasPageSize}
+              totalPages={mapasTotalPages} pageStart={mapasPageStart} pageEnd={mapasPageEnd}
+              onPageChange={setMapasPage} onPageSizeChange={setMapasPageSize}
+              itemLabel="parcelas" testIdSuffix="mapas"
+              pageSizeOptions={[10, 25, 50, 100, 200]}
+            />
           </div>
         )}
       </div>

@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { MapContainer, TileLayer, WMSTileLayer, Polygon, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import {
   Search, MapPin, Download, CheckCircle, AlertCircle, Layers, Map,
   ChevronDown, ChevronUp, Info, ExternalLink, Loader2, Eye, EyeOff, Maximize2, Minimize2,
-  MousePointer, X
+  MousePointer, X, ArrowUp, ArrowDown
 } from 'lucide-react';
 import api from '../services/api';
 import 'leaflet/dist/leaflet.css';
@@ -105,6 +105,38 @@ export default function ConsultaSIGPAC() {
   const [clickInfo, setClickInfo] = useState(null);
   const [clickLoading, setClickLoading] = useState(false);
   const [clickPolygon, setClickPolygon] = useState(null);
+
+  // Ordenación de la lista de recintos
+  const [sortField, setSortField] = useState('recinto');
+  const [sortDirection, setSortDirection] = useState('asc');
+  const toggleSortDirection = () => setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
+
+  const sortedRecintos = useMemo(() => {
+    if (!results?.data) return [];
+    const arr = [...results.data];
+    const getValue = (r) => {
+      switch (sortField) {
+        case 'recinto': return Number(r.recinto) || 0;
+        case 'superficie_ha': return Number(r.superficie_ha) || 0;
+        case 'uso_sigpac': return r.uso_sigpac || '';
+        case 'coef_regadio': return Number(r.coef_regadio) || 0;
+        default: return r[sortField] ?? '';
+      }
+    };
+    arr.sort((a, b) => {
+      const va = getValue(a);
+      const vb = getValue(b);
+      if (typeof va === 'number' && typeof vb === 'number') {
+        return sortDirection === 'asc' ? va - vb : vb - va;
+      }
+      const sa = String(va).toLowerCase();
+      const sb = String(vb).toLowerCase();
+      if (sa < sb) return sortDirection === 'asc' ? -1 : 1;
+      if (sa > sb) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return arr;
+  }, [results, sortField, sortDirection]);
 
   const handleSearch = async () => {
     if (!form.provincia || !form.municipio || !form.poligono || !form.parcela) {
@@ -613,8 +645,37 @@ export default function ConsultaSIGPAC() {
                 </div>
               )}
 
+              {/* Sort selector para recintos */}
+              {sortedRecintos.length > 1 && (
+                <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', margin: '0.5rem 0' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', whiteSpace: 'nowrap' }}>Ordenar recintos:</span>
+                  <select
+                    className="form-select"
+                    value={sortField}
+                    onChange={(e) => setSortField(e.target.value)}
+                    style={{ minWidth: '150px', fontSize: '0.8rem', padding: '0.25rem 0.4rem' }}
+                    data-testid="sort-field-sigpac"
+                  >
+                    <option value="recinto">Nº Recinto</option>
+                    <option value="superficie_ha">Superficie</option>
+                    <option value="uso_sigpac">Uso SIGPAC</option>
+                    <option value="coef_regadio">Coef. Regadío</option>
+                  </select>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-secondary"
+                    onClick={toggleSortDirection}
+                    title={sortDirection === 'asc' ? 'Ascendente' : 'Descendente'}
+                    data-testid="sort-direction-sigpac"
+                    style={{ padding: '0.25rem 0.4rem' }}
+                  >
+                    {sortDirection === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+                  </button>
+                </div>
+              )}
+
               {/* Individual recintos */}
-              {results.data?.map((recinto, idx) => (
+              {sortedRecintos.map((recinto, idx) => (
                 <div key={idx} className="card" style={{ padding: '0.75rem 1rem', borderLeft: `4px solid ${recinto.uso_sigpac?.startsWith('TA') ? '#4caf50' : '#2196f3'}` }} data-testid={`recinto-${idx}`}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
