@@ -1,9 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, Edit2, Trash2, Download, CheckCircle, Clock, Archive, Mail, History } from 'lucide-react';
+import { FileText, Edit2, Trash2, Download, CheckCircle, Clock, Archive, Mail, History, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 
 const EvaluacionesTable = ({
   evaluaciones,
+  totalCount,
   loading,
   canEdit,
   canDelete,
@@ -14,14 +15,43 @@ const EvaluacionesTable = ({
   onEdit,
   onDelete,
   getEstadoBadge,
+  sortConfig,
+  onSort,
 }) => {
   const { t } = useTranslation();
+
+  const sortable = typeof onSort === 'function';
+  const displayCount = typeof totalCount === 'number' ? totalCount : evaluaciones.length;
+
+  const renderSortIcon = (field) => {
+    if (!sortConfig || sortConfig.field !== field) {
+      return <ArrowUpDown size={12} style={{ opacity: 0.35, marginLeft: '0.25rem' }} />;
+    }
+    return sortConfig.direction === 'asc'
+      ? <ArrowUp size={12} style={{ marginLeft: '0.25rem', color: 'hsl(var(--primary))' }} />
+      : <ArrowDown size={12} style={{ marginLeft: '0.25rem', color: 'hsl(var(--primary))' }} />;
+  };
+
+  const th = (field, label) => (
+    <th
+      key={field}
+      onClick={sortable ? () => onSort(field) : undefined}
+      style={sortable ? { cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' } : undefined}
+      title={sortable ? `Ordenar por ${label}` : undefined}
+      data-testid={`sort-header-evaluacion-${field}`}
+    >
+      <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+        {label}
+        {sortable && renderSortIcon(field)}
+      </span>
+    </th>
+  );
 
   return (
     <div className="card">
       <h2 className="card-title">
         <FileText size={20} style={{ display: 'inline', marginRight: '0.5rem' }} />
-        {t('evaluations.evaluationList')} ({evaluaciones.length})
+        {t('evaluations.evaluationList')} ({displayCount})
       </h2>
       {loading ? (
         <p>{t('common.loading')}</p>
@@ -32,13 +62,13 @@ const EvaluacionesTable = ({
           <table data-testid="evaluaciones-table">
             <thead>
               <tr>
-                <th>{t('parcels.code')}</th>
-                <th>{t('suppliers.title')}</th>
-                <th>{t('crops.title')}</th>
-                <th>{t('contracts.campaign')}</th>
-                <th>{t('evaluations.startDate')}</th>
-                <th>{t('evaluations.technician')}</th>
-                <th>{t('common.status')}</th>
+                {th('codigo_plantacion', t('parcels.code'))}
+                {th('proveedor', t('suppliers.title'))}
+                {th('cultivo', t('crops.title'))}
+                {th('campana', t('contracts.campaign'))}
+                {th('fecha_inicio', t('evaluations.startDate'))}
+                {th('tecnico', t('evaluations.technician'))}
+                {th('estado', t('common.status'))}
                 {(canEdit || canDelete) ? <th>{t('common.actions')}</th> : null}
               </tr>
             </thead>
