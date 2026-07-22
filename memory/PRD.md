@@ -672,3 +672,12 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - **ConsultaSIGPAC.js**: selector "Ordenar recintos" (Nº Recinto / Superficie / Uso SIGPAC / Coef. Regadío) + ASC/DESC, condicionado a `sortedRecintos.length > 1` para no aparecer sin resultados. Sin paginación (resultados típicos < 10 recintos por consulta).
 - **testids**: `sort-field-mapas`, `sort-direction-mapas`, `pagination-footer-mapas`, `sort-field-sigpac`, `sort-direction-sigpac`.
 - **Verificación**: lint ESLint 0 issues; smoke test preview OK (page rendering, selectores presentes, toggle direction funciona, paginación calcula 1-1 de 1); Consulta SIGPAC renderiza sin compile errors.
+
+### Hook reutilizable useSortAndPaginate + persistencia en localStorage (2026-02) - DONE
+- **`/app/frontend/src/hooks/useSortAndPaginate.js`**: hook unificado que combina sort (con soporte para ambos patrones: cabeceras clicables `{sortConfig, handleSort}` y dropdown `{sortField, setSortField, sortDirection, toggleSortDirection}`) + `usePagination` internamente. Config: `defaultField`, `defaultDirection`, `defaultPageSize`, `getValue`, `storageKey`.
+- **Persistencia por usuario**: si se pasa `storageKey`, el hook guarda `{field, direction}` en `localStorage`. Al recargar la página, la preferencia del usuario se restaura automáticamente. Protegido con try/catch para modo incógnito/quota.
+- **Migraciones aplicadas** (proof-of-concept):
+  - `Evaluaciones.js`: `storageKey: 'sort:evaluaciones'`. ~40 líneas de sort+pagination duplicadas eliminadas → 8 líneas de hook.
+  - `CuadernoCampo.js`: `storageKey: 'sort:cuaderno-campo'` con `getValue` custom para casting numérico de `superficie_total`. Mismo ahorro de líneas.
+- **Verificación**: click en cabecera de Evaluaciones → localStorage guarda `{"field":"proveedor","direction":"asc"}`. Cambio en dropdown de Cuaderno de Campo → guarda `{"field":"cultivo","direction":"asc"}`. Recarga preserva la elección. Lint 0 errores. Smoke screenshot preview OK.
+- **Backlog progresivo**: quedan pendientes de migrar al hook: Proveedores, Contratos, Tratamientos, Visitas, Tareas, Cosechas, Mapas.js, ConsultaSIGPAC. Migración segura archivo por archivo (sin regresiones porque el hook expone ambas interfaces).

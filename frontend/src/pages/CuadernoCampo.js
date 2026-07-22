@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { FileText, Download, Loader2, Search, Leaf, MapPin, Calendar, Package, Droplets, Eye, ClipboardList, TrendingUp, Mail, History, ArrowUp, ArrowDown } from 'lucide-react';
@@ -7,7 +7,8 @@ import { usePermissions } from '../utils/permissions';
 import { useBulkSelect, BulkActionBar, bulkDeleteApi } from '../components/BulkActions';
 import SendEmailModal from '../components/evaluaciones/SendEmailModal';
 import EmailHistoryModal from '../components/evaluaciones/EmailHistoryModal';
-import PaginationFooter, { usePagination } from '../components/PaginationFooter';
+import PaginationFooter from '../components/PaginationFooter';
+import useSortAndPaginate from '../hooks/useSortAndPaginate';
 import '../App.css';
 import { notify } from '../lib/notify';
 
@@ -106,43 +107,21 @@ const CuadernoCampo = () => {
   const cultivosUnicos = [...new Set(parcelas.map(p => p.cultivo).filter(Boolean))].sort();
   const proveedoresUnicos = [...new Set(contratos.map(c => c.proveedor || c.cliente).filter(Boolean))].sort();
 
-  // Ordenación de la lista de parcelas
-  const [sortField, setSortField] = useState('codigo_plantacion');
-  const [sortDirection, setSortDirection] = useState('asc');
-  const toggleSortDirection = () => setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
-
-  const sortedParcelas = useMemo(() => {
-    const arr = [...filteredParcelas];
-    const getValue = (p) => {
-      switch (sortField) {
-        case 'codigo_plantacion': return p.codigo_plantacion || '';
-        case 'cultivo': return p.cultivo || '';
-        case 'proveedor': return p.proveedor || '';
-        case 'campana': return p.campana || '';
-        case 'superficie_total': return Number(p.superficie_total) || 0;
-        default: return p[sortField] ?? '';
-      }
-    };
-    arr.sort((a, b) => {
-      const va = getValue(a);
-      const vb = getValue(b);
-      if (typeof va === 'number' && typeof vb === 'number') {
-        return sortDirection === 'asc' ? va - vb : vb - va;
-      }
-      const sa = String(va).toLowerCase();
-      const sb = String(vb).toLowerCase();
-      if (sa < sb) return sortDirection === 'asc' ? -1 : 1;
-      if (sa > sb) return sortDirection === 'asc' ? 1 : -1;
-      return 0;
-    });
-    return arr;
-  }, [filteredParcelas, sortField, sortDirection]);
-
-  // Paginación
+  // Ordenación + paginación unificada
   const {
+    sortField, setSortField, sortDirection, toggleSortDirection,
     page, pageSize, totalPages, totalItems, pageStart, pageEnd,
     paginatedItems: paginatedParcelas, setPage, setPageSize,
-  } = usePagination(sortedParcelas, 20);
+  } = useSortAndPaginate(filteredParcelas, {
+    defaultField: 'codigo_plantacion',
+    defaultDirection: 'asc',
+    defaultPageSize: 20,
+    storageKey: 'sort:cuaderno-campo',
+    getValue: (p, field) => {
+      if (field === 'superficie_total') return Number(p.superficie_total) || 0;
+      return p[field] ?? '';
+    },
+  });
 
   const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(paginatedParcelas);
   const [bulkDeleting, setBulkDeleting] = useState(false);

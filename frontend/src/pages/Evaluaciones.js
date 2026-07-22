@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +12,8 @@ import EvaluacionesTable from '../components/evaluaciones/EvaluacionesTable';
 import EvaluacionesForm from '../components/evaluaciones/EvaluacionesForm';
 import SendEmailModal from '../components/evaluaciones/SendEmailModal';
 import EmailHistoryModal from '../components/evaluaciones/EmailHistoryModal';
-import PaginationFooter, { usePagination } from '../components/PaginationFooter';
+import PaginationFooter from '../components/PaginationFooter';
+import useSortAndPaginate from '../hooks/useSortAndPaginate';
 import { DEFAULT_IMPRESOS, mergeImpresos } from '../components/evaluaciones/EvaluacionesImpresos';
 import '../App.css';
 import { notify } from '../lib/notify';
@@ -233,43 +234,17 @@ const Evaluaciones = () => {
     return true;
   });
 
-  // Ordenación por columnas
-  const [sortConfig, setSortConfig] = useState({ field: 'fecha_inicio', direction: 'desc' });
-  const handleSort = (field) => {
-    setSortConfig(prev => (
-      prev.field === field
-        ? { field, direction: prev.direction === 'asc' ? 'desc' : 'asc' }
-        : { field, direction: 'asc' }
-    ));
-  };
-
-  const sortedEvaluaciones = useMemo(() => {
-    const { field, direction } = sortConfig;
-    if (!field) return filteredEvaluaciones;
-    const arr = [...filteredEvaluaciones];
-    arr.sort((a, b) => {
-      const va = (a[field] ?? '');
-      const vb = (b[field] ?? '');
-      // Ordenación numérica cuando ambos son numéricos
-      const na = Number(va);
-      const nb = Number(vb);
-      if (!Number.isNaN(na) && !Number.isNaN(nb) && va !== '' && vb !== '') {
-        return direction === 'asc' ? na - nb : nb - na;
-      }
-      const sa = String(va).toLowerCase();
-      const sb = String(vb).toLowerCase();
-      if (sa < sb) return direction === 'asc' ? -1 : 1;
-      if (sa > sb) return direction === 'asc' ? 1 : -1;
-      return 0;
-    });
-    return arr;
-  }, [filteredEvaluaciones, sortConfig]);
-
-  // Paginación
+  // Ordenación + paginación unificada
   const {
+    sortConfig, handleSort,
     page, pageSize, totalPages, totalItems, pageStart, pageEnd,
     paginatedItems: paginatedEvaluaciones, setPage, setPageSize,
-  } = usePagination(sortedEvaluaciones, 20);
+  } = useSortAndPaginate(filteredEvaluaciones, {
+    defaultField: 'fecha_inicio',
+    defaultDirection: 'desc',
+    defaultPageSize: 20,
+    storageKey: 'sort:evaluaciones',
+  });
 
   const clearFilters = () => setFilters({ parcela: '', cultivo: '', proveedor: '', campana: '', contrato: '', estado: '' });
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
