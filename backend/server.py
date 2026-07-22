@@ -97,7 +97,7 @@ app.add_middleware(
 
 # Startup/Shutdown events
 @app.on_event("startup")
-async def startup_event():
+async def startup_event() -> None:
     init_scheduler()
     # Initialize RRHH routes with database
     set_rrhh_db(db)
@@ -113,7 +113,7 @@ async def startup_event():
         await db['categorias_articulo'].insert_many([{"nombre": n, "created_at": dt.now()} for n in cats])
 
 @app.on_event("shutdown")
-async def shutdown_event():
+async def shutdown_event() -> None:
     shutdown_scheduler()
 
 # Include routers - Core modules
@@ -182,13 +182,13 @@ app.include_router(system_router)
 app.include_router(bulk_router)
 
 # Mount static files for uploaded images
-uploads_dir = "/app/uploads"
+uploads_dir: str = "/app/uploads"
 os.makedirs(uploads_dir, exist_ok=True)
 app.mount("/api/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 
 
 @app.get("/")
-async def root():
+async def root() -> dict:
     return {
         "message": "FRUVECO - Agricultural Management System V1 API",
         "version": "1.0.0",

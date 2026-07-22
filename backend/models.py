@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 from datetime import datetime
 from bson import ObjectId
 
@@ -10,13 +10,13 @@ class PyObjectId(ObjectId):
         yield cls.validate
 
     @classmethod
-    def validate(cls, v):
+    def validate(cls, v: Any) -> ObjectId:
         if not ObjectId.is_valid(v):
             raise ValueError("Invalid ObjectId")
         return ObjectId(v)
 
     @classmethod
-    def __get_pydantic_json_schema__(cls, _schema_generator):
+    def __get_pydantic_json_schema__(cls, _schema_generator: Any) -> Dict[str, str]:
         return {"type": "string"}
 
 # ============================================================================
