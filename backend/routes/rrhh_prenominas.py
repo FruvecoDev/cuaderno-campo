@@ -1,7 +1,7 @@
 """
 RRHH - Gestión de Prenóminas
 """
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
 from typing import Optional
 from datetime import datetime
@@ -9,8 +9,13 @@ from bson import ObjectId
 import io
 
 from utils.formatters import format_number_es
+from routes_auth import get_current_user
 
-router = APIRouter(prefix="/api/rrhh", tags=["RRHH - Prenóminas"])
+router = APIRouter(
+    prefix="/api/rrhh",
+    tags=["RRHH - Prenóminas"],
+    dependencies=[Depends(get_current_user)],
+)
 
 db = None
 

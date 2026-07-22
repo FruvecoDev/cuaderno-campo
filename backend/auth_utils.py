@@ -4,8 +4,14 @@ from datetime import datetime, timedelta
 from typing import Optional
 import os
 
-# Security config
-SECRET_KEY = os.getenv("SECRET_KEY", "agricultural-secret-key-change-in-production-2025")
+# Security config — SECRET_KEY debe estar SIEMPRE definido en .env (sin fallback).
+# Si falta, la app falla al arrancar (fail-fast) en lugar de usar un valor débil predecible.
+SECRET_KEY = os.environ["SECRET_KEY"]
+if len(SECRET_KEY) < 32:
+    raise RuntimeError(
+        "SECRET_KEY es demasiado corto (<32 caracteres). "
+        "Genera uno nuevo: python3 -c 'import secrets; print(secrets.token_urlsafe(64))'"
+    )
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
 

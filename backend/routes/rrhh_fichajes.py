@@ -2,13 +2,19 @@
 RRHH - Fichajes / Control Horario
 Includes: fichajes CRUD, QR/NFC/facial fichaje, informes Excel/PDF
 """
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Optional
 from datetime import datetime, timedelta
 from bson import ObjectId
 import io
 
-router = APIRouter(prefix="/api/rrhh", tags=["RRHH - Fichajes"])
+from routes_auth import get_current_user
+
+router = APIRouter(
+    prefix="/api/rrhh",
+    tags=["RRHH - Fichajes"],
+    dependencies=[Depends(get_current_user)],
+)
 
 db = None
 

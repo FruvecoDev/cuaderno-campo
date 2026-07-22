@@ -1,8 +1,10 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import Optional
 from datetime import datetime, timedelta
 from bson import ObjectId
+import os
+import secrets
 
 from models_auth import UserCreate, UserLogin, UserInDB, Token, UserRole, ALL_MENU_ITEMS, DEFAULT_MENU_PERMISSIONS, PERMISSION_PROFILES
 from auth_utils import (
@@ -430,35 +432,60 @@ async def vincular_empleado(
 
 
 @router.post("/init-admin")
-async def initialize_admin():
-    """Initialize first admin user - only works if no users exist"""
-    # Check if any users exist
+async def initialize_admin(request: Request):
+    """
+    Initialize first admin — SÓLO funciona si:
+      1. No existe ningún usuario en la base de datos.
+      2. La cabecera `X-Init-Token` coincide con `INIT_ADMIN_TOKEN` en .env.
+
+    Requiere en .env:
+      - INIT_ADMIN_TOKEN (32+ chars, secreto de un solo uso)
+      - INITIAL_ADMIN_EMAIL (opcional, default: admin@fruveco.com)
+      - INITIAL_ADMIN_PASSWORD (obligatorio, debe cambiarse tras primer login)
+
+    Nunca devuelve credenciales en el body — solo confirma la creación.
+    """
+    # Guard 1: no debe existir ningún usuario
     user_count = await users_collection.count_documents({})
     if user_count > 0:
-        raise HTTPException(status_code=400, detail="Admin already exists")
-    
-    # Create default admin with permissions from RBAC matrix
+        raise HTTPException(status_code=403, detail="Admin ya inicializado")
+
+    # Guard 2: token de un solo uso, distinto de SECRET_KEY
+    expected_token = os.environ.get("INIT_ADMIN_TOKEN")
+    if not expected_token or len(expected_token) < 32:
+        raise HTTPException(
+            status_code=503,
+            detail="Servicio no disponible: INIT_ADMIN_TOKEN no configurado en el servidor",
+        )
+    provided_token = request.headers.get("X-Init-Token", "")
+    if not secrets.compare_digest(provided_token, expected_token):
+        raise HTTPException(status_code=403, detail="Token de inicialización inválido")
+
+    # Guard 3: password obligatoria por env (no hardcoded)
+    initial_password = os.environ.get("INITIAL_ADMIN_PASSWORD")
+    if not initial_password or len(initial_password) < 8:
+        raise HTTPException(
+            status_code=503,
+            detail="INITIAL_ADMIN_PASSWORD no configurado o demasiado corto (>=8 chars)",
+        )
+
+    admin_email = os.environ.get("INITIAL_ADMIN_EMAIL", "admin@fruveco.com")
     admin_permissions = get_role_permissions(UserRole.ADMIN)
-    
+
     admin_data = {
-        "email": "admin@fruveco.com",
+        "email": admin_email,
         "full_name": "Administrador FRUVECO",
         "role": UserRole.ADMIN,
-        "hashed_password": get_password_hash("admin123"),
+        "hashed_password": get_password_hash(initial_password),
         "is_active": True,
         **admin_permissions,
         "created_at": datetime.now(),
-        "updated_at": datetime.now()
+        "updated_at": datetime.now(),
     }
-    
-    result = await users_collection.insert_one(admin_data)
-    
+    await users_collection.insert_one(admin_data)
+
+    # Respuesta minimalista — no incluye credenciales en el cuerpo
     return {
         "success": True,
-        "message": "Admin user created",
-        "credentials": {
-            "email": "admin@fruveco.com",
-            "password": "admin123",
-            "note": "Please change password after first login"
-        }
+        "message": f"Admin creado. Iniciar sesión con {admin_email} y cambiar la contraseña.",
     }

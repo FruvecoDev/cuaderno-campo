@@ -788,3 +788,33 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - **257 console statements**: mezclados legítimos (error logging) y debug — necesita revisión manual o wrapper de logging.
 - **Migración a TypeScript**: proyecto de semanas.
 - **Refactor de complejidad en `email_service.py`, `ai_service.py`, `rrhh_documentos.py`**: multi-hora por función.
+
+### Security fixes P0 — SEC-001/002/003 (2026-02) - DONE
+**SEC-001 (CRITICAL)** — RRHH ahora requiere autenticación:
+- Aplicado `dependencies=[Depends(get_current_user)]` a nivel APIRouter en los 6 archivos:
+  `routes_rrhh.py`, `rrhh_ausencias.py`, `rrhh_documentos.py`, `rrhh_fichajes.py`, `rrhh_prenominas.py`, `rrhh_productividad.py`.
+- Cubre TODOS los endpoints (empleados/DNIs, ausencias, fichajes GPS, prenóminas/salarios/IBAN, documentos, productividad) sin tocar cada handler individual.
+- Verificado runtime: `GET /api/rrhh/*` sin token → **403**; con `Authorization: Bearer <token>` válido → **200**.
+
+**SEC-002 (CRITICAL)** — JWT SECRET_KEY:
+- `auth_utils.py`: fallback hardcodeado eliminado. Ahora `SECRET_KEY = os.environ["SECRET_KEY"]` con guard `len >= 32` que hace fail-fast al arrancar.
+- Rotado con secret nuevo de 86 chars (generado con `secrets.token_urlsafe(64)`). Todas las sesiones previas quedan invalidadas por diseño.
+- Backend re-arranca correctamente; login del admin retorna nuevo token válido.
+
+**SEC-003 (HIGH)** — `/api/auth/init-admin` blindado:
+- Ya no devuelve credenciales en el body.
+- Requiere cabecera `X-Init-Token` que debe coincidir (con `secrets.compare_digest`, resistente a timing attacks) con `INIT_ADMIN_TOKEN` en `.env` (48 chars).
+- Password inicial obligatoria por env `INITIAL_ADMIN_PASSWORD` (mínimo 8 chars), nunca más hardcodeada.
+- Email configurable via `INITIAL_ADMIN_EMAIL` (default `admin@fruveco.com`).
+- Devuelve solo `{success, message}` sin credenciales.
+- Verificado: `POST /api/auth/init-admin` sin token → **403** ("Token de inicialización inválido").
+
+**Cambios en `.env`** (secretos protegidos, no expuestos):
+- `SECRET_KEY`: nuevo valor 86 chars (rotado).
+- `INIT_ADMIN_TOKEN`: nuevo (48 chars) — usar para inicializaciones futuras.
+- `INITIAL_ADMIN_EMAIL`: `admin@fruveco.com`.
+- `INITIAL_ADMIN_PASSWORD`: `admin123` (⚠️ debe cambiarse tras primer login en producción).
+
+**Deferido para próximos batches**:
+- Hardening residual (P3): CORS allowlist estricto, rate limit login, security headers, PII scrubbing Sentry, encryption at-rest de smtp_password.
+- Auditoría de otros routers sin auth (si existen).

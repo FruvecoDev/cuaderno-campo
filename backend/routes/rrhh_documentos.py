@@ -1,7 +1,7 @@
 """
 RRHH - Documentos de Empleados
 """
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends
 from typing import Optional
 from datetime import datetime, timedelta
 from bson import ObjectId
@@ -9,7 +9,13 @@ import os
 import uuid
 import io
 
-router = APIRouter(prefix="/api/rrhh", tags=["RRHH - Documentos"])
+from routes_auth import get_current_user
+
+router = APIRouter(
+    prefix="/api/rrhh",
+    tags=["RRHH - Documentos"],
+    dependencies=[Depends(get_current_user)],
+)
 
 db = None
 send_documento_notification = None

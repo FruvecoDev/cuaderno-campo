@@ -1,12 +1,18 @@
 """
 RRHH - Productividad
 """
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from typing import Optional
 from datetime import datetime, timedelta
 from bson import ObjectId
 
-router = APIRouter(prefix="/api/rrhh", tags=["RRHH - Productividad"])
+from routes_auth import get_current_user
+
+router = APIRouter(
+    prefix="/api/rrhh",
+    tags=["RRHH - Productividad"],
+    dependencies=[Depends(get_current_user)],
+)
 
 db = None
 

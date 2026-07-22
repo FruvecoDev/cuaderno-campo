@@ -11,13 +11,16 @@ Modulos extraidos a archivos separados:
 - Documentos: rrhh_documentos.py
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from typing import Optional
 from datetime import datetime
 from bson import ObjectId
 import qrcode
 import io
 import base64
+
+# Import auth guard
+from routes_auth import get_current_user
 
 # Import email service for notifications
 from email_service import send_ausencia_notification, send_documento_notification
@@ -29,7 +32,11 @@ from routes.rrhh_fichajes import router as fichajes_router, set_database as set_
 from routes.rrhh_productividad import router as productividad_router, set_database as set_productividad_db
 from routes.rrhh_documentos import router as documentos_router, set_database as set_documentos_db, set_email_service as set_documentos_email
 
-router = APIRouter(prefix="/api/rrhh", tags=["RRHH"])
+router = APIRouter(
+    prefix="/api/rrhh",
+    tags=["RRHH"],
+    dependencies=[Depends(get_current_user)],
+)
 
 # Database will be injected
 db = None

@@ -1,12 +1,18 @@
 """
 RRHH - Gestión de Ausencias y Vacaciones
 """
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from typing import Optional
 from datetime import datetime
 from bson import ObjectId
 
-router = APIRouter(prefix="/api/rrhh", tags=["RRHH - Ausencias"])
+from routes_auth import get_current_user
+
+router = APIRouter(
+    prefix="/api/rrhh",
+    tags=["RRHH - Ausencias"],
+    dependencies=[Depends(get_current_user)],
+)
 
 db = None
 send_ausencia_notification = None
