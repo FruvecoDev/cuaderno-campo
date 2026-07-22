@@ -1529,6 +1529,41 @@ const Fincas = () => {
                 )}
               </div>
             ))}
+            {/* Resumen global al pie */}
+            {filteredFincas.length > 0 && (() => {
+              const totalHa = filteredFincas.reduce((acc, f) => acc + (Number(f.hectareas) || 0), 0);
+              const totalProd = filteredFincas.reduce((acc, f) => acc + (Number(f.produccion_esperada) || 0), 0);
+              return (
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '1rem',
+                    padding: '0.75rem 1rem',
+                    borderTop: '2px solid #2d5a27',
+                    backgroundColor: '#f1f8f4',
+                    borderRadius: '8px',
+                    fontWeight: '600',
+                    color: '#2d5a27',
+                    fontSize: '0.9rem',
+                  }}
+                  data-testid="fincas-summary-footer"
+                >
+                  <span>Total ({filteredFincas.length} finca{filteredFincas.length > 1 ? 's' : ''}):</span>
+                  <div style={{ display: 'flex', gap: '1.5rem' }}>
+                    <span>
+                      Superficie:{' '}
+                      <strong>{totalHa.toLocaleString('es-ES', { maximumFractionDigits: 2 })} ha</strong>
+                    </span>
+                    <span>
+                      Producción esperada:{' '}
+                      <strong>{totalProd.toLocaleString('es-ES', { maximumFractionDigits: 2 })} t</strong>
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
       </div>

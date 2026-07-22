@@ -760,3 +760,11 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - **testid**: `provincia-total-ha-<provincia>` para permitir tests visuales.
 - **Cálculo**: `.reduce((acc, f) => acc + (Number(f.hectareas) || 0), 0)` — coerce a Number para evitar NaN si el campo viniera vacío/string.
 - **Verificación**: `Ciudad Real | 1 finca | 28 ha` visible correctamente en screenshot. Compile OK, lint 0 issues.
+
+### Fincas: fila de resumen global al pie (2026-02) - DONE
+- **Fincas.js**: nueva fila de totales al final del listado agrupado, con "Total (N fincas): | Superficie: X ha | Producción esperada: Y t". Estilo diferenciado (borde superior verde `#2d5a27`, fondo `#f1f8f4`, texto en color primario).
+- **Cálculo**: `filteredFincas.reduce((acc, f) => acc + (Number(f[campo]) || 0), 0)` para `hectareas` y `produccion_esperada`. Coerce a Number para robustez.
+- **Formato**: `es-ES` con max 2 decimales.
+- **testid**: `fincas-summary-footer` para tests de regresión visual.
+- **Gate**: se muestra siempre que haya `filteredFincas.length > 0`.
+- **Verificación**: screenshot confirma `Total (1 finca): | Superficie: 28 ha | Producción esperada: 0 t`. Compile OK, lint 0 errores.
