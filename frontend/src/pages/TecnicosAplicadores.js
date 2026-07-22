@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { 
   Plus, Edit2, Trash2, Search, UserCheck, Upload, X, 
   AlertTriangle, CheckCircle, XCircle, FileImage, Calendar,
-  Award, CreditCard, Eye, Download, FileText, Settings, User, Briefcase, ExternalLink
+  Award, CreditCard, Eye, Download, FileText, Settings, User, Briefcase, ExternalLink,
+  ArrowUp, ArrowDown, ArrowUpDown
 } from 'lucide-react';
 import { notify } from '../lib/notify';
 import { PermissionButton, usePermissions, usePermissionError } from '../utils/permissions';
@@ -13,6 +14,8 @@ import { useAuth } from '../contexts/AuthContext';
 import '../App.css';
 import ColumnConfigModal from '../components/ColumnConfigModal';
 import { useColumnConfig } from '../hooks/useColumnConfig';
+import useSortAndPaginate from '../hooks/useSortAndPaginate';
+import PaginationFooter from '../components/PaginationFooter';
 import { formatDateDMY } from '../utils/dateFormat';
 
 const DEFAULT_COLUMNS = [
@@ -45,6 +48,30 @@ const TecnicosAplicadores = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const { selectedIds, toggleOne, toggleAll, clearSelection, allSelected, someSelected } = useBulkSelect(tecnicos);
+
+  // Ordenación + paginación unificada
+  const {
+    sortConfig, handleSort,
+    page, pageSize, totalPages, totalItems, pageStart, pageEnd,
+    paginatedItems: paginatedTecnicos, setPage, setPageSize,
+  } = useSortAndPaginate(tecnicos, {
+    defaultField: 'nombre_completo',
+    defaultDirection: 'asc',
+    defaultPageSize: 25,
+    storageKey: 'sort:tecnicos-aplicadores',
+    getValue: (t, field) => {
+      switch (field) {
+        case 'nombre_completo': return `${t.nombre || ''} ${t.apellidos || ''}`.trim();
+        case 'dni': return t.dni || '';
+        case 'nivel': return t.nivel_capacitacion || '';
+        case 'num_carnet': return t.num_carnet || '';
+        case 'certificacion': return t.certificacion || '';
+        case 'validez': return t.validez_fin || t.validez_inicio || '';
+        case 'estado': return t.activo === false ? 0 : 1;
+        default: return t[field] ?? '';
+      }
+    },
+  });
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const handleBulkDelete = async () => {
     setBulkDeleting(true);
@@ -833,16 +860,49 @@ const TecnicosAplicadores = () => {
           <div style={{ overflowX: 'auto' }}>
             {canBulkDelete && <BulkActionBar selectedCount={selectedIds.size} onDelete={handleBulkDelete} onClear={clearSelection} deleting={bulkDeleting} />}
             <table className="data-table">
+              <colgroup>
+                {canBulkDelete && <col />}
+                {visibleColumns.map(col => (
+                  <col
+                    key={col.id}
+                    style={sortConfig.field === col.id ? { backgroundColor: 'hsl(var(--primary) / 0.04)' } : undefined}
+                  />
+                ))}
+                <col />
+                <col />
+              </colgroup>
               <thead>
                 <tr>
                   {canBulkDelete && <BulkCheckboxHeader allSelected={allSelected} someSelected={someSelected} onToggle={toggleAll} />}
-                  {visibleColumns.map(col => <th key={col.id}>{col.label}</th>)}
+                  {visibleColumns.map(col => {
+                    const active = sortConfig.field === col.id;
+                    const Icon = !active ? ArrowUpDown : (sortConfig.direction === 'asc' ? ArrowUp : ArrowDown);
+                    return (
+                      <th
+                        key={col.id}
+                        onClick={() => handleSort(col.id)}
+                        style={{
+                          cursor: 'pointer',
+                          userSelect: 'none',
+                          whiteSpace: 'nowrap',
+                          ...(active ? { backgroundColor: 'hsl(var(--primary) / 0.08)', color: 'hsl(var(--primary))' } : {}),
+                        }}
+                        title={`Ordenar por ${col.label}`}
+                        data-testid={`sort-header-tecnico-${col.id}`}
+                      >
+                        <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                          {col.label}
+                          <Icon size={12} style={{ marginLeft: '0.25rem', opacity: active ? 1 : 0.35, color: active ? 'hsl(var(--primary))' : undefined }} />
+                        </span>
+                      </th>
+                    );
+                  })}
                   <th>Cert.</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {tecnicos.map(tecnico => {
+                {paginatedTecnicos.map(tecnico => {
                   const estado = getEstadoBadge(tecnico);
                   return (
                     <tr key={tecnico._id}>
@@ -910,6 +970,12 @@ const TecnicosAplicadores = () => {
                 })}
               </tbody>
             </table>
+            <PaginationFooter
+              totalItems={totalItems} page={page} pageSize={pageSize}
+              totalPages={totalPages} pageStart={pageStart} pageEnd={pageEnd}
+              onPageChange={setPage} onPageSizeChange={setPageSize}
+              itemLabel="técnicos" testIdSuffix="tecnicos"
+            />
           </div>
         )}
       </div>

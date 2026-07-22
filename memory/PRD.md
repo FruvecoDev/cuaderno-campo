@@ -729,3 +729,11 @@ Desarrollar una aplicacion de campo para el sector de agricultura que permita re
 - **Verificación de negación**: rompí el hook `useSortAndPaginate.js` inyectando `if (false && ...)` → 1/18 tests falló y hook bloqueó el commit. Restaurado → 18/18 passed.
 - **Comportamiento**: si un archivo no tiene tests relacionados, `--passWithNoTests` permite pasar sin fricción. Si hay tests y fallan, el commit se rechaza.
 - **Extensión natural del hook mypy**: ahora backend + frontend tienen red de seguridad automática antes de cada commit.
+
+### Técnicos Aplicadores: ordenación + paginación (2026-02) - DONE
+- **7 cabeceras ordenables** (Nombre Completo, D.N.I., Nivel, Num Carnet, Certificacion, Validez, Estado) con iconos ↑↓↕ y toggle ASC/DESC.
+- **Migrado al hook `useSortAndPaginate`** con `storageKey: 'sort:tecnicos-aplicadores'`. `getValue` custom para `nombre_completo` (concatenación nombre+apellidos), `validez` (fallback validez_fin/inicio) y `estado` (boolean→int).
+- **Highlight visual de columna activa** vía `<colgroup>` (mismo patrón usado en Fitosanitarios).
+- **PaginationFooter** añadido (25/pág default).
+- **Verificación**: 7 headers presentes, click en "Nivel" resalta columna + localStorage persiste correctamente. Screenshot confirma UX consistente. Lint 0 errores nuevos.
+- **11 módulos** ya usan el hook: Evaluaciones, Cuaderno de Campo, Fitosanitarios, Proveedores, Contratos, Tratamientos, Visitas, Tareas, Cosechas, Mapas, ConsultaSIGPAC, Técnicos Aplicadores (12 con este).
